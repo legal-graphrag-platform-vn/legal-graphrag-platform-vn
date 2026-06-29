@@ -144,7 +144,7 @@ Properties:
   - content: string              — full text của Khoản
   - effective_from: date
   - effective_to: date | null
-  - status: enum [active, amended, repealed]
+  - status: enum [active, amended, repealed, suspended]
   - embedding: float[]           — vector 768 dims ⭐ (unit chính cho retrieval)
 
 (:Point)
@@ -159,6 +159,7 @@ Properties:
   - id: string (unique)          — e.g., "concept_von_dieu_le"
   - name: string                 — e.g., "Vốn điều lệ"
   - definition: string | null    — định nghĩa chính thức (nếu có)
+  - defined_in: string | null    — ID của Article/Clause định nghĩa (backref citation)
   - domain: string               — e.g., "company_law"
 
 (:Entity:CompanyType | :Entity:Authority | :Entity:PersonType)
@@ -205,16 +206,29 @@ REPLACED_BY
   Properties:
     - effective_from: date         ← BẮT BUỘC
     - effective_to: date | null
-  Ý nghĩa: A bị thay thế TOÀN BỘ bởi B kể từ effective_from
+  Ý nghĩa: A bị thay thế TOÀN BỘ bởi B kể từ effective_from. Có văn bản kế thừa.
   Phân biệt với AMENDED_BY: REPLACED_BY = hết toàn bộ hiệu lực
+  Phân biệt với REPEALED_BY: REPLACED_BY = có văn bản mới kế tiếp
+
+  Ví dụ phân biệt:
+  ✅ REPLACED_BY: NĐ 78/2015 → [REPLACED_BY] → NĐ 01/2021
+     (cùng lĩnh vực đăng ký DN, Nđ01 kế thừa toàn bộ Nđ78)
 
 REPEALED_BY
   Head: Document | Article | Clause
   Tail: Document (văn bản ra quyết định hủy bỏ)
   Properties:
     - effective_from: date         ← BẮT BUỘC
-  Ý nghĩa: A bị bãi bỏ hoàn toàn bởi văn bản B
+  Ý nghĩa: A bị bãi bỏ hoàn toàn bởi văn bản B. KHÔNG có văn bản kế thừa.
   Sau effective_from: A.status = "repealed"
+
+  Ví dụ phân biệt:
+  ✅ REPEALED_BY: Điều 12 LDN2014 → [REPEALED_BY] → LDN2020
+     (điều này bị bãi bỏ hoàn toàn, LDN2020 không có điều tương đương kế thừa)
+
+  Heuristic cho LLM:
+  "Có văn bản mới cùng lĩnh vực kế tiếp" → REPLACED_BY
+  "Bị loại bỏ, không có văn bản tương đương" → REPEALED_BY
 
 IMPLEMENTED_BY
   Head: :Document:Law
@@ -259,8 +273,16 @@ REQUIRES
   Tail: Concept
   Properties:
     - condition_type: enum [must, should, prohibited]
-  Ý nghĩa: Chủ thể phải/nên/không được có/làm Concept
+    - source_article: string       ← ID của Article/Clause áp đặt yêu cầu
+      (tránh mất citation khi LLM bỏ sót REGULATES tương ứng)
+  Ý nghĩa: Chủ thể phải/nên/không được có/làm Concept, theo quy định tại source_article
   Temporal: KHÔNG
+
+  Ví dụ:
+  (entity_cong_ty_tnhh)-[:REQUIRES {
+    condition_type: "must",
+    source_article: "LDN2020_D46_K1"   ← XAI có thể cite trực tiếp
+  }]->(concept_so_thanh_vien_toi_thieu)
 ```
 
 **Tổng kết temporal policy:**
@@ -281,23 +303,53 @@ REQUIRES
 ### Ontology Constraints (Rules)
 
 ```python
+# ╔══════════════════════════════════════════════════════
+# QUAN TRỌNG: Mọi relation trong RELATION_ENUM phải có
+# đúng 1 entry trong CONSTRAINTS. Duy trì bằng unit test.
+# ╚══════════════════════════════════════════════════════
+RELATION_ENUM = {
+    "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
+    "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
+    "DEFINES", "REGULATES", "REQUIRES"
+}
+
 CONSTRAINTS = {
+    # --- Cấu trúc phân cấp ---
     "CONTAINS": {
         "allowed_head": ["Document", "Article", "Clause"],
         "allowed_tail": ["Article", "Clause", "Point"],
         "no_self_loop": True,
         "head_tail_type_pairs": [
             ("Document", "Article"),
-            ("Article", "Clause"),
-            ("Clause", "Point")
+            ("Article",  "Clause"),
+            ("Clause",   "Point")
         ]
     },
+
+    # --- Temporal relations ---
     "AMENDED_BY": {
         "allowed_head": ["Document", "Article", "Clause"],
         "allowed_tail": ["Document", "Article", "Clause"],
         "head_tail_same_type": True,  # Document→Document, Article→Article
-        "no_self_loop": True
+        "no_self_loop": True,
+        "required_properties": ["effective_from"]  # bắt buộc có
     },
+    "REPLACED_BY": {
+        "allowed_head": ["Document", "Article"],
+        "allowed_tail": ["Document", "Article"],
+        "head_tail_same_type": True,  # Document→Document, Article→Article
+        "no_self_loop": True,
+        "required_properties": ["effective_from"]
+    },
+    "REPEALED_BY": {
+        "allowed_head": ["Document", "Article", "Clause"],
+        "allowed_tail": ["Document"],  # Tail LUÔN là Document
+        "head_tail_same_type": False,  # Clause→Document là hợp lệ
+        "no_self_loop": True,
+        "required_properties": ["effective_from"]
+    },
+
+    # --- Hành chính phân cấp ---
     "IMPLEMENTED_BY": {
         "allowed_head": ["Document"],
         "allowed_tail": ["Document"],
@@ -310,6 +362,13 @@ CONSTRAINTS = {
         "head_type_constraint": "Decree",
         "tail_type_constraint": "Circular"
     },
+
+    # --- Ngữ nghĩa ---
+    "REFERENCES": {
+        "allowed_head": ["Article", "Clause"],
+        "allowed_tail": ["Article", "Clause", "Document"],
+        "no_self_loop": False  # Article có thể viện dẫn Article khác
+    },
     "DEFINES": {
         "allowed_head": ["Article", "Clause"],
         "allowed_tail": ["Concept"]
@@ -317,8 +376,16 @@ CONSTRAINTS = {
     "REGULATES": {
         "allowed_head": ["Article", "Clause"],
         "allowed_tail": ["Entity", "Concept"]
+    },
+    "REQUIRES": {
+        "allowed_head": ["Entity"],
+        "allowed_tail": ["Concept"],
+        "no_self_loop": True
     }
 }
+
+# Invariant: RELATION_ENUM == set(CONSTRAINTS.keys())
+# Được kiểm tra bằng unit test (xem tests/test_ontology_consistency.py)
 ```
 
 ---

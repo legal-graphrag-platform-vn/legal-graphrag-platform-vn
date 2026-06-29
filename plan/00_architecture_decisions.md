@@ -329,12 +329,139 @@ Proposed: Temporal GraphRAG
 | 05 | Intent-based Traversal, 2-hop default | Precision > Recall; 2-hop bao phủ 90% use cases | RC3 |
 | 06 | Rule-based Confidence + threshold calibration | Explainable + threshold justified by data | RC2 |
 | 07 | 4-level evaluation vs Vector RAG baseline | Holistic + có baseline rõ ràng để so sánh | RC5 |
+| 08 | Neo4j native vector (no Qdrant) | Fit to scale; unified query; đơn giản hóa pipeline | RC3 |
+| 09 | Chapter = property, không phải node | CONTAINS chain không cần tầng Chương | RC1 |
+| 10 | Definition = attribute của Concept | Không có use case traverse qua Definition | RC1 |
+| 11 | Contribution framing vendor-neutral | Contribution ở pipeline design, không ở tooling | RC3 |
+| 12 | Ablation qua dimension nghiên cứu | Giá trị học thuật cao hơn so sánh database | RC5 |
+
+---
+
+## ADR-08: Retriever Architecture
+
+### Problem
+Retrieval layer cần kết hợp vector search + graph traversal + temporal filter. Có thể dùng Neo4j native vector index hoặc tách Qdrant (vector) + Neo4j (graph).
+
+### Options Considered
+
+| Option | Mô Tả | Vấn Đề |
+|---|---|---|
+| A) Neo4j + Qdrant riêng biệt | Qdrant cho vector, Neo4j cho graph | 2 round trips, sync issue, 2 services |
+| **B) Neo4j native vector index** | Một query: vector + graph + temporal | Phù hợp với scale ~5000 clauses |
+
+### ✅ Decision: Option B — Neo4j native vector index
+
+### Rationale
+1. **Fit to scale**: ~5000 clauses không phải bài toán performance — là bài toán correctness.
+2. **Graph là core, vector là entry point**: Tách vector store = tách entry point ra khỏi core reasoning.
+3. **Unified query**: Một Cypher query thực hiện vector search → temporal filter → graph traversal atomically.
+4. **Operational simplicity**: 1 database, 1 schema, 0 sync issue.
+
+### Interface Pattern
+Dù dùng Neo4j native, vẫn thiết kế theo interface:
+```python
+class RetrieverInterface(ABC):
+    def retrieve(self, query, temporal_ctx) -> RetrievalContext: pass
+
+class Neo4jRetriever(RetrieverInterface):
+    """Main implementation — unified query"""
+    pass
+```
+Interface cho phép: unit test với mock, swap backend nếu cần, không khóa kiến trúc.
+
+### Justification cho hội đồng
+> *"Với quy mô ~5000 clauses, kiến trúc unified storage cho phép thực hiện semantic retrieval, graph expansion và temporal filtering trong một query duy nhất. Với quy mô lớn hơn, interface-based design cho phép thay thế bằng vector database chuyên dụng mà không ảnh hưởng các tầng còn lại."*
+
+---
+
+## ADR-09: Chapter/Section Representation
+
+### Problem
+Văn bản pháp luật VN có cấu trúc Phần → Chương → Mục → Điều → Khoản → Điểm. Có nên tạo node riêng cho Chương/Mục không?
+
+### ✅ Decision: Chapter/Section = Property trên Article, không phải node riêng
+
+```cypher
+(:Article {
+  id: "LDN2020_D17",
+  chapter: "II",
+  chapter_title: "Thành lập doanh nghiệp",
+  section: null,
+  ...
+})
+```
+
+### Rationale
+1. Không có intent class nào query "Chương nào quy định X" — người dùng luôn hỏi theo Điều/Khoản.
+2. Node Chương thêm tầng vào CONTAINS chain không cần thiết.
+3. Property `chapter` đủ để filter: `MATCH (a:Article {chapter: "II"})`.
+4. Parser vẫn detect Chương → chỉ dùng để fill property, không tạo node.
+
+---
+
+## ADR-10: Definition Representation
+
+### Problem
+"Definition" ban đầu được coi là entity type riêng trong pipeline. Có nên tạo node `:Definition` không?
+
+### ✅ Decision: Definition = attribute của Concept, không phải node riêng
+
+```cypher
+(:Concept {
+  id: "concept_von_dieu_le",
+  name: "Vốn điều lệ",
+  definition: "Là tổng giá trị tài sản...",  // ← attribute
+  defined_in: "LDN2020_D4_K22"               // ← backref để cite
+})
+```
+
+### Rationale
+1. Định nghĩa pháp lý là 1-1 với Concept — không có use case traverse qua Definition.
+2. Làm attribute đơn giản hơn, ít node hơn.
+3. `defined_in` property đủ để XAI trace về Điều luật nguồn.
+4. **Action**: Xóa `"Definition"` khỏi entity type enum trong `04_graph_construction_pipeline.md` — **đã thực hiện**.
+
+---
+
+## ADR-11: Contribution Framing — Vendor Neutral
+
+### Problem
+RC3 ban đầu mô tả như "sử dụng Neo4j unified vector index thay vì Qdrant" → contribution phụ thuộc vendor.
+
+### ✅ Decision: Contribution là pipeline design, không phải tooling choice
+
+**Framing đúng:**
+> *"Một Unified Hybrid Retrieval Pipeline kết hợp semantic retrieval, intent-based graph expansion và temporal reasoning trong cùng một workflow — trong đó traversal strategy phụ thuộc vào loại câu hỏi thay vì áp dụng cố định cho mọi truy vấn."*
+
+Neo4j chỉ là implementation detail. Về lý thuyết, pipeline này có thể implement trên bất kỳ graph DB nào hỗ trợ vector.
+
+---
+
+## ADR-12: Ablation Study Design
+
+### Problem
+Cần ablation study để chứng minh từng thành phần của hệ thống đóng góp vào kết quả.
+
+### ✅ Decision: Ablation theo dimension nghiên cứu, không phải so sánh database
+
+| Ablation | Câu hỏi nghiên cứu |
+|---|---|
+| Graph expansion ON vs OFF | Graph có giúp gì so với vector thuần? |
+| Traversal depth: 1 vs 2 vs 3 | Depth tối ưu là bao nhiêu cho legal QA? |
+| Temporal filter ON vs OFF | Temporal reasoning cải thiện accuracy bao nhiêu? |
+| Intent-based vs fixed traversal | Intent classification có thực sự cần không? |
+
+### Rationale
+- Các ablation này map trực tiếp vào RC3 (traversal) và RC4 (temporal).
+- Giá trị nghiên cứu cao hơn so với "Neo4j vs Qdrant benchmark".
+- Mỗi ablation là 1 experiment nhỏ trong RC5 evaluation framework.
+- **Không implement Qdrant retriever** — không có research value cho đề tài này.
 
 ---
 
 ## Checklist Trước Khi Code
 
-Bảy quyết định trên được coi là **FROZEN** khi:
+Các quyết định được coi là **FROZEN** khi:
 
 - [ ] ADR-01: Ontology có đủ Node Types + Relation Types với ví dụ cụ thể
 - [ ] ADR-02: Parser có thể detect đúng ranh giới Điều/Khoản/Điểm trên ít nhất 2 văn bản test
@@ -343,5 +470,11 @@ Bảy quyết định trên được coi là **FROZEN** khi:
 - [ ] ADR-05: Traversal Policy table được chốt (intent → relations → depth)
 - [ ] ADR-06: Scoring criteria và weights được chốt (có thể điều chỉnh sau khi có validation data)
 - [ ] ADR-07: Ground truth dataset plan được assign người phụ trách
+- [ ] ADR-08: Verify Neo4j 5.11+ Community support vector index (`CREATE VECTOR INDEX`)
+- [ ] ADR-09: Parser property `chapter`, `section` được thêm vào Article node
+- [ ] ADR-10: `"Definition"` đã được xóa khỏi entity enum trong pipeline ✅
+- [ ] ADR-11: RC3 description trong báo cáo dùng vendor-neutral framing
+- [ ] ADR-12: 4 ablation experiments được lên kế hoạch trong evaluation framework
 
-**Khi tất cả 7 checklist trên được tick**, đề tài mới chính thức bước vào giai đoạn implementation.
+**Khi tất cả checklist trên được tick**, đề tài mới chính thức bước vào giai đoạn implementation.
+

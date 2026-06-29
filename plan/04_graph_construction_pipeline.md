@@ -193,11 +193,15 @@ ENTITY_SCHEMA = {
     "required": ["id", "type", "label"],
     "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
-        "type": {"enum": ["Document", "Article", "Clause", "Point", "Concept", "Entity", "Definition"]},
+        "type": {"enum": ["Document", "Article", "Clause", "Point", "Concept", "Entity"]},
         "label": {"type": "string", "minLength": 1},
         "properties": {"type": "object"}
     }
 }
+
+# NOTE: "Definition" đã được loại bỏ khỏi enum.
+# Definition = attribute của Concept (Concept.definition), không phải node riêng.
+# Quyết định: ADR session 2026-06-29.
 
 RELATION_SCHEMA = {
     "type": "object",
@@ -222,82 +226,234 @@ RELATION_SCHEMA = {
 
 ```python
 class OntologyValidator:
+    # ╔════════════════════════════════════════════
+    # Phải đồng bộ với CONSTRAINTS trong 02_ontology_specification.md
+    # Duy trì bằng unit test: tests/test_ontology_consistency.py
+    # ╚════════════════════════════════════════════
+    RELATION_ENUM = {
+        "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
+        "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
+        "DEFINES", "REGULATES", "REQUIRES"
+    }
+
     CONSTRAINTS = {
         "CONTAINS": {
             "valid_pairs": [
                 ("Document", "Article"),
-                ("Article", "Clause"),
-                ("Clause", "Point")
+                ("Article",  "Clause"),
+                ("Clause",   "Point")
             ],
             "no_self_loop": True
         },
         "AMENDED_BY": {
             "head_tail_same_type": True,
-            "no_self_loop": True
+            "no_self_loop": True,
+            "required_properties": ["effective_from"]
+        },
+        "REPLACED_BY": {
+            "head_tail_same_type": True,
+            "valid_pairs": [
+                ("Document", "Document"),
+                ("Article",  "Article")
+            ],
+            "no_self_loop": True,
+            "required_properties": ["effective_from"]
+        },
+        "REPEALED_BY": {
+            "allowed_tail": ["Document"],   # Tail LUÔN là Document
+            "head_tail_same_type": False,
+            "required_properties": ["effective_from"]
         },
         "IMPLEMENTED_BY": {
             "valid_pairs": [("Document", "Document")],
             "head_doc_type": "Law",
             "tail_doc_type": "Decree"
         },
+        "GUIDED_BY": {
+            "valid_pairs": [("Document", "Document")],
+            "head_doc_type": "Decree",
+            "tail_doc_type": "Circular"
+        },
+        "REFERENCES": {
+            "valid_pairs": [
+                ("Article", "Article"),
+                ("Article", "Clause"),
+                ("Article", "Document"),
+                ("Clause",  "Article"),
+                ("Clause",  "Clause"),
+                ("Clause",  "Document")
+            ]
+        },
         "DEFINES": {
             "valid_pairs": [
                 ("Article", "Concept"),
-                ("Clause", "Concept"),
-                ("Article", "Definition")
+                ("Clause",  "Concept")
             ]
+        },
+        "REGULATES": {
+            "valid_pairs": [
+                ("Article", "Entity"),
+                ("Article", "Concept"),
+                ("Clause",  "Entity"),
+                ("Clause",  "Concept")
+            ]
+        },
+        "REQUIRES": {
+            "valid_pairs": [("Entity", "Concept")]
         }
     }
-    
+
     def validate_relation(self, head_type, relation, tail_type):
         constraint = self.CONSTRAINTS.get(relation)
         if not constraint:
-            return False, f"Unknown relation type: {relation}"
-        
+            # Relation không có trong CONSTRAINTS → reject
+            # Nếu gặp lỗi này: kiểm tra RELATION_ENUM và CONSTRAINTS có khớp nhau không
+            return False, f"Unknown relation type: {relation}. Check RELATION_ENUM == set(CONSTRAINTS.keys())"
+
         valid_pairs = constraint.get("valid_pairs", [])
         if valid_pairs and (head_type, tail_type) not in valid_pairs:
             return False, f"Invalid pair: {head_type}-[{relation}]->{tail_type}"
-        
+
+        # Kiểm tra required_properties trên relation (runtime check)
+        # Được gọi bởi pipeline với relation_data dict
         return True, None
 ```
 
 ---
 
-## Step 5: Confidence Scoring (Self-Consistency)
+## Unit Test Spec — Ontology Consistency
+
+```python
+# tests/test_ontology_consistency.py
+# Chạy: pytest tests/test_ontology_consistency.py
+# Tốc độ: < 1ms, không cần DB hay LLM
+
+from pipeline.ontology_validator import OntologyValidator, RELATION_ENUM
+
+RELATION_ENUM_EXPECTED = {
+    "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
+    "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
+    "DEFINES", "REGULATES", "REQUIRES"
+}
+
+def test_all_relations_have_constraints():
+    """
+    Mọi relation trong enum phải có đúng 1 key trong CONSTRAINTS.
+    Test này fail ngay nếu thêm relation mới mà quên thêm constraint.
+    """
+    missing = RELATION_ENUM_EXPECTED - set(OntologyValidator.CONSTRAINTS.keys())
+    assert missing == set(), f"Relations thiếu constraint: {missing}"
+
+def test_no_orphan_constraints():
+    """
+    Không có constraint nào cho relation không tồn tại trong enum.
+    """
+    orphans = set(OntologyValidator.CONSTRAINTS.keys()) - RELATION_ENUM_EXPECTED
+    assert orphans == set(), f"Constraints thừa (không có trong enum): {orphans}"
+
+def test_references_not_rejected():
+    """REFERENCES là relation phổ biến nhất — phải pass validator."""
+    validator = OntologyValidator()
+    ok, err = validator.validate_relation("Article", "REFERENCES", "Article")
+    assert ok, f"REFERENCES bị reject: {err}"
+
+def test_requires_not_rejected():
+    """REQUIRES quan trọng cho XAI reasoning path."""
+    validator = OntologyValidator()
+    ok, err = validator.validate_relation("Entity", "REQUIRES", "Concept")
+    assert ok, f"REQUIRES bị reject: {err}"
+
+def test_replaced_by_same_type_enforced():
+    """REPLACED_BY phải cùng loại (Document→Document, Article→Article)."""
+    validator = OntologyValidator()
+    ok, _ = validator.validate_relation("Document", "REPLACED_BY", "Document")
+    assert ok
+    ok, _ = validator.validate_relation("Article", "REPLACED_BY", "Document")
+    assert not ok, "Article→Document REPLACED_BY phải bị reject"
+
+def test_repealed_by_tail_always_document():
+    """REPEALED_BY: Clause có thể bị bãi bỏ bởi Document."""
+    validator = OntologyValidator()
+    ok, err = validator.validate_relation("Clause", "REPEALED_BY", "Document")
+    assert ok, f"Clause→Document REPEALED_BY bị reject: {err}"
+```
+
+---
+
+## Step 5: Confidence Scoring (Rule-based)
+
+> [!IMPORTANT]
+> **ADR-06**: Dùng rule-based multi-criteria, KHÔNG dùng self-consistency N=3.
+> Lý do: Explainable, không tốn thêm API calls, threshold calibrate được trên validation set.
 
 ```python
 class ConfidenceScorer:
-    def __init__(self, n_runs: int = 3):
-        self.n_runs = n_runs
-    
-    def score(self, chunk: str, extraction_fn) -> tuple[dict, float]:
+    """Rule-based confidence scorer theo ADR-06."""
+
+    WEIGHTS = {
+        "schema_valid":       0.30,
+        "ontology_valid":     0.30,
+        "evidence_present":   0.20,
+        "entities_resolvable":0.10,
+        "direction_correct":  0.10,
+    }
+
+    def score(self, extraction: dict, validation_results: dict, graph_context: dict) -> tuple[float, dict]:
         """
-        Chạy extraction N lần, tính agreement score
+        Args:
+            extraction: LLM extraction result
+            validation_results: kết quả từ JSON Schema + Ontology Validator
+            graph_context: các IDs hiện có trong graph (dùng kiểm tra entity resolvable)
+        Returns:
+            (confidence_score, criteria_breakdown)
         """
-        results = [extraction_fn(chunk) for _ in range(self.n_runs)]
-        
-        # Aggregate relations
-        relation_counts = defaultdict(int)
-        for result in results:
-            for rel in result.get("relations", []):
-                key = (rel["head"], rel["relation"], rel["tail"])
-                relation_counts[key] += 1
-        
-        # Agreement score = fraction of runs that agree
-        agreed_relations = [
-            rel for rel, count in relation_counts.items()
-            if count >= ceil(self.n_runs / 2)  # Majority vote
-        ]
-        
-        total_possible = max(
-            len(set(k for result in results for k in 
-                   [(r["head"], r["relation"], r["tail"]) 
-                    for r in result.get("relations", [])]))
-            , 1
+        criteria = {
+            # 1. JSON Schema pass?
+            "schema_valid": 1.0 if validation_results.get("schema_ok") else 0.0,
+
+            # 2. Ontology constraint pass?
+            "ontology_valid": 1.0 if validation_results.get("ontology_ok") else 0.0,
+
+            # 3. Có evidence trong text?
+            "evidence_present": 1.0 if extraction.get("evidence", "").strip() else 0.0,
+
+            # 4. Head + Tail IDs resolvable?
+            "entities_resolvable": self._check_entities(
+                extraction, graph_context
+            ),
+
+            # 5. Hướng relation đúng?
+            "direction_correct": 1.0 if validation_results.get("direction_ok") else 0.0,
+        }
+
+        score = sum(
+            self.WEIGHTS[k] * v for k, v in criteria.items()
         )
-        
-        confidence = len(agreed_relations) / total_possible
-        
+        return round(score, 3), criteria
+
+    def _check_entities(self, extraction, graph_context) -> float:
+        head_id = extraction.get("head", "")
+        tail_id = extraction.get("tail", "")
+        existing_ids = graph_context.get("existing_ids", set())
+        resolved = sum([
+            1 if head_id in existing_ids else 0,
+            1 if tail_id in existing_ids else 0
+        ])
+        return resolved / 2.0
+```
+
+### Threshold Calibration (thực hiện sau khi có validation data)
+
+```
+Doạn calibration:
+  1. Annotate thủ công 3 văn bản (gold standard triples)
+  2. Chạy pipeline, tính confidence score cho mọi extraction
+  3. Vẽ Precision-Recall curve theo threshold
+  4. Chọn threshold tối ưu theo F1
+  5. Report threshold + PR curve trong luận văn
+
+Không viết số cụ thể trước khi chạy experiment.
+```
         return agreed_relations, confidence
 ```
 

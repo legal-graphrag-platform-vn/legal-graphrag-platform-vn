@@ -1,204 +1,349 @@
-# Câu Hỏi Mở — Cần Nhóm Quyết Định
+# Open Questions — Bảng Quyết Định Chính Thức
 
-> **Mục đích**: Tổng hợp tất cả các quyết định kỹ thuật và thiết kế chưa được chốt  
-> **Cách dùng**: Dùng file này làm agenda cho buổi họp nhóm đầu tiên
+> **Phiên bản**: v0.3 — tổng hợp sau review  
+> **Cách dùng**: Đây là **agenda bắt buộc** cho buổi họp nhóm đầu tiên.  
+> Mỗi câu hỏi phải có quyết định rõ ràng trước khi bất kỳ ai bắt đầu code.
 
 ---
 
-## 🔴 Ưu Tiên Cao — Cần Chốt Trước Khi Code
+## 🔴 Nhóm 1 — Phải Trả Lời Trước Khi Lập Timeline
 
-### Q1: Phương pháp Confidence Scoring?
+> [!CAUTION]
+> Nhóm 1 chi phối toàn bộ scope và phân công. Không chốt được nhóm này = không lập được timeline thực tế.
 
-Liên quan đến: RC2 — Graph Construction Pipeline
+### Q1: Nhóm có bao nhiêu người và ai phụ trách phần nào?
 
-| Option | Mô Tả | Trade-off |
+`07_implementation_timeline.md` hiện tại để trống hoàn toàn phần phân công.
+
+| Vai Trò | Phần Phụ Trách | Người |
 |---|---|---|
-| **A) Self-consistency N=3** | Chạy LLM 3 lần, majority vote | Tốn 3x API cost |
-| **B) Log-probability** | Dùng token log-probs | Không phải LLM nào hỗ trợ |
-| **C) Critic LLM** | LLM 2 đánh giá output LLM 1 | Chất lượng cao, đắt nhất |
+| ? | RC2 — Graph Construction Pipeline | ❓ |
+| ? | RC3 — GraphRAG Retrieval + Traversal | ❓ |
+| ? | RC4 — Temporal Logic | ❓ |
+| ? | RC5 — Evaluation Framework + Ground Truth | ❓ |
+| ? | Frontend UI | ❓ |
+| ? | Báo Cáo + Literature Review | ❓ |
 
-**Gợi ý**: Option A — self-consistency N=3  
-**Quyết định**: ?
+**Quyết định**: _______________
 
 ---
 
-### Q2: Phương pháp Intent Classification?
+### Q2: Scope cắt giảm đến đâu?
 
-Liên quan đến: RC3 — Traversal Policy (toàn bộ GraphRAG phụ thuộc vào đây)
+Nhóm cần quyết định **3 sub-question** này cùng lúc:
 
-| Option | Mô Tả | Trade-off |
+**Q2a: UI — React full hay Gradio đơn giản?**
+
+| Option | Effort | Output |
 |---|---|---|
-| **A) Few-shot LLM** | 5-10 ví dụ trong prompt | Dễ implement, latency cao |
-| **B) Fine-tuned PhoBERT** | Train trên ~200 câu labeled | Chất lượng cao, cần tạo dataset |
-| **C) Rule-based** | Keyword matching | Nhanh, không scalable |
+| React + Cytoscape.js + Timeline Slider | ~4 tuần | Demo đẹp, phù hợp bảo vệ |
+| Gradio / Streamlit | ~1 tuần | Nhanh, đủ demo chức năng |
 
-**Gợi ý**: Option A trước, sau đó so sánh với B (thêm experiment)  
-**Quyết định**: ?
+> Phụ thuộc số người và thời gian còn lại. Nếu nhóm < 3 người hoặc < 4 tháng: chọn Gradio.
 
----
-
-### Q3: Threshold cho Human Review?
-
-Liên quan đến: RC2 — Graph Construction Pipeline
-
-- Confidence < ? → Auto-reject
-- ? ≤ Confidence < ? → Human Review Queue
-- Confidence ≥ ? → Auto-accept
-
-**Gợi ý**: Auto-reject < 0.3, Human Review 0.3-0.7, Auto-accept ≥ 0.7  
-**Quyết định**: ?
+**Quyết định Q2a**: _______________
 
 ---
 
-### Q4: Ai phụ trách tạo Ground Truth Dataset?
+**Q2b: Ground Truth — full size hay giảm?**
 
-Liên quan đến: RC5 — Evaluation (không có dataset → không có evaluation → không có research)
+| Option | QA chung | Temporal QA | Effort |
+|---|---|---|---|
+| Full (ADR-07) | 100 câu | 50 câu | ~2 tuần/người |
+| Giảm (khuyến nghị nếu < 3 người) | 50 câu | 25-30 câu | ~1 tuần/người |
 
-| Task | Effort | Người Phụ Trách |
+> Lưu ý: Giảm dataset không ảnh hưởng tính học thuật nếu justify rõ trong báo cáo.
+
+**Quyết định Q2b**: _______________
+
+---
+
+**Q2c: Dataset văn bản — 4 bắt buộc hay thêm 6 mở rộng?**
+
+| Option | Số văn bản | Risk |
 |---|---|---|
-| Annotate Gold Graph (3 văn bản) | ~3 ngày/người | ? |
-| Viết 100 QA pairs | ~2 ngày/người | ? |
-| Viết 50 Temporal QA | ~2 ngày/người | ? |
-| Viết 20-30 XAI cases | ~1 ngày/người | ? |
+| 4 văn bản bắt buộc | LDN2020 + NĐ01 + NĐ47 + TT01 | Đủ demo, graph nhỏ |
+| 10 văn bản | +LDN2014 + NĐ78 + NĐ108 + ... | Graph phong phú hơn, tốn thêm 2 tuần parsing |
 
-**Quyết định**: ?
+**Quyết định Q2c**: _______________
 
 ---
 
-### Q5: Danh sách 10 văn bản cụ thể?
+### Q3: Baseline so sánh — 1 hay 2?
 
-Liên quan đến: `08_dataset_and_scope.md`
+Hiện tại có **mâu thuẫn** giữa các file:
 
-Xem file dataset để biết danh sách đề xuất. Cần:
-- Xác nhận 4 văn bản bắt buộc
-- Chọn thêm 6 văn bản mở rộng
-- Verify có thể tải/thu thập được
-
-**Quyết định**: ?
-
----
-
-## 🟡 Ưu Tiên Trung Bình — Cần Chốt Trong Tháng 1
-
-### Q6: Reranker loại gì?
-
-Liên quan đến: RC3 — Hybrid Retriever
-
-| Option | Mô Tả | Trade-off |
-|---|---|---|
-| **A) BM25 hybrid** | Combine BM25 + vector score | Nhanh, đơn giản, baseline tốt |
-| **B) Cross-encoder** | BERT/PhoBERT reranks pairs | Chất lượng cao, chậm hơn |
-| **C) LLM-based** | LLM score từng chunk | Linh hoạt, tốn cost |
-
-**Gợi ý**: A làm baseline, B là main method → có thêm 1 experiment  
-**Quyết định**: ?
-
----
-
-### Q7: `Definition` — node riêng hay attribute của Concept?
-
-Liên quan đến: RC1 — Ontology
-
-**Option A**: Node riêng `(:Definition)-[:DEFINES]->(:Concept)`  
-**Option B**: Attribute của Concept `(:Concept {definition: "..."})`
-
-**Trade-off**: Option A cho phép query "Ai định nghĩa X?" nhưng phức tạp hơn  
-**Quyết định**: ?
-
----
-
-### Q8: Có node `Procedure` (thủ tục hành chính) không?
-
-Liên quan đến: RC1 — Ontology Scope
-
-Pháp luật doanh nghiệp có nhiều thủ tục hành chính (đăng ký, thay đổi, giải thể).  
-Nếu có node `Procedure`:
-- Graph phong phú hơn
-- Complexity tăng
-- Cần thêm relation types
-
-**Quyết định**: ?
-
----
-
-### Q9: Deployment target?
-
-Liên quan đến: Architecture + Effort estimate
-
-| Option | Mô Tả |
+| File | Nội Dung |
 |---|---|
-| **A) Local only** | Chạy trên máy demo, không có cloud |
-| **B) Docker Compose** | Đóng gói, chạy được trên bất kỳ máy nào |
-| **C) Cloud (AWS/GCP/Azure)** | Có URL public |
+| `ADR-07` | Chỉ so sánh với **1 baseline** (Vector RAG) |
+| `RC5` trong `01_research_contributions.md` | Mention cả BM25 + Vector RAG (**2 baselines**) |
 
-**Gợi ý**: Option B — Docker Compose là đủ cho đồ án tốt nghiệp  
-**Quyết định**: ?
-
----
-
-### Q10: Graph Visualizer — D3.js hay Cytoscape.js?
-
-Liên quan đến: Frontend UI
-
-| Library | Pros | Cons |
+| Option | Pros | Cons |
 |---|---|---|
-| **D3.js** | Cực kỳ linh hoạt, đẹp | Khó học, boilerplate nhiều |
-| **Cytoscape.js** | Chuyên cho graph, dễ hơn | Ít custom hơn |
-| **Sigma.js** | Performance tốt với graph lớn | Ít tài liệu hơn |
+| **1 baseline (Vector RAG)** | Đơn giản, báo cáo gọn | Ít so sánh hơn |
+| **2 baselines (BM25 + Vector RAG)** | So sánh phong phú hơn | Phải implement thêm BM25 pipeline |
 
-**Gợi ý**: Cytoscape.js — phù hợp hơn cho knowledge graph visualization  
-**Quyết định**: ?
+> [!IMPORTANT]
+> Chọn 1 và **sửa tất cả file** cho nhất quán. Hiện tại inconsistency sẽ bị hội đồng hỏi.
 
----
-
-## 🟢 Ưu Tiên Thấp — Có Thể Quyết Định Sau
-
-### Q11: Ontology Evolution — làm hay để Future Work?
-
-Nếu làm: thêm ~3-4 tuần, nhưng graph có thể update schema  
-Nếu để future work: đơn giản hơn nhưng thiếu 1 contribution  
-**Gợi ý**: Future Work  
-
-### Q12: Fine-tuned PhoBERT cho Intent Classification?
-
-Nếu làm: thêm ~2 tuần tạo dataset + train  
-Nếu không: chỉ dùng few-shot LLM  
-**Gợi ý**: Làm nếu còn thời gian tháng 3, dùng làm thêm 1 ablation study  
-
-### Q13: LLM-as-judge dùng model nào?
-
-Cho Evaluation Level 2-3  
-| GPT-4o | Gemini 1.5 Pro | Llama3 local |  
-**Gợi ý**: Gemini 1.5 Pro (đồng nhất với extraction model)  
+**Quyết định**: _______________
 
 ---
 
-## Meeting Agenda Template
+## 🟡 Nhóm 2 — Câu Hỏi Kỹ Thuật (Gợi Ý Sẵn)
 
-Dùng cho buổi họp nhóm đầu tiên:
+> [!NOTE]
+> Các câu này đã có gợi ý. Nhóm chỉ cần gật/lắc đầu và ghi vào Decision Log.
+
+### Q4: Confidence Scoring — N=3 hay Rule-based?
+
+> [!WARNING]
+> **Mâu thuẫn hiện tại**: ADR-06 đã chốt **rule-based**, nhưng `09_open_questions.md` cũ vẫn ghi N=3.
+
+| Option | Mô Tả | Gợi Ý |
+|---|---|---|
+| **Rule-based (ADR-06)** | JSON valid? + Ontology valid? + Evidence? + Entities resolve? | ✅ Explainable, không tốn API |
+| Self-consistency N=3 | 3 lần gọi LLM, majority vote | Tốn 3x cost, ít explainable hơn |
+
+**Quyết định**: _______________ (khuyến nghị: rule-based theo ADR-06)
+
+---
+
+### Q5: Intent Classification — Few-shot trước, PhoBERT sau?
+
+Gợi ý: **Có** — few-shot LLM làm main method, PhoBERT là ablation study nếu còn thời gian.
+
+**Quyết định**: _______________
+
+---
+
+### Q6: Threshold Human Review — giữ 0.3 / 0.7 không?
+
+Gợi ý: **Dùng**, nhưng sẽ calibrate lại trên validation set 3 văn bản (per ADR-06).
 
 ```
-1. Review 5 Research Contributions — 15 phút
-2. Chốt Q1, Q2, Q3 (Confidence Scoring, Intent, Threshold) — 20 phút
-3. Chốt Q4 (Ground Truth assignment) — 20 phút
-4. Chốt Q5 (Dataset list) — 15 phút
-5. Timeline review — 10 phút
-6. AOB — 10 phút
+< 0.3    → Auto-reject (Rejection Log)
+0.3-0.7  → Human Review Queue
+≥ 0.7    → Auto-accept → Neo4j
 ```
+
+**Quyết định**: _______________
 
 ---
 
-## Decision Log (Cập Nhật Sau Khi Chốt)
+### Q7: Reranker — BM25 baseline + cross-encoder main?
 
-| # | Câu Hỏi | Quyết Định | Người Quyết | Ngày |
+Gợi ý: **Có** — thêm được 1 ablation experiment nhỏ.
+
+**Quyết định**: _______________
+
+---
+
+### Q8: Definition — node riêng hay attribute của Concept?
+
+| Option | Pros | Cons |
+|---|---|---|
+| Attribute `Concept.definition` | Đơn giản hơn, ít node hơn | Không query được "Ai định nghĩa X?" |
+| Node riêng `(:Definition)` | Query phong phú hơn | Schema phức tạp hơn |
+
+Gợi ý: **Attribute** — đơn giản hơn, đủ dùng cho use case hiện tại.
+
+**Quyết định**: _______________
+
+---
+
+### Q9: Node Procedure — làm hay future work?
+
+Gợi ý: **Future Work** — scope creep, không đủ thời gian làm sâu.
+
+**Quyết định**: _______________
+
+---
+
+### Q10: Deployment — Docker Compose hay cần cloud?
+
+Gợi ý: **Docker Compose đủ** cho đồ án tốt nghiệp.
+
+**Quyết định**: _______________
+
+---
+
+### Q11: Graph Visualizer — Cytoscape.js hay đơn giản hơn?
+
+Phụ thuộc Q2a. Nếu dùng Gradio thì dùng `pyvis` hoặc `streamlit-agraph` thay Cytoscape.js.
+
+**Quyết định**: _______________ (sau khi chốt Q2a)
+
+---
+
+## 🔴 Nhóm 3 — Câu Hỏi Mới Phát Hiện (Plan Chưa Đề Cập)
+
+> [!CAUTION]
+> Đây là **lỗ hổng thực sự** trong plan. Nếu không giải quyết trước khi code, sẽ bị chặn giữa chừng hoặc ra kết quả evaluation sai.
+
+### Q12: Văn bản PDF có bản scan không? Cần OCR?
+
+**Vấn đề**: `04_graph_construction_pipeline.md` giả định tất cả PDF đều có text layer. Nếu có bản scan (ảnh), PyMuPDF sẽ extract được text rỗng.
+
+**Cần kiểm tra**: Mở từng PDF trong danh sách 10 văn bản, kiểm tra:
+```bash
+# Kiểm tra nhanh text layer
+python -c "import fitz; doc=fitz.open('file.pdf'); print(doc[0].get_text()[:200])"
+# Nếu output rỗng → bản scan, cần OCR
+```
+
+| Kết quả | Action |
+|---|---|
+| Tất cả có text layer | Không cần thay đổi pipeline |
+| Có 1-2 bản scan | Thêm bước OCR (Tesseract) vào pipeline |
+| Nhiều bản scan | Cân nhắc Azure Document Intelligence hoặc loại bỏ văn bản đó |
+
+> [!WARNING]
+> Nguồn tin cậy nhất để tải văn bản có text layer: **vbpl.vn** (Cơ sở dữ liệu văn bản pháp luật quốc gia). Ưu tiên tải từ đây.
+
+**Action cần làm**: Kiểm tra 10 PDF trước buổi họp. Ghi kết quả vào đây.
+
+**Kết quả kiểm tra**: _______________
+
+---
+
+### Q13: Temporal Traversal với DAG (không phải chain tuyến tính)
+
+**Vấn đề**: Plan hiện tại giả định amendments theo chain tuyến tính:
+```
+A →[AMENDED_BY t1]→ B →[AMENDED_BY t2]→ C
+```
+
+Nhưng thực tế pháp luật có thể tạo ra DAG:
+```
+A →[AMENDED_BY t1, partial: khoản 1]→ B
+A →[AMENDED_BY t2, partial: khoản 3]→ C
+```
+Lúc này, tại thời điểm t3 > t2 > t1, phiên bản hợp lệ của A là:
+- Khoản 1: lấy từ B (theo t1)
+- Khoản 3: lấy từ C (theo t2)
+- Khoản 2, 4, 5...: vẫn lấy từ A gốc
+
+Cypher `AMENDED_BY*1..5` với `priority: latest` sẽ **xử lý sai** trường hợp này.
+
+**3 Options:**
+
+| Option | Mô Tả | Khuyến Nghị |
+|---|---|---|
+| A) **Giả định chain tuyến tính** | Document limitation trong báo cáo | ✅ Thực tế nhất cho đồ án |
+| B) Thiết kế DAG traversal | Xử lý đúng, query phức tạp hơn | Thêm 2-3 tuần |
+| C) Atomic amendment nodes | Mỗi amendment = 1 node riêng biệt | Thay đổi schema hoàn toàn |
+
+**Khuyến nghị**: Option A — giả định chain, ghi rõ limitation trong báo cáo. Đây là assumption hợp lý vì đa số văn bản pháp luật VN có cấu trúc amendment tuyến tính.
+
+> [!NOTE]
+> Câu trong báo cáo: *"Đề tài giả định mỗi điều khoản chỉ có một chuỗi sửa đổi tuyến tính tại mỗi thời điểm. Xử lý trường hợp đa luồng sửa đổi song song là một hướng mở rộng trong tương lai."*
+
+**Quyết định**: _______________
+
+---
+
+### Q14: ID Canonicalization cho Concept/Entity — Evaluation Level 1
+
+**Vấn đề**: Không giống Article/Clause (có số điều, số khoản để derive ID tự động), Concept và Entity được sinh ra bởi LLM. 
+
+Nếu:
+- Gold annotation: `concept_von_dieu_le`
+- LLM extraction: `concept_von_dieu_le_cong_ty` hoặc `concept_vdl`
+
+**String matching sẽ = 0** dù về ngữ nghĩa là cùng 1 concept → Precision/Recall đo sai.
+
+**3 Options:**
+
+| Option | Cách Làm | Effort |
+|---|---|---|
+| A) **Pre-defined concept list** | Xây trước ~50-100 concept pháp lý phổ biến, cả gold và LLM đều map vào list này | ✅ Thấp, evaluation chính xác |
+| B) Fuzzy string matching | Edit distance hoặc cosine similarity của embedding | Trung bình, vẫn có false positives |
+| C) LLM-as-judge | LLM quyết định 2 entity có cùng nghĩa không | Cao, tốn cost |
+
+**Khuyến nghị**: Option A — xây trước pre-defined concept list ~50-100 entries cho domain luật doanh nghiệp. Cả gold annotation và LLM extraction đều phải normalize về danh sách này.
+
+> [!IMPORTANT]
+> Quyết định này ảnh hưởng đến **RC5 Level 1 Evaluation**. Nếu không giải quyết, con số Relation Precision/Recall sẽ không phản ánh đúng chất lượng pipeline.
+
+**Quyết định**: _______________
+
+---
+
+### Q15: Vietnamese Legal NLP Related Work — Đã Search Chưa?
+
+**Vấn đề**: Đề tài khẳng định ontology cho pháp luật doanh nghiệp VN là "chưa có ai làm". Cần verify trước khi bảo vệ.
+
+**Cần search các từ khóa sau** (Google Scholar, Semantic Scholar, ACL Anthology):
+
+```
+"Vietnamese legal" NLP
+"legal QA Vietnam" 
+"Vietnamese legal question answering"
+"pháp luật Việt Nam" knowledge graph
+ViLegalQA
+VLSP legal NLP shared task
+```
+
+**Các nguồn cần check:**
+- ACL Anthology (https://aclanthology.org/) — search "Vietnamese legal"
+- Semantic Scholar — search "Vietnamese legal NLP"
+- VLSP Workshop proceedings (2020-2024)
+- VNU-HCM, HUST thesis/papers on legal NLP
+
+**Expected findings** (dự đoán):
+- Có thể có keyword search / basic QA cho luật VN
+- Ít khả năng có Knowledge Graph + Temporal + XAI kết hợp
+- Ontology chuyên biệt cho luật doanh nghiệp VN rất có thể là contribution mới
+
+> [!WARNING]
+> **Phải làm trước khi viết Section 2 (Related Work) của báo cáo.** Nếu có paper tương tự, cần điều chỉnh cách định vị contribution.
+
+**Action**: Ai phụ trách Literature Review search và tổng hợp kết quả?  
+**Deadline**: Trước khi viết báo cáo (cuối tháng 1 theo timeline).  
+**Kết quả**: _______________
+
+---
+
+## Decision Log (Điền Sau Khi Họp)
+
+| Q | Câu Hỏi Tóm Tắt | Quyết Định | Người Quyết | Ngày |
 |---|---|---|---|---|
-| Q1 | Confidence Scoring | ? | ? | ? |
-| Q2 | Intent Classification | ? | ? | ? |
-| Q3 | Human Review Threshold | ? | ? | ? |
-| Q4 | Ground Truth Dataset owner | ? | ? | ? |
-| Q5 | Document list | ? | ? | ? |
-| Q6 | Reranker | ? | ? | ? |
-| Q7 | Definition node | ? | ? | ? |
-| Q8 | Procedure node | ? | ? | ? |
-| Q9 | Deployment | ? | ? | ? |
-| Q10 | Graph Visualizer | ? | ? | ? |
+| Q1 | Phân công nhóm | ? | ? | ? |
+| Q2a | UI: React hay Gradio? | ? | ? | ? |
+| Q2b | Ground truth: 100 hay 50 câu? | ? | ? | ? |
+| Q2c | Dataset: 4 hay 10 văn bản? | ? | ? | ? |
+| Q3 | Baseline: 1 hay 2? | ? | ? | ? |
+| Q4 | Confidence: rule-based (ADR-06) hay N=3? | ? | ? | ? |
+| Q5 | Intent: few-shot + PhoBERT ablation? | ? | ? | ? |
+| Q6 | Threshold: 0.3 / 0.7? | ? | ? | ? |
+| Q7 | Reranker: BM25 + cross-encoder? | ? | ? | ? |
+| Q8 | Definition: node hay attribute? | ? | ? | ? |
+| Q9 | Procedure: future work? | ? | ? | ? |
+| Q10 | Deployment: Docker Compose? | ? | ? | ? |
+| Q11 | Visualizer: Cytoscape.js? | ? | ? | ? |
+| Q12 | PDF text layer: cần OCR không? | ? | ? | ? |
+| Q13 | Temporal DAG: giả định chain + limitation? | ? | ? | ? |
+| Q14 | Concept ID: dùng pre-defined list? | ? | ? | ? |
+| Q15 | Related work VN legal NLP: ai search? | ? | ? | ? |
+
+---
+
+## Thứ Tự Ưu Tiên Giải Quyết
+
+```
+TRƯỚC buổi họp nhóm:
+  └── Q12: Kiểm tra PDF text layer (ai đó làm luôn, 30 phút)
+  └── Q15: Bắt đầu search related work (có thể song song)
+
+TRONG buổi họp nhóm:
+  ├── Q1  → Q2a, Q2b, Q2c (chain dependency)
+  ├── Q3  → update ADR-07 và RC5 cho nhất quán
+  ├── Q13 → quyết định approach + viết limitation statement
+  ├── Q14 → quyết định pre-defined concept list
+  └── Q4-Q11 → gật/lắc đầu nhanh
+
+SAU buổi họp:
+  └── Update tất cả file plan cho nhất quán với decisions
+  └── Bắt đầu implementation
+```
