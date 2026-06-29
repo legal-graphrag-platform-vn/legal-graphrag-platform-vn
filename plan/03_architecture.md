@@ -17,13 +17,14 @@
 │         ↓                                                    │
 │  [LLM] Information Extraction                                │
 │         ↓                                                    │
-│  [Pipeline] Graph Construction                               │
+│  [Pipeline] Graph Construction + Embedding                   │
 │         ↓                                                    │
-│  ┌─────────────┐    ┌─────────────────────┐                 │
-│  │   Neo4j     │    │   Vector Store       │                 │
-│  │ (Knowledge  │    │ (Article/Clause      │                 │
-│  │   Graph)    │    │  embeddings)         │                 │
-│  └─────────────┘    └─────────────────────┘                 │
+│  ┌────────────────────────────────────────────┐              │
+│  │   Neo4j 5.11+ Community                    │              │
+│  │   ├── Knowledge Graph (nodes + edges)      │              │
+│  │   └── Vector Index (Article/Clause embeddings) │          │
+│  └────────────────────────────────────────────┘              │
+│  [ADR-08] Unified storage: không có Vector Store riêng biệt  │
 └──────────────────────────────────────────────────────────────┘
                             ↕ (read/write)
 ┌──────────────────────────────────────────────────────────────┐
@@ -132,8 +133,15 @@ def process_extraction(llm_output):
         validated, existing_graph
     )
     
-    # Step 4: Confidence
-    confidence = confidence_scorer.score(llm_output, n_runs=3)
+    # Step 4: Confidence (Rule-based, ADR-06)
+    confidence = confidence_scorer.score(
+        extraction=llm_output,
+        validation_results={
+            "schema_ok": bool(validated),
+            "ontology_ok": bool(ontology_check)
+        },
+        graph_context={"existing_ids": graph_consistency_checker.get_ids()}
+    )
     
     if confidence >= THRESHOLD_AUTO:
         neo4j_writer.write(validated)
@@ -151,32 +159,37 @@ def process_extraction(llm_output):
 **Output**: Ranked list of context chunks + graph paths
 
 ```python
-class HybridRetriever:
+class Neo4jRetriever:
+    """Unified retriever: vector + graph + temporal trong 1 Cypher query (ADR-08)."""
+
     def retrieve(self, query: str, temporal_context: dict):
-        # 1. Vector search — find entry points
-        entry_points = self.vector_store.search(
-            query_embedding=embed(query),
-            top_k=10
-        )
-        
+        # 1. Embed query
+        query_embedding = embed(query)
+
         # 2. Get intent
         intent = self.intent_classifier.classify(query)
-        
-        # 3. Graph expansion per intent
         traversal_policy = TRAVERSAL_POLICIES[intent]
-        expanded_context = []
-        
-        for entry in entry_points:
-            subgraph = self.neo4j.traverse(
-                start_node=entry.node_id,
-                relations=traversal_policy.relations,
-                max_depth=traversal_policy.max_depth,
-                temporal_filter=temporal_context  # ← key for RC4
-            )
-            expanded_context.extend(subgraph)
-        
-        # 4. Rerank
-        return self.reranker.rerank(query, expanded_context)
+
+        # 3. Unified Cypher: vector search + temporal filter + graph expansion
+        result = self.neo4j.run("""
+            CALL db.index.vector.queryNodes('clause_embedding', 10, $embedding)
+            YIELD node AS clause, score
+            WHERE clause.effective_from <= date($query_date)
+              AND (clause.effective_to IS NULL OR clause.effective_to > date($query_date))
+            MATCH (clause)<-[:CONTAINS]-(article:Article)
+            MATCH (article)<-[:CONTAINS]-(doc:Document)
+            CALL apoc.path.expand(clause, $relations, null, 1, $max_depth)
+            YIELD path
+            RETURN clause, article, doc, path, score
+            ORDER BY score DESC
+        """, {
+            "embedding": query_embedding,
+            "query_date": temporal_context.get("date"),
+            "relations": "|".join(traversal_policy.relations),
+            "max_depth": traversal_policy.max_depth
+        })
+
+        return result
 ```
 
 ---

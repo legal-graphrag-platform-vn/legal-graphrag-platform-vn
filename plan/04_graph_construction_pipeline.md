@@ -255,11 +255,9 @@ class OntologyValidator:
             "no_self_loop": True
         },
         "AMENDED_BY": {
+            # Document→Document ĐÃ Bỏ: cấp Document dùng REPLACED_BY hoặc REPEALED_BY.
             # head_tail_same_type bị bỏ — quá strict cho cấu trúc luật sửa đổi VN.
-            # Ví dụ thực tế: "Điều 1 Khoản 1: Điều 17 LDN2020 được sửa đổi như sau..."
-            # → (LDN2020_D17:Article) -[:AMENDED_BY]→ (LuatSD_D1_K1:Clause)  ← hợp lệ
             "valid_pairs": [
-                ("Document", "Document"),  # Toàn văn bản
                 ("Article",  "Article"),   # Điều→Điều
                 ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất VN
                 ("Clause",   "Clause"),    # Khoản→Khoản
@@ -315,7 +313,10 @@ class OntologyValidator:
             ]
         },
         "REQUIRES": {
-            "valid_pairs": [("Entity", "Concept")]
+            "valid_pairs": [
+                ("Entity", "Concept"),
+                ("Entity", "Entity"),   # ví dụ: công ty phải có người đại diện theo PL
+            ]
         }
     }
 

@@ -8,8 +8,7 @@
 
 | Layer | Công Nghệ | Lý Do Chọn | Thay Thế |
 |---|---|---|---|
-| **Graph DB** | Neo4j Community | Cypher query mạnh, tài liệu nhiều, miễn phí | ArangoDB |
-| **Vector Store** | Qdrant | Open-source, Docker-friendly, performance tốt | ChromaDB |
+| **Graph DB + Vector** | Neo4j 5.11+ Community | Graph + Vector Index native, 1 query cho vector + graph + temporal | ArangoDB |
 | **LLM (main)** | Gemini 1.5 Flash | Cost-effective, hỗ trợ Vietnamese tốt | GPT-4o-mini |
 | **LLM (judge)** | Gemini 1.5 Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
 | **Embedding** | `bkai-foundation-models/vietnamese-bi-encoder` | Tiếng Việt native | OpenAI text-embedding-3-small |
@@ -46,27 +45,51 @@ neo4j:
 
 ---
 
-### Qdrant (Vector Store)
+### Neo4j Vector Index (thay thế Qdrant)
 
-```yaml
-qdrant:
-  image: qdrant/qdrant:latest
-  ports:
-    - "6333:6333"
-  volumes:
-    - ./data/qdrant:/qdrant/storage
+> [!IMPORTANT]
+> **ADR-08**: Dùng Neo4j native vector index (5.11+), không dùng Qdrant riêng biệt.
+> Lý do: 1 Cypher query dù nhất thực hiện vector search + graph traversal + temporal filter.
+> Với quy mô ~5000 clauses, unified storage là lựa chọn phù hợp hơn split architecture.
+
+```cypher
+-- Khởi tạo vector index khi init DB:
+CREATE VECTOR INDEX clause_embedding
+FOR (c:Clause) ON c.embedding
+OPTIONS {
+  indexConfig: {
+    `vector.dimensions`: 768,
+    `vector.similarity_function`: 'cosine'
+  }
+};
+
+CREATE VECTOR INDEX article_embedding
+FOR (a:Article) ON a.embedding
+OPTIONS {
+  indexConfig: {
+    `vector.dimensions`: 768,
+    `vector.similarity_function`: 'cosine'
+  }
+};
 ```
 
-**Collection setup:**
 ```python
-client.create_collection(
-    collection_name="legal_chunks",
-    vectors_config=VectorParams(
-        size=768,  # vietnamese-bi-encoder dimension
-        distance=Distance.COSINE
-    )
-)
+# Unified query: vector + graph + temporal trong 1 Cypher
+CYPHER = """
+CALL db.index.vector.queryNodes('clause_embedding', 10, $embedding)
+YIELD node AS clause, score
+WHERE clause.effective_from <= date($query_date)
+  AND (clause.effective_to IS NULL OR clause.effective_to > date($query_date))
+MATCH (clause)<-[:CONTAINS]-(article:Article)
+MATCH (article)<-[:CONTAINS]-(doc:Document)
+RETURN clause, article, doc, score
+ORDER BY score DESC
+"""
 ```
+
+**Scalability note** (cho báo cáo):
+> Với quy mô lớn hơn, interface-based RetrieverInterface cho phép thay thế
+> bằng Qdrant hoặc Milvus mà không ảnh hưởng các tầng còn lại.
 
 ---
 
@@ -164,12 +187,11 @@ frontend/
 # Python
 python >= 3.11
 
-# Required packages
+# Required packages (không có qdrant-client — dùng Neo4j native vector)
 pip install \
   llama-index \
   llama-index-graph-stores-neo4j \
   neo4j \
-  qdrant-client \
   sentence-transformers \
   pymupdf \
   fastapi \

@@ -350,18 +350,22 @@ CONSTRAINTS = {
     # --- Temporal relations ---
     "AMENDED_BY": {
         # Bỏ head_tail_same_type — quá strict cho pháp luật VN.
+        # Bỏ Document→Document — ở cấp Document, dùng REPLACED_BY/REPEALED_BY.
         # Văn bản sửa đổi VN thường có cấu trúc:
         #   "Điều 1: Khoản 1: Điều 17 LDN2020 được sửa đổi như sau..."
         # → head=Article (LDN2020_D17), tail=Clause (LuatSD_D1_K1) là hợp lệ.
         "valid_pairs": [
-            ("Document", "Document"),  # Toàn văn bản
+            # Document→Document ĐÃ Bỏ: cấp Document dùng REPLACED_BY hoặc REPEALED_BY
             ("Article",  "Article"),   # Điều→Điều (cùng cấp)
             ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất trong luật sửa đổi VN
             ("Clause",   "Clause"),    # Khoản→Khoản (cùng cấp)
             ("Clause",   "Article"),   # Khoản→Điều (khoản nhỏ mở rộng thành điều)
         ],
         "no_self_loop": True,
-        "required_properties": ["effective_from"]
+        "required_properties": ["effective_from"],
+        # Heuristic phân biệt AMENDED_BY vs REPLACED_BY:
+        # Đối tượng sửa đổi là Article hoặc Clause → AMENDED_BY
+        # Đối tượng là toàn bộ Document → REPLACED_BY (có kế thừa) hoặc REPEALED_BY (không)
     },
     "REPLACED_BY": {
         "allowed_head": ["Document", "Article"],
@@ -407,7 +411,7 @@ CONSTRAINTS = {
     },
     "REQUIRES": {
         "allowed_head": ["Entity"],
-        "allowed_tail": ["Concept"],
+        "allowed_tail": ["Concept", "Entity"],  # Entity: ví dụ "công ty phải có người đại diện theo PL"
         "no_self_loop": True
     }
 }
