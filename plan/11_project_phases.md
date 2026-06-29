@@ -62,6 +62,7 @@ Xây dựng pipeline tự động chuyển đổi văn bản pháp luật PDF sa
 
 | Task | Mô Tả | Người Phụ Trách |
 |---|---|---|
+| P1-0 | Document Crawler: cào PDF + Web Metadata (Step 0) | Data |
 | P1-1 | Hierarchy Parser: PDF → structured JSON (Điều/Khoản/Điểm) | Backend |
 | P1-2 | LLM Entity Extraction prompt + JSON Schema validation | AI/ML |
 | P1-3 | LLM Relation Extraction prompt + Ontology Validation | AI/ML |

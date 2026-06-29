@@ -5,19 +5,22 @@
 
 ---
 
-## Tổng Quan Pipeline
+## Tổng Quan Flow
 
 ```
-Raw PDF
-    │
-    ▼
-[Step 1] Hierarchy Parser
-    │   Input : PDF binary
-    │   Output: Structured document tree (JSON)
-    │
-    ▼
-[Step 2] LLM Information Extraction
-    │   Input : Text chunks (Article/Clause level)
+[Web] CSDL Pháp luật / Thư viện pháp luật
+      │ (Step 0: Crawler tải PDF + Metadata web)
+      ▼
+[PDF + Metadata] Văn bản pháp luật thô
+      │ (Step 1: Hierarchy Parser)
+      ▼
+[JSON] Cấu trúc phân cấp (Phần → Chương → Mục → Điều → Khoản → Điểm)
+       + Metadata (ngày hiệu lực, tình trạng) đính kèm sẵn vào Document node
+      │
+      ├─ (Step 2.1: Semantic Chunking) ───────► Embedding Index (Neo4j Vector)
+      │
+      │ (Step 2.2: LLM Entity Extraction)
+      ▼  Input : Text chunks (Article/Clause level)
     │   Output: Entities + Relations (JSON)
     │
     ▼
@@ -44,9 +47,29 @@ Raw PDF
 
 ---
 
-## Step 1: Hierarchy Parser
+## Chi Tiết Các Bước
 
-### Cấu Trúc Văn Bản Pháp Luật VN
+### Step 0: Crawler & Metadata Ingestion
+
+Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effective_from`, `effective_to` từ nội dung text (rất dễ sai sót do hallucination hoặc do văn bản ghi lằng nhằng), chúng ta cào trực tiếp metadata "sự thật tuyệt đối" từ trang web cùng lúc tải PDF.
+
+**Input**: URL văn bản pháp luật
+**Output**: 
+1. File PDF (lưu vào `data/raw/`)
+2. `metadata.json` chứa thông tin cứng:
+```json
+{
+  "doc_id": "LDN2020",
+  "type": "Law",
+  "effective_from": "2021-01-01",
+  "effective_to": null,
+  "status": "active"
+}
+```
+
+### Step 1: Hierarchy Parser (PDF → JSON)
+
+**Mục tiêu**: Chuyển đổi PDF thành cấu trúc phân cấp, đồng thời đính kèm (inject) web metadata vào node Document gốc.Bản Pháp Luật VN
 
 ```
 Document

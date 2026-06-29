@@ -11,9 +11,9 @@
 ┌──────────────────────────────────────────────────────────────┐
 │                        DATA LAYER                            │
 │                                                              │
-│  Raw PDF Documents                                           │
+│  [Crawler] Legal Document Scraper (PDF + Web Metadata)       │
 │         ↓                                                    │
-│  [Parser] Hierarchy Parser                                   │
+│  [Parser] Hierarchy Parser (PDF Text extraction)             │
 │         ↓                                                    │
 │  [LLM] Information Extraction                                │
 │         ↓                                                    │
@@ -64,10 +64,23 @@
 
 ## Chi Tiết Từng Component
 
-### 1. Hierarchy Parser
+### 1. Document Crawler & Ingestion (New)
 
-**Input**: PDF file của văn bản pháp luật  
-**Output**: Cấu trúc phân cấp dạng JSON
+**Input**: URLs từ trang VBPL chính phủ hoặc Thư viện pháp luật  
+**Output**: File PDF + JSON Metadata (ngày ban hành, hiệu lực, tình trạng)
+
+**Nhiệm vụ:**
+- Tự động tải file PDF của văn bản.
+- Cào Metadata "chuẩn xác 100%" từ web (để làm hard constraints thay vì bắt LLM đoán).
+- Lưu trữ vào thư mục `data/raw/` cùng file `metadata.json`.
+
+---
+
+### 2. Hierarchy Parser
+
+**Input**: PDF file + Metadata JSON  
+**Output**: Cấu trúc phân cấp dạng JSON + Metadata được đính kèm
+
 
 ```
 Luật Doanh nghiệp 2020
