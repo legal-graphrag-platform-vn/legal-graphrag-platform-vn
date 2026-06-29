@@ -152,6 +152,9 @@ Properties:
   - id: string (unique)          — e.g., "LDN2020_D17_K1_Pa"
   - label: string                — e.g., "a"
   - content: string              — full text của Điểm
+  - effective_from: date         — ⭐ cần thiết cho RC4 temporal filter
+  - effective_to: date | null    — null = còn hiệu lực
+  - status: enum [active, amended, repealed]
   [KHÔNG có embedding — Point quá ngắn, embed ở Clause level]
 
 (:Concept)
@@ -231,20 +234,31 @@ REPEALED_BY
   "Bị loại bỏ, không có văn bản tương đương" → REPEALED_BY
 
 IMPLEMENTED_BY
-  Head: :Document:Law
-  Tail: :Document:Decree
+  Head: :Document (bất kỳ loại)
+  Tail: :Document (bất kỳ loại)
+  Rule: **head.level > tail.level** (văn bản cấp cao hướng dẫn văn bản cấp thấp)
   Properties:
     - scope: string | null         ← phạm vi hướng dẫn (optional)
-  Ý nghĩa: Luật được hướng dẫn thi hành bởi Nghị định
-  Temporal: KHÔNG (quan hệ hành chính, không có thời hạn riêng)
-
-GUIDED_BY
-  Head: :Document:Decree
-  Tail: :Document:Circular
-  Properties:
-    - scope: string | null
-  Ý nghĩa: Nghị định được hướng dẫn chi tiết bởi Thông tư
+  Ý nghĩa: Văn bản cấp cao giao cho văn bản cấp thấp hướng dẫn thi hành
   Temporal: KHÔNG
+
+  Cấp bậc văn bản:
+  ```
+  DOCUMENT_LEVELS = {
+      "Law": 3, "Resolution": 3,     # Cấp Quốc hội
+      "Decree": 2, "Decision": 2,    # Cấp Chính phủ / Thủ tướng
+      "Circular": 1                   # Cấp Bộ
+  }
+  ```
+
+  Các cặp hợp lệ (head.level > tail.level):
+    Law (3) → Decree (2)      ✓ trường hợp thông thường
+    Law (3) → Circular (1)    ✓ Luật giao thẳng cho Bộ trưởng
+    Resolution (3) → Decree (2) ✓
+    Decree (2) → Circular (1)  ✓ (trước đây là GUIDED_BY)
+    Decision (2) → Circular (1) ✓
+
+  Lưu ý: GUIDED_BY đã được hợp nhất vào IMPLEMENTED_BY.
 
 REFERENCES
   Head: Article | Clause
@@ -294,7 +308,6 @@ REQUIRES
 | `REPLACED_BY` | ✅ | Thay thế có ngày hiệu lực |
 | `REPEALED_BY` | ✅ | Hủy bỏ có ngày hiệu lực |
 | `IMPLEMENTED_BY` | ❌ | Quan hệ hành chính tĩnh |
-| `GUIDED_BY` | ❌ | Quan hệ hành chính tĩnh |
 | `REFERENCES` | ❌ | Temporal của node đã bao phủ |
 | `DEFINES` | ❌ | Temporal của node đã bao phủ |
 | `REGULATES` | ❌ | Temporal của node đã bao phủ |
@@ -306,11 +319,19 @@ REQUIRES
 # ╔══════════════════════════════════════════════════════
 # QUAN TRỌNG: Mọi relation trong RELATION_ENUM phải có
 # đúng 1 entry trong CONSTRAINTS. Duy trì bằng unit test.
+# GUIDED_BY đã được hợp nhất vào IMPLEMENTED_BY.
 # ╚══════════════════════════════════════════════════════
+DOCUMENT_LEVELS = {
+    "Law": 3, "Resolution": 3,     # Cấp Quốc hội
+    "Decree": 2, "Decision": 2,    # Cấp Chính phủ
+    "Circular": 1                   # Cấp Bộ
+}
+
 RELATION_ENUM = {
     "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
-    "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
-    "DEFINES", "REGULATES", "REQUIRES"
+    "IMPLEMENTED_BY",              # GUIDED_BY đã hợp nhất vào đây
+    "REFERENCES", "DEFINES", "REGULATES", "REQUIRES"
+    # Tổng: 9 relation types
 }
 
 CONSTRAINTS = {
@@ -328,11 +349,19 @@ CONSTRAINTS = {
 
     # --- Temporal relations ---
     "AMENDED_BY": {
-        "allowed_head": ["Document", "Article", "Clause"],
-        "allowed_tail": ["Document", "Article", "Clause"],
-        "head_tail_same_type": True,  # Document→Document, Article→Article
+        # Bỏ head_tail_same_type — quá strict cho pháp luật VN.
+        # Văn bản sửa đổi VN thường có cấu trúc:
+        #   "Điều 1: Khoản 1: Điều 17 LDN2020 được sửa đổi như sau..."
+        # → head=Article (LDN2020_D17), tail=Clause (LuatSD_D1_K1) là hợp lệ.
+        "valid_pairs": [
+            ("Document", "Document"),  # Toàn văn bản
+            ("Article",  "Article"),   # Điều→Điều (cùng cấp)
+            ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất trong luật sửa đổi VN
+            ("Clause",   "Clause"),    # Khoản→Khoản (cùng cấp)
+            ("Clause",   "Article"),   # Khoản→Điều (khoản nhỏ mở rộng thành điều)
+        ],
         "no_self_loop": True,
-        "required_properties": ["effective_from"]  # bắt buộc có
+        "required_properties": ["effective_from"]
     },
     "REPLACED_BY": {
         "allowed_head": ["Document", "Article"],
@@ -351,16 +380,15 @@ CONSTRAINTS = {
 
     # --- Hành chính phân cấp ---
     "IMPLEMENTED_BY": {
-        "allowed_head": ["Document"],
-        "allowed_tail": ["Document"],
-        "head_type_constraint": "Law",
-        "tail_type_constraint": "Decree"
-    },
-    "GUIDED_BY": {
-        "allowed_head": ["Document"],
-        "allowed_tail": ["Document"],
-        "head_type_constraint": "Decree",
-        "tail_type_constraint": "Circular"
+        # Level-based rule: head.level > tail.level
+        # GUIDED_BY đã hợp nhất vào đây.
+        # Covers: Law→Decree, Law→Circular (direct),
+        #         Resolution→Decree, Decree→Circular, Decision→Circular
+        "rule": "head_doc_level > tail_doc_level",
+        "doc_levels": {"Law": 3, "Resolution": 3,
+                       "Decree": 2, "Decision": 2,
+                       "Circular": 1},
+        # valid_pairs được tính động từ rule, không hard-code
     },
 
     # --- Ngữ nghĩa ---

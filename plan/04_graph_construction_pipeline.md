@@ -210,8 +210,9 @@ RELATION_SCHEMA = {
         "head": {"type": "string"},
         "relation": {"enum": [
             "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
-            "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
-            "DEFINES", "REGULATES", "REQUIRES"
+            "IMPLEMENTED_BY",        # GUIDED_BY đã hợp nhất vào đây
+            "REFERENCES", "DEFINES", "REGULATES", "REQUIRES"
+            # Tổng: 9 relation types
         ]},
         "tail": {"type": "string"},
         "evidence": {"type": "string"},
@@ -229,11 +230,19 @@ class OntologyValidator:
     # ╔════════════════════════════════════════════
     # Phải đồng bộ với CONSTRAINTS trong 02_ontology_specification.md
     # Duy trì bằng unit test: tests/test_ontology_consistency.py
+    # GUIDED_BY đã hợp nhất vào IMPLEMENTED_BY.
     # ╚════════════════════════════════════════════
+    DOCUMENT_LEVELS = {
+        "Law": 3, "Resolution": 3,
+        "Decree": 2, "Decision": 2,
+        "Circular": 1
+    }
+
     RELATION_ENUM = {
         "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
-        "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
-        "DEFINES", "REGULATES", "REQUIRES"
+        "IMPLEMENTED_BY",
+        "REFERENCES", "DEFINES", "REGULATES", "REQUIRES"
+        # Tổng: 9 — GUIDED_BY hợp nhất vào IMPLEMENTED_BY
     }
 
     CONSTRAINTS = {
@@ -246,7 +255,16 @@ class OntologyValidator:
             "no_self_loop": True
         },
         "AMENDED_BY": {
-            "head_tail_same_type": True,
+            # head_tail_same_type bị bỏ — quá strict cho cấu trúc luật sửa đổi VN.
+            # Ví dụ thực tế: "Điều 1 Khoản 1: Điều 17 LDN2020 được sửa đổi như sau..."
+            # → (LDN2020_D17:Article) -[:AMENDED_BY]→ (LuatSD_D1_K1:Clause)  ← hợp lệ
+            "valid_pairs": [
+                ("Document", "Document"),  # Toàn văn bản
+                ("Article",  "Article"),   # Điều→Điều
+                ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất VN
+                ("Clause",   "Clause"),    # Khoản→Khoản
+                ("Clause",   "Article"),   # Khoản→Điều (mở rộng)
+            ],
             "no_self_loop": True,
             "required_properties": ["effective_from"]
         },
@@ -265,14 +283,12 @@ class OntologyValidator:
             "required_properties": ["effective_from"]
         },
         "IMPLEMENTED_BY": {
-            "valid_pairs": [("Document", "Document")],
-            "head_doc_type": "Law",
-            "tail_doc_type": "Decree"
-        },
-        "GUIDED_BY": {
-            "valid_pairs": [("Document", "Document")],
-            "head_doc_type": "Decree",
-            "tail_doc_type": "Circular"
+            # Level-based rule: head.level > tail.level
+            # GUIDED_BY đã hợp nhất vào đây.
+            # Covers: Law→Decree, Law→Circular (direct),
+            #         Resolution→Decree, Decree→Circular, Decision→Circular
+            "rule": "head_doc_level > tail_doc_level",
+            # doc_levels reference: DOCUMENT_LEVELS dict phía trên
         },
         "REFERENCES": {
             "valid_pairs": [
