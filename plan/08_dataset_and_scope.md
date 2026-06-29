@@ -1,0 +1,173 @@
+# Dataset & Scope
+
+> **Domain**: Pháp luật doanh nghiệp Việt Nam  
+> **Phạm vi**: Luật Doanh nghiệp 2020 + các văn bản hướng dẫn
+
+---
+
+## Phạm Vi Dữ Liệu
+
+### Cấu Trúc Hệ Thống Văn Bản (Target)
+
+```
+Luật Doanh nghiệp 2020 (59/2020/QH14)
+         │
+         ├── IMPLEMENTED_BY ──→ NĐ 01/2021/NĐ-CP (Đăng ký DN)
+         │                          │
+         │                          └── GUIDED_BY ──→ TT 01/2021/TT-BKHĐT
+         │
+         ├── IMPLEMENTED_BY ──→ NĐ 47/2021/NĐ-CP (Sửa đổi NĐ 01)
+         │
+         ├── IMPLEMENTED_BY ──→ NĐ 155/2020/NĐ-CP (Chứng khoán - DN đại chúng)
+         │
+         └── AMENDED_BY ──→ Luật Doanh nghiệp 2014 (tiền thân)
+```
+
+---
+
+## Danh Sách Văn Bản Dự Kiến (Cần Xác Nhận)
+
+### Nhóm 1 — Văn Bản Cốt Lõi (BẮT BUỘC)
+
+| STT | Số Hiệu | Tên Văn Bản | Loại | Ghi Chú |
+|---|---|---|---|---|
+| 1 | 59/2020/QH14 | Luật Doanh nghiệp 2020 | Luật | Main law |
+| 2 | 01/2021/NĐ-CP | NĐ về đăng ký doanh nghiệp | NĐ | Hướng dẫn chính |
+| 3 | 47/2021/NĐ-CP | NĐ sửa đổi NĐ 01/2021 | NĐ | Temporal test |
+| 4 | 01/2021/TT-BKHĐT | TT hướng dẫn đăng ký DN | TT | Hướng dẫn NĐ 01 |
+
+### Nhóm 2 — Mở Rộng (NẾU ĐỦ THỜI GIAN)
+
+| STT | Số Hiệu | Tên Văn Bản | Loại | Ghi Chú |
+|---|---|---|---|---|
+| 5 | 68/2014/QH13 | Luật Doanh nghiệp 2014 | Luật | Temporal: trước 2020 |
+| 6 | 78/2015/NĐ-CP | NĐ đăng ký DN 2015 | NĐ | Temporal: trước 2021 |
+| 7 | 108/2018/NĐ-CP | NĐ sửa đổi NĐ 78/2015 | NĐ | Temporal: 2018-2020 |
+| 8 | 155/2020/NĐ-CP | NĐ về chứng khoán/DN đại chúng | NĐ | Mở rộng |
+| 9 | 35/2020/QH14 | Luật Đầu tư 2020 | Luật | Related law |
+| 10 | 31/2021/NĐ-CP | NĐ chi tiết Luật Đầu tư | NĐ | Liên quan |
+
+> **Tổng tối thiểu**: 4 văn bản (đủ demo)  
+> **Tổng mục tiêu**: 10 văn bản  
+> **Không nên quá**: 20 văn bản (mất kiểm soát chất lượng)
+
+---
+
+## Ground Truth Dataset
+
+### Phần 1 — Gold Graph Annotation
+**Mục đích**: Đánh giá chất lượng Graph Construction (RC5, Level 1)  
+**Số lượng**: Annotate thủ công **3 văn bản** (NĐ 01/2021 là trọng tâm)  
+**Format**:
+
+```json
+{
+  "document": "ND01_2021",
+  "entities": [
+    {
+      "id": "ND01_2021_D5",
+      "type": "Article",
+      "label": "Điều 5. Hồ sơ đăng ký doanh nghiệp",
+      "properties": {
+        "effective_from": "2021-01-04",
+        "status": "active"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "head": "ND01_2021",
+      "relation": "CONTAINS",
+      "tail": "ND01_2021_D5"
+    },
+    {
+      "head": "LDN2020_D26",
+      "relation": "REFERENCES",
+      "tail": "ND01_2021_D5"
+    }
+  ]
+}
+```
+
+### Phần 2 — QA Dataset
+**Mục đích**: Đánh giá Retrieval + QA quality (RC5, Level 2-3)
+
+**Cấu trúc 100 câu hỏi:**
+
+| Loại | Số Lượng | Ví Dụ |
+|---|---|---|
+| Factual | 40 | "Điều kiện để thành lập công ty TNHH là gì?" |
+| Hierarchy | 20 | "Nghị định nào hướng dẫn Điều 26 Luật DN 2020?" |
+| Multi-hop | 20 | "Thủ tục đăng ký DN theo NĐ 01/2021 yêu cầu những gì?" |
+| Definition | 20 | "Vốn pháp định là gì theo quy định hiện hành?" |
+
+**Format:**
+```json
+{
+  "id": "QA_001",
+  "question": "Điều kiện để thành lập công ty TNHH hai thành viên là gì?",
+  "answer": "Theo Điều 46 Luật Doanh nghiệp 2020...",
+  "relevant_articles": ["LDN2020_D46", "LDN2020_D29"],
+  "difficulty": "medium"
+}
+```
+
+### Phần 3 — Temporal QA Dataset
+**Mục đích**: Đánh giá Temporal Accuracy (RC5, Level 4)
+
+**50 câu hỏi temporal:**
+
+| Loại | Số Lượng | Ví Dụ |
+|---|---|---|
+| Point-in-time | 20 | "Năm 2019, thủ tục đăng ký DN quy định thế nào?" |
+| Before/After | 15 | "Sau khi NĐ 47/2021 có hiệu lực, quy định về vốn thay đổi gì?" |
+| Validity check | 15 | "NĐ 78/2015 còn hiệu lực tại thời điểm 2022 không?" |
+
+**Format:**
+```json
+{
+  "id": "TQA_001",
+  "question": "Năm 2019, thủ tục đăng ký doanh nghiệp theo quy định nào?",
+  "temporal_context": {
+    "year": 2019,
+    "from": "2019-01-01",
+    "to": "2019-12-31"
+  },
+  "answer": "Năm 2019, áp dụng NĐ 78/2015 (NĐ 108/2018 sửa đổi)...",
+  "relevant_articles": ["ND78_2015_D8", "ND108_2018_D1"],
+  "should_not_use": ["ND01_2021_D5"]
+}
+```
+
+### Phần 4 — XAI Evaluation
+**Mục đích**: Đánh giá Citation Completeness + Reasoning Path (RC5, Level 4)
+
+**20-30 câu** với expected reasoning path:
+
+```json
+{
+  "id": "XAI_001",
+  "question": "Công ty TNHH phải có bao nhiêu thành viên?",
+  "expected_answer": "Từ 2 đến 50 thành viên",
+  "expected_citations": ["LDN2020_D46_K1"],
+  "expected_path": [
+    "LDN2020_D46",
+    "CONTAINS",
+    "LDN2020_D46_K1",
+    "DEFINES",
+    "Concept(SốThànhViênTốiThiểu)"
+  ]
+}
+```
+
+---
+
+## Câu Hỏi Mở Cho Nhóm
+
+| # | Câu Hỏi | Ai Quyết Định |
+|---|---|---|
+| 1 | Danh sách 10 văn bản có đúng không? | Cả nhóm |
+| 2 | Có thể thu thập được các NĐ cũ (2015, 2018)? | Người phụ trách data |
+| 3 | Ai phụ trách annotate Gold Graph (3 văn bản)? | Cả nhóm |
+| 4 | Ai viết 100 QA pairs? Phân chia thế nào? | Cả nhóm |
+| 5 | Có mời legal expert review dataset không? | Leader quyết |
