@@ -1,8 +1,12 @@
 # Ontology Specification — Legal Knowledge Graph
 
-> **Trạng thái**: Draft — cần nhóm review và chốt  
-> **Phiên bản**: 0.1  
+> **Trạng thái**: v0.2 — cập nhật sau review ADR  
+> **Phiên bản**: 0.2  
 > **Domain**: Pháp luật doanh nghiệp Việt Nam
+
+> [!IMPORTANT]
+> File này là **source of truth** cho toàn bộ Neo4j schema.  
+> Mọi thay đổi phải được cả nhóm đồng ý và cập nhật vào đây trước khi code.
 
 ---
 
@@ -43,130 +47,236 @@
 
 ## Tầng 2 — Formal Ontology
 
-### Node Types
+---
+
+### ID Convention (CHỐT — không thay đổi)
+
+> [!IMPORTANT]
+> ID phải **unique, human-readable, stable**. Toàn bộ pipeline dùng convention này.
 
 ```
-(:Document)
+Document:  {doc_code}
+           Ví dụ: LDN2020, ND01_2021, TT01_2021
+           Rule: viết tắt tên văn bản + năm
+
+Article:   {doc_code}_D{number}
+           Ví dụ: LDN2020_D17
+
+Clause:    {doc_code}_D{number}_K{number}
+           Ví dụ: LDN2020_D17_K1
+
+Point:     {doc_code}_D{number}_K{number}_P{label}
+           Ví dụ: LDN2020_D17_K1_Pa  (điểm a)
+
+Concept:   concept_{slug_viet_khong_dau}
+           Ví dụ: concept_von_dieu_le
+
+Entity:    entity_{slug_viet_khong_dau}
+           Ví dụ: entity_cong_ty_tnhh
+```
+
+**Xử lý collision**: Khi Điều 17 NĐ47/2024 sửa Điều 17 LDN2020:
+- `LDN2020_D17` = phiên bản gốc
+- `ND47_2024_D17` = điều sửa đổi (node khác)
+- Quan hệ: `(LDN2020_D17)-[:AMENDED_BY]->(ND47_2024_D17)`
+
+---
+
+### Node Labels — Multi-label Strategy (CHỐT)
+
+> [!IMPORTANT]
+> **Quyết định**: Dùng **multi-label** cho Document type thay vì property.
+> Lý do: Ontology constraint `IMPLEMENTED_BY` chỉ từ `:Law` → `:Decree` enforce được ở DB level.
+
+```
+:Document:Law        — Luật, Bộ luật
+:Document:Decree     — Nghị định
+:Document:Circular   — Thông tư
+:Document:Resolution — Nghị quyết
+:Document:Decision   — Quyết định
+
+:Entity:CompanyType  — Loại hình doanh nghiệp
+:Entity:Authority    — Cơ quan nhà nước
+:Entity:PersonType   — Loại chủ thể (cá nhân, tổ chức)
+```
+
+Query examples với multi-label:
+```cypher
+// Chỉ tìm Luật (không bao gồm Nghị định)
+MATCH (d:Document:Law) RETURN d
+
+// Enforce constraint: IMPLEMENTED_BY chỉ từ Law → Decree
+MATCH (law:Document:Law)-[:IMPLEMENTED_BY]->(decree:Document:Decree)
+```
+
+---
+
+### Node Types & Properties
+
+```
+(:Document:Law | :Document:Decree | :Document:Circular | ...)
 Properties:
-  - id: string (unique) — e.g., "LDN2020"
-  - number: string — e.g., "59/2020/QH14"
-  - title: string — e.g., "Luật Doanh nghiệp"
-  - type: enum [Law, Decree, Circular, Resolution, Decision]
-  - issued_by: string — e.g., "Quốc hội"
-  - issued_date: date — e.g., "2020-06-17"
+  - id: string (unique)          — e.g., "LDN2020"
+  - number: string               — e.g., "59/2020/QH14"
+  - title: string                — e.g., "Luật Doanh nghiệp"
+  - issued_by: string            — e.g., "Quốc hội"
+  - issued_date: date            — e.g., date("2020-06-17")
   - effective_from: date
-  - effective_to: date | null
+  - effective_to: date | null    — null = còn hiệu lực
   - status: enum [active, amended, repealed, suspended]
+  [KHÔNG có property 'type' — type được encode trong label]
 
 (:Article)
 Properties:
-  - id: string (unique) — e.g., "LDN2020_D17"
-  - number: int — e.g., 17
-  - title: string — e.g., "Điều kiện thành lập doanh nghiệp"
-  - content: string — full text
+  - id: string (unique)          — e.g., "LDN2020_D17"
+  - number: int                  — e.g., 17
+  - title: string                — e.g., "Điều kiện thành lập..."
+  - content: string              — full text của Điều
   - effective_from: date
   - effective_to: date | null
   - status: enum [active, amended, repealed]
+  - embedding: float[]           — vector 768 dims ⭐ (dùng cho hybrid search)
 
 (:Clause)
 Properties:
-  - id: string (unique) — e.g., "LDN2020_D17_K1"
-  - number: int — e.g., 1
-  - content: string — full text
+  - id: string (unique)          — e.g., "LDN2020_D17_K1"
+  - number: int                  — e.g., 1
+  - content: string              — full text của Khoản
   - effective_from: date
   - effective_to: date | null
+  - status: enum [active, amended, repealed]
+  - embedding: float[]           — vector 768 dims ⭐ (unit chính cho retrieval)
 
 (:Point)
 Properties:
-  - id: string (unique) — e.g., "LDN2020_D17_K1_Da"
-  - label: string — e.g., "a"
-  - content: string — full text
+  - id: string (unique)          — e.g., "LDN2020_D17_K1_Pa"
+  - label: string                — e.g., "a"
+  - content: string              — full text của Điểm
+  [KHÔNG có embedding — Point quá ngắn, embed ở Clause level]
 
 (:Concept)
 Properties:
-  - id: string (unique)
-  - name: string — e.g., "Vốn điều lệ"
-  - definition: string (optional)
-  - domain: string — e.g., "company_law"
+  - id: string (unique)          — e.g., "concept_von_dieu_le"
+  - name: string                 — e.g., "Vốn điều lệ"
+  - definition: string | null    — định nghĩa chính thức (nếu có)
+  - domain: string               — e.g., "company_law"
 
-(:Entity)
+(:Entity:CompanyType | :Entity:Authority | :Entity:PersonType)
 Properties:
-  - id: string (unique)
-  - name: string — e.g., "Công ty TNHH"
-  - type: enum [company_type, authority, person_type]
+  - id: string (unique)          — e.g., "entity_cong_ty_tnhh"
+  - name: string                 — e.g., "Công ty TNHH"
 ```
 
+> [!NOTE]
+> **Embedding chỉ có ở Article và Clause** — đây là hai đơn vị retrieval chính.
+> Point quá ngắn để embed độc lập; Concept/Entity được retrieve qua graph, không qua vector.
+
 ### Relation Types
+
+> [!IMPORTANT]
+> **Temporal consistency rule**: Tất cả relation có ngữ nghĩa thời gian (AMENDED_BY, REPLACED_BY, REPEALED_BY) **bắt buộc** có property `effective_from`. Thiếu là lỗi ontology.
 
 ```
 CONTAINS
   Head: Document | Article | Clause
   Tail: Article | Clause | Point
-  Properties: order (int)
-  Ý nghĩa: Quan hệ phân cấp cấu trúc
+  Head-Tail pairs hợp lệ:
+    Document → Article
+    Article  → Clause
+    Clause   → Point
+  Properties:
+    - order: int (thứ tự xuất hiện trong văn bản)
+  Temporal: KHÔNG (quan hệ cấu trúc, không thay đổi)
 
 AMENDED_BY
-  Head: Article | Clause | Document
-  Tail: Article | Clause | Document (cùng loại)
+  Head: Document | Article | Clause
+  Tail: Document | Article | Clause (phải cùng loại với Head)
   Properties:
-    - effective_from: date
-    - effective_to: date | null
+    - effective_from: date         ← BẮT BUỘC
+    - effective_to: date | null    ← null = vẫn còn hiệu lực sửa đổi
     - amendment_type: enum [partial, full]
-    - source_document: string (văn bản sửa đổi)
-  Ý nghĩa: A bị sửa đổi bởi B kể từ ngày effective_from
+    - source_doc_id: string        ← ID của văn bản chứa nội dung sửa đổi
+  Ý nghĩa: A bị sửa đổi bởi B, có hiệu lực từ effective_from
+  Lưu ý: B là node chứa NỘI DUNG SỬA ĐỔI, không phải văn bản sửa đổi
 
 REPLACED_BY
   Head: Document | Article
-  Tail: Document | Article (cùng loại)
+  Tail: Document | Article (phải cùng loại với Head)
   Properties:
-    - effective_from: date
-  Ý nghĩa: A bị thay thế hoàn toàn bởi B
+    - effective_from: date         ← BẮT BUỘC
+    - effective_to: date | null
+  Ý nghĩa: A bị thay thế TOÀN BỘ bởi B kể từ effective_from
+  Phân biệt với AMENDED_BY: REPLACED_BY = hết toàn bộ hiệu lực
 
 REPEALED_BY
   Head: Document | Article | Clause
-  Tail: Document (văn bản hủy bỏ)
+  Tail: Document (văn bản ra quyết định hủy bỏ)
   Properties:
-    - effective_from: date
-  Ý nghĩa: A bị bãi bỏ bởi B
+    - effective_from: date         ← BẮT BUỘC
+  Ý nghĩa: A bị bãi bỏ hoàn toàn bởi văn bản B
+  Sau effective_from: A.status = "repealed"
 
 IMPLEMENTED_BY
-  Head: Document (type=Law)
-  Tail: Document (type=Decree)
+  Head: :Document:Law
+  Tail: :Document:Decree
   Properties:
-    - scope: string (phạm vi hướng dẫn)
-  Ý nghĩa: Luật được hướng dẫn bởi Nghị định
+    - scope: string | null         ← phạm vi hướng dẫn (optional)
+  Ý nghĩa: Luật được hướng dẫn thi hành bởi Nghị định
+  Temporal: KHÔNG (quan hệ hành chính, không có thời hạn riêng)
 
 GUIDED_BY
-  Head: Document (type=Decree)
-  Tail: Document (type=Circular)
+  Head: :Document:Decree
+  Tail: :Document:Circular
   Properties:
-    - scope: string
-  Ý nghĩa: Nghị định được hướng dẫn bởi Thông tư
+    - scope: string | null
+  Ý nghĩa: Nghị định được hướng dẫn chi tiết bởi Thông tư
+  Temporal: KHÔNG
 
 REFERENCES
   Head: Article | Clause
   Tail: Article | Clause | Document
   Properties:
     - reference_type: enum [direct, conditional]
-  Ý nghĩa: A viện dẫn B
+  Ý nghĩa: A viện dẫn B ("căn cứ theo Điều X...")
+  Temporal: KHÔNG
 
 DEFINES
   Head: Article | Clause
   Tail: Concept
-  Ý nghĩa: Điều/Khoản định nghĩa một khái niệm pháp lý
+  Properties: (không có)
+  Ý nghĩa: Điều/Khoản đưa ra định nghĩa chính thức cho Concept
+  Temporal: KHÔNG
 
 REGULATES
   Head: Article | Clause
   Tail: Entity | Concept
-  Ý nghĩa: Điều/Khoản điều chỉnh một chủ thể hoặc khái niệm
+  Properties: (không có)
+  Ý nghĩa: Điều/Khoản điều chỉnh hành vi/nghĩa vụ của chủ thể
+  Temporal: KHÔNG (temporal của Article/Clause đã bao phủ)
 
 REQUIRES
   Head: Entity
   Tail: Concept
   Properties:
     - condition_type: enum [must, should, prohibited]
-  Ý nghĩa: Chủ thể phải/nên/không được...
+  Ý nghĩa: Chủ thể phải/nên/không được có/làm Concept
+  Temporal: KHÔNG
 ```
+
+**Tổng kết temporal policy:**
+
+| Relation | Có Temporal? | Lý do |
+|---|---|---|
+| `CONTAINS` | ❌ | Cấu trúc văn bản không đổi |
+| `AMENDED_BY` | ✅ | Sửa đổi có ngày hiệu lực |
+| `REPLACED_BY` | ✅ | Thay thế có ngày hiệu lực |
+| `REPEALED_BY` | ✅ | Hủy bỏ có ngày hiệu lực |
+| `IMPLEMENTED_BY` | ❌ | Quan hệ hành chính tĩnh |
+| `GUIDED_BY` | ❌ | Quan hệ hành chính tĩnh |
+| `REFERENCES` | ❌ | Temporal của node đã bao phủ |
+| `DEFINES` | ❌ | Temporal của node đã bao phủ |
+| `REGULATES` | ❌ | Temporal của node đã bao phủ |
+| `REQUIRES` | ❌ | Temporal của node đã bao phủ |
 
 ### Ontology Constraints (Rules)
 
@@ -213,35 +323,70 @@ CONSTRAINTS = {
 
 ---
 
-## Tầng 3 — Neo4j Schema
+## Tầng 3 — Neo4j Schema (Cypher)
 
-### Cypher Schema
+### 3.1 Constraints (chạy khi init DB)
 
 ```cypher
-// Indexes
-CREATE INDEX document_id FOR (d:Document) ON (d.id);
-CREATE INDEX article_id FOR (a:Article) ON (a.id);
-CREATE INDEX concept_name FOR (c:Concept) ON (c.name);
-
-// Full-text search
-CALL db.index.fulltext.createNodeIndex(
-  "articleFullText", ["Article", "Clause", "Point"], ["content", "title"]
-);
-
-// Temporal indexes
-CREATE INDEX article_effective FOR (a:Article) ON (a.effective_from, a.effective_to);
-CREATE INDEX rel_amended_temporal FOR ()-[r:AMENDED_BY]-() ON (r.effective_from);
+// Uniqueness — bắt buộc có
+CREATE CONSTRAINT doc_id_unique   FOR (d:Document) REQUIRE d.id IS UNIQUE;
+CREATE CONSTRAINT art_id_unique   FOR (a:Article)  REQUIRE a.id IS UNIQUE;
+CREATE CONSTRAINT cls_id_unique   FOR (c:Clause)   REQUIRE c.id IS UNIQUE;
+CREATE CONSTRAINT pnt_id_unique   FOR (p:Point)    REQUIRE p.id IS UNIQUE;
+CREATE CONSTRAINT con_id_unique   FOR (c:Concept)  REQUIRE c.id IS UNIQUE;
+CREATE CONSTRAINT ent_id_unique   FOR (e:Entity)   REQUIRE e.id IS UNIQUE;
 ```
 
-### Ví Dụ Dữ Liệu Thực
+### 3.2 Indexes (chạy khi init DB)
 
 ```cypher
-// Luật Doanh nghiệp 2020
-CREATE (:Document {
+// --- Lookup indexes ---
+CREATE INDEX doc_number  FOR (d:Document) ON (d.number);   // tìm theo số hiệu
+CREATE INDEX art_number  FOR (a:Article)  ON (a.number);   // tìm theo số điều
+
+// --- Temporal indexes ---
+CREATE INDEX art_temporal FOR (a:Article) ON (a.effective_from, a.effective_to);
+CREATE INDEX cls_temporal FOR (c:Clause)  ON (c.effective_from, c.effective_to);
+CREATE INDEX doc_temporal FOR (d:Document) ON (d.effective_from, d.effective_to);
+// Index trên relationship property (Neo4j 5.x)
+CREATE INDEX amended_from FOR ()-[r:AMENDED_BY]-()   ON (r.effective_from);
+CREATE INDEX replaced_from FOR ()-[r:REPLACED_BY]-() ON (r.effective_from);
+CREATE INDEX repealed_from FOR ()-[r:REPEALED_BY]-() ON (r.effective_from);
+
+// --- Full-text search ---
+CREATE FULLTEXT INDEX legal_fulltext
+FOR (n:Article|Clause|Point)
+ON EACH [n.content, n.title];
+
+// --- Vector index (Neo4j 5.x native) ---
+CREATE VECTOR INDEX article_embedding
+FOR (a:Article) ON (a.embedding)
+OPTIONS {indexConfig: {
+  `vector.dimensions`: 768,
+  `vector.similarity_function`: 'cosine'
+}};
+
+CREATE VECTOR INDEX clause_embedding
+FOR (c:Clause) ON (c.embedding)
+OPTIONS {indexConfig: {
+  `vector.dimensions`: 768,
+  `vector.similarity_function`: 'cosine'
+}};
+```
+
+> [!NOTE]
+> **Tại sao dùng Neo4j Vector Index thay vì Qdrant riêng?**  
+> Cho phép viết 1 Cypher query duy nhất: vector search → graph traversal → temporal filter.  
+> Không cần 2 round trips (Qdrant → IDs → Neo4j).
+
+### 3.3 Ví Dụ Dữ Liệu Thực (Cypher)
+
+```cypher
+// --- Tạo Documents (multi-label) ---
+CREATE (:Document:Law {
   id: "LDN2020",
   number: "59/2020/QH14",
   title: "Luật Doanh nghiệp",
-  type: "Law",
   issued_by: "Quốc hội",
   issued_date: date("2020-06-17"),
   effective_from: date("2021-01-01"),
@@ -249,12 +394,10 @@ CREATE (:Document {
   status: "active"
 });
 
-// Nghị định 01/2021
-CREATE (:Document {
+CREATE (:Document:Decree {
   id: "ND01_2021",
   number: "01/2021/NĐ-CP",
   title: "Nghị định về đăng ký doanh nghiệp",
-  type: "Decree",
   issued_by: "Chính phủ",
   issued_date: date("2021-01-04"),
   effective_from: date("2021-01-04"),
@@ -262,34 +405,108 @@ CREATE (:Document {
   status: "active"
 });
 
-// Quan hệ
-MATCH (l:Document {id: "LDN2020"}), (d:Document {id: "ND01_2021"})
-CREATE (l)-[:IMPLEMENTED_BY {scope: "đăng ký doanh nghiệp"}]->(d);
+// --- Quan hệ giữa Documents ---
+MATCH (law:Document:Law {id: "LDN2020"}),
+      (dec:Document:Decree {id: "ND01_2021"})
+CREATE (law)-[:IMPLEMENTED_BY {scope: "đăng ký doanh nghiệp"}]->(dec);
 
-// Điều 17
+// --- Tạo Article ---
 CREATE (:Article {
   id: "LDN2020_D17",
   number: 17,
   title: "Điều kiện thành lập, quản lý doanh nghiệp",
-  content: "...",
+  content: "1. Tổ chức, cá nhân sau đây có quyền...",
   effective_from: date("2021-01-01"),
   effective_to: null,
-  status: "active"
+  status: "active",
+  embedding: null   // được fill sau khi embed
 });
 
-// CONTAINS
-MATCH (l:Document {id: "LDN2020"}), (a:Article {id: "LDN2020_D17"})
-CREATE (l)-[:CONTAINS {order: 17}]->(a);
+MATCH (doc:Document:Law {id: "LDN2020"}),
+      (art:Article {id: "LDN2020_D17"})
+CREATE (doc)-[:CONTAINS {order: 17}]->(art);
+
+// --- Tạo Clause ---
+CREATE (:Clause {
+  id: "LDN2020_D17_K1",
+  number: 1,
+  content: "Tổ chức, cá nhân sau đây có quyền thành lập...",
+  effective_from: date("2021-01-01"),
+  effective_to: null,
+  status: "active",
+  embedding: null   // được fill sau khi embed
+});
+
+MATCH (art:Article {id: "LDN2020_D17"}),
+      (cls:Clause {id: "LDN2020_D17_K1"})
+CREATE (art)-[:CONTAINS {order: 1}]->(cls);
+
+// --- Temporal relation (AMENDED_BY) ---
+// Giả sử NĐ 47/2021 sửa đổi Khoản 1 Điều 17 từ 2021-09-15
+CREATE (:Clause {
+  id: "ND47_2021_D1_K1",   // nội dung sửa đổi nằm trong NĐ47
+  number: 1,
+  content: "Nội dung sửa đổi Khoản 1 Điều 17 LDN2020...",
+  effective_from: date("2021-09-15"),
+  effective_to: null,
+  status: "active",
+  embedding: null
+});
+
+MATCH (original:Clause {id: "LDN2020_D17_K1"}),
+      (amended:Clause  {id: "ND47_2021_D1_K1"})
+CREATE (original)-[:AMENDED_BY {
+  effective_from: date("2021-09-15"),
+  effective_to: null,
+  amendment_type: "partial",
+  source_doc_id: "ND47_2021"
+}]->(amended);
+
+// Update status của node gốc
+MATCH (c:Clause {id: "LDN2020_D17_K1"})
+SET c.status = "amended", c.effective_to = date("2021-09-14");
+```
+
+### 3.4 Temporal Query Examples
+
+```cypher
+// Query 1: "Điều 17 áp dụng tại ngày 2022-01-01"
+// → Tìm phiên bản Điều 17 còn hiệu lực tại 2022
+MATCH (a:Article)
+WHERE a.id STARTS WITH 'LDN2020_D17'
+  AND a.effective_from <= date('2022-01-01')
+  AND (a.effective_to IS NULL OR a.effective_to > date('2022-01-01'))
+RETURN a;
+
+// Query 2: Time-travel với AMENDED_BY chain
+// → Tìm nội dung Khoản 1 Điều 17 tại ngày 2020-06-01
+MATCH (base:Clause {id: 'LDN2020_D17_K1'})
+OPTIONAL MATCH (base)-[r:AMENDED_BY*1..5]->(latest)
+WHERE ALL(rel IN r WHERE
+  rel.effective_from <= date('2020-06-01')
+)
+RETURN CASE WHEN latest IS NULL THEN base ELSE latest END AS valid_clause;
+
+// Query 3: Hybrid vector + graph (Neo4j 5.x)
+// → Tìm các Clause gần nhất về ngữ nghĩa, sau đó mở rộng graph
+CALL db.index.vector.queryNodes('clause_embedding', 5, $query_embedding)
+YIELD node AS clause, score
+WHERE clause.effective_from <= date($query_date)
+  AND (clause.effective_to IS NULL OR clause.effective_to > date($query_date))
+MATCH (clause)<-[:CONTAINS]-(article:Article)
+MATCH (article)<-[:CONTAINS]-(doc:Document)
+RETURN clause, article, doc, score
+ORDER BY score DESC;
 ```
 
 ---
 
-## Câu Hỏi Mở — Cần Nhóm Thảo Luận
+## Câu Hỏi Mở — Còn Lại (Sau v0.2)
 
-| # | Câu Hỏi | Ảnh Hưởng |
-|---|---|---|
-| 1 | `Definition` là node riêng hay attribute của `Concept`? | Schema của RC1 |
-| 2 | Phụ lục (Annex) xử lý như node `Annex` hay bỏ qua? | Pipeline RC2 |
-| 3 | `Procedure` (thủ tục hành chính) có phải node riêng? | Scope |
-| 4 | Có cần node `Authority` (cơ quan ban hành)? | Graph complexity |
-| 5 | Cách generate `id` cho Article: `{doc_id}_D{number}` — có ổn không? | Data consistency |
+| # | Câu Hỏi | Gợi Ý | Ảnh Hưởng |
+|---|---|---|---|
+| 1 | `Definition` là node riêng hay attribute của `Concept`? | Attribute — đơn giản hơn, đủ dùng | Schema RC1 |
+| 2 | Phụ lục (Annex) xử lý như thế nào? | Bỏ qua — scope creep | Pipeline RC2 |
+| 3 | `Procedure` có phải node riêng? | Để Future Work | Scope |
+| 4 | Embedding dimension: 768 (PhoBERT) hay 1536 (OpenAI)? | 768 — dùng Vietnamese model | Vector Index config |
+| 5 | Neo4j version: 5.x Community có hỗ trợ Vector Index không? | Cần verify — nếu không thì dùng Qdrant | Architecture |

@@ -31,9 +31,9 @@ Raw PDF
     │   Output: Ontology-compliant triples | OntologyError
     │
     ▼
-[Step 5] Confidence Scoring
-    │   Input : LLM outputs (N=3 runs)
-    │   Output: confidence score ∈ [0, 1]
+[Step 5] Confidence Scoring                       ← ADR-06: rule-based, không phải N=3
+    │   Input : Validated JSON + graph context
+    │   Output: confidence score ∈ [0, 1] (weighted multi-criteria)
     │
     ▼
 [Decision Gate]
