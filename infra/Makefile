@@ -12,7 +12,7 @@ NEO4J_PASSWORD ?= changeme_strong_password
 
 ## ─── Docker ──────────────────────────────────────────────────────────────────
 
-up:
+up: _check_env
 	@echo "🚀 Starting Neo4j..."
 	docker compose up -d
 	@echo "⏳ Waiting for Neo4j to be healthy..."
@@ -21,6 +21,20 @@ up:
 	done
 	@echo ""
 	@echo "✅ Neo4j is ready at http://localhost:7474"
+
+_check_env:
+	@if [ ! -f .env ]; then \
+		echo "❌ File .env không tồn tại. Chạy: cp .env.example .env rồi điền NEO4J_PASSWORD."; \
+		exit 1; \
+	fi
+	@if grep -q 'NEO4J_PASSWORD=changeme' .env; then \
+		echo "⚠️  NEO4J_PASSWORD vẫn là default. Đổi password trong .env trước khi tiếp tục."; \
+		exit 1; \
+	fi
+	@if [ -z "$$(grep NEO4J_PASSWORD .env | cut -d= -f2)" ]; then \
+		echo "❌ NEO4J_PASSWORD chưa được set trong .env."; \
+		exit 1; \
+	fi
 
 down:
 	docker compose down

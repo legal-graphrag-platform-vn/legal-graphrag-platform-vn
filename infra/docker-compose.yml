@@ -19,6 +19,8 @@ services:
       NEO4J_server_memory_pagecache_size: "512m"
       # Cho phép vector index (mặc định bật từ 5.11+)
       NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*"
+      # Tắt TLS cho local dev — tránh lỗi "neo4j+s://" scheme
+      NEO4J_dbms_connector_bolt_tls__level: "DISABLED"
       # Log level
       NEO4J_dbms_logs_query_enabled: "INFO"
     volumes:

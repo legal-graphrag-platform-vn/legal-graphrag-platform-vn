@@ -106,5 +106,5 @@ YIELD node, score RETURN node.id, score;
 ## Notes
 
 - **APOC**: Tự download khi Neo4j khởi động lần đầu (cần internet). Dùng cho `apoc.path.expand` trong retrieval query.
-- **Data persistence**: Dùng named Docker volumes (`graphrag_neo4j_data`). Data không mất khi `make down`.
+- **Data persistence**: Dùng bind mounts tại `infra/data/neo4j/`. Data không mất khi `make down`, chỉ mất khi `make clean`.
 - **`IF NOT EXISTS`**: Script `01_schema_init.cypher` idempotent — chạy nhiều lần không bị lỗi.
