@@ -22,26 +22,16 @@ services:
       # Log level
       NEO4J_dbms_logs_query_enabled: "INFO"
     volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-      - neo4j_import:/var/lib/neo4j/import
-      - neo4j_plugins:/plugins
+      - ./data/neo4j/data:/data
+      - ./data/neo4j/logs:/logs
+      - ./data/neo4j/import:/var/lib/neo4j/import
+      - ./data/neo4j/plugins:/plugins
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 10
       start_period: 30s
-
-volumes:
-  neo4j_data:
-    name: graphrag_neo4j_data
-  neo4j_logs:
-    name: graphrag_neo4j_logs
-  neo4j_import:
-    name: graphrag_neo4j_import
-  neo4j_plugins:
-    name: graphrag_neo4j_plugins
 
 networks:
   default:
