@@ -119,23 +119,23 @@ Ngày hiện tại: {today}
 ```python
 TRAVERSAL_POLICIES = {
     "factual": {
-        "relations": ["REGULATES", "DEFINES", "REQUIRES", "REFERENCES"],
+        "relations": ["REGULATES", "DEFINES", "REQUIRES", "REFERS_TO"],  # ADR-17: REFERENCES → REFERS_TO
         "max_depth": 2,
         "follow_temporal": False
     },
     "validity": {
-        "relations": ["AMENDED_BY", "REPLACED_BY", "REPEALED_BY"],
+        "relations": ["AMENDS", "REPLACES", "REPEALS"],  # ADR-17: active voice
         "max_depth": 3,
         "follow_temporal": True,
         "priority": "latest"  # Ưu tiên node cuối cùng trong chain
     },
     "hierarchy": {
-        "relations": ["IMPLEMENTED_BY", "GUIDED_BY", "CONTAINS"],
+        "relations": ["GUIDES", "CONTAINS"],  # ADR-17: IMPLEMENTED_BY+GUIDED_BY → GUIDES
         "max_depth": 3,
         "direction": "both"   # Traverse cả 2 chiều
     },
     "comparison": {
-        "relations": ["AMENDED_BY", "REPLACED_BY"],
+        "relations": ["AMENDS", "REPLACES"],  # ADR-17: active voice
         "max_depth": 5,
         "follow_temporal": True,
         "return_all_versions": True  # Trả về tất cả phiên bản
@@ -157,7 +157,7 @@ TRAVERSAL_POLICIES = {
 
 ```cypher
 // Template cho Traversal Policy (factual intent)
-MATCH path = (entry:Article {id: $entry_id})-[:REGULATES|DEFINES|REQUIRES|REFERENCES*1..2]->(related)
+MATCH path = (entry:Article {id: $entry_id})-[:REGULATES|DEFINES|REQUIRES|REFERS_TO*1..2]->(related)
 WHERE (
   related.effective_from <= $query_date
   AND (related.effective_to IS NULL OR related.effective_to > $query_date)
@@ -168,7 +168,7 @@ LIMIT 20
 
 // Template cho Temporal Time Travel (validity intent)
 MATCH (start:Article {id: $entry_id})
-OPTIONAL MATCH chain = (start)-[:AMENDED_BY|REPLACED_BY*1..5]->(latest)
+OPTIONAL MATCH chain = (start)-[:AMENDS|REPLACES*1..5]->(latest)
 WHERE ALL(r IN relationships(chain) WHERE
   r.effective_from <= $query_date
   AND (r.effective_to IS NULL OR r.effective_to > $query_date)
@@ -205,8 +205,8 @@ class TextChunk:
 
 @dataclass
 class GraphPath:
-    nodes: list[str]           # ["LDN2020_D46", "LDN2020_D29"]
-    relations: list[str]       # ["REFERENCES"]
+    nodes: list[str]           # ["ldn2020_art46", "ldn2020_art29"]  # naming convention: legal_ontology.md §6
+    relations: list[str]       # ["REFERS_TO"]  # ADR-17: REFERENCES → REFERS_TO
     path_description: str      # Human-readable: "Điều 46 viện dẫn Điều 29"
     is_temporal_valid: bool
 ```
@@ -227,9 +227,9 @@ có hiệu lực tại thời điểm đó.
 Định dạng trả lời (JSON):
 {
   "answer": "Câu trả lời đầy đủ...",
-  "citations": ["LDN2020_D46_K1", "LDN2020_D29"],
+  "citations": ["ldn2020_art46_cl1", "ldn2020_art29"],  // naming: legal_ontology.md §6
   "reasoning_path": [
-    {"from": "LDN2020_D46", "relation": "REFERENCES", "to": "LDN2020_D29",
+    {"from": "ldn2020_art46", "relation": "REFERS_TO", "to": "ldn2020_art29",  // ADR-17
      "explanation": "Điều 46 viện dẫn quy định vốn tại Điều 29"}
   ],
   "temporal_note": "Câu trả lời áp dụng cho giai đoạn 2021-2024",
