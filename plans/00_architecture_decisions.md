@@ -478,3 +478,84 @@ Các quyết định được coi là **FROZEN** khi:
 
 **Khi tất cả checklist trên được tick**, đề tài mới chính thức bước vào giai đoạn implementation.
 
+
+---
+
+## ADR-13: Two-Layer Ontology Architecture
+
+**Ngày**: 2026-07-03  
+**Trạng thái**: FROZEN
+
+### Problem
+Graph chỉ có Document → Article → Clause ("cây văn bản") không đủ để gọi là Knowledge Graph. Cần phân biệt rõ tầng metadata và tầng tri thức.
+
+### Decision
+Tách thành **Structural Layer** (Document, Chapter, Article, Clause, Point, Issuer) và **Semantic Layer** (LegalConcept, LegalSubject, LegalAction, Obligation, Right, Condition, Exception).
+
+### Rationale
+Semantic Layer là phần tạo ra contribution thực sự — cho phép query "Những điều nào quy định về giải thể doanh nghiệp?" thay vì chỉ keyword search.
+
+---
+
+## ADR-14: Issuer Node + Hybrid Extraction
+
+**Ngày**: 2026-07-03  
+**Trạng thái**: FROZEN
+
+### Decision
+`Issuer` là node riêng. LLM chỉ extract `issuer_name` string. Writer tự MERGE:
+```cypher
+MERGE (i:Issuer {name: d.issuer_name})
+MERGE (doc)-[:ISSUED_BY]->(i)
+```
+
+### Rationale
+Tránh string normalization issues ("Prime Minister" vs "Thủ tướng"). Neo4j normalize tự động qua MERGE. Zero thêm LLM complexity.
+
+---
+
+## ADR-15: Validator Tách Khỏi Ontology
+
+**Ngày**: 2026-07-03  
+**Trạng thái**: FROZEN
+
+### Decision
+`DOCUMENT_LEVELS` và `GUIDES_WHITELIST` chỉ sống trong Validator rule engine Python code, không phải property trong Neo4j node.
+
+### Rationale
+Ontology mô hình hóa thực thể của thế giới pháp lý, không phải logic kiểm tra. `level=3` trên Issuer node là implementation artifact, không phải ontology concept.
+
+---
+
+## ADR-16: Extraction Schema ≠ Ontology
+
+**Ngày**: 2026-07-03  
+**Trạng thái**: FROZEN
+
+### Decision
+LLM extract 3 type đơn giản: `Entity | Concept | Action`. Writer map sang Ontology nodes phức tạp hơn: `LegalSubject | LegalConcept | LegalAction`.
+
+### Rationale
+Prompt đơn giản → LLM output ổn định hơn. Writer là nơi normalize, không phải LLM.
+
+---
+
+## ADR-17: Relation Naming — Active Voice
+
+**Ngày**: 2026-07-03  
+**Trạng thái**: FROZEN
+
+### Decision
+Đổi sang active voice: `AMENDS`, `REPEALS`, `REPLACES`, `GUIDES`, `REFERS_TO`.
+
+### Old → New Mapping
+| Cũ | Mới |
+|---|---|
+| `AMENDED_BY` | `AMENDS` |
+| `REPLACED_BY` | `REPLACES` |
+| `REPEALED_BY` | `REPEALS` |
+| `IMPLEMENTED_BY` | `GUIDES` |
+
+### Rationale
+`(A)-[:AMENDS]->(B)` đọc tự nhiên: "A amends B" — A là văn bản mới hơn. Direction của relation có semantic rõ ràng.
+

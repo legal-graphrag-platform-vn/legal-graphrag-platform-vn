@@ -3,7 +3,7 @@
 > **Tên đề tài**: Xây dựng nền tảng AI khai thác tri thức pháp luật doanh nghiệp Việt Nam dựa trên Knowledge Graph và Temporal GraphRAG  
 > **Loại**: Đồ án tốt nghiệp  
 > **Domain**: Pháp luật doanh nghiệp Việt Nam  
-> **Trạng thái**: Đang thảo luận plan
+> **Trạng thái**: Đang triển khai — Ontology FROZEN v1.1.0
 
 ---
 
@@ -13,15 +13,16 @@
 
 | File | Nội dung | Ưu Tiên |
 |---|---|---|
-| [00_architecture_decisions.md](./00_architecture_decisions.md) | **7 quyết định kiến trúc đã chốt** (ADR) | 🔴 Đọc trước |
+| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.1.0 — Source of Truth** | 🔴 Đọc trước |
+| [00_architecture_decisions.md](./00_architecture_decisions.md) | ADR — các quyết định kiến trúc | 🔴 Đọc trước |
 | [01_research_contributions.md](./01_research_contributions.md) | 5 đóng góp nghiên cứu chính | 🔴 Đọc trước |
-| [02_ontology_specification.md](./02_ontology_specification.md) | Thiết kế Ontology 3 tầng | 🟡 Cần chốt |
+| ~~[02_ontology_specification.md](./02_ontology_specification.md)~~ | ~~Ontology cũ~~ — SUPERSEDED bởi legal_ontology.md | ⚠️ Lịch sử |
 | [03_architecture.md](./03_architecture.md) | Kiến trúc hệ thống tổng thể | 🟡 Review |
 | [04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md) | Pipeline xây dựng Knowledge Graph (RC2) | 🟡 Review |
 | [05_graphrag_retrieval.md](./05_graphrag_retrieval.md) | GraphRAG + Traversal Policy (RC3+RC4) | 🟡 Review |
-| [07_implementation_timeline.md](./07_implementation_timeline.md) | Lộ trình triển khai 5 tháng | 🟡 Điều chỉnh theo deadline |
+| [07_implementation_timeline.md](./07_implementation_timeline.md) | Lộ trình triển khai | 🟡 Điều chỉnh theo deadline |
 | [08_dataset_and_scope.md](./08_dataset_and_scope.md) | Phạm vi dữ liệu và ground truth | 🔴 Cần assign người làm |
-| [09_open_questions.md](./09_open_questions.md) | Câu hỏi mở — agenda họp nhóm | 🔴 Giải quyết trong họp |
+| [09_open_questions.md](./09_open_questions.md) | Câu hỏi mở — agenda họn nhóm | 🔴 Giải quyết trong họn |
 | [10_tech_stack.md](./10_tech_stack.md) | Công nghệ sử dụng | 🟢 Tham khảo |
 
 ---
@@ -61,9 +62,9 @@
 
 ## Trạng Thái Thảo Luận
 
-- [ ] RC1 — Ontology: **Chưa chốt** node types / relation types đầy đủ
-- [ ] RC2 — Pipeline: **Chưa chốt** phương pháp Confidence Scoring
+- [x] RC1 — Ontology: **FROZEN v1.1.0** — xem [legal_ontology.md](./legal_ontology.md)
+- [ ] RC2 — Pipeline: **Đang triển khai** M3 (Neo4j Writer)
 - [ ] RC3 — GraphRAG: **Chưa chốt** phương pháp Intent Classification
-- [ ] RC4 — Temporal: **Tương đối rõ** — edge timestamps
+- [ ] RC4 — Temporal: **Tương đối rõ** — edge timestamps + legal_status
 - [ ] RC5 — Evaluation: **Chưa chốt** ai tạo ground truth dataset
 - [ ] Dataset: **Chưa chốt** danh sách 20 văn bản cụ thể

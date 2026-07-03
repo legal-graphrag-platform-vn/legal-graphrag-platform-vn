@@ -1,7 +1,12 @@
 # Graph Construction Pipeline — Chi Tiết Kỹ Thuật
 
-> **Phiên bản**: 0.1  
+> **Phiên bản**: 0.2 — cập nhật theo legal_ontology.md v1.1.0
 > **Liên quan đến**: RC2
+
+> [!WARNING]
+> Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
+> `AMENDED_BY` → `AMENDS` | `REPLACED_BY` → `REPLACES` | `REPEALED_BY` → `REPEALS` | `IMPLEMENTED_BY` → `GUIDES`
+> EntityType mới: `Action` (động từ pháp lý) — bên cạnh `Entity` và `Concept`.
 
 ---
 
@@ -216,7 +221,11 @@ ENTITY_SCHEMA = {
     "required": ["id", "type", "label"],
     "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
-        "type": {"enum": ["Document", "Article", "Clause", "Point", "Concept", "Entity"]},
+        "type": {"enum": [
+            "Document", "Article", "Clause", "Point",
+            "Concept", "Entity",
+            "Action"   # v1.1.0: hành vi pháp lý (thành lập, góp vốn, giải thể...)
+        ]},
         "label": {"type": "string", "minLength": 1},
         "properties": {"type": "object"}
     }
@@ -232,9 +241,13 @@ RELATION_SCHEMA = {
     "properties": {
         "head": {"type": "string"},
         "relation": {"enum": [
-            "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
-            "IMPLEMENTED_BY",        # GUIDED_BY đã hợp nhất vào đây
-            "REFERENCES", "DEFINES", "REGULATES", "REQUIRES"
+            "CONTAINS",
+            "AMENDS",      # v1.1.0: active voice (cũ: AMENDED_BY)
+            "REPLACES",    # v1.1.0: active voice (cũ: REPLACED_BY)
+            "REPEALS",     # v1.1.0: active voice (cũ: REPEALED_BY)
+            "GUIDES",      # v1.1.0: active voice (cũ: IMPLEMENTED_BY)
+            "REFERS_TO",   # v1.1.0: (cũ: REFERENCES)
+            "DEFINES", "REGULATES", "REQUIRES"
             # Tổng: 9 relation types
         ]},
         "tail": {"type": "string"},
@@ -251,21 +264,24 @@ RELATION_SCHEMA = {
 ```python
 class OntologyValidator:
     # ╔════════════════════════════════════════════
-    # Phải đồng bộ với CONSTRAINTS trong 02_ontology_specification.md
-    # Duy trì bằng unit test: tests/test_ontology_consistency.py
-    # GUIDED_BY đã hợp nhất vào IMPLEMENTED_BY.
+    # Source of truth: plans/legal_ontology.md §5
+    # ADR-15: DOCUMENT_LEVELS chỉ trong validator, không trong Neo4j
+    # ADR-17: Relation names dùng active voice
     # ╚════════════════════════════════════════════
+
+    # Xem VALIDATOR_PRECEDENCE trong legal_ontology.md §5 — lớ chi tiết hơn
     DOCUMENT_LEVELS = {
-        "Law": 3, "Resolution": 3,
-        "Decree": 2, "Decision": 2,
-        "Circular": 1
+        "Constitution": 5, "Law": 4, "Ordinance": 4, "Resolution": 4,
+        "Decree": 3, "Decision": 3,
+        "Circular": 2, "JointCircular": 2,
     }
 
+    # GUIDES whitelist — xem legal_ontology.md §5 GUIDES_WHITELIST
     RELATION_ENUM = {
-        "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
-        "IMPLEMENTED_BY",
-        "REFERENCES", "DEFINES", "REGULATES", "REQUIRES"
-        # Tổng: 9 — GUIDED_BY hợp nhất vào IMPLEMENTED_BY
+        "CONTAINS", "AMENDS", "REPLACES", "REPEALS",
+        "GUIDES",
+        "REFERS_TO", "DEFINES", "REGULATES", "REQUIRES"
+        # Tổng: 9 — active voice theo ADR-17
     }
 
     CONSTRAINTS = {

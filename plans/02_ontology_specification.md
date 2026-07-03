@@ -1,12 +1,32 @@
 # Ontology Specification — Legal Knowledge Graph
 
-> **Trạng thái**: v0.2 — cập nhật sau review ADR  
-> **Phiên bản**: 0.2  
+> **Trạng thái**: ~~v0.2~~ → **SUPERSEDED**
+> **Phiên bản**: 0.2 → thay bởi **[legal_ontology.md v1.1.0](./legal_ontology.md)**
 > **Domain**: Pháp luật doanh nghiệp Việt Nam
 
-> [!IMPORTANT]
-> File này là **source of truth** cho toàn bộ Neo4j schema.  
-> Mọi thay đổi phải được cả nhóm đồng ý và cập nhật vào đây trước khi code.
+> [!CAUTION]
+> File này **đã lỗi thời**. Source of truth mới là **[legal_ontology.md](./legal_ontology.md)** (v1.1.0, frozen 2026-07-03).
+> File này giữ lại cho lịch sử. Không dùng để implement.
+
+## Breaking Changes so với file này (xem legal_ontology.md để biết chi tiết)
+
+| Cũ (file này) | Mới (legal_ontology.md) |
+|---|---|
+| `AMENDED_BY` | `AMENDS` (active voice) |
+| `REPLACED_BY` | `REPLACES` |
+| `REPEALED_BY` | `REPEALS` |
+| `IMPLEMENTED_BY` | `GUIDES` |
+| `DOCUMENT_LEVELS` trong ontology | Chỉ trong Validator rule engine |
+| `Entity`, `Concept` extraction | `Entity`, `Concept`, **`Action`** |
+| Không có `Issuer` node | Có `(:Issuer)` + `ISSUED_BY` relation |
+| Không có `normative`, `effective_to` | Bắt buộc có trong Document |
+| Không có `legal_status` đầy đủ | 6 states: ACTIVE/NOT_YET_EFFECTIVE/PARTIALLY_EFFECTIVE/REPLACED/REPEALED/EXPIRED |
+| Không có Semantic Layer rõ ràng | Hai tầng: Structural + Semantic |
+| Không có `LegalAction`, `LegalSubject` | Có trong Semantic Layer |
+
+---
+
+<!-- Nội dung cũ giữ nguyên bên dưới để tham khảo lịch sử -->
 
 ---
 
