@@ -307,25 +307,25 @@ VLSP legal NLP shared task
 
 ## Decision Log (Điền Sau Khi Họp)
 
-| Q | Câu Hỏi Tóm Tắt | Quyết Định | Người Quyết | Ngày |
+| Q | Câu Hỏi Tóm Tắt | Quyết Định | Nguồn | Ngày |
 |---|---|---|---|---|
-| Q1 | Phân công nhóm | ? | ? | ? |
-| Q2a | UI: React hay Gradio? | ? | ? | ? |
-| Q2b | Ground truth: 100 hay 50 câu? | ? | ? | ? |
-| Q2c | Dataset: 4 hay 10 văn bản? | ? | ? | ? |
-| Q3 | Baseline: 1 hay 2? | ? | ? | ? |
-| Q4 | Confidence: rule-based (ADR-06) hay N=3? | ? | ? | ? |
-| Q5 | Intent: few-shot + PhoBERT ablation? | ? | ? | ? |
-| Q6 | Threshold: 0.3 / 0.7? | ? | ? | ? |
-| Q7 | Reranker: BM25 + cross-encoder? | ? | ? | ? |
-| Q8 | Definition: node hay attribute? | ? | ? | ? |
-| Q9 | Procedure: future work? | ? | ? | ? |
-| Q10 | Deployment: Docker Compose? | ? | ? | ? |
-| Q11 | Visualizer: Cytoscape.js? | ? | ? | ? |
-| Q12 | PDF text layer: cần OCR không? | ? | ? | ? |
-| Q13 | Temporal DAG: giả định chain + limitation? | ? | ? | ? |
-| Q14 | Concept ID: dùng pre-defined list? | ? | ? | ? |
-| Q15 | Related work VN legal NLP: ai search? | ? | ? | ? |
+| Q1 | Phân công nhóm | TBD — cần họp nhóm | — | — |
+| Q2a | UI: React hay Gradio? | TBD — phụ thuộc số người | — | — |
+| Q2b | Ground truth: 100 hay 50 câu? | **50 QA + 25 temporal** (giảm scope) | 11_project_phases.md | 2026-07 |
+| Q2c | Dataset: 4 hay 10 văn bản? | TBD | — | — |
+| Q3 | Baseline: 1 hay 2? | **1 baseline (Vector RAG)** | ADR-07 | 2026-07 |
+| Q4 | Confidence: rule-based hay N=3? | **Rule-based** (JSON valid + Ontology valid + Evidence + Entities resolve) | ADR-06 | 2026-07 |
+| Q5 | Intent: few-shot + PhoBERT ablation? | **Few-shot LLM main, PhoBERT là ablation** nếu còn thời gian | ADR-05 | 2026-07 |
+| Q6 | Threshold: 0.3 / 0.7? | **Giữ 0.3/0.7**, calibrate lại trên validation set | ADR-06 | 2026-07 |
+| Q7 | Reranker: BM25 + cross-encoder? | **Có** — thêm 1 ablation experiment | 05_graphrag_retrieval.md | 2026-07 |
+| Q8 | Definition: node hay attribute? | **Attribute** (`Concept.definition`) — ADR-10 xóa Definition node | ADR-10 | 2026-07 |
+| Q9 | Procedure: future work? | **Future Work** — ghi rõ trong §8 legal_ontology.md | ADR, legal_ontology.md §8 | 2026-07 |
+| Q10 | Deployment: Docker Compose? | **Docker Compose** đủ cho đồ án | 11_project_phases.md P5-1 | 2026-07 |
+| Q11 | Visualizer: Cytoscape.js? | TBD — sau khi chốt Q2a | — | — |
+| Q12 | PDF text layer: cần OCR không? | TBD — cần kiểm tra 10 PDF | — | — |
+| Q13 | Temporal DAG: giả định chain + limitation? | **Giả định chain tuyến tính** + ghi limitation trong báo cáo | Q13 gợi ý Option A | 2026-07 |
+| Q14 | Concept ID: dùng pre-defined list? | **Pre-defined list ~50-100 concepts** | Q14 gợi ý Option A | 2026-07 |
+| Q15 | Related work VN legal NLP: ai search? | TBD — assign trước khi viết báo cáo | — | — |
 
 ---
 

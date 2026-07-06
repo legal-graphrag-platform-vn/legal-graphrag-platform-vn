@@ -1,8 +1,27 @@
 # 5 Đóng Góp Nghiên Cứu (Research Contributions)
 
+> **Trạng thái**: ~~v0.1~~ → **PARTIALLY SUPERSEDED**
+> Mô tả RC1-RC5 (high-level) vẫn còn giá trị. Tuy nhiên các chi tiết kỹ thuật (node types, relation names, extraction strategy) đã lỗi thời.
+
+> [!CAUTION]
+> **Node types**, **relation names**, và **extraction schema** trong file này đã lỗi thời.
+> Xem **[legal_ontology.md v1.1.0](./legal_ontology.md)** để biết schema chính xác.
+>
+> | Nội dung | Trạng thái |
+> |---|---|
+> | RC1-RC5 mô tả tổng quan | ✅ Vẫn đúng |
+> | Node types (có `Definition`, `Procedure`) | ❌ Xem legal_ontology.md §2 |
+> | Relation names (`AMENDED_BY`, `IMPLEMENTED_BY`, `GUIDED_BY`) | ❌ Xem ADR-17: `AMENDS`, `GUIDES` |
+> | Extraction strategy (single-pass) | ❌ Xem ADR-03: two-pass |
+> | Confidence scoring (N=3) | ❌ Xem ADR-06: rule-based |
+> | RC5 baselines (BM25 + Vector) | ❌ Xem ADR-07: 1 baseline (Vector RAG) |
+
+---
+
 > Đây là nền tảng học thuật của đề tài. Mỗi RC cần có **implementation**, **experiment**, và **kết quả đo được**.
 
 ---
+
 
 ## RC1 — Ontology Chuyên Biệt cho Pháp Luật Doanh Nghiệp Việt Nam
 

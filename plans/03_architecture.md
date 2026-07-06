@@ -121,9 +121,10 @@ Pass 2: Relation Extraction
 ```
 
 **Model selection:**
-- Primary: **Gemini 1.5 Flash** (cost-effective, supports Vietnamese)
-- Fallback: **GPT-4o-mini**
+- Primary: **Gemini 2.5 Flash** (cost-effective, supports Vietnamese) — REPORT.md B2
+- SDK: `google-genai` (thay `google-generativeai` deprecated)
 - Structured output: JSON mode / function calling
+
 
 ---
 

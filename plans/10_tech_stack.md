@@ -2,6 +2,10 @@
 
 > **Nguyên tắc lựa chọn**: Ưu tiên open-source, tiết kiệm cost, có tài liệu tốt cho tiếng Việt
 
+> [!WARNING]
+> File này có một số mục đã được cập nhật. **LlamaIndex** không được dùng trong implementation hiện tại (không có import nào trong `src/`). Framework là custom pipeline.
+> LLM SDK đã chuyển sang `google-genai` (SDK mới) thay vì `google-generativeai` (deprecated).
+
 ---
 
 ## Core Stack
@@ -9,14 +13,15 @@
 | Layer | Công Nghệ | Lý Do Chọn | Thay Thế |
 |---|---|---|---|
 | **Graph DB + Vector** | Neo4j 5.11+ Community | Graph + Vector Index native, 1 query cho vector + graph + temporal | ArangoDB |
-| **LLM (main)** | Gemini 1.5 Flash | Cost-effective, hỗ trợ Vietnamese tốt | GPT-4o-mini |
-| **LLM (judge)** | Gemini 1.5 Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
+| **LLM (main)** | Gemini **2.5** Flash | Cost-effective, hỗ trợ Vietnamese tốt | GPT-4o-mini |
+| **LLM (judge)** | Gemini **2.5** Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
+| **LLM SDK** | `google-genai` | SDK mới (thay `google-generativeai` đã deprecated) | — |
 | **Embedding** | `bkai-foundation-models/vietnamese-bi-encoder` | Tiếng Việt native | OpenAI text-embedding-3-small |
 | **PDF Parser** | PyMuPDF | Nhanh, access font/format info | pdfplumber |
-| **Framework** | LlamaIndex | GraphRAG support tốt hơn LangChain | LangChain |
+| **Framework** | **Custom Pipeline** (không dùng LlamaIndex) | LlamaIndex không có direct support cho cấu trúc hà văn bản pháp luật VN | LlamaIndex |
 | **Backend** | FastAPI | Async, OpenAPI docs tự động | Flask |
-| **Frontend** | React + Vite | Standard, tài liệu nhiều | Next.js |
-| **Graph UI** | Cytoscape.js | Chuyên cho graph, dễ hơn D3.js | D3.js |
+| **Frontend** | TBD (React hoặc Gradio — chốt sau Q2a) | Phụ thuộc scope | Next.js |
+| **Graph UI** | Cytoscape.js / pyvis | Chuyên cho graph | D3.js |
 | **Evaluation** | RAGAS | Industry standard cho RAG evaluation | DeepEval |
 
 ---
