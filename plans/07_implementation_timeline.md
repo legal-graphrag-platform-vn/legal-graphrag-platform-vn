@@ -146,7 +146,8 @@ Evidence Verifier
 - [ ] **2.4** BM25 Fulltext fusion (Neo4j fulltext index đã có trong schema)
 - [ ] **2.5** Cross Encoder Reranker (`ms-marco-MiniLM-L-6-v2`)
 - [ ] Evidence Verifier: check retrieved context chứa evidence thực
-- [ ] **Benchmark từng bước** với 50 câu hỏi test → Recall@5, MRR, nDCG
+- [ ] **Benchmark từng bước** với **50 câu hỏi dev split** → Recall@5, MRR, nDCG  
+  *(50 = dev split của 100 QA total; test split 50 còn lại dùng trong Phase 4 final eval)*
 
 ### 🏁 Milestone B — Retrieval Success
 
@@ -214,9 +215,12 @@ Evidence Verifier
 
 ### Dataset Evaluation
 
-- [ ] Tạo **100 câu hỏi general QA** từ LDN2020 + 2-3 văn bản khác
-- [ ] Tạo **50 câu hỏi temporal** (có thời điểm cụ thể)
-- [ ] Tạo **Ground Truth** (câu trả lời đúng + citation đúng) cho 150 câu
+- [ ] Tạo **100 câu hỏi general QA** từ LDN2020 + 2-3 văn bản khác  
+  *Split: 50 dev (dùng Phase 2-3 tune) + 50 test (hold-out, dùng Phase 4 final eval)*
+- [ ] Tạo **50 câu hỏi temporal** (có thời điểm cụ thể)  
+  *Split: 25 dev + 25 test*
+- [ ] Tạo **Ground Truth** (câu trả lời đúng + citation đúng) cho 150 câu  
+  *Nếu thiếu thời gian: giảm xuống 50 general + 25 temporal (vẫn đủ statistical significance)*
 - [ ] Review cross-check
 
 ### Baselines So Sánh
