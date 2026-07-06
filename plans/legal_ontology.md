@@ -1,8 +1,8 @@
 # Legal Ontology — Frozen Contract
 
 > **Trạng thái**: FROZEN — không sửa mà không có ADR  
-> **Phiên bản**: 1.1.0  
-> **Ngày chốt**: 2026-07-03  
+> **Phiên bản**: 1.2.0  
+> **Ngày chốt**: 2026-07-06  
 > **Phạm vi**: Pháp luật Việt Nam — tập trung Luật Doanh nghiệp + văn bản liên quan
 
 ---
@@ -73,12 +73,25 @@ Tự động tạo từ `Document.issuer_name` trong Writer (MERGE). LLM không 
 
 #### Chapter / Article / Clause / Point
 
-| Node | Key properties |
-|---|---|
-| Chapter | `id`, `number`, `title` |
-| Article | `id`, `number`, `title`, `content_raw` |
-| Clause | `id`, `number`, `content_raw` |
-| Point | `id`, `label` (a/b/c), `content_raw` |
+| Node | Property | Type | Required | Ghi chú |
+|---|---|---|---|---|
+| Chapter | `id` | string | ✅ | `{doc_id}_ch{N}`. Vd: `ldn2020_ch2` |
+| Chapter | `number` | string | ✅ | `"II"` |
+| Chapter | `title` | string | ✅ | `"Thành lập doanh nghiệp"` |
+| Article | `id` | string | ✅ | `{doc_id}_art{N}`. Vd: `ldn2020_art17` |
+| Article | `number` | string | ✅ | `"17"` |
+| Article | `title` | string | ❌ | Tiêu đề điều (nếu có) |
+| Article | `content_raw` | string | ✅ | Nội dung gốc |
+| Article | `embedding` | float[768] | ❌ | **Nullable** — Embedding Generator fill sau Writer (M3 Tuần 2). 768-dim = schema contract (xem §7). |
+| Clause | `id` | string | ✅ | `{doc_id}_art{N}_cl{K}` |
+| Clause | `number` | string | ✅ | `"1"`, `"2"`, ... |
+| Clause | `content_raw` | string | ✅ | Nội dung gốc |
+| Clause | `embedding` | float[768] | ❌ | **Nullable** — đơn vị retrieval chính theo ADR-02 |
+| Point | `id` | string | ✅ | `{doc_id}_art{N}_cl{K}_p{letter}` |
+| Point | `label` | string | ✅ | `"a"`, `"b"`, `"c"` |
+| Point | `content_raw` | string | ✅ | Nội dung gốc |
+
+> **Point không có `embedding`** — Point là 1 câu rất ngắn, không đủ ngữ cảnh để tạo vector có ý nghĩa riêng (ADR-02). Đơn vị retrieval chính là Clause; Article dùng cho câu hỏi tổng quát.
 
 ---
 
@@ -243,6 +256,10 @@ Annotator và LLM phải tuân theo:
 | No cycle trên AMENDS | DAG enforcement |
 | `normative=false` → không có GUIDES | Quyết định cá biệt không hướng dẫn |
 | `AMENDS.effective_from` required | Temporal relation bắt buộc |
+| `Article.embedding` dim = 768 | **Schema contract** — đổi model → phải ADR + DROP INDEX + re-embed |
+| `Clause.embedding` dim = 768 | Idem — 768 = vietnamese-bi-encoder dimension |
+| `Point` không có `embedding` | ADR-02: Point quá ngắn, không embed |
+
 
 ---
 
@@ -275,3 +292,4 @@ Annotator và LLM phải tuân theo:
 |---|---|---|---|
 | 1.0.0 | 2026-07-03 | Initial frozen schema | 4 rounds debate, consensus đạt được |
 | 1.1.0 | 2026-07-03 | +`issuer_name` vào Document; GUIDES dùng whitelist thay precedence; thêm `Action` extraction type; định nghĩa REPLACED/REPEALED; semantic relation guidelines; Ontology Principles | Reviewer feedback 5 điểm |
+| 1.2.0 | 2026-07-06 | +`embedding: float[768]` (nullable) vào Article và Clause; explicit note Point không có embedding; expand Chapter/Article/Clause/Point property table; Chapter ID naming convention | F2: gap giữa schema (VECTOR INDEX đã tạo) và ontology (chưa khai báo field) — RC3 Hybrid Retrieval phụ thuộc vào field này |
