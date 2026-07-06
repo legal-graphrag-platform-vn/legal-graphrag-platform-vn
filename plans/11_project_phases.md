@@ -8,12 +8,13 @@
 ## Tổng Quan
 
 ```
-Phase 0          Phase 1          Phase 2          Phase 3          Phase 4          Phase 5
-Foundation  ───► Graph Build ───► Retrieval   ───► Generation  ───► Evaluation  ───► Report
-(1-2 tuần)       (3-4 tuần)       (3-4 tuần)       (2 tuần)         (3 tuần)         (2 tuần)
+Phase 0          Phase 1          Phase 2          Phase 3          Phase 4          Phase 5          Phase 6
+Foundation  ───► Graph Build ───► Retrieval   ───► Generation  ───► Evaluation  ───► Deployment ───► Report & Defense
+(1-2 tuần)       (3-4 tuần)       (3-4 tuần)       (2 tuần)         (3 tuần)         (2 tuần)         (2 tuần)
 
-                  RC2               RC3 + RC4         RC4 + XAI        RC5              Luận văn
+                  RC2               RC3 + RC4         RC4 + XAI        RC5              Demo             Luận văn
 ```
+
 
 ---
 

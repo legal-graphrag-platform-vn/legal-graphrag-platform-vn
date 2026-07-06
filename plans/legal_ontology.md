@@ -63,11 +63,15 @@
 
 Tự động tạo từ `Document.issuer_name` trong Writer (MERGE). LLM không extract riêng.
 
-| Property | Type | Required |
-|---|---|---|
-| `id` | string | ✅ |
-| `name` | string | ✅ |
-| `branch` | enum | ✅ | LEGISLATIVE\|EXECUTIVE\|JUDICIAL\|OTHER |
+| Property | Type | Required | Ghi chú |
+|---|---|---|---|
+| `id` | string | ✅ | `slug(normalize(issuer_name))` — **MERGE key**. Vd: `"Quốc hội"` → `"quoc_hoi"` |
+| `name` | string | ✅ | Tên canonical từ vbpl.vn controlled vocabulary (không chuẩn hóa hoa/thường) |
+| `branch` | enum | ✅ | `LEGISLATIVE\|EXECUTIVE\|JUDICIAL\|OTHER` — map qua `ISSUER_BRANCH_MAP` |
+
+> **Unique key = `id` (slug), không phải `name`** (ADR-14 Rev.1).  
+> `MERGE (i:Issuer {id: $slug})` tránh duplicate khi `issuer_name` có biến thể hoa/thường.  
+> `name` lưu giá trị gốc từ vbpl.vn để hiển thị; `id` dùng để lookup/merge.
 
 > **Không có `level` property.** Level chỉ dùng trong Validator rule engine (xem §5).
 

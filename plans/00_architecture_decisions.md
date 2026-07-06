@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADR)
 
-> **Mục đích**: Ghi lại 7 quyết định kiến trúc đã được chốt (frozen), kèm lập luận rõ ràng  
+> **Mục đích**: Ghi lại 17 quyết định kiến trúc đã được chốt (frozen), kèm lập luận rõ ràng  
 > **Định dạng**: Problem → Options → Decision → Rationale → Trade-offs  
 > **Cách dùng**: Khi hội đồng hỏi "Tại sao em chọn cách này?", trả lời bằng document này
 
