@@ -58,19 +58,32 @@
 
 Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effective_from`, `effective_to` từ nội dung text (rất dễ sai sót do hallucination hoặc do văn bản ghi lằng nhằng), chúng ta cào trực tiếp metadata "sự thật tuyệt đối" từ trang web cùng lúc tải PDF.
 
-**Input**: URL văn bản pháp luật
+**Input**: URL văn bản pháp luật (tab `?tabs=thuoc-tinh` trên vbpl.vn)
 **Output**: 
 1. File PDF (lưu vào `data/raw/`)
-2. `metadata.json` chứa thông tin cứng:
+2. `metadata.json` chứa thông tin cứng (cào từ tab **Thuộc tính** vbpl.vn — controlled vocabulary, không để LLM đoán):
+
 ```json
 {
-  "doc_id": "LDN2020",
-  "type": "Law",
+  "doc_id":        "LDN2020",
+  "title":         "Luật Doanh nghiệp số 59/2020/QH14",
+  "number":        "59/2020/QH14",
+  "type":          "Law",
+  "issuer_name":   "Quốc hội",
+  "issuer_branch": "LEGISLATIVE",
+  "issued_date":   "2020-06-17",
   "effective_from": "2021-01-01",
-  "effective_to": null,
-  "status": "active"
+  "effective_to":  null,
+  "status":        "active",
+  "source_url":    "https://vbpl.vn/van-ban/chi-tiet/luat-doanh-nghiep-so-59-2020-qh14--142847"
 }
 ```
+
+> `issuer_name` cào từ field **"Cơ quan ban hành"** tab Thuộc tính — đã normalize theo controlled vocabulary vbpl.vn.  
+> `issuer_branch` map qua `ISSUER_BRANCH_MAP` trong `vbpl_crawler.py`; default `OTHER`.  
+> Writer dùng `issuer_name` để `MERGE (:Issuer {id: slug(issuer_name)})` per **ADR-14 Rev.1**.
+
+
 
 ### Step 1: Hierarchy Parser (PDF → JSON)
 
