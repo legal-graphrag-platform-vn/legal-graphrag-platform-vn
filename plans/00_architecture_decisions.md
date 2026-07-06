@@ -330,7 +330,7 @@ Proposed: Temporal GraphRAG
 | 06 | Rule-based Confidence + threshold calibration | Explainable + threshold justified by data | RC2 |
 | 07 | 4-level evaluation vs Vector RAG baseline | Holistic + có baseline rõ ràng để so sánh | RC5 |
 | 08 | Neo4j native vector (no Qdrant) | Fit to scale; unified query; đơn giản hóa pipeline | RC3 |
-| 09 | Chapter = property, không phải node | CONTAINS chain không cần tầng Chương | RC1 |
+| 09 | ~~Chapter = property~~ → **Chapter = node** (Rev.1 2026-07-06) | Structural fidelity; CONTAINS chain đầy đủ; hỗ trợ trích dẫn theo Chương | RC1 |
 | 10 | Definition = attribute của Concept | Không có use case traverse qua Definition | RC1 |
 | 11 | Contribution framing vendor-neutral | Contribution ở pipeline design, không ở tooling | RC3 |
 | 12 | Ablation qua dimension nghiên cứu | Giá trị học thuật cao hơn so sánh database | RC5 |
@@ -379,23 +379,47 @@ Interface cho phép: unit test với mock, swap backend nếu cần, không khó
 ### Problem
 Văn bản pháp luật VN có cấu trúc Phần → Chương → Mục → Điều → Khoản → Điểm. Có nên tạo node riêng cho Chương/Mục không?
 
-### ✅ Decision: Chapter/Section = Property trên Article, không phải node riêng
+### ~~Decision v1 (2026-06-29, SUPERSEDED)~~: ~~Chapter = Property trên Article~~
+
+> ⚠️ Quyết định này đã được **đảo ngược** bởi Rev.1 bên dưới.
+
+---
+
+### ✅ Decision Rev.1 (2026-07-06, FROZEN): Chapter = Node trong Structural Layer
+
+Per **`legal_ontology.md v1.1.0`** — CONTAINS chain đầy đủ:
 
 ```cypher
-(:Article {
-  id: "LDN2020_D17",
-  chapter: "II",
-  chapter_title: "Thành lập doanh nghiệp",
-  section: null,
-  ...
+// Structural hierarchy — Chapter là node thực sự
+(:Document)-[:CONTAINS]->(:Chapter {
+  id: "ldn2020_ch2",
+  number: "II",
+  title: "Thành lập doanh nghiệp"
+})-[:CONTAINS]->(:Article {
+  id: "ldn2020_art17",
+  number: "17",
+  title: "..."
 })
+
+// Traversal transparent với Chapter — dùng *1..3
+MATCH (doc:Document {id: "ldn_2020"})-[:CONTAINS*1..3]->(a:Article)
 ```
 
-### Rationale
-1. Không có intent class nào query "Chương nào quy định X" — người dùng luôn hỏi theo Điều/Khoản.
-2. Node Chương thêm tầng vào CONTAINS chain không cần thiết.
-3. Property `chapter` đủ để filter: `MATCH (a:Article {chapter: "II"})`.
-4. Parser vẫn detect Chương → chỉ dùng để fill property, không tạo node.
+### Rationale (Rev.1)
+1. **Structural fidelity**: Chapter là thực thể thực sự tồn tại trong văn bản pháp luật VN, không chỉ là grouping label. "Chương II — Thành lập doanh nghiệp" có ý nghĩa ngữ nghĩa.
+2. **Trích dẫn pháp lý**: Nhiều văn bản VN trích dẫn "theo quy định tại Chương II" — không có Chapter node thì không map được đường trích dẫn.
+3. **CONTAINS chain nhất quán**: `Doc → Chapter → Article → Clause → Point` sạch hơn `Doc → Article {chapter property}`. Hội đồng hỏi tại sao graph bỏ tầng Chương sẽ khó trả lời trong bối cảnh luận văn Legal KG.
+4. **Ontology mới hơn**: `legal_ontology.md v1.1.0` (2026-07-03) là kết quả sau 4+ rounds debate, supersede ADR-09 trên điểm này.
+5. **Traversal không ảnh hưởng**: `CONTAINS*1..3` bao phủ cả Doc→Article (không có Chapter) lẫn Doc→Chapter→Article — backward compatible.
+
+### Tại sao v1 sai
+- Rationale v1 đúng về intent classes — nhưng confuse **retrieval logic** với **ontology design**. Ontology phải model thế giới đúng; traversal policy mới là nơi tối ưu cho retrieval.
+- Property approach mất dữ liệu: không truy vấn được "tất cả Điều trong Chương II" bằng graph traversal.
+
+### Impact
+- Parser: tạo `(:Chapter)` node thay vì chỉ fill property `chapter:` trên Article.
+- Schema: thêm `Chapter` node type vào `01_schema_init.cypher`.
+- `article.chapter` property: xóa khỏi Article schema (không cần nữa).
 
 ---
 
@@ -471,7 +495,7 @@ Các quyết định được coi là **FROZEN** khi:
 - [ ] ADR-06: Scoring criteria và weights được chốt (có thể điều chỉnh sau khi có validation data)
 - [ ] ADR-07: Ground truth dataset plan được assign người phụ trách
 - [ ] ADR-08: Verify Neo4j 5.11+ Community support vector index (`CREATE VECTOR INDEX`)
-- [ ] ADR-09: Parser property `chapter`, `section` được thêm vào Article node
+- [x] ADR-09 Rev.1: Parser tạo `(:Chapter)` node (không fill property `chapter` trên Article); `Chapter` được thêm vào `01_schema_init.cypher`
 - [ ] ADR-10: `"Definition"` đã được xóa khỏi entity enum trong pipeline ✅
 - [ ] ADR-11: RC3 description trong báo cáo dùng vendor-neutral framing
 - [ ] ADR-12: 4 ablation experiments được lên kế hoạch trong evaluation framework
