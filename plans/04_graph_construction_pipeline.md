@@ -187,14 +187,14 @@ Entities: {entities_json}
 
 Xác định các quan hệ giữa entities.
 Chỉ sử dụng các relation types sau:
-- AMENDED_BY: A bị sửa đổi bởi B
-- REPLACED_BY: A bị thay thế bởi B
-- REFERENCES: A viện dẫn B
+- AMENDS: A sửa đổi B (Article/Clause scope)
+- REPLACES: A thay thế hoàn toàn B (cùng cấp)
+- REPEALS: A bãi bỏ B (tail luôn là Document)
+- REFERS_TO: A viện dẫn B
 - DEFINES: Article/Clause định nghĩa Concept
-- REGULATES: Article/Clause điều chỉnh Entity
+- REGULATES: Article/Clause điều chỉnh Entity/Concept/Action
 - REQUIRES: Entity yêu cầu/phải có Concept
-- IMPLEMENTED_BY: Law được hướng dẫn bởi Decree
-- GUIDED_BY: Decree được hướng dẫn bởi Circular
+- GUIDES: Văn bản cấp cao hướng dẫn cấp thấp (Law→Decree, Decree→Circular...)
 
 Trả về JSON:
 {
@@ -261,177 +261,163 @@ RELATION_SCHEMA = {
 
 ## Step 4: Ontology Validation
 
+> [!IMPORTANT]
+> Source of truth: `legal_ontology.md` v1.1.0 §5.
+> ADR-15: `VALIDATOR_PRECEDENCE` / `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j.
+> ADR-17: Tất cả relation names dùng active voice.
+
 ```python
-class OntologyValidator:
-    # ╔════════════════════════════════════════════
-    # Source of truth: plans/legal_ontology.md §5
-    # ADR-15: DOCUMENT_LEVELS chỉ trong validator, không trong Neo4j
-    # ADR-17: Relation names dùng active voice
-    # ╚════════════════════════════════════════════
+# Trích từ legal_ontology.md §5 — chỉ dùng trong validator, không trong Neo4j.
+VALIDATOR_PRECEDENCE = {
+    "Constitution": 5, "Law": 4, "Ordinance": 4,
+    "Resolution_NationalAssembly": 4, "Resolution_Government": 3,
+    "Resolution": 3, "Decree": 3, "PrimeMinisterDecision": 3, "Decision": 3,
+    "Resolution_Provincial": 2, "MinisterDecision": 2,
+    "Circular": 2, "JointCircular": 2, "LocalDecision": 1,
+}
 
-    # Xem VALIDATOR_PRECEDENCE trong legal_ontology.md §5 — lớ chi tiết hơn
-    DOCUMENT_LEVELS = {
-        "Constitution": 5, "Law": 4, "Ordinance": 4, "Resolution": 4,
-        "Decree": 3, "Decision": 3,
-        "Circular": 2, "JointCircular": 2,
+# GUIDES whitelist — trích từ legal_ontology.md §5
+GUIDES_WHITELIST = {
+    ("Constitution", "Law"), ("Constitution", "Ordinance"),
+    ("Law", "Decree"), ("Law", "Decision"), ("Law", "Circular"),
+    ("Ordinance", "Decree"), ("Resolution", "Decree"),
+    ("Decree", "Circular"), ("Decree", "Decision"), ("Decree", "JointCircular"),
+    ("Decision", "Circular"),
+}
+
+RELATION_ENUM = {
+    "CONTAINS", "AMENDS", "REPLACES", "REPEALS",
+    "GUIDES",
+    "REFERS_TO", "DEFINES", "REGULATES", "REQUIRES"
+    # Tổng: 9 — active voice theo ADR-17
+}
+
+CONSTRAINTS = {
+    "CONTAINS": {
+        "valid_pairs": [
+            ("Document", "Article"),
+            ("Article",  "Clause"),
+            ("Clause",   "Point")
+        ],
+        "no_self_loop": True
+    },
+    "AMENDS": {
+        # Document→Document ĐÃ Bỏ: cấp Document dùng REPLACES hoặc REPEALS.
+        "valid_pairs": [
+            ("Article",  "Article"),   # Điều→Điều
+            ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất VN
+            ("Clause",   "Clause"),    # Khoản→Khoản
+            ("Clause",   "Article"),   # Khoản→Điều (mở rộng)
+        ],
+        "no_self_loop": True,
+        "required_properties": ["effective_from"]
+    },
+    "REPLACES": {
+        "head_tail_same_type": True,
+        "valid_pairs": [
+            ("Document", "Document"),
+            ("Article",  "Article")
+        ],
+        "no_self_loop": True,
+        "required_properties": ["effective_from"]
+    },
+    "REPEALS": {
+        "allowed_tail": ["Document"],   # Tail LUÔN là Document
+        "head_tail_same_type": False,
+        "required_properties": ["effective_from"]
+    },
+    "GUIDES": {
+        # Whitelist-based rule (thay level comparison cũ).
+        # Xem GUIDES_WHITELIST ở trên — trích từ legal_ontology.md §5.
+        "rule": "guides_whitelist",
+    },
+    "REFERS_TO": {
+        "valid_pairs": [
+            ("Article", "Article"),
+            ("Article", "Clause"),
+            ("Article", "Document"),
+            ("Clause",  "Article"),
+            ("Clause",  "Clause"),
+            ("Clause",  "Document"),
+            ("Point",   "Article"),
+            ("Point",   "Clause"),
+            ("Point",   "Point"),
+            ("Point",   "Document"),
+        ]
+    },
+    "DEFINES": {
+        "valid_pairs": [
+            ("Article", "Concept"),
+            ("Clause",  "Concept")
+        ]
+    },
+    "REGULATES": {
+        "valid_pairs": [
+            ("Article", "Entity"),
+            ("Article", "Concept"),
+            ("Article", "Action"),
+            ("Clause",  "Entity"),
+            ("Clause",  "Concept"),
+            ("Clause",  "Action"),
+        ]
+    },
+    "REQUIRES": {
+        "valid_pairs": [
+            ("Entity", "Concept"),
+            ("Entity", "Entity"),
+        ]
     }
-
-    # GUIDES whitelist — xem legal_ontology.md §5 GUIDES_WHITELIST
-    RELATION_ENUM = {
-        "CONTAINS", "AMENDS", "REPLACES", "REPEALS",
-        "GUIDES",
-        "REFERS_TO", "DEFINES", "REGULATES", "REQUIRES"
-        # Tổng: 9 — active voice theo ADR-17
-    }
-
-    CONSTRAINTS = {
-        "CONTAINS": {
-            "valid_pairs": [
-                ("Document", "Article"),
-                ("Article",  "Clause"),
-                ("Clause",   "Point")
-            ],
-            "no_self_loop": True
-        },
-        "AMENDED_BY": {
-            # Document→Document ĐÃ Bỏ: cấp Document dùng REPLACED_BY hoặc REPEALED_BY.
-            # head_tail_same_type bị bỏ — quá strict cho cấu trúc luật sửa đổi VN.
-            "valid_pairs": [
-                ("Article",  "Article"),   # Điều→Điều
-                ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất VN
-                ("Clause",   "Clause"),    # Khoản→Khoản
-                ("Clause",   "Article"),   # Khoản→Điều (mở rộng)
-            ],
-            "no_self_loop": True,
-            "required_properties": ["effective_from"]
-        },
-        "REPLACED_BY": {
-            "head_tail_same_type": True,
-            "valid_pairs": [
-                ("Document", "Document"),
-                ("Article",  "Article")
-            ],
-            "no_self_loop": True,
-            "required_properties": ["effective_from"]
-        },
-        "REPEALED_BY": {
-            "allowed_tail": ["Document"],   # Tail LUÔN là Document
-            "head_tail_same_type": False,
-            "required_properties": ["effective_from"]
-        },
-        "IMPLEMENTED_BY": {
-            # Level-based rule: head.level > tail.level
-            # GUIDED_BY đã hợp nhất vào đây.
-            # Covers: Law→Decree, Law→Circular (direct),
-            #         Resolution→Decree, Decree→Circular, Decision→Circular
-            "rule": "head_doc_level > tail_doc_level",
-            # doc_levels reference: DOCUMENT_LEVELS dict phía trên
-        },
-        "REFERENCES": {
-            "valid_pairs": [
-                ("Article", "Article"),
-                ("Article", "Clause"),
-                ("Article", "Document"),
-                ("Clause",  "Article"),
-                ("Clause",  "Clause"),
-                ("Clause",  "Document")
-            ]
-        },
-        "DEFINES": {
-            "valid_pairs": [
-                ("Article", "Concept"),
-                ("Clause",  "Concept")
-            ]
-        },
-        "REGULATES": {
-            "valid_pairs": [
-                ("Article", "Entity"),
-                ("Article", "Concept"),
-                ("Clause",  "Entity"),
-                ("Clause",  "Concept")
-            ]
-        },
-        "REQUIRES": {
-            "valid_pairs": [
-                ("Entity", "Concept"),
-                ("Entity", "Entity"),   # ví dụ: công ty phải có người đại diện theo PL
-            ]
-        }
-    }
-
-    def validate_relation(self, head_type, relation, tail_type):
-        constraint = self.CONSTRAINTS.get(relation)
-        if not constraint:
-            # Relation không có trong CONSTRAINTS → reject
-            # Nếu gặp lỗi này: kiểm tra RELATION_ENUM và CONSTRAINTS có khớp nhau không
-            return False, f"Unknown relation type: {relation}. Check RELATION_ENUM == set(CONSTRAINTS.keys())"
-
-        valid_pairs = constraint.get("valid_pairs", [])
-        if valid_pairs and (head_type, tail_type) not in valid_pairs:
-            return False, f"Invalid pair: {head_type}-[{relation}]->{tail_type}"
-
-        # Kiểm tra required_properties trên relation (runtime check)
-        # Được gọi bởi pipeline với relation_data dict
-        return True, None
+}
 ```
 
 ---
 
 ## Unit Test Spec — Ontology Consistency
 
+> Xem implementation thực tế: `tests/test_ontology_consistency.py` (14 test cases, 42 passed tổng).
+
 ```python
 # tests/test_ontology_consistency.py
 # Chạy: pytest tests/test_ontology_consistency.py
-# Tốc độ: < 1ms, không cần DB hay LLM
+# Tốc độ: <1ms, không cần DB hay LLM
+# ADR-17: Tất cả relation names dùng active voice
 
-from pipeline.ontology_validator import OntologyValidator, RELATION_ENUM
-
-RELATION_ENUM_EXPECTED = {
-    "CONTAINS", "AMENDED_BY", "REPLACED_BY", "REPEALED_BY",
-    "IMPLEMENTED_BY", "GUIDED_BY", "REFERENCES",
-    "DEFINES", "REGULATES", "REQUIRES"
-}
+from src.validation.ontology_validator import (
+    CONSTRAINTS, GUIDES_WHITELIST, RELATION_ENUM, validate_relation,
+)
 
 def test_all_relations_have_constraints():
-    """
-    Mọi relation trong enum phải có đúng 1 key trong CONSTRAINTS.
-    Test này fail ngay nếu thêm relation mới mà quên thêm constraint.
-    """
-    missing = RELATION_ENUM_EXPECTED - set(OntologyValidator.CONSTRAINTS.keys())
+    missing = RELATION_ENUM - set(CONSTRAINTS.keys())
     assert missing == set(), f"Relations thiếu constraint: {missing}"
 
 def test_no_orphan_constraints():
-    """
-    Không có constraint nào cho relation không tồn tại trong enum.
-    """
-    orphans = set(OntologyValidator.CONSTRAINTS.keys()) - RELATION_ENUM_EXPECTED
-    assert orphans == set(), f"Constraints thừa (không có trong enum): {orphans}"
+    orphans = set(CONSTRAINTS.keys()) - RELATION_ENUM
+    assert orphans == set(), f"Constraints thừa: {orphans}"
 
-def test_references_not_rejected():
-    """REFERENCES là relation phổ biến nhất — phải pass validator."""
-    validator = OntologyValidator()
-    ok, err = validator.validate_relation("Article", "REFERENCES", "Article")
-    assert ok, f"REFERENCES bị reject: {err}"
+def test_refers_to_not_rejected():
+    ok, err = validate_relation("Article", "REFERS_TO", "Article")
+    assert ok, f"REFERS_TO bị reject: {err}"
 
-def test_requires_not_rejected():
-    """REQUIRES quan trọng cho XAI reasoning path."""
-    validator = OntologyValidator()
-    ok, err = validator.validate_relation("Entity", "REQUIRES", "Concept")
-    assert ok, f"REQUIRES bị reject: {err}"
-
-def test_replaced_by_same_type_enforced():
-    """REPLACED_BY phải cùng loại (Document→Document, Article→Article)."""
-    validator = OntologyValidator()
-    ok, _ = validator.validate_relation("Document", "REPLACED_BY", "Document")
+def test_replaces_same_type_enforced():
+    ok, _ = validate_relation("Article", "REPLACES", "Document", properties={"effective_from": "2021-01-01"})
+    assert not ok
+    ok, _ = validate_relation("Article", "REPLACES", "Article", properties={"effective_from": "2021-01-01"})
     assert ok
-    ok, _ = validator.validate_relation("Article", "REPLACED_BY", "Document")
-    assert not ok, "Article→Document REPLACED_BY phải bị reject"
 
-def test_repealed_by_tail_always_document():
-    """REPEALED_BY: Clause có thể bị bãi bỏ bởi Document."""
-    validator = OntologyValidator()
-    ok, err = validator.validate_relation("Clause", "REPEALED_BY", "Document")
-    assert ok, f"Clause→Document REPEALED_BY bị reject: {err}"
+def test_guides_whitelist_valid():
+    ok, err = validate_relation("Document", "GUIDES", "Document", head_doc_type="Law", tail_doc_type="Decree")
+    assert ok, f"Law→Decree bị reject: {err}"
+
+def test_guides_same_level_rejected():
+    ok, _ = validate_relation("Document", "GUIDES", "Document", head_doc_type="Law", tail_doc_type="Law")
+    assert not ok, "Law→Law không hợp lệ"
+
+def test_unknown_relation_rejected():
+    # Old names (AMENDED_BY, GUIDED_BY) phải bị reject sau khi rename ADR-17
+    ok, _ = validate_relation("Article", "GUIDED_BY", "Document")
+    assert not ok
+    ok, _ = validate_relation("Article", "AMENDED_BY", "Document")
+    assert not ok
 ```
 
 ---
