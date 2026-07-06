@@ -239,7 +239,25 @@ Cypher `AMENDED_BY*1..5` với `priority: latest` sẽ **xử lý sai** trườn
 > [!NOTE]
 > Câu trong báo cáo: *"Đề tài giả định mỗi điều khoản chỉ có một chuỗi sửa đổi tuyến tính tại mỗi thời điểm. Xử lý trường hợp đa luồng sửa đổi song song là một hướng mở rộng trong tương lai."*
 
-**Quyết định**: _______________
+> [!NOTE]
+> **Bổ sung — PARTIALLY_EFFECTIVE propagation** (2026-07-06): Tương tự giả định chain tuyến tính, hệ thống giả định `PARTIALLY_EFFECTIVE` propagation xuống Article/Clause **được annotate thủ công** cho 4 văn bản bắt buộc — không xây dựng logic tự động nhận diện điều khoản chuyển tiếp (transitional provisions). Lý do: với 4 văn bản known corpus, số case PARTIALLY_EFFECTIVE có thể đếm thủ công; logic tự động đòi hỏi parser nhận diện được loại điều khoản "bãi bỏ Điều X, sửa Khoản Y Điều Z" — vượt scope M3.
+>
+> Câu limitation bổ sung trong báo cáo: *"Trong trường hợp văn bản ở trạng thái PARTIALLY_EFFECTIVE, hệ thống yêu cầu human annotation xác định từng Article/Clause bị ảnh hưởng — tự động hóa bước này là hướng phát triển tiếp theo."*
+>
+> **Metric đo lường** (Milestone A, Tuần 3 — Graph Quality Evaluation):
+> ```cypher
+> // AMENDS Propagation Consistency Rate
+> // = 1 - (cặp AMENDS có old.effective_to không khớp / tổng AMENDS edges)
+> MATCH (newer)-[r:AMENDS]->(old)
+> WHERE old.effective_to IS NOT NULL
+>   AND old.effective_to <> r.effective_from
+> RETURN count(*) as inconsistent_count
+> ```
+> Target: inconsistent_count = 0 sau mỗi pipeline run.
+
+**Quyết định**: **Option A** — chain tuyến tính + PARTIALLY_EFFECTIVE annotation thủ công + ghi limitation (ADR context: Q13, 2026-07-06)
+
+
 
 ---
 

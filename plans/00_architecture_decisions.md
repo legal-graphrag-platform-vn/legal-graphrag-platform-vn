@@ -524,17 +524,27 @@ Semantic Layer là phần tạo ra contribution thực sự — cho phép query 
 ## ADR-14: Issuer Node + Hybrid Extraction
 
 **Ngày**: 2026-07-03  
-**Trạng thái**: FROZEN
+**Trạng thái**: FROZEN | **Rev.1**: 2026-07-06 (fix MERGE key bug)
 
 ### Decision
-`Issuer` là node riêng. LLM chỉ extract `issuer_name` string. Writer tự MERGE:
-```cypher
-MERGE (i:Issuer {name: d.issuer_name})
+`Issuer` là node riêng. LLM chỉ extract `issuer_name` string. Writer tự MERGE, **dùng id (slug đã normalize) làm MERGE key**:
+```python
+# Writer — normalize trước khi MERGE
+def get_issuer_id(issuer_name: str) -> str:
+    import unicodedata, re
+    normalized = unicodedata.normalize("NFC", issuer_name.strip()).lower()
+    return re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
+
+# Cypher
+MERGE (i:Issuer {id: $issuer_id})
+ON CREATE SET i.name = $issuer_name, i.branch = $branch
 MERGE (doc)-[:ISSUED_BY]->(i)
 ```
 
-### Rationale
-Tránh string normalization issues ("Prime Minister" vs "Thủ tướng"). Neo4j normalize tự động qua MERGE. Zero thêm LLM complexity.
+### Rationale (Rev.1)
+- **MERGE by `id` (slug), không by `name`**: `MERGE {name: ...}` là exact string match trong Cypher — `"Bộ Tư pháp"` ≠ `"Bộ Tư Pháp"` sẽ tạo 2 node riêng. Claim cũ *"Neo4j normalize tự động qua MERGE"* là **sai về mặt kỹ thuật**.
+- **`branch` sourcing**: Ưu tiên cào từ metadata có cấu trúc trên vbpl.vn (issuer dropdown/mã cơ quan cố định). Fallback: `ISSUER_BRANCH_LOOKUP` cứng cho ~20 cơ quan phổ biến trong luật doanh nghiệp + fuzzy match + default `OTHER`.
+- Zero thêm LLM complexity — giữ nguyên.
 
 ---
 

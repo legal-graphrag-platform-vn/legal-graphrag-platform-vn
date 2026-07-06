@@ -30,7 +30,7 @@ CREATE CONSTRAINT ch_id_unique      IF NOT EXISTS FOR (c:Chapter)      REQUIRE c
 CREATE CONSTRAINT art_id_unique     IF NOT EXISTS FOR (a:Article)      REQUIRE a.id IS UNIQUE;
 CREATE CONSTRAINT cls_id_unique     IF NOT EXISTS FOR (c:Clause)       REQUIRE c.id IS UNIQUE;
 CREATE CONSTRAINT pnt_id_unique     IF NOT EXISTS FOR (p:Point)        REQUIRE p.id IS UNIQUE;
-CREATE CONSTRAINT iss_name_unique   IF NOT EXISTS FOR (i:Issuer)       REQUIRE i.name IS UNIQUE;
+CREATE CONSTRAINT iss_id_unique    IF NOT EXISTS FOR (i:Issuer)       REQUIRE i.id IS UNIQUE;  // Rev.1: MERGE key = id (slug), không phải name (ADR-14 Rev.1)
 
 // --- Semantic Layer --- legal_ontology.md §2.2
 // Phase 1 scope: LegalConcept, LegalSubject, LegalAction (từ extraction Entity/Concept/Action)
