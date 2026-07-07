@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.2  
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.4.0](./legal_ontology.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
@@ -393,9 +393,9 @@ User: "Điều kiện vốn để thành lập công ty TNHH theo quy định n�
     ...
 
 [Stage 3] Evidence Expansion (intent=factual, relations=[REGULATES, DEFINES, REQUIRES])
-    LDN2020_D46 → REFERENCES → LDN2020_D29
-    LDN2020_D29 → DEFINES → Concept(VốnĐiềuLệ)
-    ND01_2021_D5 → REGULATES → Entity(CôngTyTNHH)
+    LDN2020_D46 → REFERS_TO → LDN2020_D29
+    LDN2020_D29 → DEFINES → LegalConcept(VốnĐiềuLệ)
+    ND01_2021_D5 → REGULATES → LegalSubject(CôngTyTNHH)
 
 [Stage 4] Evidence Validation (Temporal Filtering)
     Check effective dates at 2022:

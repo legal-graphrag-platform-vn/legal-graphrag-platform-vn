@@ -3,7 +3,7 @@
 > **Tên đề tài**: Xây dựng nền tảng AI khai thác tri thức pháp luật doanh nghiệp Việt Nam dựa trên Knowledge Graph và Temporal GraphRAG  
 > **Loại**: Đồ án tốt nghiệp  
 > **Domain**: Pháp luật doanh nghiệp Việt Nam  
-> **Trạng thái**: Đang triển khai — Ontology FROZEN v1.1.0
+> **Trạng thái**: Đang triển khai — Ontology FROZEN v1.4.0
 
 ---
 
@@ -13,7 +13,7 @@
 
 | File | Nội dung | Ưu Tiên |
 |---|---|---|
-| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.1.0 — Source of Truth** | 🔴 Đọc trước |
+| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.4.0 — Source of Truth** | 🔴 Đọc trước |
 | [00_architecture_decisions.md](./00_architecture_decisions.md) | ADR — các quyết định kiến trúc | 🔴 Đọc trước |
 | [01_research_contributions.md](./01_research_contributions.md) | 5 đóng góp nghiên cứu chính | 🔴 Đọc trước |
 | ~~[02_ontology_specification.md](./02_ontology_specification.md)~~ | ~~Ontology cũ~~ — SUPERSEDED bởi legal_ontology.md | ⚠️ Lịch sử |
@@ -62,7 +62,7 @@
 
 ## Trạng Thái Thảo Luận
 
-- [x] RC1 — Ontology: **FROZEN v1.1.0** — xem [legal_ontology.md](./legal_ontology.md)
+- [x] RC1 — Ontology: **FROZEN v1.4.0** — xem [legal_ontology.md](./legal_ontology.md)
 - [ ] RC2 — Pipeline: **Đang triển khai** M3 (Neo4j Writer)
 - [ ] RC3 — GraphRAG: **Chưa chốt** phương pháp Intent Classification
 - [ ] RC4 — Temporal: **Tương đối rõ** — edge timestamps + legal_status

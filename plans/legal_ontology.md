@@ -1,316 +1,278 @@
-# Legal Ontology — Frozen Contract
+# Legal Ontology — Canonical Contract
 
-> **Trạng thái**: FROZEN — không sửa mà không có ADR  
-> **Phiên bản**: 1.3.0  
-> **Ngày chốt**: 2026-07-07  
-> **Phạm vi**: Pháp luật Việt Nam — tập trung Luật Doanh nghiệp + văn bản liên quan
+> **Status**: FROZEN — changes require an ADR and version bump  
+> **Version**: 1.4.0  
+> **Frozen date**: 2026-07-07  
+> **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
----
+This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
 
-> Đây là **hợp đồng (contract)** giữa tất cả các thành phần hệ thống.  
-> Mọi thay đổi phải tạo ADR và tăng version.  
-> Thứ tự phụ thuộc: `legal_ontology.md` → `schema_init.cypher` → Pydantic models → Prompt → Validator → Writer
+Dependency order:
 
----
-
-## 1. Kiến trúc — Hai Tầng
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  STRUCTURAL LAYER — Tầng văn bản                         │
-│  Document, Chapter, Article, Clause, Point, Issuer       │
-│  Relations: ISSUED_BY, AMENDS, REPEALS, GUIDES, ...      │
-└──────────────────────────────────────────────────────────┘
-                         ↕  Article → DEFINES/REGULATES → ...
-┌──────────────────────────────────────────────────────────┐
-│  SEMANTIC LAYER — Tầng tri thức pháp lý                  │
-│  LegalConcept, LegalSubject, LegalAction,                │
-│  Obligation, Right, Condition, Exception                 │
-│  Relations: DEFINES, REGULATES, REQUIRES,                │
-│             HAS_CONDITION, HAS_EXCEPTION                 │
-└──────────────────────────────────────────────────────────┘
+```text
+legal_ontology.md
+  -> infra/neo4j/init/01_schema_init.cypher
+  -> Pydantic extraction models
+  -> prompts
+  -> ontology validator
+  -> graph consistency validator
+  -> confidence scorer
+  -> Neo4j repository
+  -> Neo4j Python driver
+  -> Neo4j
 ```
 
+`plans/02_ontology_specification.md` is historical. It must not be used as an implementation reference.
+
 ---
 
-## 2. Node Types
+## 1. Architecture
 
-### 2.1 Structural Layer
+### 1.1 Graph Layers
 
-#### Document
+```text
+STRUCTURAL LAYER
+Document, Issuer, Chapter, Article, Clause, Point
+Relations: ISSUED_BY, CONTAINS, AMENDS, REPEALS, REPLACES, GUIDES, REFERS_TO
 
-| Property | Type | Required | Ghi chú |
+SEMANTIC LAYER
+LegalConcept, LegalSubject, LegalAction
+Relations: DEFINES, REGULATES, REQUIRES
+
+RUNTIME REASONING LAYER
+Obligation, Right, Condition, Exception
+Relations: HAS_CONDITION, HAS_EXCEPTION
+```
+
+The structural layer is persisted first and is stable. The semantic layer is persisted when extraction confidence passes the decision gate. Runtime reasoning labels remain valid ontology labels, but they are not Phase 1 LLM extraction targets.
+
+### 1.2 Validation Stack
+
+```text
+LLM
+  -> Pydantic
+  -> Ontology Validator
+  -> Graph Consistency Validator
+  -> Confidence Scorer
+  -> Neo4j Repository
+  -> Neo4j Python Driver
+  -> Neo4j
+```
+
+Responsibilities:
+
+| Layer | Responsibility |
+|---|---|
+| LLM | Proposes extraction candidates only |
+| Pydantic | Enforces JSON shape, scalar types, ID pattern, and relation enum |
+| Ontology Validator | Enforces node required fields, relation type, direction, allowed endpoints, required relation properties |
+| Graph Consistency Validator | Enforces cross-record consistency: duplicate IDs, dangling endpoints, cycles, document registry lookup, temporal conflict checks |
+| Confidence Scorer | Scores accepted candidates; it does not relax ontology rules |
+| Neo4j Repository | Accepts only validated payloads and emits `MERGE` queries |
+| Neo4j Python Driver | Transport only |
+| Neo4j Community Edition | Stores graph, uniqueness constraints, lookup indexes, full-text indexes, and vector indexes |
+
+---
+
+## 2. Node Contract
+
+Required means mandatory before `Neo4jRepository.merge(...)`. Neo4j Community Edition does not enforce property existence.
+
+### 2.1 Structural Nodes
+
+| Node | Required fields | Optional fields | Enums |
 |---|---|---|---|
-| `id` | string | ✅ | snake_case, unique. Vd: `ldn_2020` |
-| `doc_type` | enum | ✅ | Constitution\|Law\|Ordinance\|Resolution\|Decree\|Decision\|Circular\|JointCircular |
-| `number` | string | ✅ | Số hiệu chính thức. Vd: `"59/2020/QH14"` |
-| `normative` | boolean | ✅ | `true` = văn bản quy phạm; `false` = không index |
-| `legal_status` | enum | ✅ | ACTIVE\|NOT_YET_EFFECTIVE\|PARTIALLY_EFFECTIVE\|REPLACED\|REPEALED\|EXPIRED |
-| `effective_from` | date | ✅ | Ngày có hiệu lực |
-| `effective_to` | date | ❌ | Null nếu chưa hết hiệu lực |
-| `jurisdiction` | string | ❌ | `"National"`, `"Ho Chi Minh City"`, ... |
-| `source_url` | string | ❌ | URL trên vbpl.vn |
-| `document_uri` | string | ❌ | URI local/S3 của file gốc |
-| `issuer_name` | string | ✅ | Tên cơ quan ban hành — Writer dùng để MERGE Issuer node. Vd: `"National Assembly"` |
-| `gazette_number` | string | ❌ | Số Công báo |
+| `Document` | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `effective_to`, `jurisdiction`, `source_url`, `document_uri`, `gazette_number` | `doc_type`: `Constitution`, `Law`, `Ordinance`, `Resolution`, `Decree`, `Decision`, `Circular`, `JointCircular`; `legal_status`: `ACTIVE`, `NOT_YET_EFFECTIVE`, `PARTIALLY_EFFECTIVE`, `REPLACED`, `REPEALED`, `EXPIRED` |
+| `Issuer` | `id`, `name`, `branch` | none | `branch`: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER` |
+| `Chapter` | `id`, `number`, `title` | none | none |
+| `Article` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `title`, `effective_to`, `embedding` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
+| `Clause` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `effective_to`, `embedding` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
+| `Point` | `id`, `label`, `content_raw` | none | none |
 
-**Định nghĩa `legal_status`**:
-- `PARTIALLY_EFFECTIVE`: Một phần văn bản còn hiệu lực — state, không mô tả nguyên nhân. Chi tiết → suy luận từ relation graph.
-- `REPLACED`: Toàn bộ nội dung được thay thế bởi một văn bản mới (có văn bản kế nhiệm).
-- `REPEALED`: Bị bãi bỏ hiệu lực mà không nhất thiết có văn bản kế nhiệm.
+Rules:
 
-#### Issuer
+| Rule | Contract |
+|---|---|
+| `Issuer` creation | Writer derives `Issuer` from `Document.issuer_name`; LLM does not extract it directly |
+| `Issuer.id` | Slug of normalized issuer name; this is the `MERGE` key, not `name` |
+| Temporal denormalization | `Article` and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
+| Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[768]`; `Point` has no embedding |
 
-Tự động tạo từ `Document.issuer_name` trong Writer (MERGE). LLM không extract riêng.
+### 2.2 Semantic Nodes
 
-| Property | Type | Required | Ghi chú |
+| Node | Required fields | Optional fields | Phase |
 |---|---|---|---|
-| `id` | string | ✅ | `slug(normalize(issuer_name))` — **MERGE key**. Vd: `"Quốc hội"` → `"quoc_hoi"` |
-| `name` | string | ✅ | Tên canonical từ vbpl.vn controlled vocabulary (không chuẩn hóa hoa/thường) |
-| `branch` | enum | ✅ | `LEGISLATIVE\|EXECUTIVE\|JUDICIAL\|OTHER` — map qua `ISSUER_BRANCH_MAP` |
+| `LegalConcept` | `id`, `name` | `aliases`, `description` | Phase 1 |
+| `LegalSubject` | `id`, `name` | `aliases`, `description` | Phase 1 |
+| `LegalAction` | `id`, `name` | `aliases`, `description` | Phase 1 |
+| `Obligation` | `id`, `name` | `aliases`, `description` | Runtime reasoning |
+| `Right` | `id`, `name` | `aliases`, `description` | Runtime reasoning |
+| `Condition` | `id`, `name` | `aliases`, `description` | Runtime reasoning |
+| `Exception` | `id`, `name` | `aliases`, `description` | Runtime reasoning |
 
-> **Unique key = `id` (slug), không phải `name`** (ADR-14 Rev.1).  
-> `MERGE (i:Issuer {id: $slug})` tránh duplicate khi `issuer_name` có biến thể hoa/thường.  
-> `name` lưu giá trị gốc từ vbpl.vn để hiển thị; `id` dùng để lookup/merge.
+Extraction mapping:
 
-> **Không có `level` property.** Level chỉ dùng trong Validator rule engine (xem §5).
-
-#### Chapter / Article / Clause / Point
-
-| Node | Property | Type | Required | Ghi chú |
-|---|---|---|---|---|
-| Chapter | `id` | string | ✅ | `{doc_id}_ch{N}`. Vd: `ldn2020_ch2` |
-| Chapter | `number` | string | ✅ | `"II"` |
-| Chapter | `title` | string | ✅ | `"Thành lập doanh nghiệp"` |
-| Article | `id` | string | ✅ | `{doc_id}_art{N}`. Vd: `ldn2020_art17` |
-| Article | `number` | string | ✅ | `"17"` |
-| Article | `title` | string | ❌ | Tiêu đề điều (nếu có) |
-| Article | `content_raw` | string | ✅ | Nội dung gốc |
-| Article | `effective_from` | date | ✅ | Kế thừa từ Document, override khi bị AMENDS riêng (ADR-18) |
-| Article | `effective_to` | date | ❌ | null = còn hiệu lực. Writer set khi bị AMENDS (ADR-18) |
-| Article | `legal_status` | enum | ✅ | `ACTIVE\|AMENDED\|REPEALED` (ADR-18) |
-| Article | `embedding` | float[768] | ❌ | **Nullable** — Embedding Generator fill sau Writer (M3 Tuần 2). 768-dim = schema contract (xem §7). |
-| Clause | `id` | string | ✅ | `{doc_id}_art{N}_cl{K}` |
-| Clause | `number` | string | ✅ | `"1"`, `"2"`, ... |
-| Clause | `content_raw` | string | ✅ | Nội dung gốc |
-| Clause | `effective_from` | date | ✅ | Kế thừa từ Article |
-| Clause | `effective_to` | date | ❌ | null = còn hiệu lực. Cascade từ Article hoặc khi bị AMENDS riêng |
-| Clause | `legal_status` | enum | ✅ | `ACTIVE\|AMENDED\|REPEALED` |
-| Clause | `embedding` | float[768] | ❌ | **Nullable** — đơn vị retrieval chính theo ADR-02 |
-| Point | `id` | string | ✅ | `{doc_id}_art{N}_cl{K}_p{letter}` |
-| Point | `label` | string | ✅ | `"a"`, `"b"`, `"c"` |
-| Point | `content_raw` | string | ✅ | Nội dung gốc |
-
-> **Point không có `embedding`** — Point là 1 câu rất ngắn, không đủ ngữ cảnh để tạo vector có ý nghĩa riêng (ADR-02). Đơn vị retrieval chính là Clause; Article dùng cho câu hỏi tổng quát.
-
----
-
-### 2.2 Semantic Layer
-
-| Node | Ý nghĩa | Ví dụ | Phase | Extraction status |
-|---|---|---|---|---|
-| `LegalConcept` | Khái niệm, thuật ngữ pháp lý trừu tượng | `vốn điều lệ`, `tư cách pháp nhân` | Phase 1 | ✅ LLM extract (`Concept` type) |
-| `LegalSubject` | Chủ thể có tư cách pháp lý | `doanh nghiệp`, `cổ đông`, `cơ quan ĐKKD` | Phase 1 | ✅ LLM extract (`Entity` type) |
-| `LegalAction` | Hành vi pháp lý (động từ) | `thành lập`, `góp vốn`, `giải thể` | Phase 1 | ✅ LLM extract (`Action` type) |
-| `Obligation` | Nghĩa vụ pháp lý | `nộp thuế`, `đăng ký thay đổi vốn` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
-| `Right` | Quyền pháp lý | `quyền biểu quyết`, `quyền yêu cầu họp` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
-| `Condition` | Điều kiện áp dụng | `vốn ≥ X tỷ`, `ít nhất 3 thành viên` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
-| `Exception` | Ngoại lệ | `trừ trường hợp điều lệ quy định khác` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
-
-> **The ontology intentionally models stable legal knowledge only. Context-dependent legal semantics, including obligations, exceptions, conditions, and legal interpretation, are generated dynamically by the Runtime Legal Reasoning layer.**
-> **Scope note (S4)**: Ontology mô tả **toàn bộ không gian khái niệm** của domain (thiết kế đúng-đắn về mặt học thuật — Ontology Principle 1: "Node represents stable legal concepts"). Việc **node type nào có pipeline extract được ở giai đoạn nào** là quyết định về **implementation scope**, không phải về ontology design. Hai việc này tách bạch có chủ đích.
-
-### 2.3 Future Layer (Out of Scope)
-
-| Node | Ý nghĩa | Ví dụ | Phase | Extraction status |
-|---|---|---|---|---|
-| `Snapshot` | Khung nhìn hợp nhất (Consolidated view) của một điều/khoản tại một thời điểm cụ thể | `Điều 17 năm 2022` | Future | ⏳ Placeholder, không implement trong đồ án |
-
-> **Lưu ý**: `Snapshot` node được đưa vào ontology như một "Future Extension" (xem ADR-18). Đối với quy mô đồ án, Graph hiện tại (Denormalized) là Source of Truth và đủ nhanh. Snapshot Builder chỉ được implement khi hệ thống scale lên Production lớn để phục vụ Hybrid Retriever siêu tốc.
-
----
-
-## 3. Relationship Types
-
-### 3.1 Structural Relations
-
-| Relation | From | To | Properties |
-|---|---|---|---|
-| `ISSUED_BY` | Document | Issuer | — |
-| `CONTAINS` | Doc/Chapter/Article/Clause | Chapter/Article/Clause/Point | — |
-| `AMENDS` | Doc/Article/Clause | Doc/Article/Clause | `effective_from`, `effective_to` |
-| `REPEALS` | Document | Document/Article/Clause | `effective_from` |
-| `REPLACES` | Document | Document | `effective_from` |
-| `GUIDES` | Document | Document | — |
-| `REFERS_TO` | Article/Clause/Point | Article/Clause/Point/Document | `citation_text`, `citation_type` |
-
-`citation_type`: `DIRECT | INDIRECT | RANGE`
-
-### 3.2 Semantic Relations
-
-Tất cả semantic relations có provenance:
-
-| Property | Type | Mô tả |
-|---|---|---|
-| `confidence` | float | Scorer confidence (0.0–1.0) |
-| `llm_model` | string | Model đã extract |
-| `created_at` | datetime | Thời điểm extract |
-
-| Relation | From | To |
-|---|---|---|
-| `DEFINES` | Article/Clause | LegalConcept |
-| `REGULATES` | Article/Clause | LegalSubject/LegalAction |
-| `REQUIRES` | LegalSubject | LegalConcept/Obligation |
-| `HAS_CONDITION` | LegalAction/Obligation/Right | Condition |
-| `HAS_EXCEPTION` | Article/Clause/LegalAction | Exception |
-
----
-
-## 4. Extraction Schema → Ontology Mapping
-
-LLM extract theo schema đơn giản. Writer thực hiện mapping:
-
-LLM extraction dùng 3 semantic type:
-
-| Extraction type | Mô tả | Ví dụ |
-|---|---|---|
-| `Entity` | Chủ thể có tư cách pháp lý | `doanh nghiệp`, `cổ đông` |
-| `Concept` | Khái niệm/thuật ngữ pháp lý | `vốn điều lệ`, `tư cách pháp nhân` |
-| `Action` | Hành vi pháp lý (động từ) | `thành lập`, `góp vốn`, `giải thể` |
-
-Writer map sang Ontology nodes:
-
-| Extraction type | Neo4j node |
+| Pydantic extraction type | Canonical Neo4j label |
 |---|---|
 | `Entity` | `LegalSubject` |
 | `Concept` | `LegalConcept` |
 | `Action` | `LegalAction` |
 | `Document` | `Document` |
-| `Article/Clause/Point` | `Article/Clause/Point` |
+| `Article` | `Article` |
+| `Clause` | `Clause` |
+| `Point` | `Point` |
 
-> LLM extract 3 type đơn giản. Writer normalize → Ontology node. Không để Writer suy luận từ Entity → LegalAction bằng POS tagging.
+Extraction types are input schema labels, not Neo4j labels. The writer or repository mapping layer must normalize them before persistence.
 
 ---
 
-## 5. Validator Rule Engine
+## 3. Relation Contract
 
-`level` chỉ tồn tại ở đây, không phải trong Neo4j.
+Only these relation names are current. Relation names use active voice.
 
-### GUIDES — Whitelist Matrix
+| Relation | From | To | Required properties | Enforced by Neo4j CE | Enforced by Python |
+|---|---|---|---|---|---|
+| `ISSUED_BY` | `Document` | `Issuer` | none | no | yes |
+| `CONTAINS` | `Document`, `Chapter`, `Article`, `Clause` | `Chapter`, `Article`, `Clause`, `Point` by allowed pair | none | no | yes |
+| `AMENDS` | `Document`, `Article`, `Clause` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
+| `REPEALS` | `Document` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
+| `REPLACES` | `Document` | `Document` | `effective_from` | indexed only | yes |
+| `GUIDES` | `Document` | `Document` | none | no | yes, with whitelist |
+| `REFERS_TO` | `Article`, `Clause`, `Point` | `Article`, `Clause`, `Point`, `Document` | `citation_text`, `citation_type` | no | yes |
+| `DEFINES` | `Article`, `Clause` | `LegalConcept` | `confidence`, `llm_model`, `created_at` | no | yes |
+| `REGULATES` | `Article`, `Clause` | `LegalSubject`, `LegalAction` | `confidence`, `llm_model`, `created_at` | no | yes |
+| `REQUIRES` | `LegalSubject` | `LegalConcept`, `Obligation` | `confidence`, `llm_model`, `created_at` | no | yes |
+| `HAS_CONDITION` | `LegalAction`, `Obligation`, `Right` | `Condition` | `confidence`, `llm_model`, `created_at` | no | yes |
+| `HAS_EXCEPTION` | `Article`, `Clause`, `LegalAction` | `Exception` | `confidence`, `llm_model`, `created_at` | no | yes |
 
-Dùng whitelist thay vì chỉ so sánh số nguyên. `Law-GUIDES-Law` sẽ bị chặn đúng (cùng level = không hướng dẫn nhau).
+`REFERS_TO.citation_type` must be one of `DIRECT`, `INDIRECT`, `RANGE`.
 
-```python
-# (from_doc_type, to_doc_type) → valid
-GUIDES_WHITELIST: set[tuple[str, str]] = {
-    ("Constitution",  "Law"),
-    ("Constitution",  "Ordinance"),
-    ("Law",           "Decree"),
-    ("Law",           "Decision"),      # PM Decision
-    ("Law",           "Circular"),
-    ("Ordinance",     "Decree"),
-    ("Resolution",    "Decree"),
-    ("Decree",        "Circular"),
-    ("Decree",        "Decision"),      # Minister Decision
-    ("Decree",        "JointCircular"),
-    ("Decision",      "Circular"),      # PM Decision → Circular
-}
+Semantic relation provenance is mandatory. The confidence scorer produces `confidence`; the extraction or runtime layer must provide `llm_model` and `created_at` before repository write.
 
-def validate_guides(from_type: str, to_type: str) -> bool:
-    return (from_type, to_type) in GUIDES_WHITELIST
-```
+### 3.1 `GUIDES` Whitelist
 
-### Precedence (dự phòng cho các relation khác)
+`GUIDES` uses a whitelist instead of a numeric `level` property. `level` must not be stored in Neo4j.
 
 ```python
-VALIDATOR_PRECEDENCE: dict[str, int] = {
-    "Constitution":                    5,
-    "Law":                             4,
-    "Ordinance":                       4,
-    "Resolution_NationalAssembly":     4,
-    "Resolution_Government":           3,
-    "Decree":                          3,
-    "PrimeMinisterDecision":           3,
-    "Resolution_Provincial":           2,
-    "MinisterDecision":                2,
-    "Circular":                        2,
-    "JointCircular":                   2,
-    "LocalDecision":                   1,
+GUIDES_WHITELIST = {
+    ("Constitution", "Law"),
+    ("Constitution", "Ordinance"),
+    ("Law", "Decree"),
+    ("Law", "Decision"),
+    ("Law", "Circular"),
+    ("Ordinance", "Decree"),
+    ("Resolution", "Decree"),
+    ("Decree", "Circular"),
+    ("Decree", "Decision"),
+    ("Decree", "JointCircular"),
+    ("Decision", "Circular"),
 }
 ```
 
-### Semantic Relation Guidelines
+### 3.2 Legacy Relation Aliases
 
-Annotator và LLM phải tuân theo:
+These names may appear in archived data, old docs, or generated samples only. They are not accepted by current validators.
 
-| Relation | Khi nào dùng | Ví dụ |
-|---|---|---|
-| `DEFINES` | Article đưa ra **định nghĩa** của một Concept | `Điều 4. Giải thích từ ngữ — "vốn điều lệ" là...` |
-| `REGULATES` | Article **điều chỉnh hành vi** của Subject/Action | `Điều 13 quy định về việc thành lập doanh nghiệp` |
-| `REQUIRES` | Subject/Action có **nghĩa vụ** phải đáp ứng | `Doanh nghiệp phải đăng ký thay đổi vốn` |
-| `HAS_CONDITION` | Áp dụng **có điều kiện** | `Chỉ áp dụng khi vốn ≥ 10 tỷ` |
-| `HAS_EXCEPTION` | Có **ngoại lệ** | `Trừ trường hợp điều lệ quy định khác` |
-
----
-
-## 6. Naming Conventions
-
-| Element | Convention | Ví dụ |
-|---|---|---|
-| Document ID | slug | `ldn_2020` |
-| Article ID | `{doc_id}_art{N}` | `ldn2020_art17` |
-| Clause ID | `{doc_id}_art{N}_cl{K}` | `ldn2020_art17_cl1` |
-| Point ID | `{doc_id}_art{N}_cl{K}_p{letter}` | `ldn2020_art17_cl1_pa` |
-| Concept/Subject ID | snake_case không dấu | `von_dieu_le` |
-| Issuer ID | snake_case | `national_assembly` |
-| Relation | SCREAMING_SNAKE_CASE, active voice | `AMENDS`, `DEFINES` |
-
----
-
-## 7. Constraints & Cardinality
-
-| Constraint | Mô tả |
+| Legacy alias | Canonical relation |
 |---|---|
-| `Document.id` UNIQUE | 1 document = 1 node |
-| `Article.id` UNIQUE | — |
-| No self-loop trên CONTAINS | — |
-| No cycle trên AMENDS | DAG enforcement |
-| `normative=false` → không có GUIDES | Quyết định cá biệt không hướng dẫn |
-| `AMENDS.effective_from` required | Temporal relation bắt buộc |
-| `Article.embedding` dim = 768 | **Schema contract** — đổi model → phải ADR + DROP INDEX + re-embed |
-| `Clause.embedding` dim = 768 | Idem — 768 = vietnamese-bi-encoder dimension |
-| `Point` không có `embedding` | ADR-02: Point quá ngắn, không embed |
+| `AMENDED_BY` | `AMENDS` |
+| `REPEALED_BY` | `REPEALS` |
+| `REPLACED_BY` | `REPLACES` |
+| `IMPLEMENTED_BY` | `GUIDES` |
+| `GUIDED_BY` | `GUIDES` |
+| `REFERENCES` | `REFERS_TO` |
 
+Any current pipeline, test, prompt, or repository code that emits a legacy alias is non-compliant.
 
 ---
 
-## 8. Out of Scope — v1.0
+## 4. Naming
 
-- `Procedure` node (quy trình nhiều bước) → Future Work
-- `LegalSubject` subtypes (Person/Organization/Enterprise/StateAgency) → Future Work
-- `OfficialDispatch` → không đưa vào normative KG
-- Cross-jurisdiction mapping → Future Work
-
----
-
-## 9. Ontology Principles
-
-> Dành cho hội đồng luận văn — thể hiện thiết kế có chủ đích, không để code dẫn dắt kiến trúc.
-
-1. **Node represents stable legal concepts** — không phải implementation artifact.
-2. **Relationship represents legal semantics** — mỗi relation type có ý nghĩa pháp lý rõ ràng.
-3. **Validator logic is NOT ontology** — precedence/whitelist sống trong rule engine, không trong graph.
-4. **Metadata không duplicate graph semantics** trừ khi vì lý do hiệu năng (vd: `legal_status` denormalized để filter nhanh).
-5. **Every semantic edge must have provenance** — confidence, llm_model, created_at là bắt buộc.
-6. **Extraction schema ≠ Ontology** — LLM extract theo schema đơn giản (Entity/Concept/Action); Writer normalize sang ontology đầy đủ.
-7. **Structural Layer ổn định trước, Semantic Layer phát triển iterative** — không block nhau.
+| Element | Convention | Example |
+|---|---|---|
+| `Document.id` | snake-case slug | `ldn_2020` |
+| `Chapter.id` | `{doc_id}_ch{N}` | `ldn_2020_ch2` |
+| `Article.id` | `{doc_id}_art{N}` | `ldn_2020_art17` |
+| `Clause.id` | `{doc_id}_art{N}_cl{K}` | `ldn_2020_art17_cl1` |
+| `Point.id` | `{doc_id}_art{N}_cl{K}_p{letter}` | `ldn_2020_art17_cl1_pa` |
+| Semantic node ID | snake-case, no Vietnamese diacritics | `von_dieu_le` |
+| `Issuer.id` | snake-case slug | `quoc_hoi` |
+| Relation | `SCREAMING_SNAKE_CASE`, active voice | `AMENDS`, `REFERS_TO` |
 
 ---
 
-## 10. ADR Log
+## 5. Enforcement Model
 
-| Version | Ngày | Thay đổi | Lý do |
+### 5.1 Neo4j Community Edition
+
+The bootstrap script must create only:
+
+| Category | Allowed in bootstrap |
+|---|---|
+| Uniqueness constraints | `id` uniqueness for persisted labels |
+| Lookup indexes | frequently filtered scalar properties |
+| Temporal indexes | `effective_from`, `effective_to` filters |
+| Relationship property indexes | `AMENDS`, `REPEALS`, `REPLACES` temporal lookup |
+| Full-text indexes | `content_raw`, `title` search |
+| Vector indexes | `Article.embedding`, `Clause.embedding` with 768 dimensions |
+
+The database bootstrap must not be treated as a full ontology validator in Community Edition.
+
+### 5.2 Python Application Layer
+
+Python must validate before any `MERGE`:
+
+| Validation | Owner |
+|---|---|
+| Required node properties | Ontology Validator |
+| Node enum values | Ontology Validator |
+| Relation enum | Pydantic and Ontology Validator |
+| Relation endpoint types | Ontology Validator |
+| Relation required properties | Ontology Validator |
+| Duplicate IDs and dangling endpoints | Graph Consistency Validator |
+| No self-loop where forbidden | Ontology Validator |
+| No `AMENDS` cycle | Graph Consistency Validator |
+| `GUIDES` whitelist | Ontology Validator |
+| Temporal conflict checks | Graph Consistency Validator |
+
+### 5.3 Future Enterprise Edition
+
+If the project moves to Neo4j Enterprise Edition, property existence and type constraints may be added as defense in depth. That change is additive and must not replace application-layer validation.
+
+---
+
+## 6. Bootstrap Compatibility Notes
+
+`infra/neo4j/init/01_schema_init.cypher` must match this contract:
+
+| Area | Expected state |
+|---|---|
+| Structural uniqueness | `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point` by `id` |
+| Phase 1 semantic uniqueness | `LegalConcept`, `LegalSubject`, `LegalAction` by `id` |
+| Runtime reasoning labels | No bootstrap requirement until persisted by a runtime reasoning component |
+| Relation indexes | `AMENDS.effective_from`, `REPEALS.effective_from`, `REPLACES.effective_from` |
+| Vector indexes | `article_embedding`, `clause_embedding`, 768 dimensions, cosine |
+
+---
+
+## 7. Ontology Principles
+
+1. Node labels represent legal concepts or legal text units, not implementation artifacts.
+2. Relationship types represent legal semantics with explicit direction.
+3. Extraction schema labels are allowed at the Pydantic boundary only; Neo4j labels are canonical labels.
+4. Validator logic such as `GUIDES_WHITELIST` is application behavior, not persisted graph metadata.
+5. Denormalized temporal fields exist for retrieval performance and must remain consistent with temporal relations.
+6. Every persisted semantic edge carries provenance.
+7. The ontology contract leads implementation; bootstrap scripts and validators follow it.
+
+---
+
+## 8. Change Log
+
+| Version | Date | Change | Reason |
 |---|---|---|---|
-| 1.0.0 | 2026-07-03 | Initial frozen schema | 4 rounds debate, consensus đạt được |
-| 1.1.0 | 2026-07-03 | +`issuer_name` vào Document; GUIDES dùng whitelist thay precedence; thêm `Action` extraction type; định nghĩa REPLACED/REPEALED; semantic relation guidelines; Ontology Principles | Reviewer feedback 5 điểm |
-| 1.2.0 | 2026-07-06 | +`embedding: float[768]` (nullable) vào Article và Clause; explicit note Point không có embedding; expand Chapter/Article/Clause/Point property table; Chapter ID naming convention | F2: gap giữa schema (VECTOR INDEX đã tạo) và ontology (chưa khai báo field) — RC3 Hybrid Retrieval phụ thuộc vào field này |
+| 1.0.0 | 2026-07-03 | Initial frozen schema | Ontology design baseline |
+| 1.1.0 | 2026-07-03 | Added `issuer_name`, `GUIDES` whitelist, `Action` extraction type, active-voice relation direction | Reviewer feedback |
+| 1.2.0 | 2026-07-06 | Added nullable `embedding: float[768]` to `Article` and `Clause`; clarified `Point` has no embedding | Retrieval schema alignment |
+| 1.3.0 | 2026-07-07 | Aligned with Neo4j Community Edition integrity strategy and denormalized temporal fields | Write-path implementation |
+| 1.4.0 | 2026-07-07 | Rewrote as canonical contract; added validation stack, relation matrix, enforcement boundaries, and legacy alias quarantine | Remove ambiguity between frozen spec, schema bootstrap, and validators |

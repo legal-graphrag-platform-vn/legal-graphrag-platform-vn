@@ -12,15 +12,15 @@
 ```
 Luật Doanh nghiệp 2020 (59/2020/QH14)
          │
-         ├── IMPLEMENTED_BY ──→ NĐ 01/2021/NĐ-CP (Đăng ký DN)
+         ├── GUIDES ──→ NĐ 01/2021/NĐ-CP (Đăng ký DN)
          │                          │
-         │                          └── GUIDED_BY ──→ TT 01/2021/TT-BKHĐT
+         │                          └── GUIDES ──→ TT 01/2021/TT-BKHĐT
          │
-         ├── IMPLEMENTED_BY ──→ NĐ 47/2021/NĐ-CP (Sửa đổi NĐ 01)
+         ├── GUIDES ──→ NĐ 47/2021/NĐ-CP (Sửa đổi NĐ 01)
          │
-         ├── IMPLEMENTED_BY ──→ NĐ 155/2020/NĐ-CP (Chứng khoán - DN đại chúng)
+         ├── GUIDES ──→ NĐ 155/2020/NĐ-CP (Chứng khoán - DN đại chúng)
          │
-         └── AMENDED_BY ──→ Luật Doanh nghiệp 2014 (tiền thân)
+         └── AMENDS ──→ Luật Doanh nghiệp 2014 (tiền thân)
 ```
 
 ---
@@ -82,7 +82,7 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
     },
     {
       "head": "LDN2020_D26",
-      "relation": "REFERENCES",
+      "relation": "REFERS_TO",
       "tail": "ND01_2021_D5"
     }
   ]

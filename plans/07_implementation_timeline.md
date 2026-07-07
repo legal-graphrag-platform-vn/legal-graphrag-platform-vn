@@ -3,7 +3,7 @@
 > **Cập nhật**: 2026-07-07  
 > **Đánh giá**: Research ⭐⭐⭐⭐⭐ | Engineering ⭐⭐⭐⭐☆ | Hoàn thành ⭐⭐⭐⭐☆  
 > **Triết lý**: Ưu tiên giá trị nghiên cứu → Experiment → Portal.
-> **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.4.0](./legal_ontology.md)
 
 ---
 
@@ -63,7 +63,7 @@ Phase 5 — Portal              ❌ CHƯA
 
 ### Bug cần fix trước M3
 
-- [ ] **Bug `properties={}`**: `orchestrator.py` truyền `properties={}` cứng → temporal relations (`AMENDED_BY`, `REPLACED_BY`, `REPEALED_BY`) luôn bị reject sai vì thiếu `effective_from`. Phải truyền properties thực từ LLM output.
+- [ ] **Bug `properties={}`**: `orchestrator.py` truyền `properties={}` cứng → temporal relations (`AMENDS`, `REPLACES`, `REPEALS`) luôn bị reject sai vì thiếu `effective_from`. Phải truyền properties thực từ LLM output.
 - [ ] **URL crawler**: cập nhật URL vbpl.vn đúng format (đã phát hiện 404).
 
 ---
@@ -93,8 +93,8 @@ Phase 5 — Portal              ❌ CHƯA
 > [!IMPORTANT]
 > Không nhảy ngay sang retrieval. Phải đo chất lượng graph trước.
 
-- [ ] Đo **Entity count** theo từng label (Document, Article, Clause, Point, Concept, Entity)
-- [ ] Đo **Relation count** theo từng type (CONTAINS, AMENDED_BY, ...)
+- [ ] Đo **Entity count** theo từng label (Document, Article, Clause, Point, LegalConcept, LegalSubject, LegalAction)
+- [ ] Đo **Relation count** theo từng type (CONTAINS, AMENDS, ...)
 - [ ] Đo **Ontology violation rate** — số relations bị reject / tổng relations extracted
 - [ ] Đo **Coverage** — % Điều có ít nhất 1 relation ngoài CONTAINS
 - [ ] Đo **Duplicate rate** — node trùng ID
@@ -142,7 +142,7 @@ Evidence Verifier
 
 - [ ] **2.1** Intent Classifier: phân loại `factual / temporal / relational / comparative`
 - [ ] **2.1** Vector Retriever: `queryNodes` trên `article_embedding` / `clause_embedding`
-- [ ] **2.2** Graph Expansion: từ vector results, traverse `CONTAINS`, `AMENDED_BY`, `REFERENCES` để lấy context liên quan
+- [ ] **2.2** Graph Expansion: từ vector results, traverse `CONTAINS`, `AMENDS`, `REFERS_TO` để lấy context liên quan
 - [ ] **2.3** Temporal Filter: Cypher filter theo `effective_from` / `effective_to` tại thời điểm T trong query
 - [ ] **2.4** BM25 Fulltext fusion (Neo4j fulltext index đã có trong schema)
 - [ ] **2.5** Cross Encoder Reranker (`ms-marco-MiniLM-L-6-v2`)
@@ -156,7 +156,7 @@ Evidence Verifier
 |---|---|
 | B-1 | Recall@5 ≥ 0.7 trên 50 câu hỏi |
 | B-2 | Temporal query trả về đúng văn bản hiệu lực tại ngày được hỏi |
-| B-3 | Graph traversal tìm được AMENDED_BY, REPLACED_BY đúng |
+| B-3 | Graph traversal tìm được AMENDS, REPLACES đúng |
 | B-4 | Ablation study table hoàn chỉnh (5 dòng: 2.1 → 2.5) |
 
 ---
@@ -287,7 +287,7 @@ Evidence Verifier
 Portal
 ├── Search          — full-text + semantic search
 ├── Chat            — AI Q&A với citation + reasoning path
-├── Timeline        — lịch sử sửa đổi (AMENDED_BY / REPLACED_BY)
+├── Timeline        — lịch sử sửa đổi (AMENDS / REPLACES)
 ├── Graph Explorer  — visualize knowledge graph (D3.js / Cytoscape)
 └── Document Reader — đọc điều khoản + highlight + quan hệ liên quan
 ```

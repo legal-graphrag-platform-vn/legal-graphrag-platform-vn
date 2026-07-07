@@ -13,7 +13,7 @@ infra/
 ├── Makefile                        # Shortcut commands
 └── neo4j/
     └── init/
-        └── 01_schema_init.cypher   # Constraints + Indexes + Vector Index
+        └── 01_schema_init.cypher   # Uniqueness constraints + indexes + vector index
 ```
 
 ---
@@ -36,9 +36,9 @@ make verify-schema
 ```
 
 Sau bước 4, kết quả mong đợi:
-- **6 constraints** (uniqueness cho Document, Article, Clause, Point, Concept, Entity)
-- **10+ indexes** (lookup + temporal + fulltext)
-- **2 vector indexes** (`article_embedding`, `clause_embedding` — 768 dims, cosine)
+- `9` uniqueness constraints cho `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction`
+- `10+` indexes (lookup + temporal + fulltext + vector)
+- `2` vector indexes (`article_embedding`, `clause_embedding` — 768 dims, cosine)
 
 ---
 
@@ -70,23 +70,28 @@ Credentials: `neo4j` / giá trị `NEO4J_PASSWORD` trong `.env`
 
 ## Schema overview
 
-Toàn bộ spec tại [`plans/02_ontology_specification.md`](../plans/02_ontology_specification.md).
+Toàn bộ spec hiện hành tại [`plans/legal_ontology.md`](../plans/legal_ontology.md). [`plans/02_ontology_specification.md`](../plans/02_ontology_specification.md) chỉ là tài liệu lịch sử.
 
 ### Node types
 ```
-:Document:Law | :Document:Decree | :Document:Circular | :Document:Resolution | :Document:Decision
+:Document
+:Issuer
+:Chapter
 :Article    (embedding 768d)
 :Clause     (embedding 768d — unit retrieval chính)
 :Point
-:Concept
-:Entity:CompanyType | :Entity:Authority | :Entity:PersonType
+:LegalConcept
+:LegalSubject
+:LegalAction
 ```
 
-### Relation types (9 loại)
+### Relation types
 ```
-CONTAINS, AMENDED_BY, REPLACED_BY, REPEALED_BY,
-IMPLEMENTED_BY, REFERENCES, DEFINES, REGULATES, REQUIRES
+ISSUED_BY, CONTAINS, AMENDS, REPEALS, REPLACES, GUIDES,
+REFERS_TO, DEFINES, REGULATES, REQUIRES, HAS_CONDITION, HAS_EXCEPTION
 ```
+
+Legacy aliases như `AMENDED_BY`, `REPEALED_BY`, `REPLACED_BY`, `IMPLEMENTED_BY`, `REFERENCES` không phải behavior hiện hành.
 
 ### Quick verify query (chạy trong Neo4j Browser)
 ```cypher
@@ -108,3 +113,5 @@ YIELD node, score RETURN node.id, score;
 - **APOC**: Tự download khi Neo4j khởi động lần đầu (cần internet). Dùng cho `apoc.path.expand` trong retrieval query.
 - **Data persistence**: Dùng bind mounts tại `infra/data/neo4j/`. Data không mất khi `make down`, chỉ mất khi `make clean`.
 - **`IF NOT EXISTS`**: Script `01_schema_init.cypher` idempotent — chạy nhiều lần không bị lỗi.
+- **Community Edition boundary**: `01_schema_init.cypher` chỉ bootstrap uniqueness constraints và indexes. Mọi mandatory property checks phải chạy ở application layer trước `MERGE`.
+- **Enterprise note**: Database-level existence/type constraints chỉ là hướng mở rộng tương lai nếu chuyển sang Enterprise Edition.

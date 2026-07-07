@@ -33,7 +33,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 | P0-1 | Setup Docker Compose: Neo4j 5.11+ Community | DevOps |
 | P0-2 | Verify Neo4j vector index: chạy `CREATE VECTOR INDEX` thử | DevOps |
 | P0-3 | Kiểm tra text layer của tất cả PDF trong corpus | Data |
-| P0-4 | Review và sign-off `02_ontology_specification.md` v1.0 | Cả nhóm |
+| P0-4 | Review và sign-off `legal_ontology.md` | Cả nhóm |
 | P0-5 | Viết `tests/test_ontology_consistency.py` và chạy pass | Backend |
 | P0-6 | Chốt toàn bộ 09_open_questions Q1-Q11 còn lại | Cả nhóm |
 | P0-7 | Setup repo structure: `src/`, `tests/`, `data/`, `scripts/` | Lead |
@@ -48,7 +48,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 | C0-3 | 5/5 unit tests trong `test_ontology_consistency.py` pass | `pytest tests/test_ontology_consistency.py` → 5 passed |
 | C0-4 | RELATION_ENUM == set(CONSTRAINTS.keys()) | Test C0-3 đã bao gồm |
 | C0-5 | Tất cả Q1-Q11 trong `09_open_questions.md` đã có Decision | Decision Log điền đầy đủ |
-| C0-6 | `02_ontology_specification.md` được sign-off bởi cả nhóm | Git commit có message "chốt ontology v1.0" |
+| C0-6 | `legal_ontology.md` được sign-off bởi cả nhóm | Git commit có message "chốt ontology" |
 
 ---
 
@@ -81,7 +81,7 @@ Xây dựng pipeline tự động chuyển đổi văn bản pháp luật PDF sa
 | C1-1 | Hierarchy Parser detect đúng ranh giới Điều/Khoản/Điểm | Manual check: so sánh output parser với PDF gốc trên 2 văn bản |
 | C1-2 | Relation Extraction Precision ≥ 0.75 | Đo trên 3 văn bản gold standard |
 | C1-3 | Relation Extraction Recall ≥ 0.65 | Đo trên 3 văn bản gold standard |
-| C1-4 | REFERENCES và REQUIRES không bị reject bởi validator | Unit test `test_references_not_rejected()` + `test_requires_not_rejected()` pass |
+| C1-4 | REFERS_TO và REQUIRES không bị reject bởi validator | Unit test `test_refers_to_not_rejected()` + `test_requires_not_rejected()` pass |
 | C1-5 | Graph có ≥ 500 nodes và ≥ 300 relations hợp lệ | Cypher: `MATCH (n) RETURN count(n)` và `MATCH ()-[r]->() RETURN count(r)` |
 | C1-6 | Confidence threshold được chọn dựa trên PR curve | PR curve plot tồn tại trong `results/phase1_pr_curve.png` |
 | C1-7 | Pipeline chạy không crash trên 4 văn bản bắt buộc | Pipeline exit code 0, log không có unhandled exception |

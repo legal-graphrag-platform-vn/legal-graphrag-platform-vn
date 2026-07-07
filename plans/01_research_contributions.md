@@ -5,7 +5,7 @@
 
 > [!CAUTION]
 > **Node types**, **relation names**, và **extraction schema** trong file này đã lỗi thời.
-> Xem **[legal_ontology.md v1.1.0](./legal_ontology.md)** để biết schema chính xác.
+> Xem **[legal_ontology.md v1.4.0](./legal_ontology.md)** để biết schema chính xác.
 >
 > | Nội dung | Trạng thái |
 > |---|---|
@@ -52,25 +52,23 @@ Tầng 3: Neo4j Schema
 | `Article` | Điều | Điều 17 — Điều kiện thành lập |
 | `Clause` | Khoản | Khoản 1 Điều 17 |
 | `Point` | Điểm | Điểm a Khoản 1 Điều 17 |
-| `Concept` | Khái niệm pháp lý | Vốn điều lệ, Cổ đông sáng lập |
-| `Entity` | Chủ thể pháp lý | Công ty TNHH, Doanh nghiệp tư nhân |
-| `Definition` | Định nghĩa pháp lý | "Vốn điều lệ là..." |
-| `Procedure` | Thủ tục hành chính | Thủ tục đăng ký doanh nghiệp |
+| `LegalConcept` | Khái niệm pháp lý | Vốn điều lệ, Cổ đông sáng lập |
+| `LegalSubject` | Chủ thể pháp lý | Công ty TNHH, Doanh nghiệp tư nhân |
+| `LegalAction` | Hành vi pháp lý | Thành lập, góp vốn, giải thể |
 
-### Relation Types (Draft — cần thảo luận)
+### Relation Types (Current — xem `legal_ontology.md`)
 
 | Relation | Ngữ Nghĩa | Head → Tail |
 |---|---|---|
 | `CONTAINS` | Cấu trúc phân cấp | Document → Article → Clause → Point |
-| `AMENDED_BY` | Bị sửa đổi bởi | Article → Article |
-| `REPLACED_BY` | Bị thay thế hoàn toàn | Document → Document |
-| `IMPLEMENTED_BY` | Được hướng dẫn bởi NĐ | Document(Law) → Document(Decree) |
-| `GUIDED_BY` | Được hướng dẫn bởi TT | Document(Decree) → Document(Circular) |
-| `REFERENCES` | Viện dẫn | Article → Article |
-| `DEFINES` | Định nghĩa khái niệm | Article → Concept |
-| `REGULATES` | Điều chỉnh chủ thể | Article → Entity |
-| `REQUIRES` | Yêu cầu điều kiện | Entity → Concept (điều kiện) |
-| `REPEALED_BY` | Bị hủy bỏ | Document → Document |
+| `AMENDS` | Sửa đổi | Document/Article/Clause → Document/Article/Clause |
+| `REPLACES` | Thay thế hoàn toàn | Document → Document |
+| `GUIDES` | Hướng dẫn thi hành | Document → Document |
+| `REFERS_TO` | Viện dẫn | Article/Clause/Point → Article/Clause/Point/Document |
+| `DEFINES` | Định nghĩa khái niệm | Article/Clause → LegalConcept |
+| `REGULATES` | Điều chỉnh chủ thể/hành vi | Article/Clause → LegalSubject/LegalAction |
+| `REQUIRES` | Yêu cầu điều kiện | LegalSubject → LegalConcept/Obligation |
+| `REPEALS` | Bãi bỏ | Document → Document/Article/Clause |
 
 ### Constraints (Ontology Rules)
 
@@ -78,14 +76,14 @@ Tầng 3: Neo4j Schema
 # Chỉ Document có thể CONTAINS Article
 CONTAINS: Document | Article | Clause → Article | Clause | Point
 
-# AMENDED_BY chỉ giữa cùng loại
-AMENDED_BY: Article → Article, Clause → Clause
+# AMENDS bắt buộc có effective_from
+AMENDS: Document | Article | Clause → Document | Article | Clause
 
-# IMPLEMENTED_BY chỉ từ Law → Decree
-IMPLEMENTED_BY: Document(type=Law) → Document(type=Decree)
+# GUIDES chỉ hợp lệ theo GUIDES_WHITELIST
+GUIDES: Document(type=Law) → Document(type=Decree)
 
-# DEFINES chỉ từ Article/Clause → Concept
-DEFINES: Article | Clause → Concept | Definition
+# DEFINES chỉ từ Article/Clause → LegalConcept
+DEFINES: Article | Clause → LegalConcept
 ```
 
 ### Câu Hỏi Mở Cho Nhóm
@@ -140,7 +138,7 @@ Cho đoạn văn bản pháp luật sau:
 [TEXT]
 
 Hãy trích xuất:
-1. Tất cả entities (Document, Article, Clause, Concept, Entity)
+1. Tất cả entities (Document, Article, Clause, Concept, Entity, Action)
 2. Tất cả relations giữa các entities
 
 Trả về JSON theo schema:
@@ -149,8 +147,8 @@ Trả về JSON theo schema:
   "relations": [{"head": str, "relation": str, "tail": str, "confidence": float}]
 }
 
-Chỉ sử dụng các relation types: AMENDED_BY, REPLACED_BY, IMPLEMENTED_BY, 
-GUIDED_BY, REFERENCES, DEFINES, REGULATES, REQUIRES, REPEALED_BY, CONTAINS
+Chỉ sử dụng các relation types: AMENDS, REPLACES, GUIDES,
+REFERS_TO, DEFINES, REGULATES, REQUIRES, REPEALS, CONTAINS
 ```
 
 ### Câu Hỏi Mở Cho Nhóm
@@ -191,9 +189,9 @@ Answer + Citation + Reasoning Path
 | Intent Type | Ví Dụ Câu Hỏi | Relations Traversed | Max Depth |
 |---|---|---|---|
 | `factual` | "Điều kiện thành lập công ty TNHH là gì?" | `REGULATES`, `DEFINES`, `REQUIRES` | 2 |
-| `validity` | "Điều 17 còn hiệu lực không?" | `AMENDED_BY`, `REPLACED_BY`, `REPEALED_BY` | 3 |
-| `hierarchy` | "Văn bản nào hướng dẫn Điều 17?" | `IMPLEMENTED_BY`, `GUIDED_BY` | 3 |
-| `comparison` | "Quy định năm 2020 vs 2024?" | `AMENDED_BY` + temporal filter | 2 |
+| `validity` | "Điều 17 còn hiệu lực không?" | `AMENDS`, `REPLACES`, `REPEALS` | 3 |
+| `hierarchy` | "Văn bản nào hướng dẫn Điều 17?" | `GUIDES` | 3 |
+| `comparison` | "Quy định năm 2020 vs 2024?" | `AMENDS` + temporal filter | 2 |
 | `definition` | "Vốn điều lệ là gì?" | `DEFINES` | 1 |
 | `multi_hop` | "Nghị định hướng dẫn điều này quy định gì?" | All relevant + follow references | 3 |
 
@@ -230,7 +228,7 @@ Graph lưu thông tin thời gian trên **cả node lẫn edge**:
 
 **Timestamps trên Edge (quan trọng hơn):**
 ```cypher
-(:Article {id: "LDN2014_D17"})-[:AMENDED_BY {
+(:Article {id: "LDN2020_D17"})-[:AMENDS {
   effective_from: "2021-01-01",
   effective_to: null,
   amendment_type: "partial"  // partial | full
@@ -246,7 +244,7 @@ WHERE a.effective_from <= "2022-06-01"
   AND (a.effective_to IS NULL OR a.effective_to > "2022-06-01")
 
 // Kiểm tra amendments tại thời điểm đó
-OPTIONAL MATCH (a)-[r:AMENDED_BY]->(b:Article)
+OPTIONAL MATCH (b:Article)-[r:AMENDS]->(a)
 WHERE r.effective_from <= "2022-06-01"
 RETURN a, r, b
 ```

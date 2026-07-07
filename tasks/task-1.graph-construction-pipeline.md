@@ -3,7 +3,7 @@
 **Giao cho:** Team Data / Backend  
 **Repo triển khai:** [`legal-graphrag-platform-vn/pipeline`](https://github.com/legal-graphrag-platform-vn/pipeline)  
 **Tài liệu tham chiếu:**
-- Ontology: [`plans/02_ontology_specification.md`](../plans/02_ontology_specification.md)
+- Ontology: [`plans/legal_ontology.md`](../plans/legal_ontology.md)
 - Kiến trúc: [`plans/03_architecture.md`](../plans/03_architecture.md)
 - Đặc tả kỹ thuật: [`plans/04_graph_construction_pipeline.md`](../plans/04_graph_construction_pipeline.md)
 
@@ -43,33 +43,36 @@ PDF văn bản pháp luật
 
 ## Ontology cần biết trước khi code
 
-Toàn bộ spec nằm trong [`02_ontology_specification.md`](../plans/02_ontology_specification.md). Tóm tắt những điểm quan trọng nhất:
+Toàn bộ spec hiện hành nằm trong [`legal_ontology.md`](../plans/legal_ontology.md). [`02_ontology_specification.md`](../plans/02_ontology_specification.md) chỉ là tài liệu lịch sử. Tóm tắt những điểm quan trọng nhất:
 
 ### Node types
 | Node | ID Convention | Có Embedding? |
 |---|---|---|
-| `:Document:Law / :Decree / :Circular / :Resolution / :Decision` | `LDN2020`, `ND01_2021` | Không |
-| `:Article` | `LDN2020_D17` | ✅ 768 dims |
-| `:Clause` | `LDN2020_D17_K1` | ✅ 768 dims (unit chính) |
-| `:Point` | `LDN2020_D17_K1_Pa` | Không |
-| `:Concept` | `concept_von_dieu_le` | Không |
-| `:Entity:CompanyType / :Authority / :PersonType` | `entity_cong_ty_tnhh` | Không |
+| `:Document` | `ldn_2020` | Không |
+| `:Issuer` | `quoc_hoi` | Không |
+| `:Chapter` | `ldn_2020_ch2` | Không |
+| `:Article` | `ldn_2020_art17` | 768 dims, nullable |
+| `:Clause` | `ldn_2020_art17_cl1` | 768 dims, nullable |
+| `:Point` | `ldn_2020_art17_cl1_pa` | Không |
+| `:LegalConcept` | `von_dieu_le` | Không |
+| `:LegalSubject` | `doanh_nghiep` | Không |
+| `:LegalAction` | `thanh_lap` | Không |
 
-Tất cả Article, Clause, Point đều có: `effective_from`, `effective_to`, `status`.
+Article và Clause có các trường temporal denormalized: `effective_from`, `effective_to`, `legal_status`.
 
-### Relation types (9 loại — không thêm, không bớt)
+### Relation types
 
 ```
-CONTAINS, AMENDED_BY, REPLACED_BY, REPEALED_BY,
-IMPLEMENTED_BY, REFERENCES, DEFINES, REGULATES, REQUIRES
+ISSUED_BY, CONTAINS, AMENDS, REPEALS, REPLACES, GUIDES,
+REFERS_TO, DEFINES, REGULATES, REQUIRES, HAS_CONDITION, HAS_EXCEPTION
 ```
 
 **Các ràng buộc quan trọng** (validator phải enforce):
-- `AMENDED_BY` chỉ tồn tại ở cấp Article/Clause, **không** có `Document→Document`.
-- `REPLACED_BY` chỉ dùng ở cấp Document hoặc Article, phải **cùng loại node**.
-- `IMPLEMENTED_BY` dùng rule cấp bậc: `head.level > tail.level` (Law=3, Decree=2, Circular=1).
-- `REQUIRES.tail` cho phép cả Concept và Entity.
-- Các quan hệ temporal (`AMENDED_BY`, `REPLACED_BY`, `REPEALED_BY`) **bắt buộc** có property `effective_from`.
+- Quan hệ active voice là bắt buộc; alias cũ như `AMENDED_BY`, `IMPLEMENTED_BY`, `REFERENCES` không được emit.
+- `GUIDES` dùng whitelist theo `doc_type`, không dùng property `level` trong Neo4j.
+- `REFERS_TO` bắt buộc có `citation_text` và `citation_type`.
+- Các quan hệ temporal (`AMENDS`, `REPLACES`, `REPEALS`) bắt buộc có property `effective_from`.
+- Semantic relations bắt buộc có provenance: `confidence`, `llm_model`, `created_at`.
 
 ### Invariant bắt buộc
 
@@ -122,7 +125,7 @@ assert RELATION_ENUM == set(CONSTRAINTS.keys())
 
 **Exit criteria M2**:
 - In ra terminal danh sách triples `(head)-[RELATION]->(tail)` extract được từ 1 văn bản.
-- Cố tình đưa vào extraction sai (`Article→Document AMENDED_BY`) — Validator phải reject.
+- Cố tình đưa vào extraction sai (`Article→Document AMENDS`) — Validator phải reject.
 - 6/6 unit tests ontology pass.
 
 ---
@@ -192,7 +195,7 @@ Báo cáo phải trả lời 3 nhóm câu hỏi sau:
 - Khi parse PDF thực tế, gặp những format nào khó nhận diện ranh giới Điều/Khoản? Giải quyết bằng cách nào?
 - LLM có thực sự trả về đúng JSON schema không, hay phải xử lý thêm? Tỉ lệ fail JSON parse là bao nhiêu?
 - Hallucination phổ biến nhất của LLM với văn bản pháp luật VN là gì? (Sai relation type? Sai entity ID? Bịa Article không tồn tại?)
-- Với `IMPLEMENTED_BY` dùng rule `head.level > tail.level`, đã gặp edge case nào không? (Ví dụ: văn bản không rõ loại?)
+- Với `GUIDES` dùng whitelist theo `doc_type`, đã gặp edge case nào không? (Ví dụ: văn bản không rõ loại?)
 
 ---
 

@@ -1,11 +1,11 @@
 # Ontology Specification — Legal Knowledge Graph
 
 > **Trạng thái**: ~~v0.2~~ → **SUPERSEDED**
-> **Phiên bản**: 0.2 → thay bởi **[legal_ontology.md v1.1.0](./legal_ontology.md)**
+> **Phiên bản**: 0.2 → thay bởi **[legal_ontology.md v1.4.0](./legal_ontology.md)**
 > **Domain**: Pháp luật doanh nghiệp Việt Nam
 
 > [!CAUTION]
-> File này **đã lỗi thời**. Source of truth mới là **[legal_ontology.md](./legal_ontology.md)** (v1.1.0, frozen 2026-07-03).
+> File này **đã lỗi thời**. Source of truth mới là **[legal_ontology.md](./legal_ontology.md)** (v1.4.0, frozen 2026-07-07).
 > File này giữ lại cho lịch sử. Không dùng để implement.
 
 ## Breaking Changes so với file này (xem legal_ontology.md để biết chi tiết)

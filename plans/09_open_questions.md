@@ -211,20 +211,20 @@ python -c "import fitz; doc=fitz.open('file.pdf'); print(doc[0].get_text()[:200]
 
 **Vấn đề**: Plan hiện tại giả định amendments theo chain tuyến tính:
 ```
-A →[AMENDED_BY t1]→ B →[AMENDED_BY t2]→ C
+A ←[AMENDS t1]← B ←[AMENDS t2]← C
 ```
 
 Nhưng thực tế pháp luật có thể tạo ra DAG:
 ```
-A →[AMENDED_BY t1, partial: khoản 1]→ B
-A →[AMENDED_BY t2, partial: khoản 3]→ C
+A ←[AMENDS t1, partial: khoản 1]← B
+A ←[AMENDS t2, partial: khoản 3]← C
 ```
 Lúc này, tại thời điểm t3 > t2 > t1, phiên bản hợp lệ của A là:
 - Khoản 1: lấy từ B (theo t1)
 - Khoản 3: lấy từ C (theo t2)
 - Khoản 2, 4, 5...: vẫn lấy từ A gốc
 
-Cypher `AMENDED_BY*1..5` với `priority: latest` sẽ **xử lý sai** trường hợp này.
+Cypher `AMENDS*1..5` với `priority: latest` sẽ **xử lý sai** trường hợp này.
 
 **3 Options:**
 

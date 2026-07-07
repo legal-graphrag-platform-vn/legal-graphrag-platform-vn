@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.3.0 (FROZEN 2026-07-07)
+// Source of truth: plans/legal_ontology.md v1.4.0 (FROZEN 2026-07-07)
 //
 // Chạy 1 lần duy nhất sau khi Neo4j khởi động:
 //   make init-schema
@@ -16,6 +16,9 @@
 //     - Thêm normative, issuer_name indexes cho Document
 //     - Thêm effective_from/to + legal_status + embedding cho Article/Clause (F2)
 //     - content → content_raw
+//   v3 (2026-07-07) — aligned comments with legal_ontology.md v1.4.0:
+//     - Community Edition bootstrap = uniqueness constraints + indexes only
+//     - Required properties and relation endpoint rules are application-layer validation
 // =============================================================================
 
 
