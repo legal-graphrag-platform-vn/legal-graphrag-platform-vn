@@ -46,9 +46,9 @@
     │
     ▼
 [Decision Gate]
-    ├── confidence ≥ 0.7 → Auto-accept → Neo4j Writer
-    ├── 0.3 ≤ confidence < 0.7 → Human Review Queue
-    └── confidence < 0.3 → Rejection Log
+    ├── confidence ≥ T_auto → Auto-accept → Neo4j Writer
+    ├── T_review ≤ confidence < T_auto → Human Review Queue
+    └── confidence < T_review → Rejection Log
 ```
 
 ---
@@ -160,7 +160,7 @@ Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effe
 
 ### Step 1: Hierarchy Parser (PDF → JSON)
 
-**Mục tiêu**: Chuyển đổi PDF thành cấu trúc phân cấp, đồng thời đính kèm (inject) web metadata vào node Document gốc.Bản Pháp Luật VN
+**Mục tiêu**: Chuyển đổi PDF thành cấu trúc phân cấp, đồng thời đính kèm (inject) web metadata vào node Document gốc.
 
 ```
 Document
@@ -575,18 +575,15 @@ class ConfidenceScorer:
 
 ### Threshold Calibration (thực hiện sau khi có validation data)
 
-```
-Doạn calibration:
-  1. Annotate thủ công 3 văn bản (gold standard triples)
-  2. Chạy pipeline, tính confidence score cho mọi extraction
-  3. Vẽ Precision-Recall curve theo threshold
-  4. Chọn threshold tối ưu theo F1
-  5. Report threshold + PR curve trong luận văn
+**Phương pháp Calibration (để chọn $T_{auto}$ và $T_{review}$)**:
 
-Không viết số cụ thể trước khi chạy experiment.
-```
-        return agreed_relations, confidence
-```
+1. Annotate thủ công 3 văn bản để tạo tập Gold Standard Triples.
+2. Chạy extraction pipeline, tính confidence score cho mọi triple được tạo ra.
+3. Vẽ đồ thị Precision-Recall (PR curve) dọc theo các mức threshold khác nhau.
+4. Chọn threshold tối ưu (ví dụ: tối đa hóa F1-score hoặc ưu tiên Precision để đảm bảo độ tin cậy của Graph).
+5. Báo cáo các threshold cụ thể và PR curve trong chương Đánh giá của luận văn.
+
+> **Lưu ý**: Tuyệt đối không hardcode các số như `0.7` hay `0.3` vào kiến trúc trước khi thực nghiệm (empirical calibration).
 
 ---
 
