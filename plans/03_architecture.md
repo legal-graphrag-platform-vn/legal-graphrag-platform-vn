@@ -8,6 +8,33 @@
 
 > **The primary objective of the Knowledge Graph is not to replace legal reasoning, but to provide trustworthy, structured, and temporally valid evidence for downstream reasoning.**
 
+> **Research Scope.** This work focuses on constructing a trustworthy Legal Knowledge Graph and an evidence-grounded retrieval pipeline for Vietnamese enterprise law. The primary research contribution lies in knowledge representation and retrieval rather than developing new legal reasoning algorithms.
+
+### 0. The Golden Thread (Research Narrative)
+
+```text
+                     USER QUERY
+                          │
+                          ▼
+               Evidence Retrieval
+                          │
+        ┌─────────────────┴─────────────────┐
+        ▼                                   ▼
+  Vector Search                      Graph Traversal
+        │                                   │
+        └──────────────┬────────────────────┘
+                       ▼
+             Retrieved Legal Evidence
+                       │
+                Knowledge Boundary
+                       │
+                       ▼
+         Runtime Legal Reasoning (LLM)
+                       │
+                       ▼
+               Grounded Legal Answer
+```
+
 ### Knowledge Classification
 
 Bảng phân loại dưới đây là triết lý thiết kế cốt lõi của đồ án, định nghĩa rõ ràng ranh giới giữa những gì thuộc về Đồ thị (Graph) và những gì thuộc về Suy luận động (LLM):
@@ -16,7 +43,9 @@ Bảng phân loại dưới đây là triết lý thiết kế cốt lõi của 
 | -------------------------- | ---------- | ----------- | --------------------------- |
 | Document hierarchy         | Structural | ✅           | ❌                           |
 | Citation links             | Structural | ✅           | ❌                           |
+| Cross-reference            | Structural | ✅           | ❌                           |
 | Temporal validity          | Temporal   | ✅           | ❌                           |
+| Amendment Relationship     | Temporal   | ✅           | ❌                           |
 | Legal concepts             | Semantic   | ✅           | ❌                           |
 | Obligations                | Contextual | ❌           | ✅ (from retrieved evidence) |
 | Rights                     | Contextual | ❌           | ✅ (from retrieved evidence) |
@@ -24,6 +53,8 @@ Bảng phân loại dưới đây là triết lý thiết kế cốt lõi của 
 | Conditions                 | Contextual | ❌           | ✅ (context-dependent)       |
 | Comparative interpretation | Contextual | ❌           | ✅                           |
 | Final legal answer         | Contextual | ❌           | ✅                           |
+
+> **The Knowledge Boundary is the central architectural decision of this work. Stable knowledge is persisted because it remains valid across queries, whereas contextual knowledge is reconstructed dynamically during inference.**
 
 ---
 
@@ -51,17 +82,23 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
                         │
                         ▼
 ┌───────────────────────────────────────────────┐
-│       LAYER 2: HYBRID RETRIEVAL LAYER         │
+│       LAYER 2: EVIDENCE RETRIEVAL             │
 │                                               │
-│  ├── Vector Search                            │
-│  ├── BM25 Keyword Search                      │
-│  ├── Graph Expansion                          │
-│  └── Temporal Filter                          │
+│  ├── Candidate Retrieval                      │
+│  │      Vector, BM25                          │
+│  ├── Evidence Expansion                       │
+│  │      Graph Traversal                       │
+│  ├── Evidence Filtering                       │
+│  │      Temporal Filter                       │
+│  ├── Evidence Ranking                         │
+│  │      Reranker                              │
+│  └── Evidence Packaging                       │
+│         Context Builder                       │
 │                                               │
 │ ───────────────────────────────────────────── │
 │             KNOWLEDGE BOUNDARY                │
-│  (Transforms deterministic graph knowledge    │
-│   into context for probabilistic reasoning)   │
+│  (Transforms structured legal evidence        │
+│   into reasoning context for the LLM)         │
 │ ───────────────────────────────────────────── │
 │                                               │
 │  └── Retrieved Evidence                       │
@@ -70,14 +107,13 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
                         ▼
 ┌───────────────────────────────────────────────┐
 │   LAYER 3: RUNTIME LEGAL REASONING (LLM)      │
-│   (Context-dependent Legal Reasoning)         │
 │                                               │
-│  ├── Legal Reasoning Services:                │
-│  │   ├── Evidence-grounded Obligation ID      │
-│  │   ├── Evidence-grounded Right ID           │
-│  │   ├── Evidence-grounded Exception Res.     │
-│  │   ├── Evidence-grounded Condition Eval.    │
-│  │   ├── Comparative Analysis                 │
+│  ├── Evidence-grounded Legal Reasoning:       │
+│  │   ├── Obligation Identification            │
+│  │   ├── Right Identification                 │
+│  │   ├── Condition Interpretation             │
+│  │   ├── Exception Resolution                 │
+│  │   ├── Cross-document Reasoning             │
 │  │   └── Answer Synthesis                     │
 └───────────────────────────────────────────────┘
                         │
@@ -217,22 +253,23 @@ def process_extraction(llm_output):
 **Output**: Ranked list of context chunks + graph paths
 
 ```text
-User Query
+Query
     │
     ▼
-[ Vector Search ] ──▶ Finds semantic matches (Entry points)
+Candidate Retrieval
+(Vector + BM25)
     │
     ▼
-[ Graph Expansion ] ──▶ Traverses structural/semantic edges (Context enrichment)
+Graph Expansion
     │
     ▼
-[ Temporal Filter ] ──▶ Filters nodes based on effective dates
+Temporal Filtering
     │
     ▼
-[ Reranker ] ──▶ Scores and orders final context window
+Evidence Ranking
     │
     ▼
-Retrieved Evidence (to Reasoning Layer)
+Context Builder
 ```
 
 ```python
@@ -343,39 +380,39 @@ TEMPORAL_NOTE: [nếu câu trả lời phụ thuộc thời điểm]
 ```
 User: "Điều kiện vốn để thành lập công ty TNHH theo quy định năm 2022?"
 
-[1] NLU Processing (If enabled)
+[Stage 1] Query Understanding (If enabled)
     (Optional) Intent: "factual" (điều kiện)
     Temporal: {year: 2022, from: "2022-01-01", to: "2022-12-31"}
     (Optional) Entities: ["công ty TNHH", "vốn điều lệ"]
 
-[2] Vector Search
+[Stage 2] Evidence Retrieval
     Query embedding → Top-5 articles:
     - LDN2020_D46 (Công ty TNHH 2 thành viên)
     - LDN2020_D74 (Công ty TNHH 1 thành viên)
     - LDN2020_D29 (Vốn điều lệ)
     ...
 
-[3] Graph Expansion (intent=factual, relations=[REGULATES, DEFINES, REQUIRES])
+[Stage 3] Evidence Expansion (intent=factual, relations=[REGULATES, DEFINES, REQUIRES])
     LDN2020_D46 → REFERENCES → LDN2020_D29
     LDN2020_D29 → DEFINES → Concept(VốnĐiềuLệ)
     ND01_2021_D5 → REGULATES → Entity(CôngTyTNHH)
 
-[4] Temporal Filter
+[Stage 4] Evidence Validation (Temporal Filtering)
     Check effective dates at 2022:
     - LDN2020_D46: effective 2021-01-01, still valid 2022 ✓
     - NĐ 47/2021: effective 2021-09-15, still valid 2022 ✓
 
-[5] Rerank + Context Build
-    Relevant chunks + graph path
+[Stage 5] Reasoning (Rerank + Context Build)
+    Relevant chunks + graph path passed to LLM
 
-[6] LLM Generation
+[Stage 6] Answer Generation
     Answer: "Theo Luật Doanh nghiệp 2020 (có hiệu lực từ 01/01/2021), 
     Điều 46 không quy định mức vốn điều lệ tối thiểu cho công ty TNHH..."
     
     Citations: [LDN2020_D46, LDN2020_D29]
     Path: LDN2020_D46 → DEFINES → Concept(VốnĐiềuLệ) → CONTAINS → LDN2020_D46_K1
 
-[7] UI Display
+[Stage 7] UI Display
     - Chat bubble với câu trả lời
     - Sidebar: Điều 46, Điều 29 (click để đọc full text)
     - Graph view: subgraph 3 nodes, 2 edges
@@ -401,10 +438,10 @@ Hệ thống đánh giá được tách biệt hoàn toàn khỏi Application La
       │
       ▼
 [Judge Model] (Configurable LLM-as-a-Judge)
-      │ Đánh giá dựa trên:
-      ├── Context Precision / Recall
-      ├── Answer Relevance / Correctness
-      └── Faithfulness (Hallucination check)
+      │ Evaluation Dimensions:
+      ├── Retrieval Quality (Context Precision/Recall)
+      ├── Reasoning Quality (Faithfulness, Hallucination check)
+      └── End-to-end QA Quality (Answer Relevance/Correctness)
       │
       ▼
 [Evaluation Report] (CSV / Dashboard)
@@ -429,6 +466,9 @@ Tuy nhiên, nếu hệ thống được triển khai lên Production với quy m
 
 3. Legal Reasoning Agent & Multi-document Reasoning
 (Phát triển LLM Agents có khả năng lập luận đa bước phức tạp qua nhiều luật khác nhau)
+
+4. Legal Semantic Expansion
+(Mở rộng hệ thống ontology: Obligation Graph, Deontic Logic, Norm Conflict Resolution)
 ```
 
 ### Engineering Extensions
