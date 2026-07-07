@@ -4,61 +4,52 @@
 > **Trạng thái**: Draft — cần nhóm review
 > **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
 
+> **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
+
 ---
 
 ## Tổng Quan 3 Layer
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                        DATA LAYER                            │
-│                                                              │
-│  [Crawler] Legal Document Scraper (PDF + Web Metadata)       │
-│         ↓                                                    │
-│  [Parser] Hierarchy Parser (PDF Text extraction)             │
-│         ↓                                                    │
-│  [LLM] Information Extraction                                │
-│         ↓                                                    │
-│  [Pipeline] Graph Construction + Embedding                   │
-│         ↓                                                    │
-│  ┌────────────────────────────────────────────┐              │
-│  │   Neo4j 5.11+ Community                    │              │
-│  │   ├── Knowledge Graph (nodes + edges)      │              │
-│  │   └── Vector Index (Article/Clause embeddings) │          │
-│  └────────────────────────────────────────────┘              │
-│  [ADR-08] Unified storage: không có Vector Store riêng biệt  │
-└──────────────────────────────────────────────────────────────┘
-                            ↕ (read/write)
-┌──────────────────────────────────────────────────────────────┐
-│                      RETRIEVAL LAYER                         │
-│                                                              │
-│  User Query (Vietnamese NL)                                  │
-│         ↓                                                    │
-│  [NLU] Intent Classifier + Temporal Extractor               │
-│         ↓                                                    │
-│  [Search] Hybrid Retriever                                   │
-│     ├── Vector Search → Entry points                         │
-│     └── Graph Expansion → Traversal Policy                   │
-│         ↓                                                    │
-│  [Ranking] Reranker                                          │
-│         ↓                                                    │
-│  [Builder] Context Builder                                   │
-│     ├── Text chunks (Article/Clause content)                 │
-│     └── Graph paths (reasoning chain)                        │
-└──────────────────────────────────────────────────────────────┘
-                            ↕
-┌──────────────────────────────────────────────────────────────┐
-│                     GENERATION LAYER                         │
-│                                                              │
-│  [LLM] Answer Generation                                     │
-│         ↓                                                    │
-│  Structured Output:                                          │
-│     ├── answer: string                                       │
-│     ├── citations: [Article/Clause IDs]                      │
-│     ├── reasoning_path: [graph edges traversed]              │
-│     └── confidence: float                                    │
-│         ↓                                                    │
-│  [UI] Chat Interface + Graph Visualization                   │
-└──────────────────────────────────────────────────────────────┘
+Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối với nhau thông qua cầu nối Retrieval:
+
+```text
+                 Legal Documents
+                        │
+                        ▼
+┌───────────────────────────────────────────────┐
+│       LAYER 1: LEGAL KNOWLEDGE GRAPH          │
+│                                               │
+│  ├── Structural Knowledge                     │
+│  │      Document, Article, Clause             │
+│  │      Citation, Hierarchy                   │
+│  ├── Semantic Knowledge                       │
+│  │      Concept, Entity                       │
+│  │      Definition, Regulates, AppliesTo      │
+│  └── Temporal Knowledge                       │
+│         effective_from, effective_to          │
+│         legal_status, amendment               │
+└───────────────────────────────────────────────┘
+                        │
+     ┌──────────────────┴──────────────────┐
+     │      LAYER 2: HYBRID RETRIEVAL      │
+     │      (Vector + BM25 + Graph)        │
+     └──────────────────┬──────────────────┘
+                        │
+                        ▼
+┌───────────────────────────────────────────────┐
+│   LAYER 3: RUNTIME LEGAL REASONING (LLM)      │
+│   (Context-dependent Legal Reasoning)         │
+│                                               │
+│  ├── Obligation & Right Detection             │
+│  ├── Exception Resolution                     │
+│  ├── Condition Evaluation                     │
+│  ├── Comparative Analysis                     │
+│  ├── Multi-hop Inference                      │
+│  └── Final Answer Generation                  │
+└───────────────────────────────────────────────┘
+                        │
+                        ▼
+                   Final Answer
 ```
 
 ---

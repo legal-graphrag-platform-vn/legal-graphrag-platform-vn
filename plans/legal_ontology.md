@@ -112,11 +112,12 @@ Tự động tạo từ `Document.issuer_name` trong Writer (MERGE). LLM không 
 | `LegalConcept` | Khái niệm, thuật ngữ pháp lý trừu tượng | `vốn điều lệ`, `tư cách pháp nhân` | Phase 1 | ✅ LLM extract (`Concept` type) |
 | `LegalSubject` | Chủ thể có tư cách pháp lý | `doanh nghiệp`, `cổ đông`, `cơ quan ĐKKD` | Phase 1 | ✅ LLM extract (`Entity` type) |
 | `LegalAction` | Hành vi pháp lý (động từ) | `thành lập`, `góp vốn`, `giải thể` | Phase 1 | ✅ LLM extract (`Action` type) |
-| `Obligation` | Nghĩa vụ pháp lý | `nộp thuế`, `đăng ký thay đổi vốn` | Future | ⏳ Chưa có extraction path — ngoài scope đánh giá |
-| `Right` | Quyền pháp lý | `quyền biểu quyết`, `quyền yêu cầu họp` | Future | ⏳ Chưa có extraction path — ngoài scope đánh giá |
-| `Condition` | Điều kiện áp dụng | `vốn ≥ X tỷ`, `ít nhất 3 thành viên` | Future | ⏳ Chưa có extraction path — ngoài scope đánh giá |
-| `Exception` | Ngoại lệ | `trừ trường hợp điều lệ quy định khác` | Future | ⏳ Chưa có extraction path — ngoài scope đánh giá |
+| `Obligation` | Nghĩa vụ pháp lý | `nộp thuế`, `đăng ký thay đổi vốn` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
+| `Right` | Quyền pháp lý | `quyền biểu quyết`, `quyền yêu cầu họp` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
+| `Condition` | Điều kiện áp dụng | `vốn ≥ X tỷ`, `ít nhất 3 thành viên` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
+| `Exception` | Ngoại lệ | `trừ trường hợp điều lệ quy định khác` | Reasoning | ⏳ Delegated to Runtime Reasoning Layer |
 
+> **The ontology intentionally models stable legal knowledge only. Context-dependent legal semantics, including obligations, exceptions, conditions, and legal interpretation, are generated dynamically by the Runtime Legal Reasoning layer.**
 > **Scope note (S4)**: Ontology mô tả **toàn bộ không gian khái niệm** của domain (thiết kế đúng-đắn về mặt học thuật — Ontology Principle 1: "Node represents stable legal concepts"). Việc **node type nào có pipeline extract được ở giai đoạn nào** là quyết định về **implementation scope**, không phải về ontology design. Hai việc này tách bạch có chủ đích.
 
 ### 2.3 Future Layer (Out of Scope)

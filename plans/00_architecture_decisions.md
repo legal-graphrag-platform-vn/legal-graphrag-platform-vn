@@ -608,3 +608,46 @@ Prompt đơn giản → LLM output ổn định hơn. Writer là nơi normalize,
 ### Rationale
 - **Với đồ án hiện tại**: Sử dụng Denormalized Graph làm Source of Truth cân bằng giữa độ phức tạp và giá trị nghiên cứu. Tránh việc kéo dài thêm thời gian với một khối lượng code khổng lồ của Snapshot Builder (RC6).
 - **Với kiến trúc tương lai**: Việc định hình trước `Snapshot` layer bảo vệ ontology không bị vỡ khi hệ thống scale, đảm bảo Hybrid Retriever có thể kết hợp Raw Graph (cho reasoning) và Snapshot (cho querying) sau này.
+
+---
+
+## ADR-19: Knowledge Representation Strategy
+
+**Ngày**: 2026-07-07  
+**Trạng thái**: FROZEN
+
+### Decision
+Only stable legal facts are persisted inside the Knowledge Graph. Context-dependent reasoning is delegated to runtime LLM reasoning.
+
+### Knowledge Classification
+
+Quyết định những gì được lưu vào Graph (Layer 1) và những gì được suy luận tại Runtime (Layer 3):
+
+| Knowledge             | Store in Graph? | Reason            |
+| --------------------- | --------------- | ----------------- |
+| Document hierarchy    | ✅               | Stable            |
+| Citation              | ✅               | Stable            |
+| Amendment             | ✅               | Stable            |
+| Legal concept         | ✅               | Stable            |
+| Legal entity          | ✅               | Stable            |
+| Obligation            | ❌               | Context dependent |
+| Exception             | ❌               | Context dependent |
+| Comparative reasoning | ❌               | Generated         |
+| Multi-hop reasoning   | ❌               | Generated         |
+| Interpretation        | ❌               | Generated         |
+
+### Alternatives Considered
+
+**Option A: Everything inside Graph (LKIF-style, Akoma Ntoso)**
+- *Pros*: Hoàn toàn deterministic, queryable trực tiếp bằng Cypher, explainability tuyệt đối.
+- *Cons*: Dẫn đến "Ontology Explosion" (tạo ra hàng ngàn relation như `OBLIGES_IF`, `PERMITS_UNLESS`). Cực kỳ khó parse bằng NLP/LLM hiện tại, không thể maintain và mở rộng sang domain khác.
+
+**Option B: Everything delegated to LLM (Pure RAG)**
+- *Pros*: Cực kỳ linh hoạt, dễ mở rộng domain, không cần thiết kế ontology.
+- *Cons*: LLM phải tự đọc và tổng hợp lại toàn bộ cấu trúc văn bản, dẫn đến Hallucination cao, không deterministic, phụ thuộc hoàn toàn vào context window.
+
+**Option C: Hybrid (Chosen)**
+- Kết hợp cả hai để tận dụng điểm mạnh của Graph (độ chính xác, cấu trúc) và LLM (suy luận logic, xử lý ngoại lệ).
+
+### Rationale
+Việc tách bạch rõ ràng giữa **Stable Knowledge** (Lưu trữ) và **Runtime Reasoning** (Suy luận động) giúp luận văn có một kiến trúc phân tầng vững chắc. Sự phân tách này tránh bùng nổ schema trong khi vẫn duy trì được khả năng giải thích (explainability) thông qua bằng chứng từ Graph.
