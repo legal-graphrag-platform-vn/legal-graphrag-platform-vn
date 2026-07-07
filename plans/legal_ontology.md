@@ -119,6 +119,14 @@ Tự động tạo từ `Document.issuer_name` trong Writer (MERGE). LLM không 
 
 > **Scope note (S4)**: Ontology mô tả **toàn bộ không gian khái niệm** của domain (thiết kế đúng-đắn về mặt học thuật — Ontology Principle 1: "Node represents stable legal concepts"). Việc **node type nào có pipeline extract được ở giai đoạn nào** là quyết định về **implementation scope**, không phải về ontology design. Hai việc này tách bạch có chủ đích.
 
+### 2.3 Future Layer (Out of Scope)
+
+| Node | Ý nghĩa | Ví dụ | Phase | Extraction status |
+|---|---|---|---|---|
+| `Snapshot` | Khung nhìn hợp nhất (Consolidated view) của một điều/khoản tại một thời điểm cụ thể | `Điều 17 năm 2022` | Future | ⏳ Placeholder, không implement trong đồ án |
+
+> **Lưu ý**: `Snapshot` node được đưa vào ontology như một "Future Extension" (xem ADR-18). Đối với quy mô đồ án, Graph hiện tại (Denormalized) là Source of Truth và đủ nhanh. Snapshot Builder chỉ được implement khi hệ thống scale lên Production lớn để phục vụ Hybrid Retriever siêu tốc.
+
 ---
 
 ## 3. Relationship Types

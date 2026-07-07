@@ -593,3 +593,18 @@ Prompt đơn giản → LLM output ổn định hơn. Writer là nơi normalize,
 ### Rationale
 `(A)-[:AMENDS]->(B)` đọc tự nhiên: "A amends B" — A là văn bản mới hơn. Direction của relation có semantic rõ ràng.
 
+
+---
+
+## ADR-18: Temporal Modeling — Hybrid Denormalization & Future Snapshot
+
+**Ngày**: 2026-07-07  
+**Trạng thái**: FROZEN
+
+### Decision
+1. **Denormalization**: Gắn `effective_from`, `effective_to`, `legal_status` trực tiếp lên `Article` và `Clause` nodes (không chỉ ở Document). Neo4j Writer sẽ tự tính toán (cascade) các property này khi insert các relation `AMENDS`, `REPEALS`.
+2. **Future Extension**: Định hướng tương lai cho large-scale deployment là sử dụng Snapshot Builder (FRBR-style) làm cache view phục vụ retrieval siêu tốc mà không phá vỡ Raw Graph (Source of truth). Thêm node `Snapshot` vào ontology (v1.3.0) như một placeholder (không implement).
+
+### Rationale
+- **Với đồ án hiện tại**: Sử dụng Denormalized Graph làm Source of Truth cân bằng giữa độ phức tạp và giá trị nghiên cứu. Tránh việc kéo dài thêm thời gian với một khối lượng code khổng lồ của Snapshot Builder (RC6).
+- **Với kiến trúc tương lai**: Việc định hình trước `Snapshot` layer bảo vệ ontology không bị vỡ khi hệ thống scale, đảm bảo Hybrid Retriever có thể kết hợp Raw Graph (cho reasoning) và Snapshot (cho querying) sau này.
