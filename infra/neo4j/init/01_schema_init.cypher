@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.1.0 (FROZEN 2026-07-06)
+// Source of truth: plans/legal_ontology.md v1.3.0 (FROZEN 2026-07-07)
 //
 // Chạy 1 lần duy nhất sau khi Neo4j khởi động:
 //   make init-schema
@@ -9,7 +9,7 @@
 //
 // Lịch sử:
 //   v1 (cũ) — dựa trên 02_ontology_specification.md (SUPERSEDED)
-//   v2 (2026-07-06) — rewrite theo legal_ontology.md v1.1.0:
+//   v2 (2026-07-07) — rewrite theo legal_ontology.md v1.3.0:
 //     - Thêm Chapter, Issuer, LegalConcept, LegalSubject, LegalAction nodes
 //     - Đổi AMENDED_BY/REPLACED_BY/REPEALED_BY → AMENDS/REPLACES/REPEALS (ADR-17)
 //     - Đổi status → legal_status
@@ -34,7 +34,7 @@ CREATE CONSTRAINT iss_id_unique    IF NOT EXISTS FOR (i:Issuer)       REQUIRE i.
 
 // --- Semantic Layer --- legal_ontology.md §2.2
 // Phase 1 scope: LegalConcept, LegalSubject, LegalAction (từ extraction Entity/Concept/Action)
-// Obligation, Right, Condition, Exception — Phase 2, chưa extract trong M3
+// Obligation, Right, Condition, Exception — Future work (Out of scope)
 CREATE CONSTRAINT lc_id_unique      IF NOT EXISTS FOR (c:LegalConcept) REQUIRE c.id IS UNIQUE;
 CREATE CONSTRAINT ls_id_unique      IF NOT EXISTS FOR (s:LegalSubject) REQUIRE s.id IS UNIQUE;
 CREATE CONSTRAINT la_id_unique      IF NOT EXISTS FOR (a:LegalAction)  REQUIRE a.id IS UNIQUE;
