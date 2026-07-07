@@ -128,18 +128,18 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
 ### 1. Document Crawler & Ingestion (New)
 
 **Input**: URLs từ trang VBPL chính phủ hoặc Thư viện pháp luật  
-**Output**: File PDF + JSON Metadata (ngày ban hành, hiệu lực, tình trạng)
+**Output**: `data/raw/<doc_id>/source.txt` + `data/raw/<doc_id>/metadata.json` (ngày ban hành, hiệu lực, tình trạng)
 
 **Nhiệm vụ:**
-- Tự động tải file PDF của văn bản.
+- Tự động crawl raw text của văn bản từ web.
 - Cào Metadata "chuẩn xác 100%" từ web (để làm hard constraints thay vì bắt LLM đoán).
-- Lưu trữ vào thư mục `data/raw/` cùng file `metadata.json`.
+- Lưu trữ raw text và metadata vào thư mục `data/raw/<doc_id>/`.
 
 ---
 
 ### 2. Hierarchy Parser
 
-**Input**: PDF file + Metadata JSON  
+**Input**: raw text file + Metadata JSON
 **Output**: Cấu trúc phân cấp dạng JSON + Metadata được đính kèm
 
 
@@ -156,7 +156,7 @@ Luật Doanh nghiệp 2020
 ```
 
 **Approach:**
-- Dùng **PyMuPDF** để extract text + formatting (bold, font size)
+- Dùng raw text từ crawler để parse theo dòng và regex.
 - Rule-based parsing dựa trên regex pattern của luật VN:
   - `"Điều \d+"` → Article boundary
   - `"\d+\."` → Clause boundary
@@ -479,7 +479,7 @@ Tuy nhiên, nếu hệ thống được triển khai lên Production với quy m
 (Cache các câu hỏi pháp lý phổ biến)
 
 2. Distributed Pipeline
-[PDF/HTML] → [MinIO/S3] → [RabbitMQ/Kafka] → [Distributed Parsers] → [Neo4j Cluster]
+[Web Crawl / Raw Text] → [MinIO/S3] → [RabbitMQ/Kafka] → [Distributed Parsers] → [Neo4j Cluster]
 (Scale hệ thống crawl và parse)
 ```
 

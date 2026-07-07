@@ -1,4 +1,3 @@
-src/pipeline
 
 # Neo4j local data (bind mounts) — ignore data, keep folder structure
 infra/data/neo4j/data/*

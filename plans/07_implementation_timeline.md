@@ -254,7 +254,7 @@ Evidence Verifier
 > Hội đồng luôn hỏi: *"Những trường hợp nào hệ thống chưa làm tốt?"*
 
 - [ ] Phân tích failure cases từng tầng:
-  - Parser fail (OCR nhận nhầm "Điều")
+  - Parser fail (text extraction nhận nhầm "Điều")
   - LLM hallucination (relation không có trong văn bản)
   - Ontology reject (vi phạm constraint)
   - Retrieval miss (top-K không chứa ground truth)
@@ -343,7 +343,7 @@ Portal
 | Rủi Ro | Khả năng | Phương án |
 |---|---|---|
 | LLM API quota hết (Gemini 20 req/ngày) | **Cao** | Qwen3 via OpenRouter (free, không limit) |
-| OCR ~43% recall | Đã biết | Dùng crawler HTML là nguồn chính |
+| Text extraction ~43% recall | Đã biết | Dùng crawler web text là nguồn chính |
 | Embedding chậm trên CPU | Trung bình | API (Google/Cohere) hoặc batch offline |
 | Ground truth thiếu | Cao | Giảm xuống 50 general + 30 temporal |
 | Không đủ thời gian làm React | Trung bình | Demo bằng Gradio thay thế |

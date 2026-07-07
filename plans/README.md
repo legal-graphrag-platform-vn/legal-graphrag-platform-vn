@@ -36,7 +36,7 @@
 ```
 ┌─────────────────────────────────────────────────┐
 │  1. Legal Knowledge Graph tự động               │
-│     PDF → Pipeline → Neo4j                      │
+│     Web Crawl → Pipeline → Neo4j                │
 ├─────────────────────────────────────────────────┤
 │  2. Temporal GraphRAG                           │
 │     Trả lời đúng theo thời điểm pháp lý         │

@@ -32,7 +32,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 |---|---|---|
 | P0-1 | Setup Docker Compose: Neo4j 5.11+ Community | DevOps |
 | P0-2 | Verify Neo4j vector index: chạy `CREATE VECTOR INDEX` thử | DevOps |
-| P0-3 | Kiểm tra text layer của tất cả PDF trong corpus | Data |
+| P0-3 | Kiểm tra raw web text của tất cả văn bản trong corpus | Data |
 | P0-4 | Review và sign-off `legal_ontology.md` | Cả nhóm |
 | P0-5 | Viết `tests/test_ontology_consistency.py` và chạy pass | Backend |
 | P0-6 | Chốt toàn bộ 09_open_questions Q1-Q11 còn lại | Cả nhóm |
@@ -44,7 +44,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 | # | Tiêu Chí | Cách Verify |
 |---|---|---|
 | C0-1 | Neo4j 5.11+ Community chạy được Vector Index | `CREATE VECTOR INDEX test_idx FOR (n:Test) ON n.v OPTIONS {...}` không lỗi |
-| C0-2 | 100% PDF corpus có text layer (hoặc OCR đã setup) | Script check: `len(page.get_text()) > 100` cho mọi trang |
+| C0-2 | 100% văn bản trong corpus có `source.txt` và `metadata.json` | Script check: raw crawl tồn tại cho mọi `doc_id` |
 | C0-3 | 5/5 unit tests trong `test_ontology_consistency.py` pass | `pytest tests/test_ontology_consistency.py` → 5 passed |
 | C0-4 | RELATION_ENUM == set(CONSTRAINTS.keys()) | Test C0-3 đã bao gồm |
 | C0-5 | Tất cả Q1-Q11 trong `09_open_questions.md` đã có Decision | Decision Log điền đầy đủ |
@@ -55,7 +55,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 ## Phase 1 — Graph Construction Pipeline (RC2)
 
 ### Mục Tiêu
-Xây dựng pipeline tự động chuyển đổi văn bản pháp luật PDF sang Knowledge Graph trong Neo4j với quality control hai tầng và confidence scoring.
+Xây dựng pipeline tự động chuyển đổi văn bản pháp luật từ web crawl sang Knowledge Graph trong Neo4j với quality control hai tầng và confidence scoring.
 
 > **RC2**: Automated Legal Knowledge Graph Construction with Quality Control
 
@@ -63,8 +63,8 @@ Xây dựng pipeline tự động chuyển đổi văn bản pháp luật PDF sa
 
 | Task | Mô Tả | Người Phụ Trách |
 |---|---|---|
-| P1-0 | Document Crawler: cào PDF + Web Metadata (Step 0) | Data |
-| P1-1 | Hierarchy Parser: PDF → structured JSON (Điều/Khoản/Điểm) | Backend |
+| P1-0 | Document Crawler: crawl web text + metadata (Step 0) | Data |
+| P1-1 | Hierarchy Parser: raw text → structured JSON (Điều/Khoản/Điểm) | Backend |
 | P1-2 | LLM Entity Extraction prompt + JSON Schema validation | AI/ML |
 | P1-3 | LLM Relation Extraction prompt + Ontology Validation | AI/ML |
 | P1-4 | Rule-based Confidence Scorer (ADR-06) | Backend |
@@ -78,7 +78,7 @@ Xây dựng pipeline tự động chuyển đổi văn bản pháp luật PDF sa
 
 | # | Tiêu Chí | Cách Verify |
 |---|---|---|
-| C1-1 | Hierarchy Parser detect đúng ranh giới Điều/Khoản/Điểm | Manual check: so sánh output parser với PDF gốc trên 2 văn bản |
+| C1-1 | Hierarchy Parser detect đúng ranh giới Điều/Khoản/Điểm | Manual check: so sánh output parser với `source.txt` gốc trên 2 văn bản |
 | C1-2 | Relation Extraction Precision ≥ 0.75 | Đo trên 3 văn bản gold standard |
 | C1-3 | Relation Extraction Recall ≥ 0.65 | Đo trên 3 văn bản gold standard |
 | C1-4 | REFERS_TO và REQUIRES không bị reject bởi validator | Unit test `test_refers_to_not_rejected()` + `test_requires_not_rejected()` pass |

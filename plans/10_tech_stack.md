@@ -17,7 +17,7 @@
 | **LLM (judge)** | Gemini **2.5** Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
 | **LLM SDK** | `google-genai` | SDK mới (thay `google-generativeai` đã deprecated) | — |
 | **Embedding** | `bkai-foundation-models/vietnamese-bi-encoder` | Tiếng Việt native | OpenAI text-embedding-3-small |
-| **PDF Parser** | PyMuPDF | Nhanh, access font/format info | pdfplumber |
+| **Hierarchy Parser** | Raw text parser | Khớp với `source.txt` từ crawler; retry/fallback selector nếu crawl lỗi | — |
 | **Framework** | **Custom Pipeline** (không dùng LlamaIndex) | LlamaIndex không có direct support cho cấu trúc hà văn bản pháp luật VN | LlamaIndex |
 | **Backend** | FastAPI | Async, OpenAPI docs tự động | Flask |
 | **Frontend** | TBD (React hoặc Gradio — chốt sau Q2a) | Phụ thuộc scope | Next.js |
@@ -146,7 +146,7 @@ backend/
 │   │   └── admin.py      # POST /ingest
 │   └── models.py
 ├── core/
-│   ├── parser/           # PDF Hierarchy Parser
+│   ├── parser/           # Raw text Hierarchy Parser
 │   ├── extraction/       # LLM Extraction
 │   ├── validation/       # Ontology + Schema Validator
 │   ├── retrieval/        # Hybrid Retriever

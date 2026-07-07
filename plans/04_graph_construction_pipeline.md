@@ -15,9 +15,9 @@
 
 ```
 [Web] CSDL Pháp luật / Thư viện pháp luật
-      │ (Step 0: Crawler tải PDF + Metadata web)
+      │ (Step 0: Crawler crawl web text + Metadata)
       ▼
-[PDF + Metadata] Văn bản pháp luật thô
+[Raw text + Metadata] Văn bản pháp luật thô
       │ (Step 1: Hierarchy Parser)
       ▼
 [JSON] Cấu trúc phân cấp (Phần → Chương → Mục → Điều → Khoản → Điểm)
@@ -59,8 +59,8 @@ Vòng đời của một văn bản pháp luật đi qua các trạng thái (sta
 
 ```mermaid
 stateDiagram-v2
-    [*] --> HTML_PDF : vbpl.vn
-    HTML_PDF --> RawText : Step 0 (Crawler)
+    [*] --> WebCrawl : vbpl.vn
+    WebCrawl --> RawText : Step 0 (Crawler)
     RawText --> ParsedJSON : Step 1 (Hierarchy Parser)
     ParsedJSON --> ExtractedJSON : Step 2 (LLM Extraction)
     ExtractedJSON --> ValidatedGraph : Step 3 & 4 (Validation)
@@ -75,17 +75,23 @@ stateDiagram-v2
 Để đảm bảo hệ thống không bị "gãy" ở các bước nối tiếp, mỗi bước đều có một Output Schema chuẩn và một bản cam kết (Data Contract).
 
 ### 1. Crawler Output & Contract
-**Schema:** `dict` metadata cơ bản và file text raw.
+**Schema:** `data/raw/<doc_id>/metadata.json` và `data/raw/<doc_id>/source.txt`.
 ```json
 {
   "doc_id": "LDN2020",
   "title": "Luật Doanh nghiệp 2020",
+  "number": "59/2020/QH14",
+  "type": "Law",
   "issuer_name": "Quốc hội",
+  "issuer_branch": "LEGISLATIVE",
+  "issued_date": "2020-06-17",
   "effective_from": "2021-01-01",
-  "content_raw": "..."
+  "effective_to": null,
+  "status": "active",
+  "source_url": "https://vbpl.vn/..."
 }
 ```
-> **Contract**: `doc_id`, `title`, `issuer_name` KHÔNG BAO GIỜ null. Crawler chịu trách nhiệm map `issuer_name` thành ID theo `ISSUER_BRANCH_MAP`.
+> **Contract**: `doc_id`, `title`, `source_url` KHÔNG BAO GIỜ null. `source.txt` chứa raw text riêng, không nằm trong `metadata.json`. Crawler chịu trách nhiệm lưu cả hai theo cùng `doc_id`, đồng thời map `issuer_name` thành ID theo `ISSUER_BRANCH_MAP`.
 
 ### 2. Parser Output & Contract
 **Schema:** Cây JSON phân cấp cấu trúc văn bản.
@@ -129,11 +135,11 @@ stateDiagram-v2
 
 ### Step 0: Crawler & Metadata Ingestion
 
-Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effective_from`, `effective_to` từ nội dung text (rất dễ sai sót do hallucination hoặc do văn bản ghi lằng nhằng), chúng ta cào trực tiếp metadata "sự thật tuyệt đối" từ trang web cùng lúc tải PDF.
+Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effective_from`, `effective_to` từ nội dung text (rất dễ sai sót do hallucination hoặc do văn bản ghi lằng nhằng), chúng ta crawl trực tiếp metadata "sự thật tuyệt đối" từ trang web cùng lúc lấy raw text.
 
 **Input**: URL văn bản pháp luật (tab `?tabs=thuoc-tinh` trên vbpl.vn)
 **Output**: 
-1. File PDF (lưu vào `data/raw/`)
+1. `source.txt` chứa raw text văn bản (lưu vào `data/raw/<doc_id>/`)
 2. `metadata.json` chứa thông tin cứng (cào từ tab **Thuộc tính** vbpl.vn — controlled vocabulary, không để LLM đoán):
 
 ```json
@@ -158,9 +164,9 @@ Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effe
 
 
 
-### Step 1: Hierarchy Parser (PDF → JSON)
+### Step 1: Hierarchy Parser (Raw text → JSON)
 
-**Mục tiêu**: Chuyển đổi PDF thành cấu trúc phân cấp, đồng thời đính kèm (inject) web metadata vào node Document gốc.
+**Mục tiêu**: Chuyển đổi `source.txt` thành cấu trúc phân cấp, đồng thời đính kèm (inject) web metadata vào node Document gốc.
 
 ```
 Document

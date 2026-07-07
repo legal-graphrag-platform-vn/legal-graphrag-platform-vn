@@ -96,12 +96,12 @@ DEFINES: Article | Clause → LegalConcept
 ## RC2 — Graph Construction Pipeline với LLM + Validation
 
 ### Mô tả
-Pipeline tự động chuyển đổi văn bản PDF → Knowledge Graph:
+Pipeline tự động chuyển đổi web crawl / raw text → Knowledge Graph:
 
 ```
-PDF
+Web Crawl
  ↓
-[1] Hierarchy Parser       — PyMuPDF + rule-based chunking
+[1] Hierarchy Parser       — raw text + rule-based chunking
  ↓
 [2] LLM Extraction         — Structured output (JSON) từ LLM
  ↓

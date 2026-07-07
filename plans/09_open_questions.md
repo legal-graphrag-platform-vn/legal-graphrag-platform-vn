@@ -181,27 +181,28 @@ Phụ thuộc Q2a. Nếu dùng Gradio thì dùng `pyvis` hoặc `streamlit-agrap
 > [!CAUTION]
 > Đây là **lỗ hổng thực sự** trong plan. Nếu không giải quyết trước khi code, sẽ bị chặn giữa chừng hoặc ra kết quả evaluation sai.
 
-### Q12: Văn bản PDF có bản scan không? Cần OCR?
+### Q12: Web crawl có khi nào trả về `source.txt` rỗng hoặc thiếu câu chữ?
 
-**Vấn đề**: `04_graph_construction_pipeline.md` giả định tất cả PDF đều có text layer. Nếu có bản scan (ảnh), PyMuPDF sẽ extract được text rỗng.
+**Vấn đề**: `04_graph_construction_pipeline.md` giả định crawler lấy được raw text ổn định từ vbpl.vn. Nếu HTML đổi cấu trúc, nội dung tải chậm, hoặc selector sai, `source.txt` có thể rỗng hay bị cắt cụt.
 
-**Cần kiểm tra**: Mở từng PDF trong danh sách 10 văn bản, kiểm tra:
+**Cần kiểm tra**: Crawl thử 10 văn bản trong danh sách, kiểm tra:
 ```bash
-# Kiểm tra nhanh text layer
-python -c "import fitz; doc=fitz.open('file.pdf'); print(doc[0].get_text()[:200])"
-# Nếu output rỗng → bản scan, cần OCR
+# Kiểm tra nhanh source.txt
+wc -c data/raw/*/source.txt
+head -n 20 data/raw/*/source.txt
+# Nếu output rỗng hoặc quá ngắn → cần sửa crawler / retry / fallback selector
 ```
 
 | Kết quả | Action |
 |---|---|
-| Tất cả có text layer | Không cần thay đổi pipeline |
-| Có 1-2 bản scan | Thêm bước OCR (Tesseract) vào pipeline |
-| Nhiều bản scan | Cân nhắc Azure Document Intelligence hoặc loại bỏ văn bản đó |
+| Tất cả source.txt đầy đủ | Không cần thay đổi pipeline |
+| Có 1-2 source.txt bị thiếu | Thêm retry / fallback selector vào crawler |
+| Nhiều văn bản bị thiếu | Cân nhắc đổi chiến lược crawl hoặc thay nguồn dữ liệu |
 
 > [!WARNING]
-> Nguồn tin cậy nhất để tải văn bản có text layer: **vbpl.vn** (Cơ sở dữ liệu văn bản pháp luật quốc gia). Ưu tiên tải từ đây.
+> Nguồn tin cậy nhất để crawl raw text: **vbpl.vn** (Cơ sở dữ liệu văn bản pháp luật quốc gia). Ưu tiên tải từ đây.
 
-**Action cần làm**: Kiểm tra 10 PDF trước buổi họp. Ghi kết quả vào đây.
+**Action cần làm**: Kiểm tra 10 văn bản trước buổi họp. Ghi kết quả vào đây.
 
 **Kết quả kiểm tra**: _______________
 
@@ -340,7 +341,7 @@ VLSP legal NLP shared task
 | Q9 | Procedure: future work? | **Future Work** — ghi rõ trong §8 legal_ontology.md | ADR, legal_ontology.md §8 | 2026-07 |
 | Q10 | Deployment: Docker Compose? | **Docker Compose** đủ cho đồ án | 11_project_phases.md P5-1 | 2026-07 |
 | Q11 | Visualizer: Cytoscape.js? | TBD — sau khi chốt Q2a | — | — |
-| Q12 | PDF text layer: cần OCR không? | TBD — cần kiểm tra 10 PDF | — | — |
+| Q12 | Raw text crawl: `source.txt` có ổn định không? | TBD — cần kiểm tra 10 văn bản | — | — |
 | Q13 | Temporal DAG: giả định chain + limitation? | **Giả định chain tuyến tính** + ghi limitation trong báo cáo | Q13 gợi ý Option A | 2026-07 |
 | Q14 | Concept ID: dùng pre-defined list? | **Pre-defined list ~50-100 concepts** | Q14 gợi ý Option A | 2026-07 |
 | Q15 | Related work VN legal NLP: ai search? | TBD — assign trước khi viết báo cáo | — | — |
@@ -351,7 +352,7 @@ VLSP legal NLP shared task
 
 ```
 TRƯỚC buổi họp nhóm:
-  └── Q12: Kiểm tra PDF text layer (ai đó làm luôn, 30 phút)
+  └── Q12: Kiểm tra raw text crawl (ai đó làm luôn, 30 phút)
   └── Q15: Bắt đầu search related work (có thể song song)
 
 TRONG buổi họp nhóm:
