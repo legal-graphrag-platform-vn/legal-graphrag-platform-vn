@@ -349,3 +349,19 @@ Level 4: Temporal & XAI Quality
 - [ ] Ai chịu trách nhiệm xây dựng ground truth dataset?
 - [ ] Có mời legal expert review không?
 - [ ] LLM-as-judge dùng model nào? (GPT-4o? Gemini?)
+
+---
+
+## Phụ lục: RC to Codebase Mapping
+
+Để dễ dàng tra cứu và đối chiếu giữa bài viết luận văn và source code thực tế, các Research Contributions (RC) được map trực tiếp vào các thư mục trong repository như sau:
+
+| Mã RC | Tên đóng góp | Thư mục Source Code Tương Ứng |
+|---|---|---|
+| **RC1** | Legal Ontology Design | `plans/legal_ontology.md` (Design doc là thành phẩm chính) |
+| **RC2** | Graph Construction Pipeline | `src/pipeline/` (chứa crawler, parser, extraction, validator, neo4j_writer) |
+| **RC3** | Intent-based Traversal GraphRAG | `src/retrieval/` (chứa classifier, graph_traversal, vector_search) |
+| **RC4** | Temporal GraphRAG | `src/retrieval/temporal/` và `src/pipeline/src/neo4j_writer/` |
+| **RC5** | Legal Evaluation Framework | `src/evaluation/` (chứa ground_truth builder, RAGAS integration, metrics) |
+
+> **Lưu ý cho hội đồng**: Việc cấu trúc thư mục code map 1-1 với cấu trúc lý thuyết giúp việc đánh giá chéo (cross-evaluation) minh bạch và dễ dàng thẩm định.

@@ -53,6 +53,78 @@
 
 ---
 
+## Document Lifecycle
+
+Vòng đời của một văn bản pháp luật đi qua các trạng thái (state) trong hệ thống:
+
+```mermaid
+stateDiagram-v2
+    [*] --> HTML_PDF : vbpl.vn
+    HTML_PDF --> RawText : Step 0 (Crawler)
+    RawText --> ParsedJSON : Step 1 (Hierarchy Parser)
+    ParsedJSON --> ExtractedJSON : Step 2 (LLM Extraction)
+    ExtractedJSON --> ValidatedGraph : Step 3 & 4 (Validation)
+    ValidatedGraph --> EmbeddedGraph : Step 5 & 6 (Neo4j Writer & Embedding)
+    EmbeddedGraph --> [*] : Ready for Query
+```
+
+---
+
+## Data Models & Contracts
+
+Để đảm bảo hệ thống không bị "gãy" ở các bước nối tiếp, mỗi bước đều có một Output Schema chuẩn và một bản cam kết (Data Contract).
+
+### 1. Crawler Output & Contract
+**Schema:** `dict` metadata cơ bản và file text raw.
+```json
+{
+  "doc_id": "LDN2020",
+  "title": "Luật Doanh nghiệp 2020",
+  "issuer_name": "Quốc hội",
+  "effective_from": "2021-01-01",
+  "content_raw": "..."
+}
+```
+> **Contract**: `doc_id`, `title`, `issuer_name` KHÔNG BAO GIỜ null. Crawler chịu trách nhiệm map `issuer_name` thành ID theo `ISSUER_BRANCH_MAP`.
+
+### 2. Parser Output & Contract
+**Schema:** Cây JSON phân cấp cấu trúc văn bản.
+```json
+{
+  "document": { "id": "LDN2020" },
+  "articles": [
+    {
+      "number": "17",
+      "content_raw": "...",
+      "clauses": [
+         { "number": "1", "content_raw": "..." }
+      ]
+    }
+  ]
+}
+```
+> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn2020_art17_cl1`).
+
+### 3. Extractor Output & Contract
+**Schema:** JSON danh sách entities và relations.
+```json
+{
+  "entities": [
+    {"type": "Concept", "name": "Vốn điều lệ"}
+  ],
+  "relations": [
+    {"head": "...", "relation": "DEFINES", "tail": "Vốn điều lệ"}
+  ]
+}
+```
+> **Contract**: LLM chỉ được phép trả về JSON. Các key `entities` và `relations` luôn tồn tại (dù có thể rỗng rỗng). `type` của entity phải nằm trong danh sách Enum (Entity, Concept, Action).
+
+### 4. Validator & Writer Contract
+> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.3.0. Nếu có lỗi, relation bị drop hoặc raise error.
+> **Writer Guarantee (Neo4j)**: Quá trình MERGE mang tính Idempotent. Việc chạy lại cùng một file JSON 10 lần sẽ không sinh ra duplicate node hay edge nào trong đồ thị.
+
+---
+
 ## Chi Tiết Các Bước
 
 ### Step 0: Crawler & Metadata Ingestion
