@@ -6,6 +6,23 @@
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
+### Knowledge Classification
+
+Bảng phân loại dưới đây là triết lý thiết kế cốt lõi của đồ án, định nghĩa rõ ràng ranh giới giữa những gì thuộc về Đồ thị (Graph) và những gì thuộc về Suy luận động (LLM):
+
+| Thành phần                 | Thuộc Graph | Thuộc LLM                   |
+| -------------------------- | ----------- | --------------------------- |
+| Document hierarchy         | ✅           | ❌                           |
+| Citation links             | ✅           | ❌                           |
+| Temporal validity          | ✅           | ❌                           |
+| Legal concepts             | ✅           | ❌                           |
+| Obligations                | ❌           | ✅ (from retrieved evidence) |
+| Rights                     | ❌           | ✅ (from retrieved evidence) |
+| Exceptions                 | ❌           | ✅ (context-dependent)       |
+| Conditions                 | ❌           | ✅ (context-dependent)       |
+| Comparative interpretation | ❌           | ✅                           |
+| Final legal answer         | ❌           | ✅                           |
+
 ---
 
 ## Tổng Quan 3 Layer
@@ -23,26 +40,27 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
 │  │      Document, Article, Clause             │
 │  │      Citation, Hierarchy                   │
 │  ├── Semantic Knowledge                       │
-│  │      Concept, Entity                       │
-│  │      Definition, Regulates, AppliesTo      │
-│  └── Temporal Knowledge                       │
+│  │      Legal Concepts, Legal Entities        │
+│  │      Domain Relationships                  │
+│  └── Temporal Dimension                       │
 │         effective_from, effective_to          │
 │         legal_status, amendment               │
 └───────────────────────────────────────────────┘
                         │
-     ┌──────────────────┴──────────────────┐
-     │      LAYER 2: HYBRID RETRIEVAL      │
-     │      (Vector + BM25 + Graph)        │
-     └──────────────────┬──────────────────┘
+                        │
+  ─────────── Retrieval Boundary ────────────
+  (Transforms deterministic graph knowledge 
+   into context for probabilistic reasoning)
+  ───────────────────────────────────────────
                         │
                         ▼
 ┌───────────────────────────────────────────────┐
 │   LAYER 3: RUNTIME LEGAL REASONING (LLM)      │
 │   (Context-dependent Legal Reasoning)         │
 │                                               │
-│  ├── Obligation & Right Detection             │
-│  ├── Exception Resolution                     │
-│  ├── Condition Evaluation                     │
+│  ├── Evidence-grounded Obligation ID          │
+│  ├── Evidence-grounded Exception Resolution   │
+│  ├── Evidence-grounded Condition Evaluation   │
 │  ├── Comparative Analysis                     │
 │  ├── Multi-hop Inference                      │
 │  └── Final Answer Generation                  │
@@ -271,10 +289,10 @@ TEMPORAL_NOTE: [nếu câu trả lời phụ thuộc thời điểm]
 ```
 User: "Điều kiện vốn để thành lập công ty TNHH theo quy định năm 2022?"
 
-[1] NLU Processing
-    Intent: "factual" (điều kiện)
+[1] NLU Processing (If enabled)
+    (Optional) Intent: "factual" (điều kiện)
     Temporal: {year: 2022, from: "2022-01-01", to: "2022-12-31"}
-    Entities: ["công ty TNHH", "vốn điều lệ"]
+    (Optional) Entities: ["công ty TNHH", "vốn điều lệ"]
 
 [2] Vector Search
     Query embedding → Top-5 articles:
@@ -328,7 +346,7 @@ Hệ thống đánh giá được tách biệt hoàn toàn khỏi Application La
       ◄────── (Trả về Context + Answer) ──────┤
       │
       ▼
-[LLM-as-a-Judge] (GPT-4o / Gemini 1.5 Pro)
+[Judge Model] (Configurable LLM-as-a-Judge)
       │ Đánh giá dựa trên:
       ├── Context Precision / Recall
       ├── Answer Relevance / Correctness
@@ -347,13 +365,14 @@ Trong phạm vi đồ án, chúng ta sử dụng kiến trúc **Single-node Pipe
 Tuy nhiên, nếu hệ thống được triển khai lên Production với quy mô hàng ngàn văn bản và hàng triệu truy vấn, kiến trúc tương lai (Future Work) sẽ được mở rộng như sau (hiện tại nằm ngoài scope):
 
 ```
-1. Event-Driven Ingestion:
-[PDF/HTML] → [MinIO/S3] → [RabbitMQ/Kafka] → [Distributed Parsers] → [Neo4j Cluster]
-(Giải quyết bài toán scale hệ thống crawl và parse)
-
-2. Bitemporal / Snapshot Versioning:
-[Neo4j] → [Snapshot Builder (FRBR)] → [Time-indexed Vector Store]
+1. Bitemporal / Snapshot Versioning (FRBR-style)
 (Tạo ra các version riêng biệt của văn bản cho mỗi lần sửa đổi thay vì dùng property trên 1 node)
+
+2. Incremental Graph Update
+(Cập nhật đồ thị thời gian thực khi có văn bản mới thay vì batch processing)
+
+3. Legal Reasoning Agent & Multi-document Reasoning
+(Phát triển LLM Agents có khả năng lập luận đa bước phức tạp qua nhiều luật khác nhau)
 
 3. Caching Layer:
 [User] → [Redis Cache] → [GraphRAG Core]
