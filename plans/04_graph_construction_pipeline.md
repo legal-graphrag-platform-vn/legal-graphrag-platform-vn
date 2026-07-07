@@ -158,6 +158,9 @@ PATTERNS = {
 
 ## Step 2: LLM Information Extraction
 
+> [!NOTE]
+> **Phase 1 scope**: LLM extraction hiện tại chỉ cover 3 semantic type (`Entity/Concept/Action` → `LegalSubject/LegalConcept/LegalAction`). `Obligation/Right/Condition/Exception` thuộc Future work — xem `legal_ontology.md` §2.2 để biết rationale và điều kiện triển khai.
+
 ### Two-Pass Strategy
 
 **Pass 1 — Entity Extraction** (per Article):
