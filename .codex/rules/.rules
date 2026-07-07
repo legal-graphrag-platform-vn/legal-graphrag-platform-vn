@@ -1,0 +1,43 @@
+# Legal GraphRAG Coding Rules
+
+## Scope
+- These rules apply to code, tests, prompts, docs, plans, and generated artifacts in this repo.
+
+## Must
+- Treat `plans/legal_ontology.md` as the canonical contract.
+- Treat web crawl -> raw text -> parse as the active ingestion path.
+- Keep relation names in active voice.
+- Keep prompts, Pydantic models, validator rules, tests, and docs aligned when a contract changes.
+- Preserve the current validator order: schema -> ontology -> graph consistency -> scoring -> Neo4j write.
+- Validate hard rules in code and tests; do not rely on scoring to rescue invalid triples.
+- Keep changes scoped to the requested task.
+- Prefer small, cohesive functions over broad multi-purpose blocks.
+- Remove dead code, dead docs, and dead CLI paths instead of preserving them.
+- Use explicit names for domain concepts; do not hide behavior behind generic helpers.
+- Keep comments short and factual. Do not add motivational or placeholder comments.
+- Make code readable on first pass: no hidden control flow, no magic literals without a nearby constant, no unexplained duplication.
+
+## Must Not
+- Do not reintroduce PDF-first or OCR-first assumptions unless the task explicitly asks for them.
+- Do not relax ontology rules in confidence scoring.
+- Do not change one side of a contract without updating the matching prompt, test, and doc.
+- Do not remove or rewrite unrelated user changes.
+- Do not accept legacy relation aliases as current behavior.
+- Do not ship "vibe" code, placeholder logic, or half-implemented branches.
+- Do not keep stale compatibility code unless the task explicitly requires it.
+- Do not let a function grow past the point where one responsibility is still obvious.
+
+## If / Then
+- If validator rules change, then update regression tests in the same change.
+- If CLI behavior changes, then update the pipeline README and the matching plan docs in the same change.
+- If a new model/task contract is introduced, then update both the extraction side and the reasoning side separately.
+- If a dependency or environment issue blocks verification, then report it plainly and stop there.
+- If a refactor makes behavior less obvious, then add a targeted test or a short code comment explaining the domain rule.
+- If a file becomes a dumping ground for unrelated logic, then split it before adding more code.
+
+## Verify
+- Run the smallest relevant test set first.
+- Confirm the docs describe the implemented behavior, not the intended old one.
+- Confirm there is no remaining prompt/validator mismatch.
+- Confirm new code has a single clear path for the common case.
+- Confirm there are no dead branches left from older behavior.
