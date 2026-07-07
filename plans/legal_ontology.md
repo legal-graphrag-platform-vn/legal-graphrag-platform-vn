@@ -1,8 +1,8 @@
 # Legal Ontology — Frozen Contract
 
 > **Trạng thái**: FROZEN — không sửa mà không có ADR  
-> **Phiên bản**: 1.2.0  
-> **Ngày chốt**: 2026-07-06  
+> **Phiên bản**: 1.3.0  
+> **Ngày chốt**: 2026-07-07  
 > **Phạm vi**: Pháp luật Việt Nam — tập trung Luật Doanh nghiệp + văn bản liên quan
 
 ---
@@ -86,10 +86,16 @@ Tự động tạo từ `Document.issuer_name` trong Writer (MERGE). LLM không 
 | Article | `number` | string | ✅ | `"17"` |
 | Article | `title` | string | ❌ | Tiêu đề điều (nếu có) |
 | Article | `content_raw` | string | ✅ | Nội dung gốc |
+| Article | `effective_from` | date | ✅ | Kế thừa từ Document, override khi bị AMENDS riêng (ADR-18) |
+| Article | `effective_to` | date | ❌ | null = còn hiệu lực. Writer set khi bị AMENDS (ADR-18) |
+| Article | `legal_status` | enum | ✅ | `ACTIVE\|AMENDED\|REPEALED` (ADR-18) |
 | Article | `embedding` | float[768] | ❌ | **Nullable** — Embedding Generator fill sau Writer (M3 Tuần 2). 768-dim = schema contract (xem §7). |
 | Clause | `id` | string | ✅ | `{doc_id}_art{N}_cl{K}` |
 | Clause | `number` | string | ✅ | `"1"`, `"2"`, ... |
 | Clause | `content_raw` | string | ✅ | Nội dung gốc |
+| Clause | `effective_from` | date | ✅ | Kế thừa từ Article |
+| Clause | `effective_to` | date | ❌ | null = còn hiệu lực. Cascade từ Article hoặc khi bị AMENDS riêng |
+| Clause | `legal_status` | enum | ✅ | `ACTIVE\|AMENDED\|REPEALED` |
 | Clause | `embedding` | float[768] | ❌ | **Nullable** — đơn vị retrieval chính theo ADR-02 |
 | Point | `id` | string | ✅ | `{doc_id}_art{N}_cl{K}_p{letter}` |
 | Point | `label` | string | ✅ | `"a"`, `"b"`, `"c"` |

@@ -1,7 +1,8 @@
 # Graph Construction Pipeline — Chi Tiết Kỹ Thuật
 
-> **Phiên bản**: 0.2 — cập nhật theo legal_ontology.md v1.1.0
+> **Phiên bản**: 0.3
 > **Liên quan đến**: RC2
+> **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:

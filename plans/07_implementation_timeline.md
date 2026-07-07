@@ -1,8 +1,9 @@
 # Implementation Timeline — Legal GraphRAG
 
-> **Cập nhật**: 2026-07-03  
+> **Cập nhật**: 2026-07-07  
 > **Đánh giá**: Research ⭐⭐⭐⭐⭐ | Engineering ⭐⭐⭐⭐☆ | Hoàn thành ⭐⭐⭐⭐☆  
 > **Triết lý**: Ưu tiên giá trị nghiên cứu → Experiment → Portal.
+> **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
 
 ---
 

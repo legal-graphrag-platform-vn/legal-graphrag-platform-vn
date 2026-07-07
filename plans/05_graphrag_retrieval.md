@@ -1,7 +1,8 @@
 # GraphRAG Retrieval — Chi Tiết Kỹ Thuật
 
-> **Phiên bản**: 0.1  
+> **Phiên bản**: 0.2  
 > **Liên quan đến**: RC3 + RC4
+> **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
 
 ---
 

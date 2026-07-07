@@ -1,7 +1,8 @@
 # Kiến Trúc Hệ Thống — Legal GraphRAG
 
-> **Phiên bản**: 0.1  
+> **Phiên bản**: 0.2  
 > **Trạng thái**: Draft — cần nhóm review
+> **Depends on**: [legal_ontology.md v1.3.0](./legal_ontology.md)
 
 ---
 
