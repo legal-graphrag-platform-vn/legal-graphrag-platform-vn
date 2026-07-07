@@ -6,22 +6,24 @@
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
+> **The primary objective of the Knowledge Graph is not to replace legal reasoning, but to provide trustworthy, structured, and temporally valid evidence for downstream reasoning.**
+
 ### Knowledge Classification
 
 Bảng phân loại dưới đây là triết lý thiết kế cốt lõi của đồ án, định nghĩa rõ ràng ranh giới giữa những gì thuộc về Đồ thị (Graph) và những gì thuộc về Suy luận động (LLM):
 
-| Thành phần                 | Thuộc Graph | Thuộc LLM                   |
-| -------------------------- | ----------- | --------------------------- |
-| Document hierarchy         | ✅           | ❌                           |
-| Citation links             | ✅           | ❌                           |
-| Temporal validity          | ✅           | ❌                           |
-| Legal concepts             | ✅           | ❌                           |
-| Obligations                | ❌           | ✅ (from retrieved evidence) |
-| Rights                     | ❌           | ✅ (from retrieved evidence) |
-| Exceptions                 | ❌           | ✅ (context-dependent)       |
-| Conditions                 | ❌           | ✅ (context-dependent)       |
-| Comparative interpretation | ❌           | ✅                           |
-| Final legal answer         | ❌           | ✅                           |
+| Component                  | Type       | Thuộc Graph | Thuộc LLM                   |
+| -------------------------- | ---------- | ----------- | --------------------------- |
+| Document hierarchy         | Structural | ✅           | ❌                           |
+| Citation links             | Structural | ✅           | ❌                           |
+| Temporal validity          | Temporal   | ✅           | ❌                           |
+| Legal concepts             | Semantic   | ✅           | ❌                           |
+| Obligations                | Contextual | ❌           | ✅ (from retrieved evidence) |
+| Rights                     | Contextual | ❌           | ✅ (from retrieved evidence) |
+| Exceptions                 | Contextual | ❌           | ✅ (context-dependent)       |
+| Conditions                 | Contextual | ❌           | ✅ (context-dependent)       |
+| Comparative interpretation | Contextual | ❌           | ✅                           |
+| Final legal answer         | Contextual | ❌           | ✅                           |
 
 ---
 
@@ -47,23 +49,36 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
 │         legal_status, amendment               │
 └───────────────────────────────────────────────┘
                         │
-                        │
-  ─────────── Retrieval Boundary ────────────
-  (Transforms deterministic graph knowledge 
-   into context for probabilistic reasoning)
-  ───────────────────────────────────────────
+                        ▼
+┌───────────────────────────────────────────────┐
+│       LAYER 2: HYBRID RETRIEVAL LAYER         │
+│                                               │
+│  ├── Vector Search                            │
+│  ├── BM25 Keyword Search                      │
+│  ├── Graph Expansion                          │
+│  └── Temporal Filter                          │
+│                                               │
+│ ───────────────────────────────────────────── │
+│             KNOWLEDGE BOUNDARY                │
+│  (Transforms deterministic graph knowledge    │
+│   into context for probabilistic reasoning)   │
+│ ───────────────────────────────────────────── │
+│                                               │
+│  └── Retrieved Evidence                       │
+└───────────────────────────────────────────────┘
                         │
                         ▼
 ┌───────────────────────────────────────────────┐
 │   LAYER 3: RUNTIME LEGAL REASONING (LLM)      │
 │   (Context-dependent Legal Reasoning)         │
 │                                               │
-│  ├── Evidence-grounded Obligation ID          │
-│  ├── Evidence-grounded Exception Resolution   │
-│  ├── Evidence-grounded Condition Evaluation   │
-│  ├── Comparative Analysis                     │
-│  ├── Multi-hop Inference                      │
-│  └── Final Answer Generation                  │
+│  ├── Legal Reasoning Services:                │
+│  │   ├── Evidence-grounded Obligation ID      │
+│  │   ├── Evidence-grounded Right ID           │
+│  │   ├── Evidence-grounded Exception Res.     │
+│  │   ├── Evidence-grounded Condition Eval.    │
+│  │   ├── Comparative Analysis                 │
+│  │   └── Answer Synthesis                     │
 └───────────────────────────────────────────────┘
                         │
                         ▼
@@ -143,6 +158,25 @@ Pass 2: Relation Extraction
 **Input**: LLM output JSON  
 **Output**: Neo4j nodes + edges
 
+```text
+  LLM Output
+      │
+      ▼
+Schema Validation (JSON Schema)
+      │
+      ▼
+Ontology Validation (legal_ontology.md)
+      │
+      ▼
+Consistency Validation (Existing Graph)
+      │
+      ▼
+Confidence Scoring (Rule-based)
+      │
+      ▼
+ Neo4j Writer
+```
+
 ```python
 # Validation flow
 def process_extraction(llm_output):
@@ -182,6 +216,25 @@ def process_extraction(llm_output):
 **Input**: User query + temporal context  
 **Output**: Ranked list of context chunks + graph paths
 
+```text
+User Query
+    │
+    ▼
+[ Vector Search ] ──▶ Finds semantic matches (Entry points)
+    │
+    ▼
+[ Graph Expansion ] ──▶ Traverses structural/semantic edges (Context enrichment)
+    │
+    ▼
+[ Temporal Filter ] ──▶ Filters nodes based on effective dates
+    │
+    ▼
+[ Reranker ] ──▶ Scores and orders final context window
+    │
+    ▼
+Retrieved Evidence (to Reasoning Layer)
+```
+
 ```python
 class Neo4jRetriever:
     """Unified retriever: vector + graph + temporal trong 1 Cypher query (ADR-08)."""
@@ -190,9 +243,10 @@ class Neo4jRetriever:
         # 1. Embed query
         query_embedding = embed(query)
 
-        # 2. Get intent
-        intent = self.intent_classifier.classify(query)
-        traversal_policy = TRAVERSAL_POLICIES[intent]
+        # 2. Intent-aware traversal policy (Optional)
+        # intent = self.intent_classifier.classify(query)
+        # traversal_policy = TRAVERSAL_POLICIES[intent]
+        traversal_policy = get_default_policy()
 
         # 3. Unified Cypher: vector search + temporal filter + graph expansion
         result = self.neo4j.run("""
@@ -364,7 +418,9 @@ Trong phạm vi đồ án, chúng ta sử dụng kiến trúc **Single-node Pipe
 
 Tuy nhiên, nếu hệ thống được triển khai lên Production với quy mô hàng ngàn văn bản và hàng triệu truy vấn, kiến trúc tương lai (Future Work) sẽ được mở rộng như sau (hiện tại nằm ngoài scope):
 
-```
+### Future Research
+
+```text
 1. Bitemporal / Snapshot Versioning (FRBR-style)
 (Tạo ra các version riêng biệt của văn bản cho mỗi lần sửa đổi thay vì dùng property trên 1 node)
 
@@ -373,10 +429,18 @@ Tuy nhiên, nếu hệ thống được triển khai lên Production với quy m
 
 3. Legal Reasoning Agent & Multi-document Reasoning
 (Phát triển LLM Agents có khả năng lập luận đa bước phức tạp qua nhiều luật khác nhau)
+```
 
-3. Caching Layer:
+### Engineering Extensions
+
+```text
+1. Distributed Caching Layer
 [User] → [Redis Cache] → [GraphRAG Core]
 (Cache các câu hỏi pháp lý phổ biến)
+
+2. Distributed Pipeline
+[PDF/HTML] → [MinIO/S3] → [RabbitMQ/Kafka] → [Distributed Parsers] → [Neo4j Cluster]
+(Scale hệ thống crawl và parse)
 ```
 
 ---
