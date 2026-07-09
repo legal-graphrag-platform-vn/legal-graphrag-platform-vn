@@ -1,20 +1,19 @@
 # 5 Đóng Góp Nghiên Cứu (Research Contributions)
 
-> **Trạng thái**: ~~v0.1~~ → **PARTIALLY SUPERSEDED**
-> Mô tả RC1-RC5 (high-level) vẫn còn giá trị. Tuy nhiên các chi tiết kỹ thuật (node types, relation names, extraction strategy) đã lỗi thời.
+> **Trạng thái**: Research framing document.
+> File này chỉ mô tả RC1-RC5 ở mức high-level. Mọi schema, validator rule, model choice, dataset size, và implementation contract phải lấy từ các file source-of-truth tương ứng.
 
 > [!CAUTION]
-> **Node types**, **relation names**, và **extraction schema** trong file này đã lỗi thời.
-> Xem **[legal_ontology.md v1.4.0](./legal_ontology.md)** để biết schema chính xác.
+> **Không dùng file này làm implementation contract.**
+> Xem **[legal_ontology.md v1.4.0](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
 >
 > | Nội dung | Trạng thái |
 > |---|---|
 > | RC1-RC5 mô tả tổng quan | ✅ Vẫn đúng |
-> | Node types (có `Definition`, `Procedure`) | ❌ Xem legal_ontology.md §2 |
-> | Relation names (`AMENDED_BY`, `IMPLEMENTED_BY`, `GUIDED_BY`) | ❌ Xem ADR-17: `AMENDS`, `GUIDES` |
-> | Extraction strategy (single-pass) | ❌ Xem ADR-03: two-pass |
-> | Confidence scoring (N=3) | ❌ Xem ADR-06: rule-based |
-> | RC5 baselines (BM25 + Vector) | ❌ Xem ADR-07: 1 baseline (Vector RAG) |
+> | Ontology labels and relation rules | `legal_ontology.md` |
+> | Extraction strategy | `04_graph_construction_pipeline.md` — two-pass extraction |
+> | Confidence scoring | ADR-06 — rule-based |
+> | Dataset size | `08_dataset_and_scope.md` — current committed vs target full scope |
 
 ---
 
@@ -60,7 +59,7 @@ Tầng 3: Neo4j Schema
 
 | Relation | Ngữ Nghĩa | Head → Tail |
 |---|---|---|
-| `CONTAINS` | Cấu trúc phân cấp | Document → Article → Clause → Point |
+| `CONTAINS` | Cấu trúc phân cấp | Document → Chapter → Article → Clause → Point |
 | `AMENDS` | Sửa đổi | Document/Article/Clause → Document/Article/Clause |
 | `REPLACES` | Thay thế hoàn toàn | Document → Document |
 | `GUIDES` | Hướng dẫn thi hành | Document → Document |
@@ -73,8 +72,8 @@ Tầng 3: Neo4j Schema
 ### Constraints (Ontology Rules)
 
 ```python
-# Chỉ Document có thể CONTAINS Article
-CONTAINS: Document | Article | Clause → Article | Clause | Point
+# Structural chain, with direct Document→Article fallback when no Chapter exists
+CONTAINS: Document | Chapter | Article | Clause → Chapter | Article | Clause | Point
 
 # AMENDS bắt buộc có effective_from
 AMENDS: Document | Article | Clause → Document | Article | Clause
@@ -86,10 +85,10 @@ GUIDES: Document(type=Law) → Document(type=Decree)
 DEFINES: Article | Clause → LegalConcept
 ```
 
-### Câu Hỏi Mở Cho Nhóm
-- [ ] Có cần node `Procedure` không? Hay để trong future work?
-- [ ] `Definition` có phải node riêng hay là attribute của `Concept`?
-- [ ] Xử lý Phụ lục (Annex) như thế nào?
+### Scope Notes
+- `Definition` is not a standalone node in Phase 1; it is represented through `LegalConcept` and `DEFINES`.
+- `Procedure` is future work/runtime reasoning, not a persisted Phase 1 node.
+- Annex handling remains future work unless the selected corpus requires it.
 
 ---
 
@@ -121,15 +120,16 @@ Neo4j
 - Confidence scoring để phân loại auto-accept / human-review.
 - Có thể đo được: Precision/Recall so với ground truth.
 
-### Phương Pháp Confidence Scoring (Cần Chốt)
+### Phương Pháp Confidence Scoring (ADR-06)
 
 | Phương Pháp | Mô Tả | Pros | Cons |
 |---|---|---|---|
-| **Self-consistency (N=3)** | Chạy LLM 3 lần, đếm majority vote | Không cần thêm model | Tốn API cost x3 |
+| **Rule-based multi-criteria** | Chấm điểm theo schema, ontology, evidence, entity resolution, direction | Explainable, 1 lần gọi LLM, dễ calibrate threshold | Cần thiết kế rule rõ ràng |
+| Self-consistency | Chạy LLM nhiều lần, đếm majority vote | Không cần thêm model | Tốn API cost xN, khó giải thích chi tiết |
 | **Log-probability** | Dùng token log-probs | Nhanh, 1 lần gọi | Không phải LLM nào cũng hỗ trợ |
 | **Critic LLM** | LLM thứ 2 đánh giá output LLM 1 | Chất lượng cao | Chi phí cao nhất |
 
-> **Đề xuất**: Self-consistency N=3 — cân bằng giữa chất lượng và chi phí.
+> **Đề xuất hiện tại**: Rule-based confidence theo ADR-06. Extraction chạy two-pass entity + relation extraction; confidence scorer không được override lỗi schema hoặc ontology.
 
 ### LLM Extraction Prompt (Draft)
 
@@ -152,8 +152,7 @@ REFERS_TO, DEFINES, REGULATES, REQUIRES, REPEALS, CONTAINS
 ```
 
 ### Câu Hỏi Mở Cho Nhóm
-- [ ] Chọn phương pháp Confidence Scoring nào?
-- [ ] Threshold để đưa vào Human Review là bao nhiêu? (0.5? 0.7?)
+- [ ] Threshold để đưa vào Human Review là bao nhiêu? (calibrate bằng PR curve)
 - [ ] Human Review tool cần UI riêng không, hay dùng Neo4j Browser?
 
 ---
@@ -218,28 +217,28 @@ Graph lưu thông tin thời gian trên **cả node lẫn edge**:
 **Timestamps trên Node:**
 ```cypher
 (:Article {
-  id: "LDN2020_D17",
+  id: "ldn_2020_art17",
   title: "Điều 17. Điều kiện thành lập",
   effective_from: "2021-01-01",
   effective_to: null,  // null = còn hiệu lực
-  status: "active"     // active | amended | repealed
+  legal_status: "ACTIVE"
 })
 ```
 
 **Timestamps trên Edge (quan trọng hơn):**
 ```cypher
-(:Article {id: "LDN2020_D17"})-[:AMENDS {
+(:Article {id: "ldn_2025_art17"})-[:AMENDS {
   effective_from: "2021-01-01",
   effective_to: null,
   amendment_type: "partial"  // partial | full
-}]->(:Article {id: "LDN2020_D17"})
+}]->(:Article {id: "ldn_2020_art17"})
 ```
 
 ### Time Travel Query
 
 ```cypher
 // Câu hỏi: "Quy định Điều 17 năm 2022"
-MATCH (a:Article {id: "LDN2020_D17"})
+MATCH (a:Article {id: "ldn_2020_art17"})
 WHERE a.effective_from <= "2022-06-01"
   AND (a.effective_to IS NULL OR a.effective_to > "2022-06-01")
 
@@ -272,9 +271,9 @@ LLM (structured output):
 - `"trước năm 2023"` → `[null, 2022-12-31]`
 - `"sau khi Nghị định XX có hiệu lực"` → lookup effective date của NĐ XX
 
-### Câu Hỏi Mở Cho Nhóm
-- [ ] Cần xử lý những loại temporal expression nào?
-- [ ] `status` trên node: enum `[active, amended, repealed, suspended]`?
+### Scope Notes
+- Temporal expression extraction starts with rule-based parsing and LLM fallback for ambiguous cases.
+- Node validity uses `legal_status` enums from `legal_ontology.md`.
 
 ---
 
@@ -330,8 +329,8 @@ Level 4: Temporal & XAI Quality
 
 | System | Mô Tả |
 |---|---|
-| **Baseline 1** | Keyword Search (BM25) |
-| **Baseline 2** | Naive RAG (vector search only) |
+| **Main Baseline** | Naive RAG (vector search only) |
+| **Optional Ablation** | Keyword Search / BM25 full-text only |
 | **Proposed** | Temporal GraphRAG (hệ thống đề tài) |
 
 ### Ground Truth Dataset
@@ -339,8 +338,8 @@ Level 4: Temporal & XAI Quality
 | Phần | Số Lượng | Người Làm |
 |---|---|---|
 | Gold Graph annotation | 3-5 văn bản (~50 entities, ~30 relations) | Cả nhóm |
-| General QA pairs | 100 câu hỏi + đáp án | Cả nhóm |
-| Temporal QA pairs | 50 câu hỏi + đáp án + năm cụ thể | Cả nhóm |
+| General QA pairs | Current committed: 50; target full: 100 | Cả nhóm |
+| Temporal QA pairs | Current committed: 25; target full: 50 | Cả nhóm |
 | XAI evaluation | 20-30 câu + expected reasoning path | Cả nhóm |
 
 ### Câu Hỏi Mở Cho Nhóm

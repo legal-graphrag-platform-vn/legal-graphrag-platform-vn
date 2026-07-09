@@ -22,7 +22,7 @@ legal_ontology.md
   -> Neo4j
 ```
 
-`plans/02_ontology_specification.md` is historical. It must not be used as an implementation reference.
+`plans/archive/02_ontology_specification_superseded.md` is historical. It must not be used as an implementation reference.
 
 ---
 
@@ -96,6 +96,7 @@ Rules:
 | `Issuer` creation | Writer derives `Issuer` from `Document.issuer_name`; LLM does not extract it directly |
 | `Issuer.id` | Slug of normalized issuer name; this is the `MERGE` key, not `name` |
 | Temporal denormalization | `Article` and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
+| Point temporal scope | Phase 1 does not store temporal fields on `Point`; point-level amendments are normalized to the nearest `Clause` |
 | Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[768]`; `Point` has no embedding |
 
 ### 2.2 Semantic Nodes
@@ -124,6 +125,8 @@ Extraction mapping:
 
 Extraction types are input schema labels, not Neo4j labels. The writer or repository mapping layer must normalize them before persistence.
 
+Phase 1 persistence is limited to `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, and `LegalAction`. Runtime reasoning labels (`Obligation`, `Right`, `Condition`, `Exception`) are valid ontology labels, but they must not be persisted by the Phase 1 extraction pipeline.
+
 ---
 
 ## 3. Relation Contract
@@ -141,7 +144,7 @@ Only these relation names are current. Relation names use active voice.
 | `REFERS_TO` | `Article`, `Clause`, `Point` | `Article`, `Clause`, `Point`, `Document` | `citation_text`, `citation_type` | no | yes |
 | `DEFINES` | `Article`, `Clause` | `LegalConcept` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REGULATES` | `Article`, `Clause` | `LegalSubject`, `LegalAction` | `confidence`, `llm_model`, `created_at` | no | yes |
-| `REQUIRES` | `LegalSubject` | `LegalConcept`, `Obligation` | `confidence`, `llm_model`, `created_at` | no | yes |
+| `REQUIRES` | `LegalSubject` | `LegalConcept`; `Obligation` only in runtime/future phase | `confidence`, `llm_model`, `created_at` | no | yes |
 | `HAS_CONDITION` | `LegalAction`, `Obligation`, `Right` | `Condition` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `HAS_EXCEPTION` | `Article`, `Clause`, `LegalAction` | `Exception` | `confidence`, `llm_model`, `created_at` | no | yes |
 
@@ -149,9 +152,35 @@ Only these relation names are current. Relation names use active voice.
 
 Semantic relation provenance is mandatory. The confidence scorer produces `confidence`; the extraction or runtime layer must provide `llm_model` and `created_at` before repository write.
 
-### 3.1 `GUIDES` Whitelist
+### 3.1 Temporal Relation Direction
+
+Temporal relations always use active voice from the newer legal unit to the older affected legal unit:
+
+```cypher
+(new_doc_or_unit)-[:AMENDS {effective_from}]->(old_doc_or_unit)
+(new_doc)-[:REPEALS {effective_from}]->(old_doc_or_unit)
+(new_doc)-[:REPLACES {effective_from}]->(old_doc)
+```
+
+To find newer changes that affect an existing node:
+
+```cypher
+MATCH (newer)-[:AMENDS|REPEALS|REPLACES]->(old {id: $id})
+RETURN newer
+```
+
+To find what a new amending document changed:
+
+```cypher
+MATCH (newer {id: $id})-[:AMENDS|REPEALS|REPLACES]->(old)
+RETURN old
+```
+
+### 3.2 `GUIDES` Whitelist
 
 `GUIDES` uses a whitelist instead of a numeric `level` property. `level` must not be stored in Neo4j.
+
+`GUIDES_WHITELIST` is an operational whitelist for this project scope, not a complete legal hierarchy model for all Vietnamese normative documents. It covers the document type pairs observed or expected in the selected corpus.
 
 ```python
 GUIDES_WHITELIST = {
@@ -169,7 +198,7 @@ GUIDES_WHITELIST = {
 }
 ```
 
-### 3.2 Legacy Relation Aliases
+### 3.3 Legacy Relation Aliases
 
 These names may appear in archived data, old docs, or generated samples only. They are not accepted by current validators.
 

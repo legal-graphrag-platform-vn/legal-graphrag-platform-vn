@@ -35,6 +35,7 @@ Use this skill for work in this repository.
 - Do not accept legacy relation aliases as current behavior.
 - Do not broaden validator acceptance to match a stale prompt or stale doc.
 - Do not keep dead CLI paths or dead compatibility branches.
+- Do not use files under `plans/archive/` as implementation contracts.
 - Do not let confidence scoring override a hard ontology or schema failure.
 - Do not change one side of a contract without updating the matching prompt, validator, test, and doc.
 

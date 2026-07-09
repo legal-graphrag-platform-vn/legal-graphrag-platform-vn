@@ -28,7 +28,7 @@ User Query (Vietnamese NL)
              ▼
 ┌─────────────────────────┐
 │   Reranker              │
-│  (BM25 hybrid /         │
+│  (Phase 2.5 optional    │
 │   cross-encoder)        │
 └────────────┬────────────┘
              │
@@ -53,6 +53,8 @@ User Query (Vietnamese NL)
 ## 1. NLU Processing
 
 ### Intent Classifier
+
+> Model choice: Gemini 2.5 Flash few-shot is the primary implementation path. PhoBERT-base-v2, XLM-R, and BamiBERT are ablation/fine-tune candidates only after an intent-labeled dataset exists. See `10_tech_stack.md` → Model Candidate Matrix.
 
 **6 Intent Classes:**
 
@@ -94,6 +96,8 @@ Intent:
 
 ### Temporal Extractor
 
+> Model choice: rule-based date parser is primary; Gemini 2.5 Flash structured output is fallback for ambiguous temporal wording. See `10_tech_stack.md` → Model Candidate Matrix.
+
 ```python
 TEMPORAL_EXTRACTION_PROMPT = """
 Trích xuất thông tin thời gian từ câu hỏi sau (nếu có):
@@ -128,7 +132,7 @@ TRAVERSAL_POLICIES = {
         "relations": ["AMENDS", "REPLACES", "REPEALS"],  # ADR-17: active voice
         "max_depth": 3,
         "follow_temporal": True,
-        "priority": "latest"  # Ưu tiên node cuối cùng trong chain
+        "priority": "latest"  # Scope M3: giả định chain tuyến tính; DAG là future work
     },
     "hierarchy": {
         "relations": ["GUIDES", "CONTAINS"],  # ADR-17: IMPLEMENTED_BY+GUIDED_BY → GUIDES
@@ -169,13 +173,15 @@ LIMIT 20
 
 // Template cho Temporal Time Travel (validity intent)
 MATCH (start:Article {id: $entry_id})
-OPTIONAL MATCH chain = (start)-[:AMENDS|REPLACES*1..5]->(latest)
+OPTIONAL MATCH chain = (newer)-[:AMENDS|REPEALS|REPLACES*1..5]->(start)
 WHERE ALL(r IN relationships(chain) WHERE
   r.effective_from <= $query_date
   AND (r.effective_to IS NULL OR r.effective_to > $query_date)
 )
-RETURN start, chain, latest
+RETURN start, chain, collect(newer) AS newer_versions
 ```
+
+Temporal relation direction is active voice: newer legal units point to older affected legal units. To ask "what changed this old node?", traverse incoming `AMENDS|REPEALS|REPLACES`. To ask "what did this new node change?", traverse outgoing `AMENDS|REPEALS|REPLACES`.
 
 ---
 
@@ -196,7 +202,7 @@ class RetrievalContext:
 
 @dataclass
 class TextChunk:
-    id: str                    # e.g., "LDN2020_D46_K1"
+    id: str                    # e.g., "ldn_2020_art46_cl1"
     content: str               # Full text of clause
     source: str                # "Luật Doanh nghiệp 2020"
     article_number: int        # 46
@@ -206,7 +212,7 @@ class TextChunk:
 
 @dataclass
 class GraphPath:
-    nodes: list[str]           # ["ldn2020_art46", "ldn2020_art29"]  # naming convention: legal_ontology.md §6
+    nodes: list[str]           # ["ldn_2020_art46", "ldn_2020_art29"]  # naming convention: legal_ontology.md §4
     relations: list[str]       # ["REFERS_TO"]  # ADR-17: REFERENCES → REFERS_TO
     path_description: str      # Human-readable: "Điều 46 viện dẫn Điều 29"
     is_temporal_valid: bool
@@ -228,9 +234,9 @@ có hiệu lực tại thời điểm đó.
 Định dạng trả lời (JSON):
 {
   "answer": "Câu trả lời đầy đủ...",
-  "citations": ["ldn2020_art46_cl1", "ldn2020_art29"],  // naming: legal_ontology.md §6
+  "citations": ["ldn_2020_art46_cl1", "ldn_2020_art29"],  // naming: legal_ontology.md §4
   "reasoning_path": [
-    {"from": "ldn2020_art46", "relation": "REFERS_TO", "to": "ldn2020_art29",  // ADR-17
+    {"from": "ldn_2020_art46", "relation": "REFERS_TO", "to": "ldn_2020_art29",  // ADR-17
      "explanation": "Điều 46 viện dẫn quy định vốn tại Điều 29"}
   ],
   "temporal_note": "Câu trả lời áp dụng cho giai đoạn 2021-2024",
@@ -283,12 +289,26 @@ result = evaluate(
 
 ---
 
+## Reranker Policy
+
+Reranking is not part of M3. It is enabled only in Phase 2.5 after vector + graph + temporal retrieval has a measurable baseline.
+
+Allowed candidates:
+- Default candidate: `bge-reranker-v2-m3`
+- Ablation candidate: `Qwen3-Reranker-0.6B`
+- Secondary candidate: `gte-multilingual-reranker-base`
+- Non-model keyword path: Neo4j fulltext / BM25 fusion
+
+Do not use `ms-marco-MiniLM-L-6-v2` as the primary reranker for Vietnamese legal text.
+
+---
+
 ## Open Questions — GraphRAG Specific
 
 | # | Câu Hỏi | Priority |
 |---|---|---|
 | 1 | Depth limit 3 có đủ không, hay cần 4-5 cho multi-hop? | High |
 | 2 | Khi graph paths rỗng (không tìm thấy), fallback như thế nào? | High |
-| 3 | Reranker cuối cùng dùng gì: BM25 hybrid hay cross-encoder? | Medium |
+| 3 | Reranker Phase 2.5 chọn `bge-reranker-v2-m3` hay ablation `Qwen3-Reranker-0.6B`? | Medium |
 | 4 | Có giới hạn số lượng context tokens không? (context window) | Medium |
 | 5 | Khi có temporal conflict (2 versions cùng valid), xử lý thế nào? | High |

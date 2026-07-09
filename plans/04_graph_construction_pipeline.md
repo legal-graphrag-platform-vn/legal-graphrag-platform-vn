@@ -35,13 +35,23 @@
     │   Output: Validated JSON | ValidationError
     │
     ▼
+[Step 3.5] Relation Normalizer / Enricher
+    │   Input : Validated JSON + document/article context + LLM config
+    │   Output: Relations with ontology-required properties
+    │
+    ▼
+[Step 3.6] Label Normalization
+    │   Input : Extraction labels (Entity, Concept, Action)
+    │   Output: Canonical ontology labels (LegalSubject, LegalConcept, LegalAction)
+    │
+    ▼
 [Step 4] Ontology Validation
-    │   Input : Validated JSON
+    │   Input : Enriched relations
     │   Output: Ontology-compliant triples | OntologyError
     │
     ▼
 [Step 5] Confidence Scoring                       ← ADR-06: rule-based, không phải N=3
-    │   Input : Validated JSON + graph context
+    │   Input : Enriched, ontology-valid relations + graph context
     │   Output: confidence score ∈ [0, 1] (weighted multi-criteria)
     │
     ▼
@@ -75,15 +85,17 @@ stateDiagram-v2
 Để đảm bảo hệ thống không bị "gãy" ở các bước nối tiếp, mỗi bước đều có một Output Schema chuẩn và một bản cam kết (Data Contract).
 
 ### 1. Crawler Output & Contract
-**Schema:** `data/raw/<doc_id>/metadata.json` và `data/raw/<doc_id>/source.txt`.
+**Schema:** `data/raw/<raw_doc_code>/metadata.json` và `data/raw/<raw_doc_code>/source.txt`.
 ```json
 {
-  "doc_id": "LDN2020",
+  "raw_doc_code": "LDN2020",
+  "graph_id": "ldn_2020",
   "title": "Luật Doanh nghiệp 2020",
   "number": "59/2020/QH14",
   "type": "Law",
   "issuer_name": "Quốc hội",
   "issuer_branch": "LEGISLATIVE",
+  "normative": true,
   "issued_date": "2020-06-17",
   "effective_from": "2021-01-01",
   "effective_to": null,
@@ -91,13 +103,19 @@ stateDiagram-v2
   "source_url": "https://vbpl.vn/..."
 }
 ```
-> **Contract**: `doc_id`, `title`, `source_url` KHÔNG BAO GIỜ null. `source.txt` chứa raw text riêng, không nằm trong `metadata.json`. Crawler chịu trách nhiệm lưu cả hai theo cùng `doc_id`, đồng thời map `issuer_name` thành ID theo `ISSUER_BRANCH_MAP`.
+> **Contract**: `raw_doc_code`, `graph_id`, `title`, `source_url` KHÔNG BAO GIỜ null. `raw_doc_code` là mã crawl/thư mục gốc; `graph_id` là ID canonical dùng cho parser, validator, writer, citation và Neo4j `MERGE`. `type` là raw crawler field; parser/writer phải map sang ontology field `doc_type`. `status` là raw crawler field; parser/writer phải map sang ontology field `legal_status` (`ACTIVE`, `REPEALED`, etc.) trước mọi graph output. `normative` phải được derive từ `doc_type` hoặc metadata nguồn; với corpus hiện tại mặc định `true` cho văn bản quy phạm pháp luật. `source.txt` chứa raw text riêng, không nằm trong `metadata.json`. Crawler chịu trách nhiệm lưu cả hai theo cùng `raw_doc_code`, đồng thời map `issuer_name` thành ID theo `ISSUER_BRANCH_MAP`.
 
 ### 2. Parser Output & Contract
 **Schema:** Cây JSON phân cấp cấu trúc văn bản.
 ```json
 {
-  "document": { "id": "LDN2020" },
+  "document": {
+    "id": "ldn_2020",
+    "doc_type": "Law",
+    "normative": true,
+    "issuer_name": "Quốc hội",
+    "legal_status": "ACTIVE"
+  },
   "articles": [
     {
       "number": "17",
@@ -109,7 +127,7 @@ stateDiagram-v2
   ]
 }
 ```
-> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn2020_art17_cl1`).
+> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Parser phải normalize `raw_doc_code`/metadata thành `document.id = graph_id`, `type` thành `doc_type`, `status` thành `legal_status`, và bảo đảm `normative` tồn tại trước mọi bước downstream. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn_2020_art17_cl1`).
 
 ### 3. Extractor Output & Contract
 **Schema:** JSON danh sách entities và relations.
@@ -139,17 +157,19 @@ Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effe
 
 **Input**: URL văn bản pháp luật (tab `?tabs=thuoc-tinh` trên vbpl.vn)
 **Output**: 
-1. `source.txt` chứa raw text văn bản (lưu vào `data/raw/<doc_id>/`)
+1. `source.txt` chứa raw text văn bản (lưu vào `data/raw/<raw_doc_code>/`)
 2. `metadata.json` chứa thông tin cứng (cào từ tab **Thuộc tính** vbpl.vn — controlled vocabulary, không để LLM đoán):
 
 ```json
 {
-  "doc_id":        "LDN2020",
+  "raw_doc_code":  "LDN2020",
+  "graph_id":      "ldn_2020",
   "title":         "Luật Doanh nghiệp số 59/2020/QH14",
   "number":        "59/2020/QH14",
   "type":          "Law",
   "issuer_name":   "Quốc hội",
   "issuer_branch": "LEGISLATIVE",
+  "normative":     true,
   "issued_date":   "2020-06-17",
   "effective_from": "2021-01-01",
   "effective_to":  null,
@@ -160,6 +180,10 @@ Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effe
 
 > `issuer_name` cào từ field **"Cơ quan ban hành"** tab Thuộc tính — đã normalize theo controlled vocabulary vbpl.vn.  
 > `issuer_branch` map qua `ISSUER_BRANCH_MAP` trong `vbpl_crawler.py`; default `OTHER`.  
+> `graph_id` là ID duy nhất writer được dùng trong Neo4j. Nếu crawler chỉ có `raw_doc_code`, parser/writer phải normalize sang canonical ID trước `MERGE`.
+> `type` là raw metadata từ website/crawler, không phải ontology property. Writer phải chuyển thành `doc_type`.
+> `status` là raw metadata từ website, không phải ontology property. Writer phải chuyển thành `legal_status` theo enum trong `legal_ontology.md`.
+> `normative` mặc định `true` cho corpus văn bản quy phạm pháp luật hiện tại, trừ khi metadata nguồn chứng minh ngược lại.
 > Writer dùng `issuer_name` để `MERGE (:Issuer {id: slug(issuer_name)})` per **ADR-14 Rev.1**.
 
 
@@ -205,11 +229,15 @@ PATTERNS = {
 ```json
 {
   "document": {
-    "id": "LDN2020",
+    "id": "ldn_2020",
     "title": "Luật Doanh nghiệp",
     "number": "59/2020/QH14",
+    "doc_type": "Law",
+    "normative": true,
+    "issuer_name": "Quốc hội",
     "issued_date": "2020-06-17",
-    "effective_from": "2021-01-01"
+    "effective_from": "2021-01-01",
+    "legal_status": "ACTIVE"
   },
   "articles": [
     {
@@ -239,6 +267,7 @@ PATTERNS = {
 
 > [!NOTE]
 > **Phase 1 scope**: LLM extraction hiện tại chỉ cover 3 semantic type (`Entity/Concept/Action` → `LegalSubject/LegalConcept/LegalAction`). `Obligation/Right/Condition/Exception` thuộc Future work — xem `legal_ontology.md` §2.2 để biết rationale và điều kiện triển khai.
+> Phase 1 validator chỉ cho phép `REQUIRES: LegalSubject -> LegalConcept` (`Entity -> Concept` trong extraction schema). `LegalSubject -> Obligation` thuộc runtime/future phase, không persist trong graph construction M1-M3.
 
 ### Two-Pass Strategy
 
@@ -282,12 +311,12 @@ Entities: {entities_json}
 
 Xác định các quan hệ giữa entities.
 Chỉ sử dụng các relation types sau:
-- AMENDS: A sửa đổi B (Article/Clause scope)
-- REPLACES: A thay thế hoàn toàn B (cùng cấp)
-- REPEALS: A bãi bỏ B (tail luôn là Document)
+- AMENDS: Văn bản/đơn vị mới hơn sửa đổi văn bản/đơn vị cũ hơn
+- REPLACES: Văn bản mới hơn thay thế hoàn toàn văn bản cũ hơn
+- REPEALS: Văn bản mới hơn bãi bỏ văn bản/đơn vị cũ hơn
 - REFERS_TO: A viện dẫn B
 - DEFINES: Article/Clause định nghĩa Concept
-- REGULATES: Article/Clause điều chỉnh Entity/Concept/Action
+- REGULATES: Article/Clause điều chỉnh Entity/Action
 - REQUIRES: Entity yêu cầu/phải có Concept
 - GUIDES: Văn bản cấp cao hướng dẫn cấp thấp (Law→Decree, Decree→Circular...)
 
@@ -317,7 +346,7 @@ ENTITY_SCHEMA = {
     "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
         "type": {"enum": [
-            "Document", "Article", "Clause", "Point",
+            "Document", "Chapter", "Article", "Clause", "Point",
             "Concept", "Entity",
             "Action"   # v1.1.0: hành vi pháp lý (thành lập, góp vốn, giải thể...)
         ]},
@@ -354,23 +383,74 @@ RELATION_SCHEMA = {
 
 ---
 
+## Step 3.5: Relation Normalizer / Enricher
+
+LLM output intentionally stays small: `head`, `relation`, `tail`, `evidence`, `confidence`. Before label normalization, ontology validation, and any writer handoff, the pipeline must enrich relation properties required by `legal_ontology.md`.
+
+**Required normalization rules:**
+
+| Relation | Input | Output properties |
+|---|---|---|
+| `REFERS_TO` | `evidence`, parser citation context | `citation_text = evidence`, `citation_type = DIRECT` when citation is explicit; otherwise `INDIRECT` or `RANGE` |
+| `DEFINES` | `confidence`, LLM provider config | `confidence`, `llm_model`, `created_at` |
+| `REGULATES` | `confidence`, LLM provider config | `confidence`, `llm_model`, `created_at` |
+| `REQUIRES` | `confidence`, LLM provider config, article context | `confidence`, `llm_model`, `created_at`, `source_article` |
+| `AMENDS`, `REPEALS`, `REPLACES` | document metadata | `effective_from`; `source_doc_id` when relation is emitted from the current document |
+
+```python
+def enrich_relation(raw_relation, *, document, article, llm_model, created_at):
+    props = {}
+    if raw_relation.relation in {"AMENDS", "REPEALS", "REPLACES"}:
+        props["effective_from"] = document.effective_from
+    if raw_relation.relation == "REFERS_TO":
+        props["citation_text"] = raw_relation.evidence
+        props["citation_type"] = "DIRECT"
+    if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES"}:
+        props["confidence"] = raw_relation.confidence
+        props["llm_model"] = llm_model
+        props["created_at"] = created_at
+    if raw_relation.relation == "REQUIRES":
+        props["source_article"] = f"{document.id}_art{article.number}"
+    return props
+```
+
+> **Rule**: Ontology validation receives enriched properties, not raw LLM output. The writer must never fill these required ontology properties silently after validation.
+
+---
+
+## Step 3.6: Label Normalization
+
+Pydantic extraction labels are not Neo4j ontology labels. They exist only at the LLM boundary because the extraction task is intentionally simple.
+
+**Mandatory mapping before ontology validation:**
+
+| Extraction label | Canonical ontology label |
+|---|---|
+| `Entity` | `LegalSubject` |
+| `Concept` | `LegalConcept` |
+| `Action` | `LegalAction` |
+| `Document`, `Chapter`, `Article`, `Clause`, `Point` | unchanged |
+
+```python
+ONTOLOGY_LABEL_MAP = {
+    "Entity": "LegalSubject",
+    "Concept": "LegalConcept",
+    "Action": "LegalAction",
+}
+```
+
+> **Rule**: `Entity`, `Concept`, and `Action` must not appear in Step 4 ontology constraints or Neo4j writes. If they appear after Step 3.6, it is a normalization bug.
+
+---
+
 ## Step 4: Ontology Validation
 
 > [!IMPORTANT]
 > Source of truth: `legal_ontology.md` v1.4.0.
-> ADR-15: `VALIDATOR_PRECEDENCE` / `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j.
+> ADR-15: `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j. Numeric precedence/level rules are legacy and must not be used in the current validator.
 > ADR-17: Tất cả relation names dùng active voice.
 
 ```python
-# Trích từ legal_ontology.md §5 — chỉ dùng trong validator, không trong Neo4j.
-VALIDATOR_PRECEDENCE = {
-    "Constitution": 5, "Law": 4, "Ordinance": 4,
-    "Resolution_NationalAssembly": 4, "Resolution_Government": 3,
-    "Resolution": 3, "Decree": 3, "PrimeMinisterDecision": 3, "Decision": 3,
-    "Resolution_Provincial": 2, "MinisterDecision": 2,
-    "Circular": 2, "JointCircular": 2, "LocalDecision": 1,
-}
-
 # GUIDES whitelist — trích từ legal_ontology.md §5
 GUIDES_WHITELIST = {
     ("Constitution", "Law"), ("Constitution", "Ordinance"),
@@ -390,6 +470,8 @@ RELATION_ENUM = {
 CONSTRAINTS = {
     "CONTAINS": {
         "valid_pairs": [
+            ("Document", "Chapter"),
+            ("Chapter",  "Article"),
             ("Document", "Article"),
             ("Article",  "Clause"),
             ("Clause",   "Point")
@@ -397,10 +479,15 @@ CONSTRAINTS = {
         "no_self_loop": True
     },
     "AMENDS": {
-        # Document→Document ĐÃ Bỏ: cấp Document dùng REPLACES hoặc REPEALS.
+        # Active direction: newer -> older affected unit.
         "valid_pairs": [
+            ("Document", "Document"),
+            ("Document", "Article"),
+            ("Document", "Clause"),
+            ("Article",  "Document"),
             ("Article",  "Article"),   # Điều→Điều
             ("Article",  "Clause"),    # Điều→Khoản ← phổ biến nhất VN
+            ("Clause",   "Document"),
             ("Clause",   "Clause"),    # Khoản→Khoản
             ("Clause",   "Article"),   # Khoản→Điều (mở rộng)
         ],
@@ -408,17 +495,18 @@ CONSTRAINTS = {
         "required_properties": ["effective_from"]
     },
     "REPLACES": {
-        "head_tail_same_type": True,
         "valid_pairs": [
             ("Document", "Document"),
-            ("Article",  "Article")
         ],
         "no_self_loop": True,
         "required_properties": ["effective_from"]
     },
     "REPEALS": {
-        "allowed_tail": ["Document"],   # Tail LUÔN là Document
-        "head_tail_same_type": False,
+        "valid_pairs": [
+            ("Document", "Document"),
+            ("Document", "Article"),
+            ("Document", "Clause"),
+        ],
         "required_properties": ["effective_from"]
     },
     "GUIDES": {
@@ -430,37 +518,38 @@ CONSTRAINTS = {
         "valid_pairs": [
             ("Article", "Article"),
             ("Article", "Clause"),
+            ("Article", "Point"),
             ("Article", "Document"),
             ("Clause",  "Article"),
             ("Clause",  "Clause"),
+            ("Clause",  "Point"),
             ("Clause",  "Document"),
             ("Point",   "Article"),
             ("Point",   "Clause"),
             ("Point",   "Point"),
             ("Point",   "Document"),
-        ]
+        ],
+        "required_properties": ["citation_text", "citation_type"]
     },
     "DEFINES": {
         "valid_pairs": [
-            ("Article", "Concept"),
-            ("Clause",  "Concept")
-        ]
+            ("Article", "LegalConcept"),
+            ("Clause",  "LegalConcept")
+        ],
+        "required_properties": ["confidence", "llm_model", "created_at"]
     },
     "REGULATES": {
         "valid_pairs": [
-            ("Article", "Entity"),
-            ("Article", "Concept"),
-            ("Article", "Action"),
-            ("Clause",  "Entity"),
-            ("Clause",  "Concept"),
-            ("Clause",  "Action"),
-        ]
+            ("Article", "LegalSubject"),
+            ("Article", "LegalAction"),
+            ("Clause",  "LegalSubject"),
+            ("Clause",  "LegalAction"),
+        ],
+        "required_properties": ["confidence", "llm_model", "created_at"]
     },
     "REQUIRES": {
-        "valid_pairs": [
-            ("Entity", "Concept"),
-            ("Entity", "Entity"),
-        ]
+        "valid_pairs": [("LegalSubject", "LegalConcept")],
+        "required_properties": ["confidence", "llm_model", "created_at"]
     }
 }
 ```
@@ -490,13 +579,25 @@ def test_no_orphan_constraints():
     assert orphans == set(), f"Constraints thừa: {orphans}"
 
 def test_refers_to_not_rejected():
-    ok, err = validate_relation("Article", "REFERS_TO", "Article")
+    ok, err = validate_relation(
+        "Article",
+        "REFERS_TO",
+        "Article",
+        properties={"citation_text": "theo Điều 17", "citation_type": "DIRECT"},
+    )
     assert ok, f"REFERS_TO bị reject: {err}"
 
-def test_replaces_same_type_enforced():
+def test_requires_canonical_labels_only():
+    props = {"confidence": 0.8, "llm_model": "gemini:gemini-2.5-flash", "created_at": "2026-07-09T00:00:00+00:00"}
+    ok, err = validate_relation("LegalSubject", "REQUIRES", "LegalConcept", properties=props)
+    assert ok, f"REQUIRES bị reject: {err}"
+    ok, _ = validate_relation("Entity", "REQUIRES", "Concept", properties=props)
+    assert not ok
+
+def test_replaces_document_only():
     ok, _ = validate_relation("Article", "REPLACES", "Document", properties={"effective_from": "2021-01-01"})
     assert not ok
-    ok, _ = validate_relation("Article", "REPLACES", "Article", properties={"effective_from": "2021-01-01"})
+    ok, _ = validate_relation("Document", "REPLACES", "Document", properties={"effective_from": "2021-01-01"})
     assert ok
 
 def test_guides_whitelist_valid():

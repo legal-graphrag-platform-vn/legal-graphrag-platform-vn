@@ -16,14 +16,15 @@
 | **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.4.0 — Source of Truth** | 🔴 Đọc trước |
 | [00_architecture_decisions.md](./00_architecture_decisions.md) | ADR — các quyết định kiến trúc | 🔴 Đọc trước |
 | [01_research_contributions.md](./01_research_contributions.md) | 5 đóng góp nghiên cứu chính | 🔴 Đọc trước |
-| ~~[02_ontology_specification.md](./02_ontology_specification.md)~~ | ~~Ontology cũ~~ — SUPERSEDED bởi legal_ontology.md | ⚠️ Lịch sử |
 | [03_architecture.md](./03_architecture.md) | Kiến trúc hệ thống tổng thể | 🟡 Review |
 | [04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md) | Pipeline xây dựng Knowledge Graph (RC2) | 🟡 Review |
 | [05_graphrag_retrieval.md](./05_graphrag_retrieval.md) | GraphRAG + Traversal Policy (RC3+RC4) | 🟡 Review |
 | [07_implementation_timeline.md](./07_implementation_timeline.md) | Lộ trình triển khai | 🟡 Điều chỉnh theo deadline |
 | [08_dataset_and_scope.md](./08_dataset_and_scope.md) | Phạm vi dữ liệu và ground truth | 🔴 Cần assign người làm |
-| [09_open_questions.md](./09_open_questions.md) | Câu hỏi mở — agenda họn nhóm | 🔴 Giải quyết trong họn |
+| [09_open_questions.md](./09_open_questions.md) | Câu hỏi mở — agenda họp nhóm | 🔴 Giải quyết trong họp |
 | [10_tech_stack.md](./10_tech_stack.md) | Công nghệ sử dụng | 🟢 Tham khảo |
+
+> Historical ontology drafts live under `plans/archive/`. Do not use archived files for implementation; the only active ontology contract is `legal_ontology.md`.
 
 ---
 
@@ -64,7 +65,7 @@
 
 - [x] RC1 — Ontology: **FROZEN v1.4.0** — xem [legal_ontology.md](./legal_ontology.md)
 - [ ] RC2 — Pipeline: **Đang triển khai** M3 (Neo4j Writer)
-- [ ] RC3 — GraphRAG: **Chưa chốt** phương pháp Intent Classification
+- [ ] RC3 — GraphRAG: **Đã chốt intent taxonomy 6 lớp** — xem [05_graphrag_retrieval.md](./05_graphrag_retrieval.md)
 - [ ] RC4 — Temporal: **Tương đối rõ** — edge timestamps + legal_status
 - [ ] RC5 — Evaluation: **Chưa chốt** ai tạo ground truth dataset
-- [ ] Dataset: **Chưa chốt** danh sách 20 văn bản cụ thể
+- [ ] Dataset: **Chưa chốt** chọn 4 văn bản bắt buộc hay mở rộng lên 10 văn bản

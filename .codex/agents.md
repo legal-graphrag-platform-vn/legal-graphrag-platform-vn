@@ -29,7 +29,8 @@ plans/
 ├── legal_ontology.md
 ├── 00_architecture_decisions.md
 ├── 01_research_contributions.md
-├── 02_ontology_specification.md
+├── archive/
+│   └── 02_ontology_specification_superseded.md
 ├── 03_architecture.md
 ├── 04_graph_construction_pipeline.md
 ├── 05_graphrag_retrieval.md
@@ -56,8 +57,8 @@ The ADR log. It explains why the major design choices were made, with problem st
 ### `plans/01_research_contributions.md`
 The research framing of the thesis. It maps the project to RC1-RC5 and explains the contribution structure in academic terms.
 
-### `plans/02_ontology_specification.md`
-Historical ontology document. It is kept for reference only and should not be treated as the active implementation contract.
+### `plans/archive/02_ontology_specification_superseded.md`
+Historical ontology document. It is archived for reference only and must not be treated as the active implementation contract.
 
 ### `plans/03_architecture.md`
 High-level system architecture. It explains the layered design, the knowledge boundary between graph and runtime reasoning, and the overall retrieval flow.

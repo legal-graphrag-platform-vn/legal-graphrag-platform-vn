@@ -314,7 +314,7 @@ Proposed: Temporal GraphRAG
 > Đây là **hypothesis**, không phải kết quả thực. Cần experiment để verify.
 
 ### Justification cho hội đồng
-> *"Đề tài sử dụng bộ Ground Truth tự xây dựng từ văn bản pháp luật chính thức, bao gồm 100 câu hỏi tổng quát, 50 câu hỏi temporal, và 20-30 trường hợp đánh giá XAI. Hệ thống đề xuất được so sánh với baseline Vector RAG trên cùng bộ dữ liệu, đảm bảo tính công bằng và có thể tái hiện."*
+> *"Đề tài sử dụng bộ Ground Truth tự xây dựng từ văn bản pháp luật chính thức. Current committed scope là 50 câu hỏi tổng quát + 25 câu hỏi temporal; target full scope là 100 câu hỏi tổng quát + 50 câu hỏi temporal, cộng 20-30 trường hợp đánh giá XAI. Hệ thống đề xuất được so sánh với baseline Vector RAG trên cùng bộ dữ liệu, đảm bảo tính công bằng và có thể tái hiện."*
 
 ---
 
@@ -392,11 +392,11 @@ Per **`legal_ontology.md v1.1.0`** — CONTAINS chain đầy đủ:
 ```cypher
 // Structural hierarchy — Chapter là node thực sự
 (:Document)-[:CONTAINS]->(:Chapter {
-  id: "ldn2020_ch2",
+  id: "ldn_2020_ch2",
   number: "II",
   title: "Thành lập doanh nghiệp"
 })-[:CONTAINS]->(:Article {
-  id: "ldn2020_art17",
+  id: "ldn_2020_art17",
   number: "17",
   title: "..."
 })
@@ -435,7 +435,7 @@ MATCH (doc:Document {id: "ldn_2020"})-[:CONTAINS*1..3]->(a:Article)
   id: "concept_von_dieu_le",
   name: "Vốn điều lệ",
   definition: "Là tổng giá trị tài sản...",  // ← attribute
-  defined_in: "LDN2020_D4_K22"               // ← backref để cite
+  defined_in: "ldn_2020_art4_cl22"           // ← backref để cite
 })
 ```
 
@@ -554,7 +554,7 @@ MERGE (doc)-[:ISSUED_BY]->(i)
 **Trạng thái**: FROZEN
 
 ### Decision
-`DOCUMENT_LEVELS` và `GUIDES_WHITELIST` chỉ sống trong Validator rule engine Python code, không phải property trong Neo4j node.
+`GUIDES_WHITELIST` chỉ sống trong Validator rule engine Python code, không phải property trong Neo4j node. Numeric `DOCUMENT_LEVELS`/precedence là legacy option và không dùng trong ontology v1.4.0.
 
 ### Rationale
 Ontology mô hình hóa thực thể của thế giới pháp lý, không phải logic kiểm tra. `level=3` trên Issuer node là implementation artifact, không phải ontology concept.
@@ -603,11 +603,11 @@ Prompt đơn giản → LLM output ổn định hơn. Writer là nơi normalize,
 
 ### Decision
 1. **Denormalization**: Gắn `effective_from`, `effective_to`, `legal_status` trực tiếp lên `Article` và `Clause` nodes (không chỉ ở Document). Neo4j Writer sẽ tự tính toán (cascade) các property này khi insert các relation `AMENDS`, `REPEALS`.
-2. **Future Extension**: Định hướng tương lai cho large-scale deployment là sử dụng Snapshot Builder (FRBR-style) làm cache view phục vụ retrieval siêu tốc mà không phá vỡ Raw Graph (Source of truth). Thêm node `Snapshot` vào ontology (v1.3.0) như một placeholder (không implement).
+2. **Future Extension**: Định hướng tương lai cho large-scale deployment là sử dụng Snapshot Builder (FRBR-style) làm cache view phục vụ retrieval siêu tốc mà không phá vỡ Raw Graph (Source of truth). Không thêm `Snapshot` vào ontology v1.4.0; Snapshot Builder là future architecture, không thuộc ontology hiện tại.
 
 ### Rationale
 - **Với đồ án hiện tại**: Sử dụng Denormalized Graph làm Source of Truth cân bằng giữa độ phức tạp và giá trị nghiên cứu. Tránh việc kéo dài thêm thời gian với một khối lượng code khổng lồ của Snapshot Builder (RC6).
-- **Với kiến trúc tương lai**: Việc định hình trước `Snapshot` layer bảo vệ ontology không bị vỡ khi hệ thống scale, đảm bảo Hybrid Retriever có thể kết hợp Raw Graph (cho reasoning) và Snapshot (cho querying) sau này.
+- **Với kiến trúc tương lai**: `Snapshot` layer có thể được thiết kế như projection/cache riêng, đảm bảo Hybrid Retriever có thể kết hợp Raw Graph (cho reasoning) và Snapshot (cho querying) sau này mà không làm sai ontology v1.4.0.
 
 ---
 

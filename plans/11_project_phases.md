@@ -35,7 +35,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 | P0-3 | Kiểm tra raw web text của tất cả văn bản trong corpus | Data |
 | P0-4 | Review và sign-off `legal_ontology.md` | Cả nhóm |
 | P0-5 | Viết `tests/test_ontology_consistency.py` và chạy pass | Backend |
-| P0-6 | Chốt toàn bộ 09_open_questions Q1-Q11 còn lại | Cả nhóm |
+| P0-6 | Chốt toàn bộ `09_open_questions.md` Q1-Q15 còn lại, hoặc gán owner + deadline cho câu chưa thể chốt ngay | Cả nhóm |
 | P0-7 | Setup repo structure: `src/`, `tests/`, `data/`, `scripts/` | Lead |
 | P0-8 | Pre-built concept list ~50 entries (ADR-14, Q14) | Data |
 
@@ -47,7 +47,7 @@ Thiết lập môi trường, chốt ontology, và xác nhận mọi giả đị
 | C0-2 | 100% văn bản trong corpus có `source.txt` và `metadata.json` | Script check: raw crawl tồn tại cho mọi `doc_id` |
 | C0-3 | 5/5 unit tests trong `test_ontology_consistency.py` pass | `pytest tests/test_ontology_consistency.py` → 5 passed |
 | C0-4 | RELATION_ENUM == set(CONSTRAINTS.keys()) | Test C0-3 đã bao gồm |
-| C0-5 | Tất cả Q1-Q11 trong `09_open_questions.md` đã có Decision | Decision Log điền đầy đủ |
+| C0-5 | Tất cả Q1-Q15 trong `09_open_questions.md` đã có Decision hoặc owner + deadline rõ ràng | Decision Log điền đầy đủ |
 | C0-6 | `legal_ontology.md` được sign-off bởi cả nhóm | Git commit có message "chốt ontology" |
 
 ---

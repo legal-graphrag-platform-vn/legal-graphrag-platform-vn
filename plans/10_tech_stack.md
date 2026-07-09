@@ -16,7 +16,7 @@
 | **LLM (main)** | Gemini **2.5** Flash | Cost-effective, hỗ trợ Vietnamese tốt | GPT-4o-mini |
 | **LLM (judge)** | Gemini **2.5** Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
 | **LLM SDK** | `google-genai` | SDK mới (thay `google-generativeai` đã deprecated) | — |
-| **Embedding** | `bkai-foundation-models/vietnamese-bi-encoder` | Tiếng Việt native | OpenAI text-embedding-3-small |
+| **Embedding** | `bkai-foundation-models/vietnamese-bi-encoder` | Tiếng Việt native, 768-dim khớp vector index | `BAAI/bge-m3` sau khi verify dimension |
 | **Hierarchy Parser** | Raw text parser | Khớp với `source.txt` từ crawler; retry/fallback selector nếu crawl lỗi | — |
 | **Framework** | **Custom Pipeline** (không dùng LlamaIndex) | LlamaIndex không có direct support cho cấu trúc hà văn bản pháp luật VN | LlamaIndex |
 | **Backend** | FastAPI | Async, OpenAPI docs tự động | Flask |
@@ -108,29 +108,32 @@ model = SentenceTransformer(
     "bkai-foundation-models/vietnamese-bi-encoder"
 )
 
-# Fallback: OpenAI (nếu Vietnamese model không đủ tốt)
-# from openai import OpenAI
-# client.embeddings.create(model="text-embedding-3-small", input=text)
+# Fallback: BAAI/bge-m3 chỉ dùng sau khi verify dimension và cập nhật vector index nếu cần.
 ```
 
 ---
 
-### LlamaIndex + Neo4j Integration
+## Model Candidate Matrix
 
-```python
-from llama_index.graph_stores.neo4j import Neo4jGraphStore
-from llama_index.core import PropertyGraphIndex
+This table is the canonical model-selection map for implementation and thesis defense. `Primary` means the default for the current research prototype. `Candidate / Fallback` means allowed alternatives for ablation, quota failure, local fallback, or future training. Before implementation, verify model availability, license, context length, output schema support, and embedding dimension.
 
-graph_store = Neo4jGraphStore(
-    username="neo4j",
-    password="password",
-    url="bolt://localhost:7687",
-    database="neo4j"
-)
+| Component | Primary | Candidate / Fallback | Future fine-tune? | Why this fits |
+|---|---|---|---|---|
+| Information Extraction | Gemini 2.5 Flash structured output | Gemini 2.5 Pro for hard cases; GPT-4o-mini; Qwen3-8B local | Optional LoRA local LLM | Needs reliable JSON/Pydantic output, Vietnamese legal text handling, low cost for batch extraction |
+| Answer Generation | Gemini 2.5 Flash | Gemini 2.5 Pro for hard cases; Qwen3-8B local | Not priority | Generation is grounded by retrieved graph evidence; fine-tuning is less important than citation discipline |
+| Judge / Evaluation | Gemini 2.5 Pro | GPT-4o; Gemini Flash smoke test | No | Judge should be stronger and more stable than the default generation model |
+| Embedding | `bkai-foundation-models/vietnamese-bi-encoder` | `Qwen3-Embedding-0.6B`; `BAAI/bge-m3` after dimension check | Yes, after query-positive pairs exist | Primary is Vietnamese-focused and 768-dim; alternatives are for retrieval ablation |
+| Intent Classifier | Gemini 2.5 Flash few-shot | PhoBERT-base-v2; XLM-R; BamiBERT | Yes, PhoBERT fine-tune | Six-class intent task can start with few-shot LLM; fine-tune only after labeled query set exists |
+| Temporal Extractor | Rule-based date regex/parser + Gemini 2.5 Flash fallback | Gemini 2.5 Pro for hard cases; BERT classifier | Not priority | Legal temporal expressions are often deterministic; LLM fallback handles ambiguous wording |
+| Reranker | Not enabled in M3 | `bge-reranker-v2-m3`; `Qwen3-Reranker-0.6B`; `gte-multilingual-reranker-base` | Yes, after retrieval dataset exists | Reranker belongs to Phase 2.5 ablation, not Neo4j Writer M3 |
+| BM25 / Full-text | Neo4j fulltext index | External BM25 only if Neo4j fulltext is insufficient | No | Not a neural model; used as keyword retrieval/fusion or optional ablation |
 
-# Custom: không dùng PropertyGraphIndex mặc định
-# mà implement custom GraphRAG với Traversal Policy
-```
+### Training Priority
+
+1. **Extraction training**: optional local LoRA only after enough corrected extraction triples exist.
+2. **Intent training**: PhoBERT/XLM-R fine-tune after a labeled intent dataset exists.
+3. **Embedding/reranker training**: only after query-positive/negative retrieval pairs exist.
+4. **Answer generation training**: not prioritized; improve prompts, retrieval, citation checks, and evidence verifier first.
 
 ---
 
@@ -192,16 +195,13 @@ frontend/
 # Python
 python >= 3.11
 
-# Required packages (không có qdrant-client — dùng Neo4j native vector)
+# Required packages (không có qdrant-client hoặc llama-index — dùng Neo4j native vector + custom pipeline)
 pip install \
-  llama-index \
-  llama-index-graph-stores-neo4j \
   neo4j \
   sentence-transformers \
-  pymupdf \
   fastapi \
   uvicorn \
-  google-generativeai \
+  google-genai \
   ragas \
   pydantic
 
@@ -215,12 +215,12 @@ pip install pytest pytest-asyncio black ruff
 
 | Model | Usage | Estimate/Month |
 |---|---|---|
-| Gemini 1.5 Flash | Extraction (20 docs, N=3) | ~$2-5 |
-| Gemini 1.5 Flash | Query answering (dev/test) | ~$3-10 |
-| Gemini 1.5 Pro | Evaluation (RAGAS judge) | ~$5-15 |
+| Gemini 2.5 Flash | Extraction (20 docs, two-pass entity + relation extraction, rule-based confidence) | ~$1-3 |
+| Gemini 2.5 Flash | Query answering (dev/test) | ~$3-10 |
+| Gemini 2.5 Pro | Evaluation (RAGAS judge) | ~$5-15 |
 | **Tổng** | | **~$10-30/month** |
 
-> **Lưu ý**: Nếu vượt budget, fallback sang Ollama + Llama3.1-8B chạy local.
+> **Lưu ý**: Nếu vượt budget, fallback sang Ollama + Llama3.1-8B chạy local. Cost phụ thuộc số Article/Clause chunks và việc chạy extraction ở Article-level hay Clause-level.
 
 ---
 
@@ -233,11 +233,7 @@ ollama pull llama3.1:8b    # General extraction
 ollama pull nomic-embed-text  # Embedding (nếu cần)
 ```
 
-```python
-# LlamaIndex với Ollama
-from llama_index.llms.ollama import Ollama
-llm = Ollama(model="llama3.1:8b", request_timeout=120.0)
-```
+Local fallback must keep the same Pydantic output schema and ontology validation path as cloud providers.
 
 ---
 

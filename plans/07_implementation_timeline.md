@@ -77,13 +77,14 @@ Phase 5 — Portal              ❌ CHƯA
 - [ ] Implement `src/writer/neo4j_writer.py`
   - Map JSONL → Cypher `MERGE` (document, article, clause, point nodes)
   - Tạo relationships từ validated relations
-  - Gắn `effective_from`, `status`, `doc_type` đúng schema
+  - Gắn `effective_from`, `effective_to`, `legal_status`, `doc_type` đúng schema
 - [ ] Chạy writer với LDN2020 JSONL output
 - [ ] Verify: `MATCH (a:Article) RETURN count(a)` → đúng 218
 
 ### Tuần 2: Embedding Generator + Vector Index
 
-- [ ] Chọn embedding model: `intfloat/multilingual-e5-large` hoặc `BAAI/bge-m3` (Vietnamese support tốt)
+- [ ] Dùng embedding model chính: `bkai-foundation-models/vietnamese-bi-encoder` (768-dim, khớp Neo4j vector index)
+- [ ] Fallback nếu chất lượng không đủ: `BAAI/bge-m3` sau khi verify dimension và cập nhật vector index nếu khác 768
 - [ ] Implement `src/writer/embedding_generator.py` — batch processing, 768-dim
 - [ ] Load vào Neo4j vector index (`article_embedding`, `clause_embedding`)
 - [ ] Verify: `CALL db.index.vector.queryNodes(...)` trả về kết quả
@@ -140,12 +141,12 @@ Evidence Verifier
 
 ### Triển khai
 
-- [ ] **2.1** Intent Classifier: phân loại `factual / temporal / relational / comparative`
+- [ ] **2.1** Intent Classifier: phân loại 6 lớp `factual / validity / hierarchy / comparison / definition / multi_hop`
 - [ ] **2.1** Vector Retriever: `queryNodes` trên `article_embedding` / `clause_embedding`
 - [ ] **2.2** Graph Expansion: từ vector results, traverse `CONTAINS`, `AMENDS`, `REFERS_TO` để lấy context liên quan
 - [ ] **2.3** Temporal Filter: Cypher filter theo `effective_from` / `effective_to` tại thời điểm T trong query
 - [ ] **2.4** BM25 Fulltext fusion (Neo4j fulltext index đã có trong schema)
-- [ ] **2.5** Cross Encoder Reranker (`ms-marco-MiniLM-L-6-v2`)
+- [ ] **2.5** Cross Encoder Reranker (default candidate: `bge-reranker-v2-m3`; ablation candidate: `Qwen3-Reranker-0.6B`)
 - [ ] Evidence Verifier: check retrieved context chứa evidence thực
 - [ ] **Benchmark từng bước** với **50 câu hỏi dev split** → Recall@5, MRR, nDCG  
   *(50 = dev split của 100 QA total; test split 50 còn lại dùng trong Phase 4 final eval)*
@@ -216,35 +217,37 @@ Evidence Verifier
 
 ### Dataset Evaluation
 
-- [ ] Tạo **100 câu hỏi general QA** từ LDN2020 + 2-3 văn bản khác  
+- [ ] Current committed scope: **50 câu hỏi general QA** từ corpus đã chọn
+- [ ] Target full scope nếu còn thời gian: **100 câu hỏi general QA** từ LDN2020 + 2-3 văn bản khác
   *Split: 50 dev (dùng Phase 2-3 tune) + 50 test (hold-out, dùng Phase 4 final eval)*
-- [ ] Tạo **50 câu hỏi temporal** (có thời điểm cụ thể)  
+- [ ] Current committed scope: **25 câu hỏi temporal** (có thời điểm cụ thể)
+- [ ] Target full scope nếu còn thời gian: **50 câu hỏi temporal**
   *Split: 25 dev + 25 test*
 - [ ] Tạo **Ground Truth** (câu trả lời đúng + citation đúng) cho 150 câu  
-  *Nếu thiếu thời gian: giảm xuống 50 general + 25 temporal (vẫn đủ statistical significance)*
+  *Minimum accepted/current committed scope: 50 general + 25 temporal. Target full scope: 100 general + 50 temporal.*
 - [ ] Review cross-check
 
 ### Baselines So Sánh
 
 | Baseline | Mô tả |
 |---|---|
-| BM25 | Full-text search thuần |
-| Naive RAG | Vector search + LLM, không có graph |
+| Naive RAG | Main baseline: Vector search + LLM, không có graph |
+| BM25 | Optional ablation: full-text search thuần nếu còn thời gian |
 | **Proposed: GraphRAG** | Vector + Graph + Temporal + Reranker |
 
 ### Expected Metrics
 
-| Metric | BM25 | Naive RAG | GraphRAG |
+| Metric | Naive RAG | Optional BM25 | GraphRAG |
 |---|---|---|---|
-| Faithfulness | - | ~0.60 | **≥ 0.80** |
-| Answer Relevancy | - | ~0.65 | **≥ 0.75** |
-| Context Recall | ~0.50 | ~0.60 | **≥ 0.70** |
-| Temporal Accuracy | ~0.30 | ~0.40 | **≥ 0.85** |
+| Faithfulness | ~0.60 | - | **≥ 0.80** |
+| Answer Relevancy | ~0.65 | - | **≥ 0.75** |
+| Context Recall | ~0.60 | ~0.50 | **≥ 0.70** |
+| Temporal Accuracy | ~0.40 | ~0.30 | **≥ 0.85** |
 | Citation Completeness | 0 | 0 | **1.0** |
 
 ### Human Evaluation
 
-- [ ] Chọn **30 câu hỏi** đại diện từ 150 câu
+- [ ] Chọn **15-30 câu hỏi** đại diện từ current committed scope hoặc target full scope
 - [ ] **3 người đánh giá** (cùng ngành luật hoặc kỹ thuật) dùng Likert 1-5
 - [ ] Tiêu chí: Correctness, Helpfulness, Citation Usefulness
 - [ ] Tính Kappa agreement giữa các evaluators
@@ -345,7 +348,7 @@ Portal
 | LLM API quota hết (Gemini 20 req/ngày) | **Cao** | Qwen3 via OpenRouter (free, không limit) |
 | Text extraction ~43% recall | Đã biết | Dùng crawler web text là nguồn chính |
 | Embedding chậm trên CPU | Trung bình | API (Google/Cohere) hoặc batch offline |
-| Ground truth thiếu | Cao | Giảm xuống 50 general + 30 temporal |
+| Ground truth thiếu | Cao | Giữ current committed scope 50 general + 25 temporal |
 | Không đủ thời gian làm React | Trung bình | Demo bằng Gradio thay thế |
 | Human evaluators khó tìm | Trung bình | Dùng GPT-4 làm judge thay thế (LLM-as-judge) |
 

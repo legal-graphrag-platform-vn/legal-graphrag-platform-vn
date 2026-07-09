@@ -65,25 +65,29 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
   "document": "ND01_2021",
   "entities": [
     {
-      "id": "ND01_2021_D5",
+      "id": "nd_01_2021_art5",
       "type": "Article",
       "label": "Điều 5. Hồ sơ đăng ký doanh nghiệp",
       "properties": {
         "effective_from": "2021-01-04",
-        "status": "active"
+        "legal_status": "ACTIVE"
       }
     }
   ],
   "relations": [
     {
-      "head": "ND01_2021",
+      "head": "nd_01_2021",
       "relation": "CONTAINS",
-      "tail": "ND01_2021_D5"
+      "tail": "nd_01_2021_art5"
     },
     {
-      "head": "LDN2020_D26",
+      "head": "ldn_2020_art26",
       "relation": "REFERS_TO",
-      "tail": "ND01_2021_D5"
+      "tail": "nd_01_2021_art5",
+      "properties": {
+        "citation_text": "theo Điều 5 Nghị định 01/2021/NĐ-CP",
+        "citation_type": "DIRECT"
+      }
     }
   ]
 }
@@ -92,7 +96,13 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
 ### Phần 2 — QA Dataset
 **Mục đích**: Đánh giá Retrieval + QA quality (RC5, Level 2-3)
 
-**Cấu trúc 100 câu hỏi:**
+**Scope chuẩn hóa:**
+
+- Current committed scope: **50 general QA + 25 temporal QA**
+- Target full scope nếu đủ thời gian: **100 general QA + 50 temporal QA**
+- Minimum accepted scope: **50 general QA + 25 temporal QA**
+
+**Cấu trúc target full 100 câu hỏi general QA:**
 
 | Loại | Số Lượng | Ví Dụ |
 |---|---|---|
@@ -107,7 +117,7 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
   "id": "QA_001",
   "question": "Điều kiện để thành lập công ty TNHH hai thành viên là gì?",
   "answer": "Theo Điều 46 Luật Doanh nghiệp 2020...",
-  "relevant_articles": ["LDN2020_D46", "LDN2020_D29"],
+  "relevant_articles": ["ldn_2020_art46", "ldn_2020_art29"],
   "difficulty": "medium"
 }
 ```
@@ -115,7 +125,7 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
 ### Phần 3 — Temporal QA Dataset
 **Mục đích**: Đánh giá Temporal Accuracy (RC5, Level 4)
 
-**50 câu hỏi temporal:**
+**Cấu trúc target full 50 câu hỏi temporal:**
 
 | Loại | Số Lượng | Ví Dụ |
 |---|---|---|
@@ -134,8 +144,8 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
     "to": "2019-12-31"
   },
   "answer": "Năm 2019, áp dụng NĐ 78/2015 (NĐ 108/2018 sửa đổi)...",
-  "relevant_articles": ["ND78_2015_D8", "ND108_2018_D1"],
-  "should_not_use": ["ND01_2021_D5"]
+  "relevant_articles": ["nd_78_2015_art8", "nd_108_2018_art1"],
+  "should_not_use": ["nd_01_2021_art5"]
 }
 ```
 
@@ -149,13 +159,13 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
   "id": "XAI_001",
   "question": "Công ty TNHH phải có bao nhiêu thành viên?",
   "expected_answer": "Từ 2 đến 50 thành viên",
-  "expected_citations": ["LDN2020_D46_K1"],
+  "expected_citations": ["ldn_2020_art46_cl1"],
   "expected_path": [
-    "LDN2020_D46",
+    "ldn_2020_art46",
     "CONTAINS",
-    "LDN2020_D46_K1",
+    "ldn_2020_art46_cl1",
     "DEFINES",
-    "Concept(SốThànhViênTốiThiểu)"
+    "LegalConcept(\"Số thành viên tối thiểu\")"
   ]
 }
 ```
