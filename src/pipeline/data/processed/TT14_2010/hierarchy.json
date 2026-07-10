@@ -1,0 +1,916 @@
+{
+  "document": {
+    "id": "TT14_2010",
+    "title": "Thông tư số 14/2010/TT-BKHĐT Hướng dẫn một số nội dung về hồ sơ, trình tự, thủ tục đăng ký doanh nghiệp theo quy định tại Nghị định số 43/2010/NĐ-CP ngày 15 tháng 4 năm 2010 của Chính phủ về đăng ký doanh nghiệp",
+    "number": "14/2010/TT-BKHĐT",
+    "doc_type": "Circular",
+    "issued_date": "2010-04-15",
+    "effective_from": "2010-07-20",
+    "status": "Hết hiệu lực toàn bộ"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi điều chỉnh",
+      "content_raw": "Phạm vi điều chỉnh\nThông tư này hướng dẫn chi tiết về:\n1. Hồ sơ, trình tự, thủ tục đăng ký thành lập và đăng ký thay đổi các nội dung đã đăng ký đối với công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh và doanh nghiệp tư nhân.\n2. Hồ sơ, trình tự, thủ tục đăng ký thành lập và đăng ký thay đổi nội dung đăng ký hoạt động đối với chi nhánh, văn phòng đại diện, địa điểm kinh doanh của doanh nghiệp.\n3. Hồ sơ, trình tự, thủ tục đăng ký thành lập và đăng ký thay đổi nội dung đăng ký đối với hộ kinh doanh.\n4. Hồ sơ, trình tự, thủ tục đăng ký giải thể công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh, doanh nghiệp tư nhân và hộ kinh doanh, chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh.\n5. Hướng dẫn chi tiết thi hành một số điều của Nghị định số 43/2010/NĐ-CP.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hồ sơ, trình tự, thủ tục đăng ký thành lập và đăng ký thay đổi các nội dung đã đăng ký đối với công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh và doanh nghiệp tư nhân.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ, trình tự, thủ tục đăng ký thành lập và đăng ký thay đổi nội dung đăng ký hoạt động đối với chi nhánh, văn phòng đại diện, địa điểm kinh doanh của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hồ sơ, trình tự, thủ tục đăng ký thành lập và đăng ký thay đổi nội dung đăng ký đối với hộ kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Hồ sơ, trình tự, thủ tục đăng ký giải thể công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh, doanh nghiệp tư nhân và hộ kinh doanh, chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Hướng dẫn chi tiết thi hành một số điều của Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Đối tượngáp dụng",
+      "content_raw": "Đối tượngáp dụng\nThông tư nàyáp dụng cho các đối tượng được quy định tại Điều 2 Nghị định số 43/2010/NĐ-CP.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": []
+    },
+    {
+      "number": 3,
+      "title": "Giải thích từ ngữ",
+      "content_raw": "Giải thích từ ngữ\nTrong Thông tư này, các từ ngữ dưới đây được hiểu như sau:\n1. “Hồ sơ đăng ký doanh nghiệp” là hồ sơ đăng ký thành lập hoặc đăng ký thay đổi nội dung đăng ký của doanh nghiệp.\n2. “Hồ sơ đăng ký điện tử” là hồ sơ đăng ký doanh nghiệp được nộp qua Cổng thông tin đăng ký doanh nghiệp quốc gia, bao gồm đầy đủ các giấy tờ theo quy định như hồ sơ giấy và được chuyển sang dạng văn bản điện tử. Hồ sơ đăng ký điện tử có giá trị pháp lý như hồ sơ nộp bằng bản giấy.\n3. “Chữ ký điện tử” được tạo lập dưới dạng từ, chữ, số ký hiệu hoặc các hình thức khác bằng phương tiện điện tử, gắn liền hoặc kết hợp một cách logic với hồ sơ điện tử, có khả năng xác nhận của người ký văn bản điện tử và xác nhận sự chấp thuận của người đó đối với nội dung hồ sơ đăng ký điện tử đã được ký.\n4. “Đơn vị phụ thuộc doanh nghiệp” là chi nhánh, văn phòng đại diện của doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "“Hồ sơ đăng ký doanh nghiệp” là hồ sơ đăng ký thành lập hoặc đăng ký thay đổi nội dung đăng ký của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "“Hồ sơ đăng ký điện tử” là hồ sơ đăng ký doanh nghiệp được nộp qua Cổng thông tin đăng ký doanh nghiệp quốc gia, bao gồm đầy đủ các giấy tờ theo quy định như hồ sơ giấy và được chuyển sang dạng văn bản điện tử. Hồ sơ đăng ký điện tử có giá trị pháp lý như hồ sơ nộp bằng bản giấy.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "“Chữ ký điện tử” được tạo lập dưới dạng từ, chữ, số ký hiệu hoặc các hình thức khác bằng phương tiện điện tử, gắn liền hoặc kết hợp một cách logic với hồ sơ điện tử, có khả năng xác nhận của người ký văn bản điện tử và xác nhận sự chấp thuận của người đó đối với nội dung hồ sơ đăng ký điện tử đã được ký.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "“Đơn vị phụ thuộc doanh nghiệp” là chi nhánh, văn phòng đại diện của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Mã số doanh nghiệp, mã số đăng ký hộ kinh doanh",
+      "content_raw": "Mã số doanh nghiệp, mã số đăng ký hộ kinh doanh\n1. Mã số doanh nghiệp thực hiện theo hướng dẫn sau:\na) Mã số doanh nghiệp thực hiện theo quy định tại Điều 8 Nghị định số 43/2010/NĐ-CP.\nb) Cấu trúc mã số doanh nghiệp thực hiện theo quy định của pháp luật về đăng ký thuế. Việc tạo mã số doanh nghiệp thực hiện theo quy trình quy định tại Điều 26 Nghị định số 43/2010/NĐ-CP.\nc) Trường hợp doanh nghiệp, các đơn vị phụ thuộc của doanh nghiệp và địa điểm kinh doanh bị chấm dứt hiệu lực mã số thuế do vi phạm pháp luật về thuế, thì doanh nghiệp, các đơn vị phụ thuộc, địa điểm kinh doanh trong được sử dụng mã số thuế trong các giao dịch kinh tế, kể từ ngày cơ quan thuế thông báo công khai về việc chấm dứt hiệu lực mã số thuế.\n2. Mã số đăng ký hộ kinh doanh thực hiện theo hướng dẫn sau:\na) Cơ quan Đăng ký kinh doanh cấp huyện ghi mã số đăng ký hộ kinh doanh trên Giấy chứng nhận đăng ký hộ kinh doanh theo cấu trúc sau: - Mã cấp tỉnh: 02 ký tự, theo Phụ lục VII-2 ban hành kèm theo Thông tư này; - Mã cấp huyện: 01 ký tự, theo Phụ lục VII-2 ban hành kèm theo Thông tư này; - Mã loại hình: 01 ký tự, 8 = hộ kinh doanh - Số thứ tự hộ kinh doanh: 06 ký tự, từ 000001 đến 999999\nb) Các quận, huyện, thị xã, thành phố thuộc tỉnh được thành lập mới sau ngày ban hành Thông tư này, được chèn mã tiếp, theo thứ tự của bảng chữ cái tiếng Việt.\nc) Trường hợp tách quận, huyện, thị xã, thành phố thuộc tỉnh sau ngày ban hành Thông tư này, một đơn vị cấp huyện giữ nguyên mã chữ cũ và huyện kia được chèn mã tiếp, theo thứ tự của bảng chữ cái tiếng Việt.\nd) Sở Kế hoạch và Đầu tư thông báo bằng văn bản cho Bộ Kế hoạch và Đầu tư mã mới của cấp huyện được thành lập mới hoặc do tách đơn vị cấp huyện.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Mã số doanh nghiệp thực hiện theo hướng dẫn sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Mã số doanh nghiệp thực hiện theo quy định tại Điều 8 Nghị định số 43/2010/NĐ-CP."
+            },
+            {
+              "label": "b",
+              "content": "Cấu trúc mã số doanh nghiệp thực hiện theo quy định của pháp luật về đăng ký thuế. Việc tạo mã số doanh nghiệp thực hiện theo quy trình quy định tại Điều 26 Nghị định số 43/2010/NĐ-CP."
+            },
+            {
+              "label": "c",
+              "content": "Trường hợp doanh nghiệp, các đơn vị phụ thuộc của doanh nghiệp và địa điểm kinh doanh bị chấm dứt hiệu lực mã số thuế do vi phạm pháp luật về thuế, thì doanh nghiệp, các đơn vị phụ thuộc, địa điểm kinh doanh trong được sử dụng mã số thuế trong các giao dịch kinh tế, kể từ ngày cơ quan thuế thông báo công khai về việc chấm dứt hiệu lực mã số thuế."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Mã số đăng ký hộ kinh doanh thực hiện theo hướng dẫn sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cơ quan Đăng ký kinh doanh cấp huyện ghi mã số đăng ký hộ kinh doanh trên Giấy chứng nhận đăng ký hộ kinh doanh theo cấu trúc sau: - Mã cấp tỉnh: 02 ký tự, theo Phụ lục VII-2 ban hành kèm theo Thông tư này; - Mã cấp huyện: 01 ký tự, theo Phụ lục VII-2 ban hành kèm theo Thông tư này; - Mã loại hình: 01 ký tự, 8 = hộ kinh doanh - Số thứ tự hộ kinh doanh: 06 ký tự, từ 000001 đến 999999"
+            },
+            {
+              "label": "b",
+              "content": "Các quận, huyện, thị xã, thành phố thuộc tỉnh được thành lập mới sau ngày ban hành Thông tư này, được chèn mã tiếp, theo thứ tự của bảng chữ cái tiếng Việt."
+            },
+            {
+              "label": "c",
+              "content": "Trường hợp tách quận, huyện, thị xã, thành phố thuộc tỉnh sau ngày ban hành Thông tư này, một đơn vị cấp huyện giữ nguyên mã chữ cũ và huyện kia được chèn mã tiếp, theo thứ tự của bảng chữ cái tiếng Việt."
+            },
+            {
+              "label": "d",
+              "content": "Sở Kế hoạch và Đầu tư thông báo bằng văn bản cho Bộ Kế hoạch và Đầu tư mã mới của cấp huyện được thành lập mới hoặc do tách đơn vị cấp huyện."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Ngành, nghề kinh doanh",
+      "content_raw": "Ngành, nghề kinh doanh\n1. Ngành, nghề kinh doanh trong Giấy chứng nhận đăng ký doanh nghiệp phải được lựa chọn từ Hệ thống ngành kinh tế Việt Nam, trừ những ngành, nghề kinh doanh quy định tại khoản 2, khoản 3 Điều 7 Nghị định số 43/2010/NĐ-CP.\n2. Trường hợp Phòng Đăng ký kinh doanh cấp tỉnh nhận được văn bản của cơ quan có thẩm quyền khẳng định doanh nghiệp kinh doanh ngành, nghề kinh doanh có điều kiện nhưng không đápứng đủ điều kiện theo quy định của pháp luật, Phòng Đăng ký kinh doanh cấp tỉnh ra Thông báo yêu cầu doanh nghiệp tạm ngừng kinh doanh ngành, nghề kinh doanh có điều kiện, đồng thời thông báo cho cơ quan nhà nước có thẩm quyền để xử lý theo quy định của pháp luật. Thông báo yêu cầu doanh nghiệp tạm dừng kinh doanh ngành, nghề kinh doanh có điều kiện thực hiện theo mẫu quy định tại Phụ lục V-6 ban hành kèm theo Thông tư này.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Ngành, nghề kinh doanh trong Giấy chứng nhận đăng ký doanh nghiệp phải được lựa chọn từ Hệ thống ngành kinh tế Việt Nam, trừ những ngành, nghề kinh doanh quy định tại khoản 2, khoản 3 Điều 7 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp Phòng Đăng ký kinh doanh cấp tỉnh nhận được văn bản của cơ quan có thẩm quyền khẳng định doanh nghiệp kinh doanh ngành, nghề kinh doanh có điều kiện nhưng không đápứng đủ điều kiện theo quy định của pháp luật, Phòng Đăng ký kinh doanh cấp tỉnh ra Thông báo yêu cầu doanh nghiệp tạm ngừng kinh doanh ngành, nghề kinh doanh có điều kiện, đồng thời thông báo cho cơ quan nhà nước có thẩm quyền để xử lý theo quy định của pháp luật. Thông báo yêu cầu doanh nghiệp tạm dừng kinh doanh ngành, nghề kinh doanh có điều kiện thực hiện theo mẫu quy định tại Phụ lục V-6 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Giá trị pháp lý của Giấy chứng nhận đăng ký điện tử",
+      "content_raw": "Giá trị pháp lý của Giấy chứng nhận đăng ký điện tử\n1. Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện được lưu dưới dạng bản điện tử trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp (sau đây gọi tắt là Giấy chứng nhận đăng ký điện tử) có giá trị pháp lý như Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động bằng văn bản do Phòng Đăng ký kinh doanh cấp cho doanh nghiệp.\n2. Giấy chứng nhận đăng ký điện tử được Cơ quan Đăng ký kinh doanh sử dụng để xác định tình trạng và nội dung đã đăng ký của doanh nghiệp, chi nhánh, văn phòng đại diện.\n3. Trường hợp Giấy chứng nhận đăng ký điện tử lưu trữ trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp tại cùng thời điểm có nội dung khác biệt so với Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện bằng văn bản, Giấy chứng nhận có giá trị pháp lý là Giấy chứng nhận có nội dung được ghi đúng theo nội dung trong hồ sơ đăng ký của doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện được lưu dưới dạng bản điện tử trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp (sau đây gọi tắt là Giấy chứng nhận đăng ký điện tử) có giá trị pháp lý như Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động bằng văn bản do Phòng Đăng ký kinh doanh cấp cho doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Giấy chứng nhận đăng ký điện tử được Cơ quan Đăng ký kinh doanh sử dụng để xác định tình trạng và nội dung đã đăng ký của doanh nghiệp, chi nhánh, văn phòng đại diện.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp Giấy chứng nhận đăng ký điện tử lưu trữ trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp tại cùng thời điểm có nội dung khác biệt so với Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện bằng văn bản, Giấy chứng nhận có giá trị pháp lý là Giấy chứng nhận có nội dung được ghi đúng theo nội dung trong hồ sơ đăng ký của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Cổng thông tin đăng ký doanh nghiệp quốc gia",
+      "content_raw": "Cổng thông tin đăng ký doanh nghiệp quốc gia\n1. Bộ Kế hoạch và Đầu tư là cơ quan nhà nước chịu trách nhiệm quản lý, vận hành Cổng thông tin đăng ký doanh nghiệp quốc gia.\n2. Nghiêm cấm các tổ chức, cá nhân khác lập trang web với tên gọi trùng hoặc gây nhầm lẫn với Cổng thông tin đăng ký doanh nghiệp quốc gia.\n3. Mỗi cơ quan đăng ký kinh doanh cấp tỉnh chỉ thực hiện nghiệp vụ đối với cơ sở dữ liệu đăng ký doanh nghiệp của địa phương mình trong cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp.\n4. Các tổ chức, cá nhân thực hiện truy cập Cổng thông tin đăng ký doanh nghiệp quốc gia theo địa chỉ www.dangkykinhdoanh.gov.vn hoặc www.businessregistration.gov.vn.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Bộ Kế hoạch và Đầu tư là cơ quan nhà nước chịu trách nhiệm quản lý, vận hành Cổng thông tin đăng ký doanh nghiệp quốc gia.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Nghiêm cấm các tổ chức, cá nhân khác lập trang web với tên gọi trùng hoặc gây nhầm lẫn với Cổng thông tin đăng ký doanh nghiệp quốc gia.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Mỗi cơ quan đăng ký kinh doanh cấp tỉnh chỉ thực hiện nghiệp vụ đối với cơ sở dữ liệu đăng ký doanh nghiệp của địa phương mình trong cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Các tổ chức, cá nhân thực hiện truy cập Cổng thông tin đăng ký doanh nghiệp quốc gia theo địa chỉ www.dangkykinhdoanh.gov.vn hoặc www.businessregistration.gov.vn.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Tên doanh nghiệp, tên chi nhánh, văn phòng đại diện, địa điểm kinh doanh",
+      "content_raw": "Tên doanh nghiệp, tên chi nhánh, văn phòng đại diện, địa điểm kinh doanh\n1. Danh mục chữ cái sử dụng trong đặt tên doanh nghiệp theo khoản 1 Điều 13 Nghị định số 43/2010/NĐ-CP được quy định tại Phụ lục VII-1 ban hành kèm theo Thông tư này. Danh mục chữ cái này cũng được sử dụng để đặt tên chi nhánh, văn phòng đại diện của doanh nghiệp và đặt tên hộ kinh doanh.\n2. Phần tên riêng trong tên chi nhánh, văn phòng đại diện, địa điểm kinh doanh của công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh, doanh nghiệp tư nhân không được sử dụng cụm từ “công ty”, “doanh nghiệp”.",
+      "chapter": "II",
+      "chapter_title": "ĐĂNG KÝ TÊN DOANH NGHIỆP",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Danh mục chữ cái sử dụng trong đặt tên doanh nghiệp theo khoản 1 Điều 13 Nghị định số 43/2010/NĐ-CP được quy định tại Phụ lục VII-1 ban hành kèm theo Thông tư này. Danh mục chữ cái này cũng được sử dụng để đặt tên chi nhánh, văn phòng đại diện của doanh nghiệp và đặt tên hộ kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phần tên riêng trong tên chi nhánh, văn phòng đại diện, địa điểm kinh doanh của công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh, doanh nghiệp tư nhân không được sử dụng cụm từ “công ty”, “doanh nghiệp”.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Tên doanh nghiệp đã đăng ký trước khi Nghị định số 43/2010/NĐ-CP có hiệu lực",
+      "content_raw": "Tên doanh nghiệp đã đăng ký trước khi Nghị định số 43/2010/NĐ-CP có hiệu lực\n1. Các doanh nghiệp có tên trùng hoặc tên gây nhầm lẫn tự thương lượng với nhau để đăng ký đổi tên doanh nghiệp. Doanh nghiệp có thể bổ sung tên địa danh để làm yếu tố phân biệt tên doanh nghiệp. Doanh nghiệp chỉ được bổ sung tên địa danh nơi doanh nghiệp đặt trụ sở chính.\n2. Việc đăng ký bổ sung tên địa danh vào tên doanh nghiệp để làm yếu tố phân biệt tên doanh nghiệp không được vi phạm pháp luật về sở hữu công nghiệp. HỒ SƠ, TRÌNH TỰ, THỦ TỤC ĐĂNG KÝ DOANH NGHIỆP, ĐĂNG KÝ HOẠT ĐỘNG CHI NHÁNH, VĂN PHÒNG ĐẠI DIỆN, THÔNG BÁO LẬP ĐỊA ĐIỂM KINH DOANH",
+      "chapter": "II",
+      "chapter_title": "ĐĂNG KÝ TÊN DOANH NGHIỆP",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các doanh nghiệp có tên trùng hoặc tên gây nhầm lẫn tự thương lượng với nhau để đăng ký đổi tên doanh nghiệp. Doanh nghiệp có thể bổ sung tên địa danh để làm yếu tố phân biệt tên doanh nghiệp. Doanh nghiệp chỉ được bổ sung tên địa danh nơi doanh nghiệp đặt trụ sở chính.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Việc đăng ký bổ sung tên địa danh vào tên doanh nghiệp để làm yếu tố phân biệt tên doanh nghiệp không được vi phạm pháp luật về sở hữu công nghiệp. HỒ SƠ, TRÌNH TỰ, THỦ TỤC ĐĂNG KÝ DOANH NGHIỆP, ĐĂNG KÝ HOẠT ĐỘNG CHI NHÁNH, VĂN PHÒNG ĐẠI DIỆN, THÔNG BÁO LẬP ĐỊA ĐIỂM KINH DOANH",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Các mẫu giấy tờ trong hồ sơ đăng ký doanh nghiệp, các đơn vị phụ thuộc của doanh nghiệp và địa điểm kinh doanh",
+      "content_raw": "Các mẫu giấy tờ trong hồ sơ đăng ký doanh nghiệp, các đơn vị phụ thuộc của doanh nghiệp và địa điểm kinh doanh\n1. Giấy Đề nghị đăng ký doanh nghiệp thực hiện theo mẫu quy định tại Phụ lục I ban hành kèm theo Thông tư này.\n2. Danh sách thành viên, cổ đông sáng lập, người đại diện theoủy quyền thực hiện theo mẫu quy định tại Phụ lục II ban hành kèm theo Thông tư này.\n3. Thông báo về việc lập, thay đổi nội dung đăng ký hoạt động, chấm dứt hoạt động của chi nhánh, văn phòng đại diện, địa điểm kinh doanh thực hiện theo mẫu quy định tại Phụ lục III-1, III-2, III-3 và III-4 ban hành kèm theo Thông tư này.\n4. Thông báo của doanh nghiệp về việc thay đổi nội dung đăng ký doanh nghiệp quy định tại Chương V Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục III-5, III-6, III-7, III-8 ban hành kèm theo Thông tư này.\n5. Thông báo tạm ngừng kinh doanh quy định tại Điều 57 Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục III-12 ban hành kèm theo Thông tư này.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giấy Đề nghị đăng ký doanh nghiệp thực hiện theo mẫu quy định tại Phụ lục I ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Danh sách thành viên, cổ đông sáng lập, người đại diện theoủy quyền thực hiện theo mẫu quy định tại Phụ lục II ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thông báo về việc lập, thay đổi nội dung đăng ký hoạt động, chấm dứt hoạt động của chi nhánh, văn phòng đại diện, địa điểm kinh doanh thực hiện theo mẫu quy định tại Phụ lục III-1, III-2, III-3 và III-4 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Thông báo của doanh nghiệp về việc thay đổi nội dung đăng ký doanh nghiệp quy định tại Chương V Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục III-5, III-6, III-7, III-8 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Thông báo tạm ngừng kinh doanh quy định tại Điều 57 Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục III-12 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Các mẫu giấy tờ do cơ quan đăng ký kinh doanh ban hành",
+      "content_raw": "Các mẫu giấy tờ do cơ quan đăng ký kinh doanh ban hành\n1. Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện thực hiện theo mẫu quy định tại Phụ lục IV ban hành kèm theo Thông tư này.\n2. Thông báo về nội dung cần sửa đổi, bổ sung hồ sơ đăng ký doanh nghiệp, Thông báo về hành vi vi phạm của doanh nghiệp và các thông báo khác của cơ quan đăng ký kinh doanh thực hiện theo mẫu quy định tại Phụ lục V ban hành kèm theo Thông tư này.\n3. Giấy biên nhận quy định tại khoản 3 Điều 25 Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục VI-6 ban hành kèm theo Thông tư này.\n4. Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp quy định tại Điều 60 Nghị định số 43/2010/NĐ-CP, Quyết định thu hồi Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện thực hiện theo Phụ lục VI-1 và Phụ lục VI-3 ban hành kèm theo Thông tư này.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện thực hiện theo mẫu quy định tại Phụ lục IV ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thông báo về nội dung cần sửa đổi, bổ sung hồ sơ đăng ký doanh nghiệp, Thông báo về hành vi vi phạm của doanh nghiệp và các thông báo khác của cơ quan đăng ký kinh doanh thực hiện theo mẫu quy định tại Phụ lục V ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Giấy biên nhận quy định tại khoản 3 Điều 25 Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục VI-6 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp quy định tại Điều 60 Nghị định số 43/2010/NĐ-CP, Quyết định thu hồi Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện thực hiện theo Phụ lục VI-1 và Phụ lục VI-3 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Ủy quyền cho người đại diện làm thủ tục đăng ký doanh nghiệp",
+      "content_raw": "Ủy quyền cho người đại diện làm thủ tục đăng ký doanh nghiệp\nTrong trường hợp người thành lập doanh nghiệpủy quyền cho người đại diện của mình nộp hồ sơ đăng ký doanh nghiệp, khi tiếp nhận hồ sơ, Phòng Đăng ký kinh doanh cấp tỉnh đề nghị người đượcủy quyền xuất trình Giấy chứng minh nhân dân hoặc hộ chiếu hoặc các giấy tờ chứng thực cá nhân hợp pháp khác quy định tại Điều 24 Nghị định số 43/2010/NĐ-CP và văn bảnủy quyền theo quy định của pháp luật.",
+      "chapter": "III",
+      "clauses": []
+    },
+    {
+      "number": 13,
+      "title": "Đăng ký thay đổi trụ sở chính của doanh nghiệp, thành lập mới chi nhánh, văn phòng đại diện tại tỉnh, thành phố khác nơi doanh nghiệp đặt trụ sở chính",
+      "content_raw": "Đăng ký thay đổi trụ sở chính của doanh nghiệp, thành lập mới chi nhánh, văn phòng đại diện tại tỉnh, thành phố khác nơi doanh nghiệp đặt trụ sở chính\n1. Trước khi đăng ký thay đổi trụ sở chính, địa điểm chi nhánh, văn phòng đại diện tại Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp dự định chuyển tới, doanh nghiệp phải thực hiện các thủ tục liên quan đến việc chuyển địa điểm với cơ quan thuế. Hồ sơ và trình tự, thủ tục kê khai, thông báo với cơ quan thuế thực hiện theo quy định pháp luật về quản lý thuế.\n2. Trong thời hạn năm ngày làm việc kể từ ngày hoàn tất thủ tục kê khai, thông báo với cơ quan thuế, doanh nghiệp gửi hồ sơ đăng ký thay đổi địa chỉ trụ sở chính đến Phòng Đăng ký kinh doanh theo quy định tại Khoản 2, 3 Điều 35 Nghị định số 43/2010/NĐ-CP.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trước khi đăng ký thay đổi trụ sở chính, địa điểm chi nhánh, văn phòng đại diện tại Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp dự định chuyển tới, doanh nghiệp phải thực hiện các thủ tục liên quan đến việc chuyển địa điểm với cơ quan thuế. Hồ sơ và trình tự, thủ tục kê khai, thông báo với cơ quan thuế thực hiện theo quy định pháp luật về quản lý thuế.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trong thời hạn năm ngày làm việc kể từ ngày hoàn tất thủ tục kê khai, thông báo với cơ quan thuế, doanh nghiệp gửi hồ sơ đăng ký thay đổi địa chỉ trụ sở chính đến Phòng Đăng ký kinh doanh theo quy định tại Khoản 2, 3 Điều 35 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Đăng ký thay đổi người đại diện theo pháp luật của công ty trách nhiệm hữu hạn, công ty cổ phần",
+      "content_raw": "Đăng ký thay đổi người đại diện theo pháp luật của công ty trách nhiệm hữu hạn, công ty cổ phần\n1. Hồ sơ đăng ký thay đổi người đại diện theo pháp luật của công ty trách nhiệm hữu hạn, công ty cổ phần bao gồm các giấy tờ sau: a. Thông báo thay đổi người đại diện theo pháp luật của công ty; b. Bản sao hợp lệ Giấy chứng minh nhân dân hoặc Hộ chiếu hoặc các giấy tờ chứng thực cá nhân hợp pháp khác quy định tại Điều 24 Nghị định số 43/2010/NĐ-CP của người thay thế làm đại diện theo pháp luật của công ty; c. Quyết định bằng văn bản và bản sao Biên bản họp của Hội đồng thành viên đối với công ty trách nhiệm hữu hạn hai thành viên trở lên về việc thay đổi người đại diện theo pháp luật, Quyết định của chủ sở hữu công ty đối với công ty trách nhiệm hữu hạn một thành viên về việc thay đổi người đại diện theo pháp luật; Quyết định bằng văn bản và bản sao biên bản họp của Đại hội đồng cổ đông đối với công ty cổ phần về việc thay đổi người đại diện theo pháp luật trong trường hợp việc thay đổi người đại diện theo pháp luật của công ty làm thay đổi nội dung điều lệ công ty, của Hội đồng quản trị đối với công ty cổ phần trong trường hợp việc thay đổi người đại diện theo pháp luật của công ty không làm thay đổi nội dung của điều lệ công ty ngoài nội dung họ, tên, chữ ký của người đại diện theo pháp luật của công ty quy định tại khoản 15 Điều 22 Luật Doanh nghiệp. Trường hợp Điều lệ công ty cổ phần quy định Chủ tịch Hội đồng quản trị là người đại diện theo pháp luật và Đại hội đồng cổ đông công ty bầu Chủ tịch Hội đồng quản trị thì phải có Quyết định bằng văn bản và bản sao Biên bản họp của Đại hội đồng cổ đông về việc thay đổi người đại diện theo pháp luật.\n2. Người ký thông báo thay đổi người đại diện theo pháp luật là một trong những cá nhân sau:\na) Chủ tịch Hội đồng thành viên đối với công ty trách nhiệm hữu hạn hai thành viên trở lên. Trong trường hợp Chủ tịch hội đồng thành viên là người đại diện theo pháp luật thì người ký thông báo là Chủ tịch Hội đồng thành viên mới được Hội đồng thành viên bầu.\nb) Chủ sở hữu công ty đối với công ty trách nhiệm hữu hạn một thành viên có chủ sở hữu là cá nhân.\nc) Chủ tịch Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty trách nhiệm hữu hạn một thành viên có chủ sở hữu là tổ chức.\nd) Chủ tịch Hội đồng quản trị đối với công ty cổ phần. Trong trường hợp Chủ tịch Hội đồng quản trị là người đại diện theo pháp luật thì người ký thông báo là Chủ tịch Hội đồng quản trị mới được Đại hội đồng cổ đông hoặc Hội đồng quản trị bầu.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hồ sơ đăng ký thay đổi người đại diện theo pháp luật của công ty trách nhiệm hữu hạn, công ty cổ phần bao gồm các giấy tờ sau: a. Thông báo thay đổi người đại diện theo pháp luật của công ty; b. Bản sao hợp lệ Giấy chứng minh nhân dân hoặc Hộ chiếu hoặc các giấy tờ chứng thực cá nhân hợp pháp khác quy định tại Điều 24 Nghị định số 43/2010/NĐ-CP của người thay thế làm đại diện theo pháp luật của công ty; c. Quyết định bằng văn bản và bản sao Biên bản họp của Hội đồng thành viên đối với công ty trách nhiệm hữu hạn hai thành viên trở lên về việc thay đổi người đại diện theo pháp luật, Quyết định của chủ sở hữu công ty đối với công ty trách nhiệm hữu hạn một thành viên về việc thay đổi người đại diện theo pháp luật; Quyết định bằng văn bản và bản sao biên bản họp của Đại hội đồng cổ đông đối với công ty cổ phần về việc thay đổi người đại diện theo pháp luật trong trường hợp việc thay đổi người đại diện theo pháp luật của công ty làm thay đổi nội dung điều lệ công ty, của Hội đồng quản trị đối với công ty cổ phần trong trường hợp việc thay đổi người đại diện theo pháp luật của công ty không làm thay đổi nội dung của điều lệ công ty ngoài nội dung họ, tên, chữ ký của người đại diện theo pháp luật của công ty quy định tại khoản 15 Điều 22 Luật Doanh nghiệp. Trường hợp Điều lệ công ty cổ phần quy định Chủ tịch Hội đồng quản trị là người đại diện theo pháp luật và Đại hội đồng cổ đông công ty bầu Chủ tịch Hội đồng quản trị thì phải có Quyết định bằng văn bản và bản sao Biên bản họp của Đại hội đồng cổ đông về việc thay đổi người đại diện theo pháp luật.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Người ký thông báo thay đổi người đại diện theo pháp luật là một trong những cá nhân sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Chủ tịch Hội đồng thành viên đối với công ty trách nhiệm hữu hạn hai thành viên trở lên. Trong trường hợp Chủ tịch hội đồng thành viên là người đại diện theo pháp luật thì người ký thông báo là Chủ tịch Hội đồng thành viên mới được Hội đồng thành viên bầu."
+            },
+            {
+              "label": "b",
+              "content": "Chủ sở hữu công ty đối với công ty trách nhiệm hữu hạn một thành viên có chủ sở hữu là cá nhân."
+            },
+            {
+              "label": "c",
+              "content": "Chủ tịch Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty trách nhiệm hữu hạn một thành viên có chủ sở hữu là tổ chức."
+            },
+            {
+              "label": "d",
+              "content": "Chủ tịch Hội đồng quản trị đối với công ty cổ phần. Trong trường hợp Chủ tịch Hội đồng quản trị là người đại diện theo pháp luật thì người ký thông báo là Chủ tịch Hội đồng quản trị mới được Đại hội đồng cổ đông hoặc Hội đồng quản trị bầu."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Thời hạn doanh nghiệp thực hiện đăng ký thay đổi nội dung đăng ký doanh nghiệp",
+      "content_raw": "Thời hạn doanh nghiệp thực hiện đăng ký thay đổi nội dung đăng ký doanh nghiệp\n1. Doanh nghiệp có trách nhiệm thực hiện việc đăng ký thay đổi nội dung đăng ký doanh nghiệp trong thời hạn mười ngày làm việc, kể từ ngày doanh nghiệp ra Quyết định (hoặc Nghị quyết) thay đổi các nội dung này, trừ trường hợp pháp luật có quy định khác.\n2. Chủ sở hữu công ty TNHH một thành viên, Hội đồng thành viên công ty TNHH hai thành viên trở lên, Đại hội đồng cổ đông, Hội đồng quản trị công ty cổ phần hoặc những người có thẩm quyền trong doanh nghiệp có trách nhiệm ban hành Quyết định (hoặc Nghị quyết) bằng văn bản về việc thay đổi nội dung đăng ký doanh nghiệp trong vòng mười ngày làm việc, kể từ ngày doanh nghiệp quyết định thay đổi nội dung đăng ký doanh nghiệp, trừ trường hợp Biên bản họp có quy định cụ thể về thời hạn ra Quyết định (hoặc Nghị quyết) khác với thời hạn nêu trên.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp có trách nhiệm thực hiện việc đăng ký thay đổi nội dung đăng ký doanh nghiệp trong thời hạn mười ngày làm việc, kể từ ngày doanh nghiệp ra Quyết định (hoặc Nghị quyết) thay đổi các nội dung này, trừ trường hợp pháp luật có quy định khác.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Chủ sở hữu công ty TNHH một thành viên, Hội đồng thành viên công ty TNHH hai thành viên trở lên, Đại hội đồng cổ đông, Hội đồng quản trị công ty cổ phần hoặc những người có thẩm quyền trong doanh nghiệp có trách nhiệm ban hành Quyết định (hoặc Nghị quyết) bằng văn bản về việc thay đổi nội dung đăng ký doanh nghiệp trong vòng mười ngày làm việc, kể từ ngày doanh nghiệp quyết định thay đổi nội dung đăng ký doanh nghiệp, trừ trường hợp Biên bản họp có quy định cụ thể về thời hạn ra Quyết định (hoặc Nghị quyết) khác với thời hạn nêu trên.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "Đăng ký để được cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới",
+      "content_raw": "Đăng ký để được cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới\n1. Những doanh nghiệp đã được cấp Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trước khi Nghị định số 43/2010/NĐ-CP có hiệu lực không bắt buộc phải đổi sang Giấy chứng nhận đăng ký doanh nghiệp.\n2. Doanh nghiệp sẽ được cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới khi đăng ký thay đổi nội dung đăng ký doanh nghiệp. Khi nộp hồ sơ đăng ký thay đổi nội dung đăng ký doanh nghiệp, doanh nghiệp phải nộp kèm bản gốc Giấy chứng nhận đăng ký kinh doanh và Giấy chứng nhận đăng ký thuế hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế cho Phòng Đăng ký kinh doanh để được cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới.\n3. Trường hợp doanh nghiệp có nhu cầu đổi Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế sang Giấy chứng nhận đăng ký doanh nghiệp nhưng không thay đổi nội dung đăng ký kinh doanh và đăng ký thuế, doanh nghiệp có thể nộp Giấy đề nghị cấp đổi Giấy chứng nhận đăng ký doanh nghiệp theo mẫu kèm theo bản chính Giấy chứng nhận đăng ký kinh doanh và bản chính Giấy chứng nhận đăng ký thuế; hoặc bản chính Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế để được cơ quan đăng ký kinh doanh cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới trong thời hạn hai ngày làm việc. Mẫu Giấy đề nghị cấp đổi giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới được thực hiện theo quy định tại Phụ lục VI-5 ban hành kèm theo Thông tư này.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Những doanh nghiệp đã được cấp Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trước khi Nghị định số 43/2010/NĐ-CP có hiệu lực không bắt buộc phải đổi sang Giấy chứng nhận đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp sẽ được cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới khi đăng ký thay đổi nội dung đăng ký doanh nghiệp. Khi nộp hồ sơ đăng ký thay đổi nội dung đăng ký doanh nghiệp, doanh nghiệp phải nộp kèm bản gốc Giấy chứng nhận đăng ký kinh doanh và Giấy chứng nhận đăng ký thuế hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế cho Phòng Đăng ký kinh doanh để được cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp doanh nghiệp có nhu cầu đổi Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế sang Giấy chứng nhận đăng ký doanh nghiệp nhưng không thay đổi nội dung đăng ký kinh doanh và đăng ký thuế, doanh nghiệp có thể nộp Giấy đề nghị cấp đổi Giấy chứng nhận đăng ký doanh nghiệp theo mẫu kèm theo bản chính Giấy chứng nhận đăng ký kinh doanh và bản chính Giấy chứng nhận đăng ký thuế; hoặc bản chính Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế để được cơ quan đăng ký kinh doanh cấp Giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới trong thời hạn hai ngày làm việc. Mẫu Giấy đề nghị cấp đổi giấy chứng nhận đăng ký doanh nghiệp theo mẫu mới được thực hiện theo quy định tại Phụ lục VI-5 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Đăng ký thay đổi nội dung đăng ký thuế mà không thay đổi nội dung đăng ký kinh doanh",
+      "content_raw": "Đăng ký thay đổi nội dung đăng ký thuế mà không thay đổi nội dung đăng ký kinh doanh\n1. Doanh nghiệp thay đổi nội dung đăng ký thuế mà không thay đổi nội dung đăng ký kinh doanh thực hiện theo quy định tại Điều 45 Nghị định số 43/2010/NĐ-CP.\n2. Thông báo thay đổi nội dung đăng ký thuế theo mẫu quy định tại Phụ lục III-10 ban hành kèm theo Thông tư này.\n3. Trong thời hạn năm ngày làm việc kể từ khi nhận được hồ sơ hợp lệ của doanh nghiệp, Phòng Đăng ký kinh doanh cập nhật dữ liệu vào Hệ thống thông tin đăng ký doanh nghiệp quốc gia để chuyển thông tin sang cơ sở dữ liệu của Tổng cục Thuế, đồng thời lưu Thông báo vào hồ sơ đăng ký doanh nghiệp.",
+      "chapter": "III",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp thay đổi nội dung đăng ký thuế mà không thay đổi nội dung đăng ký kinh doanh thực hiện theo quy định tại Điều 45 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thông báo thay đổi nội dung đăng ký thuế theo mẫu quy định tại Phụ lục III-10 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong thời hạn năm ngày làm việc kể từ khi nhận được hồ sơ hợp lệ của doanh nghiệp, Phòng Đăng ký kinh doanh cập nhật dữ liệu vào Hệ thống thông tin đăng ký doanh nghiệp quốc gia để chuyển thông tin sang cơ sở dữ liệu của Tổng cục Thuế, đồng thời lưu Thông báo vào hồ sơ đăng ký doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Đăng ký doanh nghiệp qua mạng điện tử",
+      "content_raw": "Đăng ký doanh nghiệp qua mạng điện tử\n1. Người thành lập doanh nghiệp có thể lựa chọn thực hiện việc đăng ký doanh nghiệp trực tiếp tại Phòng Đăng ký kinh doanh cấp tỉnh hoặc đăng ký doanh nghiệp qua mạng điện tử.\n2. Để thực hiện thủ tục đăng ký doanh nghiệp qua mạng điện tử, người thành lập doanh nghiệp hoặc người đại diện theoủy quyền (sau đây gọi chung là người thành lập doanh nghiệp) truy cập vào Cổng thông tin đăng ký doanh nghiệp quốc gia, điền đầy đủ và chính xác các thông tin theo yêu cầu. Thông qua Cổng thông tin đăng ký doanh nghiệp quốc gia, Hệ thống thông tin đăng ký doanh nghiệp quốc gia (sau đây gọi tắt là Hệ thống) tiếp nhận hồ sơ đăng ký điện tử và Phòng Đăng ký kinh doanh cấp tỉnh sẽ xử lý hồ sơ đăng ký doanh nghiệp qua mạng điện tử trên Hệ thống thông tin đăng ký doanh nghiệp quốc gia.\n3. Hồ sơ đăng ký điện tử được gửi qua Cổng thông tin đăng ký doanh nghiệp quốc gia được coi là đã gửi thành công khi máy chủ của Hệ thống thông tin đăng ký doanh nghiệp quốc gia nhận được.\n4. Thời gian gửi, nhận các văn bản điện tử trong hồ sơ đăng ký điện tử được xác định căn cứ theo thời gian ghi lại trên máy chủ của Hệ thống thông tin đăng ký doanh nghiệp quốc gia.\n5. Doanh nghiệp có thể nhận Giấy chứng nhận đăng ký doanh nghiệp trực tiếp tại Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính hoặc đăng ký, trả phí để nhận Giấy chứng nhận đăng ký doanh nghiệp qua dịch vụ chuyển phát.\n6. Quy định về đăng ký doanh nghiệp qua mạng điện tử đượcáp dụng đối với các trường hợp đăng ký thành lập doanh nghiệp, đăng ký thay đổi nội dung đăng ký doanh nghiệp, đăng ký lập chi nhánh, văn phòng đại diện, thông báo lập địa điểm kinh doanh, đăng ký thay đổi nội dung đăng ký doanh nghiệp.",
+      "chapter": "IV",
+      "chapter_title": "ĐĂNG KÝ DOANH NGHIỆP QUA MẠNG ĐIỆN TỬ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Người thành lập doanh nghiệp có thể lựa chọn thực hiện việc đăng ký doanh nghiệp trực tiếp tại Phòng Đăng ký kinh doanh cấp tỉnh hoặc đăng ký doanh nghiệp qua mạng điện tử.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Để thực hiện thủ tục đăng ký doanh nghiệp qua mạng điện tử, người thành lập doanh nghiệp hoặc người đại diện theoủy quyền (sau đây gọi chung là người thành lập doanh nghiệp) truy cập vào Cổng thông tin đăng ký doanh nghiệp quốc gia, điền đầy đủ và chính xác các thông tin theo yêu cầu. Thông qua Cổng thông tin đăng ký doanh nghiệp quốc gia, Hệ thống thông tin đăng ký doanh nghiệp quốc gia (sau đây gọi tắt là Hệ thống) tiếp nhận hồ sơ đăng ký điện tử và Phòng Đăng ký kinh doanh cấp tỉnh sẽ xử lý hồ sơ đăng ký doanh nghiệp qua mạng điện tử trên Hệ thống thông tin đăng ký doanh nghiệp quốc gia.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hồ sơ đăng ký điện tử được gửi qua Cổng thông tin đăng ký doanh nghiệp quốc gia được coi là đã gửi thành công khi máy chủ của Hệ thống thông tin đăng ký doanh nghiệp quốc gia nhận được.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Thời gian gửi, nhận các văn bản điện tử trong hồ sơ đăng ký điện tử được xác định căn cứ theo thời gian ghi lại trên máy chủ của Hệ thống thông tin đăng ký doanh nghiệp quốc gia.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Doanh nghiệp có thể nhận Giấy chứng nhận đăng ký doanh nghiệp trực tiếp tại Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính hoặc đăng ký, trả phí để nhận Giấy chứng nhận đăng ký doanh nghiệp qua dịch vụ chuyển phát.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Quy định về đăng ký doanh nghiệp qua mạng điện tử đượcáp dụng đối với các trường hợp đăng ký thành lập doanh nghiệp, đăng ký thay đổi nội dung đăng ký doanh nghiệp, đăng ký lập chi nhánh, văn phòng đại diện, thông báo lập địa điểm kinh doanh, đăng ký thay đổi nội dung đăng ký doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "Đăng ký doanh nghiệp qua mạng điện tử trong trường hợp người thành lập doanh nghiệp đã có chữ ký điện tử",
+      "content_raw": "Đăng ký doanh nghiệp qua mạng điện tử trong trường hợp người thành lập doanh nghiệp đã có chữ ký điện tử\nTrường hợp người thành lập doanh nghiệp có chữ ký điện tử thì việc đăng ký doanh nghiệp qua mạng điện tử được thực hiện như sau:\n1. Người thành lập doanh nghiệp nộp hồ sơ đăng ký điện tử qua Cổng thông tin đăng ký doanh nghiệp quốc gia và nộp lệ phí đăng ký doanh nghiệp cho Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính.\n2. Khi hồ sơ đăng ký qua mạng điện tử của doanh nghiệp đápứng các yêu cầu theo quy định, thông qua Cổng thông tin đăng ký doanh nghiệp quốc gia, Phòng Đăng ký kinh doanh cấp tỉnh tiếp nhận hồ sơ và người thành lập doanh nghiệp nhận được Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử.\n3. Phòng Đăng ký kinh doanh cấp tỉnh kiểm tra tính hợp lệ của hồ sơ và thông báo cho doanh nghiệp về việc cấp Giấy chứng nhận đăng ký doanh nghiệp hoặc yêu cầu người thành lập doanh nghiệp sửa đổi, bổ sung hồ sơ đăng ký doanh nghiệp qua Cổng thông tin đăng ký doanh nghiệp quốc gia và gửi đến địa chỉ thư điện tử của người thành lập doanh nghiệp đã đăng ký với Hệ thống thông tin đăng ký doanh nghiệp quốc gia.\n4. Trên cơ sở hồ sơ hợp lệ của doanh nghiệp và xác nhận về việc người thành lập doanh nghiệp đã nộp đủ lệ phí đăng ký doanh nghiệp, Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính cấp Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp.",
+      "chapter": "IV",
+      "chapter_title": "ĐĂNG KÝ DOANH NGHIỆP QUA MẠNG ĐIỆN TỬ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Người thành lập doanh nghiệp nộp hồ sơ đăng ký điện tử qua Cổng thông tin đăng ký doanh nghiệp quốc gia và nộp lệ phí đăng ký doanh nghiệp cho Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Khi hồ sơ đăng ký qua mạng điện tử của doanh nghiệp đápứng các yêu cầu theo quy định, thông qua Cổng thông tin đăng ký doanh nghiệp quốc gia, Phòng Đăng ký kinh doanh cấp tỉnh tiếp nhận hồ sơ và người thành lập doanh nghiệp nhận được Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Phòng Đăng ký kinh doanh cấp tỉnh kiểm tra tính hợp lệ của hồ sơ và thông báo cho doanh nghiệp về việc cấp Giấy chứng nhận đăng ký doanh nghiệp hoặc yêu cầu người thành lập doanh nghiệp sửa đổi, bổ sung hồ sơ đăng ký doanh nghiệp qua Cổng thông tin đăng ký doanh nghiệp quốc gia và gửi đến địa chỉ thư điện tử của người thành lập doanh nghiệp đã đăng ký với Hệ thống thông tin đăng ký doanh nghiệp quốc gia.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trên cơ sở hồ sơ hợp lệ của doanh nghiệp và xác nhận về việc người thành lập doanh nghiệp đã nộp đủ lệ phí đăng ký doanh nghiệp, Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính cấp Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "Đăng ký doanh nghiệp qua mạng điện tử trong trường hợp người thành lập doanh nghiệp chưa có chữ ký điện tử",
+      "content_raw": "Đăng ký doanh nghiệp qua mạng điện tử trong trường hợp người thành lập doanh nghiệp chưa có chữ ký điện tử\nTrường hợp người thành lập doanh nghiệp chưa có chữ ký điện tử thì việc đăng ký doanh nghiệp qua mạng điện tử được thực hiện như sau:\n1. Người thành lập doanh nghiệp nộp hồ sơ đăng ký điện tử qua Cổng thông tin đăng ký doanh nghiệp quốc gia và nộp lệ phí đăng ký doanh nghiệp cho Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính.\n2. Phòng Đăng ký kinh doanh kiểm tra tính hợp lệ của hồ sơ đăng ký doanh nghiệp trên Hệ thống và thông báo cho doanh nghiệp về việc cấp Giấy chứng nhận đăng ký doanh nghiệp hoặc yêu cầu người thành lập doanh nghiệp sửa đổi, bổ sung hồ sơ đăng ký doanh nghiệp qua Cổng thông tin đăng ký doanh nghiệp quốc gia và gửi đến địa chỉ thư điện tử của người thành lập doanh nghiệp đã đăng ký với Hệ thống thông tin đăng ký doanh nghiệp quốc gia. Khi hồ sơ đăng ký doanh nghiệp hợp lệ và được chấp thuận trên Hệ thống, Phòng Đăng ký kinh doanh gửi thông tin sang cơ quan Thuế đề nghị tạo mã số cho doanh nghiệp và gửi qua Hệ thống cho người thành lập doanh nghiệp Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử theo mẫu quy định tại Phụ lục VI-4 ban hành kèm theo Thông tư này. Người đại diện theo pháp luật của doanh nghiệp ký tên vào Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử.\n3. Người thành lập doanh nghiệp gửi Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử và các giấy tờ trong hồ sơ đăng ký doanh nghiệp đến Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính trong thời hạn mười lăm ngày làm việc kể từ ngày nhận được Giấy xác nhận nộp hồ sơ đăng ký qua mạng điện tử. Nếu quá thời hạn trên mà cơ quan đăng ký kinh doanh chưa nhận được hồ sơ do doanh nghiệp gửi đến thì hồ sơ đăng ký doanh nghiệp qua mạng điện tử không còn hiệu lực và cơ quan đăng ký kinh doanh xóa tên doanh nghiệp trong Hệ thống.\n4. Khi nhận được hồ sơ bằng bản giấy do doanh nghiệp gửi đến, Phòng Đăng ký kinh doanh đối chiếu với thông tin doanh nghiệp đã khai trên Hệ thống và cấp Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp nếu nội dung thông tin thống nhất. ĐĂNG KÝ BỔ SUNG THÔNG TIN, TẠM NGỪNG KINH DOANH, GIẢI THỂ DOANH NGHIỆP, THU HỒI, CẤP LẠI GIẤY CHỨNG NHẬN ĐĂNG KÝ DOANH NGHIỆP",
+      "chapter": "IV",
+      "chapter_title": "ĐĂNG KÝ DOANH NGHIỆP QUA MẠNG ĐIỆN TỬ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Người thành lập doanh nghiệp nộp hồ sơ đăng ký điện tử qua Cổng thông tin đăng ký doanh nghiệp quốc gia và nộp lệ phí đăng ký doanh nghiệp cho Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phòng Đăng ký kinh doanh kiểm tra tính hợp lệ của hồ sơ đăng ký doanh nghiệp trên Hệ thống và thông báo cho doanh nghiệp về việc cấp Giấy chứng nhận đăng ký doanh nghiệp hoặc yêu cầu người thành lập doanh nghiệp sửa đổi, bổ sung hồ sơ đăng ký doanh nghiệp qua Cổng thông tin đăng ký doanh nghiệp quốc gia và gửi đến địa chỉ thư điện tử của người thành lập doanh nghiệp đã đăng ký với Hệ thống thông tin đăng ký doanh nghiệp quốc gia. Khi hồ sơ đăng ký doanh nghiệp hợp lệ và được chấp thuận trên Hệ thống, Phòng Đăng ký kinh doanh gửi thông tin sang cơ quan Thuế đề nghị tạo mã số cho doanh nghiệp và gửi qua Hệ thống cho người thành lập doanh nghiệp Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử theo mẫu quy định tại Phụ lục VI-4 ban hành kèm theo Thông tư này. Người đại diện theo pháp luật của doanh nghiệp ký tên vào Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Người thành lập doanh nghiệp gửi Giấy xác nhận nộp hồ sơ đăng ký doanh nghiệp qua mạng điện tử và các giấy tờ trong hồ sơ đăng ký doanh nghiệp đến Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính trong thời hạn mười lăm ngày làm việc kể từ ngày nhận được Giấy xác nhận nộp hồ sơ đăng ký qua mạng điện tử. Nếu quá thời hạn trên mà cơ quan đăng ký kinh doanh chưa nhận được hồ sơ do doanh nghiệp gửi đến thì hồ sơ đăng ký doanh nghiệp qua mạng điện tử không còn hiệu lực và cơ quan đăng ký kinh doanh xóa tên doanh nghiệp trong Hệ thống.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Khi nhận được hồ sơ bằng bản giấy do doanh nghiệp gửi đến, Phòng Đăng ký kinh doanh đối chiếu với thông tin doanh nghiệp đã khai trên Hệ thống và cấp Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp nếu nội dung thông tin thống nhất. ĐĂNG KÝ BỔ SUNG THÔNG TIN, TẠM NGỪNG KINH DOANH, GIẢI THỂ DOANH NGHIỆP, THU HỒI, CẤP LẠI GIẤY CHỨNG NHẬN ĐĂNG KÝ DOANH NGHIỆP",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "title": "Bổ sung thông tin trong Giấy chứng nhận đăng ký doanh nghiệp",
+      "content_raw": "Bổ sung thông tin trong Giấy chứng nhận đăng ký doanh nghiệp\nTrường hợp doanh nghiệp chỉ bổ sung thay đổi những thông tin về số điện thoại, fax, email, website, địa chỉ của doanh nghiệp do thay đổi về địa giới hành chính, thông tin về chứng minh nhân dân, địa chỉ của cá nhân trong hồ sơ đăng ký kinh doanh thì doanh nghiệp gửi Thông báo theo mẫu quy định tại Phụ lục III-9 đến Phòng Đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính. Phòng Đăng ký kinh doanh nhận thông báo, trao Giấy biên nhận và thực hiện việc cấp đổi Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp. Mỗi lần cấp đổi Giấy chứng nhận đăng ký doanh nghiệp thuộc trường hợp này được coi là một lần đăng ký thay đổi nội dung đăng ký doanh nghiệp. Trong trường hợp này, doanh nghiệp không phải nộp lệ phí.",
+      "chapter": "V",
+      "clauses": []
+    },
+    {
+      "number": 22,
+      "title": "Bổ sung thông tin trong hồ sơ đăng ký doanh nghiệp",
+      "content_raw": "Bổ sung thông tin trong hồ sơ đăng ký doanh nghiệp\nTrường hợp doanh nghiệp chỉ bổ sung các thông tin trong hồ sơ đăng ký doanh nghiệp mà không làm thay đổi nội dung của Giấy chứng nhận đăng ký doanh nghiệp thì doanh nghiệp gửi Thông báo theo mẫu quy định tại Phụ lục III-9 đến Phòng đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp đặt trụ sở chính. Phòng Đăng ký kinh doanh bổ sung thông tin vào hồ sơ của doanh nghiệp và cập nhật thông tin vào Hệ thống. Trong trường hợp này, doanh nghiệp không phải trả phí.",
+      "chapter": "V",
+      "clauses": []
+    },
+    {
+      "number": 23,
+      "title": "Thu hồi Giấy chứng nhận đăng ký doanh nghiệp",
+      "content_raw": "Thu hồi Giấy chứng nhận đăng ký doanh nghiệp\n1. Đối với hành vi vi phạm của doanh nghiệp quy định tại khoản 3 Điều 60 Nghị định số 43/2010/NĐ-CP thì Phòng Đăng ký kinh doanh thông báo bằng văn bản về hành vi vi phạm và yêu cầu người đại diện theo pháp luật của doanh nghiệp đến Phòng Đăng ký kinh doanh để giải trình. Sau mười ngày làm việc, kể từ ngày kết thúc thời hạn hẹn trong thông báo mà người được yêu cầu không đến hoặc nội dung giải trình không được chấp nhận thì Phòng Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp.\n2. Trước khi ra thông báo về hành vi vi phạm và ban hành quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp, trong trường hợp cần thiết, Phòng Đăng ký kinh doanh có thể mời đại diện Thanh tra Sở Kế hoạch và Đầu tư và các cơ quan có liên quan như cơ quan thuế, Ủy ban nhân dân cấp huyện, Sở quản lý ngành, … tham dự cuộc họp liên ngành để xác định hành vi vi phạm của doanh nghiệp.\n3. Thông báo của Phòng Đăng ký kinh doanh về hành vi vi phạm của doanh nghiệp quy định tại Điều 60 Nghị định số 43/2010/NĐ-CP phải được gửi đến địa chỉ trụ sở chính của doanh nghiệp, được đăng tải trên Cổng thông tin đăng ký doanh nghiệp quốc gia và phương tiện thông tin đại chúng địa phương.",
+      "chapter": "V",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với hành vi vi phạm của doanh nghiệp quy định tại khoản 3 Điều 60 Nghị định số 43/2010/NĐ-CP thì Phòng Đăng ký kinh doanh thông báo bằng văn bản về hành vi vi phạm và yêu cầu người đại diện theo pháp luật của doanh nghiệp đến Phòng Đăng ký kinh doanh để giải trình. Sau mười ngày làm việc, kể từ ngày kết thúc thời hạn hẹn trong thông báo mà người được yêu cầu không đến hoặc nội dung giải trình không được chấp nhận thì Phòng Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trước khi ra thông báo về hành vi vi phạm và ban hành quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp, trong trường hợp cần thiết, Phòng Đăng ký kinh doanh có thể mời đại diện Thanh tra Sở Kế hoạch và Đầu tư và các cơ quan có liên quan như cơ quan thuế, Ủy ban nhân dân cấp huyện, Sở quản lý ngành, … tham dự cuộc họp liên ngành để xác định hành vi vi phạm của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thông báo của Phòng Đăng ký kinh doanh về hành vi vi phạm của doanh nghiệp quy định tại Điều 60 Nghị định số 43/2010/NĐ-CP phải được gửi đến địa chỉ trụ sở chính của doanh nghiệp, được đăng tải trên Cổng thông tin đăng ký doanh nghiệp quốc gia và phương tiện thông tin đại chúng địa phương.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "title": "Xử lý đối với trường hợp kê khai hồ sơ đăng ký doanh nghiệp không trung thực, không chính xác",
+      "content_raw": "Xử lý đối với trường hợp kê khai hồ sơ đăng ký doanh nghiệp không trung thực, không chính xác\n1. Trường hợp phát hiện thông tin kê khai trong hồ sơ đăng ký doanh nghiệp là không trung thực, không chính xác thì Phòng Đăng ký kinh doanh cấp tỉnh thông báo cho cơ quan nhà nước có thẩm quyền để xử lý theo quy định của pháp luật. Sau khi có quyết định xử lý vi phạm của cơ quan nhà nước có thẩm quyền, Phòng Đăng ký kinh doanh yêu cầu doanh nghiệp làm lại hồ sơ để cấp lại Giấy chứng nhận đăng ký doanh nghiệp.\n2. Sau thời hạn hẹn trong thông báo của Phòng Đăng ký kinh doanh mà doanh nghiệp không nộp hồ sơ để cấp lại Giấy chứng nhận đăng ký doanh nghiệp thì Phòng Đăng ký kinh doanh yêu cầu doanh nghiệp báo cáo theo quy định tại Điều 163 Luật Doanh nghiệp.",
+      "chapter": "V",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp phát hiện thông tin kê khai trong hồ sơ đăng ký doanh nghiệp là không trung thực, không chính xác thì Phòng Đăng ký kinh doanh cấp tỉnh thông báo cho cơ quan nhà nước có thẩm quyền để xử lý theo quy định của pháp luật. Sau khi có quyết định xử lý vi phạm của cơ quan nhà nước có thẩm quyền, Phòng Đăng ký kinh doanh yêu cầu doanh nghiệp làm lại hồ sơ để cấp lại Giấy chứng nhận đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Sau thời hạn hẹn trong thông báo của Phòng Đăng ký kinh doanh mà doanh nghiệp không nộp hồ sơ để cấp lại Giấy chứng nhận đăng ký doanh nghiệp thì Phòng Đăng ký kinh doanh yêu cầu doanh nghiệp báo cáo theo quy định tại Điều 163 Luật Doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "title": "Cấp lại Giấy chứng nhận đăng ký doanh nghiệp",
+      "content_raw": "Cấp lại Giấy chứng nhận đăng ký doanh nghiệp\n1. Các trường hợp cấp lại Giấy chứng nhận đăng ký doanh nghiệp do mất, thất lạc, cháy, bị tiêu hủy được thực hiện theo quy định tại Điều 58 Nghị định số 43/2010/NĐ-CP.\n2. Trường hợp Giấy chứng nhận đăng ký doanh nghiệp được cấp không đúng hồ sơ, trình tự, thủ tục theo quy định, Phòng Đăng ký kinh doanh thông báo yêu cầu doanh nghiệp hoàn chỉnh và nộp hồ sơ hợp lệ theo quy định trong thời hạn ba mươi ngày, kể từ ngày thông báo để được xem xét cấp lại Giấy chứng nhận đăng ký doanh nghiệp.",
+      "chapter": "V",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các trường hợp cấp lại Giấy chứng nhận đăng ký doanh nghiệp do mất, thất lạc, cháy, bị tiêu hủy được thực hiện theo quy định tại Điều 58 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp Giấy chứng nhận đăng ký doanh nghiệp được cấp không đúng hồ sơ, trình tự, thủ tục theo quy định, Phòng Đăng ký kinh doanh thông báo yêu cầu doanh nghiệp hoàn chỉnh và nộp hồ sơ hợp lệ theo quy định trong thời hạn ba mươi ngày, kể từ ngày thông báo để được xem xét cấp lại Giấy chứng nhận đăng ký doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "title": "Trình tự, thủ tục đăng ký giải thể doanh nghiệp",
+      "content_raw": "Trình tự, thủ tục đăng ký giải thể doanh nghiệp\n1. Trong thời hạn bảy ngày làm việc kể từ ngày kết thúc việc giải thể doanh nghiệp và thanh toán hết các khoản nợ của doanh nghiệp, người đại diện theo pháp luật của doanh nghiệp gửi hồ sơ giải thể doanh nghiệp theo quy định tại khoản 3 Điều 28 Nghị định số 139/2007/NĐ-CP ngày 05 tháng 09 năm 2007 của Chính phủ hướng dẫn chi tiết thi hành một số điều của Luật Doanh nghiệp đến Phòng Đăng ký kinh doanh cấp tỉnh.\n2. Phòng Đăng ký kinh doanh cấp tỉnh gửi thông báo về việc giải thể doanh nghiệp cho cơ quan thuế, cơ quan công an cấp tỉnh trong thời hạn hai ngày làm việc, kể từ ngày nhận được hồ sơ giải thể hợp lệ của doanh nghiệp.\n3. Trong thời hạn bảy ngày làm việc kể từ ngày nhận được hồ sơ giải thể hợp lệ của doanh nghiệp, Phòng Đăng ký kinh doanh cấp tỉnh ra thông báo về việc doanh nghiệp đã giải thể và xóa tên doanh nghiệp trong sổ đăng ký kinh doanh nếu cơ quan thuế và cơ quan công an không có yêu cầu khác.",
+      "chapter": "V",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trong thời hạn bảy ngày làm việc kể từ ngày kết thúc việc giải thể doanh nghiệp và thanh toán hết các khoản nợ của doanh nghiệp, người đại diện theo pháp luật của doanh nghiệp gửi hồ sơ giải thể doanh nghiệp theo quy định tại khoản 3 Điều 28 Nghị định số 139/2007/NĐ-CP ngày 05 tháng 09 năm 2007 của Chính phủ hướng dẫn chi tiết thi hành một số điều của Luật Doanh nghiệp đến Phòng Đăng ký kinh doanh cấp tỉnh.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phòng Đăng ký kinh doanh cấp tỉnh gửi thông báo về việc giải thể doanh nghiệp cho cơ quan thuế, cơ quan công an cấp tỉnh trong thời hạn hai ngày làm việc, kể từ ngày nhận được hồ sơ giải thể hợp lệ của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong thời hạn bảy ngày làm việc kể từ ngày nhận được hồ sơ giải thể hợp lệ của doanh nghiệp, Phòng Đăng ký kinh doanh cấp tỉnh ra thông báo về việc doanh nghiệp đã giải thể và xóa tên doanh nghiệp trong sổ đăng ký kinh doanh nếu cơ quan thuế và cơ quan công an không có yêu cầu khác.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "title": "Chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh.",
+      "content_raw": "Chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh.\n1. Khi chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh, doanh nghiệp gửi Thông báo đến Phòng Đăng ký kinh doanh cấp tỉnh nơi đặt chi nhánh, văn phòng đại diện, địa điểm kinh doanh. Kèm theo Thông báo phải có Quyết định của Chủ doanh nghiệp đối với doanh nghiệp tư nhân, của Chủ sở hữu hoặc Chủ tịch Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty TNHH một thành viên, của Hội đồng thành viên đối với công ty TNHH hai thành viên trở lên, của Hội đồng quản trị đối với công ty cổ phần, của các thành viên hợp danh đối với công ty hợp danh về việc chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh.\n2. Phòng Đăng ký kinh doanh nhận thông báo, nhập thông tin vào Hệ thống thông tin đăng ký doanh nghiệp quốc gia và thu lại Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện đối với trường hợp chấm dứt hoạt động chi nhánh, văn phòng đại diện; xóa địa điểm kinh doanh trong Giấy chứng nhận đăng ký doanh nghiệp hoặc Giấy chứng nhận đăng ký hoạt động chi nhánh đối với trường hợp chấm dứt hoạt động địa điểm kinh doanh.",
+      "chapter": "V",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Khi chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh, doanh nghiệp gửi Thông báo đến Phòng Đăng ký kinh doanh cấp tỉnh nơi đặt chi nhánh, văn phòng đại diện, địa điểm kinh doanh. Kèm theo Thông báo phải có Quyết định của Chủ doanh nghiệp đối với doanh nghiệp tư nhân, của Chủ sở hữu hoặc Chủ tịch Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty TNHH một thành viên, của Hội đồng thành viên đối với công ty TNHH hai thành viên trở lên, của Hội đồng quản trị đối với công ty cổ phần, của các thành viên hợp danh đối với công ty hợp danh về việc chấm dứt hoạt động chi nhánh, văn phòng đại diện, địa điểm kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phòng Đăng ký kinh doanh nhận thông báo, nhập thông tin vào Hệ thống thông tin đăng ký doanh nghiệp quốc gia và thu lại Giấy chứng nhận đăng ký hoạt động chi nhánh, văn phòng đại diện đối với trường hợp chấm dứt hoạt động chi nhánh, văn phòng đại diện; xóa địa điểm kinh doanh trong Giấy chứng nhận đăng ký doanh nghiệp hoặc Giấy chứng nhận đăng ký hoạt động chi nhánh đối với trường hợp chấm dứt hoạt động địa điểm kinh doanh.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "title": "Đăng ký hộ kinh doanh",
+      "content_raw": "Đăng ký hộ kinh doanh\n1. Hồ sơ, trình tự, thủ tục đăng ký hộ kinh doanh thực hiện theo quy định tại Điều 52 Nghị định số 43/2010/NĐ-CP.\n2. Giấy Đề nghị đăng ký hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục I-6 ban hành kèm theo Thông tư này.\n3. Danh sách cá nhân góp vốn thành lập hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục II-5 ban hành kèm theo Thông tư này.\n4. Cá nhân quy định tại khoản 1 Điều 50 Nghị định số 43/2010/NĐ-CP chỉ được quyền đăng ký một hộ kinh doanh trên phạm vi toàn quốc và được quyền góp vốn, mua cổ phầnở doanh nghiệp với tư cách cá nhân.\n5. Giấy chứng nhận đăng ký hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục IV-6 ban hành kèm theo Thông tư này.",
+      "chapter": "VI",
+      "chapter_title": "ĐĂNG KÝ HỘ KINH DOANH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hồ sơ, trình tự, thủ tục đăng ký hộ kinh doanh thực hiện theo quy định tại Điều 52 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Giấy Đề nghị đăng ký hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục I-6 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Danh sách cá nhân góp vốn thành lập hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục II-5 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Cá nhân quy định tại khoản 1 Điều 50 Nghị định số 43/2010/NĐ-CP chỉ được quyền đăng ký một hộ kinh doanh trên phạm vi toàn quốc và được quyền góp vốn, mua cổ phầnở doanh nghiệp với tư cách cá nhân.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Giấy chứng nhận đăng ký hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục IV-6 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "title": "Thay đổi nội dung đăng ký hộ kinh doanh",
+      "content_raw": "Thay đổi nội dung đăng ký hộ kinh doanh\n1. Việc đăng ký thay đổi nội dung đăng ký hộ kinh doanh thực hiện theo quy định tại Điều 55 Nghị định số 43/2010/NĐ-CP. Thông báo thay đổi nội dung đăng ký hộ kinh doanh thực hiện theo quy định tại Phụ lục III-14 ban hành kèm theo Thông tư này.\n2. Khi thay đổi nội dung kinh doanh đã đăng ký, chủ hộ kinh doanh hoặc người đại diện hộ kinh doanh gửi thông báo thay đổi nội dung đăng ký hộ kinh doanh tới cơ quan đăng ký kinh doanh cấp huyện nơi đã đăng ký. Khi tiếp nhận hồ sơ, Cơ quan Đăng ký kinh doanh cấp huyện trao Giấy biên nhận và cấp Giấy chứng nhận đăng ký hộ kinh doanh cho hộ kinh doanh trong thời hạn năm ngày làm việc, kể từ ngày nhận được hồ sơ hợp lệ.",
+      "chapter": "VI",
+      "chapter_title": "ĐĂNG KÝ HỘ KINH DOANH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Việc đăng ký thay đổi nội dung đăng ký hộ kinh doanh thực hiện theo quy định tại Điều 55 Nghị định số 43/2010/NĐ-CP. Thông báo thay đổi nội dung đăng ký hộ kinh doanh thực hiện theo quy định tại Phụ lục III-14 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Khi thay đổi nội dung kinh doanh đã đăng ký, chủ hộ kinh doanh hoặc người đại diện hộ kinh doanh gửi thông báo thay đổi nội dung đăng ký hộ kinh doanh tới cơ quan đăng ký kinh doanh cấp huyện nơi đã đăng ký. Khi tiếp nhận hồ sơ, Cơ quan Đăng ký kinh doanh cấp huyện trao Giấy biên nhận và cấp Giấy chứng nhận đăng ký hộ kinh doanh cho hộ kinh doanh trong thời hạn năm ngày làm việc, kể từ ngày nhận được hồ sơ hợp lệ.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "title": "Chấm dứt hoạt động hộ kinh doanh",
+      "content_raw": "Chấm dứt hoạt động hộ kinh doanh\n1. Khi chấm dứt hoạt động kinh doanh, hộ kinh doanh phải nộp lại bản gốc Giấy chứng nhận đăng ký hộ kinh doanh cho Cơ quan Đăng ký kinh doanh cấp huyện nơi đã đăng ký, đồng thời thanh toán đầy đủ các khoản nợ, gồm cả nợ thuế và nghĩa vụ tài chính chưa thực hiện.\n2. Thông báo tạm ngừng kinh doanh, chấm dứt hoạt động của hộ kinh doanh quy định tại khoản 2, khoản 3 Điều 55 Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục III-15, III-16 ban hành kèm theo Thông tư này.",
+      "chapter": "VI",
+      "chapter_title": "ĐĂNG KÝ HỘ KINH DOANH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Khi chấm dứt hoạt động kinh doanh, hộ kinh doanh phải nộp lại bản gốc Giấy chứng nhận đăng ký hộ kinh doanh cho Cơ quan Đăng ký kinh doanh cấp huyện nơi đã đăng ký, đồng thời thanh toán đầy đủ các khoản nợ, gồm cả nợ thuế và nghĩa vụ tài chính chưa thực hiện.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thông báo tạm ngừng kinh doanh, chấm dứt hoạt động của hộ kinh doanh quy định tại khoản 2, khoản 3 Điều 55 Nghị định số 43/2010/NĐ-CP thực hiện theo mẫu quy định tại Phụ lục III-15, III-16 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "title": "Thu hồi Giấy chứng nhận đăng ký hộ kinh doanh",
+      "content_raw": "Thu hồi Giấy chứng nhận đăng ký hộ kinh doanh\n1. Các trường hợp thu hồi Giấy chứng nhận đăng ký hộ kinh doanh thực hiện theo quy định tại Điều 61 Nghị định số 43/2010/NĐ-CP.\n2. Trường hợp hộ kinh doanh không tiến hành hoạt động kinh doanh trong thời hạn sáu tháng, kể từ ngày được cấp Giấy chứng nhận đăng ký hộ kinh doanh; ngừng hoạt động kinh doanh quá sáu tháng liên tục mà không thông báo với cơ quan đăng ký kinh doanh cấp huyện nơi đăng ký thì Cơ quan Đăng ký kinh doanh thông báo bằng văn bản về hành vi vi phạm và yêu cầu đại diện hộ kinh doanh đến Cơ quan Đăng ký kinh doanh để giải trình. Sau mười ngày làm việc, kể từ ngày kết thúc thời hạn hẹn trong thông báo mà người được yêu cầu không đến hoặc nội dung giải trình không được chấp nhận thì Cơ quan Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.\n3. Trường hợp hộ kinh doanh chuyển địa điểm kinh doanh sang quận, huyện, thị xã khác thì sau khi nhận được thông báo của hộ kinh doanh về việc chuyển địa điểm sang đơn vị cấp huyện khác, Cơ quan Đăng ký kinh doanh ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.\n4. Trường hợp hộ kinh doanh kinh doanh ngành, nghề bị cấm thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.\n5. Trường hợp hộ kinh doanh được thành lập bởi những người không được quyền thành lập hộ kinh doanh sẽ bị xử lý theo một trong các trường hợp sau:\na) Nếu hộ kinh doanh do một cá nhân thành lập và cá nhân đó không được quyền thành lập hộ kinh doanh thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.\nb) Nếu hộ kinh doanh do một nhóm cá nhân thành lập và một trong số cá nhân đó không được quyền thành lập hộ kinh doanh thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và yêu cầu hộ kinh doanh đăng ký thay đổi cá nhân đó trong thời hạn mười lăm ngày làm việc, kể từ ngày thông báo. Quá thời hạn trên mà hộ kinh doanh không đăng ký thay đổi thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.\n6. Thông báo về hành vi vi phạm của hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục V-10 ban hành kèm theo Thông tư này. Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục VI-2 ban hành kèm theo Thông tư này.",
+      "chapter": "VI",
+      "chapter_title": "ĐĂNG KÝ HỘ KINH DOANH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các trường hợp thu hồi Giấy chứng nhận đăng ký hộ kinh doanh thực hiện theo quy định tại Điều 61 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp hộ kinh doanh không tiến hành hoạt động kinh doanh trong thời hạn sáu tháng, kể từ ngày được cấp Giấy chứng nhận đăng ký hộ kinh doanh; ngừng hoạt động kinh doanh quá sáu tháng liên tục mà không thông báo với cơ quan đăng ký kinh doanh cấp huyện nơi đăng ký thì Cơ quan Đăng ký kinh doanh thông báo bằng văn bản về hành vi vi phạm và yêu cầu đại diện hộ kinh doanh đến Cơ quan Đăng ký kinh doanh để giải trình. Sau mười ngày làm việc, kể từ ngày kết thúc thời hạn hẹn trong thông báo mà người được yêu cầu không đến hoặc nội dung giải trình không được chấp nhận thì Cơ quan Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp hộ kinh doanh chuyển địa điểm kinh doanh sang quận, huyện, thị xã khác thì sau khi nhận được thông báo của hộ kinh doanh về việc chuyển địa điểm sang đơn vị cấp huyện khác, Cơ quan Đăng ký kinh doanh ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp hộ kinh doanh kinh doanh ngành, nghề bị cấm thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Trường hợp hộ kinh doanh được thành lập bởi những người không được quyền thành lập hộ kinh doanh sẽ bị xử lý theo một trong các trường hợp sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Nếu hộ kinh doanh do một cá nhân thành lập và cá nhân đó không được quyền thành lập hộ kinh doanh thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh."
+            },
+            {
+              "label": "b",
+              "content": "Nếu hộ kinh doanh do một nhóm cá nhân thành lập và một trong số cá nhân đó không được quyền thành lập hộ kinh doanh thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và yêu cầu hộ kinh doanh đăng ký thay đổi cá nhân đó trong thời hạn mười lăm ngày làm việc, kể từ ngày thông báo. Quá thời hạn trên mà hộ kinh doanh không đăng ký thay đổi thì Cơ quan Đăng ký kinh doanh ra Thông báo về hành vi vi phạm và ban hành Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh."
+            }
+          ]
+        },
+        {
+          "number": 6,
+          "content": "Thông báo về hành vi vi phạm của hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục V-10 ban hành kèm theo Thông tư này. Quyết định thu hồi Giấy chứng nhận đăng ký hộ kinh doanh thực hiện theo mẫu quy định tại Phụ lục VI-2 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "title": "Hiệu đính thông tin trong Giấy chứng nhận đăng ký doanh nghiệp",
+      "content_raw": "Hiệu đính thông tin trong Giấy chứng nhận đăng ký doanh nghiệp\nViệc hiệu đính thông tin trong Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại Điều 30 Nghị định số 43/2010/NĐ-CP được thực hiện như sau:\n1. Trường hợp doanh nghiệp phát hiện nội dung trong Giấy chứng nhận đăng ký doanh nghiệp chưa chính xác so với nội dung hồ sơ đăng ký doanh nghiệp thì doanh nghiệp gửi Giấy đề nghị hiệu đính thông tin theo mẫu quy định tại Phụ lục III-11 ban hành kèm theo Thông tư này yêu cầu Phòng Đăng ký kinh doanh hiệu đính nội dung trong Giấy chứng nhận đăng ký doanh nghiệp cho phù hợp với hồ sơ đăng ký doanh nghiệp đã nộp. Phòng Đăng ký kinh doanh nhận Giấy đề nghị, kiểm tra hồ sơ và thực hiện việc cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp trong thời hạn hai ngày làm việc, kể từ ngày nhận được Giấy đề nghị của doanh nghiệp nếu thông tin trong thông báo của doanh nghiệp là chính xác.\n2. Trường hợp Phòng Đăng ký kinh doanh phát hiện nội dung trong Giấy chứng nhận đăng ký doanh nghiệp chưa chính xác so với nội dung hồ sơ đăng ký doanh nghiệp thì gửi thông báo cho doanh nghiệp về việc hiệu đính nội dung trong Giấy chứng nhận đăng ký doanh nghiệp cho phù hợp với hồ sơ đăng ký doanh nghiệp đã nộp và thực hiện việc cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp trong thời hạn mười lăm ngày làm việc kể từ ngày gửi thông báo. Khi đến nhận Giấy chứng nhận đăng ký doanh nghiệp mới, doanh nghiệp phải nộp lại Giấy chứng nhận đăng ký doanh nghiệp cũ.\n3. Nếu việc hiệu đính thông tin được thực hiện trong vòng năm ngày làm việc kể từ ngày cấp Giấy chứng nhận đăng ký doanh nghiệp thì Phòng Đăng ký kinh doanh cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp và không tính là một lần thay đổi nội dung đăng ký doanh nghiệp. Nếu việc hiệu đính thông tin được thực hiện sau năm ngày làm việc kể từ ngày cấp Giấy chứng nhận đăng ký doanh nghiệp thì Phòng Đăng ký kinh doanh cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp và việc hiệu đính được tính là một lần thay đổi nội dung đăng ký doanh nghiệp.\n4. Trong trường hợp hiệu đính thông tin trên Giấy chứng nhận đăng ký doanh nghiệp, doanh nghiệp không phải nộp lệ phí cho việc hiệu đính thông tin.",
+      "chapter": "VII",
+      "chapter_title": "HIỆU ĐÍNH THÔNG TIN, ĐỐI CHIẾU THÔNG TIN VỀ ĐĂNG KÝ KINH DOANH VÀ ĐĂNG KÝ THUẾ SAU KHI CHUYỂN ĐỔI DỮ LIỆU",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp doanh nghiệp phát hiện nội dung trong Giấy chứng nhận đăng ký doanh nghiệp chưa chính xác so với nội dung hồ sơ đăng ký doanh nghiệp thì doanh nghiệp gửi Giấy đề nghị hiệu đính thông tin theo mẫu quy định tại Phụ lục III-11 ban hành kèm theo Thông tư này yêu cầu Phòng Đăng ký kinh doanh hiệu đính nội dung trong Giấy chứng nhận đăng ký doanh nghiệp cho phù hợp với hồ sơ đăng ký doanh nghiệp đã nộp. Phòng Đăng ký kinh doanh nhận Giấy đề nghị, kiểm tra hồ sơ và thực hiện việc cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp trong thời hạn hai ngày làm việc, kể từ ngày nhận được Giấy đề nghị của doanh nghiệp nếu thông tin trong thông báo của doanh nghiệp là chính xác.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp Phòng Đăng ký kinh doanh phát hiện nội dung trong Giấy chứng nhận đăng ký doanh nghiệp chưa chính xác so với nội dung hồ sơ đăng ký doanh nghiệp thì gửi thông báo cho doanh nghiệp về việc hiệu đính nội dung trong Giấy chứng nhận đăng ký doanh nghiệp cho phù hợp với hồ sơ đăng ký doanh nghiệp đã nộp và thực hiện việc cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp trong thời hạn mười lăm ngày làm việc kể từ ngày gửi thông báo. Khi đến nhận Giấy chứng nhận đăng ký doanh nghiệp mới, doanh nghiệp phải nộp lại Giấy chứng nhận đăng ký doanh nghiệp cũ.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Nếu việc hiệu đính thông tin được thực hiện trong vòng năm ngày làm việc kể từ ngày cấp Giấy chứng nhận đăng ký doanh nghiệp thì Phòng Đăng ký kinh doanh cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp và không tính là một lần thay đổi nội dung đăng ký doanh nghiệp. Nếu việc hiệu đính thông tin được thực hiện sau năm ngày làm việc kể từ ngày cấp Giấy chứng nhận đăng ký doanh nghiệp thì Phòng Đăng ký kinh doanh cấp lại Giấy chứng nhận đăng ký doanh nghiệp cho doanh nghiệp và việc hiệu đính được tính là một lần thay đổi nội dung đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trong trường hợp hiệu đính thông tin trên Giấy chứng nhận đăng ký doanh nghiệp, doanh nghiệp không phải nộp lệ phí cho việc hiệu đính thông tin.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "title": "Bổ sung, hiệu đính nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp",
+      "content_raw": "Bổ sung, hiệu đính nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp\n1. Trường hợp doanh nghiệp phát hiện nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp không có hoặc không chính xác do quá trình chuyển đổi dữ liệu, doanh nghiệp gửi Thông báo cho Phòng Đăng ký kinh doanh cấp tỉnh nơi đặt trụ sở chính để bổ sung hoặc hiệu đính thông tin. Kèm theo Thông báo phải có bản sao hợp lệ Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế. Trong thời hạn năm ngày làm việc, kể từ khi tiếp nhận Thông báo của doanh nghiệp, Phòng Đăng ký kinh doanh nơi doanh nghiệp đặt trụ sở chính có trách nhiệm bổ sung hoặc hiệu đính thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp.\n2. Trường hợp Phòng Đăng ký kinh doanh phát hiện nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp không có hoặc không chính xác với Giấy chứng nhận bằng văn bản, trong thời hạn năm ngày làm việc kể từ khi phát hiện, Phòng Đăng ký kinh doanh bổ sung, hiệu đính nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp.",
+      "chapter": "VII",
+      "chapter_title": "HIỆU ĐÍNH THÔNG TIN, ĐỐI CHIẾU THÔNG TIN VỀ ĐĂNG KÝ KINH DOANH VÀ ĐĂNG KÝ THUẾ SAU KHI CHUYỂN ĐỔI DỮ LIỆU",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp doanh nghiệp phát hiện nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp không có hoặc không chính xác do quá trình chuyển đổi dữ liệu, doanh nghiệp gửi Thông báo cho Phòng Đăng ký kinh doanh cấp tỉnh nơi đặt trụ sở chính để bổ sung hoặc hiệu đính thông tin. Kèm theo Thông báo phải có bản sao hợp lệ Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế. Trong thời hạn năm ngày làm việc, kể từ khi tiếp nhận Thông báo của doanh nghiệp, Phòng Đăng ký kinh doanh nơi doanh nghiệp đặt trụ sở chính có trách nhiệm bổ sung hoặc hiệu đính thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp Phòng Đăng ký kinh doanh phát hiện nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp không có hoặc không chính xác với Giấy chứng nhận bằng văn bản, trong thời hạn năm ngày làm việc kể từ khi phát hiện, Phòng Đăng ký kinh doanh bổ sung, hiệu đính nội dung thông tin về Giấy chứng nhận đăng ký kinh doanh hoặc Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 34,
+      "title": "Hướng dẫn xử lý đối với trường hợp doanh nghiệp chưa đăng ký số thuế hoặc có thông tin sai khác giữa đăng ký kinh doanh và đăng ký thuế.",
+      "content_raw": "Hướng dẫn xử lý đối với trường hợp doanh nghiệp chưa đăng ký số thuế hoặc có thông tin sai khác giữa đăng ký kinh doanh và đăng ký thuế.\n1. Trên cơ sở dữ liệu về đăng ký doanh nghiệp sau khi được chuyển đổi và dữ liệu về đăng ký thuế, Phòng Đăng ký kinh doanh cấp tỉnh gửi thông báo cho từng doanh nghiệp và yêu cầu doanh nghiệp:\na) Đăng ký mã số thuế trong thời hạn ba mươi ngày làm việc, kể từ ngày nhận được thông báo trong trường hợp doanh nghiệp đã được cấp Giấy chứng nhận đăng ký kinh doanh mà chưa thực hiện việc đăng ký thuế. Trường hợp doanh nghiệp không thực hiện theo yêu cầu tại điểm này thì sẽ bị xử lý theo quy định của pháp luật về thuế và bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại điểm c khoản 2 Điều 165 Luật Doanh nghiệp.\nb) Báo cáo và thực hiện việc đăng ký thay đổi nội dung đăng ký doanh nghiệp trong thời hạn ba tháng, kể từ ngày nhận được thông báo trong trường hợp nội dung đăng ký kinh doanh và đăng ký thuế của doanh nghiệp chưa thống nhất. Trường hợp doanh nghiệp không thực hiện theo yêu cầu tại điểm này thì sẽ bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại điểm g khoản 2 Điều 165 Luật Doanh nghiệp.\n2. Thông báo của Phòng Đăng ký kinh doanh về việc thu hồi Giấy chứng nhận đăng ký doanh nghiệp phải được gửi đến địa chỉ trụ sở chính, địa chỉ nhận thông báo thuế của doanh nghiệp và đăng trên phương tiện thông tin đại chúng.",
+      "chapter": "VII",
+      "chapter_title": "HIỆU ĐÍNH THÔNG TIN, ĐỐI CHIẾU THÔNG TIN VỀ ĐĂNG KÝ KINH DOANH VÀ ĐĂNG KÝ THUẾ SAU KHI CHUYỂN ĐỔI DỮ LIỆU",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trên cơ sở dữ liệu về đăng ký doanh nghiệp sau khi được chuyển đổi và dữ liệu về đăng ký thuế, Phòng Đăng ký kinh doanh cấp tỉnh gửi thông báo cho từng doanh nghiệp và yêu cầu doanh nghiệp:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đăng ký mã số thuế trong thời hạn ba mươi ngày làm việc, kể từ ngày nhận được thông báo trong trường hợp doanh nghiệp đã được cấp Giấy chứng nhận đăng ký kinh doanh mà chưa thực hiện việc đăng ký thuế. Trường hợp doanh nghiệp không thực hiện theo yêu cầu tại điểm này thì sẽ bị xử lý theo quy định của pháp luật về thuế và bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại điểm c khoản 2 Điều 165 Luật Doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Báo cáo và thực hiện việc đăng ký thay đổi nội dung đăng ký doanh nghiệp trong thời hạn ba tháng, kể từ ngày nhận được thông báo trong trường hợp nội dung đăng ký kinh doanh và đăng ký thuế của doanh nghiệp chưa thống nhất. Trường hợp doanh nghiệp không thực hiện theo yêu cầu tại điểm này thì sẽ bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại điểm g khoản 2 Điều 165 Luật Doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Thông báo của Phòng Đăng ký kinh doanh về việc thu hồi Giấy chứng nhận đăng ký doanh nghiệp phải được gửi đến địa chỉ trụ sở chính, địa chỉ nhận thông báo thuế của doanh nghiệp và đăng trên phương tiện thông tin đại chúng.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "title": "Cung cấp thông tin về đăng ký doanh nghiệp",
+      "content_raw": "Cung cấp thông tin về đăng ký doanh nghiệp\n1. Việc cung cấp thông tin về nội dung đăng ký doanh nghiệp thực hiện theo quy định tại Điều 31 và khoản 4 Điều 52 Nghị định số 43/2010/NĐ-CP.\n2. Khi giải quyết đăng ký doanh nghiệp, Phòng Đăng ký kinh doanh ghi thông tin nội dung đăng ký doanh nghiệp vào sổ đăng ký kinh doanh lưu giữ tại Phòng Đăng ký kinh doanh. Sổ đăng ký doanh nghiệp có thể là những tệp tin điện tử.",
+      "chapter": "VIII",
+      "chapter_title": "CUNG CẤP THÔNG TIN VÀ LƯU GIỮ NỘI DUNG ĐĂNG KÝ DOANH NGHIỆP",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Việc cung cấp thông tin về nội dung đăng ký doanh nghiệp thực hiện theo quy định tại Điều 31 và khoản 4 Điều 52 Nghị định số 43/2010/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Khi giải quyết đăng ký doanh nghiệp, Phòng Đăng ký kinh doanh ghi thông tin nội dung đăng ký doanh nghiệp vào sổ đăng ký kinh doanh lưu giữ tại Phòng Đăng ký kinh doanh. Sổ đăng ký doanh nghiệp có thể là những tệp tin điện tử.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "title": "Nội dung thông tin cung cấp",
+      "content_raw": "Nội dung thông tin cung cấp\n1. Các cá nhân, tổ chức có thể yêu cầu Phòng Đăng ký kinh doanh cung cấp thông tin về nội dung doanh nghiệp trong phạm vi địa phương và phải trả phí theo quy định của pháp luật.\n2. Thông tin về đăng ký doanh nghiệp được công bố công khai, miễn phí trên Cổng đăng ký kinh doanh quốc gia với bốn nội dung cơ bản: tên doanh nghiệp, địa chỉ trụ sở chính, người đại diện theo pháp luật và ngành, nghề kinh doanh.\n3. Tổ chức, cá nhân có nhu cầu tìm hiểu các thông tin về đăng ký kinh doanh của doanh nghiệp ngoài thông tin cơ bản nêu trên phải trả lệ phí, trừ trường hợp cơ quan nhà nước có thẩm quyền có yêu cầu cung cấp thông tin bằng văn bản đối với từng trường hợp cụ thể.",
+      "chapter": "VIII",
+      "chapter_title": "CUNG CẤP THÔNG TIN VÀ LƯU GIỮ NỘI DUNG ĐĂNG KÝ DOANH NGHIỆP",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các cá nhân, tổ chức có thể yêu cầu Phòng Đăng ký kinh doanh cung cấp thông tin về nội dung doanh nghiệp trong phạm vi địa phương và phải trả phí theo quy định của pháp luật.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thông tin về đăng ký doanh nghiệp được công bố công khai, miễn phí trên Cổng đăng ký kinh doanh quốc gia với bốn nội dung cơ bản: tên doanh nghiệp, địa chỉ trụ sở chính, người đại diện theo pháp luật và ngành, nghề kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Tổ chức, cá nhân có nhu cầu tìm hiểu các thông tin về đăng ký kinh doanh của doanh nghiệp ngoài thông tin cơ bản nêu trên phải trả lệ phí, trừ trường hợp cơ quan nhà nước có thẩm quyền có yêu cầu cung cấp thông tin bằng văn bản đối với từng trường hợp cụ thể.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 37,
+      "title": "Hiệu lực thi hành",
+      "content_raw": "Hiệu lực thi hành\n1. Thông tư này có hiệu lực thi hành kể từ ngày 20 tháng 7 năm 2010\n2. Thông tư này thay thế Thông tư số 03/2006/TT-BKH ngày 19 tháng 10 năm 2006 của Bộ Kế hoạch và Đầu tư hướng dẫn trình tự, thủ tục đăng ký kinh doanh theo quy định tại Nghị định số 88/2006/NĐ-CP ngày 29 tháng 8 năm 2006 của Chính phủ về đăng ký kinh doanh; Thông tư liên tịch số 05/2008/TTLT/BKH-BTC-BCA ngày 29 tháng 7 năm 2008 của Bộ Kế hoạch và Đầu tư, Bộ Tài chính, Bộ Công an hướng dẫn cơ chế phối hợp giữa các cơ quan giải quyết đăng ký kinh doanh, đăng ký thuế và đăng ký con dấu đối với doanh nghiệp thành lập, hoạt động theo Luật Doanh nghiệp và Thông tư số 01/2009/TT-BKH ngày 13 tháng 01 năm 2009 của Bộ Kế hoạch và Đầu tư sửa đổi, bổ sung Thông tư số 03/2006/TT-BKH.",
+      "chapter": "IX",
+      "chapter_title": "ĐIỀU KHOẢN THI HÀNH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thông tư này có hiệu lực thi hành kể từ ngày 20 tháng 7 năm 2010",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thông tư này thay thế Thông tư số 03/2006/TT-BKH ngày 19 tháng 10 năm 2006 của Bộ Kế hoạch và Đầu tư hướng dẫn trình tự, thủ tục đăng ký kinh doanh theo quy định tại Nghị định số 88/2006/NĐ-CP ngày 29 tháng 8 năm 2006 của Chính phủ về đăng ký kinh doanh; Thông tư liên tịch số 05/2008/TTLT/BKH-BTC-BCA ngày 29 tháng 7 năm 2008 của Bộ Kế hoạch và Đầu tư, Bộ Tài chính, Bộ Công an hướng dẫn cơ chế phối hợp giữa các cơ quan giải quyết đăng ký kinh doanh, đăng ký thuế và đăng ký con dấu đối với doanh nghiệp thành lập, hoạt động theo Luật Doanh nghiệp và Thông tư số 01/2009/TT-BKH ngày 13 tháng 01 năm 2009 của Bộ Kế hoạch và Đầu tư sửa đổi, bổ sung Thông tư số 03/2006/TT-BKH.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 38,
+      "title": "Trách nhiệm thực hiện",
+      "content_raw": "Trách nhiệm thực hiện\n1. Sở Kế hoạch và Đầu tư các tỉnh, thành phố trực thuộc trungương, cơ quan đăng ký kinh doanh cấp huyện, các doanh nghiệp thành lập theo Luật Doanh nghiệp, người thành lập doanh nghiệp và các tổ chức, cá nhân có liên quan chịu trách nhiệm thi hành Thông tư này.\n2. Trong quá trình thực hiện, nếu có vướng mắc, đề nghị các tổ chức, cá nhân có liên quan phảnánh kịp thời về Bộ Kế hoạch và Đầu tư để nghiên cứu, sửa đổi, bổ sung./.",
+      "chapter": "IX",
+      "chapter_title": "ĐIỀU KHOẢN THI HÀNH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Sở Kế hoạch và Đầu tư các tỉnh, thành phố trực thuộc trungương, cơ quan đăng ký kinh doanh cấp huyện, các doanh nghiệp thành lập theo Luật Doanh nghiệp, người thành lập doanh nghiệp và các tổ chức, cá nhân có liên quan chịu trách nhiệm thi hành Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trong quá trình thực hiện, nếu có vướng mắc, đề nghị các tổ chức, cá nhân có liên quan phảnánh kịp thời về Bộ Kế hoạch và Đầu tư để nghiên cứu, sửa đổi, bổ sung./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}

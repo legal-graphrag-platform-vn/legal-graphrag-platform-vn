@@ -1,0 +1,765 @@
+{
+  "document": {
+    "id": "TT196_2011",
+    "title": "Thông tư số 196/2011/TT-BTC Hướng dẫn bán cổ phần lần đầu và quản lý, sử dụng tiền thu từ cổ phần hóa của các doanh nghiệp 100% vốn nhà nước thực hiện chuyển đổi thành công ty cổ phần",
+    "number": "196/2011/TT-BTC",
+    "doc_type": "Circular",
+    "issued_date": "2011-12-26",
+    "effective_from": "2012-02-15",
+    "status": "Còn hiệu lực"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi, đối tượng điều chỉnh",
+      "content_raw": "Phạm vi, đối tượng điều chỉnh\nThông tư này hướng dẫn trình tự, thủ tục, phương thức bán cổ phần lần đầu và quản lý, sử dụng tiền thu từ cổ phần hóa của các đối tượng thực hiện cổ phần hoá theo quy định tại Điều 2 Nghị định số 59/2011/NĐ-CP (sau đây gọi tắt là doanh nghiệp cổ phần hóa).",
+      "clauses": []
+    },
+    {
+      "number": 2,
+      "title": "Giải thích từ ngữ",
+      "content_raw": "Giải thích từ ngữ\n1. Bán đấu giá cổ phần là hình thức bán cổ phần của doanh nghiệp cổ phần hoá công khai cho các đối tượng có sự cạnh tranh về giá.\n2. Cuộc đấu giá bán cổ phần không thành công là cuộc đấu giá không có nhà đầu tư đăng ký tham gia hoặc chỉ có 01 nhà đầu tư đăng ký tham gia.\n3. Bảo lãnh phát hành là việc tổ chức bảo lãnh phát hành cam kết với tổ chức phát hành thực hiện các thủ tục trước khi chào bán chứng khoán, nhận mua một phần hay toàn bộ chứng khoán của tổ chức phát hành để bán lại hoặc mua số chứng khoán còn lại chưa được phân phối hết của tổ chức phát hành hoặc hỗ trợ tổ chức phát hành trong việc phân phối chứng khoán ra công chúng.\n4. Tổ chức bảo lãnh phát hành là một hoặc một nhóm các công ty chứng khoán được cấp phép thực hiện nghiệp vụ bảo lãnh phát hành cho doanh nghiệp theo quy định của pháp luật về Chứng khoán và thị trường chứng khoán.\n5. Tổ chức thực hiện bán đấu giá cổ phần là các Sở giao dịch chứng khoán, tổ chức trung gian (công ty chứng khoán) cung cấp dịch vụ đấu giá bán cổ phần và Ban chỉ đạo cổ phần hoá, được cơ quan quyết định cổ phần hóa phê duyệt để bán đấu giá cổ phần lần đầu của doanh nghiệp cho các nhà đầu tư theo quy định tại Thông tư này.\n6. Tiền đặt cọc là một khoản tiền của người tham gia mua cổ phầnứng trước để đảm bảo quyền mua cổ phần.\n7. Giá khởi điểm là mức giá ban đầu của một cổ phần được chào bán ra bên ngoài do cấp có thẩm quyền quy định nhưng không thấp hơn mệnh giá (10.000 đồng Việt Nam). Giá khởi điểm của cổ phần đấu giá được xác định trên cơ sở kết quả xác định giá trị doanh nghiệp và tiềm năng của doanh nghiệp trong tương lai và giá trị Quỹ dự phòng rủi ro nghiệp vụ được để lại doanh nghiệp (nếu có). CHƯƠNG II - NHỮNG QUY ĐỊNH CỤ THỂ MỤC I - ĐỐI TƯỢNG MUA VÀ GIÁ BÁN CỔ PHẦN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Bán đấu giá cổ phần là hình thức bán cổ phần của doanh nghiệp cổ phần hoá công khai cho các đối tượng có sự cạnh tranh về giá.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cuộc đấu giá bán cổ phần không thành công là cuộc đấu giá không có nhà đầu tư đăng ký tham gia hoặc chỉ có 01 nhà đầu tư đăng ký tham gia.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Bảo lãnh phát hành là việc tổ chức bảo lãnh phát hành cam kết với tổ chức phát hành thực hiện các thủ tục trước khi chào bán chứng khoán, nhận mua một phần hay toàn bộ chứng khoán của tổ chức phát hành để bán lại hoặc mua số chứng khoán còn lại chưa được phân phối hết của tổ chức phát hành hoặc hỗ trợ tổ chức phát hành trong việc phân phối chứng khoán ra công chúng.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Tổ chức bảo lãnh phát hành là một hoặc một nhóm các công ty chứng khoán được cấp phép thực hiện nghiệp vụ bảo lãnh phát hành cho doanh nghiệp theo quy định của pháp luật về Chứng khoán và thị trường chứng khoán.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Tổ chức thực hiện bán đấu giá cổ phần là các Sở giao dịch chứng khoán, tổ chức trung gian (công ty chứng khoán) cung cấp dịch vụ đấu giá bán cổ phần và Ban chỉ đạo cổ phần hoá, được cơ quan quyết định cổ phần hóa phê duyệt để bán đấu giá cổ phần lần đầu của doanh nghiệp cho các nhà đầu tư theo quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Tiền đặt cọc là một khoản tiền của người tham gia mua cổ phầnứng trước để đảm bảo quyền mua cổ phần.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Giá khởi điểm là mức giá ban đầu của một cổ phần được chào bán ra bên ngoài do cấp có thẩm quyền quy định nhưng không thấp hơn mệnh giá (10.000 đồng Việt Nam). Giá khởi điểm của cổ phần đấu giá được xác định trên cơ sở kết quả xác định giá trị doanh nghiệp và tiềm năng của doanh nghiệp trong tương lai và giá trị Quỹ dự phòng rủi ro nghiệp vụ được để lại doanh nghiệp (nếu có). CHƯƠNG II - NHỮNG QUY ĐỊNH CỤ THỂ MỤC I - ĐỐI TƯỢNG MUA VÀ GIÁ BÁN CỔ PHẦN",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Đối tượng mua cổ phần",
+      "content_raw": "Đối tượng mua cổ phần\n1. Người lao động có tên trong danh sách thường xuyên của doanh nghiệp tại thời điểm công bố giá trị doanh nghiệp cổ phần hoá theo quy định tại Điều 48 Nghị định số 59/2011/NĐ-CP.\n2. Tổ chức công đoàn tại doanh nghiệp cổ phần hóa theo quy định tại điểm c Khoản 2 Điều 36 Nghị định số 59/2011/NĐ-CP. Tổ chức công đoànủy quyền cho người có thẩm quyền thực hiện các thủ tục liên quan đến việc mua cổ phần.\n3. Nhà đầu tư trong nước, nước ngoài theo quy định tại khoản 1, khoản 2 Điều 6 Nghị định số 59/2011/NĐ-CP, bao gồm các tổ chức, cá nhân (kể cả người lao động trong doanh nghiệp cổ phần hóa).\n4. Nhà đầu tư chiến lược là nhà đầu tư trong nước, nước ngoài theo quy định tại điểm a khoản 3 Điều 6 Nghị định số 59/2011/NĐ-CP.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Người lao động có tên trong danh sách thường xuyên của doanh nghiệp tại thời điểm công bố giá trị doanh nghiệp cổ phần hoá theo quy định tại Điều 48 Nghị định số 59/2011/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổ chức công đoàn tại doanh nghiệp cổ phần hóa theo quy định tại điểm c Khoản 2 Điều 36 Nghị định số 59/2011/NĐ-CP. Tổ chức công đoànủy quyền cho người có thẩm quyền thực hiện các thủ tục liên quan đến việc mua cổ phần.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Nhà đầu tư trong nước, nước ngoài theo quy định tại khoản 1, khoản 2 Điều 6 Nghị định số 59/2011/NĐ-CP, bao gồm các tổ chức, cá nhân (kể cả người lao động trong doanh nghiệp cổ phần hóa).",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Nhà đầu tư chiến lược là nhà đầu tư trong nước, nước ngoài theo quy định tại điểm a khoản 3 Điều 6 Nghị định số 59/2011/NĐ-CP.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Những đối tượng không được tham gia đấu giá mua cổ phần lần đầu",
+      "content_raw": "Những đối tượng không được tham gia đấu giá mua cổ phần lần đầu\n1. Thành viên Ban chỉ đạo cổ phần hoá doanh nghiệp, trừ các thành viên là đại diện của doanh nghiệp cổ phần hoá.\n2. Các tổ chức tài chính trung gian và các cá nhân thuộc các tổ chức này tham gia vào việc thực hiện tư vấn, xác định giá trị doanh nghiệp, kiểm toán báo cáo tài chính và cơ quan kiểm toán xác định giá trị doanh nghiệp; trừ các tổ chức bảo lãnh phát hành mua số cổ phần chưa phân phối hết theo hợp đồng bảo lãnh.\n3. Tổ chức thực hiện bán đấu giá cổ phần và các cá nhân thuộc tổ chức này có liên quan đến cuộc đấu giá.\n4. Các công ty con, công ty liên kết trong cùng Tập đoàn, Tổng công ty và tổ hợp công ty mẹ - công ty con.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thành viên Ban chỉ đạo cổ phần hoá doanh nghiệp, trừ các thành viên là đại diện của doanh nghiệp cổ phần hoá.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Các tổ chức tài chính trung gian và các cá nhân thuộc các tổ chức này tham gia vào việc thực hiện tư vấn, xác định giá trị doanh nghiệp, kiểm toán báo cáo tài chính và cơ quan kiểm toán xác định giá trị doanh nghiệp; trừ các tổ chức bảo lãnh phát hành mua số cổ phần chưa phân phối hết theo hợp đồng bảo lãnh.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Tổ chức thực hiện bán đấu giá cổ phần và các cá nhân thuộc tổ chức này có liên quan đến cuộc đấu giá.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Các công ty con, công ty liên kết trong cùng Tập đoàn, Tổng công ty và tổ hợp công ty mẹ - công ty con.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Giá bán cổ phần lần đầu",
+      "content_raw": "Giá bán cổ phần lần đầu\n1. Giá bán cổ phần cho các nhà đầu tư qua đấu giá là giá nhà đầu tư đặt mua tại cuộc đấu giá và được xác định là trúng thầu theo kết quả đấu giá quy định tại khoản 4 Điều 7 Thông tư này. Trường hợp doanh nghiệp cổ phần hóa bán cổ phần theo hình thức bảo lãnh phát hành thì Ban chỉ đạo cổ phần hóa thỏa thuận với Tổ chức bảo lãnh phát hành về giá bảo lãnh nhưng không thấp hơn giá khởi điểm được cơ quan có thẩm quyền phê duyệt.\n2. Giá bán cổ phầnưu đãi cho người lao động trong doanh nghiệp cổ phần hóa.\na) Trường hợp doanh nghiệp cổ phần hóa thực hiện đấu giá công khai trước khi bán cổ phần cho các nhà đầu tư chiến lược: - Giá bán cổ phần cho người lao động được xác định bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá. - Giá bán cổ phần cho người lao động mua thêm theo quy định tại điểm a khoản 2 Điều 48 Nghị định số 59/2011/NĐ-CP là giá đấu thành công thấp nhất của cuộc đấu giá.\nb) Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược trước khi thực hiện đấu giá công khai: - Giá bán cổ phần cho người lao động được xác định bằng 60% giá bán thỏa thuận thấp nhất cho nhà đầu tư chiến lược (đối với trường hợp bán thỏa thuận) hoặc bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá giữa các nhà đầu tư chiến lược (đối với trường hợp bán đấu giá). - Giá bán cổ phần cho người lao động mua thêm theo quy định tại điểm a khoản 2 Điều 48 Nghị định số 59/2011/NĐ-CP là giá bán thành công thấp nhất cho các nhà đầu tư chiến lược trong trường hợp bán thỏa thuận hoặc đấu giá giữa các nhà đầu tư chiến lược.\n3. Giá bán cổ phầnưu đãi cho tổ chức công đoàn tại doanh nghiệp cổ phần hóa.\na) Trường hợp doanh nghiệp cổ phần hóa thực hiện đấu giá công khai trước khi bán cổ phần cho các nhà đầu tư chiến lược thì giá bán cổ phần cho tổ chức công đoàn được xác định bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá.\nb) Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược trước khi thực hiện đấu giá công khai thì giá bán cổ phần cho tổ chức công đoàn được xác định bằng 60% giá bán thỏa thuận thấp nhất cho nhà đầu tư chiến lược hoặc bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá giữa các nhà đầu tư chiến lược.\n4. Giá bán cổ phần cho nhà đầu tư chiến lược.\na) Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược trước khi thực hiện đấu giá công khai: Giá bán cổ phần cho nhà đầu tư chiến lược là giá bán do Ban chỉ đạo cổ phần hóa thỏa thuận (đối với trường hợp bán thỏa thuận) hoặc giá nhà đầu tư chiến lược đặt mua được xác định là trúng thầu của cuộc đấu giá giữa các nhà đầu tư chiến lược (đối với trường hợp bán đấu giá giữa các nhà đầu tư chiến lược) nhưng không thấp hơn giá khởi điểm được cơ quan quyết định cổ phần hóa phê duyệt.\nb) Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược sau khi thực hiện đấu giá công khai: Giá bán cổ phần cho nhà đầu tư chiến lược là giá bán do Ban chỉ đạo cổ phần hóa thỏa thuận (đối với trường hợp bán thỏa thuận) hoặc giá nhà đầu tư chiến lược đặt mua được xác định là trúng thầu của cuộc đấu giá giữa các nhà đầu tư chiến lược (đối với trường hợp bán đấu giá giữa các nhà đầu tư chiến lược) nhưng không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai. MỤC II - TỔ CHỨC BÁN CỔ PHẦN LẦN ĐẦU",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giá bán cổ phần cho các nhà đầu tư qua đấu giá là giá nhà đầu tư đặt mua tại cuộc đấu giá và được xác định là trúng thầu theo kết quả đấu giá quy định tại khoản 4 Điều 7 Thông tư này. Trường hợp doanh nghiệp cổ phần hóa bán cổ phần theo hình thức bảo lãnh phát hành thì Ban chỉ đạo cổ phần hóa thỏa thuận với Tổ chức bảo lãnh phát hành về giá bảo lãnh nhưng không thấp hơn giá khởi điểm được cơ quan có thẩm quyền phê duyệt.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Giá bán cổ phầnưu đãi cho người lao động trong doanh nghiệp cổ phần hóa.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa thực hiện đấu giá công khai trước khi bán cổ phần cho các nhà đầu tư chiến lược: - Giá bán cổ phần cho người lao động được xác định bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá. - Giá bán cổ phần cho người lao động mua thêm theo quy định tại điểm a khoản 2 Điều 48 Nghị định số 59/2011/NĐ-CP là giá đấu thành công thấp nhất của cuộc đấu giá."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược trước khi thực hiện đấu giá công khai: - Giá bán cổ phần cho người lao động được xác định bằng 60% giá bán thỏa thuận thấp nhất cho nhà đầu tư chiến lược (đối với trường hợp bán thỏa thuận) hoặc bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá giữa các nhà đầu tư chiến lược (đối với trường hợp bán đấu giá). - Giá bán cổ phần cho người lao động mua thêm theo quy định tại điểm a khoản 2 Điều 48 Nghị định số 59/2011/NĐ-CP là giá bán thành công thấp nhất cho các nhà đầu tư chiến lược trong trường hợp bán thỏa thuận hoặc đấu giá giữa các nhà đầu tư chiến lược."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Giá bán cổ phầnưu đãi cho tổ chức công đoàn tại doanh nghiệp cổ phần hóa.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa thực hiện đấu giá công khai trước khi bán cổ phần cho các nhà đầu tư chiến lược thì giá bán cổ phần cho tổ chức công đoàn được xác định bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược trước khi thực hiện đấu giá công khai thì giá bán cổ phần cho tổ chức công đoàn được xác định bằng 60% giá bán thỏa thuận thấp nhất cho nhà đầu tư chiến lược hoặc bằng 60% giá đấu thành công thấp nhất của cuộc đấu giá giữa các nhà đầu tư chiến lược."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Giá bán cổ phần cho nhà đầu tư chiến lược.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược trước khi thực hiện đấu giá công khai: Giá bán cổ phần cho nhà đầu tư chiến lược là giá bán do Ban chỉ đạo cổ phần hóa thỏa thuận (đối với trường hợp bán thỏa thuận) hoặc giá nhà đầu tư chiến lược đặt mua được xác định là trúng thầu của cuộc đấu giá giữa các nhà đầu tư chiến lược (đối với trường hợp bán đấu giá giữa các nhà đầu tư chiến lược) nhưng không thấp hơn giá khởi điểm được cơ quan quyết định cổ phần hóa phê duyệt."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa bán cho các nhà đầu tư chiến lược sau khi thực hiện đấu giá công khai: Giá bán cổ phần cho nhà đầu tư chiến lược là giá bán do Ban chỉ đạo cổ phần hóa thỏa thuận (đối với trường hợp bán thỏa thuận) hoặc giá nhà đầu tư chiến lược đặt mua được xác định là trúng thầu của cuộc đấu giá giữa các nhà đầu tư chiến lược (đối với trường hợp bán đấu giá giữa các nhà đầu tư chiến lược) nhưng không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai. MỤC II - TỔ CHỨC BÁN CỔ PHẦN LẦN ĐẦU"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Bán cổ phần lần đầu",
+      "content_raw": "Bán cổ phần lần đầu\n1. Căn cứ phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt (theo phụ lục số 1 kèm theo Thông tư này), Ban chỉ đạo cổ phần hóa chỉ đạo doanh nghiệp cổ phần hóa triển khai phươngán bán cổ phần lần đầu theo các phương thức: bán đấu giá công khai; thỏa thuận trực tiếp; bảo lãnh phát hành, đảm bảo phù hợp với cơ cấu vốn điều lệ của công ty cổ phần. Trong đó:\na) Phương thức bán đấu giá công khai đượcáp dụng trong trường hợp bán đấu giá ra công chúng mà không có sự phân biệt nhà đầu tư tổ chức, nhà đầu tư cá nhân, nhà đầu tư trong nước, nhà đầu tư nước ngoài.\nb) Phương thức thoả thuận trực tiếp đượcáp dụng trong các trường hợp sau: - Bán cho các nhà đầu tư chiến lược trước hoặc sau khi bán đấu giá công khai. - Bán cho các nhà đầu tư đã tham dự đấu giá số cổ phần không bán hết theo quy định tại khoản 2 Điều 40 Nghị định số 59/2011/NĐ-CP. - Bán cho các nhà đầu tư số cổ phần chưa bán được của cuộc đấu giá bán cổ phần không thành công.\nc) Phương thức bảo lãnh phát hành đượcáp dụng trong trường hợp bán cổ phần lần đầu và/hoặc bán cổ phần cho các nhà đầu tư chiến lược của doanh nghiệp cổ phần hóa.\n2. Trong thời hạn 3 tháng kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt, doanh nghiệp cổ phần hóa phải hoàn thành việc bán cổ phần lần đầu theo các phương thức đã được phê duyệt, kể cả trường hợp thay đổi phương thức bán cổ phần theo quy định tại khoản 3 Điều 6 Thông tư này.\n3. Trong trường hợp cần thiết có sự thay đổi về phương thức bán cổ phần so với phươngán đã được duyệt thì Ban chỉ đạo cổ phần hóa báo cáo cơ quan quyết định cổ phần hóa xem xét, quyết định nhưng tối đa không quá 15 ngày kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt.\n4. Mở tài khoản phong tỏa Doanh nghiệp cổ phần hóa phải mở một tài khoản riêng biệt tại ngân hàng thương mại để phong tỏa số tiền thu từ cổ phần hóa theo quy định tại mục III Thông tư này; các ngân hàng thương mại thực hiện cổ phần hóa phải mở tại khoản phong tỏa tại một ngân hàng thương mại khác. Thời gian tối đa hoàn tất việc mở tài khoản phong tỏa là 15 ngày kể từ ngày phươngán cổ phần hóa được cơ quan có thẩm quyền phê duyệt.\n5. Bán cổ phần cho nhà đầu tư chiến lược\na) Căn cứ quy mô vốn điều lệ, tính chất ngành nghề kinh doanh và yêu cầu phát triển doanh nghiệp, Ban chỉ đạo cổ phần hóa xây dựng tiêu chí lựa chọn nhà đầu tư chiến lược, trình cơ quan quyết định cổ phần hoá phê duyệt. Số lượng nhà đầu tư chiến lược mua cổ phần tại mỗi doanh nghiệp cổ phần hóa được xác định tối đa là 03 nhà đầu tư. Đối với các doanh nghiệp quy mô lớn có vốn nhà nước trên 500 tỷ đồng (sau khi xử lý tài chính và xác định giá trị doanh nghiệp) hoạt động kinh doanh trong những lĩnh vực, ngành nghề đặc thù (bảo hiểm, ngân hàng, bưu chính viễn thông, hàng không, khai thác than, dầu khí, khai thác mỏ quý hiếm khác) và các công ty mẹ thuộc các Tập đoàn, Tổng công ty nếu nhất thiết phải chọn nhà đầu tư chiến lược trước thì cơ quan quyết định cổ phần hoá báo cáo\nb) Trên cơ sở danh sách các nhà đầu tư chiến lược đápứng được các tiêu chí lựa chọn được cơ quan quyết định cổ phần hóa phê duyệt, Ban chỉ đạo cổ phần hóa xây dựng phươngán và tổ chức bán cổ phần cho các nhà đầu tư chiến lược theo các nguyên tắc sau: - Trường hợp có tối đa 03 nhà đầu tư chiến lược đăng ký tham gia mua cổ phần, nếu số cổ phần các nhà đầu tư chiến lược đăng ký mua lớn hơn số cổ phần bán ra cho nhà đầu tư chiến lược thì phải tổ chức đấu giá giữa các nhà đầu tư chiến lược theo quy định của pháp luật hiện hành; nếu số cổ phần các nhà đầu tư chiến lược đăng ký mua tối đa bằng số cố phần bán ra cho nhà đầu tư chiến lược thì Ban chỉ đạo cổ phần hóa tiến hành thỏa thuận về số cổ phần bán ra, giá bán cổ phần, báo cáo cơ quan quyết định cổ phần hóa phê duyệt hoặc quyết định theoủy quyền của cơ quan quyết định cổ phần hóa. - Trường hợp có trên 03 nhà đầu tư chiến lược đăng ký tham gia mua cổ phần thì Ban chỉ đạo cổ phần hóa phải xây dựng quy chế tổ chức đấu giá giữa các nhà đầu tư chiến lược theo các nguyên tắc quy định tại Thông tư này.\nc) Việc lựa chọn nhà đầu tư chiến lược thông qua hình thức đấu giá phải đảm bảo nguyên tắc lựa chọn nhà đầu tư có giá đặt mua từ cao xuống thấp cho đủ số lượng cổ phần bán ra nhưng tối đa không quá 03 nhà đầu tư và phải đảm bảo giá đấu thành công thấp nhất của cuộc đấu giá giữa các nhà đầu tư chiến lược không thấp hơn giá khởi điểm đã được cơ quan quyết định cổ phần hóa phê duyệt (trong trường hợp bán cho nhà đầu tư chiến lược trước khi bán đấu giá công khai) hoặc không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai (trong trường hợp bán cho nhà đầu tư chiến lược sau khi bán đấu giá công khai). Căn cứ kết quả của cuộc đấu giá, cơ quan quyết định cổ phần hóa phê duyệt danh sách nhà đầu tư chiến lược được lựa chọn.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Căn cứ phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt (theo phụ lục số 1 kèm theo Thông tư này), Ban chỉ đạo cổ phần hóa chỉ đạo doanh nghiệp cổ phần hóa triển khai phươngán bán cổ phần lần đầu theo các phương thức: bán đấu giá công khai; thỏa thuận trực tiếp; bảo lãnh phát hành, đảm bảo phù hợp với cơ cấu vốn điều lệ của công ty cổ phần. Trong đó:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Phương thức bán đấu giá công khai đượcáp dụng trong trường hợp bán đấu giá ra công chúng mà không có sự phân biệt nhà đầu tư tổ chức, nhà đầu tư cá nhân, nhà đầu tư trong nước, nhà đầu tư nước ngoài."
+            },
+            {
+              "label": "b",
+              "content": "Phương thức thoả thuận trực tiếp đượcáp dụng trong các trường hợp sau: - Bán cho các nhà đầu tư chiến lược trước hoặc sau khi bán đấu giá công khai. - Bán cho các nhà đầu tư đã tham dự đấu giá số cổ phần không bán hết theo quy định tại khoản 2 Điều 40 Nghị định số 59/2011/NĐ-CP. - Bán cho các nhà đầu tư số cổ phần chưa bán được của cuộc đấu giá bán cổ phần không thành công."
+            },
+            {
+              "label": "c",
+              "content": "Phương thức bảo lãnh phát hành đượcáp dụng trong trường hợp bán cổ phần lần đầu và/hoặc bán cổ phần cho các nhà đầu tư chiến lược của doanh nghiệp cổ phần hóa."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trong thời hạn 3 tháng kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt, doanh nghiệp cổ phần hóa phải hoàn thành việc bán cổ phần lần đầu theo các phương thức đã được phê duyệt, kể cả trường hợp thay đổi phương thức bán cổ phần theo quy định tại khoản 3 Điều 6 Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong trường hợp cần thiết có sự thay đổi về phương thức bán cổ phần so với phươngán đã được duyệt thì Ban chỉ đạo cổ phần hóa báo cáo cơ quan quyết định cổ phần hóa xem xét, quyết định nhưng tối đa không quá 15 ngày kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Mở tài khoản phong tỏa Doanh nghiệp cổ phần hóa phải mở một tài khoản riêng biệt tại ngân hàng thương mại để phong tỏa số tiền thu từ cổ phần hóa theo quy định tại mục III Thông tư này; các ngân hàng thương mại thực hiện cổ phần hóa phải mở tại khoản phong tỏa tại một ngân hàng thương mại khác. Thời gian tối đa hoàn tất việc mở tài khoản phong tỏa là 15 ngày kể từ ngày phươngán cổ phần hóa được cơ quan có thẩm quyền phê duyệt.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Bán cổ phần cho nhà đầu tư chiến lược",
+          "points": [
+            {
+              "label": "a",
+              "content": "Căn cứ quy mô vốn điều lệ, tính chất ngành nghề kinh doanh và yêu cầu phát triển doanh nghiệp, Ban chỉ đạo cổ phần hóa xây dựng tiêu chí lựa chọn nhà đầu tư chiến lược, trình cơ quan quyết định cổ phần hoá phê duyệt. Số lượng nhà đầu tư chiến lược mua cổ phần tại mỗi doanh nghiệp cổ phần hóa được xác định tối đa là 03 nhà đầu tư. Đối với các doanh nghiệp quy mô lớn có vốn nhà nước trên 500 tỷ đồng (sau khi xử lý tài chính và xác định giá trị doanh nghiệp) hoạt động kinh doanh trong những lĩnh vực, ngành nghề đặc thù (bảo hiểm, ngân hàng, bưu chính viễn thông, hàng không, khai thác than, dầu khí, khai thác mỏ quý hiếm khác) và các công ty mẹ thuộc các Tập đoàn, Tổng công ty nếu nhất thiết phải chọn nhà đầu tư chiến lược trước thì cơ quan quyết định cổ phần hoá báo cáo"
+            },
+            {
+              "label": "b",
+              "content": "Trên cơ sở danh sách các nhà đầu tư chiến lược đápứng được các tiêu chí lựa chọn được cơ quan quyết định cổ phần hóa phê duyệt, Ban chỉ đạo cổ phần hóa xây dựng phươngán và tổ chức bán cổ phần cho các nhà đầu tư chiến lược theo các nguyên tắc sau: - Trường hợp có tối đa 03 nhà đầu tư chiến lược đăng ký tham gia mua cổ phần, nếu số cổ phần các nhà đầu tư chiến lược đăng ký mua lớn hơn số cổ phần bán ra cho nhà đầu tư chiến lược thì phải tổ chức đấu giá giữa các nhà đầu tư chiến lược theo quy định của pháp luật hiện hành; nếu số cổ phần các nhà đầu tư chiến lược đăng ký mua tối đa bằng số cố phần bán ra cho nhà đầu tư chiến lược thì Ban chỉ đạo cổ phần hóa tiến hành thỏa thuận về số cổ phần bán ra, giá bán cổ phần, báo cáo cơ quan quyết định cổ phần hóa phê duyệt hoặc quyết định theoủy quyền của cơ quan quyết định cổ phần hóa. - Trường hợp có trên 03 nhà đầu tư chiến lược đăng ký tham gia mua cổ phần thì Ban chỉ đạo cổ phần hóa phải xây dựng quy chế tổ chức đấu giá giữa các nhà đầu tư chiến lược theo các nguyên tắc quy định tại Thông tư này."
+            },
+            {
+              "label": "c",
+              "content": "Việc lựa chọn nhà đầu tư chiến lược thông qua hình thức đấu giá phải đảm bảo nguyên tắc lựa chọn nhà đầu tư có giá đặt mua từ cao xuống thấp cho đủ số lượng cổ phần bán ra nhưng tối đa không quá 03 nhà đầu tư và phải đảm bảo giá đấu thành công thấp nhất của cuộc đấu giá giữa các nhà đầu tư chiến lược không thấp hơn giá khởi điểm đã được cơ quan quyết định cổ phần hóa phê duyệt (trong trường hợp bán cho nhà đầu tư chiến lược trước khi bán đấu giá công khai) hoặc không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai (trong trường hợp bán cho nhà đầu tư chiến lược sau khi bán đấu giá công khai). Căn cứ kết quả của cuộc đấu giá, cơ quan quyết định cổ phần hóa phê duyệt danh sách nhà đầu tư chiến lược được lựa chọn."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Phương thức đấu giá công khai",
+      "content_raw": "Phương thức đấu giá công khai\n1. Tổ chức bán đấu giá cổ phần.\na) Đấu giá tại tổ chức trung gian (công ty chứng khoán), nếu giá trị cổ phần bán đấu giá dưới 10 tỷ đồng (tính theo mệnh giá). Trường hợp không có tổ chức trung gian nhận bán đấu giá cổ phần thì Ban chỉ đạo cổ phần hóa trực tiếp tổ chức bán đấu giá cổ phần tại doanh nghiệp.\nb) Đấu giá tại các Sở Giao dịch chứng khoán nếu giá trị cổ phần bán đấu giá từ 10 tỷ đồng trở lên (tính theo mệnh giá).\nc) Trường hợp doanh nghiệp cổ phần hóa có giá trị cổ phần bán ra theo mệnh giá dưới 10 tỷ đồng có nhu cầu thực hiện bán đấu giá tại Sở Giao dịch chứng khoán thì do cơ quan có thẩm quyền quyết định phê duyệt phươngán cổ phần hóa quyết định.\n2. Chuẩn bị đấu giá.\na) Tổ chức thực hiện bán đấu giá cổ phần ban hành Quyết định thành lập Hội đồng bán đấu giá cổ phần và Quy chế bán đấu giá cổ phần theo quy định.\nb) Ban chỉ đạo cổ phần hóa quyết định công bố thông tin về doanh nghiệp trước khi tổ chức đấu giá tối thiểu là 20 ngày. Nội dung thông tin về doanh nghiệp cổ phần hoá được lập theo phụ lục số 2 ban hành kèm theo Thông tư này. Đối với các doanh nghiệp quy mô lớn có vốn nhà nước trên 500 tỷ đồng (sau khi xử lý tài chính và xác định giá trị doanh nghiệp) hoạt động kinh doanh trong những lĩnh vực, ngành nghề đặc thù (bảo hiểm, ngân hàng, bưu chính viễn thông, hàng không, khai thác than, dầu khí, khai thác mỏ quý hiếm khác) và các công ty mẹ thuộc các Tập đoàn, Tổng công ty, khi công bố thông tin theo phụ lục số 2 kèm theo Thông tư này phải bao gồm cả bản Tiếng Anh.\nc) Cơ quan quyết định cổ phần hoá xem xét, quyết định hoặc uỷ quyền cho Ban chỉ đạo cổ phần hoá quyết định giá khởi điểm của cổ phần đấu giá trong quyết định phê duyệt phươngán cổ phần hóa và công bố giá khởi điểm cùng với nội dung công bố thông tin về doanh nghiệp.\nd) Ban chỉ đạo cổ phần hoá phối hợp với Tổ chức thực hiện bán đấu giá thuyết trình về doanh nghiệp cho các nhà đầu tư (nếu cần).\n3. Thực hiện đấu giá.\na) Trong thời hạn quy định trong Quy chế bán đấu giá, các nhà đầu tư đăng ký khối lượng mua và nộp tiền đặt cọc theo quy định tại điểm a khoản 1 Điều 10 Thông tư này. Nhà đầu tư được Tổ chức thực hiện bán đấu giá cung cấp Phiếu tham dự đấu giá. Đối với nhà đầu tư nước ngoài phải thực hiện theo quy định tại khoản 2 Điều 6 Nghị định số 59/2011/NĐ-CP.\nb) Trong thời hạn quy định trong Quy chế bán đấu giá, các nhà đầu tư ghi giá đặt mua (giá đấu) vào Phiếu tham dự đấu giá và gửi cho Tổ chức thực hiện bán đấu giá bằng cách: - Bỏ phiếu trực tiếp tại doanh nghiệp (nếu do Ban chỉ đạo cổ phần hoá tổ chức đấu giá tại doanh nghiệp); bỏ phiếu trực tiếp tại tổ chức tài chính trung gian (nếu đấu giá do tổ chức tài chính trung gian thực hiện) và bỏ phiếu trực tiếp tại các đại lý đấu giá (nếu do Sở giao dịch chứng khoán tổ chức đấu giá). - Bỏ phiếu qua đường bưu điện theo quy định tại Quy chế bán đấu giá cổ phần.\n4. Xác định kết quả đấu giá.\na) Việc xác định kết quả đấu giá được thực hiện theo nguyên tắc lựa chọn giá đặt mua từ cao xuống thấp cho đủ số lượng cổ phần chào bán nhưng không thấp hơn giá khởi điểm. Tại mức giá trúng thầu thấp nhất, trường hợp các nhà đầu tư (kể cả nhà đầu tư nước ngoài) cùng đặt mức giá bằng nhau, nhưng số cổ phần còn lạiít hơn tổng số cổ phần các nhà đầu tư này đăng ký mua tại mức giá trúng thầu thấp nhất thì số cổ phần của từng nhà đầu tư được mua xác định như sau: Số cổ phần nhà đầu tư được mua = Số cổ phần còn lại chào bán x Số cổ phần từ nhà đầu tư đăng ký mua Tổng số cổ phần các nhà đầu tư đăng ký mua Trường hợp có quy định tỷ lệ tối đa số cổ phần nhà đầu tư nước ngoài được mua thì việc xác định kết quả đấu giá thực hiện theo nguyên tắc trên nhưng số cổ phần nhà đầu tư nước ngoài được mua không vượt quá tỷ lệ tối đa theo quy định của pháp luật hiện hành.\nb) Trong thời gian tối đa 03 ngày làm việc kể từ ngày kết thúc cuộc đấu giá, căn cứ kết quả đấu giá, Tổ chức thực hiện bán đấu giá, Hội đồng đấu giá, đại diện Ban chỉ đạo cổ phần hóa và đại diện doanh nghiệp lập và đồng ký Biên bản xác định kết quả đấu giá theo phụ lục số 3 ban hành kèm theo Thông tư này.\nc) Trong thời gian tối đa 03 ngày làm việc kể từ ngày lập biên bản xác định kết quả đấu giá, Ban chỉ đạo cổ phần hoá và Tổ chức thực hiện bán đấu giá phối hợp công bố kết quả đấu giá cổ phần và thu tiền mua cổ phần.\n5. Trường hợp cuộc đấu giá bán cổ phần không thành công, Ban chỉ đạo cổ phần hóa báo cáo cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa quyết định chào bán công khai tiếp số cổ phần chưa bán được theo phương thức thỏa thuận trực tiếp quy định tại khoản 3 Điều 8 Thông tư này.\n6. Trường hợp vi phạm Quy chế bán đấu giá, nhà đầu tư không được nhận lại tiền đặt cọc. Các trường hợp vi phạm Quy chế bán đấu giá bao gồm: trả giá thấp hơn so với giá khởi điểm; từ bỏ quyền mua cổ phần đối với số cổ phần đã trúng thầu và các trường hợp khác theo quy định tại Quy chế bán đấu giá.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổ chức bán đấu giá cổ phần.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đấu giá tại tổ chức trung gian (công ty chứng khoán), nếu giá trị cổ phần bán đấu giá dưới 10 tỷ đồng (tính theo mệnh giá). Trường hợp không có tổ chức trung gian nhận bán đấu giá cổ phần thì Ban chỉ đạo cổ phần hóa trực tiếp tổ chức bán đấu giá cổ phần tại doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Đấu giá tại các Sở Giao dịch chứng khoán nếu giá trị cổ phần bán đấu giá từ 10 tỷ đồng trở lên (tính theo mệnh giá)."
+            },
+            {
+              "label": "c",
+              "content": "Trường hợp doanh nghiệp cổ phần hóa có giá trị cổ phần bán ra theo mệnh giá dưới 10 tỷ đồng có nhu cầu thực hiện bán đấu giá tại Sở Giao dịch chứng khoán thì do cơ quan có thẩm quyền quyết định phê duyệt phươngán cổ phần hóa quyết định."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Chuẩn bị đấu giá.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tổ chức thực hiện bán đấu giá cổ phần ban hành Quyết định thành lập Hội đồng bán đấu giá cổ phần và Quy chế bán đấu giá cổ phần theo quy định."
+            },
+            {
+              "label": "b",
+              "content": "Ban chỉ đạo cổ phần hóa quyết định công bố thông tin về doanh nghiệp trước khi tổ chức đấu giá tối thiểu là 20 ngày. Nội dung thông tin về doanh nghiệp cổ phần hoá được lập theo phụ lục số 2 ban hành kèm theo Thông tư này. Đối với các doanh nghiệp quy mô lớn có vốn nhà nước trên 500 tỷ đồng (sau khi xử lý tài chính và xác định giá trị doanh nghiệp) hoạt động kinh doanh trong những lĩnh vực, ngành nghề đặc thù (bảo hiểm, ngân hàng, bưu chính viễn thông, hàng không, khai thác than, dầu khí, khai thác mỏ quý hiếm khác) và các công ty mẹ thuộc các Tập đoàn, Tổng công ty, khi công bố thông tin theo phụ lục số 2 kèm theo Thông tư này phải bao gồm cả bản Tiếng Anh."
+            },
+            {
+              "label": "c",
+              "content": "Cơ quan quyết định cổ phần hoá xem xét, quyết định hoặc uỷ quyền cho Ban chỉ đạo cổ phần hoá quyết định giá khởi điểm của cổ phần đấu giá trong quyết định phê duyệt phươngán cổ phần hóa và công bố giá khởi điểm cùng với nội dung công bố thông tin về doanh nghiệp."
+            },
+            {
+              "label": "d",
+              "content": "Ban chỉ đạo cổ phần hoá phối hợp với Tổ chức thực hiện bán đấu giá thuyết trình về doanh nghiệp cho các nhà đầu tư (nếu cần)."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Thực hiện đấu giá.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trong thời hạn quy định trong Quy chế bán đấu giá, các nhà đầu tư đăng ký khối lượng mua và nộp tiền đặt cọc theo quy định tại điểm a khoản 1 Điều 10 Thông tư này. Nhà đầu tư được Tổ chức thực hiện bán đấu giá cung cấp Phiếu tham dự đấu giá. Đối với nhà đầu tư nước ngoài phải thực hiện theo quy định tại khoản 2 Điều 6 Nghị định số 59/2011/NĐ-CP."
+            },
+            {
+              "label": "b",
+              "content": "Trong thời hạn quy định trong Quy chế bán đấu giá, các nhà đầu tư ghi giá đặt mua (giá đấu) vào Phiếu tham dự đấu giá và gửi cho Tổ chức thực hiện bán đấu giá bằng cách: - Bỏ phiếu trực tiếp tại doanh nghiệp (nếu do Ban chỉ đạo cổ phần hoá tổ chức đấu giá tại doanh nghiệp); bỏ phiếu trực tiếp tại tổ chức tài chính trung gian (nếu đấu giá do tổ chức tài chính trung gian thực hiện) và bỏ phiếu trực tiếp tại các đại lý đấu giá (nếu do Sở giao dịch chứng khoán tổ chức đấu giá). - Bỏ phiếu qua đường bưu điện theo quy định tại Quy chế bán đấu giá cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Xác định kết quả đấu giá.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Việc xác định kết quả đấu giá được thực hiện theo nguyên tắc lựa chọn giá đặt mua từ cao xuống thấp cho đủ số lượng cổ phần chào bán nhưng không thấp hơn giá khởi điểm. Tại mức giá trúng thầu thấp nhất, trường hợp các nhà đầu tư (kể cả nhà đầu tư nước ngoài) cùng đặt mức giá bằng nhau, nhưng số cổ phần còn lạiít hơn tổng số cổ phần các nhà đầu tư này đăng ký mua tại mức giá trúng thầu thấp nhất thì số cổ phần của từng nhà đầu tư được mua xác định như sau: Số cổ phần nhà đầu tư được mua = Số cổ phần còn lại chào bán x Số cổ phần từ nhà đầu tư đăng ký mua Tổng số cổ phần các nhà đầu tư đăng ký mua Trường hợp có quy định tỷ lệ tối đa số cổ phần nhà đầu tư nước ngoài được mua thì việc xác định kết quả đấu giá thực hiện theo nguyên tắc trên nhưng số cổ phần nhà đầu tư nước ngoài được mua không vượt quá tỷ lệ tối đa theo quy định của pháp luật hiện hành."
+            },
+            {
+              "label": "b",
+              "content": "Trong thời gian tối đa 03 ngày làm việc kể từ ngày kết thúc cuộc đấu giá, căn cứ kết quả đấu giá, Tổ chức thực hiện bán đấu giá, Hội đồng đấu giá, đại diện Ban chỉ đạo cổ phần hóa và đại diện doanh nghiệp lập và đồng ký Biên bản xác định kết quả đấu giá theo phụ lục số 3 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "c",
+              "content": "Trong thời gian tối đa 03 ngày làm việc kể từ ngày lập biên bản xác định kết quả đấu giá, Ban chỉ đạo cổ phần hoá và Tổ chức thực hiện bán đấu giá phối hợp công bố kết quả đấu giá cổ phần và thu tiền mua cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "content": "Trường hợp cuộc đấu giá bán cổ phần không thành công, Ban chỉ đạo cổ phần hóa báo cáo cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa quyết định chào bán công khai tiếp số cổ phần chưa bán được theo phương thức thỏa thuận trực tiếp quy định tại khoản 3 Điều 8 Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Trường hợp vi phạm Quy chế bán đấu giá, nhà đầu tư không được nhận lại tiền đặt cọc. Các trường hợp vi phạm Quy chế bán đấu giá bao gồm: trả giá thấp hơn so với giá khởi điểm; từ bỏ quyền mua cổ phần đối với số cổ phần đã trúng thầu và các trường hợp khác theo quy định tại Quy chế bán đấu giá.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Phương thức thoả thuận trực tiếp",
+      "content_raw": "Phương thức thoả thuận trực tiếp\n1. Bán cổ phần cho các nhà đầu tư chiến lược.\na) Trong thời gian 20 ngày kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt, Ban chỉ đạo cổ phần hóa phối hợp với doanh nghiệp cổ phần hóa tiến hành thỏa thuận với các nhà đầu tư chiến lược về số cổ phần được mua, giá bán cổ phần báo cáo cơ quan quyết định cổ phần hóa phê duyệt hoặcủy quyền cho Ban chỉ đạo cổ phần hóa quyết định trong thời gian tối đa 10 ngày kể từ ngày nhận được báo cáo của Ban chỉ đạo cổ phần hóa.\nb) Trường hợp bán cổ phần cho các nhà đầu tư chiến lược trước khi bán đấu giá công khai, căn cứ vào kết quả thoả thuận bán cổ phần với nhà đầu tư chiến lược được phê duyệt, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư chiến lược ký hợp đồng mua/bán cổ phần. Thời gian hoàn tất việc ký hợp đồng với nhà đầu tư chiến lược theo phương thức thỏa thuận trực tiếp là 15 ngày kể từ ngày cơ quan có thẩm quyền phê duyệt kết quả thoả thuận bán cổ phần cho nhà đầu tư chiến lược.\nc) Trường hợp bán cổ phần cho các nhà đầu tư chiến lược sau khi bán đấu giá công khai, căn cứ biên bản xác định kết quả đấu giá quy định tại khoản 4 Điều 7 Thông tư này, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư chiến lược ký hợp đồng mua/bán cổ phần trong thời hạn 10 ngày kể từ ngày có biên bản xác định kết quả bán đấu giá cổ phần của cuộc đấu giá công khai.\n2. Bán cổ phần cho các nhà đầu tư đã tham dự đấu giá đối với số cổ phần không bán hết.\na) Căn cứ số lượng cổ phần không bán hết quy định tại khoản 1 Điều 40 Nghị định số 59/2011/NĐ-CP, Ban chỉ đạo cổ phần hóa chỉ đạo doanh nghiệp lập danh sách và thông báo đến các nhà đầu tư đã tham dự đấu giá để chào bán công khai tiếp số cổ phần không bán hết trong thời hạn 5 ngày làm việc kể từ ngày hết hạn nộp tiền theo quy định của Quy chế bán đấu giá cổ phần.\nb) Căn cứ kết quả thoả thuận bán cổ phần với các nhà đầu tư đã tham dự đấu giá, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư ký hợp đồng mua/bán cổ phần. Thời gian hoàn tất việc ký hợp đồng mua/bán cổ phần là 15 ngày kể từ ngày nhà đầu tư đăng ký mua cổ phần.\n3. Trường hợp cuộc đấu giá bán cổ phần không thành công.\na) Trong 03 ngày làm việc kể từ ngày hết hạn đăng ký tham dự đấu giá mua cổ phần, Tổ chức thực hiện bán đấu giá có trách nhiệm thông báo cho Ban chỉ đạo cổ phần hóa, doanh nghiệp cổ phần hóa về cuộc đấu giá không thành công. Ban chỉ đạo cổ phần hóa báo cáo cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa xem xét, quyết định điều chỉnh lại mức giá khởi điểm nhưng không thấp hơn mệnh giá để chào bán công khai tiếp theo phương thức thỏa thuận trực tiếp đối với số cổ phần chưa bán được của cuộc đấu giá công khai và số cổ phần người lao động và tổ chức công đoàn trong doanh nghiệp từ chối mua theo phươngán đã được duyệt (nếu có) trong thời hạn tối đa 20 ngày kể từ ngày hết hạn đăng ký tham dự đấu giá mua cổ phần.\nb) Ban chỉ đạo cổ phần hóa quyết định công bố thông tin về việc chào bán công khai tiếp cổ phần theo phương thức thỏa thuận trực tiếp (bao gồm cả thông tin về doanh nghiệp cổ phần hóa theo phụ lục số 2 ban hành kèm theo Thông tư này) tối thiểu 05 ngày làm việc trước ngày các nhà đầu tư đăng ký mua cổ phần.\nc) Căn cứ kết quả thoả thuận bán cổ phần với các nhà đầu tư, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư ký hợp đồng mua/bán cổ phần. Thời gian hoàn tất việc ký hợp đồng mua/bán cổ phần là 10 ngày kể từ ngày nhà đầu tư đăng ký mua cổ phần.\n4. Trường hợp chào bán công khai theo phương thức thỏa thuận trực tiếp quy định tại khoản 2, khoản 3 Điều 8 Thông tư này mà vẫn không bán hết thì Ban chỉ đạo cổ phần hóa báo cáo cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa thực hiện điều chỉnh cơ cấu vốn điều lệ để chuyển doanh nghiệp 100% vốn nhà nước thành công ty cổ phần trước khi tổ chức Đại hội đồng cổ đông lần đầu. Trường hợp doanh nghiệp thực hiện cổ phần hóa theo hình thức bán một phần vốn nhà nước kết hợp phát hành thêm cổ phiếu hoặc bán toàn bộ vốn nhà nước kết hợp phát hành thêm cổ phiếu thì việc điều chỉnh cơ cấu vốn điều lệ thực hiện theo nguyên tắcưu tiên xác định số cổ phần bán được là số cổ phần phát hành thêm theo phươngán bán cổ phần đã được phê duyệt. Trường hợp tổng số cổ phần bán được (kể cả thông qua phương thức bán đấu giá công khai) lớn hơn số cổ phần phát hành thêm theo phươngán bán cổ phần thì phần chênh lệch tăng được xác định là cổ phần bán vốn nhà nước.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Bán cổ phần cho các nhà đầu tư chiến lược.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trong thời gian 20 ngày kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt, Ban chỉ đạo cổ phần hóa phối hợp với doanh nghiệp cổ phần hóa tiến hành thỏa thuận với các nhà đầu tư chiến lược về số cổ phần được mua, giá bán cổ phần báo cáo cơ quan quyết định cổ phần hóa phê duyệt hoặcủy quyền cho Ban chỉ đạo cổ phần hóa quyết định trong thời gian tối đa 10 ngày kể từ ngày nhận được báo cáo của Ban chỉ đạo cổ phần hóa."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp bán cổ phần cho các nhà đầu tư chiến lược trước khi bán đấu giá công khai, căn cứ vào kết quả thoả thuận bán cổ phần với nhà đầu tư chiến lược được phê duyệt, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư chiến lược ký hợp đồng mua/bán cổ phần. Thời gian hoàn tất việc ký hợp đồng với nhà đầu tư chiến lược theo phương thức thỏa thuận trực tiếp là 15 ngày kể từ ngày cơ quan có thẩm quyền phê duyệt kết quả thoả thuận bán cổ phần cho nhà đầu tư chiến lược."
+            },
+            {
+              "label": "c",
+              "content": "Trường hợp bán cổ phần cho các nhà đầu tư chiến lược sau khi bán đấu giá công khai, căn cứ biên bản xác định kết quả đấu giá quy định tại khoản 4 Điều 7 Thông tư này, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư chiến lược ký hợp đồng mua/bán cổ phần trong thời hạn 10 ngày kể từ ngày có biên bản xác định kết quả bán đấu giá cổ phần của cuộc đấu giá công khai."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Bán cổ phần cho các nhà đầu tư đã tham dự đấu giá đối với số cổ phần không bán hết.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Căn cứ số lượng cổ phần không bán hết quy định tại khoản 1 Điều 40 Nghị định số 59/2011/NĐ-CP, Ban chỉ đạo cổ phần hóa chỉ đạo doanh nghiệp lập danh sách và thông báo đến các nhà đầu tư đã tham dự đấu giá để chào bán công khai tiếp số cổ phần không bán hết trong thời hạn 5 ngày làm việc kể từ ngày hết hạn nộp tiền theo quy định của Quy chế bán đấu giá cổ phần."
+            },
+            {
+              "label": "b",
+              "content": "Căn cứ kết quả thoả thuận bán cổ phần với các nhà đầu tư đã tham dự đấu giá, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư ký hợp đồng mua/bán cổ phần. Thời gian hoàn tất việc ký hợp đồng mua/bán cổ phần là 15 ngày kể từ ngày nhà đầu tư đăng ký mua cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp cuộc đấu giá bán cổ phần không thành công.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trong 03 ngày làm việc kể từ ngày hết hạn đăng ký tham dự đấu giá mua cổ phần, Tổ chức thực hiện bán đấu giá có trách nhiệm thông báo cho Ban chỉ đạo cổ phần hóa, doanh nghiệp cổ phần hóa về cuộc đấu giá không thành công. Ban chỉ đạo cổ phần hóa báo cáo cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa xem xét, quyết định điều chỉnh lại mức giá khởi điểm nhưng không thấp hơn mệnh giá để chào bán công khai tiếp theo phương thức thỏa thuận trực tiếp đối với số cổ phần chưa bán được của cuộc đấu giá công khai và số cổ phần người lao động và tổ chức công đoàn trong doanh nghiệp từ chối mua theo phươngán đã được duyệt (nếu có) trong thời hạn tối đa 20 ngày kể từ ngày hết hạn đăng ký tham dự đấu giá mua cổ phần."
+            },
+            {
+              "label": "b",
+              "content": "Ban chỉ đạo cổ phần hóa quyết định công bố thông tin về việc chào bán công khai tiếp cổ phần theo phương thức thỏa thuận trực tiếp (bao gồm cả thông tin về doanh nghiệp cổ phần hóa theo phụ lục số 2 ban hành kèm theo Thông tư này) tối thiểu 05 ngày làm việc trước ngày các nhà đầu tư đăng ký mua cổ phần."
+            },
+            {
+              "label": "c",
+              "content": "Căn cứ kết quả thoả thuận bán cổ phần với các nhà đầu tư, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp và nhà đầu tư ký hợp đồng mua/bán cổ phần. Thời gian hoàn tất việc ký hợp đồng mua/bán cổ phần là 10 ngày kể từ ngày nhà đầu tư đăng ký mua cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp chào bán công khai theo phương thức thỏa thuận trực tiếp quy định tại khoản 2, khoản 3 Điều 8 Thông tư này mà vẫn không bán hết thì Ban chỉ đạo cổ phần hóa báo cáo cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa thực hiện điều chỉnh cơ cấu vốn điều lệ để chuyển doanh nghiệp 100% vốn nhà nước thành công ty cổ phần trước khi tổ chức Đại hội đồng cổ đông lần đầu. Trường hợp doanh nghiệp thực hiện cổ phần hóa theo hình thức bán một phần vốn nhà nước kết hợp phát hành thêm cổ phiếu hoặc bán toàn bộ vốn nhà nước kết hợp phát hành thêm cổ phiếu thì việc điều chỉnh cơ cấu vốn điều lệ thực hiện theo nguyên tắcưu tiên xác định số cổ phần bán được là số cổ phần phát hành thêm theo phươngán bán cổ phần đã được phê duyệt. Trường hợp tổng số cổ phần bán được (kể cả thông qua phương thức bán đấu giá công khai) lớn hơn số cổ phần phát hành thêm theo phươngán bán cổ phần thì phần chênh lệch tăng được xác định là cổ phần bán vốn nhà nước.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Phương thức bảo lãnh phát hành",
+      "content_raw": "Phương thức bảo lãnh phát hành\n1. Trong thời gian 20 ngày kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt, Ban chỉ đạo cổ phần hóa thỏa thuận với các tổ chức bảo lãnh phát hành về số lượng cổ phần, giá bảo lãnh phát hành, báo cáo cơ quan quyết định cổ phần hóa phê duyệt hoặcủy quyền cho Ban chỉ đạo cổ phần hóa quyết định trong thời hạn tối đa 10 ngày kể từ ngày nhận được báo cáo của Ban chỉ đạo cổ phần hóa. Trường hợp bán cổ phần cho nhà đầu tư chiến lược sau khi đấu giá công khai thì giá bảo lãnh phát hành không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai.\n2. Ban chỉ đạo cổ phần hóa thực hiện ký hợp đồng với các tổ chức bảo lãnh phát hành trong thời gian tối đa 5 ngày làm việc kể từ ngày được cấp có thẩm quyền phê duyệt hoặcủy quyền.\n3. Các tổ chức bảo lãnh phát hành thực hiện phân phối, bán số lượng cổ phần cam kết bảo lãnh theo quy định tại Hợp đồng bảo lãnh. Trường hợp không bán hết cổ phần, các tổ chức bảo lãnh phát hành có trách nhiệm mua hết số cổ phần còn lại theo giá bảo lãnh đã cam kết trong hợp đồng bảo lãnh.\n4. Tổ chức bảo lãnh phát hành được hưởng phí bảo lãnh theo thoả thuận giữa Ban chỉ đạo cổ phần hoá và tổ chức bảo lãnh nhưng không vượt ngoài khung quy định của Bộ Tài chính về phí bảo lãnh. Phí bảo lãnh tính trong chi phí cổ phần hoá.\n5. Kết thúc quá trình phân phối, bán cổ phần, Ban chỉ đạo cổ phần hóa phối hợp cùng doanh nghiệp và tổ chức bảo lãnh phát hành kiểm tra, rà soát nội dung hợp đồng bảo lãnh phát hành để thanh lý hợp đồng theo quy định. MỤC III - QUẢN LÝ, SỬ DỤNG TIỀN THU TỪ CỔ PHẦN HOÁ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trong thời gian 20 ngày kể từ ngày phươngán cổ phần hóa được cấp có thẩm quyền phê duyệt, Ban chỉ đạo cổ phần hóa thỏa thuận với các tổ chức bảo lãnh phát hành về số lượng cổ phần, giá bảo lãnh phát hành, báo cáo cơ quan quyết định cổ phần hóa phê duyệt hoặcủy quyền cho Ban chỉ đạo cổ phần hóa quyết định trong thời hạn tối đa 10 ngày kể từ ngày nhận được báo cáo của Ban chỉ đạo cổ phần hóa. Trường hợp bán cổ phần cho nhà đầu tư chiến lược sau khi đấu giá công khai thì giá bảo lãnh phát hành không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Ban chỉ đạo cổ phần hóa thực hiện ký hợp đồng với các tổ chức bảo lãnh phát hành trong thời gian tối đa 5 ngày làm việc kể từ ngày được cấp có thẩm quyền phê duyệt hoặcủy quyền.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Các tổ chức bảo lãnh phát hành thực hiện phân phối, bán số lượng cổ phần cam kết bảo lãnh theo quy định tại Hợp đồng bảo lãnh. Trường hợp không bán hết cổ phần, các tổ chức bảo lãnh phát hành có trách nhiệm mua hết số cổ phần còn lại theo giá bảo lãnh đã cam kết trong hợp đồng bảo lãnh.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Tổ chức bảo lãnh phát hành được hưởng phí bảo lãnh theo thoả thuận giữa Ban chỉ đạo cổ phần hoá và tổ chức bảo lãnh nhưng không vượt ngoài khung quy định của Bộ Tài chính về phí bảo lãnh. Phí bảo lãnh tính trong chi phí cổ phần hoá.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Kết thúc quá trình phân phối, bán cổ phần, Ban chỉ đạo cổ phần hóa phối hợp cùng doanh nghiệp và tổ chức bảo lãnh phát hành kiểm tra, rà soát nội dung hợp đồng bảo lãnh phát hành để thanh lý hợp đồng theo quy định. MỤC III - QUẢN LÝ, SỬ DỤNG TIỀN THU TỪ CỔ PHẦN HOÁ",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Quản lý tiền đặt cọc và thanh toán tiền mua cổ phần",
+      "content_raw": "Quản lý tiền đặt cọc và thanh toán tiền mua cổ phần\n1. Quản lý tiền đặt cọc\na) Bán đấu giá cổ phần: - Nhà đầu tư (bao gồm cả nhà đầu tư chiến lược trong trường hợp bán đấu giá giữa các nhà đầu tư chiến lược) có trách nhiệm nộp tiền đặt cọc bằng 10% giá trị cổ phần đặt mua tính theo giá khởi điểm vào tài khoản của tổ chức thực hiện bán đấu giá tối thiểu 05 ngày làm việc trước ngày đấu giá theo quy định tại Quy chế bán đấu giá. - Trong 05 ngày làm việc kể từ ngày kết thúc việc bán cổ phần, tổ chức thực hiện bán đấu giá có trách nhiệm thanh toán hoàn trả tiền đặt cọc cho nhà đầu tư có tham gia đấu giá hợp lệ nhưng không được mua cổ phần. Tiền đặt cọc không phải trả cho nhà đầu tư, tổ chức thực hiện bán đấu giá chuyển vào tài khoản phong tỏa của doanh nghiệp cổ phần hóa để xử lý theo quy định về quản lý và sử dụng tiền thu từ cổ phần hoá.\nb) Phương thức thỏa thuận trực tiếp: - Nhà đầu tư chiến lược có trách nhiệm nộp tiền đặt cọc cùng thời điểm đăng ký mua cổ phần vào tài khoản của doanh nghiệp cổ phần hoá. Số tiền đặt cọc được xác định bằng 10% giá trị cổ phần đặt mua theo giá khởi điểm đã được cơ quan có thẩm quyền phê duyệt (trong trường hợp bán cho nhà đầu tư chiến lược trước khi bán đấu giá công khai) hoặc bằng 10% giá trị cổ phần đặt mua theo giá bán dự kiến được cơ quan có thẩm quyền phê duyệt (trong trường hợp bán cho nhà đầu tư chiến lược sau khi bán đấu giá công khai) nhưng không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai . - Nhà đầu tư đã tham dự đấu giá công khai thực hiện mua tiếp số cổ phần không bán hết hoặc nhà đầu tư đăng ký mua cổ phần sau cuộc đấu giá không thành công quy định tại khoản 3 Điều 8 Thông tư này, có trách nhiệm nộp tiền đặt cọc cùng thời điểm đăng ký mua cổ phần vào tài khoản của tổ chức thực hiện bán đấu giá bằng 10% giá trị cổ phần đặt mua theo giá chào bán đã được cơ quan có thẩm quyền phê duyệt. - Trong 5 ngày làm việc kể từ ngày kết thúc việc bán cổ phần theo phương thức thỏa thuận trực tiếp, doanh nghiệp cổ phần hóa hoặc tổ chức thực hiện bán đấu giá có trách nhiệm thanh toán hoàn trả tiền đặt cọc cho nhà đầu tư đã đăng ký mua nhưng không thỏa thuận thành công. Số tiền còn lại doanh nghiệp cổ phần hóa hoặc tổ chức thực hiện bán đấu giá chuyển vào tài khoản phong tỏa của doanh nghiệp cổ phần hóa để xử lý theo quy định về quản lý và sử dụng tiền thu từ cổ phần hoá.\nc) Phương thức bảo lãnh phát hành: Tại thời điểm ký hợp đồng bảo lãnh phát hành, tổ chức bảo lãnh phát hành nộp tiền đặt cọc bằng 10% giá trị cổ phần bảo lãnh đã thỏa thuận trong hợp đồng bảo lãnh phát hành vào tài khoản phong tỏa tiền thu từ cổ phần hóa của doanh nghiệp.\n2. Thanh toán tiền mua cổ phần:\na) Các nhà đầu tư có trách nhiệm thanh toán tiền mua cổ phần theo quy định sau: - Bán đấu giá công khai qua tổ chức thực hiện bán đấu giá (bao gồm cả trường hợp đấu giá giữa các nhà đầu tư chiến lược), trong thời hạn 10 ngày kể từ ngày công bố kết quả bán đấu giá cổ phần, các nhà đầu tư hoàn tất việc mua bán cổ phần và chuyển tiền mua cổ phần vào tài khoản của tổ chức thực hiện bán đấu giá theo quy định tại Quy chế bán đấu giá. Tổ chức thực hiện bán đấu giá có trách nhiệm chuyển tiền thu từ bán cổ phần về tài khoản phong tỏa của doanh nghiệp cổ phần hóa trong thời gian 5 ngày làm việc kể từ ngày hết hạn nộp tiền của nhà đầu tư. - Trường hợp Ban chỉ đạo cổ phần hóa trực tiếp bán đấu giá cổ phần công khai tại doanh nghiệp theo quy định tại điểm a khoản 1 Điều 7 Thông tư này thì trong thời hạn 10 ngày kể từ ngày công bố kết quả bán đấu giá cổ phần, các nhà đầu tư phải hoàn tất việc mua bán cổ phần và chuyển tiền mua cổ phần vào tài khoản phong tỏa của doanh nghiệp cổ phần hóa. - Phương thức thỏa thuận trực tiếp: Nhà đầu tư (kể cả nhà đầu tư chiến lược) thực hiện thanh toán tiền mua cổ phần tối đa 05 ngày làm việc kể từ ngày ký hợp đồng mua bán cổ phần. - Phương thức bảo lãnh phát hành: Trong thời hạn 10 ngày kể từ ngày kết thúc việc mua bán cổ phần, tổ chức bảo lãnh phát hành có trách nhiệm hoàn tất việc mua bán cổ phần và chuyển tiền về tài khoản phong tỏa của doanh nghiệp cổ phần hóa.\nb) Nhà đầu tư được mua cổ phần theo kết quả đấu giá hoặc thoả thuận, tiền đặt cọc được trừ vào tổng số tiền phải thanh toán mua cổ phần. Trường hợp số tiền đặt cọc lớn hơn số tiền phải thanh toán, nhà đầu tư được hoàn trả lại phần chênh lệch trong thời gian 03 ngày làm việc kể từ ngày kết thúc thời hạn các nhà đầu tư thanh toán tiền mua cổ phần.\nc) Nếu quá thời hạn nộp tiền nêu trên mà nhà đầu tư không nộp, hoặc nộp không đủ so với số tiền phải thanh toán mua cổ phần thì số cổ phần chưa được thanh toán được coi là số cổ phần không bán hết và được xử lý theo quy định tại Điều 40 Nghị định số 59/2011/NĐ-CP.\n3. Việc mua bán cổ phần được thanh toán bằng đồng Việt Nam. Việc thanh toán thực hiện bằng tiền mặt hoặc chuyển khoản.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Quản lý tiền đặt cọc",
+          "points": [
+            {
+              "label": "a",
+              "content": "Bán đấu giá cổ phần: - Nhà đầu tư (bao gồm cả nhà đầu tư chiến lược trong trường hợp bán đấu giá giữa các nhà đầu tư chiến lược) có trách nhiệm nộp tiền đặt cọc bằng 10% giá trị cổ phần đặt mua tính theo giá khởi điểm vào tài khoản của tổ chức thực hiện bán đấu giá tối thiểu 05 ngày làm việc trước ngày đấu giá theo quy định tại Quy chế bán đấu giá. - Trong 05 ngày làm việc kể từ ngày kết thúc việc bán cổ phần, tổ chức thực hiện bán đấu giá có trách nhiệm thanh toán hoàn trả tiền đặt cọc cho nhà đầu tư có tham gia đấu giá hợp lệ nhưng không được mua cổ phần. Tiền đặt cọc không phải trả cho nhà đầu tư, tổ chức thực hiện bán đấu giá chuyển vào tài khoản phong tỏa của doanh nghiệp cổ phần hóa để xử lý theo quy định về quản lý và sử dụng tiền thu từ cổ phần hoá."
+            },
+            {
+              "label": "b",
+              "content": "Phương thức thỏa thuận trực tiếp: - Nhà đầu tư chiến lược có trách nhiệm nộp tiền đặt cọc cùng thời điểm đăng ký mua cổ phần vào tài khoản của doanh nghiệp cổ phần hoá. Số tiền đặt cọc được xác định bằng 10% giá trị cổ phần đặt mua theo giá khởi điểm đã được cơ quan có thẩm quyền phê duyệt (trong trường hợp bán cho nhà đầu tư chiến lược trước khi bán đấu giá công khai) hoặc bằng 10% giá trị cổ phần đặt mua theo giá bán dự kiến được cơ quan có thẩm quyền phê duyệt (trong trường hợp bán cho nhà đầu tư chiến lược sau khi bán đấu giá công khai) nhưng không thấp hơn giá đấu thành công thấp nhất của cuộc đấu giá công khai . - Nhà đầu tư đã tham dự đấu giá công khai thực hiện mua tiếp số cổ phần không bán hết hoặc nhà đầu tư đăng ký mua cổ phần sau cuộc đấu giá không thành công quy định tại khoản 3 Điều 8 Thông tư này, có trách nhiệm nộp tiền đặt cọc cùng thời điểm đăng ký mua cổ phần vào tài khoản của tổ chức thực hiện bán đấu giá bằng 10% giá trị cổ phần đặt mua theo giá chào bán đã được cơ quan có thẩm quyền phê duyệt. - Trong 5 ngày làm việc kể từ ngày kết thúc việc bán cổ phần theo phương thức thỏa thuận trực tiếp, doanh nghiệp cổ phần hóa hoặc tổ chức thực hiện bán đấu giá có trách nhiệm thanh toán hoàn trả tiền đặt cọc cho nhà đầu tư đã đăng ký mua nhưng không thỏa thuận thành công. Số tiền còn lại doanh nghiệp cổ phần hóa hoặc tổ chức thực hiện bán đấu giá chuyển vào tài khoản phong tỏa của doanh nghiệp cổ phần hóa để xử lý theo quy định về quản lý và sử dụng tiền thu từ cổ phần hoá."
+            },
+            {
+              "label": "c",
+              "content": "Phương thức bảo lãnh phát hành: Tại thời điểm ký hợp đồng bảo lãnh phát hành, tổ chức bảo lãnh phát hành nộp tiền đặt cọc bằng 10% giá trị cổ phần bảo lãnh đã thỏa thuận trong hợp đồng bảo lãnh phát hành vào tài khoản phong tỏa tiền thu từ cổ phần hóa của doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Thanh toán tiền mua cổ phần:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Các nhà đầu tư có trách nhiệm thanh toán tiền mua cổ phần theo quy định sau: - Bán đấu giá công khai qua tổ chức thực hiện bán đấu giá (bao gồm cả trường hợp đấu giá giữa các nhà đầu tư chiến lược), trong thời hạn 10 ngày kể từ ngày công bố kết quả bán đấu giá cổ phần, các nhà đầu tư hoàn tất việc mua bán cổ phần và chuyển tiền mua cổ phần vào tài khoản của tổ chức thực hiện bán đấu giá theo quy định tại Quy chế bán đấu giá. Tổ chức thực hiện bán đấu giá có trách nhiệm chuyển tiền thu từ bán cổ phần về tài khoản phong tỏa của doanh nghiệp cổ phần hóa trong thời gian 5 ngày làm việc kể từ ngày hết hạn nộp tiền của nhà đầu tư. - Trường hợp Ban chỉ đạo cổ phần hóa trực tiếp bán đấu giá cổ phần công khai tại doanh nghiệp theo quy định tại điểm a khoản 1 Điều 7 Thông tư này thì trong thời hạn 10 ngày kể từ ngày công bố kết quả bán đấu giá cổ phần, các nhà đầu tư phải hoàn tất việc mua bán cổ phần và chuyển tiền mua cổ phần vào tài khoản phong tỏa của doanh nghiệp cổ phần hóa. - Phương thức thỏa thuận trực tiếp: Nhà đầu tư (kể cả nhà đầu tư chiến lược) thực hiện thanh toán tiền mua cổ phần tối đa 05 ngày làm việc kể từ ngày ký hợp đồng mua bán cổ phần. - Phương thức bảo lãnh phát hành: Trong thời hạn 10 ngày kể từ ngày kết thúc việc mua bán cổ phần, tổ chức bảo lãnh phát hành có trách nhiệm hoàn tất việc mua bán cổ phần và chuyển tiền về tài khoản phong tỏa của doanh nghiệp cổ phần hóa."
+            },
+            {
+              "label": "b",
+              "content": "Nhà đầu tư được mua cổ phần theo kết quả đấu giá hoặc thoả thuận, tiền đặt cọc được trừ vào tổng số tiền phải thanh toán mua cổ phần. Trường hợp số tiền đặt cọc lớn hơn số tiền phải thanh toán, nhà đầu tư được hoàn trả lại phần chênh lệch trong thời gian 03 ngày làm việc kể từ ngày kết thúc thời hạn các nhà đầu tư thanh toán tiền mua cổ phần."
+            },
+            {
+              "label": "c",
+              "content": "Nếu quá thời hạn nộp tiền nêu trên mà nhà đầu tư không nộp, hoặc nộp không đủ so với số tiền phải thanh toán mua cổ phần thì số cổ phần chưa được thanh toán được coi là số cổ phần không bán hết và được xử lý theo quy định tại Điều 40 Nghị định số 59/2011/NĐ-CP."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Việc mua bán cổ phần được thanh toán bằng đồng Việt Nam. Việc thanh toán thực hiện bằng tiền mặt hoặc chuyển khoản.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Tiền thu từ bán cổ phần",
+      "content_raw": "Tiền thu từ bán cổ phần\n1. Trong thời hạn 15 ngày kể từ ngày hoàn tất việc bán cổ phần, Ban chỉ đạo cổ phần hoá có trách nhiệm xác định số tiền được để lại doanh nghiệp và khoản phải nộp về Quỹ để chỉ đạo doanh nghiệp cổ phần hóa chuyển tiền từ tài khoản phong toả về Quỹ theo quy định tại khoản 5 Điều 43 Nghị định số 59/2011/NĐ-CP. Cơ quan quản lý Quỹ có trách nhiệm thông báo cho doanh nghiệp cổ phần hóa và ngân hàng thương mại nơi doanh nghiệp mở tài khoản phong tỏa xác nhận số tiền đã chuyển trong thời gian tối đa 05 ngày làm việc.\n2. Doanh nghiệp cổ phần hóa chuyển số tiền được để lại doanh nghiệp từ tài khoản phong tỏa về tài khoản của doanh nghiệp trong thời hạn 5 ngày làm việc kể từ ngày có thông báo xác nhận của cơ quan quản lý Quỹ để quản lý, sử dụng theo quy định. Các ngân hàng thương mại nơi doanh nghiệp mở tài khoản phong tỏa chỉ thực hiện chuyển tiền từ tài khoản phong tỏa về tài khoản của doanh nghiệp sau khi có xác nhận của Cơ quan quản lý Quỹ.\n3. Xử lý tiền thu từ cổ phần hóa trong các trường hợp cụ thể:\na) Đối với trường hợp bán phần vốn nhà nước: Số tiền thu từ cổ phần hóa doanh nghiệp được xử lý theo quy định tại khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP.\nb) Đối với trường hợp giữ nguyên phần vốn nhà nước, phát hành thêm cổ phiếu để tăng vốn điều lệ, số tiền thu từ cổ phần hóa được xử lý như sau: - Để lại doanh nghiệp phần giá trị tươngứng với số cổ phần phát hành thêm tính theo mệnh giá. - Phần thặng dư vốn (chênh lệch giữa tiền thu từ cổ phần hóa và tổng mệnh giá cổ phần phát hành thêm) được sử dụng để thanh toán chi phí cổ phần hóa theo quy định tại Điều 12 Thông tư này và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư. Số tiền còn lại (nếu có) được xử lý như quy định tại điểm b khoản 2 Điều 42 Nghị định số 59/2011/NĐ-CP, trong đó khoản chênh lệch do bán cổ phần phát hành thêm để lại công ty cổ phần (ký hiệu là A) được xác định như sau: - Trường hợp phần thặng dư vốn không đủ để thanh toán chi phí cổ phần hóa và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư thì được bổ sung từ nguồn Quỹ theo quy định tại điểm b khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP.\nc) Trường hợp bán phần vốn nhà nước kết hợp phát hành thêm, số tiền thu từ cổ phần hóa được xử lý như sau: - Nộp về Quỹ theo quy định tại khoản 3 Điều 21 Nghị định số 59/2011/NĐ-CP phần giá trị cổ phần Nhà nước bán bớt theo mệnh giá. - Để lại doanh nghiệp phần giá trị tươngứng với số cổ phần phát hành thêm tính theo mệnh giá. - Phần thặng dư vốn (chênh lệch giữa tiền thu từ cổ phần hóa và tổng mệnh giá cổ phần nhà nước bán bớt cộng (+) cổ phần phát hành thêm) được sử dụng để thanh toán chi phí cổ phần hóa theo quy định tại Điều 12 Thông tư này và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư. Số tiền còn lại (nếu có) được phân chia như sau: Để lại cho doanh nghiệp theo tỷ lệ tươngứng với số cổ phần phát hành thêm (ký hiệu là B), được xác định như sau: Số tiền còn lại (nếu có) được nộp về Quỹ theo quy định tại khoản 3 Điều 21 Nghị định số 59/2011/NĐ-CP. - Trường hợp phần thặng dư vốn không đủ để thanh toán chi phí cổ phần hóa và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư thì được bổ sung từ nguồn Quỹ theo quy định tại điểm b khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP.\n4. Tại thời điểm doanh nghiệp chính thức chuyển thành công ty cổ phần, trường hợp phát sinh chênh lệch tăng hoặc giảm giá trị thực tế phần vốn nhà nước so với thời điểm xác định giá trị doanh nghiệp thì phần chênh lệch này được xử lý theo quy định tại khoản 3, 4 Điều 21 Nghị định số 59/2011/NĐ-CP.\n5. Sau khi được cấp giấy chứng nhận đăng ký doanh nghiệp chuyển thành công ty cổ phần, doanh nghiệp cổ phần hoá có trách nhiệm xác định chính thức số phải nộp, quyết toán các khoản chi cho người lao động và chi phí cổ phần hoá báo cáo Ban chỉ đạo cổ phần hóa để báo cáo cơ quan quyết định cổ phần hoá phê duyệt, đồng gửi Bộ Tài chính (Cục Tài chính doanh nghiệp).",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trong thời hạn 15 ngày kể từ ngày hoàn tất việc bán cổ phần, Ban chỉ đạo cổ phần hoá có trách nhiệm xác định số tiền được để lại doanh nghiệp và khoản phải nộp về Quỹ để chỉ đạo doanh nghiệp cổ phần hóa chuyển tiền từ tài khoản phong toả về Quỹ theo quy định tại khoản 5 Điều 43 Nghị định số 59/2011/NĐ-CP. Cơ quan quản lý Quỹ có trách nhiệm thông báo cho doanh nghiệp cổ phần hóa và ngân hàng thương mại nơi doanh nghiệp mở tài khoản phong tỏa xác nhận số tiền đã chuyển trong thời gian tối đa 05 ngày làm việc.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp cổ phần hóa chuyển số tiền được để lại doanh nghiệp từ tài khoản phong tỏa về tài khoản của doanh nghiệp trong thời hạn 5 ngày làm việc kể từ ngày có thông báo xác nhận của cơ quan quản lý Quỹ để quản lý, sử dụng theo quy định. Các ngân hàng thương mại nơi doanh nghiệp mở tài khoản phong tỏa chỉ thực hiện chuyển tiền từ tài khoản phong tỏa về tài khoản của doanh nghiệp sau khi có xác nhận của Cơ quan quản lý Quỹ.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Xử lý tiền thu từ cổ phần hóa trong các trường hợp cụ thể:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với trường hợp bán phần vốn nhà nước: Số tiền thu từ cổ phần hóa doanh nghiệp được xử lý theo quy định tại khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP."
+            },
+            {
+              "label": "b",
+              "content": "Đối với trường hợp giữ nguyên phần vốn nhà nước, phát hành thêm cổ phiếu để tăng vốn điều lệ, số tiền thu từ cổ phần hóa được xử lý như sau: - Để lại doanh nghiệp phần giá trị tươngứng với số cổ phần phát hành thêm tính theo mệnh giá. - Phần thặng dư vốn (chênh lệch giữa tiền thu từ cổ phần hóa và tổng mệnh giá cổ phần phát hành thêm) được sử dụng để thanh toán chi phí cổ phần hóa theo quy định tại Điều 12 Thông tư này và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư. Số tiền còn lại (nếu có) được xử lý như quy định tại điểm b khoản 2 Điều 42 Nghị định số 59/2011/NĐ-CP, trong đó khoản chênh lệch do bán cổ phần phát hành thêm để lại công ty cổ phần (ký hiệu là A) được xác định như sau: - Trường hợp phần thặng dư vốn không đủ để thanh toán chi phí cổ phần hóa và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư thì được bổ sung từ nguồn Quỹ theo quy định tại điểm b khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP."
+            },
+            {
+              "label": "c",
+              "content": "Trường hợp bán phần vốn nhà nước kết hợp phát hành thêm, số tiền thu từ cổ phần hóa được xử lý như sau: - Nộp về Quỹ theo quy định tại khoản 3 Điều 21 Nghị định số 59/2011/NĐ-CP phần giá trị cổ phần Nhà nước bán bớt theo mệnh giá. - Để lại doanh nghiệp phần giá trị tươngứng với số cổ phần phát hành thêm tính theo mệnh giá. - Phần thặng dư vốn (chênh lệch giữa tiền thu từ cổ phần hóa và tổng mệnh giá cổ phần nhà nước bán bớt cộng (+) cổ phần phát hành thêm) được sử dụng để thanh toán chi phí cổ phần hóa theo quy định tại Điều 12 Thông tư này và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư. Số tiền còn lại (nếu có) được phân chia như sau: Để lại cho doanh nghiệp theo tỷ lệ tươngứng với số cổ phần phát hành thêm (ký hiệu là B), được xác định như sau: Số tiền còn lại (nếu có) được nộp về Quỹ theo quy định tại khoản 3 Điều 21 Nghị định số 59/2011/NĐ-CP. - Trường hợp phần thặng dư vốn không đủ để thanh toán chi phí cổ phần hóa và hỗ trợ doanh nghiệp thực hiện chính sách đối với người lao động dôi dư thì được bổ sung từ nguồn Quỹ theo quy định tại điểm b khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Tại thời điểm doanh nghiệp chính thức chuyển thành công ty cổ phần, trường hợp phát sinh chênh lệch tăng hoặc giảm giá trị thực tế phần vốn nhà nước so với thời điểm xác định giá trị doanh nghiệp thì phần chênh lệch này được xử lý theo quy định tại khoản 3, 4 Điều 21 Nghị định số 59/2011/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Sau khi được cấp giấy chứng nhận đăng ký doanh nghiệp chuyển thành công ty cổ phần, doanh nghiệp cổ phần hoá có trách nhiệm xác định chính thức số phải nộp, quyết toán các khoản chi cho người lao động và chi phí cổ phần hoá báo cáo Ban chỉ đạo cổ phần hóa để báo cáo cơ quan quyết định cổ phần hoá phê duyệt, đồng gửi Bộ Tài chính (Cục Tài chính doanh nghiệp).",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Chi phí cổ phần hoá",
+      "content_raw": "Chi phí cổ phần hoá\n1. Chi phí cổ phần hóa là các khoản chi liên quan đến cổ phần hóa doanh nghiệp từ thời điểm quyết định cổ phần hóa đến thời điểm bàn giao giữa doanh nghiệp và công ty cổ phần. Các khoản chi phí cổ phần hóa phải đảm bảo có đầy đủ chứng từ hợp lý, hợp lệ theo quy định hiện hành của nhà nước.\n2. Tổng giám đốc hoặc giám đốc doanh nghiệp quyết định nội dung và mức chi trong phạm vi mức khống chế tối đa quy định tại khoản 4 Điều 12 Thông tư này để thực hiện quá trình cổ phần hoá và chịu trách nhiệm về tính hợp pháp của các khoản chi này.\n3. Chi phí cổ phần hoá bao gồm:\na) Các khoản chi phí trực tiếp tại doanh nghiệp: - Chi phí cho việc tập huấn nghiệp vụ về cổ phần hoá doanh nghiệp; - Chi phí kiểm kê, xác định giá trị tài sản; - Chi phí lập phươngán cổ phần hoá, xây dựng Điều lệ. Mức chi tối đa không quá 10% tổng mức chi phí cổ phần hóa tối đa theo quy định tại khoản 4 Điều 12 Thông tư này; - Chi phí Đại hội công nhân viên chức để triển khai cổ phần hoá; - Chi phí hoạt động tuyên truyền, công bố thông tin về doanh nghiệp; - Chi phí cho việc tổ chức bán cổ phần, trong đó: chi phí cho hoạt động đấu giá, bảo lãnh phát hành do doanh nghiệp cổ phần hoá và tổ chức bán đấu giá hoặc tổ chức nhận bảo lãnh thoả thuận; - Chi phí Đại hội cổ đông lần đầu;\nb) Tiền thuê kiểm toán, tư vấn xác định giá trị doanh nghiệp và bán cổ phần do cơ quan quyết định cổ phần hoá hoặc Ban chỉ đạo cổ phần hoá (nếu được uỷ quyền) quyết định. Việc thanh toán chi phí tư vấn bán cổ phần được căn cứ vào Hợp đồng ký kết giữa các bên và kết quả đấu giá.\nc) Thù lao cho Ban chỉ đạo cổ phần hoá và Tổ giúp việc. Mức chi thù lao cho từng thành viên Ban chỉ đạo cổ phần hóa tối đa là 2.500.000 đồng/người/tháng và từng thành viên Tổ giúp việc tối đa là 1.500.000 đồng/người/tháng.\nd) Các chi phí khác có liên quan đến cổ phần hoá doanh nghiệp tối đa bằng 10% tổng mức chi phí cổ phần hóa tối đa theo quy định tại khoản 4 Điều 12 Thông tư này.\n4. Tổng mức chi phí tối đa được xác định theo giá trị doanh nghiệp trên sổ kế toán cụ thể như sau: - Không quá 200 triệu đồng đối với doanh nghiệp có giá trị dưới 30 tỷ đồng. - Không quá 300 triệu đồng đối với doanh nghiệp có giá trị từ 30 tỷ đến 50 tỷ đồng. - Không quá 400 triệu đồng đối với doanh nghiệp có giá trị trên 50 tỷ đến 100 tỷ đồng. - Không quá 500 triệu đồng đối với doanh nghiệp có giá trị trên 100 tỷ đồng. Trường hợp doanh nghiệpáp dụng phương thức bảo lãnh phát hành dẫn tới chi phí cổ phần hóa vượt mức khung quy định thì Ban chỉ đạo cổ phần hóa báo cáo cơ quan quyết định cổ phần hóa xem xét, phê duyệt trong phươngán cổ phần hóa.\n5. Trường hợp cổ phần hóa toàn bộ Tập đoàn kinh tế, Tổng công ty nhà nước hoặc Công ty mẹ - Tập đoàn kinh tế, Tổng công ty nhà nước, Ban chỉ đạo cổ phần hóa chỉ đạo doanh nghiệp cổ phần hóa lập dự toán chi phí báo cáo cơ quan có thẩm quyền phê duyệt trong phươngán cổ phần hóa (kể cả trường hợp dự toán chi phí cổ phần hóa lớn hơn mức quy định tại khoản 4 Điều 12 Thông tư này), đồng gửi Bộ Tài chính (Cục Tài chính doanh nghiệp) để thực hiện giám sát.\n6. Chi phí cổ phần hoá được lấy từ nguồn tiền thu từ bán cổ phần theo quy định tại Điều 11 Thông tư này. Trường hợp doanh nghiệpáp dụng hình thức giữ nguyên vốn nhà nước hiện có, phát hành thêm cổ phiếu hoặc bán phần vốn nhà nước kết hợp phát hành thêm, nếu chênh lệch do bán cổ phần phát hành thêm không đủ để bù đắp chi phí cổ phần hoá thì được bổ sung từ Quỹ theo quy định tại điểm b khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP. Chương III - TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chi phí cổ phần hóa là các khoản chi liên quan đến cổ phần hóa doanh nghiệp từ thời điểm quyết định cổ phần hóa đến thời điểm bàn giao giữa doanh nghiệp và công ty cổ phần. Các khoản chi phí cổ phần hóa phải đảm bảo có đầy đủ chứng từ hợp lý, hợp lệ theo quy định hiện hành của nhà nước.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổng giám đốc hoặc giám đốc doanh nghiệp quyết định nội dung và mức chi trong phạm vi mức khống chế tối đa quy định tại khoản 4 Điều 12 Thông tư này để thực hiện quá trình cổ phần hoá và chịu trách nhiệm về tính hợp pháp của các khoản chi này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Chi phí cổ phần hoá bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Các khoản chi phí trực tiếp tại doanh nghiệp: - Chi phí cho việc tập huấn nghiệp vụ về cổ phần hoá doanh nghiệp; - Chi phí kiểm kê, xác định giá trị tài sản; - Chi phí lập phươngán cổ phần hoá, xây dựng Điều lệ. Mức chi tối đa không quá 10% tổng mức chi phí cổ phần hóa tối đa theo quy định tại khoản 4 Điều 12 Thông tư này; - Chi phí Đại hội công nhân viên chức để triển khai cổ phần hoá; - Chi phí hoạt động tuyên truyền, công bố thông tin về doanh nghiệp; - Chi phí cho việc tổ chức bán cổ phần, trong đó: chi phí cho hoạt động đấu giá, bảo lãnh phát hành do doanh nghiệp cổ phần hoá và tổ chức bán đấu giá hoặc tổ chức nhận bảo lãnh thoả thuận; - Chi phí Đại hội cổ đông lần đầu;"
+            },
+            {
+              "label": "b",
+              "content": "Tiền thuê kiểm toán, tư vấn xác định giá trị doanh nghiệp và bán cổ phần do cơ quan quyết định cổ phần hoá hoặc Ban chỉ đạo cổ phần hoá (nếu được uỷ quyền) quyết định. Việc thanh toán chi phí tư vấn bán cổ phần được căn cứ vào Hợp đồng ký kết giữa các bên và kết quả đấu giá."
+            },
+            {
+              "label": "c",
+              "content": "Thù lao cho Ban chỉ đạo cổ phần hoá và Tổ giúp việc. Mức chi thù lao cho từng thành viên Ban chỉ đạo cổ phần hóa tối đa là 2.500.000 đồng/người/tháng và từng thành viên Tổ giúp việc tối đa là 1.500.000 đồng/người/tháng."
+            },
+            {
+              "label": "d",
+              "content": "Các chi phí khác có liên quan đến cổ phần hoá doanh nghiệp tối đa bằng 10% tổng mức chi phí cổ phần hóa tối đa theo quy định tại khoản 4 Điều 12 Thông tư này."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Tổng mức chi phí tối đa được xác định theo giá trị doanh nghiệp trên sổ kế toán cụ thể như sau: - Không quá 200 triệu đồng đối với doanh nghiệp có giá trị dưới 30 tỷ đồng. - Không quá 300 triệu đồng đối với doanh nghiệp có giá trị từ 30 tỷ đến 50 tỷ đồng. - Không quá 400 triệu đồng đối với doanh nghiệp có giá trị trên 50 tỷ đến 100 tỷ đồng. - Không quá 500 triệu đồng đối với doanh nghiệp có giá trị trên 100 tỷ đồng. Trường hợp doanh nghiệpáp dụng phương thức bảo lãnh phát hành dẫn tới chi phí cổ phần hóa vượt mức khung quy định thì Ban chỉ đạo cổ phần hóa báo cáo cơ quan quyết định cổ phần hóa xem xét, phê duyệt trong phươngán cổ phần hóa.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Trường hợp cổ phần hóa toàn bộ Tập đoàn kinh tế, Tổng công ty nhà nước hoặc Công ty mẹ - Tập đoàn kinh tế, Tổng công ty nhà nước, Ban chỉ đạo cổ phần hóa chỉ đạo doanh nghiệp cổ phần hóa lập dự toán chi phí báo cáo cơ quan có thẩm quyền phê duyệt trong phươngán cổ phần hóa (kể cả trường hợp dự toán chi phí cổ phần hóa lớn hơn mức quy định tại khoản 4 Điều 12 Thông tư này), đồng gửi Bộ Tài chính (Cục Tài chính doanh nghiệp) để thực hiện giám sát.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Chi phí cổ phần hoá được lấy từ nguồn tiền thu từ bán cổ phần theo quy định tại Điều 11 Thông tư này. Trường hợp doanh nghiệpáp dụng hình thức giữ nguyên vốn nhà nước hiện có, phát hành thêm cổ phiếu hoặc bán phần vốn nhà nước kết hợp phát hành thêm, nếu chênh lệch do bán cổ phần phát hành thêm không đủ để bù đắp chi phí cổ phần hoá thì được bổ sung từ Quỹ theo quy định tại điểm b khoản 1 Điều 42 Nghị định số 59/2011/NĐ-CP. Chương III - TỔ CHỨC THỰC HIỆN",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "title": "Trách nhiệm của Ban chỉ đạo cổ phần hóa",
+      "content_raw": "Trách nhiệm của Ban chỉ đạo cổ phần hóa\n1. Trình cơ quan quyết định cổ phần hoá quyết định tiêu chí lựa chọn nhà đầu tư chiến lược, số lượng cổ phần bán đấu giá và giá khởi điểm.\n2. Kiểm tra, hoàn tất các thông tin liên quan đến cổ phần hóa.\n3. Thực hiện công bố (hoặc cung cấp cho Tổ chức thực hiện bán đấu giá) thông tin đầy đủ, chính xác về doanh nghiệp trước khi bán cổ phần theo quy định.\n4. Gửi các tài liệu liên quan đến cổ phần hóa và đơn đăng ký tổ chức bán đấu giá theo mẫu quy định tại phụ lục số 4 kèm theo Thông tư này và ký hợp đồng với Sở giao dịch chứng khoán, tổ chức tài chính trung gian nếu bán đấu giá qua các tổ chức này.\n5. Phối hợp với tổ chức thực hiện bán đấu giá để công bố công khai cho các nhà đầu tư các thông tin liên quan đến doanh nghiệp và cuộc đấu giá chậm nhất 20 ngày trước ngày thực hiện đấu giá.\n6. Giám sát việc bán đấu giá cổ phần khi doanh nghiệp thực hiện bán tại các Sở giao dịch chứng khoán hoặc các tổ chức trung gian. Chịu trách nhiệm về việc thực hiện bán đấu giá cổ phần khi trực tiếp tổ chức bán đấu giá tại doanh nghiệp theo quy định tại Thông tư này.\n7. Ban chỉ đạo cổ phần hóa phải giữ bí mật về giá đặt mua của các nhà đầu tư cho đến khi công bố kết quả chính thức.\n8. Tổng hợp, báo cáo kết quả bán đấu giá cổ phần gửi cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa.\n9. Báo cáo cơ quan quyết định cổ phần hóa phê duyệt các khoản chi phí cổ phần hóa, chi cho người lao động dôi dư và số tiền thu từ cổ phần hóa phải nộp, đồng gửi Bộ Tài chính (Cục Tài chính doanh nghiệp).\n10. Ban chỉ đạo cổ phần hóa có trách nhiệm thực hiện theo đúng các quy định tại Thông tư này, các thành viên kiêm nhiệm chịu trách nhiệm trước cơ quan quyết định cổ phần hóa doanh nghiệp về các nhiệm vụ được phân công trong việc tổ chức bán cổ phần, quản lý, sử dụng tiền thu từ cổ phần hóa.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trình cơ quan quyết định cổ phần hoá quyết định tiêu chí lựa chọn nhà đầu tư chiến lược, số lượng cổ phần bán đấu giá và giá khởi điểm.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Kiểm tra, hoàn tất các thông tin liên quan đến cổ phần hóa.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thực hiện công bố (hoặc cung cấp cho Tổ chức thực hiện bán đấu giá) thông tin đầy đủ, chính xác về doanh nghiệp trước khi bán cổ phần theo quy định.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Gửi các tài liệu liên quan đến cổ phần hóa và đơn đăng ký tổ chức bán đấu giá theo mẫu quy định tại phụ lục số 4 kèm theo Thông tư này và ký hợp đồng với Sở giao dịch chứng khoán, tổ chức tài chính trung gian nếu bán đấu giá qua các tổ chức này.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Phối hợp với tổ chức thực hiện bán đấu giá để công bố công khai cho các nhà đầu tư các thông tin liên quan đến doanh nghiệp và cuộc đấu giá chậm nhất 20 ngày trước ngày thực hiện đấu giá.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Giám sát việc bán đấu giá cổ phần khi doanh nghiệp thực hiện bán tại các Sở giao dịch chứng khoán hoặc các tổ chức trung gian. Chịu trách nhiệm về việc thực hiện bán đấu giá cổ phần khi trực tiếp tổ chức bán đấu giá tại doanh nghiệp theo quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Ban chỉ đạo cổ phần hóa phải giữ bí mật về giá đặt mua của các nhà đầu tư cho đến khi công bố kết quả chính thức.",
+          "points": []
+        },
+        {
+          "number": 8,
+          "content": "Tổng hợp, báo cáo kết quả bán đấu giá cổ phần gửi cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa.",
+          "points": []
+        },
+        {
+          "number": 9,
+          "content": "Báo cáo cơ quan quyết định cổ phần hóa phê duyệt các khoản chi phí cổ phần hóa, chi cho người lao động dôi dư và số tiền thu từ cổ phần hóa phải nộp, đồng gửi Bộ Tài chính (Cục Tài chính doanh nghiệp).",
+          "points": []
+        },
+        {
+          "number": 10,
+          "content": "Ban chỉ đạo cổ phần hóa có trách nhiệm thực hiện theo đúng các quy định tại Thông tư này, các thành viên kiêm nhiệm chịu trách nhiệm trước cơ quan quyết định cổ phần hóa doanh nghiệp về các nhiệm vụ được phân công trong việc tổ chức bán cổ phần, quản lý, sử dụng tiền thu từ cổ phần hóa.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Trách nhiệm của doanh nghiệp cổ phần hóa",
+      "content_raw": "Trách nhiệm của doanh nghiệp cổ phần hóa\n1. Mở tài khoản phong tỏa và quản lý, sử dụng tiền thu từ cổ phần hóa theo đúng quy định tại Thông tư này.\n2. Chịu trách nhiệm cung cấp tài liệu, thông tin đầy đủ, chính xác về doanh nghiệp (bao gồm cả phươngán cổ phần hóa, dự thảo điều lệ tổ chức và hoạt động của công ty cổ phần) trước khi bán cổ phần theo quy định tại Thông tư này.\n3. Kết thúc quá trình cổ phần hoá, doanh nghiệp phải quyết toán chi phí cổ phần hoá và kinh phí hỗ trợ lao động dôi dư, báo cáo Ban chỉ đạo cổ phần hóa trình cơ quan có thẩm quyền quyết định phê duyệt.\n4. Nộp tiền thu từ cổ phần hóa theo quy định tại Thông này. Trường hợp chậm nộp, doanh nghiệp cổ phần hoá phải nộp thêm tiền lãi theo quy định tại khoản 6 Điều 43 Nghị định số 59/2011/NĐ-CP.\n5. Khi có tổn thất xảy ra do vi phạm, không thực hiện đúng các quy định tại Thông tư này thì doanh nghiệp cổ phần hóa và các cá nhân có liên quan phải chịu trách nhiệm bồi thường theo quy định của pháp luật.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Mở tài khoản phong tỏa và quản lý, sử dụng tiền thu từ cổ phần hóa theo đúng quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Chịu trách nhiệm cung cấp tài liệu, thông tin đầy đủ, chính xác về doanh nghiệp (bao gồm cả phươngán cổ phần hóa, dự thảo điều lệ tổ chức và hoạt động của công ty cổ phần) trước khi bán cổ phần theo quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Kết thúc quá trình cổ phần hoá, doanh nghiệp phải quyết toán chi phí cổ phần hoá và kinh phí hỗ trợ lao động dôi dư, báo cáo Ban chỉ đạo cổ phần hóa trình cơ quan có thẩm quyền quyết định phê duyệt.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Nộp tiền thu từ cổ phần hóa theo quy định tại Thông này. Trường hợp chậm nộp, doanh nghiệp cổ phần hoá phải nộp thêm tiền lãi theo quy định tại khoản 6 Điều 43 Nghị định số 59/2011/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Khi có tổn thất xảy ra do vi phạm, không thực hiện đúng các quy định tại Thông tư này thì doanh nghiệp cổ phần hóa và các cá nhân có liên quan phải chịu trách nhiệm bồi thường theo quy định của pháp luật.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Trách nhiệm của Tổ chức thực hiện bán đấu giá cổ phần (Sở Giao dịch chứng khoán, Tổ chức tài chính trung gian)",
+      "content_raw": "Trách nhiệm của Tổ chức thực hiện bán đấu giá cổ phần (Sở Giao dịch chứng khoán, Tổ chức tài chính trung gian)\n1. Yêu cầu doanh nghiệp cung cấp đầy đủ tài liệu, thông tin về cổ phần hoá theo quy định.\n2. Thông báo với Ban chỉ đạo cổ phần hóa và doanh nghiệp thời gian, địa điểm tổ chức bán đấu giá.\n3. Thông báo công khai tại doanh nghiệp, nơi bán đấu giá, trên các phương tiện thông tin đại chúng (trên 3 số báo liên tiếp của 1 tờ báo phát hành trong toàn quốc và 1 tờ báo địa phương nơi doanh nghiệp có trụ sở chính) về các thông tin liên quan đến việc bán cổ phần trước khi tổ chức đấu giá tối thiểu 20 ngày (phụ lục số 5 kèm theo Thông tư này).\n4. Cung cấp cho các nhà đầu tư thông tin liên quan đến doanh nghiệp cổ phần hoá (phụ lục số 2 kèm theo Thông tư này), phươngán cổ phần hoá, dự thảo điều lệ tổ chức - hoạt động của công ty cổ phần, đơn đăng ký tham gia đấu giá (phụ lục số 6a, 6b kèm theo Thông tư này) và các thông tin liên quan khác đến cuộc đấu giá theo quy định. Trường hợp thông tin công bố không chính xác, phảnánh sai lệch so với thông tin, số liệu do Ban chỉ đạo cổ phần hóa và doanh nghiệp cung cấp thì Tổ chức thực hiện bán đấu giá chịu trách nhiệm bồi thường theo quy định của pháp luật.\n5. Tiếp nhận đơn đăng ký tham gia đấu giá, kiểm tra điều kiện tham dự đấu giá và phát phiếu tham dự đấu giá cho các nhà đầu tư có đủ điều kiện. Trường hợp nhà đầu tư không đủ điều kiện tham dự đấu giá thì tổ chức thực hiện bán đấu giá phải thông báo và hoàn trả tiền đặt cọc cho nhà đầu tư (nếu nhà đầu tư đã đặt cọc).\n6. Phối hợp với các tổ chức, cá nhân có liên quan lập biên bản xác định kết quả đấu giá, công bố kết quả đấu giá và thu tiền mua cổ phần theo quy định.\n7. Giữ bí mật về giá đặt mua của các nhà đầu tư cho đến khi công bố kết quả chính thức. Chịu trách nhiệm về việc xác định kết quả đấu giá theo quy định.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Yêu cầu doanh nghiệp cung cấp đầy đủ tài liệu, thông tin về cổ phần hoá theo quy định.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thông báo với Ban chỉ đạo cổ phần hóa và doanh nghiệp thời gian, địa điểm tổ chức bán đấu giá.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thông báo công khai tại doanh nghiệp, nơi bán đấu giá, trên các phương tiện thông tin đại chúng (trên 3 số báo liên tiếp của 1 tờ báo phát hành trong toàn quốc và 1 tờ báo địa phương nơi doanh nghiệp có trụ sở chính) về các thông tin liên quan đến việc bán cổ phần trước khi tổ chức đấu giá tối thiểu 20 ngày (phụ lục số 5 kèm theo Thông tư này).",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Cung cấp cho các nhà đầu tư thông tin liên quan đến doanh nghiệp cổ phần hoá (phụ lục số 2 kèm theo Thông tư này), phươngán cổ phần hoá, dự thảo điều lệ tổ chức - hoạt động của công ty cổ phần, đơn đăng ký tham gia đấu giá (phụ lục số 6a, 6b kèm theo Thông tư này) và các thông tin liên quan khác đến cuộc đấu giá theo quy định. Trường hợp thông tin công bố không chính xác, phảnánh sai lệch so với thông tin, số liệu do Ban chỉ đạo cổ phần hóa và doanh nghiệp cung cấp thì Tổ chức thực hiện bán đấu giá chịu trách nhiệm bồi thường theo quy định của pháp luật.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Tiếp nhận đơn đăng ký tham gia đấu giá, kiểm tra điều kiện tham dự đấu giá và phát phiếu tham dự đấu giá cho các nhà đầu tư có đủ điều kiện. Trường hợp nhà đầu tư không đủ điều kiện tham dự đấu giá thì tổ chức thực hiện bán đấu giá phải thông báo và hoàn trả tiền đặt cọc cho nhà đầu tư (nếu nhà đầu tư đã đặt cọc).",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Phối hợp với các tổ chức, cá nhân có liên quan lập biên bản xác định kết quả đấu giá, công bố kết quả đấu giá và thu tiền mua cổ phần theo quy định.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Giữ bí mật về giá đặt mua của các nhà đầu tư cho đến khi công bố kết quả chính thức. Chịu trách nhiệm về việc xác định kết quả đấu giá theo quy định.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "Trách nhiệm của cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa",
+      "content_raw": "Trách nhiệm của cơ quan có thẩm quyền phê duyệt phươngán cổ phần hóa\n1. Phê duyệt phươngán cổ phần hóa để triển khai việc bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa theo đúng quy định tại Thông tư này.\n2. Kiểm tra, giám sát Ban chỉ đạo cổ phần hóa và doanh nghiệp cổ phần hóa trong việc thực hiện bán cổ phần theo phươngán đã được duyệt và quản lý, sử dụng tiền thu từ cổ phần hóa theo quy định.\n3. Chỉ đạo, đôn đốc các doanh nghiệp cổ phần hóa nộp tiền thu từ cổ phần hóa về Quỹ theo quy định tại khoản 3 Điều 21 Nghị định số 59/2011/NĐ-CP.\n4. Phê duyệt quyết toán chi phí cổ phần hoá, kinh phí hỗ trợ lao động dôi dư và số tiền thu từ cổ phần hóa, đồng thời gửi về Bộ Tài chính (Cục Tài chính doanh nghiệp).",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Phê duyệt phươngán cổ phần hóa để triển khai việc bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa theo đúng quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Kiểm tra, giám sát Ban chỉ đạo cổ phần hóa và doanh nghiệp cổ phần hóa trong việc thực hiện bán cổ phần theo phươngán đã được duyệt và quản lý, sử dụng tiền thu từ cổ phần hóa theo quy định.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Chỉ đạo, đôn đốc các doanh nghiệp cổ phần hóa nộp tiền thu từ cổ phần hóa về Quỹ theo quy định tại khoản 3 Điều 21 Nghị định số 59/2011/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Phê duyệt quyết toán chi phí cổ phần hoá, kinh phí hỗ trợ lao động dôi dư và số tiền thu từ cổ phần hóa, đồng thời gửi về Bộ Tài chính (Cục Tài chính doanh nghiệp).",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Trách nhiệm của Bộ Tài chính",
+      "content_raw": "Trách nhiệm của Bộ Tài chính\n1. Hướng dẫn các cơ quan, tổ chức, doanh nghiệp cổ phần hóa trong việc thực hiện bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa theo quy định tại Thông tư này và các văn bản có liên quan.\n2. Kiểm tra, giám sát việc chấp hành các quy định tại Thông tư này và các văn bản có liên quan trong hoạt động bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa.\n3. Phối hợp với các cơ quan, tổ chức, doanh nghiệp cổ phần hóa xử lý các vấn đề phát sinh trong quá trình bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa.\n4. Giao Uỷ ban chứng khoán nhà nước xây dựng và ban hành Quy chế bán đấu giá cổ phần theo quy định.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hướng dẫn các cơ quan, tổ chức, doanh nghiệp cổ phần hóa trong việc thực hiện bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa theo quy định tại Thông tư này và các văn bản có liên quan.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Kiểm tra, giám sát việc chấp hành các quy định tại Thông tư này và các văn bản có liên quan trong hoạt động bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Phối hợp với các cơ quan, tổ chức, doanh nghiệp cổ phần hóa xử lý các vấn đề phát sinh trong quá trình bán cổ phần và quản lý, sử dụng tiền thu từ cổ phần hóa.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Giao Uỷ ban chứng khoán nhà nước xây dựng và ban hành Quy chế bán đấu giá cổ phần theo quy định.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Trách nhiệm của các nhà đầu tư",
+      "content_raw": "Trách nhiệm của các nhà đầu tư\nCác nhà đầu tư tham gia mua cổ phần (kể cả nhà đầu tư chiến lược) có trách nhiệm thực hiện đúng các quy định về quyền mua cổ phần, Quy chế bán đấu giá cổ phần và các quy định tại Thông tư này.",
+      "clauses": []
+    },
+    {
+      "number": 19,
+      "title": "Hiệu lực thi hành",
+      "content_raw": "Hiệu lực thi hành\n1. Thông tư này có hiệu lực thi hành kể từ ngày 15 tháng 2 năm 2012 và thay thế các nội dung có liên quan tại Thông tư số 146/2007/TT-BTC ngày 6/12/2007 của Bộ Tài chính hướng dẫn thực hiện một số vấn đề về tài chính khi thực hiện chuyển doanh nghiệp 100% vốn nhà nước thành công ty cổ phần theo quy định tại Nghị định số 109/2007/NĐ-CP ngày 26/6/2007 của Chính phủ.\n2. Trong quá trình triển khai thực hiện, nếu có vướng mắc, đề nghị phảnánh kịp thời về Bộ Tài chính để xem xét, xử lý./.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thông tư này có hiệu lực thi hành kể từ ngày 15 tháng 2 năm 2012 và thay thế các nội dung có liên quan tại Thông tư số 146/2007/TT-BTC ngày 6/12/2007 của Bộ Tài chính hướng dẫn thực hiện một số vấn đề về tài chính khi thực hiện chuyển doanh nghiệp 100% vốn nhà nước thành công ty cổ phần theo quy định tại Nghị định số 109/2007/NĐ-CP ngày 26/6/2007 của Chính phủ.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trong quá trình triển khai thực hiện, nếu có vướng mắc, đề nghị phảnánh kịp thời về Bộ Tài chính để xem xét, xử lý./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}

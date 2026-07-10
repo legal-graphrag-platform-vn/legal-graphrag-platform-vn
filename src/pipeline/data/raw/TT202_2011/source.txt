@@ -1,0 +1,939 @@
+Chương I
+
+QUY ĐỊNH CHUNG
+
+Điều 1. Đối tượng áp dụng và phạm vi điều chỉnh
+
+Thông tư này áp dụng cho các doanh nghiệp là đối tượng cổ phần hoá quy định tại Điều 2 Nghị định số 59/2011/NĐ-CP (sau đây viết tắt là doanh nghiệp cổ phần hoá) và trong phạm vi quá trình thực hiện chuyển doanh nghiệp 100% vốn nhà nước thành công ty cổ phần (viết tắt là cổ phần hóa doanh nghiệp).
+
+Điều 2. Một số nguyên tắc khi thực hiện cổ phần hóa doanh nghiệp
+
+1. Khi thực hiện cổ phần hóa công ty mẹ, Công ty con do công ty mẹ sở hữu 100% vốn điều lệ phải thực hiện xác định giá trị doanh nghiệp theo qui định tại thông tư này. Thời điểm xác định giá trị doanh nghiệp của công ty con phải trùng với thời điểm xác định giá trị doanh nghiệp của công ty mẹ.
+
+2. Cơ quan có thẩm quyền quyết định thực hiện cổ phần hoá doanh nghiệp, quyết định công bố giá trị doanh nghiệp, quyết định phê duyệt phương án cổ phần hoá doanh nghiệp, quyết định phê duyệt phương án tái cơ cấu doanh nghiệp, quyết định phê duyệt quyết toán tài chính, quyết toán chi phí cổ phần hóa, quyết toán kinh phí hỗ trợ cho người lao động dôi dư, quyết toán số tiền thu từ cổ phần hóa và công bố giá trị thực tế phần vốn nhà nước tại thời điểm công ty cổ phần được cấp Giấy chứng nhận đăng ký doanh nghiệp cổ phần lần đầu theo qui định tại khoản 1, khoản 2 Điều 49 Nghị định số 59/2011/NĐ-CP (sau đây viết tắt là cơ quan quyết định cổ phần hoá doanh nghiệp).
+
+3. Trước khi thực hiện cổ phần hóa, doanh nghiệp cổ phần hoá phải thực hiện kiểm kê, xử lý tài chính và xác định lại giá trị doanh nghiệp, giá trị phần vốn nhà nước tại doanh nghiệp theo quy định của pháp luật hiện hành. Nhà nước không cấp thêm vốn để cổ phần hoá, kể cả các doanh nghiệp theo Quyết định số 14/2011/QĐ-TTg ngày 04/3/2011 của Thủ tướng Chính phủ về ban hành tiêu chí, danh mục, phân loại doanh nghiệp nhà nước khi thực hiện cổ phần hóa thuộc diện nhà nước nắm giữ trên 50% tổng số cổ phần.
+
+4. Sau khi đã được xử lý tài chính và thực hiện xác định giá trị doanh nghiệp mà không còn vốn nhà nước tại doanh nghiệp hoặc giá trị thực tế doanh nghiệp thấp hơn các khoản nợ phải trả, thì cơ quan có thẩm quyền quyết định cổ phần hóa chỉ đạo doanh nghiệp phối hợp với Công ty Mua bán nợ Việt Nam và các chủ nợ của doanh nghiệp xây dựng phương án tái cơ cấu doanh nghiệp để chuyển doanh nghiệp thành công ty cổ phần. Trong trường hợp phương án tái cơ cấu không khả thi, không có hiệu quả thì áp dụng hình thức sắp xếp khác phù hợp theo quy định của pháp luật.
+
+5. Quá trình xử lý tài chính và xác định giá trị doanh nghiệp cổ phần hóa phải đảm bảo chặt chẽ, công khai, minh bạch, không làm thất thoát vốn, tài sản của Nhà nước. Các tổ chức, cá nhân có liên quan khi thực hiện xử lý tài chính và xác định giá trị doanh nghiệp không chấp hành đúng chế độ quy định, gây ra tổn thất hoặc thất thoát tài sản nhà nước thì tổ chức, cá nhân đó chịu trách nhiệm hành chính, bồi thường vật chất hoặc truy cứu trách nhiệm hình sự theo quy định của pháp luật.
+
+6. Kết quả xác định giá trị doanh nghiệp cổ phần hoá, giá trị thực tế phần vốn nhà nước đã được cơ quan có thẩm quyền phê duyệt là cơ sở để doanh nghiệp cổ phần hoá xác định vốn điều lệ, xây dựng phương án cổ phần hoá và tổ chức bán cổ phần lần đầu, tổ chức đại hội đồng cổ đông, tiếp tục xử lý những vấn đề tài chính còn tồn tại đến thời điểm chính thức chuyển thành công ty cổ phần, quyết toán tài chính quá trình cổ phần hóa với nhà nước và bàn giao cho công ty cổ phần.
+
+7. Người có thẩm quyền theo quy định tại Điều 49 Nghị định số 59/2011/NĐ-CP thành lập Ban chỉ đạo cổ phần hóa doanh nghiệp để giúp tổ chức triển khai công tác cổ phần hoá theo chế độ quy định. Ban chỉ đạo cổ phần hoá giải thể sau khi doanh nghiệp cổ phần hoá đã hoàn thành bàn giao sang công ty cổ phần. Những vấn đề về tài chính phát sinh (nếu có) sau khi doanh nghiệp cổ phần hóa đã chính thức chuyển thành công ty cổ phần nhưng có liên quan đến quá trình cổ phần hoá thì cơ quan có thẩm quyền quyết định cổ phần hoá doanh nghiệp có trách nhiệm tiếp tục xử lý.
+
+Ban Chỉ đạo đổi mới và Phát triển doanh nghiệp và Bộ Tài chính cử thành viên tham gia Ban Chỉ đạo cổ phần hóa doanh nghiệp có quy mô vốn lớn, hoạt động kinh doanh trong những lĩnh vực, ngành nghề đặc thù theo quy định tại điểm b khoản 4 Điều 49 Nghị định số 59/2011/NĐ-CP, để giúp Ban Chỉ đạo cổ phần hóa doanh nghiệp thực hiện nhiệm vụ của Ban mà trực tiếp là các vấn đề khó khăn, vướng mắc về cơ chế chính sách trong quá trình thực hiện cổ phần hóa doanh nghiệp khi phải trình cơ quan có thẩm quyền xử lý và thực hiện các nhiệm vụ khác theo sự phân công của Trưởng Ban Chỉ đạo cổ phần hóa doanh nghiệp.
+
+8. Các bước công việc và quy trình chuyển doanh nghiệp 100% vốn nhà nước thành công ty cổ phần thực hiện theo phụ lục ban hành kèm theo Nghị định số 59/2011/NĐ-CP. Trường hợp doanh nghiệp cổ phần hóa không thực hiện chuyển đổi doanh nghiệp theo quy trình này thì thực hiện theo quyết định của Thủ tướng Chính phủ.
+
+Điều 3. Giải thích từ ngữ
+
+Một số từ ngữ trong thông tư này được hiểu như sau:
+
+1. "Thời điểm quyết định cổ phần hoá" là thời điểm cơ quan có thẩm quyền quyết định cổ phần hoá doanh nghiệp ban hành quyết định thực hiện cổ phần hoá doanh nghiệp.
+
+2."Thời điểm xác định giá trị doanh nghiệp cổ phần hóa" là thời điểm khóa sổ kế toán, lập báo cáo tài chính quý hoặc năm được cơ quan quyết định cổ phần hóa lựa chọn phù hợp với phương pháp xác định giá trị doanh nghiệp, cụ thể:
+
+a) Trường hợp xác định giá trị doanh nghiệp cổ phần hóa theo phương pháp tài sản thì thời điểm xác định giá trị doanh nghiệp là thời điểm khóa sổ kế toán lập báo cáo tài chính quý hoặc năm gần nhất với thời điểm quyết định cổ phần hóa.
+
+b) Trường hợp xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu hoặc phương pháp khác thì thời điểm xác định giá trị doanh nghiệp là thời điểm khóa sổ, lập báo cáo tài chính năm gần nhất với thời điểm quyết định cổ phần hóa.
+
+3. "Thời điểm công bố giá trị doanh nghiệp" là thời điểm cơ quan có thẩm quyền quyết định cổ phần hoá doanh nghiệp ban hành quyết định công bố giá trị doanh nghiệp cổ phần hoá.
+
+4. "Thời điểm doanh nghiệp cổ phần hoá chuyển sang Công ty cổ phần " là thời điểm công ty cổ phần được chuyển đổi từ doanh nghiệp cổ phần hoá được cấp giấy chứng nhận đăng ký doanh nghiệp công ty cổ phần lần đầu.
+
+Chương II
+
+XỬ LÝ TÀI CHÍNH KHI CỔ PHẦN HÓA
+
+MỤC I. KIỂM KÊ TÀI SẢN, ĐỐI CHIẾU CÔNG NỢ
+
+Điều 4. Kiểm kê, phân loại tài sản
+
+1. Khi nhận được quyết định cổ phần hoá của cơ quan có thẩm quyền quyết định cổ phần hoá, doanh nghiệp cổ phần hoá có trách nhiệm kiểm kê, phân loại tài sản, các nguồn vốn và quỹ doanh nghiệp đang quản lý, sử dụng tại thời điểm xác định giá trị doanh nghiệp. Tổ giúp việc cổ phần hóa, doanh nghiệp cổ phần hóa phối hợp với Tổ chức tư vấn ( nếu có) thực hiện kiểm kê, phân loại tài sản.
+
+2. Lập bảng kê xác định đúng số lượng, chất lượng và giá trị của tài sản hiện có do doanh nghiệp đang quản lý và sử dụng; kiểm quỹ tiền mặt, đối chiếu số dư tiền gửi ngân hàng; xác định tài sản, tiền mặt thừa, thiếu so với sổ kế toán, phân tích rõ nguyên nhân thừa, thiếu và trách nhiệm của những người có liên quan, xác định mức bồi thường theo quy định của pháp luật.
+
+3. Tài sản đã kiểm kê được phân loại theo các nhóm sau:
+
+a) Tài sản doanh nghiệp có nhu cầu sử dụng.
+
+b) Tài sản không cần dùng, tài sản ứ đọng, tài sản chờ thanh lý.
+
+c) Tài sản hình thành từ nguồn quỹ khen thưởng, quỹ phúc lợi (nếu có).
+
+d) Tài sản thuê, mượn, vật tư hàng hoá nhận giữ hộ, nhận gia công, nhận đại lý, nhận ký gửi, tài sản nhận góp vốn liên doanh, liên kết và các tài sản khác không phải của doanh nghiệp.
+
+đ) Tài sản gắn liền với đất thuộc diện phải xử lý theo phương án sắp xếp lại, xử lý đối với các cơ sở cơ sở nhà, đất theo quyết định của Thủ tướng Chính phủ về việc sắp xếp lại, xử lý nhà, đất thuộc sở hữu nhà nước.
+
+Điều 5. Đối chiếu, xác nhận và phân loại các khoản công nợ
+
+Doanh nghiệp cổ phần hóa đối chiếu, xác nhận và phân loại các khoản công nợ; lập bảng kê chi tiết đối với từng khách nợ, chủ nợ theo quy định sau:
+
+1. Nợ phải thu:
+
+a) Đối chiếu, xác nhận toàn bộ các khoản nợ phải thu theo từng khách nợ, bao gồm:
+
+- Các khoản nợ phải thu chưa đến hạn và nợ phải thu đã quá hạn thanh toán.
+
+- Phân tích rõ các khoản nợ phải thu khó đòi là nợ phải thu đã quá hạn thanh toán ghi trên hợp đồng kinh tế. Nợ phải thu chưa đến thời hạn thanh toán nhưng tổ chức kinh tế (các công ty, doanh nghiệp tư nhân, hợp tác xã, tổ chức tín dụng) đã lâm vào tình trạng phá sản hoặc đang làm thủ tục giải thể; người nợ mất tích, bỏ trốn, đang bị các cơ quan pháp luật truy tố, giam giữ, xét xử, đang thi hành án hoặc đã chết.
+
+Các khoản nợ phải thu không có khả năng thu hồi phải có đủ tài liệu chứng minh là không thu hồi được.
+
+b) Rà soát các hợp đồng kinh tế để xác định các khoản đã trả trước cho người cung cấp hàng hoá dịch vụ nhưng đã hạch toán toàn bộ giá trị trả trước vào chi phí kinh doanh như: tiền thuê nhà, tiền thuê đất, tiền mua hàng, tiền mua bảo hiểm dài hạn, tiền lương, tiền công....
+
+2. Nợ phải trả bao gồm các khoản nợ vay, nợ thuế và các khoản phải nộp ngân sách nhà nước:
+
+a) Căn cứ hợp đồng, giấy báo nợ đối chiếu lập bảng kê các khoản nợ vay theo từng chủ nợ; xác định các khoản nợ thuế và khoản phải nộp ngân sách nhà nước khác; phân tích cụ thể các khoản nợ vay theo hợp đồng ( vay trong nước, vay nước ngoài), vay có bảo lãnh, vay do phát hành trái phiếu; các khoản vay trong hạn, vay chưa đến hạn trả, vay đã quá hạn thanh toán, khoản nợ gốc, nợ lãi chưa trả, khoản nợ phải trả nhưng không phải trả.
+
+b) Nợ phải trả nhưng không phải trả là khoản nợ mà chủ nợ của doanh nghiệp cổ phần hóa khi thực hiện đối chiếu xác nhận nợ thuộc các trường hợp sau:
+
+- Nợ của các doanh nghiệp đã giải thể, phá sản nhưng không xác định cơ quan hoặc cá nhân kế thừa theo phương án giải thể, xử lý tài sản phá sản doanh nghiệp của doanh nghiệp giải thể, phá sản được cơ quan có thẩm quyền quyết định phê duyệt.
+
+- Nợ của các cá nhân đã chết nhưng không xác định người kế thừa.
+
+- Nợ của các chủ nợ khác đã quá hạn nhiều năm nhưng chủ nợ không đến đối chiếu, xác nhận. Trong trường hợp này doanh nghiệp cổ phần hoá phải có văn bản thông báo gửi trực tiếp đến chủ nợ hoặc thông báo trên phương tiện thông tin đại chúng trước thời điểm kiểm kê 5 ngày làm việc.
+
+Điều 6. Đối chiếu, xác nhận các khoản đầu tư tài chính; các khoản được chia; các khoản nhận góp vốn
+
+Doanh nghiệp cổ phần hoá đối chiếu, xác nhận lập bảng kê chi tiết đối với các khoản đầu tư tài chính, các khoản được chia của doanh nghiệp bao gồm: các khoản đầu tư góp vốn liên doanh, liên kết với các doanh nghiệp, tổ chức; góp vốn cổ phần, góp vốn thành lập công ty trách nhiệm hữu hạn; vốn đầu tư thành lập công ty trách nhiệm hữu hạn một thành viên do doanh nghiệp cổ phần hoá làm chủ sở hữu; lợi nhuận được chia từ hoạt động đầu tư góp vốn (đã có Nghị quyết của Hội đồng quản trị, Hội đồng thành viên) nhưng thực tế chưa nhận được tiền; phân tích kết quả các hoạt động đầu tư có lãi và hoạt động đầu tư lỗ chưa được xử lý;
+
+Xác định số lượng, giá trị các loại chứng khoán (cổ phiếu, trái phiếu ...) đã mua; số lượng cổ phiếu doanh nghiệp cổ phần hoá được nhận thêm mà không phải trả tiền do công ty cổ phần sử dụng các khoản thặng dư vốn cổ phần, các quỹ thuộc vốn chủ sở hữu, lợi nhuận sau thuế chưa phân phối để tăng vốn điều lệ (tăng vốn đầu tư của chủ sở hữu trong công ty cổ phần có vốn góp của doanh nghiệp cổ phần hóa).
+
+Đối với các khoản nhận góp vốn liên doanh, liên kết doanh nghiệp cổ phần hóa căn cứ hợp đồng liên doanh, liên kết lập bảng kê chi tiết theo từng đối tác đã góp vốn vào doanh nghiệp cổ phần hóa và thông báo cho chủ góp vốn biết để công ty cổ phần kế thừa các hợp đồng đã ký trước đây hoặc thanh lý hợp đồng.
+
+Điều 7. Kiểm kê, đối chiếu, xác nhận, phân loại tài sản và các khoản nợ khi cổ phần hoá các ngân hàng thương mại nhà nước
+
+Việc kiểm kê, đánh giá, phân loại tài sản là vốn bằng tiền, tài sản cho thuê tài chính và các khoản công nợ tại Ngân hàng Thương mại Nhà nước khi thực hiện cổ phần hóa được thực hiện như sau:
+
+1. Kiểm kê, đối chiếu các khoản tiền gửi của khách hàng, chứng chỉ tiền gửi (tín phiếu, kỳ phiếu, trái phiếu) như sau:
+
+ a) Kiểm kê chi tiết từng khoản trên sổ kế toán.
+
+ b) Đối chiếu xác nhận số dư tiền gửi của khách hàng là pháp nhân.
+
+ c) Tiền gửi tiết kiệm, tiền gửi cá nhân, chứng chỉ tiền gửi có thể không thực hiện đối chiếu với khách hàng, nhưng phải đối chiếu với thẻ lưu. Đối với một số trường hợp cụ thể (có số dư tiền gửi lớn hoặc có chênh lệch giữa số liệu trên sổ kế toán với thẻ lưu) thì thực hiện đối chiếu trực tiếp với khách hàng.
+
+2. Đối chiếu tài sản là dư nợ tín dụng (kể cả dư nợ được theo dõi ngoài bảng) như sau:
+
+a) Căn cứ hồ sơ tín dụng của từng khách hàng tại ngân hàng thương mại để lập danh sách những khách hàng còn dư nợ tín dụng và số dư nợ tín dụng của từng khách hàng, chi tiết theo từng hợp đồng tín dụng.
+
+b) Đối chiếu giữa số liệu xác định theo hồ sơ tín dụng với số liệu hạch toán trên sổ kế toán của ngân hàng thương mại; đối chiếu dư nợ tín dụng với từng khách hàng để có xác nhận của khách hàng về số dư nợ tín dụng.
+
+Đối với khách hàng là cá nhân, trường hợp không tổ chức đối chiếu được với khách hàng thì ngân hàng thương mại tổ chức tín dụng phải đối chiếu với thẻ lưu.
+
+c) Trường hợp có sự chênh lệch số liệu giữa hồ sơ tín dụng với sổ kế toán và xác nhận của khách hàng thì ngân hàng thương mại phải làm rõ nguyên nhân chênh lệch và xác định trách nhiệm của tổ chức, cá nhân có liên quan để xử lý theo quy định hiện hành của Nhà nước.
+
+3. Phân loại các khoản nợ phải thu tồn đọng đủ điều kiện được xử lý theo hướng dẫn của Ngân hàng Nhà nước Việt Nam.
+
+4. Đối với các tài sản cho thuê tài chính: phải thực hiện đối chiếu với từng khách hàng, xác định rõ số nợ còn phải trả của từng tài sản cho thuê tài chính.
+
+Điều 8. Trách nhiệm trong kiểm kê tài sản, đối chiếu xác nhận tài sản, tiền vốn các loại để thực hiện cổ phần hóa doanh nghiệp
+
+Trong quá trình kiểm kê tài sản, đối chiếu xác nhận công nợ, tiền vốn các loại nếu bỏ sót làm giảm giá trị doanh nghiệp và vốn nhà nước tại doanh nghiệp cổ phần hoá thì Giám đốc, Kế toán trưởng và các tổ chức, cá nhân liên quan phải chịu trách nhiệm bồi hoàn nộp vào ngân sách nhà nước toàn bộ giá trị tài sản, tiền vốn các loại bị bỏ sót theo quy định của pháp luật.
+
+MỤC II. XỬ LÝ TÀI CHÍNH TRƯỚC KHI XÁC ĐỊNH GIÁ TRỊ DOANH NGHIỆP VÀ TẠI THỜI ĐIỂM CHUYỂN THÀNH CÔNG TY CỔ PHẦN
+
+Điều 9. Xử lý về tài chính trước khi xác định giá trị doanh nghiệp
+
+1. Xử lý tài sản:
+
+Căn cứ vào kết quả kiểm kê, phân loại tài sản, doanh nghiệp xử lý tài sản theo quy định tại Điều 14 của Nghị định số 59/2011/NĐ-CP, trong đó:
+
+a) Đối với tài sản thừa, thiếu, phải phân tích làm rõ nguyên nhân và xử lý như sau:
+
+- Tài sản thiếu phải xác định trách nhiệm của tổ chức, cá nhân để xử lý bồi thường vật chất theo quy định hiện hành; giá trị tài sản thiếu sau khi trừ khoản bồi thường của tổ chức, cá nhân (nếu có), doanh nghiệp được hạch toán vào chi phí sản xuất kinh doanh.
+
+- Tài sản thừa, nếu không xác định được nguyên nhân hoặc không tìm được chủ sở hữu thì xử lý tăng giá trị thực tế phần vốn nhà nước.
+
+b) Đối với những tài sản không cần dùng, tài sản ứ đọng, tài sản chờ thanh lý:
+
+- Giám đốc doanh nghiệp cổ phần hóa chịu trách nhiệm chỉ đạo tổ chức thanh lý, nhượng bán tài sản. Việc thanh lý, nhượng bán tài sản được thực hiện thông qua phương thức đấu giá công khai theo quy định hiện hành của Nhà nước.
+
+- Các khoản thu và chi phí cho hoạt động thanh lý, nhượng bán tài sản được hạch toán vào thu nhập và chi phí của doanh nghiệp.
+
+- Đến thời điểm tiến hành xác định giá trị doanh nghiệp, những tài sản không cần dùng, tài sản ứ đọng, tài sản chờ thanh lý chưa được xử lý, ngoại trừ các trường hợp tài sản không được phép loại trừ quy định tại khoản 3 Điều 14 Nghị định số 59/2011/NĐ-CP, cơ quan có thẩm quyền quyết định công bố giá trị doanh nghiệp cổ phần hóa xem xét, quyết định loại trừ không tính vào giá trị doanh nghiệp và thực hiện chuyển giao cho các cơ quan theo quy định tại khoản 2 Điều 14 Nghị định số 59/2011/NĐ-CP. Cụ thể:
+
+Công ty Mua bán nợ Việt Nam để xử lý theo quy định của pháp luật đối với các doanh nghiệp quy định tại Điều 2 Nghị định số 59/2011/NĐ-CP.
+
+Công ty mẹ của Tập đoàn kinh tế, Tổng công ty nhà nước, Công ty mẹ trong tổ hợp công ty mẹ - công ty con để xử lý theo quy định đối với các công ty trách nhiệm hữu hạn do các doanh nghiệp này nắm giữ 100% vốn điều lệ.
+
+c) Doanh nghiệp cổ phần hoá không được loại trừ ra khỏi giá trị doanh nghiệp cổ phần hoá các tài sản đã được doanh nghiệp sử dụng để thế chấp đảm bảo cho các khoản nợ vay kể cả những tài sản doanh nghiệp không có nhu cầu sử dụng.
+
+d) Các tài sản không được phép loại trừ doanh nghiệp cổ phần hoá có trách nhiệm xử lý theo quy định tại khoản 3 Điều 14 Nghị định số 59/2011/CP-NĐ.
+
+đ) Doanh nghiệp cổ phần hóa lập phương án sắp xếp lại, xử lý các cơ sở nhà, đất trình cấp có thẩm quyền phê duyệt theo quy định của Thủ tướng Chính phủ để xử lý dứt điểm quyền sở hữu tài sản và quyền sử dụng đất của doanh nghiệp trước khi thực hiện xác định giá trị doanh nghiệp để cổ phần hóa.
+
+Đối với tài sản gắn liền với đất không thuộc quyền quản lý, sử dụng của doanh nghiệp, doanh nghiệp cổ phần hóa căn cứ phương án sắp xếp lại, xử lý các cơ sở nhà, đất đã được cấp có thẩm quyền phê duyệt theo quy định của Thủ tướng Chính phủ xử lý dứt điểm quyền sở hữu tài sản và quyền sử dụng đất của doanh nghiệp trước khi thực hiện xác định giá trị doanh nghiệp để cổ phần hóa.
+
+e) Tài sản là công trình phúc lợi: nhà trẻ, nhà mẫu giáo, bệnh xá và các tài sản phúc lợi khác được đầu tư bằng nguồn quỹ phúc lợi, quỹ khen thưởng; nhà ở của cán bộ, công nhân viên được đầu tư bằng nguồn quỹ phúc lợi và đầu tư bằng nguồn vốn ngân sách nhà nước cấp được xử lý theo quy định tại khoản 4 Điều 14 Nghị định số 59/2011/NĐ-CP.
+
+g) Đối với tài sản đang dùng trong sản xuất kinh doanh được đầu tư bằng nguồn Quỹ phúc lợi, Quỹ khen thưởng của doanh nghiệp cổ phần hoá được tính vào giá trị doanh nghiệp cổ phần hóa và công ty cổ phần tiếp tục sử dụng trong sản xuất kinh doanh.
+
+2. Xử lý nợ phải thu:
+
+Việc xử lý nợ phải thu của doanh nghiệp thực hiện theo quy định tại Điều 15 Nghị định số 59/2011/NĐ-CP, trong đó:
+
+2.1. Căn cứ kết quả đối chiếu xác nhận các khoản nợ phải thu, doanh nghiệp cổ phần hoá có trách nhiệm thu hồi các khoản nợ khi đến hạn; tích cực đôn đốc và áp dụng mọi biện pháp để thu hồi các khoản nợ phải thu quá hạn có khả năng thu hồi trước khi xác định giá trị doanh nghiệp cổ phần hoá.
+
+2.2. Các khoản nợ phải thu được xác định là nợ phải thu không có khả năng thu hồi khi có đủ tài liệu chứng minh, cụ thể như sau:
+
+a) Khoản nợ phải thu phải có chứng từ gốc, có đối chiếu xác nhận của khách nợ về số tiền còn nợ như: hợp đồng kinh tế, khế ước vay nợ, bản thanh lý hợp đồng, bản cam kết nợ, biên bản đối chiếu công nợ và tài liệu khách quan khác chứng minh được số nợ còn tồn đọng chưa thu được.
+
+b) Sổ kế toán, chứng từ, tài liệu chứng minh khoản nợ chưa thu hồi được đến thời điểm xử lý nợ doanh nghiệp đang hạch toán nợ phải thu trên sổ kế toán của doanh nghiệp.
+
+c) Trường hợp đối với tổ chức kinh tế:
+
+- Khách nợ đã giải thể, phá sản: phải có quyết định của Tòa án tuyên bố phá sản doanh nghiệp theo Luật phá sản hoặc quyết định của người có thẩm quyền về giải thể đối với doanh nghiệp nợ, trường hợp tự giải thể thì có thông báo của đơn vị hoặc xác nhận của cơ quan quyết định thành lập đơn vị, tổ chức.
+
+- Khách nợ đã ngừng hoạt động và không có khả năng chi trả: là xác nhận của cơ quan quyết định thành lập doanh nghiệp hoặc tổ chức đăng ký kinh doanh về việc doanh nghiệp, tổ chức đã ngừng hoạt động không có khả năng thanh toán.
+
+- Đối với khoản nợ phải thu nhưng khách nợ đã được cơ quan có thẩm quyền quyết định cho xoá nợ theo quy định của pháp luật; khoản chênh lệch thiệt hại được cơ quan có thẩm quyền chấp nhận do bán nợ phải thu: là quyết định của cơ quan có thẩm quyền cho xoá nợ .
+
+- Đối với những khoản nợ phải thu đã phát sinh trên 3 năm mà khách nợ vẫn còn tồn tại nhưng không có khả năng trả nợ, doanh nghiệp đã áp dụng nhiều giải pháp nhưng không thu hồi được thì doanh nghiệp phải đưa ra các bằng chứng như: Biên bản đối chiếu công nợ với khách nợ, công văn đòi nợ, công văn đề nghị Toà án thực hiện phá sản theo Luật định. Các khoản nợ phải thu mà dự toán chi phí đòi nợ lớn hơn giá trị khoản nợ phải thu.
+
+d) Trường hợp đối với cá nhân:
+
+- Giấy chứng tử (bản sao) hoặc xác nhận của chính quyền địa phương đối với người nợ đã chết nhưng không có tài sản thừa kế để trả nợ.
+
+- Giấy xác nhận của chính quyền địa phương đối với người nợ còn sống hoặc đã mất tích nhưng không có khả năng trả nợ.
+
+- Lệnh truy nã hoặc xác nhận của cơ quan pháp luật đối với người nợ đã bỏ trốn hoặc đang bị truy tố, đang thi hành án hoặc xác nhận của chính quyền địa phương về việc khách nợ hoặc người thừa kế không có khả năng trả nợ.
+
+đ) Đến thời điểm tiến hành xác định giá trị doanh nghiệp, các khoản nợ phải thu đã có đủ hồ sơ tài liệu chứng minh không có khả năng thu hồi theo quy định (không phân biệt khoản nợ đã được trích lập và chưa trích lập dự phòng), doanh nghiệp sử dụng nguồn dự phòng nợ phải thu khó đòi để bù đắp, phần chênh lệch thiếu được hạch toán vào chi phí sản xuất kinh doanh của doanh nghiệp.
+
+2.3. Những khoản nợ không có đủ hồ sơ pháp lý chứng minh khách nợ còn nợ hoặc không có khả năng thu hồi theo quy định thì không được loại trừ ra ngoài giá trị doanh nghiệp, doanh nghiệp phải làm rõ nguyên nhân để xử lý như sau:
+
+- Đối với khoản nợ phải thu không có đủ hồ sơ chứng minh khách nợ còn nợ, doanh nghiệp phải xác định nguyên nhân xử lý trách nhiệm bồi thường của tập thể, cá nhân có liên quan; phần tổn thất sau khi xử lý trách nhiệm bồi thường của tổ chức, cá nhân (nếu có) doanh nghiệp cổ phần hóa bàn giao sang công ty cổ phần sau này để tiếp tục xử lý.
+
+- Những khoản nợ phải thu không có tài liệu theo quy định để chứng minh là không có khả năng thu hồi thì doanh nghiệp cổ phần hóa và công ty cổ phần sau này có trách nhiệm tiếp tục hoàn thiện hồ sơ theo quy định và xử lý theo quy định của pháp luật hiện hành.
+
+2.4. Doanh nghiệp được loại trừ không tính vào giá trị doanh nghiệp cổ phần hóa các khoản nợ phải thu có đủ hồ sơ tài liệu chứng minh không có khả năng thu hồi theo quy định.
+
+Doanh nghiệp cổ phần hóa có trách nhiệm bàn giao các khoản công nợ không tính vào giá trị doanh nghiệp cổ phần hóa (bao gồm cả các khoản nợ khó đòi đã được xử lý bằng nguồn dự phòng trong vòng 05 năm liền kề trước khi cổ phần hóa) kèm theo đầy đủ hồ sơ, các tài liệu liên quan cho cơ quan quy định tại khoản 2 Điều 14 Nghị định số 59/2011/NĐ-CP.
+
+Các khoản nợ phải thu không có khả năng thu hồi tuy đã được xử lý nhưng khách nợ còn tồn tại thì các cơ quan tiếp nhận bàn giao có trách nhiệm tiếp tục theo dõi và tổ chức thu hồi.
+
+Trong thời gian chưa thực hiện bàn giao, chưa chính thức chuyển thành công ty cổ phần, doanh nghiệp cổ phần hóa vẫn có trách nhiệm tiếp tục theo dõi và tổ chức thu hồi các khoản công nợ đã được loại trừ không tính vào giá trị doanh nghiệp cổ phần hoá.
+
+2.5. Đối với các khoản tiền doanh nghiệp đã trả trước cho người cung cấp hàng hoá, dịch vụ như: tiền thuê nhà, tiền thuê đất, tiền mua bảo hiểm dài hạn, tiền mua hàng, tiền công đã được hạch toán vào chi phí kinh doanh, doanh nghiệp căn cứ hợp đồng mua bán hàng hóa, cung cấp dịch vụ, đối chiếu nợ để hạch toán giảm chi phí (tương ứng với phần hàng hoá, dịch vụ chưa được cung cấp hoặc thời gian thuê chưa thực hiện) và hạch toán tăng khoản chi phí trả trước khi xác định giá trị doanh nghiệp cổ phần hóa.
+
+3. Xử lý nợ phải trả các tổ chức, cá nhân:
+
+Căn cứ kết quả đối chiếu phân loại nợ, doanh nghiệp thực hiện xử lý nợ phải trả theo quy định tại Điều 16 Nghị định số 59/2011/NĐ-CP, trong đó:
+
+a) Các khoản nợ phải trả nhưng không phải thanh toán khi có đủ tài liệu và làm đủ thủ tục đối với chủ nợ theo quy định tại điểm b khoản 2 Điều 5 Thông tư này được hạch toán tăng vốn nhà nước tại doanh nghiệp cổ phần hóa.
+
+b) Đối với khoản nợ thuế và các khoản phải nộp ngân sách nhà nước: doanh nghiệp cổ phần hóa có trách nhiệm kê khai nộp đầy đủ các khoản nợ thuế và nghĩa vụ với Ngân sách nhà nước và gửi báo cáo quyết toán thuế thời điểm xác định giá trị doanh nghiệp kèm theo văn bản đề nghị cho cơ quan thuế trực tiếp quản lý để kiểm tra, xác định số thuế còn phải nộp theo quy định. Trong thời gian 30 ngày kể từ ngày nhận được văn bản đề nghị của doanh nghiệp cổ phần hóa, cơ quan thuế có trách nhiệm bố trí cán bộ thực hiện kiểm tra đối với các doanh nghiệp cổ phần hoá phù hợp với thời gian xác định giá trị doanh nghiệp đã được thông báo.
+
+Trường hợp khi tiến hành xác định giá trị doanh nghiệp mà vẫn chưa hoàn thành kiểm tra quyết toán thuế thì doanh nghiệp cổ phần hóa được sử dụng báo cáo tài chính đã lập và số liệu thuế đã kê khai làm cơ sở xác định giá trị doanh nghiệp (kể cả việc xác định các nghĩa vụ về thuế và phân phối lợi nhuận), nhưng phải đưa vào Biên bản xác định giá trị doanh nghiệp cổ phần hoá, quyết định công bố giá trị doanh nghiệp và trong phương án cổ phần hóa doanh nghiệp, công bố công khai về việc chưa hoàn thành việc kiểm tra quyết toán thuế khi thực hiện công bố thông tin bán cổ phần cho nhà đầu tư.
+
+Các khoản chênh lệch về nghĩa vụ thuế đối với Nhà nước (nếu có) sẽ được điều chỉnh khi lập báo cáo tài chính thời điểm doanh nghiệp được cấp giấy chứng nhận đăng ký doanh nghiệp cổ phần lần đầu để bàn giao sang công ty cổ phần.
+
+c) Đối với các khoản nợ vay Ngân hàng thương mại và Ngân hàng phát triển Việt Nam (gọi chung là ngân hàng cho vay), vay của các tổ chức, cá nhân khác doanh nghiệp cổ phần hóa có trách nhiệm huy động các nguồn vốn hợp pháp để thanh toán các khoản nợ đến hạn trước khi xác định giá trị doanh nghiệp.
+
+d) Trong quá trình xử lý tài chính trước khi xác định giá trị doanh nghiệp nếu doanh nghiệp cổ phần hoá có khó khăn về khả năng thanh toán các khoản nợ quá hạn của các Ngân hàng, hoặc còn lỗ luỹ kế doanh nghiệp phối hợp với Ngân hàng cho vay xử lý nợ vay như sau:
+
+- Doanh nghiệp cổ phần hóa làm thủ tục, hồ sơ đề nghị Ngân hàng cho vay xem xét, quyết định khoanh nợ, giãn nợ, xoá nợ lãi vay theo quy định của pháp luật hiện hành.
+
+Trong thời gian tối đa 20 ngày làm việc kể từ ngày nhận được hồ sơ của doanh nghiệp, ngân hàng cho vay có ý kiến xử lý bằng văn bản thông báo cho doanh nghiệp.
+
+- Ngoài biện pháp khoanh nợ, giãn nợ, xoá nợ lãi vay nói trên, doanh nghiệp phối hợp với ngân hàng cho vay để xử lý phần nợ gốc quá hạn còn lại theo phương thức bán nợ cho Công ty Mua bán nợ Việt Nam theo giá thoả thuận. Căn cứ vào thoả thuận mua, bán nợ, doanh nghiệp cổ phần hoá có trách nhiệm nhận nợ với Công ty Mua bán nợ; đồng thời phối hợp với Công ty Mua bán nợ Việt Nam lập phương án cơ cấu lại nợ xử lý tài chính trình cơ quan quyết định cổ phần hoá xem xét, thoả thuận với Công ty Mua bán nợ Việt Nam về phương án chuyển doanh nghiệp thành công ty cổ phần.
+
+- Thoả thuận với ngân hàng cho vay để chuyển nợ vay thành vốn góp cổ phần. Việc chuyển nợ vay thành vốn góp cổ phần được thực hiện theo kết quả đấu giá thành công của ngân hàng cho vay hoặc theo giá đấu thành công thấp nhất. Trường hợp ngân hàng cho vay được lựa chọn là nhà đầu tư chiến lược thì việc chuyển nợ thành cổ phần được xác định theo giá quy định tại điểm đ, khoản 3 Điều 6 Nghị định số 59/2011/NĐ-CP.
+
+- Việc xử lý chuyển nợ phải trả của các tổ chức, cá nhân cho vay ( không phải là Ngân hàng) thành vốn góp cổ phần được thực hiện theo qui định hiện hành tại khoản 1 Điều 16 Nghị định số 59/2011/NĐ-CP.
+
+đ) Đối với các khoản nợ vay nước ngoài (có bảo lãnh và không có bảo lãnh) đã quá hạn, doanh nghiệp và người bảo lãnh phải đàm phán với chủ nợ để có phương án xử lý theo quy định của pháp luật về quản lý vay nợ và trả nợ vay nước ngoài.
+
+e) Đối với khoản nợ bảo hiểm xã hội, nợ cán bộ công nhân viên, doanh nghiệp có trách nhiệm thanh toán dứt điểm trước khi chuyển thành công ty cổ phần để đảm bảo quyền lợi cho người lao động. Đối với khoản chi có tính đặc thù cho lao động là quân nhân, công nhân viên chức quốc phòng (tiền lương thời gian chuẩn bị hưu) tại doanh nghiệp cổ phần hoá thuộc Bộ Quốc phòng nếu có phát sinh được hạch toán vào chi phí sản xuất kinh doanh trước khi quyết toán tài chính bàn giao doanh nghiệp cổ phần hoá sang công ty cổ phần.
+
+4. Các khoản dự phòng, lỗ hoặc lãi
+
+Việc xử lý các khoản dự phòng, quỹ dự phòng rủi ro của ngân hàng, dự phòng nghiệp vụ của bảo hiểm, chênh lệch tỷ giá , Quỹ dự phòng tài chính và các khoản lãi, lỗ của doanh nghiệp, doanh nghiệp cổ phần hoá thực hiện theo quy định tại Điều 17 Nghị định số 59/2011/NĐ-CP.
+
+Trường hợp doanh nghiệp cổ phần có khoản lỗ do chênh lệch tỷ giá, doanh nghiệp cổ phần hoá báo cáo nguyên nhân dẫn đến lỗ tỷ giá với cơ quan quyết định cổ phần hoá để xử lý đối với từng trường hợp cụ thể.
+
+Trường hợp doanh nghiệp cổ phần hóa sau khi đã xử lý các khoản lỗ theo qui định tính đến thời điểm xác định giá trị doanh nghiệp mà doanh nghiệp cổ phần hoá vẫn còn các khoản nợ đọng của các tổ chức tín dụng (bao gồm cả Ngân hàng phát triển Việt Nam) thì doanh nghiệp cổ phần hóa có trách nhiệm làm thủ tục, hồ sơ đề nghị với Ngân hàng cho vay để xem xét xử lý xóa nợ lãi vay theo quy định hiện hành của Nhà nước về xử lý nợ tồn đọng.
+
+Các khoản lãi phát sinh của doanh nghiệp sau khi sử dụng để bù lỗ (nếu có) theo quy định của Luật Thuế thu nhập doanh nghiệp, bù đắp các khoản tổn thất về tài sản không cần dùng, chờ thanh lý, giảm giá tài sản, nợ không có khả năng thu hồi, số còn lại phân phối theo quy định hiện hành trước khi xác định giá trị doanh nghiệp. Trường hợp thời điểm xác định giá trị doanh nghiệp không trùng với thời điểm báo cáo tài chính năm thì việc trích lập các quỹ của doanh nghiệp thực hiện theo quy định tại khoản 2 Điều 10 Thông tư này.
+
+5. Vốn đầu tư dài hạn vào các doanh nghiệp khác như góp vốn liên doanh, liên kết; góp vốn cổ phần; góp vốn thành lập công ty trách nhiệm hữu hạn và các hình thức đầu tư dài hạn khác được xử lý theo quy định tại Điều 18 Nghị định số 59/2011/NĐ-CP.
+
+Trường hợp doanh nghiệp cổ phần hoá không kế thừa vốn đã đầu tư dài hạn vào doanh nghiệp khác mà bán lại cho đối tác hoặc các nhà đầu tư khác theo quy định của pháp luật thì doanh nghiệp cổ phần hoá phải báo cáo, có xác nhận của cơ quan thuế về kết quả và nghĩa vụ thuế về việc chuyển nhượng vốn làm cơ sở để xác định giá trị doanh nghiệp.
+
+6. Quỹ khen thưởng và Quỹ phúc lợi:
+
+Số dư bằng tiền của Quỹ khen thưởng, Quỹ phúc lợi sau khi đã bù đắp các khoản chi quá chế độ cho người lao động (nếu có) được dùng để chia cho người lao động đang làm việc tại thời điểm xác định giá trị doanh nghiệp theo số năm công tác tại doanh nghiệp cổ phần hoá.
+
+Giám đốc doanh nghiệp phối hợp với tổ chức công đoàn tại doanh nghiệp cổ phần hoá, xây dựng phương án và quyết định việc phân chia số dư bằng tiền và phần giá trị tương ứng với giá trị tài sản được đầu tư bằng nguồn Quỹ khen thưởng, Quỹ phúc lợi mà công ty cổ phần tiếp tục sử dụng trong sản xuất kinh doanh cho người lao động. Số tiền được chia từ Quỹ phúc lợi, Quỹ khen thưởng và danh sách người lao động được hưởng theo quyết định của doanh nghiệp phải được thông báo công khai để người lao động biết.
+
+Trường hợp doanh nghiệp đã chi quá nguồn Quỹ khen thưởng, Quỹ phúc lợi, thì doanh nghiệp phải kiểm điểm trách nhiệm của tổ chức, cá nhân quyết định chi Quỹ khen thưởng, Quỹ phúc lợi nhưng không có nguồn và xử lý như sau:
+
+- Đối với khoản đã chi trực tiếp cho người lao động có tên trong danh sách thường xuyên tại thời điểm có quyết định cổ phần hoá và chi cho các thành viên Ban quản lý, điều hành công ty không được khấu trừ vào phần vốn nhà nước tại doanh nghiệp. Giám đốc doanh nghiệp phối hợp với tổ chức công đoàn doanh nghiệp xử lý bằng cách thu hồi hoặc chuyển thành nợ phải thu để công ty cổ phần sau này tiếp tục xử lý.
+
+- Đối với các khoản chi quá nguồn Quỹ khen thưởng, Quỹ phúc lợi mà không xác định được đối tượng để thu hồi (như chi cho người lao động đã nghỉ mất việc, thôi việc trước thời điểm quyết định cổ phần hoá ) thì Ban chỉ đạo cổ phần hoá báo cáo cơ quan quyết định giá trị doanh nghiệp xử lý như đối với khoản nợ phải thu không có khả năng thu hồi.
+
+7. Quỹ thưởng Ban quản lý điều hành
+
+Số dư bằng tiền của Quỹ thưởng Ban quản lý điều hành, doanh nghiệp báo cáo chủ sở hữu quyết định thưởng cho đối tượng theo quy định: Hội đồng thành viên, Chủ tịch công ty (đối với công ty không có Hội đồng thành viên), Ban giám đốc công ty trước khi xác định giá trị doanh nghiệp.
+
+8. Các doanh nghiệp hình thành Quỹ phát triển khoa học và công nghệ của doanh nghiệp, khi thực hiện cổ phần hoá số dư Quỹ đuợc chuyển sang công ty cổ phần. Công ty cổ phần có trách nhiệm quản lý, sử dụng Quỹ theo qui định tại Thông tư số 15/2011/TT-BTC ngày 9/02/2011 của Bộ Tài chính.
+
+9. Số dư Quỹ hỗ trợ sắp xếp doanh nghiệp tại doanh nghiệp cổ phần hóa (nếu có) được xử lý hạch toán tăng vốn nhà nước tại doanh nghiệp theo Điều 20 Nghị định số 59/2011/NĐ-CP.
+
+Điều 10. Xử lý tài chính thời điểm doanh nghiệp cổ phần hoá chính thức chuyển thành công ty cổ phần
+
+1. Căn cứ quyết định công bố giá trị doanh nghiệp của cơ quan có thẩm quyền, doanh nghiệp cổ phần hoá có trách nhiệm điều chỉnh số liệu trong sổ kế toán theo giá trị doanh nghiệp đã được công bố. Thực hiện chuyển giao tài sản và các khoản nợ phải thu không tính vào giá trị doanh nghiệp cho các cơ quan theo quy định tại khoản 2 Điều 14 Nghị định số 59/2011/NĐ-CP trong thời gian 30 ngày sau khi có quyết định công bố giá trị doanh nghiệp của cơ quan có thẩm quyền.
+
+2. Trong giai đoạn từ thời điểm xác định giá trị doanh nghiệp đến thời điểm chính thức chuyển thành công ty cổ phần, doanh nghiệp cổ phần hóa tiếp tục xử lý các tồn tại về tài chính theo quy định tại Điều 21 Nghị định số 59/2011/NĐ-CP và lập báo cáo tài chính tại thời điểm chính thức chuyển thành công ty cổ phần. Trong đó:
+
+2.1. Đối với đầu tư tài sản cố định, đầu tư xây dựng công trình còn dở dang khi xác định giá trị doanh nghiệp, nhưng đến thời điểm chính thức chuyển thành công ty cổ phần hoàn thành đầu tư và được cơ quan có thẩm quyền phê duyệt quyết toán nếu có chênh lệch so với thời điểm xác định giá trị doanh nghiệp thì được điều chỉnh theo quyết toán đã được phê duyệt.
+
+2.2. Xác định mức trích khấu hao tài sản cố định là mức khấu hao đã được xác định theo phương pháp khấu hao tài sản mà doanh nghiệp cổ phần hoá đã đăng ký với cơ quan thuế trước khi thực hiện xác định giá trị doanh nghiệp.
+
+2.3. Việc phân phối lợi nhuận doanh nghiệp thực hiện theo quy định hiện hành đối với công ty trách nhiệm hữu hạn một thành viên do Nhà nước làm chủ sở hữu.
+
+Trường hợp thời điểm xác định giá trị doanh nghiệp và thời điểm chính thức chuyển thành công ty cổ phần không trùng với thời điểm lập báo cáo tài chính năm nên không thực hiện được việc xếp loại doanh nghiệp làm căn cứ để trích lập các quỹ của doanh nghiệp; doanh nghiệp cổ phần hoá thực hiện trích lập quỹ thưởng Ban quản lý điều hành và hai quỹ khen thưởng, quỹ phúc lợi tại các thời điểm này theo nguyên tắc sau:
+
+- Căn cứ vào kết quả xếp loại doanh nghiệp của năm trước năm thực hiện xác định giá trị doanh nghiệp cổ phần hoá.
+
+- Doanh nghiệp căn cứ nguồn lợi nhuận theo chế độ qui định được sử dụng để trích lập các quỹ để phân phối các quỹ của doanh nghiệp.
+
+- Nếu từ thời điểm xác định giá trị doanh nghiệp đến thời điểm chính thức chuyển thành công ty cổ phần đủ 12 tháng thì mức trích quỹ là mức tối đa theo qui định của chế độ phân phối lợi nhuận; nếu từ thời điểm xác định giá trị doanh nghiệp đến thời điểm chính thức chuyển thành công ty cổ phần không đủ 12 tháng thì mức trích quỹ bằng mức trích theo chế độ phân phối lợi nhuận qui định chia 12, nhân với số tháng tính từ thời điểm xác định giá trị doanh nghiệp đến thời điểm chính thức chuyển thành công ty cổ phần.
+
+2.4. Doanh nghiệp cổ phần hóa có trách nhiệm trích quỹ dự phòng trợ cấp mất việc làm đầy đủ theo chế độ Nhà nước quy định để sử dụng chi trả trợ cấp cho lao động dôi dư trong quá trình cổ phần hóa; khi lập báo cáo tài chính thời điểm chính thức chuyển thành công ty cổ phần nếu còn số dư thì hạch toán tăng thu nhập của doanh nghiệp cổ phần hóa.
+
+3. Trong thời gian 30 ngày kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp cổ phần lần đầu, Ban chỉ đạo cổ phần hoá chỉ đạo tổ giúp việc, doanh nghiệp cổ phần hoá phải hoàn thành việc lập báo cáo tài chính tại thời điểm được cấp giấy chứng nhận đăng ký doanh nghiệp công ty cổ phần, thực hiện kiểm toán báo cáo tài chính; đề nghị với cơ quan thuế ưu tiên tiến hành kiểm tra quyết toán thuế và các khoản phải nộp ngân sách; xác định lại giá trị phần vốn nhà nước tại thời điểm chính thức chuyển thành công ty cổ phần; thực hiện lập các báo cáo quyết toán: tiền thu về cổ phần hoá, chi trả chế độ cho người lao động dôi dư, chi phí cổ phần hoá.
+
+Trường hợp thời điểm xác định giá trị doanh nghiệp là năm trước, thời điểm chính thức chuyển thành công ty cổ phần là năm sau thì chỉ lập một báo cáo tài chính của cả thời kỳ, không tách riêng hai báo cáo ở thời điểm ngày 31/12 và ở thời điểm chính thức chuyển thành công ty cổ phần. Báo cáo tài chính phải gửi các cơ quan, đơn vị theo quy định của chế độ kế toán.
+
+Báo cáo tài chính đã được kiểm toán, các hồ sơ quyết toán quá trình cổ phần hoá gồm (tiền thu về cổ phần hoá, chi trả chế độ cho người lao động dôi dư, chi phí cổ phần hoá ) và tài liệu có liên quan của doanh nghiệp được gửi đến cơ quan quyết định cổ phần hoá doanh nghiệp và cơ quan liên quan để phối hợp kiểm tra, xử lý các tồn tại về tài chính và thực hiện phê duyệt báo cáo tài chính, phê duyệt quyết toán quá trình cổ phần hoá doanh nghiệp.
+
+a) Khi lập báo cáo tài chính để bàn giao từ doanh nghiệp cổ phần hóa sang công ty cổ phần, doanh nghiệp thực hiện định giá lại các khoản đầu tư tài chính, đầu tư chứng khoán (nếu có) đã xác định trong giá trị doanh nghiệp cổ phần hóa; nếu tổng giá trị các khoản đầu tư tài chính, đầu tư chứng khoán phát sinh giảm so với giá trị đã xác định trong giá trị doanh nghiệp đã được công bố và hạch toán trên sổ kế toán thì doanh nghiệp cổ phần hóa được trích lập dự phòng giảm giá các khoản đầu tư tài chính, đầu tư chứng khoán và hạch toán vào chi phí theo quy định hiện hành.
+
+Trường hợp tổng giá trị các khoản đầu tư tài chính, đầu tư chứng khoán phát sinh tăng thì khoản chênh lệch tăng so với giá trị đã xác định trong giá trị doanh nghiệp đã được công bố và hạch toán trên sổ kế toán, doanh nghiệp được hạch toán tăng thu nhập.
+
+b) Đối với khoản lợi nhuận được chia từ hoạt động đầu tư góp vốn (đã có Nghị quyết của Hội đồng quản trị, Hội đồng thành viên), thực tế đến thời điểm chuyển sang công ty cổ phần, doanh nghiệp cổ phần hoá vẫn chưa thu được tiền mà sử dụng để tăng vốn đầu tư vào doanh nghiệp khác thì khi lập báo cáo tài chính thời điểm chính thức chuyển sang công ty cổ phần phải ghi tăng giá trị thực tế phần vốn nhà nước tại doanh nghiệp cổ phần hoá và thực hiện quyết toán tiền thu về cổ phần hoá đối với công ty cổ phần.
+
+Khi quyết toán bàn giao từ công ty nhà nước sang công ty cổ phần, giá trị vốn đầu tư từ nguồn lãi nêu trên là giá trị đầu tư của công ty cổ phần vào doanh nghiệp khác.
+
+c) Đối với cổ phiếu doanh nghiệp cổ phần hóa được nhận thêm mà không phải trả tiền, khi lập báo cáo tài chính thời điểm chuyển sang công ty cổ phần doanh nghiệp căn cứ vào số lượng cổ phiếu nhận thêm và giá giao dịch theo hướng dẫn tại khoản 8 Điều 17 Thông tư này để ghi tăng giá trị thực tế phần vốn nhà nước tại doanh nghiệp cổ phần hoá.
+
+Khi quyết toán bàn giao từ công ty nhà nước sang công ty cổ phần số lượng cổ phiếu này được chuyển giao thuộc sở hữu của công ty cổ phần.
+
+d) Trường hợp thời gian tính từ ngày hết hạn nhà đầu tư nộp tiền mua cổ phần đến thời điểm công ty được cấp giấy chứng nhận đăng ký doanh nghiệp kéo dài trên 3 tháng thì doanh nghiệp được tính chi phí lãi vay để chi trả cho các nhà đầu tư theo nguyên tắc:
+
+- Chỉ tính lãi từ tháng thứ tư trở đi trên tổng mệnh giá của số cổ phần được mua. Đối với cổ phần người lao động mua cổ phần ưu đãi giảm giá, nếu giá mua cổ phần ưu đãi dưới mệnh giá thì chỉ được tính lãi trên số tiền thực nộp.
+
+- Tỷ lệ trả lãi không vượt quá lãi suất vay ngắn hạn cùng kỳ của ngân hàng thương mại nơi doanh nghiệp cổ phần hoá đang mở tài khoản tại thời điểm tính lãi.
+
+- Số tiền trả lãi cho nhà đầu tư doanh nghiệp cổ phần hoá được hạch toán vào chi phí sản xuất kinh doanh nhưng phải đảm bảo không vượt quá số tiền phải trả theo quy định và doanh nghiệp cổ phần hoá không bị lỗ khi lập báo cáo tài chính để bàn giao sang công ty cổ phần.
+
+đ) Kể từ ngày nhận được văn bản đề nghị của doanh nghiệp cổ phần hóa đến trước thời điểm theo quy định phải thực hiện phê duyệt báo cáo tài chính để bàn giao, cơ quan thuế có trách nhiệm ưu tiên bố trí cán bộ thực hiện kiểm tra quyết toán thuế và các khoản phải nộp ngân sách phù hợp với thời gian doanh nghiệp cổ phần hoá chuyển sang công ty cổ phần.
+
+Trường hợp qua thời gian theo quy định phải tiến hành phê duyệt báo cáo tài chính để thực hiện bàn giao mà vẫn chưa hoàn thành kiểm tra quyết toán thuế thì doanh nghiệp cổ phần hóa được sử dụng báo cáo tài chính đã lập và số liệu thuế đã kê khai để làm cơ sở bàn giao sang công ty cổ phần. Công ty cổ phần có trách nhiệm kế thừa và nộp toàn bộ các khoản thuế và các khoản phải nộp ngân sách nhà nước khác còn nợ khi bàn giao.
+
+Sau khi chính thức chuyển thành công ty cổ phần nếu phát sinh các khoản tổn thất do không tiến hành kiểm tra quyết toán thuế thì xử lý theo quy định tại khoản 3 Điều 52 Nghị định số 59/2011/NĐ-CP.
+
+4. Trong thời gian 30 ngày kể từ ngày nhận được báo cáo tài chính của doanh nghiệp đã được kiểm toán, báo cáo quyết toán thuế (nếu có) cơ quan có thẩm quyền quyết định cổ phần hoá doanh nghiệp có trách nhiệm phối hợp với cơ quan có liên quan thực hiện kiểm tra, xử lý các tồn tại tài chính của doanh nghiệp và ban hành quyết định phê duyệt quyết toán tài chính, quyết toán số tiền thu từ cổ phần hoá, quyết toán chi phí cổ phần hóa, quyết toán kinh phí hỗ trợ cho người lao động dôi dư, và quyết định công bố giá trị thực tế phần vốn nhà nước tại thời điểm doanh nghiệp cổ phần hoá chính thức chuyển thành công ty cổ phần làm căn cứ để bàn giao giữa doanh nghiệp cổ phần hoá và công ty cổ phần.
+
+Các doanh nghiệp cổ phần hoá do Thủ tướng Chính phủ phê duyệt phương án cổ phần hoá thì Bộ trưởng quản lý ngành thực hiện phê duyệt quyết toán báo cáo tài chính và các báo cáo quyết toán: tiền thu về cổ phần hoá, chi trả chế độ cho người lao động dôi dư, chi phí cổ phần hoá.
+
+Hội đồng thành viên công ty mẹ của Tập đoàn kinh tế; Tổng công ty đặc biệt do Thủ tướng Chính phủ quyết định thành lập thực hiện phê duyệt quyết toán báo cáo tài chính và các báo cáo quyết toán tiền thu về cổ phần hoá, chi trả chế độ cho người lao động dôi dư, chi phí cổ phần hoá của doanh nghiệp được Thủ tướng Chính phủ uỷ quyền quyết định công bố giá trị doanh nghiệp, quyết định phê duyệt phương án cổ phần hóa.
+
+Giám đốc và Kế toán trưởng doanh nghiệp cổ phần hoá chịu trách nhiệm lập và ký báo cáo tài chính, báo cáo xác định giá trị phần vốn nhà nước tại thời điểm chuyển sang công ty cổ phần, các báo cáo quyết toán tiền thu về cổ phần hoá, chi trả chế độ cho người lao động dôi dư, chi phí cổ phần hoá và chịu trách nhiệm về tính trung thực, chính xác của báo cáo.
+
+Hội đồng quản trị công ty cổ phần (mới) có trách nhiệm tạo điều kiện để lãnh đạo doanh nghiệp cổ phần hoá hoàn thành nhiệm vụ và ký, đóng dấu xác nhận chữ ký các chức danh trên của doanh nghiệp cổ phần hoá trong báo cáo tài chính và các quyết toán liên quan đến quá trình cổ phần hoá.
+
+Trường hợp Giám đốc, Kế toán trưởng doanh nghiệp cổ phần hoá chưa hoàn thành các công việc nêu trên và doanh nghiệp cổ phần hoá chưa hoàn thành việc bàn giao sang công ty cổ phần thì chưa được chuyển công tác hoặc nghỉ việc theo chế độ.
+
+5. Khoản chênh lệch giữa giá trị thực tế phần vốn nhà nước tại thời điểm doanh nghiệp cổ phần hoá chuyển sang công ty cổ phần với giá trị thực tế phần vốn nhà nước tại thời điểm xác định giá trị doanh nghiệp được xử lý theo quy định tại khoản 3 Điều 21 của Nghị định số 59/2011/NĐ-CP. Trường hợp phát sinh chênh lệch giảm (bao gồm cả nguyên nhân do kinh doanh bị thua lỗ) phải làm rõ nguyên nhân khách quan, chủ quan trước khi xử lý, trong đó:
+
+5.1. Chênh lệch giảm do nguyên nhân khách quan là các khoản tổn thất do thiên tai, địch hoạ, do Nhà nước thay đổi chính sách hoặc do biến động của thị trường quốc tế và các nguyên nhân bất khả kháng khác, nhưng doanh nghiệp cổ phần hoá không bị âm vốn nhà nước tại thời điểm chuyển sang công ty cổ phần thì cơ quan có thẩm quyền quyết định phương án cổ phần hóa xem xét thông qua Đại hội đồng cổ đông điều chỉnh quy mô, cơ cấu vốn điều lệ của công ty cổ phần.
+
+Trường hợp phát sinh chênh lệch giảm dẫn đến giá trị vốn nhà nước tại doanh nghiệp cổ phần hoá thời điểm chuyển sang công ty cổ phần bị âm thì doanh nghiệp báo cáo cơ quan có thẩm quyền quyết định phương án cổ phần hóa xem xét quyết định việc sử dụng tiền thu từ bán cổ phần (sau khi đã chi trả trợ cấp cho người lao động dôi dư và chi phí cổ phần hoá) và tiền bồi thường bảo hiểm (nếu có) để bù đắp; sau khi đã được bù đắp mà giá trị vốn nhà nước vẫn còn bị âm và doanh nghiệp cổ phần hoá đã được cấp giấy chứng nhận đăng ký doanh nghiệp công ty cổ phần lần đầu thì Hội đồng quản trị triệu tập Đại hội đồng cổ đông bất thường để biểu quyết việc xử lý lỗ và duy trì hoạt động của doanh nghiệp.
+
+5.2. Các trường hợp giảm vốn còn lại được xác định là nguyên nhân chủ quan xử lý theo quy định tại điểm b khoản 4 Điều 21 Nghị định số 59/2011/NĐ-CP. Cơ quan quyết định cổ phần hoá không lựa chọn và tiến cử các cá nhân có trách nhiệm liên quan đến việc kinh doanh thua lỗ dẫn đến giảm vốn làm đại diện phần vốn nhà nước góp tại công ty cổ phần.
+
+Điều 11. Bàn giao giữa doanh nghiệp cổ phần hoá và công ty cổ phần
+
+Căn cứ quyết định phê duyệt quyết toán tài chính; quyết toán số tiền thu từ cổ phần hoá; quyết toán chi phí cổ phần hóa; quyết toán kinh phí hỗ trợ cho người lao động dôi dư; và quyết định công bố giá trị thực tế phần vốn nhà nước tại thời điểm doanh nghiệp cổ phần hoá chính thức chuyển thành công ty cổ phần của cơ quan quyết định cổ phần hóa doanh nghiệp, Ban chỉ đạo cổ phần hoá chỉ đạo doanh nghiệp cổ phần hoá điều chỉnh sổ sách kế toán, lập hồ sơ bàn giao và tổ chức bàn giao giữa doanh nghiệp cổ phần hoá và công ty cổ phần. Thời gian hoàn thành bàn giao không quá 30 ngày kể từ ngày có phê duyệt quyết toán tài chính thời điểm doanh nghiệp cổ phần hoá chuyển sang công ty cổ phần.
+
+Công ty cổ phần được sử dụng toàn bộ tài sản ( hữu hình, vô hình) nguồn vốn đã nhận bàn giao để tổ chức sản xuất, kinh doanh; kế thừa mọi quyền lợi, nghĩa vụ, trách nhiệm của doanh nghiệp cổ phần hóa đã bàn giao và có các quyền, nghĩa vụ khác theo quy định của pháp luật.
+
+Các nghĩa vụ và trách nhiệm của doanh nghiệp cổ phần hóa được xác định bổ sung sau khi đã quyết toán, bàn giao cho công ty cổ phần không thuộc trách nhiệm của công ty cổ phần. Trường hợp do bàn giao thiếu, dẫn đến việc công ty cổ phần không chịu trách nhiệm kế thừa nghĩa vụ trả nợ của doanh nghiệp cổ phần hoá thì Giám đốc, Kế toán trưởng của doanh nghiệp cổ phần hoá và các tổ chức, cá nhân có liên quan hoàn toàn chịu trách nhiệm thanh toán nợ.
+
+Sau thời gian 60 kể từ ngày ký Biên bản bàn giao, Công ty cổ phần phải hoàn thành các hồ sơ về tài sản, đất đai và gửi đến các cơ quan có thẩm quyền theo quy định để thực hiện chuyển quyền quản lý, sử dụng tài sản từ doanh nghiệp cổ phần hoá thành sở hữu của công ty cổ phần; thực hiện giao đất, nộp tiền sử dụng đất, cấp hoặc cấp đổi cấp giấy chứng nhận quyền sử dụng đất theo quy định tại Luật Đất đai và các văn bản hướng dẫn thi hành Luật Đất đai.
+
+1. Hồ sơ bàn giao doanh nghiệp cổ phần hoá sang công ty cổ phần bao gồm:
+
+- Hồ sơ xác định giá trị doanh nghiệp và quyết định công bố giá trị doanh nghiệp.
+
+- Báo cáo tài chính tại thời điểm chính thức chuyển thành công ty cổ phần đã được kiểm toán và phê duyệt của cơ quan có thẩm quyền.
+
+- Quyết định xác định giá trị phần vốn nhà nước tại thời điểm chuyển thành công ty cổ phần của cơ quan có thẩm quyền.
+
+- Biên bản bàn giao tài sản, tiền vốn được lập tại thời điểm bàn giao (có bảng chi tiết công nợ bàn giao cho công ty cổ phần tiếp tục kế thừa và các tồn tại về tài chính cần tiếp tục xử lý - nếu có).
+
+- Các báo cáo về tình hình lao động và sử dụng đất của doanh nghiệp.
+
+2. Thành phần bàn giao gồm:
+
+- Đại diện Bộ, cơ quan ngang Bộ hoặc Uỷ ban nhân dân tỉnh, thành phố trực thuộc Trung ương và đại diện Bộ Tài chính (trường hợp cổ phần hoá Tập đoàn kinh tế, Tổng công ty, Công ty mẹ).
+
+- Đại diện Tập đoàn kinh tế, Tổng công ty, Công ty mẹ (trường hợp cổ phần hoá doanh nghiệp thành viên Tập đoàn kinh tế, Tổng công ty, công ty con), Giám đốc, Kế toán trưởng doanh nghiệp cổ phần hoá đại diện cho bên giao.
+
+- Chủ tịch Hội đồng quản trị, Giám đốc, Kế toán trưởng và đại diện tổ chức công đoàn công ty cổ phần đại diện cho bên nhận.
+
+- Đại diện của Tổng công ty Đầu tư và kinh doanh vốn nhà nước đối với các doanh nghiệp cổ phần hoá thuộc đối tượng chuyển giao quyền đại diện chủ sở hữu vốn nhà nước cho Tổng công ty Đầu tư và kinh doanh vốn nhà nước.
+
+3. Biên bản bàn giao phải có đầy đủ chữ ký của thành phần bàn giao và phải ghi rõ:
+
+- Tình hình tài sản, tiền vốn, lao động có tại thời điểm bàn giao.
+
+- Quyền lợi và nghĩa vụ công ty cổ phần tiếp tục kế thừa.
+
+- Những tồn tại công ty cổ phần có trách nhiệm tiếp tục giải quyết.
+
+Chương III
+
+XÁC ĐỊNH GIÁ TRỊ DOANH NGHIỆP CỔ PHẦN HÓA
+
+MỤC I. TỔ CHỨC XÁC ĐỊNH GIÁ TRỊ DOANH NGHIỆP
+
+Điều 12. Tư vấn xác định giá trị doanh nghiệp
+
+1. Doanh nghiệp cổ phần hóa có tổng giá trị tài sản theo sổ kế toán từ 30 tỷ đồng trở lên hoặc giá trị vốn nhà nước theo sổ kế toán từ 10 tỷ đồng trở lên phải thuê các tổ chức có chức năng định giá thực hiện tư vấn xác định giá trị doanh nghiệp theo quy định tại Điều 22 Nghị định số 59/2011/NĐ-CP.
+
+2. Tổ chức có chức năng định giá là các công ty kiểm toán, công ty chứng khoán, doanh nghiệp thẩm định giá trong nước và ngoài nước (sau đây viết tắt là tổ chức tư vấn định giá) khi đăng ký cung cấp dịch vụ tư vấn xác định giá trị doanh nghiệp cổ phần hóa, phải có đủ các điều kiện quy định tại khoản 5 Điều 22 Nghị định số 59/2011/NĐ-CP và thuộc danh sách các doanh nghiệp có đủ điều kiện thực hiện chức năng thẩm định giá do Bộ Tài chính thông báo hàng năm.
+
+3. Căn cứ danh sách các tổ chức tư vấn định giá được công bố, cơ quan quyết định cổ phần hoá lựa chọn tổ chức tư vấn định giá và chịu trách nhiệm về việc lựa chọn của mình.
+
+Trường hợp có từ 2 tổ chức tư vấn định giá đăng ký tham gia cung cấp dịch vụ tư vấn định giá xác định giá trị doanh nghiệp trở lên thì cơ quan quyết định cổ phần hoá thực hiện hình thức đầu thầu để lựa chọn tổ chức tư vấn định giá.
+
+4. Căn cứ quyết định lựa chọn tổ chức tư vấn định giá của cơ quan quyết định cổ phần hoá, Giám đốc doanh nghiệp cổ phần hóa ký hợp đồng với tổ chức tư vấn định giá. Hợp đồng tư vấn xác định giá trị doanh nghiệp cần phải thể hiện đầy đủ trách nhiệm của doanh nghiệp cổ phần hoá và trách nhiệm của tổ chức tư vấn định giá và các nội dung sau:
+
+a) Phương pháp định giá mà tổ chức tư vấn sử dụng để xác định giá trị doanh nghiệp.
+
+b) Thời gian hoàn thành: tối đa không quá 60 ngày theo lịch kể từ ngày được cung cấp đầy đủ các thông tin có liên quan đến xác định giá trị doanh nghiệp cổ phần hóa Tập đoàn kinh tế, Tổng công ty, công ty mẹ; không quá 30 ngày đối với các đối tượng còn lại.
+
+Trường hợp doanh nghiệp cổ phần hoá có quy mô lớn và có tính đặc thù (nhiều đầu mối, xử lý tài chính phức tạp...) phải kéo dài thời gian thì phải được sự chấp thuận của cơ quan quyết định cổ phần hoá.
+
+c) Trách nhiệm của doanh nghiệp cổ phần hoá: doanh nghiệp cổ phần hoá có trách nhiệm trong việc thực hiện các công việc có liên quan đến việc định giá như: kiểm kê, phân loại tài sản, xử lý tài chính, lập phương án sản xuất kinh doanh, cung cấp tài liệu có liên quan và chịu trách nhiệm trước pháp luật về tính chính xác, hợp pháp của các tài liệu đã cung cấp.
+
+d) Trách nhiệm của tổ chức tư vấn định giá: tổ chức tư vấn định giá có trách nhiệm lựa chọn các phương pháp xác định giá trị doanh nghiệp thích hợp để định giá, thực hiện đúng các quy định xác định giá trị doanh nghiệp; giải thích rõ các trường hợp giá trị tài sản xác định lại thấp hơn giá trị tài sản ghi trên sổ kế toán và giải trình các vấn đề khác liên quan đến việc xác định giá trị doanh nghiệp theo yêu cầu của cơ quan có thẩm quyền; hoàn thành đúng thời hạn theo hợp đồng đã ký; chịu trách nhiệm về kết quả xác định giá trị doanh nghiệp.
+
+Trường hợp kết quả xác định giá trị doanh nghiệp không đảm bảo đúng quy định của Nhà nước thì cơ quan quyết định cổ phần hoá có văn bản thông báo từ chối không thanh toán phí thực hiện dịch vụ và bị xem xét loại ra khỏi danh sách các tổ chức đủ điều kiện tham gia tư vấn định giá. Nếu gây tổn thất cho Nhà nước thì tổ chức tư vấn định giá phải bồi thường theo quy định của pháp luật.
+
+đ) Chi phí tư vấn định giá và thanh toán, quyết toán:
+
+Chi phí tư vấn định giá do doanh nghiệp cổ phần hóa và tổ chức tư vấn thoả thuận theo kết quả đầu thầu. Trường hợp không đấu thầu, Ban chỉ đạo cổ phần hoá thương thảo với tổ chức tư vấn định giá về chi phí và trình cơ quan quyết định cổ phần hoá quyết định. Mức chi phí cổ phần hoá thực hiện theo qui định tại Thông tư số 196/2011/TT-BTC ngày 26/12/2011 của Bộ Tài chính.
+
+Việc thanh toán chi phí tư vấn định giá: Khi có quyết định công bố giá trị doanh nghiệp, doanh nghiệp cổ phần hoá thực hiện thanh toán bằng 80% giá trị ghi trong hợp đồng. Khi có quyết định phê duyệt phương án cổ phần hoá, doanh nghiệp cổ phần hoá thanh toán số tiền còn lại theo hợp đồng cho tổ chức tư vấn định giá.
+
+5. Trong quá trình thực hiện phương án cổ phần hóa, tổ chức tư vấn định giá có trách nhiệm phối hợp với doanh nghiệp để giải trình các nội dung có liên quan đến việc định giá.
+
+6. Doanh nghiệp cổ phần hóa không thuộc đối tượng phải thuê tổ chức tư vấn định giá theo quy định tại khoản 1 Điều 22 Nghị định số 59/2011/NĐ-CP thì doanh nghiệp tự xác định giá trị doanh nghiệp và báo cáo cơ quan có thẩm quyền quyết định giá trị doanh nghiệp. Trường hợp doanh nghiệp này thuê tổ chức tư vấn định giá xác định giá trị doanh nghiệp thì doanh nghiệp tự lựa chọn tổ chức tư vấn định giá mà không phải tổ chức đấu thầu. Các quy định khác đối với tổ chức tư vấn định giá và doanh nghiệp cổ phần hoá trong việc thực hiện thuê tư vấn định giá xác định giá trị doanh nghiệp thực hiện theo quy định tại điều này.
+
+Điều 13. Các phương pháp áp dụng để xác định giá trị doanh nghiệp
+
+Tổ chức tư vấn định giá lựa chọn phương pháp xác định giá trị doanh nghiệp:
+
+1. Phương pháp tài sản: là phương pháp xác định giá trị doanh nghiệp trên cơ sở giá trị thực tế của toàn bộ tài sản hữu hình, vô hình của doanh nghiệp tại thời điểm xác định giá trị doanh nghiệp.
+
+Căn cứ để xác định giá trị doanh nghiệp theo phương pháp tài sản theo qui định tại Điều 30 Nghị định số 59/2011/NĐ-CP gồm:
+
+- Báo cáo tài chính, số liệu theo sổ kế toán của doanh nghiệp tại thời điểm xác định giá trị doanh nghiệp.
+
+- Tài liệu kiểm kê, phân loại và đánh giá chất lượng tài sản của doanh nghiệp tại thời điểm xác định giá trị doanh nghiệp.
+
+- Giá thị trường của tài sản tại thời điểm tổ chức định giá.
+
+- Giá trị quyền sử dụng đất được giao, trị giá tiền thuê đất xác định lại trong trường hợp doanh nghiệp đã trả tiền một lần cho cả thời hạn thuê đất và giá trị lợi thế kinh doanh của doanh nghiệp.
+
+2. Phương pháp dòng tiền chiết khấu là phương pháp xác định giá trị doanh nghiệp trên cơ sở khả năng sinh lời của doanh nghiệp trong tương lai, không phụ thuộc vào giá trị tài sản của doanh nghiệp.
+
+Căn cứ để xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu theo qui định tại Điều 35 Nghị định số 59/2011/NĐ-CP gồm:
+
+- Báo cáo tài chính của doanh nghiệp trong 05 năm liền kề, trước thời điểm xác định giá trị doanh nghiệp.
+
+- Phương án hoạt động sản xuất, kinh doanh của doanh nghiệp trong 03 đến 05 năm sau khi chuyển thành công ty cổ phần.
+
+- Lãi suất trái phiếu Chính phủ kỳ hạn 05 năm ở thời điểm gần nhất, trước thời điểm tổ chức thực hiện xác định giá trị doanh nghiệp và hệ số chiết khấu dòng tiền của doanh nghiệp được định giá.
+
+- Giá trị quyền sử dụng đất được giao, trị giá tiền thuê đất xác định lại trong trường hợp doanh nghiệp đã trả tiền một lần cho cả thời hạn thuê đất.
+
+3. Tổ chức tư vấn định giá được lựa chọn các phương pháp khác (ngoài hai phương pháp trên) để xác định giá trị doanh nghiệp. Các phương pháp khác phải đảm bảo tính khoa học, phản ảnh đúng giá trị doanh nghiệp, được quốc tế áp dụng rộng rãi và dễ hiểu để áp dụng trong tính toán xác định giá trị doanh nghiệp .
+
+Điều 14. Kiểm toán nhà nước đối với doanh nghiệp cổ phần hóa
+
+Đối với doanh nghiệp cổ phần hóa thuộc đối tượng phải thực hiện kiểm toán nhà nước theo quy định tại Điều 27 Nghị định số 59/2011/NĐ-CP:
+
+1. Căn cứ quyết định phê duyệt phương án sắp xếp, đổi mới doanh nghiệp đã được Thủ tướng Chính phủ phê duyệt, cơ quan quyết định cổ phần hóa doanh nghiệp gửi danh sách thông báo thời gian (lộ trình) thực hiện cổ phần hóa các doanh nghiệp đến cơ quan Kiểm toán Nhà nước để cơ quan Kiểm toán Nhà nước có chương trình, kế hoạch kiểm toán kết quả xác định giá trị doanh nghiệp của tổ chức tư vấn định giá và xử lý các ván đề tài chính trước khi chính thức công bố giá trị doanh nghiệp cổ phần hoá.
+
+2. Sau khi tổ chức tư vấn định giá đã hoàn thiện hồ sơ kết quả xác định giá trị doanh nghiệp theo quy định, cơ quan quyết định cổ phần hóa có văn bản gửi cơ quan Kiểm toán Nhà nước kèm theo hồ sơ xác định giá trị doanh nghiệp cổ phần hóa để cơ quan Kiểm toán nhà nước thực hiện kiểm toán kết quả xác định giá trị doanh nghiệp của tổ chức tư vấn định giá.
+
+Ban chỉ đạo cổ phần hóa, doanh nghiệp cổ phần hoá và tổ chức tư vấn định giá có trách nhiệm cung cấp tài liệu và giải trình các nội dung có liên quan đến việc xử lý tài chính, xác định giá trị doanh nghiệp của tổ chức định giá theo yếu cầu của Kiểm toán nhà nước.
+
+3. Trong thời gian 15 ngày kể từ ngày nhận được đề nghị của cơ quan có thẩm quyền quyết định giá trị doanh nghiệp cổ phần hoá, cơ quan Kiểm toán Nhà nước có trách nhiệm tổ chức thực hiện kiểm toán kết quả tư vấn định giá và xử lý tài chính doanh nghiệp cổ phần hóa. Thời gian hoàn thành, công bố kết quả kiểm toán không quá 60 ngày kể từ ngày tiến hành kiểm toán. Kiểm toán Nhà nước chịu trách nhiệm về kết quả kiểm toán theo quy định của pháp luật.
+
+Trường hợp phải kéo dài thời gian kiểm toán kết quả xác định giá trị doanh nghiệp của tổ chức tư vấn định giá theo quy định tại Điều 27 Nghị định số 59/2011/NĐ-CP thì cơ quan Kiểm toán Nhà nước có văn bản gửi cơ quan có thẩm quyền quyết định công bố giá trị doanh nghiệp để phối hợp xử lý đảm bảo thời gian công bố giá trị doanh nghiệp theo quy định tại Điều 15 của Thông tư này.
+
+4. Việc thực hiện kiểm toán kết quả xác định giá trị doanh nghiệp của tổ chức tư vấn định giá của cơ quan Kiểm toán nhà nước đối với Công ty mẹ thuộc Tập đoàn kinh tế, Tổng công ty nhà nước và các doanh nghiệp khác (kể cả công ty trách nhiệm hữu hạn một thành viên do doanh nghiệp cổ phần hoá làm chủ sở hữu) theo yêu cầu của Thủ tướng Chính phủ.
+
+Điều 15. Công bố giá trị doanh nghiệp
+
+1. Tổ chức tư vấn xác định giá trị doanh nghiệp cùng với doanh nghiệp cổ phần hoá lập hồ sơ xác định giá trị doanh nghiệp, bao gồm:
+
+a) Báo cáo tài chính của doanh nghiệp cổ phần hóa lập tại thời điểm xác định giá trị doanh nghiệp.
+
+Doanh nghiệp cổ phần hóa có trách nhiệm thực hiện kiểm toán báo cáo tài chính hàng năm theo chế độ Nhà nước quy định để sử dụng khi xác định giá trị doanh nghiệp. Trường hợp thời điểm xác định giá trị doanh nghiệp không trùng với thời điểm báo cáo tài chính năm thì doanh nghiệp được sử dụng báo cáo tài chính quý hoặc báo cáo tài chính lập tại thời điểm xác định giá trị doanh nghiệp (theo quy định không phải kiểm toán) để xác định giá trị doanh nghiệp theo quyết định của cơ quan quyết định cổ phần hóa doanh nghiệp.
+
+b) Báo cáo kết quả phân loại tài sản và xử lý tồn tại về tài chính của doanh nghiệp.
+
+c) Biên bản xác định giá trị doanh nghiệp (Mẫu Biên bản theo phụ lục số 1, 1a, 2, 2a kèm theo Thông tư này).
+
+d) Bản sao hồ sơ chi tiết của những vấn đề vướng mắc đề nghị được xử lý khi xác định giá trị doanh nghiệp.
+
+đ) Các tài liệu cần thiết khác theo quy định tại Điều 30, Điều 35 Nghị định số 59/2011/NĐ-CP của Chính phủ (tuỳ theo việc áp dụng các phương pháp khác nhau khi xác định giá trị doanh nghiệp).
+
+2. Quyết định công bố giá trị doanh nghiệp
+
+Việc quyết định công bố giá trị doanh nghiệp cổ phần hóa của cơ quan có thẩm quyền phải được Ban Chỉ đạo cổ phần hóa doanh nghiệp thẩm tra về trình tự, thủ tục, tuân thủ các quy định của pháp luật về xác định giá trị doanh nghiệp theo quy định tại Điều 24 Nghị định số 59/2011/NĐ-CP.
+
+a) Đối với các doanh nghiệp cổ phần hoá khi xác định giá trị doanh nghiệp không thuộc diện phải thực hiện kiểm toán theo quy định tại khoản 1 Điều 27 Nghị định số 59/2011/NĐ-CP, trong thời gian không quá 10 ngày kể từ ngày nhận được báo cáo của Ban chỉ đạo cổ phần hoá và hồ sơ xác định giá trị doanh nghiệp, cơ quan có thẩm quyền quyết định giá trị doanh nghiệp ban hành quyết định công bố giá trị doanh nghiệp cổ phần hoá.
+
+b) Đối với các doanh nghiệp cổ phần hoá khi xác định giá trị doanh nghiệp thuộc diện phải thực hiện kiểm toán theo quy định tại khoản 1 Điều 27 Nghị định số 59/2011/NĐ-CP trong thời gian không quá 10 ngày kể từ ngày nhận được kết quả kiểm toán của Kiểm toán nhà nước, Ban chỉ đạo cổ phần hoá phải báo cáo cơ quan quyết định giá trị doanh nghiệp, nếu thống nhất với kết quả của Kiểm toán nhà nước thì trong thời gian không quá 10 ngày kể từ ngày nhận được báo cáo của Ban chỉ đạo cổ phần hoá, cơ quan quyết định giá trị doanh nghiệp ban hành quyết định công bố giá trị doanh nghiệp cổ phần hoá.
+
+Trường hợp cơ quan có thẩm quyền quyết định giá trị doanh nghiệp cổ phần hóa không thống nhất với kết quả Kiểm toán Nhà nước thì tổ chức trao đổi lại để thống nhất hoặc báo cáo Thủ tướng Chính phủ xem xét, quyết định trước khi công bố giá trị doanh nghiệp theo thẩm quyền.
+
+3. Thời điểm công bố giá trị doanh nghiệp cổ phần hóa của cơ quan có thẩm quyền đảm bảo cách thời điểm xác định giá trị doanh nghiệp tối đa không quá 6 tháng đối với trường hợp xác định giá trị doanh nghiệp theo phương pháp tài sản và không quá 9 tháng đối với trường hợp xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu và các phương pháp khác.
+
+Trường hợp quá thời hạn trên chưa công bố được giá trị của doanh nghiệp cổ phần hoá, cơ quan quyết định cổ phần hoá xem xét, quyết định kéo dài thời gian công bố giá trị doanh nghiệp nhưng phải đảm bảo nguyên tắc việc công bố giá trị doanh nghiệp và việc tổ chức bán cổ phần lần đầu của doanh nghiệp cổ phần hóa cách thời điểm xác định giá trị doanh nghiệp không quá 12 tháng trừ các trường hợp đặc thù theo quyết định của Thủ tướng Chính phủ.
+
+4. Đối với các Tập đoàn kinh tế, Tổng công ty nhà nước và các doanh nghiệp hoạt động trong lĩnh vực đặc thù như: bảo hiểm, ngân hàng, viễn thông, hàng không, khai thác than, dầu khí, khai thác mỏ quý hiếm khác, do Thủ tướng Chính phủ quyết định phê duyệt phương án cổ phần hóa thì Ban chỉ đạo cổ phần hoá gửi báo cáo và hồ sơ xác định giá trị doanh nghiệp về Bộ quản lý ngành, Uỷ ban nhân dân các tỉnh, thành phố trực thuộc Trung ương để quyết định công bố giá trị doanh nghiệp, đồng thời gửi Bộ Tài chính để thực hiện giám sát.
+
+5. Hội đồng thành viên các công ty trách nhiệm hữu hạn một thành viên do Nhà nước nắm giữ 100% vốn điều lệ là công ty mẹ của Tập đoàn kinh tế; Tổng công ty đặc biệt do Thủ tướng Chính phủ quyết định thành lập được Thủ tướng Chính phủ ủy quyền quyết định công bố giá trị doanh nghiệp, quyết định phê duyệt phương án cổ phần hóa các doanh nghiệp thành viên. Sau khi quyết định, Hội đồng thành viên các Tập đoàn kinh tế, Tổng công ty đặc biệt báo cáo Ban Chỉ đạo đổi mới và phát triển doanh nghiệp Trung ương và Bộ Tài chính để kiểm tra, giám sát bảo đảm đúng quy định của pháp luật.
+
+Mẫu quyết định công bố giá trị doanh nghiệp theo Phụ lục số 04 kèm theo Thông tư này.
+
+Điều 16. Điều chỉnh giá trị doanh nghiệp
+
+1. Doanh nghiệp cổ phần hoá phải điều chỉnh giá trị doanh nghiệp đã công bố theo quy định tại Điều 26 Nghị định số 59/2011/NĐ-CP.
+
+2. Trách nhiệm của của doanh nghiệp cổ phần hoá và cơ quan có thẩm quyền quyết định cổ phần hoá khi điều chỉnh giá trị doanh nghiệp:
+
+a) Trường hợp do nguyên nhân khách quan làm ảnh hưởng đến giá trị doanh nghiệp, doanh nghiệp cổ phần hoá phải chủ động tổ chức kiểm kê, xác định mức độ tổn thất và kịp thời báo cáo bằng văn bản với cơ quan có thẩm quyền quyết định cổ phần hoá để xem xét, quyết định điều chỉnh lại giá trị doanh nghiệp.
+
+Trong thời hạn 15 ngày kể từ ngày nhận được báo cáo của doanh nghiệp cổ phần hoá, cơ quan có thẩm quyền quyết định cổ phần hoá có trách nhiệm tổ chức kiểm tra, xác định lại giá trị doanh nghiệp cổ phần hoá và chỉ đạo Ban chỉ đạo cổ phần hoá phối hợp với doanh nghiệp điều chỉnh lại phương án cổ phần hoá.
+
+b) Trường hợp sau 12 tháng kể từ thời điểm xác định giá trị doanh nghiệp mà doanh nghiệp chưa thực hiện việc bán cổ phần, cơ quan quyết định cổ phần hoá phải yêu cầu doanh nghiệp đình chỉ các bước triển khai phương án cổ phần hoá được duyệt, làm rõ nguyên nhân, xử lý trách nhiệm đối với tập thể và cá nhân có liên quan. Đồng thời chỉ đạo Ban chỉ đạo cổ phần hoá tổ chức triển khai xác định lại giá trị doanh nghiệp và điều chỉnh phương án cổ phần hoá (nếu cần), chi phí cho việc xác định lại giá trị doanh nghiệp và điều chỉnh phương án cổ phần hoá (sau khi trừ đi các khoản bồi thường của cá nhân có liên quan) được trừ vào tiền thu từ cổ phần hoá doanh nghiệp.
+
+MỤC II. XÁC ĐỊNH GIÁ TRỊ DOANH NGHIỆP CỔ PHẦN HÓA THEO PHƯƠNG PHÁP TÀI SẢN
+
+Điều 17. Giá trị thực tế doanh nghiệp cổ phần hoá
+
+1. Giá trị doanh nghiệp theo sổ kế toán là tổng giá trị tài sản thể hiện trong Bảng cân đối kế toán của doanh nghiệp.
+
+2. Giá trị thực tế của doanh nghiệp cổ phần hóa là giá trị của toàn bộ tài sản hiện có của doanh nghiệp tại thời điểm cổ phần hóa có tính đến khả năng sinh lời của doanh nghiệp mà người mua, người bán cổ phần đều chấp nhận được.
+
+3. Giá trị thực tế của doanh nghiệp cổ phần hóa không bao gồm các khoản không tính vào giá trị doanh nghiệp để cổ phần hóa do người có thẩm quyền quyết định giá trị doanh nghiệp xem xét quyết định và chịu trách nhiệm trước pháp luật về quyết định của mình theo quy định tại Điều 29 Nghị định số 59/2011/NĐ-CP.
+
+4. Giá trị thực tế của doanh nghiệp cổ phần hóa bao gồm giá trị quyền sử dụng đất theo qui định tại Điều 31 và giá trị lợi thế kinh doanh theo quy định tại Điều 32 của của Nghị định số 59/2011/NĐ-CP.
+
+5. Đối với các tổ chức tài chính, tín dụng khi xác định giá trị doanh nghiệp theo phương pháp tài sản được sử dụng kết quả kiểm toán báo cáo tài chính để xác định tài sản vốn bằng tiền, các khoản công nợ nhưng phải thực hiện kiểm kê, đánh giá đối với tài sản cố định, các khoản đầu tư dài hạn, chi phí dở dang liên quan đến chi phí đền bù, giải tỏa, san lấp mặt bằng và giá trị quyền sử dụng đất theo chế độ Nhà nước quy định.
+
+Điều 18. Xác định giá trị thực tế các loại tài sản của doanh nghiệp
+
+Giá trị thực tế tài sản được xác định bằng đồng Việt Nam. Tài sản đã hạch toán bằng ngoại tệ được quy đổi thành đồng Việt Nam theo tỷ giá giao dịch bình quân trên thị trường ngoại tệ liên ngân hàng do Ngân hàng Nhà nước công bố tại thời điểm xác định giá trị doanh nghiệp.
+
+1. Đối với tài sản là hiện vật:
+
+1.1. Chỉ đánh giá lại những tài sản mà công ty cổ phần tiếp tục sử dụng.
+
+1.2. Giá trị thực tế của tài sản bằng (=) Nguyên giá tính theo giá thị trường tại thời điểm tổ chức định giá nhân (x) Chất lượng còn lại của tài sản tại thời điểm định giá.
+
+Trong đó:
+
+a) Giá thị trường là:
+
+- Giá tài sản mới cùng loại đang mua, bán trên thị trường bao gồm cả chi phí vận chuyển lắp đặt (nếu có). Nếu là tài sản đặc thù không có trên thị trường thì giá mua tài sản được tính theo giá mua mới của tài sản tương đương, cùng nước sản xuất, có cùng công suất hoặc tính năng tương đương. Trường hợp không có tài sản tương đương thì tính theo giá tài sản ghi trên sổ kế toán.
+
+- Đơn giá xây dựng cơ bản, suất đầu tư do cơ quan có thẩm quyền quy định tại thời điểm gần nhất với thời điểm định giá đối với tài sản là sản phẩm xây dựng cơ bản. Trường hợp chưa có quy định thì tính theo giá sổ sách, có xét thêm yếu tố trượt giá trong xây dựng cơ bản.
+
+Riêng đối với các công trình mới hoàn thành đầu tư xây dựng trong 03 năm trước khi xác định giá trị doanh nghiệp: sử dụng giá trị quyết toán công trình đã được cơ quan có thẩm quyền phê duyệt. Trường hợp cá biệt, công trình chưa được cơ quan có thẩm quyền phê duyệt nhưng đã đưa vào sử dụng thì tạm tính theo giá ghi trên sổ kế toán.
+
+b) Chất lượng của tài sản được xác định bằng tỷ lệ phần trăm so với chất lượng của tài sản cùng loại mua sắm mới hoặc đầu tư xây dựng mới, phù hợp với các quy định của Nhà nước về điều kiện an toàn trong sử dụng, vận hành tài sản; đảm bảo chất lượng sản phẩm sản xuất; vệ sinh môi trường theo hướng dẫn của các Bộ quản lý ngành kinh tế kỹ thuật. Nếu chưa có quy định của Nhà nước thì chất lượng tài sản là máy móc thiết bị, phương tiện vận tải được đánh giá lại không thấp hơn 20% so với chất lượng của tài sản cùng loại mua sắm mới; của nhà xưởng, vật kiến trúc không thấp hơn 30% so với chất lượng của tài sản cùng loại đầu tư xây dựng mới.
+
+1.3. Tài sản cố định đã khấu hao thu hồi đủ vốn; công cụ lao động, dụng cụ quản lý đã phân bổ hết giá trị vào chi phí kinh doanh nhưng công ty cổ phần tiếp tục sử dụng phải đánh giá lại để tính vào giá trị doanh nghiệp theo nguyên tắc không thấp hơn 20% giá trị tài sản, công cụ, dụng cụ mua mới.
+
+1.4. Đối với doanh nghiệp cổ phần hoá có tài sản hiện vật là vườn cây cao su, khi xác định giá trị doanh nghiệp cổ phần hoá thì giá trị vườn cây cao su được xác định theo qui định tại Thông tư số 132/2011/TT-BTC ngày 28/9/2011 của Bộ Tài chính.
+
+2. Tài sản bằng tiền gồm tiền mặt, tiền gửi và các giấy tờ có giá (tín phiếu, trái phiếu,...) của doanh nghiệp được xác định như sau:
+
+a) Tiền mặt được xác định theo biên bản kiểm quỹ.
+
+b) Tiền gửi được xác định theo số dư đã đối chiếu xác nhận với ngân hàng nơi doanh nghiệp mở tài khoản.
+
+c) Các giấy tờ có giá được xác định theo giá giao dịch trên thị trường. Nếu không có giao dịch thì xác định theo mệnh giá của giấy tờ đó.
+
+3. Các khoản nợ phải thu tính vào giá trị doanh nghiệp được xác định theo số dư thực tế trên sổ kế toán và sau khi đối chiếu xử lý như quy định tại khoản 2 Điều 9 Thông tư này.
+
+4. Các khoản chi phí dở dang về sản xuất kinh doanh, đầu tư xây dựng cơ bản, chi phí dở dang liên quan đến đền bù, giải toả, san lấp mặt bằng và giá trị quyền sử dụng đất được xác định theo thực tế phát sinh hạch toán trên sổ kế toán.
+
+5. Giá trị tài sản ký cược, ký quỹ ngắn hạn và dài hạn được xác định theo số dư thực tế trên sổ kế toán đã được đối chiếu xác nhận.
+
+6. Giá trị tài sản vô hình (nếu có) được xác định theo giá trị còn lại đang hạch toán trên sổ kế toán.
+
+7. Giá trị lợi thế kinh doanh
+
+Giá trị lợi thế kinh doanh tính vào giá trị doanh nghiệp cổ phần hoá theo qui định tại Điều 32 Nghị định số 59/2011/NĐ-CP gồm giá trị thương hiệu, tiềm năng phát triển được xác định như sau:
+
+a) Giá trị lợi thế kinh doanh tính vào giá trị doanh nghiệp cổ phần hóa là giá trị thương hiệu được xác định trên cơ sở các chi phí thực tế cho việc tạo dựng và bảo vệ nhãn hiệu, tên thương mại trong quá trình hoạt động của doanh nghiệp trước thời điểm xác định giá trị doanh nghiệp (bao gồm cả chi phí thành lập doanh nghiệp, chi phí đào tạo nhân viên, chi phí quảng cáo phát sinh trước khi thành lập doanh nghiệp, chi phí quảng cáo, tuyên truyền trong và ngoài nước để quảng bá, giới thiệu sản phẩm, giới thiệu công ty; xây dựng trang web...).
+
+b) Giá trị lợi thế kinh doanh tính vào giá trị doanh nghiệp cổ phần hóa là tiềm năng phát triển của doanh nghiệp được đánh giá trên cơ sở khả năng sinh lời của doanh nghiệp trong tương lai khi so sánh tỷ suất lợi nhuận của doanh nghiệp với lãi suất trái phiếu Chính phủ như sau:
+
+Giá trị lợi thế kinh doanh của doanh nghiệp
+
+	
+
+=
+
+	
+
+Giá trị phần vốn nhà nước theo sổ kế toán tại thời điểm định giá
+
+	
+
+x
+
+	
+
+Tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu bình quân 3 năm trước thời điểm xác định giá trị doanh nghiệp
+
+	
+
+-
+
+	
+
+Lãi suất của trái phiếu Chính phủ có kỳ hạn 5 năm do Bộ Tài chính công bố tại thời điểm gần nhất với thời điểm xác định giá trị doanh nghiệp
+
+Trong đó:
+
+- Giá trị thực tế phần vốn nhà nước theo sổ kế toán tại thời điểm định giá (thời điểm xác định giá trị doanh nghiệp) được xác định bằng giá trị doanh nghiệp theo sổ kế toán (là tổng giá trị tài sản thể hiện trong Bảng cân đối kế toán của doanh nghiệp quy định tại khoản 1 Điều 17 Thông tư này) trừ các khoản nợ phải trả theo sổ kế toán tại thời điểm định giá.
+
+- Vốn chủ sở hữu được xác định bao gồm số dư : Nguồn vốn đầu tư của chủ sở hữu - tài khoản 411; Quỹ đầu tư phát triển - tài khoản 414 và Nguồn vốn đầu tư xây dựng cơ bản - tài khoản 441 theo Quyết định số 15/2006/QĐ-BTC ngày 20/03/2006 của Bộ trưởng Bộ Tài chính về việc Ban hành chế độ kế toán doanh nghiệp. Việc xác định vốn chủ sở hữu của các doanh nghiệp cổ phần hoá là các tổ chức tín dụng theo hướng dẫn của Ngân hàng nhà nước Việt Nam.
+
+- Tỷ suất lợi nhuận sau thuế xác định như sau:
+
+Tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu bình quân 3 năm trước thời điểm xác định giá trị doanh nghiệp
+
+	
+
+=
+
+	
+
+Lợi nhuận sau thuế bình quân 3 năm liền kềt trước thời điểm xác định giá trị doanh nghiệp
+
+	
+
+x
+
+	
+
+100%
+
+
+
+
+Vốn chủ sở hữu theo sổ kế toán bình quân 3 năm liền kề trước thời điểm xác định giá trị doanh nghiệp
+
+8. Giá trị vốn đầu tư dài hạn của doanh nghiệp tại các doanh nghiệp khác được xác định theo quy định tại Điều 33 Nghị định số 59/2011/NĐ-CP. Trong đó:
+
+- Khi xác định giá trị vốn chủ sở hữu của các doanh nghiệp khác để xác định giá trị vốn đầu tư dài hạn của doanh nghiệp cổ phần hóa vào doanh nghiệp khác (không phải là công ty cổ phần) được loại trừ khoản lợi nhuận chưa phân phối ( nếu có) dùng để trích lập các quỹ khen thưởng, phúc lợi, quỹ thưởng ban điều hành, chia lợi nhuận cho thành viên góp vốn (theo nghị quyết của Hội đồng thành viên của doanh nghiệp khác).
+
+- Phần lợi nhuận được chia từ doanh nghiệp khác cho doanh nghiệp cổ phần hóa, doanh nghiệp cổ phần hóa hạch toán vào kết quả sản xuất kinh doanh của doanh nghiệp.
+
+- Trường hợp doanh nghiệp cổ phần hoá có các khoản đầu tư ngắn hạn (các khoản đầu tư có thời hạn dưới một năm) tại doanh nghiệp khác thì việc xác định giá trị khoản đầu tư ngắn hạn của doanh nghiệp cổ phần hoá thực hiện như đối với các khoản đầu tư dài hạn.
+
+9. Giá trị quyền sử dụng đất
+
+Việc xác định giá trị quyền sử dụng đất để tính vào giá trị doanh nghiệp được thực hiện theo quy định tại Điều 31 Nghị định số 59/2011/NĐ-CP, trong đó:
+
+9.1. Trước khi thực hiện xác định giá trị doanh nghiệp, doanh nghiệp cổ phần hóa có trách nhiệm xây dựng phương án sử dụng đất trình cơ quan có thẩm quyền xem xét, quyết định để thực hiện. Phương án sử dụng đất của doanh nghiệp phải bảo đảm phù hợp với quy định về phương án về sắp xếp lại, xử lý nhà, đất theo quyết định của Thủ tướng Chính phủ và phải được gửi đến Ủy ban nhân dân tỉnh, thành phố trực thuộc Trung ương trên địa bàn trước khi thực hiện xác định giá trị doanh nghiệp. Doanh nghiệp được lựa chọn hình thức thuê đất hoặc giao đất theo quy định của Luật Đất đai.
+
+Doanh nghiệp cổ phần hoá có trách nhiệm gửi công văn đề nghị kèm theo phương án sử dụng đất được cấp có thẩm quyền phê duyệt, hồ sơ tài liệu có liên quan về đất đến Sở Tài chính địa phương nơi doanh nghiệp cổ phần hóa có diện tích đất đang sử dụng. Trong thời hạn 30 ngày làm việc kể từ ngày nhận đủ hồ sơ, Sở Tài chính phối hợp với các Sở, ngành có liên quan xác định giá đất để tính thu tiền sử dụng đất trình Ủy ban nhân dân tỉnh, thành phố để quyết định hoặc có ý kiến chính thức đối với diện tích đất doanh nghiệp sẽ tiếp tục sử dụng sau cổ phần hóa và giá đất làm căn cứ để xác định giá trị doanh nghiệp.
+
+9.2. Trường hợp doanh nghiệp lựa chọn hình thức giao đất thì việc xác định giá trị quyền sử dụng đất để tính giá trị doanh nghiệp được thực hiện như sau:
+
+a) Đối với những diện tích đất doanh nghiệp cổ phần hoá đang thực hiện hình thức thuê đất nay chuyển sang hình thức giao đất có thu tiền sử dụng đất nộp ngân sách nhà nước thì phải tính giá trị quyền sử dụng đất vào giá trị doanh nghiệp cổ phần hóa.
+
+Giá đất để xác định giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp cổ phần hóa được thực hiện theo quy định tại điểm a khoản 2 Điều 31 Nghị định số 59/2011/NĐ-CP.
+
+Trường hợp Ủy ban nhân dân tỉnh, thành phố trực thuộc Trung ương chưa có ý kiến chính thức về giá đất quy định tại điểm a khoản 2 Điều 31 Nghị định số 59/2011/NĐ-CP thì cơ quan có thẩm quyền quyết định giá trị doanh nghiệp cổ phần hóa sử dụng giá đất do Ủy ban nhân dân tỉnh, thành phố trực thuộc Trung ương công bố tại thời điểm gần nhất theo quy định của pháp luật về đất đai để xác định giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp cổ phần hóa; đồng thời, cơ quan có thẩm quyền quyết định phương án cổ phần hóa phải chỉ đạo doanh nghiệp công bố công khai trong phương án cổ phần hóa và công bố thông tin khi thực hiện bán cổ phần lần đầu cho các nhà đầu tư biết về việc doanh nghiệp cổ phần hóa nhận giao đất và giá đất áp dụng để tạm tính giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp cổ phần hóa.
+
+Khi thực hiện giao đất, Ủy ban nhân dân tỉnh, thành phố trực thuộc Trung ương thực hiện rà soát, xác định chính thức nghĩa vụ nộp tiền sử dụng đất giao theo giá sát với giá chuyển nhượng quyền sử dụng đất có mục đích sử dụng tương tự thực tế trên thị trường tại thời điểm giao đất. Doanh nghiệp cổ phần hóa có trách nhiệm nộp ngân sách nhà nước toàn bộ khoản tiền này (bao gồm cả chênh lệch với giá tạm tính - nếu có) để được cấp giấy chứng nhận quyền sử dụng đất theo quy định của pháp luật hiện hành về đất đai.
+
+Trường hợp giá đất áp dụng để xác định giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp cổ phần hóa khi thực hiện xác định giá trị doanh nghiệp đã được Ủy ban nhân dân tỉnh, thành phố trực thuộc Trung ương có ý kiến sát với giá chuyển nhượng quyền sử dụng đất thực tế trên thị trường trong điều kiện bình thường, thì khi công ty cổ phần được cấp có thẩm quyền quyết định giao đất và doanh nghiệp làm thủ tục cấp giấy chứng nhận quyền sử dụng đất theo quy định của Luật Đất đai và các văn bản hướng dẫn thi hành Luật Đất đai, công ty cổ phần phải nộp tiền sử dụng đất theo giá đất đã áp dụng để tính giá trị quyền sử dụng đất vào giá trị doanh nghiệp cổ phần hóa (không phải điều chỉnh lại giá đất theo giá thời điểm thực hiện giao đất cho doanh nghiệp).
+
+b) Đối với diện tích đất của những doanh nghiệp cổ phần hoá đã được giao đất và đã nộp tiền sử dụng đất cho Ngân sách nhà nước hoặc nhận chuyển nhượng quyền sử dụng đất hợp pháp từ tổ chức, cá nhân (đã thanh toán tiền nhận chuyển nhượng, đã hoàn thành hoặc chưa hoàn thành thủ tục cấp, cấp đổi giấy chứng nhận quyền sử dụng đất), kể cả diện tích đất đã giao, nhận chuyển nhượng của doanh nghiệp để xây dựng nhà để bán hoặc cho thuê kinh doanh khách sạn, kinh doanh thương mại dịch vụ; xây dựng kết cấu hạ tầng để chuyển nhượng hoặc cho thuê thì phải xác định lại giá trị quyền sử dụng đất theo giá đất quy định tại khoản 2 Điều 31 Nghị định số 59/2011/NĐ-CP, nếu có chênh lệch tăng với giá trị đang hạch toán trên sổ sách kế toán thì tính vào giá trị doanh nghiệp cổ phần hóa và tăng vốn nhà nước tại doanh nghiệp cổ phần hóa.
+
+c) Trường hợp doanh nghiệp cổ phần hoá được giao đất xây dựng nhà, hạ tầng để chuyển nhượng hoặc cho thuê có thực hiện chuyển nhượng một phần diện tích nhà cao tầng cho cơ quan khác làm trụ sở hoặc kinh doanh thì giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp chỉ tính cho phần diện tích nhà, hạ tầng do doanh nghiệp cổ phần hoá sử dụng (là tài sản cố định của doanh nghiệp cổ phần hoá) được xác định như sau:
+
+Giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp
+
+	
+
+=
+
+	
+
+Giá trị quyền sử dụng đất được giao
+
+	
+
+-
+
+	
+
+Giá trị quyền sử dụng đất phân bổ cho diện tích nhà chuyển nhượng
+
+Giá trị quyền sử dụng đất phân bổ cho diện tích nhà chuyển giao được xác định trên cơ sở giá bán của từng tầng hoặc theo hệ số phân bổ nhân (x) với diện tích nhà của từng đối tượng sử dụng như sau:
+
+Hệ số phân bổ được xác định bằng tỷ lệ giữa diện tích đất xây dựng nhà và tổng diện tích nhà của các đối tượng sử dụng.
+
+Trường hợp nhà có tầng hầm thì 50% diện tích tầng hầm được cộng vào tổng diện tích nhà của các đối tượng sử dụng để tính hệ số phân bổ.
+
+d) Trường hợp doanh nghiệp cổ phần hoá được giao đất để thực hiện dự án xây dựng nhà để bán hoặc cho thuê kinh doanh khách sạn, kinh doanh thương mại dịch vụ; xây dựng kết cấu hạ tầng để chuyển nhượng hoặc cho thuê có sử dụng một phần diện tích đất làm các công trình phúc lợi công cộng và đã bàn giao cho địa phương quản lý sử dụng thì giá trị quyền sử dụng đất tính vào giá trị doanh nghiệp cổ phần hoá hoặc tính vào giá bán nhà, cho thuê nhà được xác định theo diện tích đất doanh nghiệp được giao để kinh doanh nhà và hạ tầng (không bao gồm diện tích đất làm các công trình phúc lợi công cộng đã bàn giao cho địa phương).
+
+đ) Trường hợp doanh nghiệp cổ phần hoá được giao đất xây dựng nhà, kết cấu hạ tầng để bán, tiền sử dụng đất phải nộp khi thực hiện giao đất theo quy định của Luật Đất đai và các văn bản hướng dẫn thi hành Luật Đất đai tính vào giá bán nhà, kết cấu hạ tầng cho người mua thì không tính giá trị quyền sử dụng đất vào giá trị doanh nghiệp cổ phần hóa.
+
+e) Trường hợp doanh nghiệp thực hiện chuyển mục đích sử dụng đất đã được giao thì phải nộp thêm khoản tiền chênh lệch giá trị quyền sử dụng đất theo mục đích chuyển đổi theo quy định của pháp luật về đất đai vào ngân sách nhà nước và tính vào giá trị doanh nghiệp cổ phần hóa.
+
+g) Trường hợp giá trị quyền sử dụng đất xác định lại thấp hơn chi phí thực tế về quyền sử dụng đất đang hạch toán trên sổ kế toán thì tính theo giá doanh nghiệp đang hạch toán.
+
+9.3.Trường hợp doanh nghiệp thực hiện hình thức thuê đất:
+
+a) Đối với những diện tích đất thuê theo phương thức trả tiền thuê đất hằng năm thì tiền thuê đất phải nộp hằng năm theo qui định của Luật Đất đai và các văn bản hướng dẫn thi hành Luật Đất đai doanh nghiệp hạch toán vào chi phí sản xuất kinh doanh của doanh nghiệp.
+
+b) Đối với những doanh nghiệp cổ phần hoá đã trả tiền thuê đất một lần cho toàn bộ thời gian thuê đất trước ngày 01/7/2004 (ngày Luật Đất đai năm 2003 có hiệu lực thi hành) thì phải tính lại giá trị tiền thuê đất theo giá thuê đất thời điểm xác định giá trị doanh nghiệp.
+
+Doanh nghiệp cổ phần hoá căn cứ Hợp đồng thuê đất, đơn giá thuê đất và giá đất cho thuê do Uỷ ban nhân dân tỉnh, thành phố nơi doanh nghiệp có diện tích đất thuê quy định để xác định lại giá trị tiền thuê đất của thời gian thuê đất còn lại. Phần chênh lệch tăng do xác định lại tiền thuê đất được tính vào giá trị doanh nghiệp và tăng vốn nhà nước tại doanh nghiệp cổ phần hóa tại thời điểm xác định giá trị doanh nghiệp
+
+Công ty cổ phần có trách nhiệm kế thừa (hoặc ký lại Hợp đồng thuê đất) và sử dụng đất đúng mục đích theo quy định của pháp luật đất đai. Công ty cổ phần không phải nộp tiền thuê đất cho thời gian còn lại của Hợp đồng thuê đất đã trả tiền thuê đất.
+
+c) Đối với những doanh nghiệp cổ phần hoá được nhà nước giao đất có thu tiền sử dụng đất và đã nộp tiền sử dụng đất vào ngân sách nhà nước nay chuyển sang lựa chọn hình thức thuê đất trả tiền thuê đất hàng năm thì giá trị quyền sử dụng đất đã xác định khi giao đất trước đây không tính vào giá trị doanh nghiệp cổ phần hoá.
+
+Doanh nghiệp cổ phần hóa phải hoàn thành thủ tục chuyển sang thuê đất gửi cơ quan quyết định cổ phần hóa và cơ quan quản lý nhà đất tại địa phương trước khi chính thức chuyển sang công ty cổ phần.
+
+9.4. Doanh nghiệp cổ phần hóa được ưu tiên kế thừa các quyền và lợi ích hợp pháp về sử dụng đất theo quy định của pháp luật về đất đai khi chuyển sang công ty cổ phần theo qui định tại khoản 3 Điều 47 Nghị định số 59/2011/NĐ-CP; những doanh nghiệp cổ phần hoá đã được giao đất và đã nộp tiền sử dụng đất cho ngân sách nhà nước hoặc nhận chuyển nhượng quyền sử dụng đất hợp pháp đã xác định lại giá đất khi xác định giá trị doanh nghiệp theo giá sát với giá chuyển nhượng quyền sử dụng đất có mục đích sử dụng tương tự thực tế trên thị trường, giá trị quyền sử dụng đất tăng do xác định lại giá đất đã được ghi tăng vốn nhà nước tại doanh nghiệp cổ phần hóa, khi làm thủ tục cấp đổi giấy chứng nhận quyền sử dụng đất từ doanh nghiệp cổ phần hóa sang công ty cổ phần, công ty cổ phần không phải nộp tiền sử dụng đất.
+
+10. Khi xác định giá trị doanh nghiệp theo phương pháp tài sản, toàn bộ giá trị cấu thành nên tổng giá trị tài sản doanh nghiệp và được tính vào giá trị thực tế doanh nghiệp cổ phần hoá, thông qua việc mua cổ phần của doanh nghiệp cổ phần hoá chuyển thành tài sản của công ty cổ phần được đầu tư bằng vốn của các cổ đông. Công ty cổ phần thực hiện trích khấu hao tính vào chi phí kinh doanh theo qui định hiện hành (đối với giá trị tài sản tăng thuộc tài sản cố định); các giá trị tài sản tăng khác tính vào trị doanh nghiệp cổ phần hoá: giá trị quyền sử dụng đất, giá trị lợi thế kinh doanh, doanh nghiệp được thực hiện phân bổ dần vào chi phí kinh doanh được trừ khi xác định thu nhập chịu thuế thu nhập doanh nghiệp trong thời hạn không quá 10 năm kể từ khi doanh nghiệp cổ phần hoá chuyển sang công ty cổ phần.
+
+Điều 19. Giá trị thực tế vốn Nhà nước tại doanh nghiệp
+
+1. Giá trị thực tế vốn Nhà nước tại doanh nghiệp bằng giá trị thực tế của doanh nghiệp trừ (-) các khoản nợ thực tế phải trả và số dư nguồn kinh phí sự nghiệp (nếu có). Trong đó, nợ thực tế phải trả là tổng giá trị các khoản nợ phải trả của doanh nghiệp trừ (-) các khoản nợ không phải thanh toán.
+
+2. Khi thực hiện cổ phần hoá công ty mẹ trong Tập đoàn kinh tế, Tổng công ty Nhà nước, công ty mẹ trong tổ hợp Công ty mẹ - Công ty con (sau đây gọi chung là Công ty mẹ) thì:
+
+- Các công ty con do công ty mẹ (doanh nghiệp cổ phần hoá) sở hữu 100% vốn điều lệ, phải tiến hành xác định giá trị doanh nghiệp theo quy định tại thông tư này như đối với doanh nghiệp cổ phần hóa, để xác định giá trị thực tế phần vốn của công ty mẹ tại công ty con.
+
+- Giá trị thực tế doanh nghiệp cổ phần hoá (công ty mẹ) là giá trị doanh nghiệp công ty mẹ và giá trị doanh nghiệp hạch toán phụ thuộc công ty mẹ được xác định theo quy định tại thông tư này.
+
+- Giá trị thực tế vốn nhà nước tại công ty mẹ bằng giá trị thực tế của doanh nghiệp công ty mẹ được xác định như trên trừ các khoản nợ thực tế phải trả và số dư nguồn kinh phí sự nghiệp (nếu có) như quy định chung.
+
+MỤC III. XÁC ĐỊNH GIÁ TRỊ DOANH NGHIỆP CỔ PHẦN HÓA THEO PHƯƠNG PHÁP DÒNG TIỀN CHIẾT KHẤU
+
+Điều 20. Giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu
+
+1. Xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu là phương pháp xác định giá trị doanh nghiệp trên cơ sở khả năng sinh lời của doanh nghiệp cổ phần hoá trong tương lai, không phụ thuộc vào giá trị tài sản của doanh nghiệp.
+
+2. Doanh nghiệp cổ phần hóa xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu là các doanh nghiệp có thời gian hoạt động trước khi xác định giá trị doanh nghiệp tối thiếu là 5 năm, có tỷ suất lợi nhuận sau thuế trên vốn nhà nước bình quân 5 năm liền kề trước khi xác định giá trị doanh nghiệp cổ phần hóa cao hơn lãi suất của trái phiếu Chính phủ có kỳ hạn 5 năm được phát hành tại thời điểm gần nhất với thời điểm xác định giá trị doanh nghiệp.
+
+3. Theo phương pháp này, số liệu về lợi nhuận, vốn nhà nước của doanh nghiệp cổ phần hóa trong năm quá khứ được sử dụng để tính toán khi xác định giá trị doanh nghiệp, căn cứ vào số liệu về lợi nhuận, vốn nhà nước theo quy định tại quy chế tài chính đối với doanh nghiệp cổ phần hóa.
+
+Trường hợp doanh nghiệp cổ phần hóa có đầu tư vốn vào doanh nghiệp khác thì lợi nhuận do việc đầu tư vốn vào doanh nghiệp khác mang lại là căn cứ để xác định giá trị doanh nghiệp cổ phần hoá.
+
+4. Theo phương pháp dòng tiền chiết khấu, việc xác định số liệu lợi nhuận sau thuế các năm trong tương lai và sử dụng số liệu này để tính toán các chỉ tiêu ( tỷ suất lợi nhuận/vốn; tỷ lệ tăng trưởng cổ tức ) làm cơ sở qui đổi giá trị cổ tức, vốn các năm trong tương lai về năm hiện tại ( năm xác định giá trị doanh nghiêp) như sau:
+
+- Căn cứ vào tỷ lệ tăng trưởng bình quân của lợi nhuận sau thuế trong năm quá khứ để xác định lợi nhuận sau thuế của các năm trong tương lai. Trường hợp doanh nghiệp sử dụng số liệu lợi nhuận sau thuế của các năm trong tương lai là lợi nhuận chỉ tiêu kế hoạch thì công ty phải chứng minh được số liệu lợi nhuận chỉ tiêu kế hoạch là khả thi.
+
+- Việc phân phối lợi nhuận sau thuế của các năm trong tương lai được thống nhất theo giả định sử dụng để chia cổ tức là 50% và để bổ sung vốn là 30% ( không phân biệt lợi nhuận các năm trong tương lai khi sử dụng tính toán được xác định theo số liệu lợi nhuận của các năm quá khứ hoặc theo số liệu lợi nhuận chỉ tiêu kế hoạch).
+
+5. Giá trị thực tế của doanh nghiệp bao gồm giá trị thực tế phần vốn nhà nước, nợ phải trả, số dư kinh phí sự nghiệp (nếu có).
+
+Điều 21. Giá trị thực tế phần vốn nhà nước tại doanh nghiệp
+
+Giá trị thực tế phần vốn nhà nước theo phương pháp dòng tiền chiết khấu được xác định theo công thức sau:
+
+Giá trị thực tế phần vốn nhà nước
+
+	
+
+=
+
+	
+
+	
+
++
+
+	
+
+	
+
++
+
+	
+
+Chênh lệch về giá trị quyền sử dụng đất đã được giao, hoặc chênh lệch về tiền thuê đất của số năm thuê đất đã trả tiền còn lại ghi tăng vốn nhà nước
+
+Trong đó:
+
+1. Các chỉ tiêu và xác định các chỉ tiêu
+
+Di
+
+	
+
+: là Giá trị hiện tại của cổ tức năm thứ i
+
+
+
+
+(1+ K)i
+
+
+
+
+ 
+
+	
+
+ 
+
+
+
+
+Pn
+
+	
+
+: là Giá trị hiện tại của phần vốn Nhà nước năm thứ n
+
+
+
+
+(1+ K)n
+
+i : thứ tự các năm kế tiếp kể từ năm xác định giá trị doanh nghiệp (i:1n).
+
+Di : Khoản lợi nhuận sau thuế dùng để chia cổ tức năm thứ i.
+
+n : Là số năm tương lai được lựa chọn (3 - 5 năm).
+
+Pn : Giá trị phần vốn nhà nước năm thứ n và được xác định theo công thức:
+
+Pn
+
+	
+
+=
+
+	
+
+D n+1
+
+
+
+
+K – g
+
+D n+1: Khoản lợi nhuận sau thuế dùng để chia cổ tức dự kiến của năm thứ n+1
+
+K : Tỷ lệ chiết khấu hay tỷ lệ hoàn vốn cần thiết của các nhà đầu tư khi mua cổ phần và được xác định theo công thức:
+
+K = Rf + Rp
+
+Rf : Tỷ suất lợi nhuận thu được từ các khoản đầu tư không rủi ro, chỉ tiêu này được tính bằng lãi suất của trái phiếu Chính phủ có kỳ hạn 5 năm đã phát hành ở thời điểm gần nhất với thời điểm xác định giá trị doanh nghiệp.
+
+Rp : Tỷ lệ phụ phí rủi ro khi đầu tư mua cổ phần của các công ty ở Việt Nam, chỉ tiêu này được xác định theo bảng chỉ số phụ phí rủi ro chứng khoán quốc tế tại niên giám định giá hoặc do các công ty định giá xác định cho từng doanh nghiệp nhưng không vượt quá tỷ suất lợi nhuận thu được từ các khoản đầu tư không rủi ro (Rf).
+
+g: Tỷ lệ tăng trưởng hàng năm của cổ tức và được xác định như sau:
+
+g = b x R
+
+Trong đó: b là tỷ lệ lợi nhuận sau thuế để lại bổ sung vốn.
+
+R là tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu bình quân của các năm tương lai.
+
+2. Chênh lệch về giá trị quyền sử dụng đất được xác định theo quy định tại khoản 9 Điều 18 Thông tư này.
+
+Ví dụ minh họa xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu theo hướng dẫn tại Phụ lục số 3, 3a, 3b kèm theo Thông tư này.
+
+Điều 22. Xác định giá trị thực tế của doanh nghiệp
+
+1. Giá trị thực tế của doanh nghiệp tại thời điểm xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu được xác định như sau:
+
+Giá trị thực tế doanh nghiệp
+
+	
+
+=
+
+	
+
+Giá trị thực tế phần vốn nhà nước
+
+	
+
++
+
+	
+
+Nợ thực tế phải trả
+
+	
+
++
+
+	
+
+Nguồn kinh phí sự nghiệp
+
+Trong đó:
+
+Nợ thực tế phải trả = Tổng nợ phải trả trên sổ kế toán trừ (-) Giá trị các khoản nợ không phải thanh toán cộng (+) Giá trị quyền sử dụng đất phải nộp ngân sách nhà nước của diện tích đất nhận giao, chuyển mục đích sử dụng đất giao xác định theo quy định tại khoản 9 Điều 18 của Thông tư này.
+
+2. Chênh lệch tăng giữa giá trị thực tế phần vốn nhà nước theo phương pháp dòng tiền chiết khấu và giá trị vốn nhà nước theo sổ kế toán tại thời điểm xác định giá trị doanh nghiệp được tính vào giá trị doanh nghiệp cổ phần hóa, thông qua việc mua cổ phần của doanh nghiệp cổ phần hóa chuyển thành tài sản của công ty cổ phần được đầu tư bằng vốn của các cổ đông. Công ty cổ phần được hạch toán phân bổ dần vào chi phí kinh doanh được trừ khi xác định thu nhập chịu thuế thu nhập doanh nghiệp trong thời gian không quá 10 năm kể từ thời điểm doanh nghiệp cổ phần hoá chính thức chuyển sang công ty cổ phần.
+
+MỤC IV. XÁC ĐỊNH GIÁ TRỊ DOANH NGHIỆP CỔ PHẦN HÓA BẰNG CÁC PHƯƠNG PHÁP KHÁC
+
+Điều 23. Xác định giá trị doanh nghiệp bằng phương pháp khác
+
+Ngoài 2 phương pháp xác định giá trị doanh nghiệp nêu tại Mục II, Mục III Chương III của Thông tư này; Tổ chức tư vấn định giá xác định giá trị doanh nghiệp được áp dụng các phương pháp định giá khác để xác định giá trị doanh nghiệp cổ phần hoá. Các phương pháp xác định giá trị doanh nghiệp này phải đảm bảo tính khoa học, phản ảnh thực chất giá trị doanh nghiệp và được quốc tế áp dụng rộng rãi, dễ hiểu dễ sử dụng trong tính toán; thời điểm xác định giá trị doanh nghiệp theo các phương pháp khác phải là thời điểm kết thúc quý hoặc năm gần nhất với thời điểm có quyết định cổ phần hóa.
+
+Điều 24. Lựa chọn, sử dụng kết quả xác định giá trị doanh nghiệp
+
+1. Kết quả xác định giá trị doanh nghiệp theo phương pháp dòng tiền chiết khấu hoặc phương pháp khác phải được so sánh với kết quả xác định giá trị doanh nghiệp theo phương pháp tài sản cùng thời điểm để lựa chọn theo nguyên tắc: Giá trị doanh nghiệp được xác định và công bố không được thấp hơn giá trị doanh nghiệp xác định theo phương pháp tài sản.
+
+2. Hồ sơ và kết quả xác định giá trị doanh nghiệp được xác định và lựa chọn theo các quy định tại Nghị định số 59/2011/NĐ-CP và Thông tư này là căn cứ để cơ quan có thẩm quyền quyết định công bố giá trị doanh nghiệp cổ phần hoá, xác định quy mô vốn điều lệ, cơ cấu cổ phần phát hành lần đầu và giá khởi điểm để thực hiện đấu giá bán cổ phần.
+
+Chương IV
+
+TỔ CHỨC THỰC HIỆN
+
+Điều 25. Tổ chức thực hiện
+
+1. Các doanh nghiệp thực hiện cổ phần hoá đã có quyết định công bố giá trị doanh nghiệp trước ngày 5/9/2011 (ngày Nghị định số 59/2011/NĐ-CP có hiệu lực thi hành) theo quy định tại Nghị định số 109/2007/NĐ-CP ngày 26/6/2007 của Chính phủ và Thông tư số 146/2007/TT-BTC ngày 6/12/2007 của Bộ Tài chính thì không phải tiến hành điều chỉnh lại giá trị doanh nghiệp theo hướng dẫn tại Thông tư này.
+
+2. Các doanh nghiệp thực hiện cổ phần hóa mà phương án cổ phần hoá được cấp có thẩm quyền phê duyệt theo Nghị định số 109/2007/NĐ-CP ngày 26/6/2007 của Chính phủ, đến ngày 5/9/2011 Nghị định số 59/2011/NĐ-CP ngày 18/7/2011 của Chính phủ có hiệu lực thi hành mà chưa được cơ quan có thẩm quyền phê duyệt quyết toán tài chính, xác định giá trị vốn nhà nước thời điểm doanh nghiệp cổ phần hóa chính thức chuyển sang công ty cổ phần thì thực hiện xử lý tài chính đối với khoản đầu tư tài chính và đầu tư chứng khoản từ thời điểm xác định giá trị doanh nghiệp đến thời điểm chuyển sang công ty cổ phần theo quy định tại Điều 10 của Thông tư này.
+
+Điều 26. Hiệu lực thi hành
+
+1. Thông tư này có hiệu lực từ ngày 15 tháng 02 năm 2012 và thay thế các nội dung quy định về xử lý tài chính và xác định giá trị doanh nghiệp cổ phần hóa tại Thông tư số 146/2007/TT-BTC ngày 6/12/2007 của Bộ Tài chính hướng dẫn Nghị định số 109/2007/NĐ-CP ngày 26/6/2007 của Chính phủ về việc chuyển công ty nhà nước thành công ty cổ phần.
+
+2. Trong quá trình thực hiện nếu có vướng mắc, đề nghị cơ quan, doanh nghiệp phản ánh về Bộ Tài chính để nghiên cứu sửa đổi, bổ sung./.

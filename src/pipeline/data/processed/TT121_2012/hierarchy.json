@@ -1,0 +1,918 @@
+{
+  "document": {
+    "id": "TT121_2012",
+    "title": "Thông tư số 121/2012/TT-BTC Quy định về quản trị công ty áp dụng cho các công ty đại chúng",
+    "number": "121/2012/TT-BTC",
+    "doc_type": "Circular",
+    "issued_date": "2001-12-25",
+    "effective_from": "2012-09-17",
+    "status": "Hết hiệu lực toàn bộ"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi điều chỉnh",
+      "content_raw": "Phạm vi điều chỉnh\nThông tư này quy định về quản trị công tyáp dụng cho các công ty đại chúng.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": []
+    },
+    {
+      "number": 2,
+      "title": "Giải thích thuật ngữ",
+      "content_raw": "Giải thích thuật ngữ\nTrong Thông tư này, các từ ngữ dưới đây được hiểu như sau:\n1. Người có liên quan là cá nhân hoặc tổ chức được quy định tại Khoản 34, Điều 6 Luật Chứng khoán.\n2. Thành viên Hội đồng quản trị không điều hành là thành viên Hội đồng quản trị không phải là Giám đốc (Tổng giám đốc), Phó giám đốc (Phó Tổng giám đốc), Kế toán trưởng và những cán bộ quản lý khác được Hội đồng quản trị bổ nhiệm.\n3. Thành viên Hội đồng quản trị độc lập là thành viên Hội đồng quản trị đápứng các điều kiện sau: - Là thành viên Hội đồng quản trị không điều hành và không phải là người có liên quan với Giám đốc (Tổng giám đốc), Phó giám đốc (Phó Tổng giám đốc), Kế toán trưởng và những cán bộ quản lý khác được Hội đồng quản trị bổ nhiệm; - Không phải là thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc), Phó Giám đốc (Phó Tổng giám đốc) của các công ty con, công ty liên kết, công ty do công ty đại chúng nắm quyền kiểm soát; - Không phải là cổ đông lớn hoặc người đại diện của cổ đông lớn hoặc người có liên quan của cổ đông lớn của công ty; - Không làm việc tại các tổ chức cung cấp dịch vụ tư vấn pháp luật, kiểm toán cho công ty trong hai (02) năm gần nhất; - Không phải là đối tác hoặc người liên quan của đối tác có giá trị giao dịch hàng năm với công ty chiếm từ ba mươi phần trăm (30%) trở lên tổng doanh thu hoặc tổng giá trị hàng hoá, dịch vụ mua vào của công ty trong hai (02) năm gần nhất.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Người có liên quan là cá nhân hoặc tổ chức được quy định tại Khoản 34, Điều 6 Luật Chứng khoán.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thành viên Hội đồng quản trị không điều hành là thành viên Hội đồng quản trị không phải là Giám đốc (Tổng giám đốc), Phó giám đốc (Phó Tổng giám đốc), Kế toán trưởng và những cán bộ quản lý khác được Hội đồng quản trị bổ nhiệm.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thành viên Hội đồng quản trị độc lập là thành viên Hội đồng quản trị đápứng các điều kiện sau: - Là thành viên Hội đồng quản trị không điều hành và không phải là người có liên quan với Giám đốc (Tổng giám đốc), Phó giám đốc (Phó Tổng giám đốc), Kế toán trưởng và những cán bộ quản lý khác được Hội đồng quản trị bổ nhiệm; - Không phải là thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc), Phó Giám đốc (Phó Tổng giám đốc) của các công ty con, công ty liên kết, công ty do công ty đại chúng nắm quyền kiểm soát; - Không phải là cổ đông lớn hoặc người đại diện của cổ đông lớn hoặc người có liên quan của cổ đông lớn của công ty; - Không làm việc tại các tổ chức cung cấp dịch vụ tư vấn pháp luật, kiểm toán cho công ty trong hai (02) năm gần nhất; - Không phải là đối tác hoặc người liên quan của đối tác có giá trị giao dịch hàng năm với công ty chiếm từ ba mươi phần trăm (30%) trở lên tổng doanh thu hoặc tổng giá trị hàng hoá, dịch vụ mua vào của công ty trong hai (02) năm gần nhất.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Quyền và nghĩa vụ của cổ đông",
+      "content_raw": "Quyền và nghĩa vụ của cổ đông\n1. Cổ đông có đầy đủ các quyền và nghĩa vụ theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan và Điều lệ công ty, đặc biệt là:\na) Quyền tự do chuyển nhượng cổ phần đã được thanh toán đầy đủ và được ghi trong sổ cổ đông của công ty, trừ một số trường hợp bị hạn chế chuyển nhượng theo quy định của pháp luật, Điều lệ công ty và quyết định của Đại hội đồng cổ đông;\nb) Quyền được đối xử công bằng. Mỗi cổ phần của cùng một loại đều tạo cho cổ đông sở hữu các quyền, nghĩa vụ và lợiích ngang nhau. Trường hợp công ty có các loại cổ phầnưu đãi, các quyền và nghĩa vụ gắn liền với các loại cổ phầnưu đãi phải được công bố đầy đủ cho cổ đông và phải được Đại hội đồng cổ đông thông qua;\nc) Quyền được thông báo đầy đủ thông tin định kỳ và thông tin bất thường về hoạt động của công ty;\nd) Quyền và trách nhiệm tham gia các cuộc họp Đại hội đồng cổ đông và thực hiện quyền biểu quyết trực tiếp hoặc thông qua đại diện đượcủy quyền hoặc thực hiện bỏ phiếu từ xa;\nđ) Quyền đượcưu tiên mua cổ phần mới chào bán tươngứng với tỷ lệ sở hữu cổ phần trong công ty.\n2. Cổ đông có quyền bảo vệ các quyền lợi hợp pháp của mình. Trong trường hợp quyết định của Đại hội đồng cổ đông, quyết định của Hội đồng quản trị vi phạm pháp luật hoặc vi phạm những quyền lợi cơ bản của cổ đông theo quy định của pháp luật, cổ đông có quyền đề nghị hủy quyết định đó theo trình tự, thủ tục pháp luật quy định. Trường hợp các quyết định vi phạm pháp luật gây tổn hại tới công ty, Hội đồng quản trị, Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành phải đền bù cho công ty theo trách nhiệm của mình. Cổ đông có quyền yêu cầu công ty bồi thường tổn thất theo quy định của pháp luật.",
+      "chapter": "II",
+      "chapter_title": "CỔ ĐÔNG VÀ ĐẠI HỘI ĐỒNG CỔ ĐÔNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cổ đông có đầy đủ các quyền và nghĩa vụ theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan và Điều lệ công ty, đặc biệt là:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Quyền tự do chuyển nhượng cổ phần đã được thanh toán đầy đủ và được ghi trong sổ cổ đông của công ty, trừ một số trường hợp bị hạn chế chuyển nhượng theo quy định của pháp luật, Điều lệ công ty và quyết định của Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "b",
+              "content": "Quyền được đối xử công bằng. Mỗi cổ phần của cùng một loại đều tạo cho cổ đông sở hữu các quyền, nghĩa vụ và lợiích ngang nhau. Trường hợp công ty có các loại cổ phầnưu đãi, các quyền và nghĩa vụ gắn liền với các loại cổ phầnưu đãi phải được công bố đầy đủ cho cổ đông và phải được Đại hội đồng cổ đông thông qua;"
+            },
+            {
+              "label": "c",
+              "content": "Quyền được thông báo đầy đủ thông tin định kỳ và thông tin bất thường về hoạt động của công ty;"
+            },
+            {
+              "label": "d",
+              "content": "Quyền và trách nhiệm tham gia các cuộc họp Đại hội đồng cổ đông và thực hiện quyền biểu quyết trực tiếp hoặc thông qua đại diện đượcủy quyền hoặc thực hiện bỏ phiếu từ xa;"
+            },
+            {
+              "label": "đ",
+              "content": "Quyền đượcưu tiên mua cổ phần mới chào bán tươngứng với tỷ lệ sở hữu cổ phần trong công ty."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Cổ đông có quyền bảo vệ các quyền lợi hợp pháp của mình. Trong trường hợp quyết định của Đại hội đồng cổ đông, quyết định của Hội đồng quản trị vi phạm pháp luật hoặc vi phạm những quyền lợi cơ bản của cổ đông theo quy định của pháp luật, cổ đông có quyền đề nghị hủy quyết định đó theo trình tự, thủ tục pháp luật quy định. Trường hợp các quyết định vi phạm pháp luật gây tổn hại tới công ty, Hội đồng quản trị, Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành phải đền bù cho công ty theo trách nhiệm của mình. Cổ đông có quyền yêu cầu công ty bồi thường tổn thất theo quy định của pháp luật.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Trách nhiệm của cổ đông lớn",
+      "content_raw": "Trách nhiệm của cổ đông lớn\n1. Cổ đông lớn không được lợi dụngưu thế của mình gây tổn hại đến các quyền, lợiích của công ty và của các cổ đông khác.\n2. Cổ đông lớn có nghĩa vụ công bố thông tin theo quy định của pháp luật.",
+      "chapter": "II",
+      "chapter_title": "CỔ ĐÔNG VÀ ĐẠI HỘI ĐỒNG CỔ ĐÔNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cổ đông lớn không được lợi dụngưu thế của mình gây tổn hại đến các quyền, lợiích của công ty và của các cổ đông khác.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cổ đông lớn có nghĩa vụ công bố thông tin theo quy định của pháp luật.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Điều lệ công ty",
+      "content_raw": "Điều lệ công ty\n1. Điều lệ công ty không được trái với các quy định tại Luật Doanh nghiệp và các văn bản pháp luật có liên quan.\n2. Công ty đại chúng tham chiếu Điều lệ mẫu tại Phụ lục của Thông tư này để xây dựng Điều lệ công ty.",
+      "chapter": "II",
+      "chapter_title": "CỔ ĐÔNG VÀ ĐẠI HỘI ĐỒNG CỔ ĐÔNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Điều lệ công ty không được trái với các quy định tại Luật Doanh nghiệp và các văn bản pháp luật có liên quan.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng tham chiếu Điều lệ mẫu tại Phụ lục của Thông tư này để xây dựng Điều lệ công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Cuộc họp Đại hội đồng cổ đông thường niên và bất thường",
+      "content_raw": "Cuộc họp Đại hội đồng cổ đông thường niên và bất thường\n1. Công ty đại chúng phải xây dựng và công bố trên trang thông tin điện tử của công ty quy định về trình tự, thủ tục triệu tập và biểu quyết tại Đại hội đồng cổ đông theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan và Điều lệ công ty, gồm các nội dung chính sau:\na) Thông báo về việc chốt danh sách cổ đông có quyền tham dự họp Đại hội đồng cổ đông;\nb) Thông báo triệu tập Đại hội đồng cổ đông;\nc) Cách thức đăng ký tham dự Đại hội đồng cổ đông;\nd) Cách thức bỏ phiếu;\nđ)đ) Cách thức kiểm phiếu, đối với những vấn đề nhạy cảm và nếu cổ đông có yêu cầu, công ty đại chúng phải chỉ định tổ chức độc lập thực hiện việc thu thập và kiểm phiếu;\ne) Thông báo kết quả kiểm phiếu;\ng) Cách thức phản đối quyết định của Đại hội đồng cổ đông;\nh) Lập biên bản Đại hội đồng cổ đông;\ni) Thông báo quyết định Đại hội đồng cổ đông ra công chúng;\nk) Các vấn đề khác.\n2. Công ty đại chúng phải tuân thủ đầy đủ trình tự, thủ tục về triệu tập Đại hội đồng cổ đông theo quy định của pháp luật, Điều lệ công ty và các quy định nội bộ của công ty. Công ty đại chúng phải công bố thông tin về việc chốt danh sách cổ đông có quyền tham dự họp Đại hội đồng cổ đông tối thiểu năm (05) ngày trước ngày chốt danh sách. Công ty đại chúng không được hạn chế cổ đông tham dự Đại hội đồng cổ đông, phải tạo điều kiện cho cổ đông thực hiện việc uỷ quyền đại diện tham gia Đại hội đồng cổ đông hoặc bỏ phiếu bằng thư bảo đảm khi cổ đông có yêu cầu. Công ty đại chúng phải hướng dẫn thủ tụcủy quyền và lập giấyủy quyền cho các cổ đông theo quy định.\n3. Hội đồng quản trị hoặc người triệu tập Đại hội đồng cổ đông sắp xếp chương trình nghị sự, bố trí địa điểm và thời gian hợp lý để thảo luận và biểu quyết từng vấn đề trong chương trình họp Đại hội đồng cổ đông.\n4. Công ty đại chúng phải cố gắng tối đa trong việcáp dụng các công nghệ thông tin hiện đại để cổ đông có thể tham gia vào các cuộc họp Đại hội đồng cổ đông một cách tốt nhất, bao gồm hướng dẫn cổ đông bỏ phiếu từ xa, biểu quyết thông qua họp Đại hội đồng cổ đông trực tuyến.\n5. Hàng năm công ty đại chúng phải tổ chức họp Đại hội đồng cổ đông thường niên theo quy định của Luật Doanh nghiệp. Việc họp Đại hội đồng cổ đông thường niên không được tổ chức dưới hình thức lấyý kiến cổ đông bằng văn bản.\n6. Công ty đại chúng quy định trong Điều lệ công ty hoặc trong các quy định nội bộ các nguyên tắc, nội dung, trình tự, thủ tục lấyý kiến cổ đông bằng văn bản để thông qua quyết định của Đại hội đồng cổ đông. Trường hợp lấyý kiến bằng văn bản, công ty đại chúng phải đảm bảo gửi, công bố đầy đủ tài liệu và đảm bảo thời gian hợp lý cho các cổ đông xem xét tài liệu trước khi gửi phiếu biểu quyết như trường hợp tổ chức họp Đại hội đồng cổ đông.",
+      "chapter": "II",
+      "chapter_title": "CỔ ĐÔNG VÀ ĐẠI HỘI ĐỒNG CỔ ĐÔNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty đại chúng phải xây dựng và công bố trên trang thông tin điện tử của công ty quy định về trình tự, thủ tục triệu tập và biểu quyết tại Đại hội đồng cổ đông theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan và Điều lệ công ty, gồm các nội dung chính sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thông báo về việc chốt danh sách cổ đông có quyền tham dự họp Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "b",
+              "content": "Thông báo triệu tập Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "c",
+              "content": "Cách thức đăng ký tham dự Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "d",
+              "content": "Cách thức bỏ phiếu;"
+            },
+            {
+              "label": "đ",
+              "content": "đ) Cách thức kiểm phiếu, đối với những vấn đề nhạy cảm và nếu cổ đông có yêu cầu, công ty đại chúng phải chỉ định tổ chức độc lập thực hiện việc thu thập và kiểm phiếu;"
+            },
+            {
+              "label": "e",
+              "content": "Thông báo kết quả kiểm phiếu;"
+            },
+            {
+              "label": "g",
+              "content": "Cách thức phản đối quyết định của Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "h",
+              "content": "Lập biên bản Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "i",
+              "content": "Thông báo quyết định Đại hội đồng cổ đông ra công chúng;"
+            },
+            {
+              "label": "k",
+              "content": "Các vấn đề khác."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng phải tuân thủ đầy đủ trình tự, thủ tục về triệu tập Đại hội đồng cổ đông theo quy định của pháp luật, Điều lệ công ty và các quy định nội bộ của công ty. Công ty đại chúng phải công bố thông tin về việc chốt danh sách cổ đông có quyền tham dự họp Đại hội đồng cổ đông tối thiểu năm (05) ngày trước ngày chốt danh sách. Công ty đại chúng không được hạn chế cổ đông tham dự Đại hội đồng cổ đông, phải tạo điều kiện cho cổ đông thực hiện việc uỷ quyền đại diện tham gia Đại hội đồng cổ đông hoặc bỏ phiếu bằng thư bảo đảm khi cổ đông có yêu cầu. Công ty đại chúng phải hướng dẫn thủ tụcủy quyền và lập giấyủy quyền cho các cổ đông theo quy định.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hội đồng quản trị hoặc người triệu tập Đại hội đồng cổ đông sắp xếp chương trình nghị sự, bố trí địa điểm và thời gian hợp lý để thảo luận và biểu quyết từng vấn đề trong chương trình họp Đại hội đồng cổ đông.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Công ty đại chúng phải cố gắng tối đa trong việcáp dụng các công nghệ thông tin hiện đại để cổ đông có thể tham gia vào các cuộc họp Đại hội đồng cổ đông một cách tốt nhất, bao gồm hướng dẫn cổ đông bỏ phiếu từ xa, biểu quyết thông qua họp Đại hội đồng cổ đông trực tuyến.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Hàng năm công ty đại chúng phải tổ chức họp Đại hội đồng cổ đông thường niên theo quy định của Luật Doanh nghiệp. Việc họp Đại hội đồng cổ đông thường niên không được tổ chức dưới hình thức lấyý kiến cổ đông bằng văn bản.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Công ty đại chúng quy định trong Điều lệ công ty hoặc trong các quy định nội bộ các nguyên tắc, nội dung, trình tự, thủ tục lấyý kiến cổ đông bằng văn bản để thông qua quyết định của Đại hội đồng cổ đông. Trường hợp lấyý kiến bằng văn bản, công ty đại chúng phải đảm bảo gửi, công bố đầy đủ tài liệu và đảm bảo thời gian hợp lý cho các cổ đông xem xét tài liệu trước khi gửi phiếu biểu quyết như trường hợp tổ chức họp Đại hội đồng cổ đông.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Báo cáo hoạt động của Hội đồng quản trị tại Đại hội đồng cổ đông thường niên",
+      "content_raw": "Báo cáo hoạt động của Hội đồng quản trị tại Đại hội đồng cổ đông thường niên\nBáo cáo hoạt động của Hội đồng quản trị trình Đại hội đồng cổ đông thường niên tối thiểu phải bao gồm các nội dung sau: - Đánh giá tình hình hoạt động của công ty trong năm tài chính; - Hoạt động, thù lao và chi phí hoạt động của Hội đồng quản trị và từng thành viên Hội đồng quản trị; - Tổng kết các cuộc họp của Hội đồng quản trị và các quyết định của Hội đồng quản trị; - Kết quả giám sát đối với Giám đốc (Tổng giám đốc) điều hành; - Kết quả giám sát đối với các cán bộ quản lý khác; - Các kế hoạch trong tương lai.",
+      "chapter": "II",
+      "chapter_title": "CỔ ĐÔNG VÀ ĐẠI HỘI ĐỒNG CỔ ĐÔNG",
+      "clauses": []
+    },
+    {
+      "number": 8,
+      "title": "Báo cáo hoạt động của Ban kiểm soát tại Đại hội đồng cổ đông thường niên",
+      "content_raw": "Báo cáo hoạt động của Ban kiểm soát tại Đại hội đồng cổ đông thường niên\nBáo cáo hoạt động của Ban kiểm soát trình Đại hội đồng cổ đông thường niên tối thiểu phải bao gồm các nội dung sau: - Hoạt động, thù lao và chi phí hoạt động của Ban kiểm soát và từng thành viên Ban kiểm soát; - Tổng kết các cuộc họp của Ban kiểm soát và các quyết định của Ban kiểm soát; - Kết quả giám sát tình hình hoạt động và tài chính của công ty; - Kết quả giám sát đối với thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác; - Báo cáo đánh giá sự phối hợp hoạt động giữa Ban kiểm soát với Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và cổ đông.",
+      "chapter": "II",
+      "chapter_title": "CỔ ĐÔNG VÀ ĐẠI HỘI ĐỒNG CỔ ĐÔNG",
+      "clauses": []
+    },
+    {
+      "number": 9,
+      "title": "Ứng cử, đề cử thành viên Hội đồng quản trị",
+      "content_raw": "Ứng cử, đề cử thành viên Hội đồng quản trị\n1. Thông tin liên quan đến cácứng viên Hội đồng quản trị (trong trường hợp đã xác định được trước cácứng viên) được công bố tối thiểu bảy (07) ngày trước ngày triệu tập họp Đại hội đồng cổ đông trên trang thông tin điện tử của công ty để cổ đông có thể tìm hiểu về cácứng viên này trước khi bỏ phiếu. Thông tin liên quan đến cácứng viên Hội đồng quản trị được công bố tối thiểu bao gồm: - Họ tên, ngày tháng năm sinh; - Trình độ chuyên môn; - Quá trình công tác; - Tên các công ty màứng viên đang nắm giữ chức vụ thành viên Hội đồng quản trị và các chức danh quản lý khác; - Các lợiích có liên quan tới công ty (nếu có); - Các thông tin khác (nếu có).\n2. Cácứng viên Hội đồng quản trị có cam kết bằng văn bản về tính trung thực, chính xác và hợp lý của các thông tin cá nhân được công bố và phải cam kết thực hiện nhiệm vụ một cách trung thực nếu được bầu làm thành viên Hội đồng quản trị.\n3. Các cổ đông nắm giữ cổ phần có quyền biểu quyết trong thời hạn liên tụcít nhất sáu (06) tháng tính đến thời điểm chốt danh sách cổ đông dự họp có quyền gộp số quyền biểu quyết để đề cử cácứng viên Hội đồng quản trị. Việc đề cửứng viên Hội đồng quản trị mà các cổ đông sau khi gộp số quyền biểu quyết có quyền đề cử phải tuân thủ các quy định của pháp luật và Điều lệ công ty.\n4. Trường hợp số lượng cácứng viên Hội đồng quản trị thông qua đề cử vàứng cử vẫn không đủ số lượng cần thiết, Hội đồng quản trị có thể đề cử thêmứng viên hoặc tổ chức đề cử theo quy định tại Điều lệ và Quy chế nội bộ của công ty. Cơ chế Hội đồng quản trị đương nhiệm đề cửứng viên Hội đồng quản trị được công bố rõ ràng và được Đại hội đồng cổ đông thông qua trước khi tiến hành đề cử.\n5. Công ty đại chúng quy định và hướng dẫn cụ thể cho cổ đông việc bỏ phiếu bầu thành viên Hội đồng quản trị theo phương thức dồn phiếu.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thông tin liên quan đến cácứng viên Hội đồng quản trị (trong trường hợp đã xác định được trước cácứng viên) được công bố tối thiểu bảy (07) ngày trước ngày triệu tập họp Đại hội đồng cổ đông trên trang thông tin điện tử của công ty để cổ đông có thể tìm hiểu về cácứng viên này trước khi bỏ phiếu. Thông tin liên quan đến cácứng viên Hội đồng quản trị được công bố tối thiểu bao gồm: - Họ tên, ngày tháng năm sinh; - Trình độ chuyên môn; - Quá trình công tác; - Tên các công ty màứng viên đang nắm giữ chức vụ thành viên Hội đồng quản trị và các chức danh quản lý khác; - Các lợiích có liên quan tới công ty (nếu có); - Các thông tin khác (nếu có).",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cácứng viên Hội đồng quản trị có cam kết bằng văn bản về tính trung thực, chính xác và hợp lý của các thông tin cá nhân được công bố và phải cam kết thực hiện nhiệm vụ một cách trung thực nếu được bầu làm thành viên Hội đồng quản trị.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Các cổ đông nắm giữ cổ phần có quyền biểu quyết trong thời hạn liên tụcít nhất sáu (06) tháng tính đến thời điểm chốt danh sách cổ đông dự họp có quyền gộp số quyền biểu quyết để đề cử cácứng viên Hội đồng quản trị. Việc đề cửứng viên Hội đồng quản trị mà các cổ đông sau khi gộp số quyền biểu quyết có quyền đề cử phải tuân thủ các quy định của pháp luật và Điều lệ công ty.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp số lượng cácứng viên Hội đồng quản trị thông qua đề cử vàứng cử vẫn không đủ số lượng cần thiết, Hội đồng quản trị có thể đề cử thêmứng viên hoặc tổ chức đề cử theo quy định tại Điều lệ và Quy chế nội bộ của công ty. Cơ chế Hội đồng quản trị đương nhiệm đề cửứng viên Hội đồng quản trị được công bố rõ ràng và được Đại hội đồng cổ đông thông qua trước khi tiến hành đề cử.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Công ty đại chúng quy định và hướng dẫn cụ thể cho cổ đông việc bỏ phiếu bầu thành viên Hội đồng quản trị theo phương thức dồn phiếu.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Tư cách thành viên Hội đồng quản trị",
+      "content_raw": "Tư cách thành viên Hội đồng quản trị\n1. Thành viên Hội đồng quản trị là những người không thuộc đối tượng mà pháp luật và Điều lệ công ty cấm làm thành viên Hội đồng quản trị. Thành viên Hội đồng quản trị có thể không phải là cổ đông của công ty.\n2. Công ty đại chúng cần hạn chế thành viên Hội đồng quản trị kiêm nhiệm các chức danh quản lý trong bộ máy điều hành của công ty để đảm bảo tính độc lập của Hội đồng quản trị.\n3. Chủ tịch Hội đồng quản trị không được kiêm nhiệm chức danh Giám đốc (Tổng giám đốc) điều hành trừ khi việc kiêm nhiệm này được phê chuẩn hàng năm tại Đại hội đồng cổ đông thường niên.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thành viên Hội đồng quản trị là những người không thuộc đối tượng mà pháp luật và Điều lệ công ty cấm làm thành viên Hội đồng quản trị. Thành viên Hội đồng quản trị có thể không phải là cổ đông của công ty.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng cần hạn chế thành viên Hội đồng quản trị kiêm nhiệm các chức danh quản lý trong bộ máy điều hành của công ty để đảm bảo tính độc lập của Hội đồng quản trị.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Chủ tịch Hội đồng quản trị không được kiêm nhiệm chức danh Giám đốc (Tổng giám đốc) điều hành trừ khi việc kiêm nhiệm này được phê chuẩn hàng năm tại Đại hội đồng cổ đông thường niên.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Thành phần Hội đồng quản trị",
+      "content_raw": "Thành phần Hội đồng quản trị\n1. Số lượng thành viên Hội đồng quản trịít nhất là ba (03) người và nhiều nhất là mười một (11) người. Cơ cấu Hội đồng quản trị cần đảm bảo sự cân đối giữa các thành viên có kiến thức và kinh nghiệm về pháp luật, tài chính và lĩnh vực hoạt động kinh doanh của công ty.\n2. Cơ cấu thành viên Hội đồng quản trị cần đảm bảo sự cân đối giữa các thành viên kiêm điều hành và các thành viên không điều hành, trong đó tối thiểu một phần ba (1/3) tổng số thành viên Hội đồng quản trị phải là thành viên Hội đồng quản trị không điều hành.\n3. Trong trường hợp một thành viên bị mất tư cách thành viên theo quy định của pháp luật và Điều lệ công ty, bị cách chức, miễn nhiệm hoặc vì một lý do nào đó không thể tiếp tục làm thành viên Hội đồng quản trị, Hội đồng quản trị có thể bổ nhiệm người khác tạm thời làm thành viên Hội đồng quản trị theo quy định tại Điều lệ công ty. Việc bầu mới thành viên Hội đồng quản trị thay thế phải được thực hiện tại Đại hội đồng cổ đông gần nhất.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Số lượng thành viên Hội đồng quản trịít nhất là ba (03) người và nhiều nhất là mười một (11) người. Cơ cấu Hội đồng quản trị cần đảm bảo sự cân đối giữa các thành viên có kiến thức và kinh nghiệm về pháp luật, tài chính và lĩnh vực hoạt động kinh doanh của công ty.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ cấu thành viên Hội đồng quản trị cần đảm bảo sự cân đối giữa các thành viên kiêm điều hành và các thành viên không điều hành, trong đó tối thiểu một phần ba (1/3) tổng số thành viên Hội đồng quản trị phải là thành viên Hội đồng quản trị không điều hành.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong trường hợp một thành viên bị mất tư cách thành viên theo quy định của pháp luật và Điều lệ công ty, bị cách chức, miễn nhiệm hoặc vì một lý do nào đó không thể tiếp tục làm thành viên Hội đồng quản trị, Hội đồng quản trị có thể bổ nhiệm người khác tạm thời làm thành viên Hội đồng quản trị theo quy định tại Điều lệ công ty. Việc bầu mới thành viên Hội đồng quản trị thay thế phải được thực hiện tại Đại hội đồng cổ đông gần nhất.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Quyền của thành viên Hội đồng quản trị",
+      "content_raw": "Quyền của thành viên Hội đồng quản trị\nThành viên Hội đồng quản trị có đầy đủ các quyền theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan và Điều lệ công ty, đặc biệt là quyền được cung cấp các thông tin, tài liệu về tình hình tài chính, hoạt động kinh doanh của công ty và của các đơn vị trong công ty.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": []
+    },
+    {
+      "number": 13,
+      "title": "Trách nhiệm và nghĩa vụ của thành viên Hội đồng quản trị",
+      "content_raw": "Trách nhiệm và nghĩa vụ của thành viên Hội đồng quản trị\n1. Thành viên Hội đồng quản trị phải tuân thủ đầy đủ trách nhiệm và nghĩa vụ theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan.\n2. Thành viên Hội đồng quản trị có trách nhiệm thực hiện các nhiệm vụ của mình một cách trung thực, cẩn trọng vì quyền lợi tối cao của cổ đông và của công ty.\n3. Thành viên Hội đồng quản trị có trách nhiệm tham dự đầy đủ các cuộc họp của Hội đồng quản trị và cóý kiến rõ ràng về các vấn đề được đưa ra thảo luận.\n4. Thành viên Hội đồng quản trị có trách nhiệm công bố cho công ty các khoản thù lao mà họ nhận được từ các công ty con, công ty liên kết và các tổ chức khác mà họ là người đại diện phần vốn góp của công ty.\n5. Các thành viên Hội đồng quản trị và những người có liên quan khi thực hiện giao dịch cổ phần của công ty phải báo cáoỦy ban Chứng khoán Nhà nước và thực hiện công bố thông tin về việc giao dịch này theo quy định của pháp luật.\n6. Công ty đại chúng có thể mua bảo hiểm trách nhiệm cho các thành viên Hội đồng quản trị sau khi có sự chấp thuận của Đại hội đồng cổ đông. Bảo hiểm này không bao gồm bảo hiểm cho những trách nhiệm của thành viên Hội đồng quản trị liên quan đến việc vi phạm pháp luật và Điều lệ công ty.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thành viên Hội đồng quản trị phải tuân thủ đầy đủ trách nhiệm và nghĩa vụ theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thành viên Hội đồng quản trị có trách nhiệm thực hiện các nhiệm vụ của mình một cách trung thực, cẩn trọng vì quyền lợi tối cao của cổ đông và của công ty.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thành viên Hội đồng quản trị có trách nhiệm tham dự đầy đủ các cuộc họp của Hội đồng quản trị và cóý kiến rõ ràng về các vấn đề được đưa ra thảo luận.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Thành viên Hội đồng quản trị có trách nhiệm công bố cho công ty các khoản thù lao mà họ nhận được từ các công ty con, công ty liên kết và các tổ chức khác mà họ là người đại diện phần vốn góp của công ty.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Các thành viên Hội đồng quản trị và những người có liên quan khi thực hiện giao dịch cổ phần của công ty phải báo cáoỦy ban Chứng khoán Nhà nước và thực hiện công bố thông tin về việc giao dịch này theo quy định của pháp luật.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Công ty đại chúng có thể mua bảo hiểm trách nhiệm cho các thành viên Hội đồng quản trị sau khi có sự chấp thuận của Đại hội đồng cổ đông. Bảo hiểm này không bao gồm bảo hiểm cho những trách nhiệm của thành viên Hội đồng quản trị liên quan đến việc vi phạm pháp luật và Điều lệ công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Trách nhiệm và nghĩa vụ của Hội đồng quản trị",
+      "content_raw": "Trách nhiệm và nghĩa vụ của Hội đồng quản trị\n1. Hội đồng quản trị phải tuân thủ đầy đủ trách nhiệm và nghĩa vụ theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan.\n2. Hội đồng quản trị chịu trách nhiệm trước các cổ đông về hoạt động của công ty.\n3. Hội đồng quản trị chịu trách nhiệm đảm bảo hoạt động của công ty tuân thủ các quy định của pháp luật, Điều lệ và các quy định nội bộ của công ty, đối xử bình đẳng đối với tất cả cổ đông và tôn trọng lợiích của người có quyền lợi liên quan đến công ty.\n4. Hội đồng quản trị xây dựng các quy định về trình tự, thủ tục đề cử, ứng cử, bầu, miễn nhiệm và bãi nhiệm thành viên Hội đồng quản trị và trình tự, thủ tục tổ chức họp Hội đồng quản trị gồm các nội dung chủ yếu sau:\na) Trình tự và thủ tục đề cử, ứng cử, bầu, miễn nhiệm và bãi nhiệm thành viên Hội đồng quản trị: - Tiêu chuẩn thành viên Hội đồng quản trị; - Cách thức đề cử người vàứng cử vào vị trí thành viên Hội đồng quản trị của cổ đông, nhóm cổ đông theo quy định của pháp luật và Điều lệ công ty; - Cách thức bầu thành viên Hội đồng quản trị; - Các trường hợp miễn nhiệm hay bãi nhiệm thành viên Hội đồng quản trị; - Thông báo về bầu, miễn nhiệm, bãi nhiệm thành viên Hội đồng quản trị.\nb) Trình tự, thủ tục tổ chức họp Hội đồng quản trị: - Thông báo họp Hội đồng quản trị (gồm chương trình họp, thời gian, địa điểm, các tài liệu liên quan và các phiếu bầu cho những thành viên Hội đồng quản trị không thể dự họp); - Điều kiện tổ chức họp Hội đồng quản trị; - Cách thức biểu quyết; - Cách thức thông qua nghị quyết của Hội đồng quản trị; - Ghi biên bản họp Hội đồng quản trị; - Thông báo nghị quyết Hội đồng quản trị.\n5. Hội đồng quản trị xây dựng các quy định về trình tự, thủ tục lựa chọn, bổ nhiệm, miễn nhiệm cán bộ quản lý và quy trình, thủ tục phối hợp hoạt động giữa Hội đồng quản trị với Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành, gồm các nội dung chính sau đây:\na) Trình tự, thủ tục lựa chọn, bổ nhiệm, miễn nhiệm cán bộ quản lý cấp cao: - Các tiêu chuẩn để lựa chọn cán bộ quản lý cấp cao; - Việc bổ nhiệm cán bộ quản lý cấp cao; - Ký hợp đồng lao động với cán bộ quản lý cấp cao; - Các trường hợp miễn nhiệm cán bộ quản lý cấp cao; - Thông báo bổ nhiệm, miễn nhiệm cán bộ quản lý cấp cao.\nb) Quy trình, thủ tục phối hợp hoạt động giữa Hội đồng quản trị, Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành: - Thủ tục, trình tự triệu tập, thông báo mời họp, ghi biên bản, thông báo kết quả họp giữa Hội đồng quản trị, Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành; - Thông báo nghị quyết của Hội đồng quản trị cho Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành; - Các trường hợp Giám đốc (Tổng giám đốc) điều hành và Ban kiểm soát đề nghị triệu tập họp Hội đồng quản trị và những vấn đề cần xiný kiến Hội đồng quản trị; - Báo cáo của Giám đốc (Tổng giám đốc) điều hành với Hội đồng quản trị về việc thực hiện nhiệm vụ và quyền hạn được giao; - Kiểm điểm việc thực hiện nghị quyết và các vấn đề uỷ quyền khác của Hội đồng quản trị đối với Giám đốc (Tổng giám đốc) điều hành; - Các vấn đề Giám đốc (Tổng giám đốc) điều hành phải báo cáo, cung cấp thông tin và cách thức thông báo cho Hội đồng quản trị, Ban kiểm soát; - Phối hợp hoạt động kiểm soát, điều hành, giám sát giữa các thành viên Hội đồng quản trị, các thành viên Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành theo các nhiệm vụ cụ thể của các thành viên nêu trên.\n6. Hội đồng quản trị có trách nhiệm xây dựng cơ chế đánh giá hoạt động, khen thưởng và kỷ luật đối với thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác.\n7. Hội đồng quản trị có trách nhiệm báo cáo hoạt động của Hội đồng quản trị tại Đại hội đồng cổ đông theo quy định tại Điều 7 Thông tư này.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hội đồng quản trị phải tuân thủ đầy đủ trách nhiệm và nghĩa vụ theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hội đồng quản trị chịu trách nhiệm trước các cổ đông về hoạt động của công ty.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hội đồng quản trị chịu trách nhiệm đảm bảo hoạt động của công ty tuân thủ các quy định của pháp luật, Điều lệ và các quy định nội bộ của công ty, đối xử bình đẳng đối với tất cả cổ đông và tôn trọng lợiích của người có quyền lợi liên quan đến công ty.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Hội đồng quản trị xây dựng các quy định về trình tự, thủ tục đề cử, ứng cử, bầu, miễn nhiệm và bãi nhiệm thành viên Hội đồng quản trị và trình tự, thủ tục tổ chức họp Hội đồng quản trị gồm các nội dung chủ yếu sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trình tự và thủ tục đề cử, ứng cử, bầu, miễn nhiệm và bãi nhiệm thành viên Hội đồng quản trị: - Tiêu chuẩn thành viên Hội đồng quản trị; - Cách thức đề cử người vàứng cử vào vị trí thành viên Hội đồng quản trị của cổ đông, nhóm cổ đông theo quy định của pháp luật và Điều lệ công ty; - Cách thức bầu thành viên Hội đồng quản trị; - Các trường hợp miễn nhiệm hay bãi nhiệm thành viên Hội đồng quản trị; - Thông báo về bầu, miễn nhiệm, bãi nhiệm thành viên Hội đồng quản trị."
+            },
+            {
+              "label": "b",
+              "content": "Trình tự, thủ tục tổ chức họp Hội đồng quản trị: - Thông báo họp Hội đồng quản trị (gồm chương trình họp, thời gian, địa điểm, các tài liệu liên quan và các phiếu bầu cho những thành viên Hội đồng quản trị không thể dự họp); - Điều kiện tổ chức họp Hội đồng quản trị; - Cách thức biểu quyết; - Cách thức thông qua nghị quyết của Hội đồng quản trị; - Ghi biên bản họp Hội đồng quản trị; - Thông báo nghị quyết Hội đồng quản trị."
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "content": "Hội đồng quản trị xây dựng các quy định về trình tự, thủ tục lựa chọn, bổ nhiệm, miễn nhiệm cán bộ quản lý và quy trình, thủ tục phối hợp hoạt động giữa Hội đồng quản trị với Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành, gồm các nội dung chính sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trình tự, thủ tục lựa chọn, bổ nhiệm, miễn nhiệm cán bộ quản lý cấp cao: - Các tiêu chuẩn để lựa chọn cán bộ quản lý cấp cao; - Việc bổ nhiệm cán bộ quản lý cấp cao; - Ký hợp đồng lao động với cán bộ quản lý cấp cao; - Các trường hợp miễn nhiệm cán bộ quản lý cấp cao; - Thông báo bổ nhiệm, miễn nhiệm cán bộ quản lý cấp cao."
+            },
+            {
+              "label": "b",
+              "content": "Quy trình, thủ tục phối hợp hoạt động giữa Hội đồng quản trị, Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành: - Thủ tục, trình tự triệu tập, thông báo mời họp, ghi biên bản, thông báo kết quả họp giữa Hội đồng quản trị, Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành; - Thông báo nghị quyết của Hội đồng quản trị cho Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành; - Các trường hợp Giám đốc (Tổng giám đốc) điều hành và Ban kiểm soát đề nghị triệu tập họp Hội đồng quản trị và những vấn đề cần xiný kiến Hội đồng quản trị; - Báo cáo của Giám đốc (Tổng giám đốc) điều hành với Hội đồng quản trị về việc thực hiện nhiệm vụ và quyền hạn được giao; - Kiểm điểm việc thực hiện nghị quyết và các vấn đề uỷ quyền khác của Hội đồng quản trị đối với Giám đốc (Tổng giám đốc) điều hành; - Các vấn đề Giám đốc (Tổng giám đốc) điều hành phải báo cáo, cung cấp thông tin và cách thức thông báo cho Hội đồng quản trị, Ban kiểm soát; - Phối hợp hoạt động kiểm soát, điều hành, giám sát giữa các thành viên Hội đồng quản trị, các thành viên Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành theo các nhiệm vụ cụ thể của các thành viên nêu trên."
+            }
+          ]
+        },
+        {
+          "number": 6,
+          "content": "Hội đồng quản trị có trách nhiệm xây dựng cơ chế đánh giá hoạt động, khen thưởng và kỷ luật đối với thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Hội đồng quản trị có trách nhiệm báo cáo hoạt động của Hội đồng quản trị tại Đại hội đồng cổ đông theo quy định tại Điều 7 Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Họp Hội đồng quản trị",
+      "content_raw": "Họp Hội đồng quản trị\n1. Hội đồng quản trị tổ chức họp theo đúng trình tự được quy định tại Điều lệ và Quy chế nội bộ của công ty. Việc tổ chức họp Hội đồng quản trị, chương trình họp và các tài liệu liên quan được thông báo trước cho các thành viên Hội đồng quản trị theo đúng thời hạn quy định của pháp luật và Điều lệ công ty.\n2. Biên bản họp Hội đồng quản trị phải được lập chi tiết và rõ ràng. Thư ký và các thành viên Hội đồng quản trị tham gia vào phiên họp phải ký tên vào các biên bản cuộc họp. Biên bản họp Hội đồng quản trị phải được lưu giữ theo quy định của pháp luật và Điều lệ công ty.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hội đồng quản trị tổ chức họp theo đúng trình tự được quy định tại Điều lệ và Quy chế nội bộ của công ty. Việc tổ chức họp Hội đồng quản trị, chương trình họp và các tài liệu liên quan được thông báo trước cho các thành viên Hội đồng quản trị theo đúng thời hạn quy định của pháp luật và Điều lệ công ty.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Biên bản họp Hội đồng quản trị phải được lập chi tiết và rõ ràng. Thư ký và các thành viên Hội đồng quản trị tham gia vào phiên họp phải ký tên vào các biên bản cuộc họp. Biên bản họp Hội đồng quản trị phải được lưu giữ theo quy định của pháp luật và Điều lệ công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "Thù lao của Hội đồng quản trị",
+      "content_raw": "Thù lao của Hội đồng quản trị\n1. Thù lao của Hội đồng quản trị được Đại hội đồng cổ đông thông qua hàng năm và được công bố theo quy định.\n2. Trường hợp thành viên Hội đồng quản trị kiêm nhiệm chức danh trong bộ máy điều hành của công ty và các công ty con thì thù lao được công bố phải bao gồm các khoản lương, thưởng gắn với chức danh điều hành và các khoản thù lao khác.\n3. Thù lao, các khoản lợiích khác và chi phí do công ty thanh toán, cấp cho từng thành viên Hội đồng quản trị được công bố chi tiết trong Báo cáo thường niên của công ty.",
+      "chapter": "III",
+      "chapter_title": "THÀNH VIÊN HỘI ĐỒNG QUẢN TRỊ VÀ HỘI ĐỒNG QUẢN TRỊ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thù lao của Hội đồng quản trị được Đại hội đồng cổ đông thông qua hàng năm và được công bố theo quy định.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp thành viên Hội đồng quản trị kiêm nhiệm chức danh trong bộ máy điều hành của công ty và các công ty con thì thù lao được công bố phải bao gồm các khoản lương, thưởng gắn với chức danh điều hành và các khoản thù lao khác.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thù lao, các khoản lợiích khác và chi phí do công ty thanh toán, cấp cho từng thành viên Hội đồng quản trị được công bố chi tiết trong Báo cáo thường niên của công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Ứng cử, đề cử thành viên Ban kiểm soát",
+      "content_raw": "Ứng cử, đề cử thành viên Ban kiểm soát\nTrừ trường hợp Điều lệ công ty có quy định khác, việcứng cử, đề cử thành viên Ban kiểm soát được thực hiện tương tự việcứng cử, đề cử thành viên Hội đồng quản trị được quy định tại các Khoản 1, 2, 3 và 5 Điều 9 Thông tư này. Trường hợp số lượng cácứng viên Ban kiểm soát thông qua đề cử vàứng cử không đủ số lượng cần thiết, Ban kiểm soát đương nhiệm có thể đề cử thêmứng viên hoặc tổ chức đề cử theo cơ chế quy định tại Điều lệ công ty. Cơ chế đề cử của Ban kiểm soát đương nhiệm được công bố rõ ràng và được Đại hội đồng cổ đông thông qua trước khi tiến hành đề cử.",
+      "chapter": "IV",
+      "chapter_title": "THÀNH VIÊN BAN KIỂM SOÁT VÀ BAN KIỂM SOÁT",
+      "clauses": []
+    },
+    {
+      "number": 18,
+      "title": "Tư cách thành viên Ban kiểm soát",
+      "content_raw": "Tư cách thành viên Ban kiểm soát\n1. Thành viên Ban kiểm soát là những người không thuộc đối tượng mà pháp luật và Điều lệ công ty cấm làm thành viên Ban kiểm soát. Thành viên Ban kiểm soát phải là người có trình độ chuyên môn và kinh nghiệm. Thành viên Ban kiểm soát có thể không phải là cổ đông của công ty.\n2. Thành viên Ban kiểm soát không phải là người trong bộ phận kế toán, tài chính của công ty và không phải là thành viên hay nhân viên của công ty kiểm toán độc lập đang thực hiện kiểm toán các báo cáo tài chính của công ty.",
+      "chapter": "IV",
+      "chapter_title": "THÀNH VIÊN BAN KIỂM SOÁT VÀ BAN KIỂM SOÁT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thành viên Ban kiểm soát là những người không thuộc đối tượng mà pháp luật và Điều lệ công ty cấm làm thành viên Ban kiểm soát. Thành viên Ban kiểm soát phải là người có trình độ chuyên môn và kinh nghiệm. Thành viên Ban kiểm soát có thể không phải là cổ đông của công ty.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thành viên Ban kiểm soát không phải là người trong bộ phận kế toán, tài chính của công ty và không phải là thành viên hay nhân viên của công ty kiểm toán độc lập đang thực hiện kiểm toán các báo cáo tài chính của công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "Thành phần Ban kiểm soát",
+      "content_raw": "Thành phần Ban kiểm soát\n1. Số lượng thành viên Ban kiểm soátít nhất là ba (03) người và nhiều nhất là năm (05) người. Trong Ban kiểm soát cóít nhất một thành viên là kế toán viên hoặc kiểm toán viên.\n2. Trưởng Ban kiểm soát là người có chuyên môn về kế toán.",
+      "chapter": "IV",
+      "chapter_title": "THÀNH VIÊN BAN KIỂM SOÁT VÀ BAN KIỂM SOÁT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Số lượng thành viên Ban kiểm soátít nhất là ba (03) người và nhiều nhất là năm (05) người. Trong Ban kiểm soát cóít nhất một thành viên là kế toán viên hoặc kiểm toán viên.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trưởng Ban kiểm soát là người có chuyên môn về kế toán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "Quyền tiếp cận thông tin của thành viên Ban kiểm soát",
+      "content_raw": "Quyền tiếp cận thông tin của thành viên Ban kiểm soát\n1. Thành viên Ban kiểm soát có quyền tiếp cận tất cả các thông tin và tài liệu liên quan đến tình hình hoạt động của công ty. Thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và cán bộ quản lý khác có trách nhiệm cung cấp các thông tin theo yêu cầu của các thành viên Ban kiểm soát.\n2. Công ty đại chúng xây dựng cơ chế nhằm hỗ trợ thành viên Ban kiểm soát hoạt động và thực thi nhiệm vụ một cách có hiệu quả theo các quy định của pháp luật và Điều lệ công ty.",
+      "chapter": "IV",
+      "chapter_title": "THÀNH VIÊN BAN KIỂM SOÁT VÀ BAN KIỂM SOÁT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thành viên Ban kiểm soát có quyền tiếp cận tất cả các thông tin và tài liệu liên quan đến tình hình hoạt động của công ty. Thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và cán bộ quản lý khác có trách nhiệm cung cấp các thông tin theo yêu cầu của các thành viên Ban kiểm soát.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng xây dựng cơ chế nhằm hỗ trợ thành viên Ban kiểm soát hoạt động và thực thi nhiệm vụ một cách có hiệu quả theo các quy định của pháp luật và Điều lệ công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "title": "Trách nhiệm và nghĩa vụ của Ban kiểm soát",
+      "content_raw": "Trách nhiệm và nghĩa vụ của Ban kiểm soát\n1. Ban kiểm soát chịu trách nhiệm trước cổ đông của công ty về các hoạt động giám sát của mình. Ban kiểm soát có trách nhiệm giám sát tình hình tài chính công ty, tính hợp pháp trong các hoạt động của thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác, sự phối hợp hoạt động giữa Ban kiểm soát với Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và cổ đông và các nhiệm vụ khác theo quy định của pháp luật và Điều lệ công ty nhằm bảo vệ quyền lợi hợp pháp của công ty và cổ đông.\n2. Ban kiểm soát phải họpít nhất hai (02) lần trong một năm, số lượng thành viên tham dự họpít nhất là hai phần ba (2/3) số thành viên Ban kiểm soát. Biên bản họp Ban kiểm soát được lập chi tiết và rõ ràng. Thư ký và các thành viên Ban kiểm soát tham dự họp phải ký tên vào các biên bản cuộc họp. Các biên bản họp của Ban kiểm soát phải được lưu giữ nhằm xác định trách nhiệm của từng thành viên Ban kiểm soát.\n3. Trong các cuộc họp của Ban kiểm soát, Ban kiểm soát có quyền yêu cầu thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành, thành viên kiểm toán nội bộ (nếu có) và kiểm toán viên độc lập tham dự và trả lời các vấn đề mà các thành viên Ban kiểm soát quan tâm.\n4. Trường hợp Ban kiểm soát phát hiện những hành vi vi phạm pháp luật hoặc vi phạm Điều lệ công ty của các thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác, Ban kiểm soát phải thông báo bằng văn bản với Hội đồng quản trị trong vòng bốn mươi tám (48) giờ, yêu cầu người có hành vi vi phạm chấm dứt vi phạm và có giải pháp khắc phục hậu quả. Sau thời hạn bảy (07) ngày kể từ ngày ra thông báo nêu trên, nếu người có hành vi vi phạm không chấm dứt vi phạm và có giải pháp khắc phục hậu quả, Ban kiểm soát có trách nhiệm báo cáo trực tiếp với Uỷ ban Chứng khoán Nhà nước về vấn đề này.\n5. Ban kiểm soát có quyền lựa chọn và đề nghị Đại hội đồng cổ đông phê chuẩn tổ chức kiểm toán độc lập thực hiện kiểm toán các báo cáo tài chính của công ty đại chúng.\n6. Ban kiểm soát chịu trách nhiệm báo cáo tại Đại hội đồng cổ đông theo quy định tại Điều 8 Thông tư này.",
+      "chapter": "IV",
+      "chapter_title": "THÀNH VIÊN BAN KIỂM SOÁT VÀ BAN KIỂM SOÁT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Ban kiểm soát chịu trách nhiệm trước cổ đông của công ty về các hoạt động giám sát của mình. Ban kiểm soát có trách nhiệm giám sát tình hình tài chính công ty, tính hợp pháp trong các hoạt động của thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác, sự phối hợp hoạt động giữa Ban kiểm soát với Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và cổ đông và các nhiệm vụ khác theo quy định của pháp luật và Điều lệ công ty nhằm bảo vệ quyền lợi hợp pháp của công ty và cổ đông.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Ban kiểm soát phải họpít nhất hai (02) lần trong một năm, số lượng thành viên tham dự họpít nhất là hai phần ba (2/3) số thành viên Ban kiểm soát. Biên bản họp Ban kiểm soát được lập chi tiết và rõ ràng. Thư ký và các thành viên Ban kiểm soát tham dự họp phải ký tên vào các biên bản cuộc họp. Các biên bản họp của Ban kiểm soát phải được lưu giữ nhằm xác định trách nhiệm của từng thành viên Ban kiểm soát.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong các cuộc họp của Ban kiểm soát, Ban kiểm soát có quyền yêu cầu thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành, thành viên kiểm toán nội bộ (nếu có) và kiểm toán viên độc lập tham dự và trả lời các vấn đề mà các thành viên Ban kiểm soát quan tâm.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp Ban kiểm soát phát hiện những hành vi vi phạm pháp luật hoặc vi phạm Điều lệ công ty của các thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác, Ban kiểm soát phải thông báo bằng văn bản với Hội đồng quản trị trong vòng bốn mươi tám (48) giờ, yêu cầu người có hành vi vi phạm chấm dứt vi phạm và có giải pháp khắc phục hậu quả. Sau thời hạn bảy (07) ngày kể từ ngày ra thông báo nêu trên, nếu người có hành vi vi phạm không chấm dứt vi phạm và có giải pháp khắc phục hậu quả, Ban kiểm soát có trách nhiệm báo cáo trực tiếp với Uỷ ban Chứng khoán Nhà nước về vấn đề này.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Ban kiểm soát có quyền lựa chọn và đề nghị Đại hội đồng cổ đông phê chuẩn tổ chức kiểm toán độc lập thực hiện kiểm toán các báo cáo tài chính của công ty đại chúng.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Ban kiểm soát chịu trách nhiệm báo cáo tại Đại hội đồng cổ đông theo quy định tại Điều 8 Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "title": "Thù lao của Ban kiểm soát",
+      "content_raw": "Thù lao của Ban kiểm soát\nHàng năm các thành viên Ban kiểm soát được hưởng thù lao cho việc thực hiện nghĩa vụ của Ban kiểm soát. Thù lao cho các thành viên Ban kiểm soát được Đại hội đồng cổ đông thông qua. Tổng số thù lao, các khoản lợiích khác cũng như chi phí mà công ty đã thanh toán, cấp cho từng thành viên Ban kiểm soát được công bố trong Báo cáo thường niên của công ty và cho các cổ đông.",
+      "chapter": "IV",
+      "chapter_title": "THÀNH VIÊN BAN KIỂM SOÁT VÀ BAN KIỂM SOÁT",
+      "clauses": []
+    },
+    {
+      "number": 23,
+      "title": "Trách nhiệm trung thực và tránh các xung đột về quyền lợi của các thành viên Hội đồng quản trị, Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác",
+      "content_raw": "Trách nhiệm trung thực và tránh các xung đột về quyền lợi của các thành viên Hội đồng quản trị, Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác\n1. Thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác phải công khai các lợiích liên quan theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan.\n2. Thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác và những người liên quan tới các thành viên này không được phép sử dụng những cơ hội kinh doanh có thể mang lại lợiích cho công ty vì mục đích cá nhân; không được sử dụng những thông tin có được nhờ chức vụ của mình để tư lợi cá nhân hay để phục vụ lợiích của tổ chức hoặc cá nhân khác.\n3. Thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành và cán bộ quản lý khác có nghĩa vụ thông báo cho Hội đồng quản trị các giao dịch giữa công ty, công ty con, công ty do công ty đại chúng nắm quyền kiểm soát với chính thành viên đó hoặc với những người có liên quan tới thành viên đó theo quy định của pháp luật. Công ty đại chúng phải thực hiện công bố thông tin về nghị quyết Đại hội đồng cổ đông hoặc nghị quyết Hội đồng quản trị thông qua các giao dịch nêu trên trong thời hạn hai mươi bốn (24) giờ trên trang thông tin điện tử của công ty và báo cáoỦy ban Chứng khoán Nhà nước.\n4. Công ty không được cấp các khoản vay hoặc bảo lãnh cho các thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác và những người có liên quan tới thành viên nêu trên, trừ khi Đại hội đồng cổ đông có quyết định khác.\n5. Thành viên Hội đồng quản trị không được biểu quyết đối với các giao dịch mà thành viên đó hoặc người có liên quan đến thành viên đó tham gia, bao gồm các giao dịch mà lợiích vật chất hay phi vật chất của thành viên Hội đồng quản trị đó chưa được xác định. Các giao dịch nêu trên phải được công bố trong Báo cáo thường niên của công ty.\n6. Các thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác và những người có liên quan tới các thành viên nêu trên không được sử dụng các thông tin chưa được phép công bố của công ty hoặc tiết lộ cho người khác để thực hiện các giao dịch có liên quan.",
+      "chapter": "V",
+      "chapter_title": "NGĂN NGỪA XUNG ĐỘT LỢIÍCH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác phải công khai các lợiích liên quan theo quy định của Luật Doanh nghiệp, các văn bản pháp luật liên quan.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác và những người liên quan tới các thành viên này không được phép sử dụng những cơ hội kinh doanh có thể mang lại lợiích cho công ty vì mục đích cá nhân; không được sử dụng những thông tin có được nhờ chức vụ của mình để tư lợi cá nhân hay để phục vụ lợiích của tổ chức hoặc cá nhân khác.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành và cán bộ quản lý khác có nghĩa vụ thông báo cho Hội đồng quản trị các giao dịch giữa công ty, công ty con, công ty do công ty đại chúng nắm quyền kiểm soát với chính thành viên đó hoặc với những người có liên quan tới thành viên đó theo quy định của pháp luật. Công ty đại chúng phải thực hiện công bố thông tin về nghị quyết Đại hội đồng cổ đông hoặc nghị quyết Hội đồng quản trị thông qua các giao dịch nêu trên trong thời hạn hai mươi bốn (24) giờ trên trang thông tin điện tử của công ty và báo cáoỦy ban Chứng khoán Nhà nước.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Công ty không được cấp các khoản vay hoặc bảo lãnh cho các thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác và những người có liên quan tới thành viên nêu trên, trừ khi Đại hội đồng cổ đông có quyết định khác.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Thành viên Hội đồng quản trị không được biểu quyết đối với các giao dịch mà thành viên đó hoặc người có liên quan đến thành viên đó tham gia, bao gồm các giao dịch mà lợiích vật chất hay phi vật chất của thành viên Hội đồng quản trị đó chưa được xác định. Các giao dịch nêu trên phải được công bố trong Báo cáo thường niên của công ty.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Các thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, cán bộ quản lý khác và những người có liên quan tới các thành viên nêu trên không được sử dụng các thông tin chưa được phép công bố của công ty hoặc tiết lộ cho người khác để thực hiện các giao dịch có liên quan.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "title": "Giao dịch với người có liên quan",
+      "content_raw": "Giao dịch với người có liên quan\n1. Khi tiến hành giao dịch với những người có liên quan, công ty đại chúng phải ký kết hợp đồng bằng văn bản theo nguyên tắc bình đẳng, tự nguyện. Nội dung hợp đồng phải rõ ràng, cụ thể và công bố thông tin cho cổ đông khi có yêu cầu.\n2. Công ty đại chúngáp dụng các biện pháp cần thiết để ngăn ngừa những người có liên quan can thiệp vào hoạt động của công ty và gây tổn hại cho lợiích của công ty thông qua việc kiểm soát các kênh mua, bán hàng hoá của công ty hay lũng đoạn giá cả.\n3. Công ty đại chúngáp dụng các biện pháp cần thiết để ngăn ngừa cổ đông và những người có liên quan tiến hành các giao dịch làm thất thoát vốn, tài sản hoặc các nguồn lực khác của công ty. Công ty đại chúng không được cung cấp các khoản vay hoặc bảo lãnh cho các cổ đông và những người có liên quan.",
+      "chapter": "V",
+      "chapter_title": "NGĂN NGỪA XUNG ĐỘT LỢIÍCH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Khi tiến hành giao dịch với những người có liên quan, công ty đại chúng phải ký kết hợp đồng bằng văn bản theo nguyên tắc bình đẳng, tự nguyện. Nội dung hợp đồng phải rõ ràng, cụ thể và công bố thông tin cho cổ đông khi có yêu cầu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúngáp dụng các biện pháp cần thiết để ngăn ngừa những người có liên quan can thiệp vào hoạt động của công ty và gây tổn hại cho lợiích của công ty thông qua việc kiểm soát các kênh mua, bán hàng hoá của công ty hay lũng đoạn giá cả.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Công ty đại chúngáp dụng các biện pháp cần thiết để ngăn ngừa cổ đông và những người có liên quan tiến hành các giao dịch làm thất thoát vốn, tài sản hoặc các nguồn lực khác của công ty. Công ty đại chúng không được cung cấp các khoản vay hoặc bảo lãnh cho các cổ đông và những người có liên quan.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "title": "Đảm bảo quyền hợp pháp của các bên có quyền lợi liên quan đến công ty",
+      "content_raw": "Đảm bảo quyền hợp pháp của các bên có quyền lợi liên quan đến công ty\n1. Công ty đại chúng phải tôn trọng quyền lợi hợp pháp của các bên có quyền lợi liên quan đến công ty bao gồm ngân hàng, chủ nợ, người lao động, người tiêu dùng, nhà cung cấp, cộng đồng và những người khác có quyền lợi liên quan đến công ty.\n2. Công ty đại chúng cần hợp tác tích cực với những người có quyền lợi liên quan đến công ty thông qua việc:\na) Cung cấp đầy đủ thông tin cần thiết cho ngân hàng và chủ nợ để giúp họ đánh giá về tình hình hoạt động và tài chính của công ty và đưa ra quyết định;\nb) Khuyến khích họ đưa raý kiến về tình hình hoạt động kinh doanh, tình hình tài chính và các quyết định quan trọng liên quan tới lợiích của họ thông qua liên hệ trực tiếp với Hội đồng quản trị, Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành.\n3. Công ty đại chúng phải tuân thủ các quy định về lao động, môi trường, hoạt động có trách nhiệm với cộng đồng và xã hội.",
+      "chapter": "V",
+      "chapter_title": "NGĂN NGỪA XUNG ĐỘT LỢIÍCH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty đại chúng phải tôn trọng quyền lợi hợp pháp của các bên có quyền lợi liên quan đến công ty bao gồm ngân hàng, chủ nợ, người lao động, người tiêu dùng, nhà cung cấp, cộng đồng và những người khác có quyền lợi liên quan đến công ty.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng cần hợp tác tích cực với những người có quyền lợi liên quan đến công ty thông qua việc:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cung cấp đầy đủ thông tin cần thiết cho ngân hàng và chủ nợ để giúp họ đánh giá về tình hình hoạt động và tài chính của công ty và đưa ra quyết định;"
+            },
+            {
+              "label": "b",
+              "content": "Khuyến khích họ đưa raý kiến về tình hình hoạt động kinh doanh, tình hình tài chính và các quyết định quan trọng liên quan tới lợiích của họ thông qua liên hệ trực tiếp với Hội đồng quản trị, Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Công ty đại chúng phải tuân thủ các quy định về lao động, môi trường, hoạt động có trách nhiệm với cộng đồng và xã hội.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "title": "Nghĩa vụ công bố thông tin",
+      "content_raw": "Nghĩa vụ công bố thông tin\n1. Công ty đại chúng có nghĩa vụ công bố đầy đủ, chính xác và kịp thời thông tin định kỳ và bất thường về tình hình hoạt động sản xuất kinh doanh, tài chính và tình hình quản trị công ty cho cổ đông và công chúng. Thông tin và cách thức công bố thông tin được thực hiện theo quy định của pháp luật và Điều lệ công ty. Ngoài ra, công ty đại chúng phải công bố đầy đủ, chính xác và kịp thời các thông tin khác nếu các thông tin đó có khả năngảnh hưởng đến giá chứng khoán vàảnh hưởng đến quyết định của cổ đông và nhà đầu tư.\n2. Việc công bố thông tin được thực hiện theo những phương thức nhằm đảm bảo cổ đông và công chúng đầu tư có thể tiếp cận một cách công bằng. Ngôn từ trong công bố thông tin cần rõ ràng, dễ hiểu và tránh gây hiểu lầm cho cổ đông và công chúng đầu tư.",
+      "chapter": "VI",
+      "chapter_title": "BÁO CÁO VÀ CÔNG BỐ THÔNG TIN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty đại chúng có nghĩa vụ công bố đầy đủ, chính xác và kịp thời thông tin định kỳ và bất thường về tình hình hoạt động sản xuất kinh doanh, tài chính và tình hình quản trị công ty cho cổ đông và công chúng. Thông tin và cách thức công bố thông tin được thực hiện theo quy định của pháp luật và Điều lệ công ty. Ngoài ra, công ty đại chúng phải công bố đầy đủ, chính xác và kịp thời các thông tin khác nếu các thông tin đó có khả năngảnh hưởng đến giá chứng khoán vàảnh hưởng đến quyết định của cổ đông và nhà đầu tư.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Việc công bố thông tin được thực hiện theo những phương thức nhằm đảm bảo cổ đông và công chúng đầu tư có thể tiếp cận một cách công bằng. Ngôn từ trong công bố thông tin cần rõ ràng, dễ hiểu và tránh gây hiểu lầm cho cổ đông và công chúng đầu tư.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "title": "Công bố thông tin về quản trị công ty",
+      "content_raw": "Công bố thông tin về quản trị công ty\n1. Công ty đại chúng phải công bố thông tin về tình hình quản trị công ty tại các kỳ Đại hội đồng cổ đông thường niên và trong Báo cáo thường niên của công ty theo quy định của pháp luật về chứng khoán và thị trường chứng khoán.\n2. Công ty đại chúng có nghĩa vụ báo cáo định kỳ sáu (06) tháng và công bố thông tin về tình hình quản trị công ty theo quy định của pháp luật về chứng khoán và thị trường chứng khoán.",
+      "chapter": "VI",
+      "chapter_title": "BÁO CÁO VÀ CÔNG BỐ THÔNG TIN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty đại chúng phải công bố thông tin về tình hình quản trị công ty tại các kỳ Đại hội đồng cổ đông thường niên và trong Báo cáo thường niên của công ty theo quy định của pháp luật về chứng khoán và thị trường chứng khoán.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng có nghĩa vụ báo cáo định kỳ sáu (06) tháng và công bố thông tin về tình hình quản trị công ty theo quy định của pháp luật về chứng khoán và thị trường chứng khoán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "title": "Trách nhiệm về báo cáo và công bố thông tin của thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành",
+      "content_raw": "Trách nhiệm về báo cáo và công bố thông tin của thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành\nNgoài các trách nhiệm theo quy định tại Điều 23 Thông tư này, thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành có trách nhiệm báo cáo và công bố thông tin về giao dịch trong các trường hợp sau:\n1. Các giao dịch giữa công ty với công ty mà các thành viên nêu trên là thành viên sáng lập hoặc là thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành trong thời gian ba (03) năm trước.\n2. Các giao dịch giữa công ty với công ty trong đó người liên quan của các thành viên nêu trên là thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành hoặc cổ đông lớn.\n3. Các giao dịch có thể mang lại lợiích vật chất hoặc phi vật chất đối với các thành viên nêu trên.",
+      "chapter": "VI",
+      "chapter_title": "BÁO CÁO VÀ CÔNG BỐ THÔNG TIN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các giao dịch giữa công ty với công ty mà các thành viên nêu trên là thành viên sáng lập hoặc là thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành trong thời gian ba (03) năm trước.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Các giao dịch giữa công ty với công ty trong đó người liên quan của các thành viên nêu trên là thành viên Hội đồng quản trị, Giám đốc (Tổng giám đốc) điều hành hoặc cổ đông lớn.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Các giao dịch có thể mang lại lợiích vật chất hoặc phi vật chất đối với các thành viên nêu trên.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "title": "Áp dụng quản trị công ty đối với công ty đại chúng quy mô lớn và công ty niêm yết",
+      "content_raw": "Áp dụng quản trị công ty đối với công ty đại chúng quy mô lớn và công ty niêm yết\n1. Các công ty không đápứng điều kiện là công ty đại chúng quy mô lớn và không phải công ty niêm yết không phảiáp dụng các quy định tại Chương này.\n2. Công ty đại chúng phải báo cáo Uỷ ban Chứng khoán Nhà nước về việc trở thành công ty đại chúng quy mô lớn và công bố thông tin theo quy định.\n3. Công ty đại chúng quy mô lớn phải có kế hoạch cụ thể về việc thực hiện các quy định của Chương này. Công ty đại chúng quy mô lớn phải tuân thủ đầy đủ các quy định của Chương này trong thời hạn không quá một (01) năm kể từ ngày trở thành công ty đại chúng quy mô lớn.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các công ty không đápứng điều kiện là công ty đại chúng quy mô lớn và không phải công ty niêm yết không phảiáp dụng các quy định tại Chương này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Công ty đại chúng phải báo cáo Uỷ ban Chứng khoán Nhà nước về việc trở thành công ty đại chúng quy mô lớn và công bố thông tin theo quy định.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Công ty đại chúng quy mô lớn phải có kế hoạch cụ thể về việc thực hiện các quy định của Chương này. Công ty đại chúng quy mô lớn phải tuân thủ đầy đủ các quy định của Chương này trong thời hạn không quá một (01) năm kể từ ngày trở thành công ty đại chúng quy mô lớn.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "title": "Thành viên Hội đồng quản trị",
+      "content_raw": "Thành viên Hội đồng quản trị\n1. Công ty đại chúng quy mô lớn và công ty niêm yết phải cóít nhất là năm (05) thành viên Hội đồng quản trị và tối đa mười một (11) thành viên Hội đồng quản trị.\n2. Cơ cấu thành viên Hội đồng quản trị cần đảm bảo sự cân đối giữa các thành viên nắm giữ các chức danh điều hành với các thành viên độc lập, trong đó tối thiểu một phần ba (1/3) tổng số thành viên Hội đồng quản trị là thành viên độc lập.\n3. Thành viên Hội đồng quản trị của một công ty không được đồng thời là thành viên Hội đồng quản trị của trên năm (05) công ty khác, trừ trường hợp là thành viên Hội đồng quản trị của các công ty trong cùng tập đoàn hoặc các công ty hoạt động theo nhóm công ty, bao gồm công ty mẹ - công ty con, tập đoàn kinh tế hoặc là người đại diện của công ty quản lý quỹ, công ty đầu tư chứng khoán.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty đại chúng quy mô lớn và công ty niêm yết phải cóít nhất là năm (05) thành viên Hội đồng quản trị và tối đa mười một (11) thành viên Hội đồng quản trị.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ cấu thành viên Hội đồng quản trị cần đảm bảo sự cân đối giữa các thành viên nắm giữ các chức danh điều hành với các thành viên độc lập, trong đó tối thiểu một phần ba (1/3) tổng số thành viên Hội đồng quản trị là thành viên độc lập.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thành viên Hội đồng quản trị của một công ty không được đồng thời là thành viên Hội đồng quản trị của trên năm (05) công ty khác, trừ trường hợp là thành viên Hội đồng quản trị của các công ty trong cùng tập đoàn hoặc các công ty hoạt động theo nhóm công ty, bao gồm công ty mẹ - công ty con, tập đoàn kinh tế hoặc là người đại diện của công ty quản lý quỹ, công ty đầu tư chứng khoán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "title": "Quy chế nội bộ về quản trị công ty",
+      "content_raw": "Quy chế nội bộ về quản trị công ty\n1. Hội đồng quản trị có trách nhiệm xây dựng và ban hành Quy chế nội bộ về quản trị công ty. Quy chế nội bộ về quản trị công ty không được trái với các nguyên tắc và quy định hiện hành về quản trị công ty. Quy chế nội bộ được công bố trên trang thông tin điện tử của công ty. Quy chế nội bộ về quản trị công ty gồm các nội dung chủ yếu sau:\na) Trình tự, thủ tục về triệu tập và biểu quyết tại Đại hội đồng cổ đông;\nb) Trình tự, thủ tục đề cử, ứng cử, bầu, miễn nhiệm và bãi nhiệm thành viên Hội đồng quản trị;\nc) Trình tự, thủ tục tổ chức họp Hội đồng quản trị;\nd) Trình tự, thủ tục lựa chọn, bổ nhiệm, miễn nhiệm cán bộ quản lý;\nđ) Quy trình, thủ tục phối hợp hoạt động giữa Hội đồng quản trị, Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành;\ne) Quy định về đánh giá hàng năm đối với hoạt động, khen thưởng và kỷ luật đối với thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác;\ng) Quy trình, thủ tục về việc thành lập và hoạt động của các tiểu ban thuộc Hội đồng quản trị.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hội đồng quản trị có trách nhiệm xây dựng và ban hành Quy chế nội bộ về quản trị công ty. Quy chế nội bộ về quản trị công ty không được trái với các nguyên tắc và quy định hiện hành về quản trị công ty. Quy chế nội bộ được công bố trên trang thông tin điện tử của công ty. Quy chế nội bộ về quản trị công ty gồm các nội dung chủ yếu sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trình tự, thủ tục về triệu tập và biểu quyết tại Đại hội đồng cổ đông;"
+            },
+            {
+              "label": "b",
+              "content": "Trình tự, thủ tục đề cử, ứng cử, bầu, miễn nhiệm và bãi nhiệm thành viên Hội đồng quản trị;"
+            },
+            {
+              "label": "c",
+              "content": "Trình tự, thủ tục tổ chức họp Hội đồng quản trị;"
+            },
+            {
+              "label": "d",
+              "content": "Trình tự, thủ tục lựa chọn, bổ nhiệm, miễn nhiệm cán bộ quản lý;"
+            },
+            {
+              "label": "đ",
+              "content": "Quy trình, thủ tục phối hợp hoạt động giữa Hội đồng quản trị, Ban kiểm soát và Giám đốc (Tổng giám đốc) điều hành;"
+            },
+            {
+              "label": "e",
+              "content": "Quy định về đánh giá hàng năm đối với hoạt động, khen thưởng và kỷ luật đối với thành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành và các cán bộ quản lý khác;"
+            },
+            {
+              "label": "g",
+              "content": "Quy trình, thủ tục về việc thành lập và hoạt động của các tiểu ban thuộc Hội đồng quản trị."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "title": "Các tiểu ban của Hội đồng quản trị",
+      "content_raw": "Các tiểu ban của Hội đồng quản trị\n1. Hội đồng quản trị cần thành lập các tiểu ban để hỗ trợ hoạt động của Hội đồng quản trị, bao gồm tiểu ban chính sách phát triển, tiểu ban nhân sự, tiểu ban lương thưởng và các tiểu ban đặc biệt khác theo nghị quyết của Đại hội đồng cổ đông.\n2. Tiểu ban nhân sự và tiểu ban lương thưởng phải cóít nhất một (01) thành viên Hội đồng quản trị độc lập làm trưởng ban.\n3. Hội đồng quản trị quy định chi tiết về việc thành lập, trách nhiệm của các tiểu ban và trách nhiệm của từng thành viên.\n4. Trường hợp các công ty không thành lập các tiểu ban thì Hội đồng quản trị cử thành viên Hội đồng quản trị độc lập phụ trách riêng về từng vấn đề như lương thưởng, nhân sự.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hội đồng quản trị cần thành lập các tiểu ban để hỗ trợ hoạt động của Hội đồng quản trị, bao gồm tiểu ban chính sách phát triển, tiểu ban nhân sự, tiểu ban lương thưởng và các tiểu ban đặc biệt khác theo nghị quyết của Đại hội đồng cổ đông.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tiểu ban nhân sự và tiểu ban lương thưởng phải cóít nhất một (01) thành viên Hội đồng quản trị độc lập làm trưởng ban.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hội đồng quản trị quy định chi tiết về việc thành lập, trách nhiệm của các tiểu ban và trách nhiệm của từng thành viên.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp các công ty không thành lập các tiểu ban thì Hội đồng quản trị cử thành viên Hội đồng quản trị độc lập phụ trách riêng về từng vấn đề như lương thưởng, nhân sự.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "title": "Thư ký công ty",
+      "content_raw": "Thư ký công ty\n1. Để hỗ trợ cho hoạt động quản trị công ty được tiến hành một cách có hiệu quả, Hội đồng quản trị phải chỉ địnhít nhất một (01) người làm Thư ký công ty. Thư ký công ty phải là người có hiểu biết về pháp luật. Thư ký công ty không được đồng thời làm việc cho công ty kiểm toán đang thực hiện kiểm toán các báo cáo tài chính của công ty.\n2. Vai trò và nhiệm vụ của Thư ký công ty bao gồm: - Chuẩn bị các cuộc họp Hội đồng quản trị, Ban kiểm soát và Đại hội đồng cổ đông theo yêu cầu của Hội đồng quản trị hoặc Ban kiểm soát; - Tư vấn về thủ tục của các cuộc họp; - Tham dự các cuộc họp; - Đảm bảo các nghị quyết của Hội đồng quản trị phù hợp với luật pháp; - Cung cấp các thông tin tài chính, bản sao biên bản họp Hội đồng quản trị và các thông tin khác cho thành viên Hội đồng quản trị và thành viên Ban kiểm soát.\n3. Thư ký công ty có trách nhiệm bảo mật thông tin theo các quy định của pháp luật và Điều lệ công ty.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Để hỗ trợ cho hoạt động quản trị công ty được tiến hành một cách có hiệu quả, Hội đồng quản trị phải chỉ địnhít nhất một (01) người làm Thư ký công ty. Thư ký công ty phải là người có hiểu biết về pháp luật. Thư ký công ty không được đồng thời làm việc cho công ty kiểm toán đang thực hiện kiểm toán các báo cáo tài chính của công ty.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Vai trò và nhiệm vụ của Thư ký công ty bao gồm: - Chuẩn bị các cuộc họp Hội đồng quản trị, Ban kiểm soát và Đại hội đồng cổ đông theo yêu cầu của Hội đồng quản trị hoặc Ban kiểm soát; - Tư vấn về thủ tục của các cuộc họp; - Tham dự các cuộc họp; - Đảm bảo các nghị quyết của Hội đồng quản trị phù hợp với luật pháp; - Cung cấp các thông tin tài chính, bản sao biên bản họp Hội đồng quản trị và các thông tin khác cho thành viên Hội đồng quản trị và thành viên Ban kiểm soát.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thư ký công ty có trách nhiệm bảo mật thông tin theo các quy định của pháp luật và Điều lệ công ty.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 34,
+      "title": "Đào tạo về quản trị công ty",
+      "content_raw": "Đào tạo về quản trị công ty\nThành viên Hội đồng quản trị, thành viên Ban kiểm soát, Giám đốc (Tổng giám đốc) điều hành, Thư ký công ty của công ty đại chúng phải tham gia các khóa đào tạo về quản trị công ty tại các cơ sở đào tạo đượcỦy ban Chứng khoán Nhà nước công nhận.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": []
+    },
+    {
+      "number": 35,
+      "title": "Tham dự Đại hội đồng cổ đông của kiểm toán viên độc lập",
+      "content_raw": "Tham dự Đại hội đồng cổ đông của kiểm toán viên độc lập\nKiểm toán viên hoặc đại diện công ty kiểm toán phải được mời dự họp Đại hội đồng cổ đông thường niên để phát biểuý kiến tại Đại hội đồng cổ đông về các vấn đề liên quan đến Báo cáo tài chính năm trong trường hợp Báo cáo kiểm toán có các khoản ngoại trừ trọng yếu.",
+      "chapter": "VII",
+      "chapter_title": "CÔNG TY ĐẠI CHÚNG QUY MÔ LỚN VÀ CÔNG TY NIÊM YẾT",
+      "clauses": []
+    },
+    {
+      "number": 36,
+      "title": "Giám sát",
+      "content_raw": "Giám sát\nCác công ty đại chúng, các tổ chức và cá nhân có liên quan phải chịu sự giám sát về quản trị công ty của Uỷ ban Chứng khoán Nhà nước và các cơ quan có thẩm quyền khác theo quy định của pháp luật.",
+      "chapter": "VIII",
+      "chapter_title": "GIÁM SÁT VÀ XỬ LÝ VI PHẠM",
+      "clauses": []
+    },
+    {
+      "number": 37,
+      "title": "Xử lý vi phạm",
+      "content_raw": "Xử lý vi phạm\nCác công ty đại chúng, các tổ chức và cá nhân có liên quan vi phạm hoặc không thực hiện quy định tại Thông tư này tùy theo tính chất, mức độ bị xử phạt vi phạm hành chính hoặc bị truy cứu trách nhiệm hình sự theo quy định của pháp luật.",
+      "chapter": "VIII",
+      "chapter_title": "GIÁM SÁT VÀ XỬ LÝ VI PHẠM",
+      "clauses": []
+    },
+    {
+      "number": 38,
+      "title": "Tổ chức thực hiện",
+      "content_raw": "Tổ chức thực hiện\n1. Thông tư này có hiệu lực kể từ ngày 17/9/2012 và thay thế Quyết định số 12/2007/QĐ-BTC ngày 13/3/2007 của Bộ trưởng Bộ Tài chính về việc ban hành Quy chế quản trị công tyáp dụng cho các công ty niêm yết trên Sở giao dịch chứng khoán/Trung tâm giao dịch chứng khoán, Quyết định số 15/2007/QĐ-BTC ngày 19/03/2007 của Bộ trưởng Bộ Tài chính về việc ban hành Điều lệ mẫuáp dụng cho các công ty niêm yết trên Sở giao dịch chứng khoán/Trung tâm giao dịch chứng khoán. Riêng các quy định tại Điều 5, Điều 6, Điều 10, Điều 11, Điều 16, Điều 17, Điều 18, Điều 19, Điều 30, Điều 31, Điều 32, Điều 35 sẽ đượcáp dụng từ kỳ họp Đại hội đồng cổ đông thường niên năm 2013.\n2. Uỷ ban Chứng khoán Nhà nước, các Sở giao dịch chứng khoán, các công ty đại chúng và các tổ chức, cá nhân có liên quan chịu trách nhiệm thực hiện Thông tư này./.",
+      "chapter": "IX",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thông tư này có hiệu lực kể từ ngày 17/9/2012 và thay thế Quyết định số 12/2007/QĐ-BTC ngày 13/3/2007 của Bộ trưởng Bộ Tài chính về việc ban hành Quy chế quản trị công tyáp dụng cho các công ty niêm yết trên Sở giao dịch chứng khoán/Trung tâm giao dịch chứng khoán, Quyết định số 15/2007/QĐ-BTC ngày 19/03/2007 của Bộ trưởng Bộ Tài chính về việc ban hành Điều lệ mẫuáp dụng cho các công ty niêm yết trên Sở giao dịch chứng khoán/Trung tâm giao dịch chứng khoán. Riêng các quy định tại Điều 5, Điều 6, Điều 10, Điều 11, Điều 16, Điều 17, Điều 18, Điều 19, Điều 30, Điều 31, Điều 32, Điều 35 sẽ đượcáp dụng từ kỳ họp Đại hội đồng cổ đông thường niên năm 2013.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Uỷ ban Chứng khoán Nhà nước, các Sở giao dịch chứng khoán, các công ty đại chúng và các tổ chức, cá nhân có liên quan chịu trách nhiệm thực hiện Thông tư này./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}

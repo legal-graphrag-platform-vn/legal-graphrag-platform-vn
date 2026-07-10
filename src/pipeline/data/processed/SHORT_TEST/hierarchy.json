@@ -1,0 +1,24 @@
+{
+  "document": {
+    "id": "SHORT_TEST",
+    "title": "Luật Thử nghiệm Ngắn",
+    "number": "99/2026/QH15",
+    "doc_type": "Law",
+    "issued_by": "QUỐC HỘI",
+    "issued_date": "2026-01-01",
+    "effective_from": "2026-06-01",
+    "status": "Còn hiệu lực"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "content_raw": "Điều 1. Phạm vi điều chỉnh\nLuật này quy định về việc thành lập và hoạt động của các doanh nghiệp công nghệ tại Việt Nam.",
+      "clauses": []
+    },
+    {
+      "number": 2,
+      "content_raw": "Điều 2. Đối tượng áp dụng\nLuật này áp dụng đối với tổ chức, cá nhân tham gia hoạt động công nghệ.",
+      "clauses": []
+    }
+  ]
+}

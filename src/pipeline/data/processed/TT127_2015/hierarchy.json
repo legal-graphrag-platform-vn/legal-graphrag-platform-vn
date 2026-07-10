@@ -1,0 +1,222 @@
+{
+  "document": {
+    "id": "TT127_2015",
+    "title": "Thông tư số 127/2015/TT-BTC Hướng dẫn việc cấp mã số doanh nghiệp thành lập mớỉ và phân công cơ quan thuế quản lý đốỉ vớỉ doanh nghiệp",
+    "number": "127/2015/TT-BTC",
+    "doc_type": "Circular",
+    "issued_date": "2015-08-21",
+    "effective_from": "2015-10-10",
+    "status": "Còn hiệu lực"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi và đối tượngáp dụng",
+      "content_raw": "Phạm vi và đối tượngáp dụng\n1. Phạm vi điều chỉnh\na) Thông tư này hướng dẫn về cấp mã số doanh nghiệp tự động theo phương thức điện tử trên Hệ thống Đăng ký thuế của Tổng cục Thuế và trao đổi thông tin đăng ký thuế với Hệ thống thông tin quốc gia về đăng ký doanh nghiệp theo quy định của Luật Doanh nghiệp và Luật Quản lý thuế hiện hành.\nb) Thông tư này hướng dẫn về việc phân công quản lý thuế của cơ quan thuế các cấp đối với doanh nghiệp, chi nhánh, đơn vị trực thuộc của doanh nghiệp được thành lập theo quy định của Luật Doanh nghiệp, bao gồm các trường hợp: thành lập mới; tổ chức lại doanh nghiệp (chia, tách, hợp nhất, sáp nhập và chuyển đổi loại hình doanh nghiệp); thay đổi địa chỉ trụ sở khác địa bàn tỉnh, thành phố trực thuộc Trungương. Việc phân công cơ quan thuế quản lý đối với doanh nghiệp thành lập mới theo quy định tại Thông tư này đượcáp dụng kể từ ngày Thông tư có hiệu lực thi hành. Đối với những doanh nghiệp đã được phân công cơ quan thuế quản lý trước thời điểm Thông tư này có hiệu lực thi hành thì tiếp tục thực hiện theo phân công đó hoặc theo quyết định củaỦy ban nhân dân cấp tỉnh đã báo cáo và được Hội đồng nhân dân cấp tỉnh thông qua.\n2. Đối tượngáp dụng Thông tư nàyáp dụng đối với các tổ chức, cá nhân sau:\na) Cơ quan Thuế gồm: Tổng cục Thuế, Cục Thuế cấp tỉnh, Chi cục Thuế cấp huyện;\nb) Cơ quan Đăng ký kinh doanh cấp tỉnh;\nc) Tổ chức, cá nhân thực hiện đăng ký thành lập doanh nghiệp theo quy định của Luật Doanh nghiệp;\nd) Các tổ chức, cá nhân có liên quan khác.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Phạm vi điều chỉnh",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thông tư này hướng dẫn về cấp mã số doanh nghiệp tự động theo phương thức điện tử trên Hệ thống Đăng ký thuế của Tổng cục Thuế và trao đổi thông tin đăng ký thuế với Hệ thống thông tin quốc gia về đăng ký doanh nghiệp theo quy định của Luật Doanh nghiệp và Luật Quản lý thuế hiện hành."
+            },
+            {
+              "label": "b",
+              "content": "Thông tư này hướng dẫn về việc phân công quản lý thuế của cơ quan thuế các cấp đối với doanh nghiệp, chi nhánh, đơn vị trực thuộc của doanh nghiệp được thành lập theo quy định của Luật Doanh nghiệp, bao gồm các trường hợp: thành lập mới; tổ chức lại doanh nghiệp (chia, tách, hợp nhất, sáp nhập và chuyển đổi loại hình doanh nghiệp); thay đổi địa chỉ trụ sở khác địa bàn tỉnh, thành phố trực thuộc Trungương. Việc phân công cơ quan thuế quản lý đối với doanh nghiệp thành lập mới theo quy định tại Thông tư này đượcáp dụng kể từ ngày Thông tư có hiệu lực thi hành. Đối với những doanh nghiệp đã được phân công cơ quan thuế quản lý trước thời điểm Thông tư này có hiệu lực thi hành thì tiếp tục thực hiện theo phân công đó hoặc theo quyết định củaỦy ban nhân dân cấp tỉnh đã báo cáo và được Hội đồng nhân dân cấp tỉnh thông qua."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối tượngáp dụng Thông tư nàyáp dụng đối với các tổ chức, cá nhân sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cơ quan Thuế gồm: Tổng cục Thuế, Cục Thuế cấp tỉnh, Chi cục Thuế cấp huyện;"
+            },
+            {
+              "label": "b",
+              "content": "Cơ quan Đăng ký kinh doanh cấp tỉnh;"
+            },
+            {
+              "label": "c",
+              "content": "Tổ chức, cá nhân thực hiện đăng ký thành lập doanh nghiệp theo quy định của Luật Doanh nghiệp;"
+            },
+            {
+              "label": "d",
+              "content": "Các tổ chức, cá nhân có liên quan khác."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Trình tự thực hiện cấp mã số doanh nghiệp tự động",
+      "content_raw": "Trình tự thực hiện cấp mã số doanh nghiệp tự động\n1. Nguyên tắc cấp mã số doanh nghiệp tự động Việc cấp mã số doanh nghiệp được thực hiện tự động theo phương thức điện tử trên Hệ thống Đăng ký thuế của Tổng cục Thuế ngay trong ngày làm việc theo quy định của Luật Doanh nghiệp và Luật Quản lý thuế kể từ khi nhận hồ sơ đầy đủ, hợp lệ từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.\n2. Trình tự thực hiện Căn cứ thông tin giao dịch điện tử về doanh nghiệp đăng ký thành lập mới do Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, Hệ thống Đăng ký thuế của Tổng cục Thuế tự động thực hiện kiểm tra tính đầy đủ, chính xác, hợp pháp của các thông tin liên quan trên hồ sơ đăng ký doanh nghiệp theo các quy định của Luật Doanh nghiệp và Luật Quản lý thuế.\na) Trường hợp thông tin đầy đủ, đúng quy định: Tự động tạo mã số doanh nghiệp và thực hiện phân công cơ quan Thuế trực tiếp quản lý đối với doanh nghiệp (Cục Thuế, Chi cục Thuế) phù hợp với Nghị quyết phân cấp nguồn thu của Hội đồng nhân dân cấp tỉnh và phù hợp với quy định của Luật Quản lý thuế. Tự động truyền thông tin về mã số doanh nghiệp, thông tin cơ quan Thuế trực tiếp quản lý đối với doanh nghiệp sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.\nb) Trường hợp thông tin không đầy đủ (thiếu các chỉ tiêu bắt buộc) hoặc không theo đúng quy định: Tự động tạo thông báo về thông tin không đầy đủ, không đúng quy định; Tự động truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để Cơ quan Đăng ký kinh doanh thông báo cho doanh nghiệp biết, thực hiện điều chỉnh, bổ sung hồ sơ đăng ký doanh nghiệp theo quy định.\n3. Sau khi nhận được kết quả cấp mã số doanh nghiệp và các thông tin về cơ quan Thuế trực tiếp quản lý do Cơ quan thuế truyền sang, Cơ quan Đăng ký kinh doanh thực hiện cấp Giấy chứng nhận đăng ký doanh nghiệp, đồng thời in Thông báo cơ quan thuế trực tiếp quản lý và trả cùng kết quả đăng ký doanh nghiệp cho doanh nghiệp biết để thực hiện các thủ tục, nghĩa vụ về thuế theo quy định.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nguyên tắc cấp mã số doanh nghiệp tự động Việc cấp mã số doanh nghiệp được thực hiện tự động theo phương thức điện tử trên Hệ thống Đăng ký thuế của Tổng cục Thuế ngay trong ngày làm việc theo quy định của Luật Doanh nghiệp và Luật Quản lý thuế kể từ khi nhận hồ sơ đầy đủ, hợp lệ từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trình tự thực hiện Căn cứ thông tin giao dịch điện tử về doanh nghiệp đăng ký thành lập mới do Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, Hệ thống Đăng ký thuế của Tổng cục Thuế tự động thực hiện kiểm tra tính đầy đủ, chính xác, hợp pháp của các thông tin liên quan trên hồ sơ đăng ký doanh nghiệp theo các quy định của Luật Doanh nghiệp và Luật Quản lý thuế.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trường hợp thông tin đầy đủ, đúng quy định: Tự động tạo mã số doanh nghiệp và thực hiện phân công cơ quan Thuế trực tiếp quản lý đối với doanh nghiệp (Cục Thuế, Chi cục Thuế) phù hợp với Nghị quyết phân cấp nguồn thu của Hội đồng nhân dân cấp tỉnh và phù hợp với quy định của Luật Quản lý thuế. Tự động truyền thông tin về mã số doanh nghiệp, thông tin cơ quan Thuế trực tiếp quản lý đối với doanh nghiệp sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp thông tin không đầy đủ (thiếu các chỉ tiêu bắt buộc) hoặc không theo đúng quy định: Tự động tạo thông báo về thông tin không đầy đủ, không đúng quy định; Tự động truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để Cơ quan Đăng ký kinh doanh thông báo cho doanh nghiệp biết, thực hiện điều chỉnh, bổ sung hồ sơ đăng ký doanh nghiệp theo quy định."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Sau khi nhận được kết quả cấp mã số doanh nghiệp và các thông tin về cơ quan Thuế trực tiếp quản lý do Cơ quan thuế truyền sang, Cơ quan Đăng ký kinh doanh thực hiện cấp Giấy chứng nhận đăng ký doanh nghiệp, đồng thời in Thông báo cơ quan thuế trực tiếp quản lý và trả cùng kết quả đăng ký doanh nghiệp cho doanh nghiệp biết để thực hiện các thủ tục, nghĩa vụ về thuế theo quy định.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Phân công cơ quan thuế trực tiếp quản lý doanh nghiệp",
+      "content_raw": "Phân công cơ quan thuế trực tiếp quản lý doanh nghiệp\n1. Nguyên tắc phân công cơ quan Thuế trực tiếp quản lý đối với doanh nghiệp\na) Việc phân công cơ quan thuế quản lý đối với doanh nghiệp được thực hiện trên Hệ thống Đăng ký thuế của Tổng cục Thuế và đồng thời với cấp mã số doanh nghiệp. Cơ quan thuế căn cứ thông tin của người nộp thuế trên hồ sơ đăng ký thành lập doanh nghiệp do Cơ quan Đăng ký kinh doanh truyền sang qua hình thức điện tử để thực hiện phân công cơ quan thuế quản lý đối với doanh nghiệp.\nb) Phù hợp với năng lực quản lý của cơ quan thuế các cấp, các quy định của Luật Ngân sách nhà nước về thẩm quyền quản lý, phân cấp nguồn thu tại địa phương và phù hợp với các quy định của Luật Quản lý thuế hiện hành;\nc) Phù hợp với tổ chức hoạt động kinh doanh của doanh nghiệp, đặc điểm của từng địa phương, vùng, miền trên cả nước.\n2. Căn cứ các nguyên tắc phân công cơ quan thuế quản lý đối với doanh nghiệp quy định tại khoản 1 Điều này và căn cứ nội dung phân cấp nguồn thu nêu tại Nghị quyết của Hội đồng nhân dân cấp tỉnh, Cục Thuế phối hợp với Sở Tài chính và các cơ quan có liên quan xây dựng tiêu thức phân công cơ quan thuế quản lý đối với doanh nghiệp thành lập mới trên địa bàn thuộc phạm vi điều chỉnh của Thông tư này, báo cáoỦy ban nhân dân cấp tỉnh xem xét trình Hội đồng nhân dân cấp tỉnh quyết định. Để đảm bảo việc phân công được Hệ thống Đăng ký thuế của Tổng cục Thuế thực hiện tự động, tiêu thức phân công cơ quan Thuế quản lý đối với doanh nghiệp thành lập mới về cơ bản phải căn cứ các thông tin của người nộp thuế trên hồ sơ đăng ký thành lập doanh nghiệp do Cơ quan Đăng ký kinh doanh truyền sang. Khi xây dựng tiêu thức phân công cơ quan Thuế quản lý đối với doanh nghiệp thành lập mới, cần lưuý một số nội dung sau:\na) Cục Thuế trực tiếp quản lý đối với các doanh nghiệp: a.1) Doanh nghiệp nhà nước. Riêng doanh nghiệp có phần vốn góp của nhà nước, Cục Thuế căn cứ tình hình thực tế tại địa phương và quy định tại khoản 1 và khoản 2 Điều này để đề xuất phân công cơ quan thuế quản lý đối với doanh nghiệp; a.2) Doanh nghiệp có vốn đầu tư nước ngoài; Doanh nghiệp dựán BOT, BTO, BT do nhà đầu tư thành lập để thiết kế, xây dựng, vận hành, quản lý công trình dựán và để thực hiện dựán khác theo quy định của pháp luật về đầu tư; a.3) Doanh nghiệp hạch toán toàn ngành, doanh nghiệp hoạt động trên nhiều địa bàn (như thủy điện, bưu chính, viễn thông, xây dựng cơ bản...); doanh nghiệp có quy mô kinh doanh lớn; doanh nghiệp có số thu ngân sách được phân bố cho nhiều địa bàn cấp tỉnh hoặc nhiều địa bàn cấp huyện trên cùng tỉnh, thành phố được thụ hưởng theo quy định của pháp luật; a.4) Doanh nghiệp có hoạt động kinh doanh thuộc ngành, nghề kinh doanh đặc thù, có tính chất pháp lý phức tạp như: hoạt động tài chính, ngân hàng, bảo hiểm, chứng khoán, kinh doanh bất động sản, kế toán, kiểm toán, hoạt động pháp luật, khai khoáng. Cục Thuế căn cứ tình hình thực tế tại địa phương và các nguyên tắc phân công quản lý thuế nêu tại khoản 1 Điều này để đề xuất phân công cơ quan thuế quản lý đối với doanh nghiệp;\nb) Chi cục Thuế trực tiếp quản lý các doanh nghiệp còn lại có địa điểm hoạt động sản xuất kinh doanh trên địa bàn cấp huyện.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nguyên tắc phân công cơ quan Thuế trực tiếp quản lý đối với doanh nghiệp",
+          "points": [
+            {
+              "label": "a",
+              "content": "Việc phân công cơ quan thuế quản lý đối với doanh nghiệp được thực hiện trên Hệ thống Đăng ký thuế của Tổng cục Thuế và đồng thời với cấp mã số doanh nghiệp. Cơ quan thuế căn cứ thông tin của người nộp thuế trên hồ sơ đăng ký thành lập doanh nghiệp do Cơ quan Đăng ký kinh doanh truyền sang qua hình thức điện tử để thực hiện phân công cơ quan thuế quản lý đối với doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Phù hợp với năng lực quản lý của cơ quan thuế các cấp, các quy định của Luật Ngân sách nhà nước về thẩm quyền quản lý, phân cấp nguồn thu tại địa phương và phù hợp với các quy định của Luật Quản lý thuế hiện hành;"
+            },
+            {
+              "label": "c",
+              "content": "Phù hợp với tổ chức hoạt động kinh doanh của doanh nghiệp, đặc điểm của từng địa phương, vùng, miền trên cả nước."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Căn cứ các nguyên tắc phân công cơ quan thuế quản lý đối với doanh nghiệp quy định tại khoản 1 Điều này và căn cứ nội dung phân cấp nguồn thu nêu tại Nghị quyết của Hội đồng nhân dân cấp tỉnh, Cục Thuế phối hợp với Sở Tài chính và các cơ quan có liên quan xây dựng tiêu thức phân công cơ quan thuế quản lý đối với doanh nghiệp thành lập mới trên địa bàn thuộc phạm vi điều chỉnh của Thông tư này, báo cáoỦy ban nhân dân cấp tỉnh xem xét trình Hội đồng nhân dân cấp tỉnh quyết định. Để đảm bảo việc phân công được Hệ thống Đăng ký thuế của Tổng cục Thuế thực hiện tự động, tiêu thức phân công cơ quan Thuế quản lý đối với doanh nghiệp thành lập mới về cơ bản phải căn cứ các thông tin của người nộp thuế trên hồ sơ đăng ký thành lập doanh nghiệp do Cơ quan Đăng ký kinh doanh truyền sang. Khi xây dựng tiêu thức phân công cơ quan Thuế quản lý đối với doanh nghiệp thành lập mới, cần lưuý một số nội dung sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cục Thuế trực tiếp quản lý đối với các doanh nghiệp: a.1) Doanh nghiệp nhà nước. Riêng doanh nghiệp có phần vốn góp của nhà nước, Cục Thuế căn cứ tình hình thực tế tại địa phương và quy định tại khoản 1 và khoản 2 Điều này để đề xuất phân công cơ quan thuế quản lý đối với doanh nghiệp; a.2) Doanh nghiệp có vốn đầu tư nước ngoài; Doanh nghiệp dựán BOT, BTO, BT do nhà đầu tư thành lập để thiết kế, xây dựng, vận hành, quản lý công trình dựán và để thực hiện dựán khác theo quy định của pháp luật về đầu tư; a.3) Doanh nghiệp hạch toán toàn ngành, doanh nghiệp hoạt động trên nhiều địa bàn (như thủy điện, bưu chính, viễn thông, xây dựng cơ bản...); doanh nghiệp có quy mô kinh doanh lớn; doanh nghiệp có số thu ngân sách được phân bố cho nhiều địa bàn cấp tỉnh hoặc nhiều địa bàn cấp huyện trên cùng tỉnh, thành phố được thụ hưởng theo quy định của pháp luật; a.4) Doanh nghiệp có hoạt động kinh doanh thuộc ngành, nghề kinh doanh đặc thù, có tính chất pháp lý phức tạp như: hoạt động tài chính, ngân hàng, bảo hiểm, chứng khoán, kinh doanh bất động sản, kế toán, kiểm toán, hoạt động pháp luật, khai khoáng. Cục Thuế căn cứ tình hình thực tế tại địa phương và các nguyên tắc phân công quản lý thuế nêu tại khoản 1 Điều này để đề xuất phân công cơ quan thuế quản lý đối với doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Chi cục Thuế trực tiếp quản lý các doanh nghiệp còn lại có địa điểm hoạt động sản xuất kinh doanh trên địa bàn cấp huyện."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Trao đổi thông tin cảnh báo các trường hợp vi phạm pháp luật thuế",
+      "content_raw": "Trao đổi thông tin cảnh báo các trường hợp vi phạm pháp luật thuế\n1. Các trường hợp vi phạm pháp luật về thuế cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp gồm:\na) Cá nhân là người quản lý doanh nghiệp có dấu hiệu vi phạm pháp luật hình sự, đã bị cơ quan Thuế chuyển cơ quan điều tra theo quy định của pháp luật về tố tụng hình sự và pháp luật về thuế.\nb) Doanh nghiệp có cá nhân là \"người quản lý doanh nghiệp\" hoặc thành viên của Hội đồng thành viên, thành viên của Hội đồng quản trị hoặc thành viên hợp danh mà trước đó các cá nhân này là Chủ doanh nghiệp (đối với doanh nghiệp tư nhân); Chủ tịch hội đồng thành viên, chủ tịch hội đồng quản trị, giám đốc, tổng giám đốc (đối với công ty trách nhiệm hữu hạn, công ty cổ phần); thành viên hợp danh (đối với công ty hợp danh) và người đại diện theo pháp luật của doanh nghiệp đã bị cơ quan thuế thông báo doanh nghiệp không còn kinh doanhở địa chỉ đã đăng ký với cơ quan quản lý nhà nước.\nc) Doanh nghiệp thành lập trái với các quy định của Luật Doanh nghiệp như: cá nhân là chủ doanh nghiệp tư nhân, chủ hộ kinh doanh thì không được làm chủ doanh nghiệp tư nhân và ngược lại; thành viên hợp danh không được làm chủ doanh nghiệp tư nhân hoặc thành viên hợp danh của công ty hợp danh khác.\n2. Tổng cục Thuế có trách nhiệm cung cấp thông tin về cá nhân người thành lập doanh nghiệp, người quản lý doanh nghiệp do cơ quan Thuế quản lý thuộc khoản 1 Điều này để Cục Quản lý đăng ký kinh doanh - Bộ Kế hoạch và đầu tư cập nhật danh sách cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.\n3. Cơ quan Đăng ký kinh doanh khi tiếp nhận hồ sơ đăng ký doanh nghiệp có trách nhiệm kiểm tra, rà soát các trường hợp nêu tại khoản 1 Điều này và phối hợp với các cơ quan Thuế có liên quan trong việc yêu cầu cá nhân người thành lập doanh nghiệp, người quản lý doanh nghiệp hoàn thành các nghĩa vụ và thủ tục về thuế liên quan theo quy định của pháp luật về thuế.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các trường hợp vi phạm pháp luật về thuế cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cá nhân là người quản lý doanh nghiệp có dấu hiệu vi phạm pháp luật hình sự, đã bị cơ quan Thuế chuyển cơ quan điều tra theo quy định của pháp luật về tố tụng hình sự và pháp luật về thuế."
+            },
+            {
+              "label": "b",
+              "content": "Doanh nghiệp có cá nhân là \"người quản lý doanh nghiệp\" hoặc thành viên của Hội đồng thành viên, thành viên của Hội đồng quản trị hoặc thành viên hợp danh mà trước đó các cá nhân này là Chủ doanh nghiệp (đối với doanh nghiệp tư nhân); Chủ tịch hội đồng thành viên, chủ tịch hội đồng quản trị, giám đốc, tổng giám đốc (đối với công ty trách nhiệm hữu hạn, công ty cổ phần); thành viên hợp danh (đối với công ty hợp danh) và người đại diện theo pháp luật của doanh nghiệp đã bị cơ quan thuế thông báo doanh nghiệp không còn kinh doanhở địa chỉ đã đăng ký với cơ quan quản lý nhà nước."
+            },
+            {
+              "label": "c",
+              "content": "Doanh nghiệp thành lập trái với các quy định của Luật Doanh nghiệp như: cá nhân là chủ doanh nghiệp tư nhân, chủ hộ kinh doanh thì không được làm chủ doanh nghiệp tư nhân và ngược lại; thành viên hợp danh không được làm chủ doanh nghiệp tư nhân hoặc thành viên hợp danh của công ty hợp danh khác."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Tổng cục Thuế có trách nhiệm cung cấp thông tin về cá nhân người thành lập doanh nghiệp, người quản lý doanh nghiệp do cơ quan Thuế quản lý thuộc khoản 1 Điều này để Cục Quản lý đăng ký kinh doanh - Bộ Kế hoạch và đầu tư cập nhật danh sách cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cơ quan Đăng ký kinh doanh khi tiếp nhận hồ sơ đăng ký doanh nghiệp có trách nhiệm kiểm tra, rà soát các trường hợp nêu tại khoản 1 Điều này và phối hợp với các cơ quan Thuế có liên quan trong việc yêu cầu cá nhân người thành lập doanh nghiệp, người quản lý doanh nghiệp hoàn thành các nghĩa vụ và thủ tục về thuế liên quan theo quy định của pháp luật về thuế.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Tổ chức thực hiện",
+      "content_raw": "Tổ chức thực hiện\n1. Doanh nghiệp, tổ chức đang hoạt động đã được phân công cơ quan thuế quản lý (Cục Thuế hoặc Chi cục Thuế trực tiếp quản lý) trước thời điểm Thông tư này có hiệu lực vẫn được giữ nguyên. Việc phân công cơ quan Thuế quản lý đối với doanh nghiệp thành lập mới theo hướng dẫn tại Thông tư này được thực hiện đến 31/12/2016. Từ 01/01/2017, thực hiện Luật Ngân sách nhà nước số 83/2015/QH13, Bộ Tài chính sẽ có hướng dẫn cụ thể về việc phân công cơ quan Thuế quản lý đối với doanh nghiệp để thực hiện.\n2. Doanh nghiệp, tổ chức thành lập được cấp mã số doanh nghiệp và phân công Chi cục Thuế quản lý theo hướng dẫn tại Thông tư này, sau đó có hoạt động sản xuất kinh doanh xuất khẩu thường xuyên thuộc đối tượng và các trường hợp được hoàn thuế giá trị gia tăng (phát sinh hoàn thuế giá trị gia tăng) theo quy định thì thực hiện phân công Cục Thuế quản lý thuế đối với những nhiệm vụ liên quan đến hoàn thuế theo các quy định của Luật Quản lý thuế về thẩm quyền ra quyết định hoàn thuế.\n3. Cục Thuế có trách nhiệm thông báo nội dung phân công cơ quan Thuế quản lý đối với doanh nghiệp trên địa bàn đã được Hội đồng nhân dân cấp tỉnh quyết định nêu tại khoản 2 Điều 3 Thông tư này về Bộ Tài chính (Tổng cục Thuế) để phối hợp thực hiện.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp, tổ chức đang hoạt động đã được phân công cơ quan thuế quản lý (Cục Thuế hoặc Chi cục Thuế trực tiếp quản lý) trước thời điểm Thông tư này có hiệu lực vẫn được giữ nguyên. Việc phân công cơ quan Thuế quản lý đối với doanh nghiệp thành lập mới theo hướng dẫn tại Thông tư này được thực hiện đến 31/12/2016. Từ 01/01/2017, thực hiện Luật Ngân sách nhà nước số 83/2015/QH13, Bộ Tài chính sẽ có hướng dẫn cụ thể về việc phân công cơ quan Thuế quản lý đối với doanh nghiệp để thực hiện.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp, tổ chức thành lập được cấp mã số doanh nghiệp và phân công Chi cục Thuế quản lý theo hướng dẫn tại Thông tư này, sau đó có hoạt động sản xuất kinh doanh xuất khẩu thường xuyên thuộc đối tượng và các trường hợp được hoàn thuế giá trị gia tăng (phát sinh hoàn thuế giá trị gia tăng) theo quy định thì thực hiện phân công Cục Thuế quản lý thuế đối với những nhiệm vụ liên quan đến hoàn thuế theo các quy định của Luật Quản lý thuế về thẩm quyền ra quyết định hoàn thuế.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cục Thuế có trách nhiệm thông báo nội dung phân công cơ quan Thuế quản lý đối với doanh nghiệp trên địa bàn đã được Hội đồng nhân dân cấp tỉnh quyết định nêu tại khoản 2 Điều 3 Thông tư này về Bộ Tài chính (Tổng cục Thuế) để phối hợp thực hiện.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Hiệu lực thi hành",
+      "content_raw": "Hiệu lực thi hành\n1. Thông tư này có hiệu lực thi hành từ ngày 10 tháng 10 năm 2015.\n2. Các văn bản hướng dẫn về việc phân công quản lý thuế đối với doanh nghiệp thành lập mới trước đây trái với quy định tại Thông tư này đều bị bãi bỏ.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thông tư này có hiệu lực thi hành từ ngày 10 tháng 10 năm 2015.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Các văn bản hướng dẫn về việc phân công quản lý thuế đối với doanh nghiệp thành lập mới trước đây trái với quy định tại Thông tư này đều bị bãi bỏ.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Trách nhiệm thực hiện",
+      "content_raw": "Trách nhiệm thực hiện\n1. Tổng cục Thuế có trách nhiệm phối hợp với Cục Quản lý đăng ký kinh doanh - Bộ Kế hoạch và Đầu tư tổ chức thực hiện việc cấp mã số doanh nghiệp tự động theo quy định tại Thông tư này đảm bảo tạo thuận lợi nhất cho doanh nghiệp.\n2. Tổng cục Thuế có trách nhiệm triển khai, hướng dẫn việc phân công quản lý thuế đối với doanh nghiệp, kiểm tra việc thực hiện phân công quản lý đối với doanh nghiệp tại các Cục Thuế, Chi cục Thuế theo các nguyên tắc phân công quy định tại Thông tư này.\n3. Cục Thuế, Chi cục Thuế và các cơ quan, tổ chức có liên quan có trách nhiệm thực hiện đầy đủ, triệt để các quy định tại Thông tư này. Trong quá trình triển khai thực hiện nếu phát sinh vướng mắc, đề nghị phảnánh kịp thời về Bộ Tài chính để nghiên cứu, giải quyết./.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổng cục Thuế có trách nhiệm phối hợp với Cục Quản lý đăng ký kinh doanh - Bộ Kế hoạch và Đầu tư tổ chức thực hiện việc cấp mã số doanh nghiệp tự động theo quy định tại Thông tư này đảm bảo tạo thuận lợi nhất cho doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổng cục Thuế có trách nhiệm triển khai, hướng dẫn việc phân công quản lý thuế đối với doanh nghiệp, kiểm tra việc thực hiện phân công quản lý đối với doanh nghiệp tại các Cục Thuế, Chi cục Thuế theo các nguyên tắc phân công quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cục Thuế, Chi cục Thuế và các cơ quan, tổ chức có liên quan có trách nhiệm thực hiện đầy đủ, triệt để các quy định tại Thông tư này. Trong quá trình triển khai thực hiện nếu phát sinh vướng mắc, đề nghị phảnánh kịp thời về Bộ Tài chính để nghiên cứu, giải quyết./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}

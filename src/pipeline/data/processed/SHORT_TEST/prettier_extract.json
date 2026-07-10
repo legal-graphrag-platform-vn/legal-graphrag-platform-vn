@@ -1,0 +1,154 @@
+[
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 1,
+    "relation": {
+      "head": "dieu_1_pham_vi_dieu_chinh",
+      "relation": "DEFINES",
+      "tail": "pham_vi_dieu_chinh",
+      "evidence": "Điều 1. Phạm vi điều chỉnh — Luật này quy định về việc thành lập và hoạt động của các doanh nghiệp công nghệ tại Việt Nam.",
+      "confidence": 0.95,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[DEFINES]->Concept",
+    "confidence": 0.5425925925925926
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 1,
+    "relation": {
+      "head": "dieu_1_pham_vi_dieu_chinh",
+      "relation": "REGULATES",
+      "tail": "doanh_nghiep_cong_nghe",
+      "evidence": "Luật này quy định về việc thành lập và hoạt động của các doanh nghiệp công nghệ tại Việt Nam.",
+      "confidence": 0.95,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[REGULATES]->Concept",
+    "confidence": 0.55
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 1,
+    "relation": {
+      "head": "dieu_1_pham_vi_dieu_chinh",
+      "relation": "REGULATES",
+      "tail": "thanh_lap_va_hoat_dong",
+      "evidence": "Luật này quy định về việc thành lập và hoạt động của các doanh nghiệp công nghệ tại Việt Nam.",
+      "confidence": 0.9,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[REGULATES]->Concept",
+    "confidence": 0.55
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 1,
+    "relation": {
+      "head": "dieu_1_pham_vi_dieu_chinh",
+      "relation": "REGULATES",
+      "tail": "viet_nam",
+      "evidence": "Luật này quy định về việc thành lập và hoạt động của các doanh nghiệp công nghệ tại Việt Nam.",
+      "confidence": 0.9,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[REGULATES]->Entity",
+    "confidence": 0.55
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 2,
+    "relation": {
+      "head": "dieu_2_doi_tuong_ap_dung",
+      "relation": "DEFINES",
+      "tail": "to_chuc",
+      "evidence": "Luật này áp dụng đối với tổ chức, cá nhân tham gia hoạt động công nghệ.",
+      "confidence": 0.85,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[DEFINES]->Entity",
+    "confidence": 0.55
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 2,
+    "relation": {
+      "head": "dieu_2_doi_tuong_ap_dung",
+      "relation": "DEFINES",
+      "tail": "ca_nhan",
+      "evidence": "Luật này áp dụng đối với tổ chức, cá nhân tham gia hoạt động công nghệ.",
+      "confidence": 0.85,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[DEFINES]->Entity",
+    "confidence": 0.55
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 2,
+    "relation": {
+      "head": "dieu_2_doi_tuong_ap_dung",
+      "relation": "REGULATES",
+      "tail": "hoat_dong_cong_nghe",
+      "evidence": "Luật này áp dụng đối với tổ chức, cá nhân tham gia hoạt động công nghệ.",
+      "confidence": 0.85,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[REGULATES]->Concept",
+    "confidence": 0.55
+  },
+  {
+    "document_id": "SHORT_TEST",
+    "article_number": 2,
+    "relation": {
+      "head": "dieu_2_doi_tuong_ap_dung",
+      "relation": "CONTAINS",
+      "tail": "luat_nay_ap_dung_doi_voi_to_chuc_ca_nhan_tham_gia_hoat_dong_cong_nghe",
+      "evidence": "Điều 2. Đối tượng áp dụng\nLuật này áp dụng đối với tổ chức, cá nhân tham gia hoạt động công nghệ.",
+      "confidence": 0.9,
+      "properties": {
+        "effective_from": "2026-06-01"
+      }
+    },
+    "schema_valid": true,
+    "schema_error": null,
+    "ontology_valid": false,
+    "ontology_error": "Invalid pair: Entity-[CONTAINS]->Entity",
+    "confidence": 0.5
+  }
+]

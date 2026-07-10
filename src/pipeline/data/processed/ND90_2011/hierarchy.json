@@ -1,0 +1,1287 @@
+{
+  "document": {
+    "id": "ND90_2011",
+    "title": "Nghị định số 90/2011/NĐ-CP Về phát hành trái phiếu doanh nghiệp",
+    "number": "90/2011/NĐ-CP",
+    "doc_type": "Decree",
+    "issued_by": "CHÍNH PHỦ",
+    "issued_date": "2011-10-14",
+    "effective_from": "2011-12-01",
+    "status": "Còn hiệu lực"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi và đối tượng điều chỉnh",
+      "content_raw": "Phạm vi và đối tượng điều chỉnh\n1. Nghị định này quy định việc phát hành trái phiếu riêng lẻ trên phạm vi lãnh thổ nước Cộng hòa xã hội chủ nghĩa Việt Nam và phát hành trái phiếu ra thị trường quốc tế của doanh nghiệp.\n2. Doanh nghiệp thuộc phạm vi điều chỉnh của Nghị định này bao gồm:\na) Công ty cổ phần;\nb) Công ty trách nhiệm hữu hạn.\n3. Việc phát hành trái phiếu của các doanh nghiệp thuộc lĩnh vực ngân hàng, chứng khoán, ngoài việc tuân thủ quy định của Nghị định này, phải thực hiện theo quy định của pháp luật chuyên ngành liên quan. Trường hợp quy định của pháp luật chuyên ngành khác với quy định tại Nghị định này, doanh nghiệp phát hành trái phiếu thực hiện theo quy định của pháp luật chuyên ngành.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nghị định này quy định việc phát hành trái phiếu riêng lẻ trên phạm vi lãnh thổ nước Cộng hòa xã hội chủ nghĩa Việt Nam và phát hành trái phiếu ra thị trường quốc tế của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp thuộc phạm vi điều chỉnh của Nghị định này bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Công ty cổ phần;"
+            },
+            {
+              "label": "b",
+              "content": "Công ty trách nhiệm hữu hạn."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Việc phát hành trái phiếu của các doanh nghiệp thuộc lĩnh vực ngân hàng, chứng khoán, ngoài việc tuân thủ quy định của Nghị định này, phải thực hiện theo quy định của pháp luật chuyên ngành liên quan. Trường hợp quy định của pháp luật chuyên ngành khác với quy định tại Nghị định này, doanh nghiệp phát hành trái phiếu thực hiện theo quy định của pháp luật chuyên ngành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Giải thích từ ngữ",
+      "content_raw": "Giải thích từ ngữ\nTrong Nghị định này, các từ ngữ dưới đây được hiểu như sau:\n1. \"Trái phiếu doanh nghiệp\" là loại chứng khoán nợ do doanh nghiệp phát hành, xác nhận nghĩa vụ trả gốc, lãi, và các nghĩa vụ khác (nếu có) của doanh nghiệp đối với chủ sở hữu trái phiếu.\n2. \"Trái phiếu chuyển đổi\" là loại trái phiếu do công ty cổ phần phát hành, có thể chuyển đổi thành cổ phiếu phổ thông của doanh nghiệp phát hành theo điều kiện đã được xác định trong phươngán phát hành trái phiếu.\n3. \"Trái phiếu có bảo đảm\" là loại trái phiếu được bảo đảm thanh toán toàn bộ hoặc một phần gốc, lãi khi đến hạn bằng tài sản của doanh nghiệp phát hành hoặc tài sản của bên thứ ba; hoặc được bảo lãnh thanh toán của tổ chức tài chính, tín dụng có chức năng cung cấp dịch vụ bảo lãnh thanh toán.\n4. \"Phát hành trái phiếu riêng lẻ\" là phát hành trái phiếu cho dưới một trăm (100) nhà đầu tư, không kể nhà đầu tư chuyên nghiệp và không sử dụng phương tiện thông tin đại chúng hoặc internet.\n5. \"Bảo lãnh phát hành trái phiếu\" là phương thức phát hành trái phiếu mà doanh nghiệp phát hành bán trái phiếu thông qua tổ chức bảo lãnh phát hành.\n6. \"Đấu thầu phát hành trái phiếu\" là phương thức phát hành mà doanh nghiệp phát hành lựa chọn các tổ chức đủ điều kiện trúng thầu mua trái phiếu đápứng yêu cầu của doanh nghiệp phát hành.\n7. \"Đại lý phát hành trái phiếu\" là phương thức phát hành trái phiếu mà doanh nghiệp phát hànhủy thác cho một tổ chức khác thực hiện bán trái phiếu cho các đối tượng mua trái phiếu.\n8. \"Bán lẻ trái phiếu\" là phương thức phát hành trái phiếu mà doanh nghiệp phát hành trực tiếp bán trái phiếu cho từng đối tượng mua trái phiếu.\n9. \"Hệ số tín nhiệm\" là hệ số các tổ chức đánh giá hệ số tín nhiệm xác định để đánh giá các quốc gia (hệ số tín nhiệm quốc gia) hoặc các doanh nghiệp (hệ số tín nhiệm doanh nghiệp) về mức độ tin cậy, mức độ rủi ro đầu tư và khả năng hoàn trả các khoản vay.\n10. \"Lưu ký trái phiếu\" là việc chủ sở hữu trái phiếu thực hiện ký gửi trái phiếu của mình tại một tổ chức được phép lưu giữ, bảo quản trái phiếu để giúp chủ sở hữu trái phiếu thực hiện các quyền đối với trái phiếu.\n11. \"Tư vấn pháp lý\" là công ty luật được lựa chọn làm tư vấn cho doanh nghiệp phát hành hoặc tổ chức (tổ hợp) bảo lãnh phát hành về các quy định của pháp luật liên quan đến đợt phát hành trái phiếu, soạn thảo bản cáo bạch vàý kiến pháp lý cho đợt phát hành trái phiếu.\n12. \"Hợp đồng tư vấn pháp lý\" là thỏa thuận được ký giữa doanh nghiệp phát hành và tổ chức (tổ hợp) bảo lãnh phát hành với một hoặc nhiều công ty luật về việc cung cấp các dịch vụ tư vấn pháp luật trong nước, nước ngoài hoặc quốc tế.\n13. \"Ý kiến pháp lý\" là văn bản do tư vấn pháp lý phát hành phù hợp với các quy định của pháp luật Việt Nam và thông lệ quốc tế về căn cứ pháp luật của các giao dịch liên quan tới phát hành, thanh toán trái phiếu được thực hiện trên cơ sở pháp luật Việt Nam, các điềuước, các thỏa thuận quốc tế, các hợp đồng có yếu tố nước ngoài và các văn bản pháp lý khác.\n14. \"Hoán đổi trái phiếu\" là việc mua, bán hai trái phiếu khác nhau do cùng một doanh nghiệp phát hành tại cùng một thời điểm với mục tiêu cơ cấu lại danh mục nợ của doanh nghiệp.\n15. \"Doanh nghiệp nhà nước\" là doanh nghiệp trong đó Nhà nước sở hữu trên năm mươi phần trăm (50%) vốn điều lệ, theo quy định tại khoản 22 Điều 4 Luật Doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "\"Trái phiếu doanh nghiệp\" là loại chứng khoán nợ do doanh nghiệp phát hành, xác nhận nghĩa vụ trả gốc, lãi, và các nghĩa vụ khác (nếu có) của doanh nghiệp đối với chủ sở hữu trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "\"Trái phiếu chuyển đổi\" là loại trái phiếu do công ty cổ phần phát hành, có thể chuyển đổi thành cổ phiếu phổ thông của doanh nghiệp phát hành theo điều kiện đã được xác định trong phươngán phát hành trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "\"Trái phiếu có bảo đảm\" là loại trái phiếu được bảo đảm thanh toán toàn bộ hoặc một phần gốc, lãi khi đến hạn bằng tài sản của doanh nghiệp phát hành hoặc tài sản của bên thứ ba; hoặc được bảo lãnh thanh toán của tổ chức tài chính, tín dụng có chức năng cung cấp dịch vụ bảo lãnh thanh toán.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "\"Phát hành trái phiếu riêng lẻ\" là phát hành trái phiếu cho dưới một trăm (100) nhà đầu tư, không kể nhà đầu tư chuyên nghiệp và không sử dụng phương tiện thông tin đại chúng hoặc internet.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "\"Bảo lãnh phát hành trái phiếu\" là phương thức phát hành trái phiếu mà doanh nghiệp phát hành bán trái phiếu thông qua tổ chức bảo lãnh phát hành.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "\"Đấu thầu phát hành trái phiếu\" là phương thức phát hành mà doanh nghiệp phát hành lựa chọn các tổ chức đủ điều kiện trúng thầu mua trái phiếu đápứng yêu cầu của doanh nghiệp phát hành.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "\"Đại lý phát hành trái phiếu\" là phương thức phát hành trái phiếu mà doanh nghiệp phát hànhủy thác cho một tổ chức khác thực hiện bán trái phiếu cho các đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 8,
+          "content": "\"Bán lẻ trái phiếu\" là phương thức phát hành trái phiếu mà doanh nghiệp phát hành trực tiếp bán trái phiếu cho từng đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 9,
+          "content": "\"Hệ số tín nhiệm\" là hệ số các tổ chức đánh giá hệ số tín nhiệm xác định để đánh giá các quốc gia (hệ số tín nhiệm quốc gia) hoặc các doanh nghiệp (hệ số tín nhiệm doanh nghiệp) về mức độ tin cậy, mức độ rủi ro đầu tư và khả năng hoàn trả các khoản vay.",
+          "points": []
+        },
+        {
+          "number": 10,
+          "content": "\"Lưu ký trái phiếu\" là việc chủ sở hữu trái phiếu thực hiện ký gửi trái phiếu của mình tại một tổ chức được phép lưu giữ, bảo quản trái phiếu để giúp chủ sở hữu trái phiếu thực hiện các quyền đối với trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 11,
+          "content": "\"Tư vấn pháp lý\" là công ty luật được lựa chọn làm tư vấn cho doanh nghiệp phát hành hoặc tổ chức (tổ hợp) bảo lãnh phát hành về các quy định của pháp luật liên quan đến đợt phát hành trái phiếu, soạn thảo bản cáo bạch vàý kiến pháp lý cho đợt phát hành trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 12,
+          "content": "\"Hợp đồng tư vấn pháp lý\" là thỏa thuận được ký giữa doanh nghiệp phát hành và tổ chức (tổ hợp) bảo lãnh phát hành với một hoặc nhiều công ty luật về việc cung cấp các dịch vụ tư vấn pháp luật trong nước, nước ngoài hoặc quốc tế.",
+          "points": []
+        },
+        {
+          "number": 13,
+          "content": "\"Ý kiến pháp lý\" là văn bản do tư vấn pháp lý phát hành phù hợp với các quy định của pháp luật Việt Nam và thông lệ quốc tế về căn cứ pháp luật của các giao dịch liên quan tới phát hành, thanh toán trái phiếu được thực hiện trên cơ sở pháp luật Việt Nam, các điềuước, các thỏa thuận quốc tế, các hợp đồng có yếu tố nước ngoài và các văn bản pháp lý khác.",
+          "points": []
+        },
+        {
+          "number": 14,
+          "content": "\"Hoán đổi trái phiếu\" là việc mua, bán hai trái phiếu khác nhau do cùng một doanh nghiệp phát hành tại cùng một thời điểm với mục tiêu cơ cấu lại danh mục nợ của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 15,
+          "content": "\"Doanh nghiệp nhà nước\" là doanh nghiệp trong đó Nhà nước sở hữu trên năm mươi phần trăm (50%) vốn điều lệ, theo quy định tại khoản 22 Điều 4 Luật Doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Mục đích phát hành trái phiếu",
+      "content_raw": "Mục đích phát hành trái phiếu\n1. Thực hiện các chương trình, dựán đầu tư của doanh nghiệp.\n2. Tăng quy mô vốn hoạt động của doanh nghiệp.\n3. Cơ cấu lại các khoản nợ của doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thực hiện các chương trình, dựán đầu tư của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tăng quy mô vốn hoạt động của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cơ cấu lại các khoản nợ của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Nguyên tắc phát hành trái phiếu",
+      "content_raw": "Nguyên tắc phát hành trái phiếu\n1. Danh mục phát hành trái phiếu theo nguyên tắc tự vay, tự trả và tự chịu trách nhiệm về hiệu quả sử dụng vốn.\n2. Các hoạt động phát hành trái phiếu phải đảm bảo công khai, minh bạch, công bằng, bảo vệ quyền và lợiích hợp pháp của các nhà đầu tư.\n3. Việc phát hành trái phiếu để cơ cấu lại nợ phải đảm bảo nguyên tắc không phát hành trái phiếu ra thị trường quốc tế để cơ cấu lại nợ bằng đồng Việt Nam.\n4. Đối với phát hành trái phiếu để đầu tư cho các chương trình, dựán, doanh nghiệp phát hành phải đảm bảo duy trì tỷ lệ vốn chủ sở hữu tối thiểu là hai mươi phần trăm (20%) trong tổng mức đầu tư của chương trình, dựán.\n5. Đối với trường hợp doanh nghiệp phát hành trái phiếu ra thị trường quốc tế, ngoài việc tuân thủ quy định của Nghị định này còn phải tuân thủ quy định của pháp luật về vay và trả nợ nước ngoài.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Danh mục phát hành trái phiếu theo nguyên tắc tự vay, tự trả và tự chịu trách nhiệm về hiệu quả sử dụng vốn.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Các hoạt động phát hành trái phiếu phải đảm bảo công khai, minh bạch, công bằng, bảo vệ quyền và lợiích hợp pháp của các nhà đầu tư.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Việc phát hành trái phiếu để cơ cấu lại nợ phải đảm bảo nguyên tắc không phát hành trái phiếu ra thị trường quốc tế để cơ cấu lại nợ bằng đồng Việt Nam.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Đối với phát hành trái phiếu để đầu tư cho các chương trình, dựán, doanh nghiệp phát hành phải đảm bảo duy trì tỷ lệ vốn chủ sở hữu tối thiểu là hai mươi phần trăm (20%) trong tổng mức đầu tư của chương trình, dựán.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Đối với trường hợp doanh nghiệp phát hành trái phiếu ra thị trường quốc tế, ngoài việc tuân thủ quy định của Nghị định này còn phải tuân thủ quy định của pháp luật về vay và trả nợ nước ngoài.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Loại hình và hình thức trái phiếu",
+      "content_raw": "Loại hình và hình thức trái phiếu\n1. Trái phiếu không chuyển đổi\na) Trái phiếu không chuyển đổi là trái phiếu có bảo đảm hoặc trái phiếu không có bảo đảm, trái phiếu kèm theo chứng quyền hoặc trái phiếu không kèm theo chứng quyền;\nb) Đối tượng phát hành trái phiếu không chuyển đổi là công ty cổ phần và công ty trách nhiệm hữu hạn. Đối tượng phát hành trái phiếu không chuyển đổi có kèm chứng quyền là công ty cổ phần.\n2. Trái phiếu chuyển đổi\na) Trái phiếu chuyển đổi là trái phiếu có bảo đảm hoặc trái phiếu không có bảo đảm, trái phiếu kèm theo chứng quyền hoặc trái phiếu không kèm theo chứng quyền;\nb) Đối tượng phát hành trái phiếu chuyển đổi là công ty cổ phần.\n3. Trái phiếu được phát hành dưới hình thức chứng chỉ, bút toán ghi sổ hoặc dữ liệu điện tử.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trái phiếu không chuyển đổi",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trái phiếu không chuyển đổi là trái phiếu có bảo đảm hoặc trái phiếu không có bảo đảm, trái phiếu kèm theo chứng quyền hoặc trái phiếu không kèm theo chứng quyền;"
+            },
+            {
+              "label": "b",
+              "content": "Đối tượng phát hành trái phiếu không chuyển đổi là công ty cổ phần và công ty trách nhiệm hữu hạn. Đối tượng phát hành trái phiếu không chuyển đổi có kèm chứng quyền là công ty cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trái phiếu chuyển đổi",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trái phiếu chuyển đổi là trái phiếu có bảo đảm hoặc trái phiếu không có bảo đảm, trái phiếu kèm theo chứng quyền hoặc trái phiếu không kèm theo chứng quyền;"
+            },
+            {
+              "label": "b",
+              "content": "Đối tượng phát hành trái phiếu chuyển đổi là công ty cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Trái phiếu được phát hành dưới hình thức chứng chỉ, bút toán ghi sổ hoặc dữ liệu điện tử.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Kỳ hạn trái phiếu",
+      "content_raw": "Kỳ hạn trái phiếu\n1. Trái phiếu doanh nghiệp có kỳ hạn từ một (01) năm trở lên.\n2. Doanh nghiệp phát hành quyết định kỳ hạn trái phiếu trên cơ sở nhu cầu sử dụng vốn và công bố tại phươngán phát hành.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trái phiếu doanh nghiệp có kỳ hạn từ một (01) năm trở lên.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp phát hành quyết định kỳ hạn trái phiếu trên cơ sở nhu cầu sử dụng vốn và công bố tại phươngán phát hành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Đồng tiền phát hành và thanh toán trái phiếu",
+      "content_raw": "Đồng tiền phát hành và thanh toán trái phiếu\n1. Đối với trái phiếu phát hành tại thị trường trong nước, đồng tiền phát hành là đồng Việt Nam.\n2. Đối với trái phiếu phát hành ra thị trường quốc tế, đồng tiền phát hành là ngoại tệ tự do chuyển đổi.\n3. Đồng tiền sử dụng để thanh toán gốc, lãi trái phiếu cùng loại với đồng tiền phát hành.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với trái phiếu phát hành tại thị trường trong nước, đồng tiền phát hành là đồng Việt Nam.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đối với trái phiếu phát hành ra thị trường quốc tế, đồng tiền phát hành là ngoại tệ tự do chuyển đổi.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Đồng tiền sử dụng để thanh toán gốc, lãi trái phiếu cùng loại với đồng tiền phát hành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Chuyển nhượng trái phiếu",
+      "content_raw": "Chuyển nhượng trái phiếu\nTrái phiếu chuyển đổi, chứng quyền phát hành kèm theo trái phiếu không được chuyển nhượng trong tối thiểu một (01) năm kể từ ngày hoàn thành đợt phát hành, trừ trường hợp chuyển nhượng cho hoặc chuyển nhượng giữa các nhà đầu tư chứng khoán chuyên nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": []
+    },
+    {
+      "number": 9,
+      "title": "Mệnh giá trái phiếu",
+      "content_raw": "Mệnh giá trái phiếu\nMệnh giá tối thiểu của trái phiếu là một trăm nghìn (100.000) đồng, các mệnh giá khác là bội số của một trăm nghìn (100.000) đồng.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": []
+    },
+    {
+      "number": 10,
+      "title": "Đối tượng mua trái phiếu",
+      "content_raw": "Đối tượng mua trái phiếu\n1. Đối tượng mua trái phiếu là các tổ chức, cá nhân Việt Nam và tổ chức, cá nhân nước ngoài.\n2. Tổ chức của Việt Nam không được sử dụng kinh phí của ngân sách nhà nước để mua trái phiếu.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối tượng mua trái phiếu là các tổ chức, cá nhân Việt Nam và tổ chức, cá nhân nước ngoài.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổ chức của Việt Nam không được sử dụng kinh phí của ngân sách nhà nước để mua trái phiếu.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Quyền lợi của chủ sở hữu trái phiếu",
+      "content_raw": "Quyền lợi của chủ sở hữu trái phiếu\n1. Được doanh nghiệp phát hành bảo đảm thanh toán đầy đủ, đúng hạn gốc, lãi trái phiếu khi đến hạn và đảm bảo việc thực hiện các quyền kèm theo (nếu có).\n2. Được dùng trái phiếu để chuyển nhượng, cho, tặng, để lại thừa kế, chiết khấu, và cầm cố trong các quan hệ dân sự và quan hệ tín dụng theo quy định của pháp luật hiện hành.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Được doanh nghiệp phát hành bảo đảm thanh toán đầy đủ, đúng hạn gốc, lãi trái phiếu khi đến hạn và đảm bảo việc thực hiện các quyền kèm theo (nếu có).",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Được dùng trái phiếu để chuyển nhượng, cho, tặng, để lại thừa kế, chiết khấu, và cầm cố trong các quan hệ dân sự và quan hệ tín dụng theo quy định của pháp luật hiện hành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Lãi suất danh nghĩa trái phiếu",
+      "content_raw": "Lãi suất danh nghĩa trái phiếu\n1. Lãi suất danh nghĩa trái phiếu có thể xác định theo một trong các phương thức sau:\na) Cố định cho cả kỳ hạn trái phiếu;\nb) Thả nổi theo lãi suất thị trường;\nc) Kết hợp giữa lãi suất cố định và thả nổi.\n2. Trường hợp trái phiếu được phát hành theo phương thức lãi suất quy định tại điểm b và c khoản 1 Điều này, doanh nghiệp phát hành phải công bố cơ sở tham chiếu được sử dụng để xác định mức lãi suất danh nghĩa trái phiếu thả nổi tại phươngán phát hành và công bố công khai cho đối tượng mua trái phiếu.\n3. Doanh nghiệp phát hành trái phiếu quyết định lãi suất danh nghĩa trái phiếu cho từng đợt phát hành phù hợp với năng lực và khả năng tài chính của doanh nghiệp. Riêng đối với các tổ chức tín dụng, việc xác định lãi suất danh nghĩa trái phiếu còn phải tuân thủ quy định của Luật các Tổ chức tín dụng và các văn bản hướng dẫn.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Lãi suất danh nghĩa trái phiếu có thể xác định theo một trong các phương thức sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cố định cho cả kỳ hạn trái phiếu;"
+            },
+            {
+              "label": "b",
+              "content": "Thả nổi theo lãi suất thị trường;"
+            },
+            {
+              "label": "c",
+              "content": "Kết hợp giữa lãi suất cố định và thả nổi."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp trái phiếu được phát hành theo phương thức lãi suất quy định tại điểm b và c khoản 1 Điều này, doanh nghiệp phát hành phải công bố cơ sở tham chiếu được sử dụng để xác định mức lãi suất danh nghĩa trái phiếu thả nổi tại phươngán phát hành và công bố công khai cho đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Doanh nghiệp phát hành trái phiếu quyết định lãi suất danh nghĩa trái phiếu cho từng đợt phát hành phù hợp với năng lực và khả năng tài chính của doanh nghiệp. Riêng đối với các tổ chức tín dụng, việc xác định lãi suất danh nghĩa trái phiếu còn phải tuân thủ quy định của Luật các Tổ chức tín dụng và các văn bản hướng dẫn.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "title": "Điều kiện phát hành trái phiếu",
+      "content_raw": "Điều kiện phát hành trái phiếu\n1. Đối với trái phiếu không chuyển đổi\na) Doanh nghiệp có thời gian hoạt động tối thiểu là một (01) năm kể từ ngày doanh nghiệp chính thức đi vào hoạt động;\nb) Kết quả hoạt động sản xuất, kinh doanh của năm liền kề trước năm phát hành phải có lãi theo báo cáo tài chính được kiểm toán bởi Kiểm toán Nhà nước hoặc tổ chức kiểm toán độc lập được phép hoạt động hợp pháp tại Việt Nam. Báo cáo tài chính được kiểm toán của doanh nghiệp phát hành phải là báo cáo kiểm toán nêuý kiến chấp nhận toàn phần. Trường hợp doanh nghiệp phát hành trái phiếu trước ngày 01 tháng 4 hàng năm chưa có báo cáo tài chính năm của năm liền kề được kiểm toán thì phải có: - Báo cáo tài chính được kiểm toán của năm trước năm liền kề với kết quả hoạt động sản xuất kinh doanh có lãi; - Báo cáo tài chính quý gần nhất với kết quả hoạt động sản xuất kinh doanh có lãi được kiểm toán (nếu có); - Báo cáo tài chính của năm liền kề với kết quả hoạt động sản xuất kinh doanh có lãi được Hội đồng quản trị, Hội đồng thành viên hoặc Chủ tịch công ty phê duyệt theo Điều lệ hoạt động của công ty.\nc) Đápứng yêu cầu về tỷ lệ an toàn vốn và các hạn chế khác về đảm bảo an toàn trong hoạt động đối với các ngành nghề kinh doanh có điều kiện quy định tại pháp luật chuyên ngành;\nd) Có phươngán phát hành trái phiếu được cơ quan có thẩm quyền phê duyệt và chấp thuận quy định tại Điều 14, Điều 15 Nghị định này.\n2. Đối với phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm chứng quyền, doanh nghiệp phát hành ngoài việc đápứng các điều kiện quy định tại khoản 1 Điều này còn phải đápứng các điều kiện sau:\na) Thuộc đối tượng được phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền;\nb) Đảm bảo tỷ lệ tham gia của bên nước ngoài trong các doanh nghiệp Việt Nam theo quy định của pháp luật hiện hành;\nc) Các đợt phát hành trái phiếu chuyển đổi phải cách nhauít nhất sáu (06) tháng.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với trái phiếu không chuyển đổi",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp có thời gian hoạt động tối thiểu là một (01) năm kể từ ngày doanh nghiệp chính thức đi vào hoạt động;"
+            },
+            {
+              "label": "b",
+              "content": "Kết quả hoạt động sản xuất, kinh doanh của năm liền kề trước năm phát hành phải có lãi theo báo cáo tài chính được kiểm toán bởi Kiểm toán Nhà nước hoặc tổ chức kiểm toán độc lập được phép hoạt động hợp pháp tại Việt Nam. Báo cáo tài chính được kiểm toán của doanh nghiệp phát hành phải là báo cáo kiểm toán nêuý kiến chấp nhận toàn phần. Trường hợp doanh nghiệp phát hành trái phiếu trước ngày 01 tháng 4 hàng năm chưa có báo cáo tài chính năm của năm liền kề được kiểm toán thì phải có: - Báo cáo tài chính được kiểm toán của năm trước năm liền kề với kết quả hoạt động sản xuất kinh doanh có lãi; - Báo cáo tài chính quý gần nhất với kết quả hoạt động sản xuất kinh doanh có lãi được kiểm toán (nếu có); - Báo cáo tài chính của năm liền kề với kết quả hoạt động sản xuất kinh doanh có lãi được Hội đồng quản trị, Hội đồng thành viên hoặc Chủ tịch công ty phê duyệt theo Điều lệ hoạt động của công ty."
+            },
+            {
+              "label": "c",
+              "content": "Đápứng yêu cầu về tỷ lệ an toàn vốn và các hạn chế khác về đảm bảo an toàn trong hoạt động đối với các ngành nghề kinh doanh có điều kiện quy định tại pháp luật chuyên ngành;"
+            },
+            {
+              "label": "d",
+              "content": "Có phươngán phát hành trái phiếu được cơ quan có thẩm quyền phê duyệt và chấp thuận quy định tại Điều 14, Điều 15 Nghị định này."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối với phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm chứng quyền, doanh nghiệp phát hành ngoài việc đápứng các điều kiện quy định tại khoản 1 Điều này còn phải đápứng các điều kiện sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thuộc đối tượng được phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền;"
+            },
+            {
+              "label": "b",
+              "content": "Đảm bảo tỷ lệ tham gia của bên nước ngoài trong các doanh nghiệp Việt Nam theo quy định của pháp luật hiện hành;"
+            },
+            {
+              "label": "c",
+              "content": "Các đợt phát hành trái phiếu chuyển đổi phải cách nhauít nhất sáu (06) tháng."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Phươngán phát hành trái phiếu và thẩm quyền phê duyệt",
+      "content_raw": "Phươngán phát hành trái phiếu và thẩm quyền phê duyệt\n1. Doanh nghiệp phát hành phải xây dựng phươngán phát hành trái phiếu trình cấp có thẩm quyền phê duyệt, chấp thuận theo quy định tại khoản 3 Điều này và Điều 15 Nghị định này để làm cơ sở cho việc phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.\n2. Phươngán phát hành trái phiếu phải bao gồm các nội dung cơ bản sau:\na) Thông tin chung về ngành nghề, lĩnh vực kinh doanh, tình hình tài chính và kết quả hoạt động kinh doanh của doanh nghiệp;\nb) Mục đích phát hành trái phiếu và phươngán sử dụng vốn phát hành trái phiếu;\nc) Khối lượng, loại hình, kỳ hạn, lãi suất danh nghĩa trái phiếu dự kiến phát hành;\nd) Tỷ lệ chuyển đổi, thời hạn chuyển đổi, giá chuyển đổi và biên độ biến động giá cổ phiếu (nếu có) đối với phát hành trái phiếu chuyển đổi; giá và thời điểm thực hiện mua cổ phiếu đối với phát hành trái phiếu kèm chứng quyền;\nđ) Phương thức phát hành trái phiếu và các tổ chức tham gia bảo lãnh phát hành, bảo lãnh thanh toán, đại lý phát hành, đại lý thanh toán gốc, lãi trái phiếu;\ne) Kế hoạch bố trí nguồn và phương thức thanh toán gốc, lãi trái phiếu;\ng) Các cam kết khác đối với chủ sở hữu trái phiếu.\n3. Thẩm quyền phê duyệt phươngán phát hành trái phiếu\na) Đối với trái phiếu chuyển đổi và trái phiếu kèm chứng quyền: Đại hội đồng cổ đông phê duyệt phươngán phát hành trái phiếu.\nb) Đối với các loại trái phiếu khác, ngoại trừ trường hợp quy định tại điểm a khoản này: Đại hội đồng cổ đông hoặc Hội đồng quản trị, hoặc Hội đồng thành viên hoặc Chủ tịch công ty phê duyệt phươngán phát hành trái phiếu căn cứ vào mô hình tổ chức của doanh nghiệp và quy định tại Điều lệ doanh nghiệp.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành phải xây dựng phươngán phát hành trái phiếu trình cấp có thẩm quyền phê duyệt, chấp thuận theo quy định tại khoản 3 Điều này và Điều 15 Nghị định này để làm cơ sở cho việc phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phươngán phát hành trái phiếu phải bao gồm các nội dung cơ bản sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thông tin chung về ngành nghề, lĩnh vực kinh doanh, tình hình tài chính và kết quả hoạt động kinh doanh của doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Mục đích phát hành trái phiếu và phươngán sử dụng vốn phát hành trái phiếu;"
+            },
+            {
+              "label": "c",
+              "content": "Khối lượng, loại hình, kỳ hạn, lãi suất danh nghĩa trái phiếu dự kiến phát hành;"
+            },
+            {
+              "label": "d",
+              "content": "Tỷ lệ chuyển đổi, thời hạn chuyển đổi, giá chuyển đổi và biên độ biến động giá cổ phiếu (nếu có) đối với phát hành trái phiếu chuyển đổi; giá và thời điểm thực hiện mua cổ phiếu đối với phát hành trái phiếu kèm chứng quyền;"
+            },
+            {
+              "label": "đ",
+              "content": "Phương thức phát hành trái phiếu và các tổ chức tham gia bảo lãnh phát hành, bảo lãnh thanh toán, đại lý phát hành, đại lý thanh toán gốc, lãi trái phiếu;"
+            },
+            {
+              "label": "e",
+              "content": "Kế hoạch bố trí nguồn và phương thức thanh toán gốc, lãi trái phiếu;"
+            },
+            {
+              "label": "g",
+              "content": "Các cam kết khác đối với chủ sở hữu trái phiếu."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Thẩm quyền phê duyệt phươngán phát hành trái phiếu",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với trái phiếu chuyển đổi và trái phiếu kèm chứng quyền: Đại hội đồng cổ đông phê duyệt phươngán phát hành trái phiếu."
+            },
+            {
+              "label": "b",
+              "content": "Đối với các loại trái phiếu khác, ngoại trừ trường hợp quy định tại điểm a khoản này: Đại hội đồng cổ đông hoặc Hội đồng quản trị, hoặc Hội đồng thành viên hoặc Chủ tịch công ty phê duyệt phươngán phát hành trái phiếu căn cứ vào mô hình tổ chức của doanh nghiệp và quy định tại Điều lệ doanh nghiệp."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước",
+      "content_raw": "Chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước\n1. Ngoài việc tuân thủ quy định tại Điều 14 Nghị định này, phươngán phát hành trái phiếu của doanh nghiệp nhà nước phải được chủ sở hữu xem xét, chấp thuận trước khi tổ chức phát hành, cụ thể như sau:\na) Đối với doanh nghiệp Nhà nước 100% vốn Nhà nước do\nb) Đối với doanh nghiệp Nhà nước 100% vốn Nhà nước do Bộ, ngành hoặcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương quyết định thành lập và làm chủ sở hữu, thì phươngán phát hành trái phiếu phải được Bộ, ngành, hoặcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương xem xét, chấp thuận;\nc) Đối với doanh nghiệp Nhà nước được tổ chức dưới hình thức công ty cổ phần, công ty trách nhiệm hữu hạn từ hai thành viên trở lên, thì phươngán phát hành trái phiếu phải được tổ chức được giao chức năng đại diện phần vốn nhà nước tại doanh nghiệp xem xét chấp thuận.\n2. Hồ sơ đề nghị chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước bao gồm:\na) Văn bản đề nghị chấp thuận phươngán phát hành trái phiếu;\nb) Phươngán phát hành trái phiếu và quyết định phê duyệt phươngán phát hành trái phiếu theo quy định tại Điều 14 Nghị định này;\nc) Báo cáo tài chính được kiểm toán của năm liền kề trước năm phát hành theo quy định tại điểm b khoản 1 Điều 13 Nghị định này.\n3. Thủ tục chấp thuận phươngán phát hành:\na) Doanh nghiệp phát hành gửi hồ sơ đề nghị chấp thuận phươngán phát hành trái phiếu theo quy định tại khoản 2 Điều này đến chủ sở hữu;\nb) Trong vòng năm (5) ngày làm việc kể từ ngày nhận được hồ sơ, chủ sở hữu có trách nhiệm kiểm tra tính đầy đủ và hợp lệ của hồ sơ. Trường hợp hồ sơ không đầy đủ, hợp lệ chủ sở hữu đề nghị doanh nghiệp bổ sung hồ sơ theo quy định;\nc) Trong vòng ba mươi (30) ngày kể từ ngày nhận được hồ sơ đầy đủ, hợp lệ, chủ sở hữu phải cóý kiến trả lời bằng văn bản về việc chấp thuận hoặc không chấp thuận phươngán phát hành trái phiếu của doanh nghiệp. Trường hợp không chấp thuận, chủ sở hữu phải nêu rõ lý do.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Ngoài việc tuân thủ quy định tại Điều 14 Nghị định này, phươngán phát hành trái phiếu của doanh nghiệp nhà nước phải được chủ sở hữu xem xét, chấp thuận trước khi tổ chức phát hành, cụ thể như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với doanh nghiệp Nhà nước 100% vốn Nhà nước do"
+            },
+            {
+              "label": "b",
+              "content": "Đối với doanh nghiệp Nhà nước 100% vốn Nhà nước do Bộ, ngành hoặcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương quyết định thành lập và làm chủ sở hữu, thì phươngán phát hành trái phiếu phải được Bộ, ngành, hoặcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương xem xét, chấp thuận;"
+            },
+            {
+              "label": "c",
+              "content": "Đối với doanh nghiệp Nhà nước được tổ chức dưới hình thức công ty cổ phần, công ty trách nhiệm hữu hạn từ hai thành viên trở lên, thì phươngán phát hành trái phiếu phải được tổ chức được giao chức năng đại diện phần vốn nhà nước tại doanh nghiệp xem xét chấp thuận."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ đề nghị chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Văn bản đề nghị chấp thuận phươngán phát hành trái phiếu;"
+            },
+            {
+              "label": "b",
+              "content": "Phươngán phát hành trái phiếu và quyết định phê duyệt phươngán phát hành trái phiếu theo quy định tại Điều 14 Nghị định này;"
+            },
+            {
+              "label": "c",
+              "content": "Báo cáo tài chính được kiểm toán của năm liền kề trước năm phát hành theo quy định tại điểm b khoản 1 Điều 13 Nghị định này."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Thủ tục chấp thuận phươngán phát hành:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp phát hành gửi hồ sơ đề nghị chấp thuận phươngán phát hành trái phiếu theo quy định tại khoản 2 Điều này đến chủ sở hữu;"
+            },
+            {
+              "label": "b",
+              "content": "Trong vòng năm (5) ngày làm việc kể từ ngày nhận được hồ sơ, chủ sở hữu có trách nhiệm kiểm tra tính đầy đủ và hợp lệ của hồ sơ. Trường hợp hồ sơ không đầy đủ, hợp lệ chủ sở hữu đề nghị doanh nghiệp bổ sung hồ sơ theo quy định;"
+            },
+            {
+              "label": "c",
+              "content": "Trong vòng ba mươi (30) ngày kể từ ngày nhận được hồ sơ đầy đủ, hợp lệ, chủ sở hữu phải cóý kiến trả lời bằng văn bản về việc chấp thuận hoặc không chấp thuận phươngán phát hành trái phiếu của doanh nghiệp. Trường hợp không chấp thuận, chủ sở hữu phải nêu rõ lý do."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "Hồ sơ phát hành trái phiếu",
+      "content_raw": "Hồ sơ phát hành trái phiếu\n1. Hồ sơ phát hành trái phiếu do doanh nghiệp phát hành chuẩn bị để đăng ký phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.\n2. Hồ sơ phát hành trái phiếu bao gồm:\na) Phươngán phát hành trái phiếu và quyết định phê duyệt, chấp thuận phươngán phát hành trái phiếu của các cấp có thẩm quyền quy định tại Điều 14, Điều 15 Nghị định này;\nb) Các tài liệu và văn bản pháp lý chứng minh doanh nghiệp đủ điều kiện để phát hành trái phiếu theo quy định tại Điều 13 Nghị định này;\nc) Kết quả xếp loại của tổ chức định mức tín nhiệm đối với tổ chức phát hành trái phiếu và loại trái phiếu phát hành (nếu có);\nd) Các hợp đồng bảo lãnh phát hành, bảo lãnh thanh toán, hợp đồng đại lý và các tài liệu liên quan khác (nếu có).\nđ) Văn bản pháp lý chứng minh các dựán sử dụng nguồn vốn trái phiếu đã hoàn thành các thủ tục về đầu tư và đã có quyết định đầu tư của cấp có thẩm quyền trong trường hợp phát hành trái phiếu để thực hiện các chương trình, dựán đầu tư của doanh nghiệp.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hồ sơ phát hành trái phiếu do doanh nghiệp phát hành chuẩn bị để đăng ký phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ phát hành trái phiếu bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Phươngán phát hành trái phiếu và quyết định phê duyệt, chấp thuận phươngán phát hành trái phiếu của các cấp có thẩm quyền quy định tại Điều 14, Điều 15 Nghị định này;"
+            },
+            {
+              "label": "b",
+              "content": "Các tài liệu và văn bản pháp lý chứng minh doanh nghiệp đủ điều kiện để phát hành trái phiếu theo quy định tại Điều 13 Nghị định này;"
+            },
+            {
+              "label": "c",
+              "content": "Kết quả xếp loại của tổ chức định mức tín nhiệm đối với tổ chức phát hành trái phiếu và loại trái phiếu phát hành (nếu có);"
+            },
+            {
+              "label": "d",
+              "content": "Các hợp đồng bảo lãnh phát hành, bảo lãnh thanh toán, hợp đồng đại lý và các tài liệu liên quan khác (nếu có)."
+            },
+            {
+              "label": "đ",
+              "content": "Văn bản pháp lý chứng minh các dựán sử dụng nguồn vốn trái phiếu đã hoàn thành các thủ tục về đầu tư và đã có quyết định đầu tư của cấp có thẩm quyền trong trường hợp phát hành trái phiếu để thực hiện các chương trình, dựán đầu tư của doanh nghiệp."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Phương thức phát hành trái phiếu",
+      "content_raw": "Phương thức phát hành trái phiếu\n1. Trái phiếu được phát hành thông qua các phương thức sau:\na) Đấu thầu phát hành trái phiếu;\nb) Bảo lãnh phát hành trái phiếu;\nc) Đại lý phát hành trái phiếu;\nd) Bán trực tiếp cho nhà đầu tư trái phiếu (đối với doanh nghiệp phát hành là tổ chức tín dụng).\n2. Bộ Tài chính hướng dẫn cụ thể về các phương thức phát hành trái phiếu.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trái phiếu được phát hành thông qua các phương thức sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đấu thầu phát hành trái phiếu;"
+            },
+            {
+              "label": "b",
+              "content": "Bảo lãnh phát hành trái phiếu;"
+            },
+            {
+              "label": "c",
+              "content": "Đại lý phát hành trái phiếu;"
+            },
+            {
+              "label": "d",
+              "content": "Bán trực tiếp cho nhà đầu tư trái phiếu (đối với doanh nghiệp phát hành là tổ chức tín dụng)."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Bộ Tài chính hướng dẫn cụ thể về các phương thức phát hành trái phiếu.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Đối tượng tham gia đấu thầu, bảo lãnh, đại lý phát hành",
+      "content_raw": "Đối tượng tham gia đấu thầu, bảo lãnh, đại lý phát hành\nĐối tượng tham gia đấu thầu, bảo lãnh phát hành, đại lý phát hành trái phiếu doanh nghiệp gồm các công ty chứng khoán, tổ chức tín dụng và các định chế tài chính khác được phép cung cấp dịch vụ đấu thầu, bảo lãnh và đại lý phát hành theo quy định của pháp luật hiện hành.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": []
+    },
+    {
+      "number": 19,
+      "title": "Lưu ký, niêm yết và giao dịch trái phiếu",
+      "content_raw": "Lưu ký, niêm yết và giao dịch trái phiếu\n1. Trái phiếu được lưu ký tại các tổ chức được phép lưu ký chứng khoán hoặc được ký gửi tại các tổ chức tín dụng theo yêu cầu của chủ sở hữu trái phiếu.\n2. Trái phiếu được niêm yết và giao dịch tại Sở Giao dịch chứng khoán. Việc lưu ký, niêm yết và giao dịch trái phiếu thực hiện theo quy định của pháp luật chứng khoán.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trái phiếu được lưu ký tại các tổ chức được phép lưu ký chứng khoán hoặc được ký gửi tại các tổ chức tín dụng theo yêu cầu của chủ sở hữu trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trái phiếu được niêm yết và giao dịch tại Sở Giao dịch chứng khoán. Việc lưu ký, niêm yết và giao dịch trái phiếu thực hiện theo quy định của pháp luật chứng khoán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "Chi phí phát hành, thanh toán trái phiếu",
+      "content_raw": "Chi phí phát hành, thanh toán trái phiếu\n1. Chi phí phát hành, thanh toán trái phiếu do doanh nghiệp phát hành chi trả và được hạch toán vào giá trị của dựán sử dụng nguồn vốn phát hành trái phiếu hoặc chi phí kinh doanh của doanh nghiệp tùy theo mục đích sử dụng.\n2. Phí đấu thầu, bảo lãnh, đại lý phát hành trái phiếu do doanh nghiệp phát hành thỏa thuận với tổ chức nhận đấu thầu, bảo lãnh, đại lý phát hành; doanh nghiệp phát hành chịu trách nhiệm trả phí cho tổ chức nhận đấu thầu, bảo lãnh, đại lý phát hành đảm bảo công khai minh bạch.\n3. Việc hạch toán chi phí phát hành, thanh toán trái phiếu doanh nghiệp được thực hiện theo quy định của pháp luật hiện hành.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chi phí phát hành, thanh toán trái phiếu do doanh nghiệp phát hành chi trả và được hạch toán vào giá trị của dựán sử dụng nguồn vốn phát hành trái phiếu hoặc chi phí kinh doanh của doanh nghiệp tùy theo mục đích sử dụng.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phí đấu thầu, bảo lãnh, đại lý phát hành trái phiếu do doanh nghiệp phát hành thỏa thuận với tổ chức nhận đấu thầu, bảo lãnh, đại lý phát hành; doanh nghiệp phát hành chịu trách nhiệm trả phí cho tổ chức nhận đấu thầu, bảo lãnh, đại lý phát hành đảm bảo công khai minh bạch.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Việc hạch toán chi phí phát hành, thanh toán trái phiếu doanh nghiệp được thực hiện theo quy định của pháp luật hiện hành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "title": "Thanh toán gốc, lãi trái phiếu",
+      "content_raw": "Thanh toán gốc, lãi trái phiếu\n1. Doanh nghiệp phát hành bố trí nguồn thanh toán gốc, lãi trái phiếu từ các nguồn vốn hợp pháp của doanh nghiệp.\n2. Đối với trái phiếu được bảo đảm bằng tài sản của doanh nghiệp phát hành hoặc tài sản bên thứ ba, khi doanh nghiệp phát hành không cân đối được nguồn trả nợ gốc, lãi trái phiếu thì các tài sản bảo đảm sẽ được phát mại để thanh toán gốc, lãi trái phiếu khi đến hạn theo quy định của pháp luật hiện hành.\n3. Đối với trái phiếu được các tổ chức tài chính, tổ chức tín dụng bảo lãnh thanh toán, khi doanh nghiệp phát hành không cân đối được nguồn trả nợ gốc và lãi trái phiếu, các tổ chức bảo lãnh thanh toán có trách nhiệm bố trí nguồn vốn để thanh toán gốc, lãi cho chủ sở hữu trái phiếu theo hợp đồng thỏa thuận giữa doanh nghiệp phát hành và tổ chức bảo lãnh thanh toán.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành bố trí nguồn thanh toán gốc, lãi trái phiếu từ các nguồn vốn hợp pháp của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đối với trái phiếu được bảo đảm bằng tài sản của doanh nghiệp phát hành hoặc tài sản bên thứ ba, khi doanh nghiệp phát hành không cân đối được nguồn trả nợ gốc, lãi trái phiếu thì các tài sản bảo đảm sẽ được phát mại để thanh toán gốc, lãi trái phiếu khi đến hạn theo quy định của pháp luật hiện hành.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Đối với trái phiếu được các tổ chức tài chính, tổ chức tín dụng bảo lãnh thanh toán, khi doanh nghiệp phát hành không cân đối được nguồn trả nợ gốc và lãi trái phiếu, các tổ chức bảo lãnh thanh toán có trách nhiệm bố trí nguồn vốn để thanh toán gốc, lãi cho chủ sở hữu trái phiếu theo hợp đồng thỏa thuận giữa doanh nghiệp phát hành và tổ chức bảo lãnh thanh toán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "title": "Mua lại, hoán đổi trái phiếu",
+      "content_raw": "Mua lại, hoán đổi trái phiếu\n1. Doanh nghiệp phát hành chỉ được thực hiện mua lại trái phiếu trước hạn, hoặc hoán đổi trái phiếu để cơ cấu lại nợ, khi có phươngán mua lại hoặc hoán đổi được cấp có thẩm quyền phê duyệt trên cơ sở thỏa thuận giữa doanh nghiệp phát hành và chủ sở hữu trái phiếu.\n2. Tổ chức, cá nhân có thẩm quyền phê duyệt, chấp thuận phươngán phát hành trái phiếu quy định tại Điều 14, Điều 15 Nghị định này cũng chính là tổ chức, cá nhân có thẩm quyền phê duyệt, chấp thuận phươngán mua lại hoặc hoán đổi trái phiếu.\n3. Ngân hàng Nhà nước Việt Nam hướng dẫn cụ thể việc mua lại, hoán đổi trái phiếu do tổ chức tín dụng phát hành.",
+      "chapter": "II",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU TRONG NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành chỉ được thực hiện mua lại trái phiếu trước hạn, hoặc hoán đổi trái phiếu để cơ cấu lại nợ, khi có phươngán mua lại hoặc hoán đổi được cấp có thẩm quyền phê duyệt trên cơ sở thỏa thuận giữa doanh nghiệp phát hành và chủ sở hữu trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổ chức, cá nhân có thẩm quyền phê duyệt, chấp thuận phươngán phát hành trái phiếu quy định tại Điều 14, Điều 15 Nghị định này cũng chính là tổ chức, cá nhân có thẩm quyền phê duyệt, chấp thuận phươngán mua lại hoặc hoán đổi trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Ngân hàng Nhà nước Việt Nam hướng dẫn cụ thể việc mua lại, hoán đổi trái phiếu do tổ chức tín dụng phát hành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "title": "Điều kiện phát hành trái phiếu",
+      "content_raw": "Điều kiện phát hành trái phiếu\n1. Đối với trái phiếu không chuyển đổi\na) Doanh nghiệp phát hành có thời gian hoạt động tối thiểu là ba (03) năm kể từ ngày chính thức đi vào hoạt động;\nb) Kết quả hoạt động sản xuất, kinh doanh của ba (03) năm liên tiếp liền kề trước năm phát hành phải có lãi theo báo cáo tài chính được kiểm toán bởi Kiểm toán Nhà nước hoặc tổ chức kiểm toán độc lập được phép hoạt động hợp phápở Việt Nam. Báo cáo tài chính được kiểm toán của doanh nghiệp phát hành trong 3 năm liên tiếp liền kề trước năm phát hành phải là báo cáo kiểm toán nêuý kiến chấp nhận toàn phần;\nc) Đápứng yêu cầu về tỷ lệ an toàn vốn và các hạn chế khác về đảm bảo an toàn trong hoạt động đối với các ngành nghề kinh doanh có điều kiện quy định tại pháp luật chuyên ngành;\nd) Trị giá phát hành trái phiếu quốc tế phải được Ngân hàng Nhà nước xác nhận thuộc tổng hạn mức vay thương mại nước ngoài hàng năm được\nđ) Đápứng yêu cầu của thị trường quốc tế về hệ số tín nhiệm để phát hành trái phiếu. Riêng đối với doanh nghiệp nhà nước phải đảm bảo có hệ số tín nhiệm tối thiểu bằng hệ số tín nhiệm quốc gia;\ne) Phươngán phát hành trái phiếu được cơ quan có thẩm quyền phê duyệt và chấp thuận quy định tại Điều 24 và Điều 26 Nghị định này;\ng) Doanh nghiệp phát hành đã hoàn chỉnh hồ sơ phát hành theo đúng luật pháp của thị trường phát hànháp dụng cho từng đợt, từng hình thức phát hành.\n2. Đối với trái phiếu chuyển đổi và trái phiếu kèm chứng quyền: Doanh nghiệp phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền ngoài việc đápứng các điều kiện quy định tại khoản 1 Điều này còn phải đápứng các điều kiện sau:\na) Thuộc đối tượng được phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền;\nb) Đảm bảo tỷ lệ tham gia của bên nước ngoài trong các doanh nghiệp Việt Nam theo quy định của pháp luật hiện hành;\nc) Các đợt phát hành trái phiếu chuyển đổi phải cách nhauít nhất sáu (06) tháng.",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với trái phiếu không chuyển đổi",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp phát hành có thời gian hoạt động tối thiểu là ba (03) năm kể từ ngày chính thức đi vào hoạt động;"
+            },
+            {
+              "label": "b",
+              "content": "Kết quả hoạt động sản xuất, kinh doanh của ba (03) năm liên tiếp liền kề trước năm phát hành phải có lãi theo báo cáo tài chính được kiểm toán bởi Kiểm toán Nhà nước hoặc tổ chức kiểm toán độc lập được phép hoạt động hợp phápở Việt Nam. Báo cáo tài chính được kiểm toán của doanh nghiệp phát hành trong 3 năm liên tiếp liền kề trước năm phát hành phải là báo cáo kiểm toán nêuý kiến chấp nhận toàn phần;"
+            },
+            {
+              "label": "c",
+              "content": "Đápứng yêu cầu về tỷ lệ an toàn vốn và các hạn chế khác về đảm bảo an toàn trong hoạt động đối với các ngành nghề kinh doanh có điều kiện quy định tại pháp luật chuyên ngành;"
+            },
+            {
+              "label": "d",
+              "content": "Trị giá phát hành trái phiếu quốc tế phải được Ngân hàng Nhà nước xác nhận thuộc tổng hạn mức vay thương mại nước ngoài hàng năm được"
+            },
+            {
+              "label": "đ",
+              "content": "Đápứng yêu cầu của thị trường quốc tế về hệ số tín nhiệm để phát hành trái phiếu. Riêng đối với doanh nghiệp nhà nước phải đảm bảo có hệ số tín nhiệm tối thiểu bằng hệ số tín nhiệm quốc gia;"
+            },
+            {
+              "label": "e",
+              "content": "Phươngán phát hành trái phiếu được cơ quan có thẩm quyền phê duyệt và chấp thuận quy định tại Điều 24 và Điều 26 Nghị định này;"
+            },
+            {
+              "label": "g",
+              "content": "Doanh nghiệp phát hành đã hoàn chỉnh hồ sơ phát hành theo đúng luật pháp của thị trường phát hànháp dụng cho từng đợt, từng hình thức phát hành."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối với trái phiếu chuyển đổi và trái phiếu kèm chứng quyền: Doanh nghiệp phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền ngoài việc đápứng các điều kiện quy định tại khoản 1 Điều này còn phải đápứng các điều kiện sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thuộc đối tượng được phát hành trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền;"
+            },
+            {
+              "label": "b",
+              "content": "Đảm bảo tỷ lệ tham gia của bên nước ngoài trong các doanh nghiệp Việt Nam theo quy định của pháp luật hiện hành;"
+            },
+            {
+              "label": "c",
+              "content": "Các đợt phát hành trái phiếu chuyển đổi phải cách nhauít nhất sáu (06) tháng."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "title": "Phươngán phát hành trái phiếu và thẩm quyền phê duyệt",
+      "content_raw": "Phươngán phát hành trái phiếu và thẩm quyền phê duyệt\n1. Doanh nghiệp phát hành xây dựng phươngán phát hành trái phiếu trình cấp có thẩm quyền phê duyệt, chấp thuận theo quy định tại Điều này và Điều 26 Nghị định này để làm cơ sở cho việc phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.\n2. Phươngán phát hành trái phiếu bao gồm các nội dung quy định tại khoản 2 Điều 14 Nghị định này và các nội dung sau:\na) Dự kiến đồng tiền phát hành và thanh toán trái phiếu;\nb) Dự kiến thị trường phát hành, phân tích về điều kiện thị trường phát hành và việc đápứng các điều kiện của thị trường phát hành;\nc) Dự kiến lựa chọn nhà bảo lãnh phát hành, tư vấn pháp lý, các đại lý liên quan;\nd) Kế hoạch bố trí nguồn vốn, phương thức thanh toán gốc, lãi, và xử lý các rủi ro tài chính.\n3. Thẩm quyền phê duyệt phươngán phát hành trái phiếu\na) Đối với trái phiếu chuyển đổi và trái phiếu kèm chứng quyền: Đại hội đồng cổ đông phê duyệt phươngán phát hành trái phiếu.\nb) Đối với các loại trái phiếu khác, ngoại trừ trường hợp quy định tại điểm a khoản này: Đại hội đồng cổ đông hoặc Hội đồng quản trị, hoặc Hội đồng thành viên hoặc Chủ tịch công ty phê duyệt phươngán phát hành trái phiếu căn cứ vào mô hình tổ chức của doanh nghiệp và theo quy định tại Điều lệ doanh nghiệp.",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành xây dựng phươngán phát hành trái phiếu trình cấp có thẩm quyền phê duyệt, chấp thuận theo quy định tại Điều này và Điều 26 Nghị định này để làm cơ sở cho việc phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phươngán phát hành trái phiếu bao gồm các nội dung quy định tại khoản 2 Điều 14 Nghị định này và các nội dung sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Dự kiến đồng tiền phát hành và thanh toán trái phiếu;"
+            },
+            {
+              "label": "b",
+              "content": "Dự kiến thị trường phát hành, phân tích về điều kiện thị trường phát hành và việc đápứng các điều kiện của thị trường phát hành;"
+            },
+            {
+              "label": "c",
+              "content": "Dự kiến lựa chọn nhà bảo lãnh phát hành, tư vấn pháp lý, các đại lý liên quan;"
+            },
+            {
+              "label": "d",
+              "content": "Kế hoạch bố trí nguồn vốn, phương thức thanh toán gốc, lãi, và xử lý các rủi ro tài chính."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Thẩm quyền phê duyệt phươngán phát hành trái phiếu",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với trái phiếu chuyển đổi và trái phiếu kèm chứng quyền: Đại hội đồng cổ đông phê duyệt phươngán phát hành trái phiếu."
+            },
+            {
+              "label": "b",
+              "content": "Đối với các loại trái phiếu khác, ngoại trừ trường hợp quy định tại điểm a khoản này: Đại hội đồng cổ đông hoặc Hội đồng quản trị, hoặc Hội đồng thành viên hoặc Chủ tịch công ty phê duyệt phươngán phát hành trái phiếu căn cứ vào mô hình tổ chức của doanh nghiệp và theo quy định tại Điều lệ doanh nghiệp."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "title": "Xác nhận và đăng ký khoản vay phát hành trái phiếu quốc tế",
+      "content_raw": "Xác nhận và đăng ký khoản vay phát hành trái phiếu quốc tế\n1. Doanh nghiệp phát hành trái phiếu ra thị trường quốc tế phải làm thủ tục xác nhận và đăng ký khoản vay thương mại nước ngoài với Ngân hàng Nhà nước Việt Nam.\n2. Hồ sơ xác nhận và đăng ký khoản vay phát hành trái phiếu quốc tế bao gồm văn bản đề nghị của doanh nghiệp và phươngán phát hành trái phiếu đã được phê duyệt theo quy định tại Điều 24 Nghị định này.\n3. Trình tự, thủ tục xác nhận và đăng ký khoản vay:\na) Doanh nghiệp phát hành gửi hồ sơ đề nghị xác nhận và đăng ký khoản vay phát hành trái phiếu quốc tế theo quy định tại khoản 2 Điều này đến Ngân hàng Nhà nước Việt Nam.\nb) Trong vòng năm (5) ngày làm việc kể từ ngày nhận được hồ sơ, Ngân hàng Nhà nước Việt Nam kiểm tra tính đầy đủ, hợp lệ của hồ sơ. Trường hợp hồ sơ không đầy đủ, hợp lệ Ngân hàng Nhà nước Việt Nam đề nghị doanh nghiệp bổ sung, sửa đổi.\nc) Trong vòng mười (10) ngày kể từ ngày nhận được hồ sơ đầy đủ, hợp lệ, Ngân hàng Nhà nước Việt Nam trả lời doanh nghiệp bằng văn bản về việc xác nhận khoản vay phát hành trái phiếu quốc tế thuộc tổng hạn mức vay thương mại nước ngoài hàng năm của quốc gia được",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành trái phiếu ra thị trường quốc tế phải làm thủ tục xác nhận và đăng ký khoản vay thương mại nước ngoài với Ngân hàng Nhà nước Việt Nam.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ xác nhận và đăng ký khoản vay phát hành trái phiếu quốc tế bao gồm văn bản đề nghị của doanh nghiệp và phươngán phát hành trái phiếu đã được phê duyệt theo quy định tại Điều 24 Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trình tự, thủ tục xác nhận và đăng ký khoản vay:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp phát hành gửi hồ sơ đề nghị xác nhận và đăng ký khoản vay phát hành trái phiếu quốc tế theo quy định tại khoản 2 Điều này đến Ngân hàng Nhà nước Việt Nam."
+            },
+            {
+              "label": "b",
+              "content": "Trong vòng năm (5) ngày làm việc kể từ ngày nhận được hồ sơ, Ngân hàng Nhà nước Việt Nam kiểm tra tính đầy đủ, hợp lệ của hồ sơ. Trường hợp hồ sơ không đầy đủ, hợp lệ Ngân hàng Nhà nước Việt Nam đề nghị doanh nghiệp bổ sung, sửa đổi."
+            },
+            {
+              "label": "c",
+              "content": "Trong vòng mười (10) ngày kể từ ngày nhận được hồ sơ đầy đủ, hợp lệ, Ngân hàng Nhà nước Việt Nam trả lời doanh nghiệp bằng văn bản về việc xác nhận khoản vay phát hành trái phiếu quốc tế thuộc tổng hạn mức vay thương mại nước ngoài hàng năm của quốc gia được"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "title": "Thẩm định, chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước",
+      "content_raw": "Thẩm định, chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước\n1. Đối với doanh nghiệp nhà nước, ngoài việc tuân thủ quy định tại Điều 24 Nghị định này, phươngán phát hành trái phiếu ra thị trường quốc tế phải được chủ sở hữu thẩm định và trình\na) Đối với doanh nghiệp Nhà nước 100% vốn Nhà nước do\nb) Đối với doanh nghiệp nhà nước 100% vốn nhà nước do Bộ, ngành hoặcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương quyết định thành lập và làm chủ sở hữu, thì phươngán phát hành trái phiếu phải được Bộ, ngành hoặcỦy ban nhân dân tỉnh, thành phố thẩm định và trình\nc) Đối với doanh nghiệp Nhà nước được tổ chức dưới hình thức công ty cổ phần, công ty trách nhiệm hữu hạn từ hai thành viên trở lên, thì phươngán phát hành trái phiếu phải được tổ chức được giao chức năng đại diện phần vốn nhà nước tại doanh nghiệp thẩm định và trình\n2. Hồ sơ đề nghị thẩm định phươngán phát hành trái phiếu ra thị trường quốc tế của doanh nghiệp nhà nước bao gồm:\na) Văn bản đề nghị chấp thuận phươngán phát hành trái phiếu;\nb) Phươngán phát hành trái phiếu và quyết định phê duyệt phươngán phát hành trái phiếu theo quy định tại Điều 24 Nghị định này;\nc) Báo cáo tài chính được kiểm toán của ba (03) năm liên tiếp liền kề trước năm phát hành được kiểm toán theo quy định tại điểm b khoản 1 Điều 23 Nghị định này.\n3. Thủ tục thẩm định, chấp thuận phươngán phát hành:\na) Doanh nghiệp phát hành gửi hồ sơ đề nghị chấp thuận phươngán phát hành trái phiếu theo quy định tại khoản 2 Điều này đến đơn vị có trách nhiệm thẩm định theo quy định tại khoản 1 Điều này.\nb) Trong vòng năm (5) ngày làm việc kể từ ngày nhận được hồ sơ, đơn vị thẩm định có trách nhiệm kiểm tra tính đầy đủ và hợp lệ của hồ sơ. Trường hợp hồ sơ không đầy đủ, hợp lệ đề nghị doanh nghiệp bổ sung, sửa đổi hồ sơ theo quy định.\nc) Trong vòng ba mươi (30) ngày kể từ ngày nhận được hồ sơ đầy đủ, hợp lệ, đơn vị có trách nhiệm thẩm định phải cóý kiến bằng văn bản về kết quả thẩm định phươngán phát hành trái phiếu đồng thời làm thủ tục báo cáo\nd) Trong thời hạn mười lăm (15) ngày kể từ ngày nhận được kết quả thẩm định bằng văn bản của đơn vị thẩm định kèm theo hồ sơ phát hành,",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với doanh nghiệp nhà nước, ngoài việc tuân thủ quy định tại Điều 24 Nghị định này, phươngán phát hành trái phiếu ra thị trường quốc tế phải được chủ sở hữu thẩm định và trình",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với doanh nghiệp Nhà nước 100% vốn Nhà nước do"
+            },
+            {
+              "label": "b",
+              "content": "Đối với doanh nghiệp nhà nước 100% vốn nhà nước do Bộ, ngành hoặcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương quyết định thành lập và làm chủ sở hữu, thì phươngán phát hành trái phiếu phải được Bộ, ngành hoặcỦy ban nhân dân tỉnh, thành phố thẩm định và trình"
+            },
+            {
+              "label": "c",
+              "content": "Đối với doanh nghiệp Nhà nước được tổ chức dưới hình thức công ty cổ phần, công ty trách nhiệm hữu hạn từ hai thành viên trở lên, thì phươngán phát hành trái phiếu phải được tổ chức được giao chức năng đại diện phần vốn nhà nước tại doanh nghiệp thẩm định và trình"
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ đề nghị thẩm định phươngán phát hành trái phiếu ra thị trường quốc tế của doanh nghiệp nhà nước bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Văn bản đề nghị chấp thuận phươngán phát hành trái phiếu;"
+            },
+            {
+              "label": "b",
+              "content": "Phươngán phát hành trái phiếu và quyết định phê duyệt phươngán phát hành trái phiếu theo quy định tại Điều 24 Nghị định này;"
+            },
+            {
+              "label": "c",
+              "content": "Báo cáo tài chính được kiểm toán của ba (03) năm liên tiếp liền kề trước năm phát hành được kiểm toán theo quy định tại điểm b khoản 1 Điều 23 Nghị định này."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Thủ tục thẩm định, chấp thuận phươngán phát hành:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp phát hành gửi hồ sơ đề nghị chấp thuận phươngán phát hành trái phiếu theo quy định tại khoản 2 Điều này đến đơn vị có trách nhiệm thẩm định theo quy định tại khoản 1 Điều này."
+            },
+            {
+              "label": "b",
+              "content": "Trong vòng năm (5) ngày làm việc kể từ ngày nhận được hồ sơ, đơn vị thẩm định có trách nhiệm kiểm tra tính đầy đủ và hợp lệ của hồ sơ. Trường hợp hồ sơ không đầy đủ, hợp lệ đề nghị doanh nghiệp bổ sung, sửa đổi hồ sơ theo quy định."
+            },
+            {
+              "label": "c",
+              "content": "Trong vòng ba mươi (30) ngày kể từ ngày nhận được hồ sơ đầy đủ, hợp lệ, đơn vị có trách nhiệm thẩm định phải cóý kiến bằng văn bản về kết quả thẩm định phươngán phát hành trái phiếu đồng thời làm thủ tục báo cáo"
+            },
+            {
+              "label": "d",
+              "content": "Trong thời hạn mười lăm (15) ngày kể từ ngày nhận được kết quả thẩm định bằng văn bản của đơn vị thẩm định kèm theo hồ sơ phát hành,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "title": "Hồ sơ phát hành trái phiếu",
+      "content_raw": "Hồ sơ phát hành trái phiếu\n1. Hồ sơ phát hành là các tài liệu pháp lý do doanh nghiệp phát hành phối hợp cùng các tư vấn pháp lý và các tổ chức có liên quan chuẩn bị theo quy định của luật pháp tại thị trường phát hành và quy định tại Nghị định này. Doanh nghiệp sử dụng hồ sơ phát hành để đăng ký phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.\n2. Hồ sơ phát hành bao gồm các tài liệu sau:\na) Phươngán phát hành trái phiếu đã được cấp có thẩm quyền phê duyệt, và chấp thuận theo quy định tại Nghị định này;\nb) Bản cáo bạch;\nc) Hợp đồng bảo lãnh phát hành; hợp đồng bảo lãnh thanh toán, hợp đồng đại lý thanh toán (nếu có);\nd) Hợp đồng tư vấn pháp lý;\nđ) Ý kiến pháp lý;\ne) Các thỏa thuận đại lý;\ng) Văn bản pháp lý chứng minh các dựán sử dụng nguồn vốn trái phiếu quốc tế đã hoàn thành các thủ tục về đầu tư và đã có quyết định đầu tư của cấp có thẩm quyền trong trường hợp phát hành trái phiếu để thực hiện các chương trình, dựán đầu tư của doanh nghiệp;\nh) Xác nhận của công ty đánh giá hệ số tín nhiệm về hệ số tín nhiệm của doanh nghiệp phát hành;\ni) Xác nhận của Ngân hàng Nhà nước về việc doanh nghiệp đã đăng ký trị giá trái phiếu phát hành ra thị trường quốc tế thuộc tổng hạn mức vay thương mại nước ngoài hàng năm của quốc gia được\nk) Các tài liệu khác theo quy định tại thị trường phát hành.",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hồ sơ phát hành là các tài liệu pháp lý do doanh nghiệp phát hành phối hợp cùng các tư vấn pháp lý và các tổ chức có liên quan chuẩn bị theo quy định của luật pháp tại thị trường phát hành và quy định tại Nghị định này. Doanh nghiệp sử dụng hồ sơ phát hành để đăng ký phát hành trái phiếu và công bố cho các đối tượng mua trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ phát hành bao gồm các tài liệu sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Phươngán phát hành trái phiếu đã được cấp có thẩm quyền phê duyệt, và chấp thuận theo quy định tại Nghị định này;"
+            },
+            {
+              "label": "b",
+              "content": "Bản cáo bạch;"
+            },
+            {
+              "label": "c",
+              "content": "Hợp đồng bảo lãnh phát hành; hợp đồng bảo lãnh thanh toán, hợp đồng đại lý thanh toán (nếu có);"
+            },
+            {
+              "label": "d",
+              "content": "Hợp đồng tư vấn pháp lý;"
+            },
+            {
+              "label": "đ",
+              "content": "Ý kiến pháp lý;"
+            },
+            {
+              "label": "e",
+              "content": "Các thỏa thuận đại lý;"
+            },
+            {
+              "label": "g",
+              "content": "Văn bản pháp lý chứng minh các dựán sử dụng nguồn vốn trái phiếu quốc tế đã hoàn thành các thủ tục về đầu tư và đã có quyết định đầu tư của cấp có thẩm quyền trong trường hợp phát hành trái phiếu để thực hiện các chương trình, dựán đầu tư của doanh nghiệp;"
+            },
+            {
+              "label": "h",
+              "content": "Xác nhận của công ty đánh giá hệ số tín nhiệm về hệ số tín nhiệm của doanh nghiệp phát hành;"
+            },
+            {
+              "label": "i",
+              "content": "Xác nhận của Ngân hàng Nhà nước về việc doanh nghiệp đã đăng ký trị giá trái phiếu phát hành ra thị trường quốc tế thuộc tổng hạn mức vay thương mại nước ngoài hàng năm của quốc gia được"
+            },
+            {
+              "label": "k",
+              "content": "Các tài liệu khác theo quy định tại thị trường phát hành."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "title": "Tổ chức phát hành trái phiếu",
+      "content_raw": "Tổ chức phát hành trái phiếu\n1. Việc phát hành trái phiếu ra thị trường quốc tế chỉ được thực hiện khi doanh nghiệp phát hành đã đápứng được các quy định nêu tại Điều 23, 24, 25, 26, 27, 30 của Nghị định này đồng thời đápứng được các điều kiện phát hành theo quy định tại thị trường phát hành.\n2. Doanh nghiệp phát hành phối hợp với tổ chức bảo lãnh phát hành, các đại lý và tư vấn pháp lý tổ chức thực hiện phát hành trái phiếu theo các quy định tại thị trường phát hành.",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Việc phát hành trái phiếu ra thị trường quốc tế chỉ được thực hiện khi doanh nghiệp phát hành đã đápứng được các quy định nêu tại Điều 23, 24, 25, 26, 27, 30 của Nghị định này đồng thời đápứng được các điều kiện phát hành theo quy định tại thị trường phát hành.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp phát hành phối hợp với tổ chức bảo lãnh phát hành, các đại lý và tư vấn pháp lý tổ chức thực hiện phát hành trái phiếu theo các quy định tại thị trường phát hành.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "title": "Thanh toán gốc, lãi trái phiếu",
+      "content_raw": "Thanh toán gốc, lãi trái phiếu\n1. Doanh nghiệp phát hành chuyển tiền trực tiếp cho đại lý thanh toán theo thỏa thuận đã ký để thanh toán gốc, lãi trái phiếu khi đến hạn cho chủ sở hữu trái phiếu.\n2. Doanh nghiệp phát hành thực hiện việc mở và sử dụng tài khoản vốn vay và trả nợ nước ngoài để thực hiện nhận tiền phát hành trái phiếu, thực hiện trả gốc, lãi trái phiếu theo quy định của pháp luật về quản lý ngoại hối.",
+      "chapter": "III",
+      "chapter_title": "PHÁT HÀNH TRÁI PHIẾU RA THỊ TRƯỜNG QUỐC TẾ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành chuyển tiền trực tiếp cho đại lý thanh toán theo thỏa thuận đã ký để thanh toán gốc, lãi trái phiếu khi đến hạn cho chủ sở hữu trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp phát hành thực hiện việc mở và sử dụng tài khoản vốn vay và trả nợ nước ngoài để thực hiện nhận tiền phát hành trái phiếu, thực hiện trả gốc, lãi trái phiếu theo quy định của pháp luật về quản lý ngoại hối.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "title": "Thông báo và đăng ký phát hành trái phiếu",
+      "content_raw": "Thông báo và đăng ký phát hành trái phiếu\n1. Doanh nghiệp phát hành trái phiếu trong nước và ra thị trường quốc tế, phải thông báo bằng văn bản về việc phát hành trái phiếu với Bộ Tài chính.\n2. Đối với doanh nghiệp phát hành là công ty đại chúng, phươngán phát hành trái phiếu chuyển đổi, trái phiếu kèm theo chứng quyền sau khi được cấp có thẩm quyền phê duyệt và chấp thuận theo quy định tại Chương II, Chương III Nghị định này, phải đăng ký vớiỦy ban Chứng khoán Nhà nước và chỉ được phát hành trái phiếu khi cóý kiến bằng văn bản củaỦy ban Chứng khoán Nhà nước.\n3. Bộ Tài chính hướng dẫn cụ thể về việc đăng ký phát hành trái phiếu doanh nghiệp.",
+      "chapter": "IV",
+      "chapter_title": "THÔNG BÁO PHÁT HÀNH, CÔNG BỐ THÔNG TIN CHẾ ĐỘ BÁO CÁO VÀ XỬ LÝ VI PHẠM",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp phát hành trái phiếu trong nước và ra thị trường quốc tế, phải thông báo bằng văn bản về việc phát hành trái phiếu với Bộ Tài chính.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đối với doanh nghiệp phát hành là công ty đại chúng, phươngán phát hành trái phiếu chuyển đổi, trái phiếu kèm theo chứng quyền sau khi được cấp có thẩm quyền phê duyệt và chấp thuận theo quy định tại Chương II, Chương III Nghị định này, phải đăng ký vớiỦy ban Chứng khoán Nhà nước và chỉ được phát hành trái phiếu khi cóý kiến bằng văn bản củaỦy ban Chứng khoán Nhà nước.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Bộ Tài chính hướng dẫn cụ thể về việc đăng ký phát hành trái phiếu doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "title": "Công bố thông tin",
+      "content_raw": "Công bố thông tin\n1. Đối với phát hành trái phiếu trong nước\na) Doanh nghiệp phát hành có trách nhiệm công bố thông tin cho các nhà đầu tư đăng ký mua trái phiếu. Việc công bố thông tin không được chứa đựng nội dung có tính chất quảng cáo, mời chào và không được đăng tải công khai trên các phương tiện thông tin đại chúng, trừ trường hợp công bố thông tin theo pháp luật về chứng khoán và các văn bản pháp luật có liên quan. Nội dung công bố thông tin bao gồm: - Tổng giá trị trái phiếu và kỳ hạn phát hành; - Tình hình tài chính của doanh nghiệp tại thời điểm phát hành; - Phươngán phát hành trái phiếu, kế hoạch sử dụng tiền thu được từ phát hành trái phiếu, phươngán trả nợ gốc, lãi trái phiếu đã được cấp có thẩm quyền thông qua; - Kết quả xếp loại của tổ chức định mức tín nhiệm (nếu có).\nb) Sau mười lăm (15) ngày kể từ khi hoàn tất đợt phát hành trái phiếu, doanh nghiệp phát hành phải thực hiện công bố thông tin về kết quả đợt phát hành với các nội dung cơ bản sau: - Khối lượng trái phiếu phát hành thành công; - Kỳ hạn và lãi suất trái phiếu.\n2. Doanh nghiệp phát hành trái phiếu ra thị trường quốc tế thực hiện công bố thông tin theo quy định tại thị trường phát hành.\n3. Doanh nghiệp phát hành là công ty đại chúng ngoài việc thực hiện quy định tại Nghị định này phải thực hiện công bố thông tin theo quy định của pháp luật chứng khoán.",
+      "chapter": "IV",
+      "chapter_title": "THÔNG BÁO PHÁT HÀNH, CÔNG BỐ THÔNG TIN CHẾ ĐỘ BÁO CÁO VÀ XỬ LÝ VI PHẠM",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với phát hành trái phiếu trong nước",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp phát hành có trách nhiệm công bố thông tin cho các nhà đầu tư đăng ký mua trái phiếu. Việc công bố thông tin không được chứa đựng nội dung có tính chất quảng cáo, mời chào và không được đăng tải công khai trên các phương tiện thông tin đại chúng, trừ trường hợp công bố thông tin theo pháp luật về chứng khoán và các văn bản pháp luật có liên quan. Nội dung công bố thông tin bao gồm: - Tổng giá trị trái phiếu và kỳ hạn phát hành; - Tình hình tài chính của doanh nghiệp tại thời điểm phát hành; - Phươngán phát hành trái phiếu, kế hoạch sử dụng tiền thu được từ phát hành trái phiếu, phươngán trả nợ gốc, lãi trái phiếu đã được cấp có thẩm quyền thông qua; - Kết quả xếp loại của tổ chức định mức tín nhiệm (nếu có)."
+            },
+            {
+              "label": "b",
+              "content": "Sau mười lăm (15) ngày kể từ khi hoàn tất đợt phát hành trái phiếu, doanh nghiệp phát hành phải thực hiện công bố thông tin về kết quả đợt phát hành với các nội dung cơ bản sau: - Khối lượng trái phiếu phát hành thành công; - Kỳ hạn và lãi suất trái phiếu."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp phát hành trái phiếu ra thị trường quốc tế thực hiện công bố thông tin theo quy định tại thị trường phát hành.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Doanh nghiệp phát hành là công ty đại chúng ngoài việc thực hiện quy định tại Nghị định này phải thực hiện công bố thông tin theo quy định của pháp luật chứng khoán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "title": "Chế độ báo cáo",
+      "content_raw": "Chế độ báo cáo\n1. Về kết quả phát hành: Chậm nhất là mười lăm (15) ngày sau khi hoàn tất toàn bộ đợt phát hành trái phiếu, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu kết quả phát hành, đồng gửi Bộ Tài chính. Riêng đối với trường hợp phát hành trái phiếu ra thị trường quốc tế, doanh nghiệp phát hành gửi báo cáo kết quả phát hành cho cả Ngân hàng Nhà nước Việt Nam.\n2. Về việc thanh toán gốc, lãi và sử dụng vốn từ phát hành trái phiếu:\na) Định kỳ hàng năm cho đến khi đến hạn thanh toán toàn bộ gốc, lãi trái phiếu, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu về tình hình thanh toán gốc, lãi trái phiếu và tình hình sử dụng vốn từ phát hành trái phiếu, đồng gửi Bộ Tài chính và Ngân hàng Nhà nước Việt Nam (đối với trường hợp phát hành trái phiếu ra thị trường quốc tế);\nb) Chậm nhất sau mười lăm (15) ngày, kể từ ngày đến hạn thanh toán toàn bộ gốc, lãi trái phiếu, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu về tình hình thanh toán gốc, lãi trái phiếu và tình hình sử dụng vốn từ phát hành trái phiếu, đồng gửi Bộ Tài chính và Ngân hàng Nhà nước Việt Nam (đối với trường hợp phát hành trái phiếu ra thị trường quốc tế).\n3. Riêng đối với trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền, trong vòng mười (10) ngày kể từ ngày hoàn tất việc chuyển đổi trái phiếu chuyển đổi thành cổ phiếu hoặc ngày thực hiện quyền mua cổ phiếu của người sở hữu trái phiếu kèm theo chứng quyền, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu đồng gửi Bộ Tài chính và Ngân hàng Nhà nước Việt Nam (đối với trường hợp phát hành trái phiếu ra thị trường quốc tế). Nội dung báo cáo bao gồm: - Tổng giá trị trái phiếu phát hành và tổng giá trị trái phiếu được chuyển đổi; - Mã cổ phiếu được chuyển đổi, số lượng cổ phiếu được chuyển đổi và phân bổ cổ phiếu giữa các nhà đầu tư; - Dự kiến thời gian thực hiện lưu ký, niêm yết, giao dịch cổ phiếu chuyển đổi và các văn bản đề nghị lưu ký, niêm yết, giao dịch (nếu có).",
+      "chapter": "IV",
+      "chapter_title": "THÔNG BÁO PHÁT HÀNH, CÔNG BỐ THÔNG TIN CHẾ ĐỘ BÁO CÁO VÀ XỬ LÝ VI PHẠM",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Về kết quả phát hành: Chậm nhất là mười lăm (15) ngày sau khi hoàn tất toàn bộ đợt phát hành trái phiếu, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu kết quả phát hành, đồng gửi Bộ Tài chính. Riêng đối với trường hợp phát hành trái phiếu ra thị trường quốc tế, doanh nghiệp phát hành gửi báo cáo kết quả phát hành cho cả Ngân hàng Nhà nước Việt Nam.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Về việc thanh toán gốc, lãi và sử dụng vốn từ phát hành trái phiếu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Định kỳ hàng năm cho đến khi đến hạn thanh toán toàn bộ gốc, lãi trái phiếu, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu về tình hình thanh toán gốc, lãi trái phiếu và tình hình sử dụng vốn từ phát hành trái phiếu, đồng gửi Bộ Tài chính và Ngân hàng Nhà nước Việt Nam (đối với trường hợp phát hành trái phiếu ra thị trường quốc tế);"
+            },
+            {
+              "label": "b",
+              "content": "Chậm nhất sau mười lăm (15) ngày, kể từ ngày đến hạn thanh toán toàn bộ gốc, lãi trái phiếu, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu về tình hình thanh toán gốc, lãi trái phiếu và tình hình sử dụng vốn từ phát hành trái phiếu, đồng gửi Bộ Tài chính và Ngân hàng Nhà nước Việt Nam (đối với trường hợp phát hành trái phiếu ra thị trường quốc tế)."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Riêng đối với trái phiếu chuyển đổi hoặc trái phiếu kèm theo chứng quyền, trong vòng mười (10) ngày kể từ ngày hoàn tất việc chuyển đổi trái phiếu chuyển đổi thành cổ phiếu hoặc ngày thực hiện quyền mua cổ phiếu của người sở hữu trái phiếu kèm theo chứng quyền, doanh nghiệp phát hành có trách nhiệm báo cáo cơ quan phê duyệt, chấp thuận phươngán phát hành trái phiếu đồng gửi Bộ Tài chính và Ngân hàng Nhà nước Việt Nam (đối với trường hợp phát hành trái phiếu ra thị trường quốc tế). Nội dung báo cáo bao gồm: - Tổng giá trị trái phiếu phát hành và tổng giá trị trái phiếu được chuyển đổi; - Mã cổ phiếu được chuyển đổi, số lượng cổ phiếu được chuyển đổi và phân bổ cổ phiếu giữa các nhà đầu tư; - Dự kiến thời gian thực hiện lưu ký, niêm yết, giao dịch cổ phiếu chuyển đổi và các văn bản đề nghị lưu ký, niêm yết, giao dịch (nếu có).",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "title": "Xử lý vi phạm",
+      "content_raw": "Xử lý vi phạm\nTổ chức, cá nhân vi phạm các quy định của Nghị định này, tùy theo tính chất và mức độ vi phạm sẽ bị xử lý kỷ luật, xử lý vi phạm hành chính theo pháp luật về xử phạt hành chính trong lĩnh vực chứng khoán hoặc bị truy cứu trách nhiệm hình sự theo quy định của pháp luật hiện hành.",
+      "chapter": "IV",
+      "chapter_title": "THÔNG BÁO PHÁT HÀNH, CÔNG BỐ THÔNG TIN CHẾ ĐỘ BÁO CÁO VÀ XỬ LÝ VI PHẠM",
+      "clauses": []
+    },
+    {
+      "number": 34,
+      "title": "Bộ Tài chính",
+      "content_raw": "Bộ Tài chính\n1. Chủ trì, phối hợp với các cơ quan liên quan hướng dẫn thực hiện quy định của Nghị định này.\n2. Tổng hợp, theo dõi tình hình phát hành trái phiếu doanh nghiệp theo quy định tại Nghị định này.",
+      "chapter": "V",
+      "chapter_title": "TRÁCH NHIỆM CỦA CÁC TỔ CHỨC, CÁ NHÂN LIÊN QUAN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chủ trì, phối hợp với các cơ quan liên quan hướng dẫn thực hiện quy định của Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổng hợp, theo dõi tình hình phát hành trái phiếu doanh nghiệp theo quy định tại Nghị định này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "title": "Ngân hàng Nhà nước Việt Nam",
+      "content_raw": "Ngân hàng Nhà nước Việt Nam\n1. Hướng dẫn, tổ chức xác nhận và đăng ký trị giá trái phiếu doanh nghiệp phát hành ra thị trường quốc tế thuộc hạn mức vay thương mại nước ngoài hàng năm của quốc gia được\n2. Hướng dẫn các tổ chức tín dụng thực hiện phát hành trái phiếu theo Luật các Tổ chức tín dụng và Nghị định này.\n3. Quy định về việc sử dụng trái phiếu doanh nghiệp để giao dịch trên thị trường tiền tệ; chiết khấu, cầm cố trái phiếu trong các quan hệ tín dụng giữa các tổ chức tín dụng với chủ sở hữu trái phiếu theo quy định của pháp luật liên quan.",
+      "chapter": "V",
+      "chapter_title": "TRÁCH NHIỆM CỦA CÁC TỔ CHỨC, CÁ NHÂN LIÊN QUAN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hướng dẫn, tổ chức xác nhận và đăng ký trị giá trái phiếu doanh nghiệp phát hành ra thị trường quốc tế thuộc hạn mức vay thương mại nước ngoài hàng năm của quốc gia được",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hướng dẫn các tổ chức tín dụng thực hiện phát hành trái phiếu theo Luật các Tổ chức tín dụng và Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Quy định về việc sử dụng trái phiếu doanh nghiệp để giao dịch trên thị trường tiền tệ; chiết khấu, cầm cố trái phiếu trong các quan hệ tín dụng giữa các tổ chức tín dụng với chủ sở hữu trái phiếu theo quy định của pháp luật liên quan.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "title": "Hội đồng quản trị, Đại hội cổ đông, Hội đồng thành viên, Chủ tịch công ty",
+      "content_raw": "Hội đồng quản trị, Đại hội cổ đông, Hội đồng thành viên, Chủ tịch công ty\n1. Phê duyệt phươngán phát hành trái phiếu theo quy định tại Nghị định này.\n2. Giám sát việc huy động và sử dụng vốn phát hành trái phiếu theo quy định của pháp luật và quy định tại Điều lệ doanh nghiệp.",
+      "chapter": "V",
+      "chapter_title": "TRÁCH NHIỆM CỦA CÁC TỔ CHỨC, CÁ NHÂN LIÊN QUAN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Phê duyệt phươngán phát hành trái phiếu theo quy định tại Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Giám sát việc huy động và sử dụng vốn phát hành trái phiếu theo quy định của pháp luật và quy định tại Điều lệ doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 37,
+      "title": "Chủ sở hữu đối với doanh nghiệp nhà nước",
+      "content_raw": "Chủ sở hữu đối với doanh nghiệp nhà nước\n1. Chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước tại thị trường trong nước theo quy định tại Điều 14 Nghị định này.\n2. Thẩm định phươngán phát hành trái phiếu ra thị trường quốc tế của doanh nghiệp nhà nước để báo cáo\n3. Quản lý, giám sát việc phát hành, sử dụng nguồn vốn từ phát hành trái phiếu và việc thanh toán gốc, lãi trái phiếu khi đến hạn.\n4. Thực hiện các nhiệm vụ khác theo quy định của Nghị định này.",
+      "chapter": "V",
+      "chapter_title": "TRÁCH NHIỆM CỦA CÁC TỔ CHỨC, CÁ NHÂN LIÊN QUAN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chấp thuận phươngán phát hành trái phiếu của doanh nghiệp nhà nước tại thị trường trong nước theo quy định tại Điều 14 Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thẩm định phươngán phát hành trái phiếu ra thị trường quốc tế của doanh nghiệp nhà nước để báo cáo",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Quản lý, giám sát việc phát hành, sử dụng nguồn vốn từ phát hành trái phiếu và việc thanh toán gốc, lãi trái phiếu khi đến hạn.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Thực hiện các nhiệm vụ khác theo quy định của Nghị định này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 38,
+      "title": "Doanh nghiệp phát hành",
+      "content_raw": "Doanh nghiệp phát hành\n1. Chịu hoàn toàn trách nhiệm về việc huy động vốn qua phát hành trái phiếu doanh nghiệp, phân bổ, quản lý và sử dụng vốn từ phát hành trái phiếu đúng mục đích, có hiệu quả theo phươngán phát hành trái phiếu đã được cấp có thẩm quyền phê duyệt.\n2. Thanh toán đầy đủ, đúng hạn gốc, lãi trái phiếu khi đến hạn và đảm bảo việc thực hiện các quyền kèm theo (nếu có) cho chủ sở hữu trái phiếu.\n3. Thực hiện đầy đủ nghĩa vụ về đăng ký phát hành, công bố thông tin và chế độ báo cáo theo quy định tại Nghị định này và văn bản pháp luật có liên quan; đồng thời chịu trách nhiệm về tính chính xác, trung thực của thông tin đã công bố.\n4. Trước ngày 01 tháng 11 hàng năm, có trách nhiệm đăng ký kế hoạch phát hành trái phiếu ra thị trường quốc tế của năm tiếp theo để Ngân hàng Nhà nước và Bộ Tài chính tổng hợp, báo cáo\n5. Thực hiện đầy đủ trách nhiệm với các đại lý, tổ chức và cá nhân liên quan khác.\n6. Chịu trách nhiệm về tính chính xác, trung thực, đầy đủ của các báo cáo tài chính; thực hiện chế độ quản lý tài chính, báo cáo và kế toán thống kê theo quy định của pháp luật.",
+      "chapter": "V",
+      "chapter_title": "TRÁCH NHIỆM CỦA CÁC TỔ CHỨC, CÁ NHÂN LIÊN QUAN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chịu hoàn toàn trách nhiệm về việc huy động vốn qua phát hành trái phiếu doanh nghiệp, phân bổ, quản lý và sử dụng vốn từ phát hành trái phiếu đúng mục đích, có hiệu quả theo phươngán phát hành trái phiếu đã được cấp có thẩm quyền phê duyệt.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thanh toán đầy đủ, đúng hạn gốc, lãi trái phiếu khi đến hạn và đảm bảo việc thực hiện các quyền kèm theo (nếu có) cho chủ sở hữu trái phiếu.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thực hiện đầy đủ nghĩa vụ về đăng ký phát hành, công bố thông tin và chế độ báo cáo theo quy định tại Nghị định này và văn bản pháp luật có liên quan; đồng thời chịu trách nhiệm về tính chính xác, trung thực của thông tin đã công bố.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Trước ngày 01 tháng 11 hàng năm, có trách nhiệm đăng ký kế hoạch phát hành trái phiếu ra thị trường quốc tế của năm tiếp theo để Ngân hàng Nhà nước và Bộ Tài chính tổng hợp, báo cáo",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Thực hiện đầy đủ trách nhiệm với các đại lý, tổ chức và cá nhân liên quan khác.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Chịu trách nhiệm về tính chính xác, trung thực, đầy đủ của các báo cáo tài chính; thực hiện chế độ quản lý tài chính, báo cáo và kế toán thống kê theo quy định của pháp luật.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 39,
+      "title": "Hiệu lực thi hành",
+      "content_raw": "Hiệu lực thi hành\n1. Nghị định này có hiệu lực thi hành kể từ ngày 01 tháng 12 năm 2011.\n2. Nghị định này thay thế Nghị định số 52/2006/NĐ-CP ngày 19 tháng 5 năm 2006 của Chính phủ về phát hành trái phiếu doanh nghiệp và nội dung về phát hành trái phiếu doanh nghiệp ra thị trường vốn quốc tế quy định tại Nghị định số 53/2009/NĐ-CP ngày 04 tháng 6 năm 2009 của Chính phủ về phát hành trái phiếu quốc tế.\n3. Những quy định tại các văn bản khác trước đây về phát hành trái phiếu doanh nghiệp trái với quy định tại Nghị định này đều bị bãi bỏ.",
+      "chapter": "VI",
+      "chapter_title": "ĐIỀU KHOẢN THI HÀNH",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nghị định này có hiệu lực thi hành kể từ ngày 01 tháng 12 năm 2011.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Nghị định này thay thế Nghị định số 52/2006/NĐ-CP ngày 19 tháng 5 năm 2006 của Chính phủ về phát hành trái phiếu doanh nghiệp và nội dung về phát hành trái phiếu doanh nghiệp ra thị trường vốn quốc tế quy định tại Nghị định số 53/2009/NĐ-CP ngày 04 tháng 6 năm 2009 của Chính phủ về phát hành trái phiếu quốc tế.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Những quy định tại các văn bản khác trước đây về phát hành trái phiếu doanh nghiệp trái với quy định tại Nghị định này đều bị bãi bỏ.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 40,
+      "title": "Hướng dẫn thực hiện",
+      "content_raw": "Hướng dẫn thực hiện\nCác Bộ trưởng, Thủ trưởng cơ quan ngang Bộ, Thủ trưởng cơ quan thuộc Chính phủ, Chủ tịchỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương; Hội đồng quản trị, Hội đồng thành viên, Tổng giám đốc, Giám đốc các doanh nghiệp phát hành trái phiếu chịu trách nhiệm thi hành Nghị định này./.",
+      "chapter": "VI",
+      "chapter_title": "ĐIỀU KHOẢN THI HÀNH",
+      "clauses": []
+    }
+  ]
+}

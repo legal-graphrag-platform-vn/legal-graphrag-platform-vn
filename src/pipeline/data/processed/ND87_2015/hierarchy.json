@@ -1,0 +1,1822 @@
+{
+  "document": {
+    "id": "ND87_2015",
+    "title": "Nghị định số 87/2015/NĐ-CP Về giám sát đầu tư vốn nhà nước vào doanh nghiệp; giám sát tài chính, đánh giá hiệu quả hoạt động và công khai thông tin tài chính của doanh nghiệp nhà nước và doanh nghiệp có vốn nhà nước",
+    "number": "87/2015/NĐ-CP",
+    "doc_type": "Decree",
+    "issued_by": "CHÍNH PHỦ",
+    "issued_date": "2015-10-06",
+    "effective_from": "2015-12-01",
+    "status": "Hết hiệu lực toàn bộ"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi điều chỉnh",
+      "content_raw": "Phạm vi điều chỉnh\nNghị định này quy định về:\n1. Giám sát tình hình đầu tư vốn nhà nước vào doanh nghiệp.\n2. Giám sát tài chính, đánh giá hiệu quả hoạt động và xếp loại đối với doanh nghiệp nhà nước.\n3. Giám sát tài chính đối với doanh nghiệp có vốn nhà nước.\n4. Công khai thông tin tài chính của doanh nghiệp nhà nước.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giám sát tình hình đầu tư vốn nhà nước vào doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Giám sát tài chính, đánh giá hiệu quả hoạt động và xếp loại đối với doanh nghiệp nhà nước.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Giám sát tài chính đối với doanh nghiệp có vốn nhà nước.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Công khai thông tin tài chính của doanh nghiệp nhà nước.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Đối tượngáp dụng",
+      "content_raw": "Đối tượngáp dụng\nĐối tượngáp dụng Nghị định này gồm:\n1. Cơ quan tài chính.\n2. Cơ quan đại diện chủ sở hữu.\n3. Doanh nghiệp do Nhà nước nắm giữ 100% vốn điều lệ (sau đây gọi là doanh nghiệp nhà nước):\na) Công ty trách nhiệm hữu hạn một thành viên - Công ty mẹ của các tập đoàn kinh tế, tổng công ty, công ty hoạt động theo mô hình công ty mẹ - công ty con (sau đây gọi chung là công ty mẹ) do Thủ tướng Chính phủ, Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ (sau đây gọi chung là Bộ quản lý ngành), Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trungương (sau đây gọi chung làỦy ban nhân dân cấp tỉnh) quyết định thành lập;\nb) Công ty trách nhiệm hữu hạn một thành viên (sau đây gọi là Công ty trách nhiệm hữu hạn một thành viên độc lập) do Bộ quản lý ngành, Ủy ban nhân dân cấp tỉnh quyết định thành lập;\nc) Tổng công ty Đầu tư và Kinh doanh vốn nhà nước (viết tắt là SCIC).\n4. Người đại diện phần vốn nhà nước đầu tư tại công ty cổ phần, công ty trách nhiệm hữu hạn hai thành viên trở lên.\n5. Cơ quan, tổ chức, cá nhân khác có liên quan đến hoạt động đầu tư, quản lý, sử dụng vốn nhà nước tại doanh nghiệp.\n6. Các doanh nghiệp nhà nước hoạt động trong lĩnh vực trực tiếp phục vụ quốc phòng, an ninh, kết hợp kinh tế với quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán thực hiện giám sát tài chính, đánh giá hiệu quả hoạt động và công khai thông tin tài chính theo quy định tại Nghị định này và quy định của pháp luật về quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán. Trường hợp quy định của pháp luật về quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán khác quy định tại Nghị định này thìáp dụng theo quy định của pháp luật về quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ quan tài chính.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Doanh nghiệp do Nhà nước nắm giữ 100% vốn điều lệ (sau đây gọi là doanh nghiệp nhà nước):",
+          "points": [
+            {
+              "label": "a",
+              "content": "Công ty trách nhiệm hữu hạn một thành viên - Công ty mẹ của các tập đoàn kinh tế, tổng công ty, công ty hoạt động theo mô hình công ty mẹ - công ty con (sau đây gọi chung là công ty mẹ) do Thủ tướng Chính phủ, Bộ, cơ quan ngang Bộ, cơ quan thuộc Chính phủ (sau đây gọi chung là Bộ quản lý ngành), Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trungương (sau đây gọi chung làỦy ban nhân dân cấp tỉnh) quyết định thành lập;"
+            },
+            {
+              "label": "b",
+              "content": "Công ty trách nhiệm hữu hạn một thành viên (sau đây gọi là Công ty trách nhiệm hữu hạn một thành viên độc lập) do Bộ quản lý ngành, Ủy ban nhân dân cấp tỉnh quyết định thành lập;"
+            },
+            {
+              "label": "c",
+              "content": "Tổng công ty Đầu tư và Kinh doanh vốn nhà nước (viết tắt là SCIC)."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Người đại diện phần vốn nhà nước đầu tư tại công ty cổ phần, công ty trách nhiệm hữu hạn hai thành viên trở lên.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Cơ quan, tổ chức, cá nhân khác có liên quan đến hoạt động đầu tư, quản lý, sử dụng vốn nhà nước tại doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Các doanh nghiệp nhà nước hoạt động trong lĩnh vực trực tiếp phục vụ quốc phòng, an ninh, kết hợp kinh tế với quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán thực hiện giám sát tài chính, đánh giá hiệu quả hoạt động và công khai thông tin tài chính theo quy định tại Nghị định này và quy định của pháp luật về quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán. Trường hợp quy định của pháp luật về quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán khác quy định tại Nghị định này thìáp dụng theo quy định của pháp luật về quốc phòng, an ninh, tài chính, ngân hàng, xổ số, chứng khoán.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Giải thích từ ngữ",
+      "content_raw": "Giải thích từ ngữ\n1. Báo cáo giám sát tài chính là báo cáo phân tích, đánh giá, cảnh báo các vấn đề về tài chính của từng doanh nghiệp.\n2. Báo cáo kết quả giám sát tài chính là báo cáo tổng hợp kết quả công tác giám sát tài chính đối với các doanh nghiệp thuộc cơ quan đại diện chủ sở hữu.\n3. Doanh nghiệp có vốn nhà nước là công ty cổ phần, công ty trách nhiệm hữu hạn hai thành viên trở lên có vốn góp của nhà nước.\n4. Giám sát trực tiếp là việc kiểm tra, thanh tra trực tiếp tại doanh nghiệp.\n5. Giám sát gián tiếp là việc theo dõi và kiểm tra tình hình của doanh nghiệp thông qua các báo cáo tài chính, thống kê và báo cáo khác theo quy định của pháp luật và của cơ quan đại diện chủ sở hữu.\n6. Giám sát trước là việc xem xét, kiểm tra tính khả thi của các kế hoạch ngắn hạn, dài hạn, dựán đầu tư, phươngán huy động vốn, các dựán và phươngán khác của doanh nghiệp.\n7. Giám sát trong là việc theo dõi, kiểm tra việc thực hiện các kế hoạch, dựán của doanh nghiệp, việc chấp hành các quy định của pháp luật, của cơ quan đại diện chủ sở hữu trong suốt quá trình triển khai kế hoạch, dựán.\n8. Giám sát sau là việc kiểm tra kết quả hoạt động của doanh nghiệp trên cơ sở các báo cáo định kỳ, kết quả chấp hành pháp luật của cơ quan đại diện chủ sở hữu hoặc điều lệ doanh nghiệp, việc tuân thủ các quy định của pháp luật.\n9. Giám sát tài chính là việc theo dõi, kiểm tra, thanh tra, đánh giá các vấn đề về tài chính, chấp hành chính sách pháp luật về tài chính của doanh nghiệp.\n10. Giám sát tài chính đặc biệt là quy trình giám sát đối với các doanh nghiệp có dấu hiệu mất an toàn về tài chính cần phải được các cơ quan có thẩm quyền theo dõi và chấn chỉnh.\n11. Tiêu chí đánh giá là hệ thống các chỉ tiêu, chuẩn mực dùng để đánh giá hiệu quả hoạt động và xếp loại doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Báo cáo giám sát tài chính là báo cáo phân tích, đánh giá, cảnh báo các vấn đề về tài chính của từng doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Báo cáo kết quả giám sát tài chính là báo cáo tổng hợp kết quả công tác giám sát tài chính đối với các doanh nghiệp thuộc cơ quan đại diện chủ sở hữu.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Doanh nghiệp có vốn nhà nước là công ty cổ phần, công ty trách nhiệm hữu hạn hai thành viên trở lên có vốn góp của nhà nước.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Giám sát trực tiếp là việc kiểm tra, thanh tra trực tiếp tại doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Giám sát gián tiếp là việc theo dõi và kiểm tra tình hình của doanh nghiệp thông qua các báo cáo tài chính, thống kê và báo cáo khác theo quy định của pháp luật và của cơ quan đại diện chủ sở hữu.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Giám sát trước là việc xem xét, kiểm tra tính khả thi của các kế hoạch ngắn hạn, dài hạn, dựán đầu tư, phươngán huy động vốn, các dựán và phươngán khác của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Giám sát trong là việc theo dõi, kiểm tra việc thực hiện các kế hoạch, dựán của doanh nghiệp, việc chấp hành các quy định của pháp luật, của cơ quan đại diện chủ sở hữu trong suốt quá trình triển khai kế hoạch, dựán.",
+          "points": []
+        },
+        {
+          "number": 8,
+          "content": "Giám sát sau là việc kiểm tra kết quả hoạt động của doanh nghiệp trên cơ sở các báo cáo định kỳ, kết quả chấp hành pháp luật của cơ quan đại diện chủ sở hữu hoặc điều lệ doanh nghiệp, việc tuân thủ các quy định của pháp luật.",
+          "points": []
+        },
+        {
+          "number": 9,
+          "content": "Giám sát tài chính là việc theo dõi, kiểm tra, thanh tra, đánh giá các vấn đề về tài chính, chấp hành chính sách pháp luật về tài chính của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 10,
+          "content": "Giám sát tài chính đặc biệt là quy trình giám sát đối với các doanh nghiệp có dấu hiệu mất an toàn về tài chính cần phải được các cơ quan có thẩm quyền theo dõi và chấn chỉnh.",
+          "points": []
+        },
+        {
+          "number": 11,
+          "content": "Tiêu chí đánh giá là hệ thống các chỉ tiêu, chuẩn mực dùng để đánh giá hiệu quả hoạt động và xếp loại doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Mục đích của việc giám sát đầu tư vốn nhà nước vào doanh nghiệp, giám sát tài chính, đánh giá hiệu quả và công khai thông tin tài chính doanh nghiệp",
+      "content_raw": "Mục đích của việc giám sát đầu tư vốn nhà nước vào doanh nghiệp, giám sát tài chính, đánh giá hiệu quả và công khai thông tin tài chính doanh nghiệp\n1. Đánh giá việc tuân thủ quy định về phạm vi, quy trình, thủ tục, thẩm quyền và hiệu quả đầu tư vốn nhà nước vào doanh nghiệp.\n2. Đánh giá đầy đủ, kịp thời tình hình tài chính và hiệu quả hoạt động của doanh nghiệp để có biện pháp khắc phục tồn tại, hoàn thành mục tiêu, kế hoạch kinh doanh, nhiệm vụ côngích, nâng cao hiệu quả sản xuất, kinh doanh và khả năng cạnh tranh.\n3. Giúp nhà nước, cơ quan đại diện chủ sở hữu kịp thời phát hiện các yếu kém trong hoạt động sản xuất kinh doanh của doanh nghiệp, cảnh báo và đề ra biện pháp chấn chỉnh.\n4. Thực hiện công khai minh bạch tình hình tài chính của doanh nghiệp nhà nước.\n5. Nâng cao trách nhiệm của doanh nghiệp trong việc chấp hành các quy định của pháp luật trong quản lý và sử dụng vốn, tài sản nhà nước đầu tư vào sản xuất kinh doanh tại doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đánh giá việc tuân thủ quy định về phạm vi, quy trình, thủ tục, thẩm quyền và hiệu quả đầu tư vốn nhà nước vào doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đánh giá đầy đủ, kịp thời tình hình tài chính và hiệu quả hoạt động của doanh nghiệp để có biện pháp khắc phục tồn tại, hoàn thành mục tiêu, kế hoạch kinh doanh, nhiệm vụ côngích, nâng cao hiệu quả sản xuất, kinh doanh và khả năng cạnh tranh.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Giúp nhà nước, cơ quan đại diện chủ sở hữu kịp thời phát hiện các yếu kém trong hoạt động sản xuất kinh doanh của doanh nghiệp, cảnh báo và đề ra biện pháp chấn chỉnh.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Thực hiện công khai minh bạch tình hình tài chính của doanh nghiệp nhà nước.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Nâng cao trách nhiệm của doanh nghiệp trong việc chấp hành các quy định của pháp luật trong quản lý và sử dụng vốn, tài sản nhà nước đầu tư vào sản xuất kinh doanh tại doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Chủ thể giám sát",
+      "content_raw": "Chủ thể giám sát\nBộ Tài chính chủ trì phối hợp với các Bộ, ngành liên quan thực hiện việc giám sát tình hình đầu tư vốn nhà nước vào doanh nghiệp của các cơ quan đại diện chủ sở hữu.",
+      "chapter": "II",
+      "chapter_title": "GIÁM SÁT ĐẦU TƯ VỐN NHÀ NƯỚC VÀO DOANH NGHIỆP",
+      "clauses": []
+    },
+    {
+      "number": 6,
+      "title": "Nội dung giám sát",
+      "content_raw": "Nội dung giám sát\n1. Nội dung giám sát hoạt động đầu tư vốn nhà nước vào doanh nghiệp thực hiện theo quy định tại các Khoản 2, 3, 4, 5, 6 Điều 51 Luật Quản lý, sử dụng vốn nhà nước đầu tư vào sản xuất, kinh doanh tại doanh nghiệp.\n2. Bộ Tài chính quy định biểu mẫu để thực hiện các nội dung giám sát nêu tại Khoản 1 Điều này.",
+      "chapter": "II",
+      "chapter_title": "GIÁM SÁT ĐẦU TƯ VỐN NHÀ NƯỚC VÀO DOANH NGHIỆP",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nội dung giám sát hoạt động đầu tư vốn nhà nước vào doanh nghiệp thực hiện theo quy định tại các Khoản 2, 3, 4, 5, 6 Điều 51 Luật Quản lý, sử dụng vốn nhà nước đầu tư vào sản xuất, kinh doanh tại doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Bộ Tài chính quy định biểu mẫu để thực hiện các nội dung giám sát nêu tại Khoản 1 Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Phương thức tổ chức giám sát",
+      "content_raw": "Phương thức tổ chức giám sát\n1. Giám sát đầu tư vốn nhà nước vào doanh nghiệp thực hiện bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát trước và giám sát sau.\n2. Quý IV năm trước, Bộ Tài chính lập Kế hoạch giám sát hoạt động đầu tư vốn nhà nước vào doanh nghiệp, công bố trước ngày 31 tháng 01 hằng năm. Bộ Tài chính chủ trì, phối hợp với các Bộ, ngành liên quan thực hiện Kế hoạch giám sát hoạt động đầu tư vốn nhà nước vào doanh nghiệp đã được công bố.\n3. Chế độ báo cáo:\na) Cơ quan đại diện chủ sở hữu lập Báo cáo tình hình đầu tư vốn nhà nước vào doanh nghiệp năm trước gửi Bộ Tài chính trước ngày 31 tháng 5 hàng năm. Nội dung Báo cáo thực hiện theo quy định tại Điều 6 Nghị định này;\nb) Bộ Tài chính lập Báo cáo giám sát đầu tư vốn nhà nước vào doanh nghiệp năm trước, báo cáo Chính phủ trước ngày 31 tháng 7 hằng năm.\n4. Trường hợp phát hiện vi phạm của cơ quan đại diện chủ sở hữu về phạm vi đầu tư vốn, trình tự, thủ tục và thẩm quyền quyết định đầu tư vốn nhà nước vào doanh nghiệp, Bộ Tài chính báo cáo Thủ tướng Chính phủ xử lý theo quy định của pháp luật. Mục 1 GIÁM SÁT TÀI CHÍNH",
+      "chapter": "II",
+      "chapter_title": "GIÁM SÁT ĐẦU TƯ VỐN NHÀ NƯỚC VÀO DOANH NGHIỆP",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giám sát đầu tư vốn nhà nước vào doanh nghiệp thực hiện bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát trước và giám sát sau.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Quý IV năm trước, Bộ Tài chính lập Kế hoạch giám sát hoạt động đầu tư vốn nhà nước vào doanh nghiệp, công bố trước ngày 31 tháng 01 hằng năm. Bộ Tài chính chủ trì, phối hợp với các Bộ, ngành liên quan thực hiện Kế hoạch giám sát hoạt động đầu tư vốn nhà nước vào doanh nghiệp đã được công bố.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Chế độ báo cáo:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cơ quan đại diện chủ sở hữu lập Báo cáo tình hình đầu tư vốn nhà nước vào doanh nghiệp năm trước gửi Bộ Tài chính trước ngày 31 tháng 5 hàng năm. Nội dung Báo cáo thực hiện theo quy định tại Điều 6 Nghị định này;"
+            },
+            {
+              "label": "b",
+              "content": "Bộ Tài chính lập Báo cáo giám sát đầu tư vốn nhà nước vào doanh nghiệp năm trước, báo cáo Chính phủ trước ngày 31 tháng 7 hằng năm."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp phát hiện vi phạm của cơ quan đại diện chủ sở hữu về phạm vi đầu tư vốn, trình tự, thủ tục và thẩm quyền quyết định đầu tư vốn nhà nước vào doanh nghiệp, Bộ Tài chính báo cáo Thủ tướng Chính phủ xử lý theo quy định của pháp luật. Mục 1 GIÁM SÁT TÀI CHÍNH",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Chủ thể giám sát",
+      "content_raw": "Chủ thể giám sát\n1. Cơ quan đại diện chủ sở hữu:\na) Bộ quản lý ngành chủ trì, phối hợp với Bộ Tài chính thực hiện giám sát tài chính và đánh giá hiệu quả hoạt động sản xuất kinh doanh đối với doanh nghiệp là công ty mẹ, công ty trách nhiệm hữu hạn một thành viên độc lập do Bộ quản lý ngành quyết định thành lập hoặc được giao quản lý;\nb) Ủy ban nhân dân cấp tỉnh thực hiện giám sát tài chính và đánh giá hiệu quả hoạt động sản xuất kinh doanh đối với doanh nghiệp là công ty mẹ, công ty trách nhiệm hữu hạn một thành viên độc lập doỦy ban nhân dân cấp tỉnh quyết định thành lập.\n2. Cơ quan tài chính:\na) Bộ Tài chính phối hợp với cơ quan đại diện chủ sở hữu thực hiện giám sát tài chính đối với công ty mẹ, công ty trách nhiệm hữu hạn một thành viên độc lập do Bộ quản lý ngành thành lập hoặc được giao quản lý; tổng hợp báo cáo Chính phủ kết quả giám sát tài chính của các cơ quan đại diện chủ sở hữu, Hội đồng thành viên tập đoàn kinh tế, tổng công ty nhà nước;\nb) Sở Tài chính các tỉnh, thành phố giúpỦy ban nhân dân cấp tỉnh thực hiện giám sát tài chính và đánh giá hiệu quả sản xuất kinh doanh, tổng hợp báo cáo kết quả giám sát tài chính đối với các doanh nghiệp doỦy ban nhân dân cấp tỉnh quyết định thành lập.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ quan đại diện chủ sở hữu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Bộ quản lý ngành chủ trì, phối hợp với Bộ Tài chính thực hiện giám sát tài chính và đánh giá hiệu quả hoạt động sản xuất kinh doanh đối với doanh nghiệp là công ty mẹ, công ty trách nhiệm hữu hạn một thành viên độc lập do Bộ quản lý ngành quyết định thành lập hoặc được giao quản lý;"
+            },
+            {
+              "label": "b",
+              "content": "Ủy ban nhân dân cấp tỉnh thực hiện giám sát tài chính và đánh giá hiệu quả hoạt động sản xuất kinh doanh đối với doanh nghiệp là công ty mẹ, công ty trách nhiệm hữu hạn một thành viên độc lập doỦy ban nhân dân cấp tỉnh quyết định thành lập."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan tài chính:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Bộ Tài chính phối hợp với cơ quan đại diện chủ sở hữu thực hiện giám sát tài chính đối với công ty mẹ, công ty trách nhiệm hữu hạn một thành viên độc lập do Bộ quản lý ngành thành lập hoặc được giao quản lý; tổng hợp báo cáo Chính phủ kết quả giám sát tài chính của các cơ quan đại diện chủ sở hữu, Hội đồng thành viên tập đoàn kinh tế, tổng công ty nhà nước;"
+            },
+            {
+              "label": "b",
+              "content": "Sở Tài chính các tỉnh, thành phố giúpỦy ban nhân dân cấp tỉnh thực hiện giám sát tài chính và đánh giá hiệu quả sản xuất kinh doanh, tổng hợp báo cáo kết quả giám sát tài chính đối với các doanh nghiệp doỦy ban nhân dân cấp tỉnh quyết định thành lập."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Nội dung giám sát",
+      "content_raw": "Nội dung giám sát\n1. Giám sát việc bảo toàn và phát triển vốn.\n2. Giám sát việc quản lý, sử dụng vốn và tài sản nhà nước tại doanh nghiệp theo các nội dung sau:\na) Hoạt động đầu tư vốn đối với các dựán đầu tư, gồm: Nguồn vốn huy động, tiến độ thực hiện dựán đầu tư, tiến độ giải ngân vốn đầu tư;\nb) Hoạt động đầu tư vốn ra ngoài doanh nghiệp, trong đó nội dung giám sát tài chính công ty con, công ty liên kết thông qua danh mục đầu tư của công ty mẹ thực hiện theo quy định tại Mục 2 Chương III Nghị định này; giám sát hoạt động đầu tư ra nước ngoài của doanh nghiệp thực hiện theo quy định tại Mục 3 Chương III Nghị định này;\nc) Tình hình huy động vốn và sử dụng vốn huy động, phát hành trái phiếu;\nd) Tình hình quản lý tài sản, quản lý nợ tại doanh nghiệp, khả năng thanh toán nợ của doanh nghiệp, hệ số nợ phải trả trên vốn chủ sở hữu;\nđ) Tình hình lưu chuyển tiền tệ của doanh nghiệp.\n3. Giám sát kết quả hoạt động sản xuất kinh doanh của doanh nghiệp\na) Việc thực hiện kế hoạch sản xuất kinh doanh, thực hiện nhiệm vụ cungứng sản phẩm, dịch vụ côngích do Nhà nước đặt hàng, giao kế hoạch;\nb) Kết quả hoạt động kinh doanh: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA);\nc) Việc thực hiện nghĩa vụ với ngân sách nhà nước;\nd) Phân phối lợi nhuận, trích lập và sử dụng các quỹ.\n4. Giám sát chấp hành pháp luật về đầu tư, quản lý và sử dụng vốn nhà nước tại doanh nghiệp; ban hành và thực hiện quy chế quản lý tài chính của doanh nghiệp.\n5. Giám sát việc cơ cấu lại vốn nhà nước đầu tư tại doanh nghiệp, cơ cấu lại vốn của doanh nghiệp đầu tư tại công ty con, công ty liên kết.\n6. Giám sát thực hiện chế độ tiền lương, thù lao, tiền thưởng, phụ cấp trách nhiệm và quyền lợi khác đối với người lao động, người quản lý doanh nghiệp, Kiểm soát viên, người đại diện phần vốn của doanh nghiệp theo quy định của Bộ luật Lao động.\n7. Bộ Tài chính quy định các biểu mẫu để thực hiện các nội dung giám sát nêu tại các Khoản 1, 2, 3,4 và Khoản 5 Điều này.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giám sát việc bảo toàn và phát triển vốn.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Giám sát việc quản lý, sử dụng vốn và tài sản nhà nước tại doanh nghiệp theo các nội dung sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Hoạt động đầu tư vốn đối với các dựán đầu tư, gồm: Nguồn vốn huy động, tiến độ thực hiện dựán đầu tư, tiến độ giải ngân vốn đầu tư;"
+            },
+            {
+              "label": "b",
+              "content": "Hoạt động đầu tư vốn ra ngoài doanh nghiệp, trong đó nội dung giám sát tài chính công ty con, công ty liên kết thông qua danh mục đầu tư của công ty mẹ thực hiện theo quy định tại Mục 2 Chương III Nghị định này; giám sát hoạt động đầu tư ra nước ngoài của doanh nghiệp thực hiện theo quy định tại Mục 3 Chương III Nghị định này;"
+            },
+            {
+              "label": "c",
+              "content": "Tình hình huy động vốn và sử dụng vốn huy động, phát hành trái phiếu;"
+            },
+            {
+              "label": "d",
+              "content": "Tình hình quản lý tài sản, quản lý nợ tại doanh nghiệp, khả năng thanh toán nợ của doanh nghiệp, hệ số nợ phải trả trên vốn chủ sở hữu;"
+            },
+            {
+              "label": "đ",
+              "content": "Tình hình lưu chuyển tiền tệ của doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Giám sát kết quả hoạt động sản xuất kinh doanh của doanh nghiệp",
+          "points": [
+            {
+              "label": "a",
+              "content": "Việc thực hiện kế hoạch sản xuất kinh doanh, thực hiện nhiệm vụ cungứng sản phẩm, dịch vụ côngích do Nhà nước đặt hàng, giao kế hoạch;"
+            },
+            {
+              "label": "b",
+              "content": "Kết quả hoạt động kinh doanh: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA);"
+            },
+            {
+              "label": "c",
+              "content": "Việc thực hiện nghĩa vụ với ngân sách nhà nước;"
+            },
+            {
+              "label": "d",
+              "content": "Phân phối lợi nhuận, trích lập và sử dụng các quỹ."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Giám sát chấp hành pháp luật về đầu tư, quản lý và sử dụng vốn nhà nước tại doanh nghiệp; ban hành và thực hiện quy chế quản lý tài chính của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Giám sát việc cơ cấu lại vốn nhà nước đầu tư tại doanh nghiệp, cơ cấu lại vốn của doanh nghiệp đầu tư tại công ty con, công ty liên kết.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Giám sát thực hiện chế độ tiền lương, thù lao, tiền thưởng, phụ cấp trách nhiệm và quyền lợi khác đối với người lao động, người quản lý doanh nghiệp, Kiểm soát viên, người đại diện phần vốn của doanh nghiệp theo quy định của Bộ luật Lao động.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Bộ Tài chính quy định các biểu mẫu để thực hiện các nội dung giám sát nêu tại các Khoản 1, 2, 3,4 và Khoản 5 Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Căn cứ thực hiện giám sát tài chính",
+      "content_raw": "Căn cứ thực hiện giám sát tài chính\n1. Quy định của pháp luật hiện hành về quản lý tài chính doanh nghiệp.\n2. Điều lệ tổ chức và hoạt động, Quy chế quản lý tài chính của doanh nghiệp.\n3. Kế hoạch sản xuất kinh doanh và đầu tư phát triển hằng năm và năm (05) năm của doanh nghiệp, mục tiêu giám sát trong từng thời kỳ do cơ quan đại diện chủ sở hữu xây dựng đối với từng doanh nghiệp.\n4. Báo cáo tài chính năm của doanh nghiệp đã được kiểm toán độc lập và được Hội đồng thành viên thông qua; báo cáo tài chính sáu (06) tháng, báo cáo tài chính quý, báo cáo nghiệp vụ định kỳ và các báo cáo đột xuất khác theo yêu cầu của cơ quan đại diện chủ sở hữu hoặc cơ quan quản lý nhà nước.\n5. Kết quả thanh tra, kiểm tra, kiểm toán tại doanh nghiệp của các cơ quan chức năng đã công bố theo quy định hoặc đã gửi bằng văn bản đến cơ quan đại diện chủ sở hữu.\n6. Các thông tin, tài liệu có liên quan khác theo quy định của pháp luật.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Quy định của pháp luật hiện hành về quản lý tài chính doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Điều lệ tổ chức và hoạt động, Quy chế quản lý tài chính của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Kế hoạch sản xuất kinh doanh và đầu tư phát triển hằng năm và năm (05) năm của doanh nghiệp, mục tiêu giám sát trong từng thời kỳ do cơ quan đại diện chủ sở hữu xây dựng đối với từng doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Báo cáo tài chính năm của doanh nghiệp đã được kiểm toán độc lập và được Hội đồng thành viên thông qua; báo cáo tài chính sáu (06) tháng, báo cáo tài chính quý, báo cáo nghiệp vụ định kỳ và các báo cáo đột xuất khác theo yêu cầu của cơ quan đại diện chủ sở hữu hoặc cơ quan quản lý nhà nước.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Kết quả thanh tra, kiểm tra, kiểm toán tại doanh nghiệp của các cơ quan chức năng đã công bố theo quy định hoặc đã gửi bằng văn bản đến cơ quan đại diện chủ sở hữu.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Các thông tin, tài liệu có liên quan khác theo quy định của pháp luật.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Phương thức giám sát",
+      "content_raw": "Phương thức giám sát\n1. Giám sát tài chính thực hiện bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát trước và giám sát trong nhằm phát hiện kịp thời các rủi ro về tài chính, hạn chế trong quản lý tài chính của doanh nghiệp và có cảnh báo, giải pháp xử lý.\n2. Việc kiểm tra, thanh tra thực hiện định kỳ hoặc đột xuất theo quy định của pháp luật về kiểm tra, thanh tra.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Giám sát tài chính thực hiện bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát trước và giám sát trong nhằm phát hiện kịp thời các rủi ro về tài chính, hạn chế trong quản lý tài chính của doanh nghiệp và có cảnh báo, giải pháp xử lý.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Việc kiểm tra, thanh tra thực hiện định kỳ hoặc đột xuất theo quy định của pháp luật về kiểm tra, thanh tra.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Tổ chức giám sát",
+      "content_raw": "Tổ chức giám sát\n1. Trách nhiệm của cơ quan đại diện chủ sở hữu:\na) Xây dựng và ban hành Quy chế giám sát tài chính và đánh giá hiệu quả các doanh nghiệp (trong đó quy định cụ thể trách nhiệm, cơ chế phối hợp, báo cáo trong nội bộ cơ quan đại diện chủ sở hữu và giữa cơ quan đại diện chủ sở hữu với các bên liên quan) trong thời hạn sáu (06) tháng kể từ ngày Nghị định này có hiệu lực thi hành;\nb) Giao một đơn vị làm đầu mối thực hiện công tác giám sát tài chính và đánh giá hiệu quả hoạt động doanh nghiệp;\nc) Xây dựng hệ thống công nghệ thông tin để thu thập thông tin trực tiếp từ các doanh nghiệp;\nd) Xác định chỉ tiêu giám sát tài chính đặc thù (nếu có) đối với từng doanh nghiệp trong từng thời kỳ phù hợp với hoạt động kinh doanh và tình hình tài chính của doanh nghiệp;\nđ) Lập kế hoạch giám sát tài chính (bao gồm kế hoạch thanh tra, kiểm tra về tài chính) đối với các doanh nghiệp. Kế hoạch giám sát tài chính phải xác định rõ mục tiêu, nội dung, đối tượng, phạm vi giám sát đối với mỗi doanh nghiệp. Kế hoạch giám sát tài chính phải được lấyý kiến của cơ quan tài chính và các Bộ, ngành liên quan, Thanh tra Chính phủ và Kiểm toán Nhà nước trước ngày 31 tháng 12 của năm trước để hoàn thiện, phê duyệt và công bố trước ngày 31 tháng 01 hằng năm;\ne) Quy định thời gian nộp báo cáo về tình hình tài chính của các doanh nghiệp cho cơ quan đại diện chủ sở hữu, đảm bảo cơ quan đại diện chủ sở hữu có đủ thời gian tổng hợp và lập Báo cáo sáu (06) tháng về giám sát tài chính gửi Bộ Tài chính trước ngày 31 tháng 8 của năm báo cáo và Báo cáo giám sát tài chính năm gửi Bộ Tài chính trước ngày 31 tháng 5 của năm tiếp theo;\ng) Thu thập và quản lý thông tin tài chính của từng doanh nghiệp đảm bảo kịp thời, đầy đủ, liên tục;\nh) Khi phát hiện tình hình tài chính, công tác quản lý tài chính của doanh nghiệp có dấu hiệu rủi ro, phải cảnh báo kịp thời cho doanh nghiệp. Chỉ đạo doanh nghiệp có giải pháp kịp thời ngăn chặn, khắc phục các rủi ro, yếu kém; đưa ra các biện pháp chấn chỉnh và xử lý sai phạm về quản lý tài chính của doanh nghiệp; báo cáo Thủ tướng Chính phủ và thông báo cơ quan tài chính cùng cấp đối với các trường hợp vi phạm quy định của pháp luật về tài chính doanh nghiệp;\ni) Căn cứ vào kết quả giám sát tài chính doanh nghiệp và các quy định quản lý tài chính, doanh nghiệp, cơ quan đại diện chủ sở hữu lập Báo cáo giám sát tài chính của từng doanh nghiệp. Trường hợp doanh nghiệp có dấu hiệu mất an toàn tài chính quy định tại Điều 24 Nghị định này, cơ quan đại diện chủ sở hữu đánh giá “Doanh nghiệp có dấu hiệu mất an toàn tài chính”, quyết định sự cần thiết thực hiện chế độ giám sát tài chính đặc biệt theo quy định tại Mục 4 Chương III Nghị định này;\nk) Lập Báo cáo kết quả giám sát tài chính định kỳ sáu (06) tháng và hằng năm gửi Bộ Tài chính kèm theo báo cáo giám sát tài chính của từng doanh nghiệp. Báo cáo 6 tháng gửi trước ngày 31 tháng 8 của năm báo cáo; báo cáo năm gửi trước ngày 31 tháng 5 của năm tiếp theo. Cơ quan đại diện chủ sở hữu chịu trách nhiệm về tính trung thực, chính xác của kết quả giám sát tài chính doanh nghiệp do mình quyết định thành lập hoặc được giao quản lý;\nl) Tổ chức thực hiện các chỉ đạo của Chính phủ, Thủ tướng Chính phủ và các kiến nghị của cơ quan tài chính, cơ quan thanh tra, kiểm tra, kiểm toán về việc xử lý các sai phạm và biện pháp tăng cường giám sát tài chính doanh nghiệp. Xử lý kỷ luật đối với người quản lý doanh nghiệp là công chức hoặc viên chức trong các trường hợp không thực hiện chế độ báo cáo đúng quy định và không chấp hành các khuyến nghị, chỉ đạo trong báo cáo giám sát của cơ quan đại diện chủ sở hữu, của Bộ Tài chính. Trường hợp báo cáo tài chính có dấu hiệu không đầy đủ, chính xác, cơ quan đại diện chủ sở hữu được quyền yêu cầu doanh nghiệp thuê công ty kế toán, kiểm toán độc lập đápứng điều kiện chuyên môn thực hiện việc soát xét lại số liệu tài chính của doanh nghiệp để có cơ sở đưa ra đánh giá, nhận xét và kết luận giám sát.\n2. Trách nhiệm của Bộ Tài chính:\na) Phối hợp với cơ quan đại diện chủ sở hữu lập và thực hiện kế hoạch giám sát các doanh nghiệp; giám sát theo chuyên đề hoặc theo yêu cầu của Chính phủ, Thủ tướng Chính phủ;\nb) Xây dựng hệ thống thông tin phù hợp để thu thập, lưu trữ và xử lý các thông tin, báo cáo giám sát tài chính doanh nghiệp;\nc) Căn cứ báo cáo kết quả giám sát tài chính của cơ quan đại diện chủ sở hữu và báo cáo kết quả giám sát chuyên đề về quản lý tài chính doanh nghiệp (do cơ quan thanh tra, Kiểm toán Nhà nước hoặc cơ quan tài chính lập), tổng hợp báo cáo Chính phủ, Thủ tướng Chính phủ sáu (06) tháng và hằng năm về tình hình quản lý và sử dụng vốn nhà nước tại doanh nghiệp, hiệu quả hoạt động và thực trạng tài chính của các doanh nghiệp. Báo cáo sáu (06) tháng gửi trước ngày 30 tháng 9 của năm báo cáo, Báo cáo năm gửi trước ngày 31 tháng 7 của năm tiếp theo;\nd) Cảnh báo các doanh nghiệp có dấu hiệu mất an toàn tài chính, có trách nhiệm trả lời các kiến nghị, đề xuất của doanh nghiệp;\nđ) Trao đổi, làm rõ căn cứ, nhận xét đánh giá, cảnh báo, khuyến nghị trong trường hợp doanh nghiệp và cơ quan đại diện chủ sở hữu cóý kiến khácý kiến của Bộ Tài chính. Trường hợp, cơ quan đại diện chủ sở hữu, doanh nghiệp vẫn cóý kiến khác, Bộ Tài chính tổng hợp, báo cáo Thủ tướng Chính phủ xem xét quyết định;\ne) Kiến nghị Thủ tướng Chính phủ xử lý theo quy định của pháp luật đối với người có trách nhiệm của cơ quan đại diện chủ sở hữu và người quản lý doanh nghiệp không thực hiện chế độ báo cáo, không chấp hành khuyến nghị, chỉ đạo của cơ quan đại diện chủ sở hữu và Bộ Tài chính.\n3. Trách nhiệm của doanh nghiệp:\na) Xây dựng và ban hành các quy trình quản lý phục vụ giám sát tài chính và đánh giá hiệu quả hoạt động sản xuất kinh doanh của doanh nghiệp, bao gồm: Quy trình kế hoạch ngân sách và dự báo, quy trình kế toán, lập báo cáo tài chính hợp nhất, quy trình quản lý rủi ro tài chính, kế hoạch sản xuất kinh doanh, quy chế giám sát tài chính và đánh giá hiệu quả hoạt động đối với các công ty con, công ty liên kết;\nb) Ban hành quy định phân công nhiệm vụ, trách nhiệm của các phòng, ban; cơ chế phối hợp giữa các phòng ban, đặc biệt là các phòng ban có chức năng giám sát và bộ phận kiểm soát nội bộ; tổ chức giám sát tài chính trong nội bộ doanh nghiệp. Hội đồng thành viên (Chủ tịch công ty) sử dụng bộ máy trong tổ chức của doanh nghiệp để thực hiện việc giám sát này. Doanh nghiệp phải lập báo cáo kết quả công tác giám sát tài chính nội bộ định kỳ hằng năm theo yêu cầu của cơ quan đại diện chủ sở hữu (nếu có);\nc) Xây dựng hệ thống công nghệ thông tin hỗ trợ hoạt động của bộ phận kiểm soát nội bộ nói riêng và doanh nghiệp nói chung, đảm bảo thu thập được thông tin về các chỉ tiêu giám sát tài chính doanh nghiệp;\nd) Lập và gửi các báo cáo phục vụ công tác giám sát tài chính theo quy định của cơ quan tài chính và của cơ quan đại diện chủ sở hữu theo quy định tại Nghị định này;\nđ) Được quyền thuê tổ chức dịch vụ tư vấn tài chính để xây dựng chỉ tiêu giám sát tài chính đặc thù (nếu có), báo cáo cơ quan đại diện chủ sở hữu xem xét, phê duyệt làm cơ sở để tổ chức thực hiện;\ne) Có trách nhiệm thuê công ty cung cấp dịch vụ kế toán, kiểm toán độc lập theo yêu cầu của cơ quan đại diện chủ sở hữu để soát xét lại số liệu tài chính của doanh nghiệp, chi phí này được hạch toán vào chi phí của doanh nghiệp;\ng) Xây dựng và thực hiện ngay các biện pháp để ngăn chặn, khắc phục các nguy cơ mất an toàn tài chính doanh nghiệp, rủi ro trong quản lý tài chính doanh nghiệp khi có cảnh báo của cơ quan đại diện chủ sở hữu, cơ quan tài chính;\nh) Thực hiện đầy đủ kịp thời các chỉ đạo, khuyến nghị của cơ quan đại diện chủ sở hữu, cơ quan tài chính trong các báo cáo giám sát. Trường hợp không thống nhất, trong vòng 15 ngày làm việc kể từ ngày nhận đượcý kiến chỉ đạo, khuyến nghị, doanh nghiệp báo cáo cơ quan đại diện chủ sở hữu và cơ quan tài chính. Khi cơ quan đại diện chủ sở hữu, cơ quan tài chính đưa raý kiến cuối cùng thì doanh nghiệp có trách nhiệm phải thực hiện cácý kiến đó. Mục 2 GIÁM SÁT TÀI CHÍNH ĐỐI VỚI CÔNG TY CON, CÔNG TY LIÊN KẾT",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trách nhiệm của cơ quan đại diện chủ sở hữu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Xây dựng và ban hành Quy chế giám sát tài chính và đánh giá hiệu quả các doanh nghiệp (trong đó quy định cụ thể trách nhiệm, cơ chế phối hợp, báo cáo trong nội bộ cơ quan đại diện chủ sở hữu và giữa cơ quan đại diện chủ sở hữu với các bên liên quan) trong thời hạn sáu (06) tháng kể từ ngày Nghị định này có hiệu lực thi hành;"
+            },
+            {
+              "label": "b",
+              "content": "Giao một đơn vị làm đầu mối thực hiện công tác giám sát tài chính và đánh giá hiệu quả hoạt động doanh nghiệp;"
+            },
+            {
+              "label": "c",
+              "content": "Xây dựng hệ thống công nghệ thông tin để thu thập thông tin trực tiếp từ các doanh nghiệp;"
+            },
+            {
+              "label": "d",
+              "content": "Xác định chỉ tiêu giám sát tài chính đặc thù (nếu có) đối với từng doanh nghiệp trong từng thời kỳ phù hợp với hoạt động kinh doanh và tình hình tài chính của doanh nghiệp;"
+            },
+            {
+              "label": "đ",
+              "content": "Lập kế hoạch giám sát tài chính (bao gồm kế hoạch thanh tra, kiểm tra về tài chính) đối với các doanh nghiệp. Kế hoạch giám sát tài chính phải xác định rõ mục tiêu, nội dung, đối tượng, phạm vi giám sát đối với mỗi doanh nghiệp. Kế hoạch giám sát tài chính phải được lấyý kiến của cơ quan tài chính và các Bộ, ngành liên quan, Thanh tra Chính phủ và Kiểm toán Nhà nước trước ngày 31 tháng 12 của năm trước để hoàn thiện, phê duyệt và công bố trước ngày 31 tháng 01 hằng năm;"
+            },
+            {
+              "label": "e",
+              "content": "Quy định thời gian nộp báo cáo về tình hình tài chính của các doanh nghiệp cho cơ quan đại diện chủ sở hữu, đảm bảo cơ quan đại diện chủ sở hữu có đủ thời gian tổng hợp và lập Báo cáo sáu (06) tháng về giám sát tài chính gửi Bộ Tài chính trước ngày 31 tháng 8 của năm báo cáo và Báo cáo giám sát tài chính năm gửi Bộ Tài chính trước ngày 31 tháng 5 của năm tiếp theo;"
+            },
+            {
+              "label": "g",
+              "content": "Thu thập và quản lý thông tin tài chính của từng doanh nghiệp đảm bảo kịp thời, đầy đủ, liên tục;"
+            },
+            {
+              "label": "h",
+              "content": "Khi phát hiện tình hình tài chính, công tác quản lý tài chính của doanh nghiệp có dấu hiệu rủi ro, phải cảnh báo kịp thời cho doanh nghiệp. Chỉ đạo doanh nghiệp có giải pháp kịp thời ngăn chặn, khắc phục các rủi ro, yếu kém; đưa ra các biện pháp chấn chỉnh và xử lý sai phạm về quản lý tài chính của doanh nghiệp; báo cáo Thủ tướng Chính phủ và thông báo cơ quan tài chính cùng cấp đối với các trường hợp vi phạm quy định của pháp luật về tài chính doanh nghiệp;"
+            },
+            {
+              "label": "i",
+              "content": "Căn cứ vào kết quả giám sát tài chính doanh nghiệp và các quy định quản lý tài chính, doanh nghiệp, cơ quan đại diện chủ sở hữu lập Báo cáo giám sát tài chính của từng doanh nghiệp. Trường hợp doanh nghiệp có dấu hiệu mất an toàn tài chính quy định tại Điều 24 Nghị định này, cơ quan đại diện chủ sở hữu đánh giá “Doanh nghiệp có dấu hiệu mất an toàn tài chính”, quyết định sự cần thiết thực hiện chế độ giám sát tài chính đặc biệt theo quy định tại Mục 4 Chương III Nghị định này;"
+            },
+            {
+              "label": "k",
+              "content": "Lập Báo cáo kết quả giám sát tài chính định kỳ sáu (06) tháng và hằng năm gửi Bộ Tài chính kèm theo báo cáo giám sát tài chính của từng doanh nghiệp. Báo cáo 6 tháng gửi trước ngày 31 tháng 8 của năm báo cáo; báo cáo năm gửi trước ngày 31 tháng 5 của năm tiếp theo. Cơ quan đại diện chủ sở hữu chịu trách nhiệm về tính trung thực, chính xác của kết quả giám sát tài chính doanh nghiệp do mình quyết định thành lập hoặc được giao quản lý;"
+            },
+            {
+              "label": "l",
+              "content": "Tổ chức thực hiện các chỉ đạo của Chính phủ, Thủ tướng Chính phủ và các kiến nghị của cơ quan tài chính, cơ quan thanh tra, kiểm tra, kiểm toán về việc xử lý các sai phạm và biện pháp tăng cường giám sát tài chính doanh nghiệp. Xử lý kỷ luật đối với người quản lý doanh nghiệp là công chức hoặc viên chức trong các trường hợp không thực hiện chế độ báo cáo đúng quy định và không chấp hành các khuyến nghị, chỉ đạo trong báo cáo giám sát của cơ quan đại diện chủ sở hữu, của Bộ Tài chính. Trường hợp báo cáo tài chính có dấu hiệu không đầy đủ, chính xác, cơ quan đại diện chủ sở hữu được quyền yêu cầu doanh nghiệp thuê công ty kế toán, kiểm toán độc lập đápứng điều kiện chuyên môn thực hiện việc soát xét lại số liệu tài chính của doanh nghiệp để có cơ sở đưa ra đánh giá, nhận xét và kết luận giám sát."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trách nhiệm của Bộ Tài chính:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Phối hợp với cơ quan đại diện chủ sở hữu lập và thực hiện kế hoạch giám sát các doanh nghiệp; giám sát theo chuyên đề hoặc theo yêu cầu của Chính phủ, Thủ tướng Chính phủ;"
+            },
+            {
+              "label": "b",
+              "content": "Xây dựng hệ thống thông tin phù hợp để thu thập, lưu trữ và xử lý các thông tin, báo cáo giám sát tài chính doanh nghiệp;"
+            },
+            {
+              "label": "c",
+              "content": "Căn cứ báo cáo kết quả giám sát tài chính của cơ quan đại diện chủ sở hữu và báo cáo kết quả giám sát chuyên đề về quản lý tài chính doanh nghiệp (do cơ quan thanh tra, Kiểm toán Nhà nước hoặc cơ quan tài chính lập), tổng hợp báo cáo Chính phủ, Thủ tướng Chính phủ sáu (06) tháng và hằng năm về tình hình quản lý và sử dụng vốn nhà nước tại doanh nghiệp, hiệu quả hoạt động và thực trạng tài chính của các doanh nghiệp. Báo cáo sáu (06) tháng gửi trước ngày 30 tháng 9 của năm báo cáo, Báo cáo năm gửi trước ngày 31 tháng 7 của năm tiếp theo;"
+            },
+            {
+              "label": "d",
+              "content": "Cảnh báo các doanh nghiệp có dấu hiệu mất an toàn tài chính, có trách nhiệm trả lời các kiến nghị, đề xuất của doanh nghiệp;"
+            },
+            {
+              "label": "đ",
+              "content": "Trao đổi, làm rõ căn cứ, nhận xét đánh giá, cảnh báo, khuyến nghị trong trường hợp doanh nghiệp và cơ quan đại diện chủ sở hữu cóý kiến khácý kiến của Bộ Tài chính. Trường hợp, cơ quan đại diện chủ sở hữu, doanh nghiệp vẫn cóý kiến khác, Bộ Tài chính tổng hợp, báo cáo Thủ tướng Chính phủ xem xét quyết định;"
+            },
+            {
+              "label": "e",
+              "content": "Kiến nghị Thủ tướng Chính phủ xử lý theo quy định của pháp luật đối với người có trách nhiệm của cơ quan đại diện chủ sở hữu và người quản lý doanh nghiệp không thực hiện chế độ báo cáo, không chấp hành khuyến nghị, chỉ đạo của cơ quan đại diện chủ sở hữu và Bộ Tài chính."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Trách nhiệm của doanh nghiệp:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Xây dựng và ban hành các quy trình quản lý phục vụ giám sát tài chính và đánh giá hiệu quả hoạt động sản xuất kinh doanh của doanh nghiệp, bao gồm: Quy trình kế hoạch ngân sách và dự báo, quy trình kế toán, lập báo cáo tài chính hợp nhất, quy trình quản lý rủi ro tài chính, kế hoạch sản xuất kinh doanh, quy chế giám sát tài chính và đánh giá hiệu quả hoạt động đối với các công ty con, công ty liên kết;"
+            },
+            {
+              "label": "b",
+              "content": "Ban hành quy định phân công nhiệm vụ, trách nhiệm của các phòng, ban; cơ chế phối hợp giữa các phòng ban, đặc biệt là các phòng ban có chức năng giám sát và bộ phận kiểm soát nội bộ; tổ chức giám sát tài chính trong nội bộ doanh nghiệp. Hội đồng thành viên (Chủ tịch công ty) sử dụng bộ máy trong tổ chức của doanh nghiệp để thực hiện việc giám sát này. Doanh nghiệp phải lập báo cáo kết quả công tác giám sát tài chính nội bộ định kỳ hằng năm theo yêu cầu của cơ quan đại diện chủ sở hữu (nếu có);"
+            },
+            {
+              "label": "c",
+              "content": "Xây dựng hệ thống công nghệ thông tin hỗ trợ hoạt động của bộ phận kiểm soát nội bộ nói riêng và doanh nghiệp nói chung, đảm bảo thu thập được thông tin về các chỉ tiêu giám sát tài chính doanh nghiệp;"
+            },
+            {
+              "label": "d",
+              "content": "Lập và gửi các báo cáo phục vụ công tác giám sát tài chính theo quy định của cơ quan tài chính và của cơ quan đại diện chủ sở hữu theo quy định tại Nghị định này;"
+            },
+            {
+              "label": "đ",
+              "content": "Được quyền thuê tổ chức dịch vụ tư vấn tài chính để xây dựng chỉ tiêu giám sát tài chính đặc thù (nếu có), báo cáo cơ quan đại diện chủ sở hữu xem xét, phê duyệt làm cơ sở để tổ chức thực hiện;"
+            },
+            {
+              "label": "e",
+              "content": "Có trách nhiệm thuê công ty cung cấp dịch vụ kế toán, kiểm toán độc lập theo yêu cầu của cơ quan đại diện chủ sở hữu để soát xét lại số liệu tài chính của doanh nghiệp, chi phí này được hạch toán vào chi phí của doanh nghiệp;"
+            },
+            {
+              "label": "g",
+              "content": "Xây dựng và thực hiện ngay các biện pháp để ngăn chặn, khắc phục các nguy cơ mất an toàn tài chính doanh nghiệp, rủi ro trong quản lý tài chính doanh nghiệp khi có cảnh báo của cơ quan đại diện chủ sở hữu, cơ quan tài chính;"
+            },
+            {
+              "label": "h",
+              "content": "Thực hiện đầy đủ kịp thời các chỉ đạo, khuyến nghị của cơ quan đại diện chủ sở hữu, cơ quan tài chính trong các báo cáo giám sát. Trường hợp không thống nhất, trong vòng 15 ngày làm việc kể từ ngày nhận đượcý kiến chỉ đạo, khuyến nghị, doanh nghiệp báo cáo cơ quan đại diện chủ sở hữu và cơ quan tài chính. Khi cơ quan đại diện chủ sở hữu, cơ quan tài chính đưa raý kiến cuối cùng thì doanh nghiệp có trách nhiệm phải thực hiện cácý kiến đó. Mục 2 GIÁM SÁT TÀI CHÍNH ĐỐI VỚI CÔNG TY CON, CÔNG TY LIÊN KẾT"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "title": "Chủ thể giám sát",
+      "content_raw": "Chủ thể giám sát\n1. Công ty mẹ thực hiện giám sát tài chính đối với các công ty con, công ty liên kết.\n2. Cơ quan đại diện chủ sở hữu chủ trì phối hợp với cơ quan tài chính thực hiện giám sát gián tiếp đối với các công ty con, công ty liên kết quan trọng của doanh nghiệp thông qua công ty mẹ.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty mẹ thực hiện giám sát tài chính đối với các công ty con, công ty liên kết.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu chủ trì phối hợp với cơ quan tài chính thực hiện giám sát gián tiếp đối với các công ty con, công ty liên kết quan trọng của doanh nghiệp thông qua công ty mẹ.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Đối tượng giám sát",
+      "content_raw": "Đối tượng giám sát\n1. Đối tượng cần giám sát bởi công ty mẹ theo quy định tại Khoản 1 Điều 13 Nghị định này bao gồm toàn bộ các công ty con, công ty liên kết của doanh nghiệp.\n2. Đối tượng cần giám sát bởi cơ quan đại diện chủ sở hữu và cơ quan tài chính theo quy định tại Khoản 2 Điều 13 Nghị định này bao gồm:\na) Công ty con của doanh nghiệp;\nb) Công ty liên kết quan trọng của doanh nghiệp. Việc xác định công ty liên kết quan trọng do cơ quan đại diện chủ sở hữu phối hợp với công ty mẹ lựa chọn theo một trong các tiêu chí sau: - Có tầm quan trọng chiến lược (về công nghệ, hoặc về thị trường, hoặc về tài chính) đối với sự phát triển của doanh nghiệp; - Có tỷ lệ góp vốn của công ty mẹ trên 35% vốn điều lệ; - Có mức vốn điều lệ đạt tiêu chí phân loại từ dựán nhóm B trở lên theo quy định của Luật Đầu tư công; - Lợi nhuận dự kiến được chia từ công ty liên kết đóng góp trên 10% doanh thu (bao gồm doanh thu bán hàng, cung cấp dịch vụ và doanh thu hoạt động tài chính) của doanh nghiệp trong năm báo cáo.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối tượng cần giám sát bởi công ty mẹ theo quy định tại Khoản 1 Điều 13 Nghị định này bao gồm toàn bộ các công ty con, công ty liên kết của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đối tượng cần giám sát bởi cơ quan đại diện chủ sở hữu và cơ quan tài chính theo quy định tại Khoản 2 Điều 13 Nghị định này bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Công ty con của doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Công ty liên kết quan trọng của doanh nghiệp. Việc xác định công ty liên kết quan trọng do cơ quan đại diện chủ sở hữu phối hợp với công ty mẹ lựa chọn theo một trong các tiêu chí sau: - Có tầm quan trọng chiến lược (về công nghệ, hoặc về thị trường, hoặc về tài chính) đối với sự phát triển của doanh nghiệp; - Có tỷ lệ góp vốn của công ty mẹ trên 35% vốn điều lệ; - Có mức vốn điều lệ đạt tiêu chí phân loại từ dựán nhóm B trở lên theo quy định của Luật Đầu tư công; - Lợi nhuận dự kiến được chia từ công ty liên kết đóng góp trên 10% doanh thu (bao gồm doanh thu bán hàng, cung cấp dịch vụ và doanh thu hoạt động tài chính) của doanh nghiệp trong năm báo cáo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Nội dung giám sát",
+      "content_raw": "Nội dung giám sát\n1. Đối với công ty con\na) Công ty mẹ thực hiện giám sát công ty con trên cơ sở tham khảo các nội dung giám sát quy định tại Điều 9 Nghị định này;\nb) Cơ quan đại diện chủ sở hữu phối hợp với cơ quan tài chính và công ty mẹ thực hiện giám sát tài chính công ty con theo quy định tại các Khoản 1, 2, 3 Điều 9 Nghị định này.\n2. Đối với công ty liên kết\na) Tình hình sản xuất kinh doanh: Biến động về doanh thu, biến động về lợi nhuận so với hai năm gần nhất;\nb) Hiệu quả đầu tư vốn: Thu hồi vốn, thu lợi nhuận, cổ tức được chia từ khoản vốn đầu tư ra ngoài doanh nghiệp;\nc) Khả năng thanh toán, hệ số nợ phải trả trên vốn chủ sở hữu;\nd) Việc chuyển nhượng vốn đã đầu tư.\n3. Bộ Tài chính quy định các biểu mẫu “Báo cáo giám sát tài chính công ty con, công ty liên kết” mà công ty mẹ phải gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính.\n4. Công ty mẹ có trách nhiệm xây dựng biểu mẫu để thực hiện giám sát tài chính các công ty con, công ty liên kết theo nội dung quy định tại Khoản 1 và Khoản 2 Điều này.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với công ty con",
+          "points": [
+            {
+              "label": "a",
+              "content": "Công ty mẹ thực hiện giám sát công ty con trên cơ sở tham khảo các nội dung giám sát quy định tại Điều 9 Nghị định này;"
+            },
+            {
+              "label": "b",
+              "content": "Cơ quan đại diện chủ sở hữu phối hợp với cơ quan tài chính và công ty mẹ thực hiện giám sát tài chính công ty con theo quy định tại các Khoản 1, 2, 3 Điều 9 Nghị định này."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối với công ty liên kết",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tình hình sản xuất kinh doanh: Biến động về doanh thu, biến động về lợi nhuận so với hai năm gần nhất;"
+            },
+            {
+              "label": "b",
+              "content": "Hiệu quả đầu tư vốn: Thu hồi vốn, thu lợi nhuận, cổ tức được chia từ khoản vốn đầu tư ra ngoài doanh nghiệp;"
+            },
+            {
+              "label": "c",
+              "content": "Khả năng thanh toán, hệ số nợ phải trả trên vốn chủ sở hữu;"
+            },
+            {
+              "label": "d",
+              "content": "Việc chuyển nhượng vốn đã đầu tư."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Bộ Tài chính quy định các biểu mẫu “Báo cáo giám sát tài chính công ty con, công ty liên kết” mà công ty mẹ phải gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Công ty mẹ có trách nhiệm xây dựng biểu mẫu để thực hiện giám sát tài chính các công ty con, công ty liên kết theo nội dung quy định tại Khoản 1 và Khoản 2 Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "Phương thức giám sát",
+      "content_raw": "Phương thức giám sát\n1. Công ty mẹ thực hiện giám sát tài chính công ty con, công ty liên kết bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát gián tiếp.\n2. Cơ quan đại diện chủ sở hữu chủ trì, phối hợp với cơ quan tài chính thực hiện giám sát gián tiếp công ty con, công ty liên kết quan trọng của doanh nghiệp.\n3. Trường hợp phát hiện có dấu hiệu vi phạm quy định của pháp luật về tài chính doanh nghiệp, cơ quan đại diện chủ sở hữu phối hợp cơ quan tài chính xem xét, quyết định thực hiện hình thức giám sát trực tiếp tại công ty mẹ hoặc công ty con do công ty mẹ nắm giữ 100% vốn điều lệ.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty mẹ thực hiện giám sát tài chính công ty con, công ty liên kết bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát gián tiếp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu chủ trì, phối hợp với cơ quan tài chính thực hiện giám sát gián tiếp công ty con, công ty liên kết quan trọng của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp phát hiện có dấu hiệu vi phạm quy định của pháp luật về tài chính doanh nghiệp, cơ quan đại diện chủ sở hữu phối hợp cơ quan tài chính xem xét, quyết định thực hiện hình thức giám sát trực tiếp tại công ty mẹ hoặc công ty con do công ty mẹ nắm giữ 100% vốn điều lệ.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Tổ chức giám sát",
+      "content_raw": "Tổ chức giám sát\n1. Trách nhiệm của cơ quan đại diện chủ sở hữu:\na) Chủ động thống nhất với công ty mẹ danh sách các công ty con, công ty liên kết cần đưa vào Kế hoạch giám sát tài chính theo quy định tại Điểm đ Khoản 1 Điều 12 Nghị định này;\nb) Giao công ty mẹ xây dựng Báo cáo giám sát tài chính đối với các công ty con, công ty liên kết của doanh nghiệp trong Kế hoạch giám sát tài chính;\nc) Thu thập các báo cáo giám sát tài chính định kỳ của công ty mẹ đối với các công ty con, công ty liên kết trong Kế hoạch giám sát tài chính;\nd) Phân tích tình hình sản xuất kinh doanh và các rủi ro tài chính của các công ty con, công ty liên kết của các doanh nghiệp;\nđ) Trường hợp phát hiện tình hình sản xuất kinh doanh, hiệu quả đầu tư vốn có dấu hiệu rủi ro phải cảnh báo đồng thời yêu cầu công ty mẹ làm rõ nguyên nhân tại Báo cáo giám sát tài chính công ty con, công ty liên kết kỳ gần nhất.\n2. Trách nhiệm của cơ quan tài chính:\na) Phối hợp với cơ quan đại diện chủ sở hữu thực hiện kế hoạch giám sát các công ty con, công ty liên kết quan trọng của các doanh nghiệp;\nb) Phân tích các rủi ro về tài chính của các công ty con, công ty liên kết để đưa ra những cảnh báo, khuyến nghị cho cơ quan đại diện chủ sở hữu và công ty mẹ.\n3. Trách nhiệm của doanh nghiệp: Thực hiện các quy định tại Khoản 3 Điều 12 Nghị định này và các quy định sau:\na) Chủ động xây dựng chỉ tiêu giám sát tài chính, hiệu quả đầu tư vốn phù hợp đặc điểm, tình hình hoạt động của từng công ty con, công ty liên kết;\nb) Lập kế hoạch giám sát tài chính các công ty con, công ty liên kết, đảm bảo thu thập và xử lý thông tin kịp thời; thống nhất danh sách công ty con, công ty liên kết quan trọng cần giám sát của cơ quan đại diện chủ sở hữu;\nc) Lập Báo cáo giám sát tài chính công ty con, công ty liên kết sáu (06) tháng và hàng năm gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính cùng cấp cùng với các báo cáo quy định tại Điểm d Khoản 3 Điều 12 Nghị định này. Trường hợp kết quả sản xuất kinh doanh và hiệu quả đầu tư vốn vào các công ty con, công ty liên kết không đạt kế hoạch phê duyệt đầu kỳ, công ty mẹ phải giải trình và đề xuất biện pháp khắc phục, xử lý đối với từng công ty con, công ty liên kết tại Báo cáo giám sát tài chính công ty con, công ty liên kết gửi cơ quan đại diện chủ sở hữu;\nd) Khi có cảnh báo của cơ quan đại diện chủ sở hữu, cơ quan tài chính về những rủi ro tài chính đối với các công ty con, công ty liên kết, công ty mẹ phải xây dựng và thực hiện ngay các biện pháp để ngăn chặn, khắc phục. Mục 3 GIÁM SÁT VỐN CỦA DOANH NGHIỆP ĐẦU TƯ RA NƯỚC NGOÀI",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trách nhiệm của cơ quan đại diện chủ sở hữu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Chủ động thống nhất với công ty mẹ danh sách các công ty con, công ty liên kết cần đưa vào Kế hoạch giám sát tài chính theo quy định tại Điểm đ Khoản 1 Điều 12 Nghị định này;"
+            },
+            {
+              "label": "b",
+              "content": "Giao công ty mẹ xây dựng Báo cáo giám sát tài chính đối với các công ty con, công ty liên kết của doanh nghiệp trong Kế hoạch giám sát tài chính;"
+            },
+            {
+              "label": "c",
+              "content": "Thu thập các báo cáo giám sát tài chính định kỳ của công ty mẹ đối với các công ty con, công ty liên kết trong Kế hoạch giám sát tài chính;"
+            },
+            {
+              "label": "d",
+              "content": "Phân tích tình hình sản xuất kinh doanh và các rủi ro tài chính của các công ty con, công ty liên kết của các doanh nghiệp;"
+            },
+            {
+              "label": "đ",
+              "content": "Trường hợp phát hiện tình hình sản xuất kinh doanh, hiệu quả đầu tư vốn có dấu hiệu rủi ro phải cảnh báo đồng thời yêu cầu công ty mẹ làm rõ nguyên nhân tại Báo cáo giám sát tài chính công ty con, công ty liên kết kỳ gần nhất."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trách nhiệm của cơ quan tài chính:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Phối hợp với cơ quan đại diện chủ sở hữu thực hiện kế hoạch giám sát các công ty con, công ty liên kết quan trọng của các doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Phân tích các rủi ro về tài chính của các công ty con, công ty liên kết để đưa ra những cảnh báo, khuyến nghị cho cơ quan đại diện chủ sở hữu và công ty mẹ."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Trách nhiệm của doanh nghiệp: Thực hiện các quy định tại Khoản 3 Điều 12 Nghị định này và các quy định sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Chủ động xây dựng chỉ tiêu giám sát tài chính, hiệu quả đầu tư vốn phù hợp đặc điểm, tình hình hoạt động của từng công ty con, công ty liên kết;"
+            },
+            {
+              "label": "b",
+              "content": "Lập kế hoạch giám sát tài chính các công ty con, công ty liên kết, đảm bảo thu thập và xử lý thông tin kịp thời; thống nhất danh sách công ty con, công ty liên kết quan trọng cần giám sát của cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "c",
+              "content": "Lập Báo cáo giám sát tài chính công ty con, công ty liên kết sáu (06) tháng và hàng năm gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính cùng cấp cùng với các báo cáo quy định tại Điểm d Khoản 3 Điều 12 Nghị định này. Trường hợp kết quả sản xuất kinh doanh và hiệu quả đầu tư vốn vào các công ty con, công ty liên kết không đạt kế hoạch phê duyệt đầu kỳ, công ty mẹ phải giải trình và đề xuất biện pháp khắc phục, xử lý đối với từng công ty con, công ty liên kết tại Báo cáo giám sát tài chính công ty con, công ty liên kết gửi cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "d",
+              "content": "Khi có cảnh báo của cơ quan đại diện chủ sở hữu, cơ quan tài chính về những rủi ro tài chính đối với các công ty con, công ty liên kết, công ty mẹ phải xây dựng và thực hiện ngay các biện pháp để ngăn chặn, khắc phục. Mục 3 GIÁM SÁT VỐN CỦA DOANH NGHIỆP ĐẦU TƯ RA NƯỚC NGOÀI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Chủ thể giám sát",
+      "content_raw": "Chủ thể giám sát\n1. Công ty mẹ thực hiện giám sát hoạt động đầu tư ra nước ngoài của công ty mẹ, công ty con, công ty do công ty mẹ và công ty con góp vốn (thành lập trước ngày 01 tháng 7 năm 2010).\n2. Cơ quan đại diện chủ sở hữu chủ trì phối hợp với cơ quan tài chính giám sát các dựán đầu tư ra nước ngoài có vốn của doanh nghiệp nhà nước, công ty con của doanh nghiệp nhà nước thông qua công ty mẹ.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty mẹ thực hiện giám sát hoạt động đầu tư ra nước ngoài của công ty mẹ, công ty con, công ty do công ty mẹ và công ty con góp vốn (thành lập trước ngày 01 tháng 7 năm 2010).",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu chủ trì phối hợp với cơ quan tài chính giám sát các dựán đầu tư ra nước ngoài có vốn của doanh nghiệp nhà nước, công ty con của doanh nghiệp nhà nước thông qua công ty mẹ.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "Đối tượng giám sát",
+      "content_raw": "Đối tượng giám sát\nĐối tượng giám sát là toàn bộ các dựán đầu tư ra nước ngoài của doanh nghiệp, bao gồm các dựán của công ty mẹ, công ty con và dựán do công ty mẹ và công ty con góp vốn thành lập. Điều 20: Nội dung giám sát\n1. Tình hình quản lý và sử dụng vốn doanh nghiệp đầu tư ra nước ngoài:\na) Tiến độ triển khai dựán so với kế hoạch;\nb) Hoạt động đầu tư vốn ra nước ngoài của doanh nghiệp: Hình thức đầu tư, cơ cấu vốn đầu tư cho dựán, biến động của tổng mức đầu tư dựán (nếu có);\nc) Tình hình huy động vốn, quản lý tài sản và quản lý nợ của dựán tại nước ngoài, bao gồm các khoản do doanh nghiệp trong mô hình công ty mẹ - công ty con bảo lãnh vay hoặc tài trợ vốn dưới hình thức khác.\n2. Kết quả hoạt động sản xuất kinh doanh của dựán: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA).\n3. Tình hình thu hồi vốn (bao gồm vốn chủ sở hữu và vốn tài trợ dưới hình thức khác) và thực hiện nghĩa vụ với ngân sách nhà nước: Lợi nhuận được chia của nhà đầu tư Việt Nam; lợi nhuận để tái đầu tư; lợi nhuận chuyển về nước và lợi nhuận được sử dụng cho yêu cầu khác.\n4. Các rủi ro tại địa bàn đầu tư.\n5. Việc ban hành và thực hiện Quy chế hoạt động và quản lý, sử dụng vốn, tài sản của doanh nghiệp tại nước ngoài.\n6. Bộ Tài chính quy định các biểu mẫu để thực hiện nội dung giám sát quy định tại Điều này.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tình hình quản lý và sử dụng vốn doanh nghiệp đầu tư ra nước ngoài:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tiến độ triển khai dựán so với kế hoạch;"
+            },
+            {
+              "label": "b",
+              "content": "Hoạt động đầu tư vốn ra nước ngoài của doanh nghiệp: Hình thức đầu tư, cơ cấu vốn đầu tư cho dựán, biến động của tổng mức đầu tư dựán (nếu có);"
+            },
+            {
+              "label": "c",
+              "content": "Tình hình huy động vốn, quản lý tài sản và quản lý nợ của dựán tại nước ngoài, bao gồm các khoản do doanh nghiệp trong mô hình công ty mẹ - công ty con bảo lãnh vay hoặc tài trợ vốn dưới hình thức khác."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Kết quả hoạt động sản xuất kinh doanh của dựán: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA).",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Tình hình thu hồi vốn (bao gồm vốn chủ sở hữu và vốn tài trợ dưới hình thức khác) và thực hiện nghĩa vụ với ngân sách nhà nước: Lợi nhuận được chia của nhà đầu tư Việt Nam; lợi nhuận để tái đầu tư; lợi nhuận chuyển về nước và lợi nhuận được sử dụng cho yêu cầu khác.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Các rủi ro tại địa bàn đầu tư.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Việc ban hành và thực hiện Quy chế hoạt động và quản lý, sử dụng vốn, tài sản của doanh nghiệp tại nước ngoài.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Bộ Tài chính quy định các biểu mẫu để thực hiện nội dung giám sát quy định tại Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "title": "Căn cứ giám sát",
+      "content_raw": "Căn cứ giám sát\n1. Quy định pháp luật về đầu tư ra nước ngoài, quy định pháp luật về quản lý và sử dụng vốn nhà nước đầu tư vào sản xuất, kinh doanh tại doanh nghiệp.\n2. Báo cáo tài chính sáu (06) tháng và hằng năm của dựán tại nước ngoài.\n3. Kết quả thanh tra, kiểm tra, kiểm toán tại dựán của các cơ quan chức năng (nếu có).\n4. Quy chế hoạt động và quản lý, sử dụng vốn, tài sản của doanh nghiệp tại nước ngoài.\n5. Các quy định về định mức kinh tế, kỹ thuật của ngành.\n6. Báo cáo đầu tư của dựán được cấp có thẩm quyền phê duyệt.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Quy định pháp luật về đầu tư ra nước ngoài, quy định pháp luật về quản lý và sử dụng vốn nhà nước đầu tư vào sản xuất, kinh doanh tại doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Báo cáo tài chính sáu (06) tháng và hằng năm của dựán tại nước ngoài.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Kết quả thanh tra, kiểm tra, kiểm toán tại dựán của các cơ quan chức năng (nếu có).",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Quy chế hoạt động và quản lý, sử dụng vốn, tài sản của doanh nghiệp tại nước ngoài.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Các quy định về định mức kinh tế, kỹ thuật của ngành.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Báo cáo đầu tư của dựán được cấp có thẩm quyền phê duyệt.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "title": "Phương thức giám sát",
+      "content_raw": "Phương thức giám sát\n1. Công ty mẹ thực hiện giám sát hoạt động đầu tư ra nước ngoài bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát gián tiếp.\n2. Cơ quan đại diện chủ sở hữu chủ trì, phối hợp với cơ quan tài chính thực hiện giám sát hoạt động đầu tư ra nước ngoài của doanh nghiệp, trong đó tập trung giám sát trước và giám sát gián tiếp.\n3. Trường hợp cơ quan đại diện chủ sở hữu hoặc cơ quan tài chính phát hiện doanh nghiệp báo cáo không trung thực, để xảy ra các sai phạm trong quản lý, sử dụng vốn nhà nước đầu tư tại doanh nghiệp liên quan đến hoạt động đầu tư ra nước ngoài hoặc các dựán đầu tư tại nước ngoài có dấu hiệu mất an toàn về tài chính, cơ quan đại diện chủ sở hữu cần phối hợp với cơ quan tài chính lựa chọn thực hiện hình thức giám sát trực tiếp tại công ty mẹ hoặc công ty con do công ty mẹ nắm giữ 100% vốn điều lệ có hoạt động đầu tư ra nước ngoài.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Công ty mẹ thực hiện giám sát hoạt động đầu tư ra nước ngoài bằng phương thức giám sát trực tiếp, giám sát gián tiếp, giám sát trước, giám sát trong, giám sát sau, trong đó tập trung việc giám sát gián tiếp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu chủ trì, phối hợp với cơ quan tài chính thực hiện giám sát hoạt động đầu tư ra nước ngoài của doanh nghiệp, trong đó tập trung giám sát trước và giám sát gián tiếp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp cơ quan đại diện chủ sở hữu hoặc cơ quan tài chính phát hiện doanh nghiệp báo cáo không trung thực, để xảy ra các sai phạm trong quản lý, sử dụng vốn nhà nước đầu tư tại doanh nghiệp liên quan đến hoạt động đầu tư ra nước ngoài hoặc các dựán đầu tư tại nước ngoài có dấu hiệu mất an toàn về tài chính, cơ quan đại diện chủ sở hữu cần phối hợp với cơ quan tài chính lựa chọn thực hiện hình thức giám sát trực tiếp tại công ty mẹ hoặc công ty con do công ty mẹ nắm giữ 100% vốn điều lệ có hoạt động đầu tư ra nước ngoài.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "title": "Tổ chức giám sát",
+      "content_raw": "Tổ chức giám sát\n1. Trách nhiệm của cơ quan đại diện chủ sở hữu:\na) Thu thập các báo cáo giám sát tài chính định kỳ của doanh nghiệp về các dựán đầu tư tại nước ngoài;\nb) Tiến hành phân tích tình hình sản xuất kinh doanh và tình hình tài chính của các dựán đầu tư ra nước ngoài của các doanh nghiệp. Trường hợp phát hiện dựán có dấu hiệu rủi ro phải cảnh báo kịp thời cho công ty mẹ, đồng thời thông báo cơ quan tài chính để xem xét phối hợp thực hiện hình thức giám sát trực tiếp tại công ty mẹ hoặc công ty con do công ty mẹ nắm giữ 100% vốn điều lệ;\nc) Cơ quan đại diện chủ sở hữu có trách nhiệm xem xét, phối hợp với cơ quan tài chính thực hiện các giải pháp cần thiết nhằm tháo gỡ khó khăn, vướng mắc cho dựán đầu tư tại nước ngoài; báo cáo Thủ tướng Chính phủ trong trường hợp vượt thẩm quyền theo quy định.\n2. Trách nhiệm của cơ quan tài chính:\na) Phối hợp với cơ quan đại diện chủ sở hữu thực hiện giám sát các dựán đầu tư ra nước ngoài của các doanh nghiệp;\nb) Trên cơ sở báo cáo của doanh nghiệp và của cơ quan đại diện chủ sở hữu, tiến hành phân tích tình hình sản xuất kinh doanh và các rủi ro của các dựán đầu tư ra nước ngoài. Trường hợp phát hiện có dấu hiệu vi phạm quy định của pháp luật về tài chính doanh nghiệp hoặc dựán tiềmẩn rủi ro phải cảnh báo đến cơ quan đại diện chủ sở hữu.\n3. Trách nhiệm của doanh nghiệp:\na) Xây dựng Quy chế hoạt động và quản lý, sử dụng vốn, tài sản của doanh nghiệp tại nước ngoài;\nb) Xây dựng chỉ tiêu giám sát kết quả sản xuất kinh doanh, hiệu quả đầu tư vốn đối với các dựán đầu tư ra nước ngoài;\nc) Lập kế hoạch giám sát tình hình tài chính và hiệu quả đầu tư tại các dựán đầu tư ra nước ngoài;\nd) Lập Báo cáo giám sát tình hình tài chính và hiệu quả đầu tư ra nước ngoài sáu (06) tháng và hằng năm gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính. Trường hợp kết quả sản xuất kinh doanh và hiệu quả đầu tư vốn vào các dựán không đạt kế hoạch, doanh nghiệp phải giải trình và đề xuất biện pháp đối với từng Dựán. Thời hạn gửi báo cáo thực hiện theo quy định của cơ quan đại diện chủ sở hữu;\nđ) Trong quá trình thực hiện dựán đầu tư tại nước ngoài, trường hợp phát sinh các vấn đềảnh hưởng nghiêm trọng đến hoạt động đầu tư, sản xuất kinh doanh (rủi ro chính trị, rủi ro pháp lý, rủi ro thị trường, rủi ro tài chính), doanh nghiệp cần báo cáo trung thực, kịp thời và đề xuất giải pháp với cơ quan đại diện chủ sở hữu và cơ quan tài chính. Mục 4 GIÁM SÁT TÀI CHÍNH ĐẶC BIỆT",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trách nhiệm của cơ quan đại diện chủ sở hữu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thu thập các báo cáo giám sát tài chính định kỳ của doanh nghiệp về các dựán đầu tư tại nước ngoài;"
+            },
+            {
+              "label": "b",
+              "content": "Tiến hành phân tích tình hình sản xuất kinh doanh và tình hình tài chính của các dựán đầu tư ra nước ngoài của các doanh nghiệp. Trường hợp phát hiện dựán có dấu hiệu rủi ro phải cảnh báo kịp thời cho công ty mẹ, đồng thời thông báo cơ quan tài chính để xem xét phối hợp thực hiện hình thức giám sát trực tiếp tại công ty mẹ hoặc công ty con do công ty mẹ nắm giữ 100% vốn điều lệ;"
+            },
+            {
+              "label": "c",
+              "content": "Cơ quan đại diện chủ sở hữu có trách nhiệm xem xét, phối hợp với cơ quan tài chính thực hiện các giải pháp cần thiết nhằm tháo gỡ khó khăn, vướng mắc cho dựán đầu tư tại nước ngoài; báo cáo Thủ tướng Chính phủ trong trường hợp vượt thẩm quyền theo quy định."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trách nhiệm của cơ quan tài chính:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Phối hợp với cơ quan đại diện chủ sở hữu thực hiện giám sát các dựán đầu tư ra nước ngoài của các doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Trên cơ sở báo cáo của doanh nghiệp và của cơ quan đại diện chủ sở hữu, tiến hành phân tích tình hình sản xuất kinh doanh và các rủi ro của các dựán đầu tư ra nước ngoài. Trường hợp phát hiện có dấu hiệu vi phạm quy định của pháp luật về tài chính doanh nghiệp hoặc dựán tiềmẩn rủi ro phải cảnh báo đến cơ quan đại diện chủ sở hữu."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Trách nhiệm của doanh nghiệp:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Xây dựng Quy chế hoạt động và quản lý, sử dụng vốn, tài sản của doanh nghiệp tại nước ngoài;"
+            },
+            {
+              "label": "b",
+              "content": "Xây dựng chỉ tiêu giám sát kết quả sản xuất kinh doanh, hiệu quả đầu tư vốn đối với các dựán đầu tư ra nước ngoài;"
+            },
+            {
+              "label": "c",
+              "content": "Lập kế hoạch giám sát tình hình tài chính và hiệu quả đầu tư tại các dựán đầu tư ra nước ngoài;"
+            },
+            {
+              "label": "d",
+              "content": "Lập Báo cáo giám sát tình hình tài chính và hiệu quả đầu tư ra nước ngoài sáu (06) tháng và hằng năm gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính. Trường hợp kết quả sản xuất kinh doanh và hiệu quả đầu tư vốn vào các dựán không đạt kế hoạch, doanh nghiệp phải giải trình và đề xuất biện pháp đối với từng Dựán. Thời hạn gửi báo cáo thực hiện theo quy định của cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "đ",
+              "content": "Trong quá trình thực hiện dựán đầu tư tại nước ngoài, trường hợp phát sinh các vấn đềảnh hưởng nghiêm trọng đến hoạt động đầu tư, sản xuất kinh doanh (rủi ro chính trị, rủi ro pháp lý, rủi ro thị trường, rủi ro tài chính), doanh nghiệp cần báo cáo trung thực, kịp thời và đề xuất giải pháp với cơ quan đại diện chủ sở hữu và cơ quan tài chính. Mục 4 GIÁM SÁT TÀI CHÍNH ĐẶC BIỆT"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "title": "Các dấu hiệu mất an toàn tài chính của doanh nghiệp",
+      "content_raw": "Các dấu hiệu mất an toàn tài chính của doanh nghiệp\n1. Các dấu hiệu mất an toàn tài chính của doanh nghiệp bao gồm:\na) Đối với doanh nghiệp đang trong giai đoạn lỗ kế hoạch: Có số lỗ phát sinh năm báo cáo lớn hơn 30% so với mức lỗ kế hoạch được cấp có thẩm quyền phê duyệt.\nb) Đối với doanh nghiệp sau giai đoạn lỗ kế hoạch: - Có số lỗ phát sinh trong năm báo cáo từ 30% vốn đầu tư của chủ sở hữu trở lên hoặc số lỗ lũy kế lớn hơn 50% vốn đầu tư của chủ sở hữu; - Có hệ số nợ phải trả trên vốn chủ sở hữu vượt quá mức an toàn theo quy định của pháp luật về quản lý, sử dụng vốn nhà nước đầu tư vào sản xuất kinh doanh tại doanh nghiệp và quy định của cơ quan đại diện chủ sở hữu (nếu có); - Có hệ số khả năng thanh toán nợ đến hạn nhỏ hơn 0,5.\n2. Các dấu hiệu khác cơ quan đại diện chủ sở hữu cần kết hợp xem xét khi xác định dấu hiệu mất an toàn tài chính của doanh nghiệp bao gồm:\na) Đối với doanh nghiệp đang trong giai đoạn lỗ kế hoạch: Có số lỗ thực tế lớn hơn số lỗ kế hoạch trong 2 năm liền.\nb) Đối với doanh nghiệp sau giai đoạn lỗ kế hoạch - Lỗ hai năm liên tiếp trở lên; - Doanh thu thuần hoặc lợi nhuận gộp giảm liên tiếp 2 năm trở lên; - Có hệ số tín nhiệm thấp theo xếp hạng của các tổ chức xếp hạng tín dụng; - Không tiến hành kiểm toán báo cáo tài chính, hoặc cóý kiến không chấp nhận, ý kiến từ chối trong Báo cáo kiểm toán, hoặc cóý kiến ngoại trừ trong Báo cáo kiểm toán trong 2 năm liền về cùng một vấn đề cóảnh hưởng trọng yếu tới hoạt động sản xuất kinh doanh của doanh nghiệp.\n3. Các dấu hiệu quy định tại Khoản 1, Khoản 2 Điều này là dấu hiệu cảnh báo khả năng đặt một doanh nghiệp vào tình trạng giám sát tài chính đặc biệt. Khi doanh nghiệp có một trong các dấu hiệu này, cơ quan đại diện chủ sở hữu và cơ quan tài chính cùng cấp phối hợp xem xét dấu hiệu mất an toàn tài chính, tình hình hoạt động sản xuất kinh doanh và đầu tư của doanh nghiệp để quyết định đưa doanh nghiệp vào diện giám sát tài chính đặc biệt hay tiếp tục thực hiện giám sát tài chính theo quy định tại Mục 1 Chương III Nghị định này.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các dấu hiệu mất an toàn tài chính của doanh nghiệp bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với doanh nghiệp đang trong giai đoạn lỗ kế hoạch: Có số lỗ phát sinh năm báo cáo lớn hơn 30% so với mức lỗ kế hoạch được cấp có thẩm quyền phê duyệt."
+            },
+            {
+              "label": "b",
+              "content": "Đối với doanh nghiệp sau giai đoạn lỗ kế hoạch: - Có số lỗ phát sinh trong năm báo cáo từ 30% vốn đầu tư của chủ sở hữu trở lên hoặc số lỗ lũy kế lớn hơn 50% vốn đầu tư của chủ sở hữu; - Có hệ số nợ phải trả trên vốn chủ sở hữu vượt quá mức an toàn theo quy định của pháp luật về quản lý, sử dụng vốn nhà nước đầu tư vào sản xuất kinh doanh tại doanh nghiệp và quy định của cơ quan đại diện chủ sở hữu (nếu có); - Có hệ số khả năng thanh toán nợ đến hạn nhỏ hơn 0,5."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Các dấu hiệu khác cơ quan đại diện chủ sở hữu cần kết hợp xem xét khi xác định dấu hiệu mất an toàn tài chính của doanh nghiệp bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với doanh nghiệp đang trong giai đoạn lỗ kế hoạch: Có số lỗ thực tế lớn hơn số lỗ kế hoạch trong 2 năm liền."
+            },
+            {
+              "label": "b",
+              "content": "Đối với doanh nghiệp sau giai đoạn lỗ kế hoạch - Lỗ hai năm liên tiếp trở lên; - Doanh thu thuần hoặc lợi nhuận gộp giảm liên tiếp 2 năm trở lên; - Có hệ số tín nhiệm thấp theo xếp hạng của các tổ chức xếp hạng tín dụng; - Không tiến hành kiểm toán báo cáo tài chính, hoặc cóý kiến không chấp nhận, ý kiến từ chối trong Báo cáo kiểm toán, hoặc cóý kiến ngoại trừ trong Báo cáo kiểm toán trong 2 năm liền về cùng một vấn đề cóảnh hưởng trọng yếu tới hoạt động sản xuất kinh doanh của doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Các dấu hiệu quy định tại Khoản 1, Khoản 2 Điều này là dấu hiệu cảnh báo khả năng đặt một doanh nghiệp vào tình trạng giám sát tài chính đặc biệt. Khi doanh nghiệp có một trong các dấu hiệu này, cơ quan đại diện chủ sở hữu và cơ quan tài chính cùng cấp phối hợp xem xét dấu hiệu mất an toàn tài chính, tình hình hoạt động sản xuất kinh doanh và đầu tư của doanh nghiệp để quyết định đưa doanh nghiệp vào diện giám sát tài chính đặc biệt hay tiếp tục thực hiện giám sát tài chính theo quy định tại Mục 1 Chương III Nghị định này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "title": "Quyết định giám sát tài chính đặc biệt",
+      "content_raw": "Quyết định giám sát tài chính đặc biệt\n1. Khi doanh nghiệp được đặt vào tình trạng phải giám sát tài chính đặc biệt, cơ quan đại diện chủ sở hữu ra quyết định giám sát tài chính đặc biệt đối với doanh nghiệp. Quyết định giám sát tài chính đặc biệt bao gồm những nội dung sau:\na) Tên doanh nghiệp thuộc diện giám sát tài chính đặc biệt;\nb) Lý do giám sát tài chính đặc biệt;\nc) Nội dung giám sát tài chính đặc biệt.\n2. Quyết định giám sát tài chính đặc biệt được cơ quan đại diện chủ sở hữu thông báo với cơ quan tài chính cùng cấp để phối hợp thực hiện.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Khi doanh nghiệp được đặt vào tình trạng phải giám sát tài chính đặc biệt, cơ quan đại diện chủ sở hữu ra quyết định giám sát tài chính đặc biệt đối với doanh nghiệp. Quyết định giám sát tài chính đặc biệt bao gồm những nội dung sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tên doanh nghiệp thuộc diện giám sát tài chính đặc biệt;"
+            },
+            {
+              "label": "b",
+              "content": "Lý do giám sát tài chính đặc biệt;"
+            },
+            {
+              "label": "c",
+              "content": "Nội dung giám sát tài chính đặc biệt."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Quyết định giám sát tài chính đặc biệt được cơ quan đại diện chủ sở hữu thông báo với cơ quan tài chính cùng cấp để phối hợp thực hiện.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "title": "Quy trình xử lý của cơ quan đại diện chủ sở hữu đối với doanh nghiệp được đưa vào diện giám sát tài chính đặc biệt",
+      "content_raw": "Quy trình xử lý của cơ quan đại diện chủ sở hữu đối với doanh nghiệp được đưa vào diện giám sát tài chính đặc biệt\n1. Phối hợp doanh nghiệp tiến hành phân tích, đánh giá các nguyên nhân chính dẫn tới khả năng mất an toàn tài chính của doanh nghiệp.\n2. Phối hợp doanh nghiệp xây dựng phươngán khắc phục các khó khăn tài chính của doanh nghiệp. Trường hợp doanh nghiệp cần cơ cấu lại tổ chức, hoạt động kinh doanh, tài chính, cơ quan đại diện chủ sở hữu phải tiến hành phê duyệt phươngán cơ cấu lại của doanh nghiệp trong thời hạn không quá 30 ngày làm việc kể từ ngày nhận được phươngán của doanh nghiệp. Phươngán khắc phục, phươngán cơ cấu lại phải quy định rõ đơn vị, cá nhân chịu trách nhiệm triển khai; kết quả cụ thể khi hoàn thành phươngán; thời hạn bắt đầu và dự kiến hoàn thành; các điều kiện cần và đủ để triển khai phươngán và nhu cầu hỗ trợ trong phạm vi quy định của pháp luật (nếu có). Cơ quan đại diện chủ sở hữu có thể thuê tư vấn giúp cơ quan đại diện chủ sở hữu nghiên cứu và đánh giá phươngán khắc phục, phươngán cơ cấu lại doanh nghiệp. Chi phí thuê tư vấn được hạch toán vào chi phí của doanh nghiệp.\n3. Quy định tần suất báo cáo, các tiêu chí giám sát và cơ chế phản hồi thông tin giữa cơ quan đại diện chủ sở hữu, doanh nghiệp và các bên liên quan khác (nếu cần).\n4. Giám sát doanh nghiệp thực hiện phươngán đã được phê duyệt.\n5. Phối hợp với cơ quan tài chính cùng cấp tiến hành phân tích, đánh giá kết quả hoạt động kinh doanh, công tác quản lý tài chính, điều hành sản xuất kinh doanh của doanh nghiệp để đưa raý kiến chỉ đạo đối với doanh nghiệp.\n6. Trong trường hợp cần thiết, cơ quan đại diện chủ sở hữu có thể tổ chức kiểm tra hoặc phối hợp với cơ quan tài chính cùng cấp tổ chức kiểm tra doanh nghiệp nhằm đánh giá tính trung thực, chính xác về các chỉ tiêu trong các báo cáo của doanh nghiệp; công tác quản lý điều hành hoạt động kinh doanh của Ban điều hành doanh nghiệp; công tác quản lý sản xuất, kinh doanh, quản lý tài chính và các nguồn lực khác của doanh nghiệp. Việc kiểm tra phải tuân thủ theo quy định của pháp luật về thanh tra, kiểm tra. Kết thúc kiểm tra phải có báo cáo, kết luận về những nội dung kiểm tra và đưa ra những khuyến nghị nhằm nâng cao hiệu quả kinh doanh của doanh nghiệp.\n7. Trình Thủ tướng Chính phủ phươngán xử lý trong trường hợp doanh nghiệp đã thực hiện các yêu cầu của cơ quan đại diện chủ sở hữu và cơ quan tài chính mà kết quả hoạt động sản xuất kinh doanh và tình hình tài chính của doanh nghiệp không được cải thiện.\n8. Đánh giá, quyết định đưa doanh nghiệp thuộc diện giám sát tài chính đặc biệt ra khỏi Danh sách giám sát tài chính đặc biệt khi doanh nghiệp đã phục hồi, không còn các dấu hiệu mất an toàn tài chính và thực hiện đầy đủ chế độ báo cáo giám sát theo quy định tại Nghị định này. Cơ quan đại diện chủ sở hữu ban hành quyết định kết thúc giám sát tài chính đặc biệt. Quyết định này được thông báo tới cơ quan tài chính cùng cấp.\n9. Doanh nghiệp thuộc diện giám sát tài chính đặc biệt sau khi kết thúc thời hạnáp dụng phươngán khắc phục, phươngán cơ cấu lại mà chưa phục hồi được hoạt động sản xuất kinh doanh, tình hình tài chính theo phươngán cơ cấu lại doanh nghiệp, phươngán khắc phục thì phải báo cáo cơ quan có thẩm quyền để thực hiện chuyển đổi sở hữu hoặc sắp xếp lại doanh nghiệp theo quy định.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Phối hợp doanh nghiệp tiến hành phân tích, đánh giá các nguyên nhân chính dẫn tới khả năng mất an toàn tài chính của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Phối hợp doanh nghiệp xây dựng phươngán khắc phục các khó khăn tài chính của doanh nghiệp. Trường hợp doanh nghiệp cần cơ cấu lại tổ chức, hoạt động kinh doanh, tài chính, cơ quan đại diện chủ sở hữu phải tiến hành phê duyệt phươngán cơ cấu lại của doanh nghiệp trong thời hạn không quá 30 ngày làm việc kể từ ngày nhận được phươngán của doanh nghiệp. Phươngán khắc phục, phươngán cơ cấu lại phải quy định rõ đơn vị, cá nhân chịu trách nhiệm triển khai; kết quả cụ thể khi hoàn thành phươngán; thời hạn bắt đầu và dự kiến hoàn thành; các điều kiện cần và đủ để triển khai phươngán và nhu cầu hỗ trợ trong phạm vi quy định của pháp luật (nếu có). Cơ quan đại diện chủ sở hữu có thể thuê tư vấn giúp cơ quan đại diện chủ sở hữu nghiên cứu và đánh giá phươngán khắc phục, phươngán cơ cấu lại doanh nghiệp. Chi phí thuê tư vấn được hạch toán vào chi phí của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Quy định tần suất báo cáo, các tiêu chí giám sát và cơ chế phản hồi thông tin giữa cơ quan đại diện chủ sở hữu, doanh nghiệp và các bên liên quan khác (nếu cần).",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Giám sát doanh nghiệp thực hiện phươngán đã được phê duyệt.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Phối hợp với cơ quan tài chính cùng cấp tiến hành phân tích, đánh giá kết quả hoạt động kinh doanh, công tác quản lý tài chính, điều hành sản xuất kinh doanh của doanh nghiệp để đưa raý kiến chỉ đạo đối với doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Trong trường hợp cần thiết, cơ quan đại diện chủ sở hữu có thể tổ chức kiểm tra hoặc phối hợp với cơ quan tài chính cùng cấp tổ chức kiểm tra doanh nghiệp nhằm đánh giá tính trung thực, chính xác về các chỉ tiêu trong các báo cáo của doanh nghiệp; công tác quản lý điều hành hoạt động kinh doanh của Ban điều hành doanh nghiệp; công tác quản lý sản xuất, kinh doanh, quản lý tài chính và các nguồn lực khác của doanh nghiệp. Việc kiểm tra phải tuân thủ theo quy định của pháp luật về thanh tra, kiểm tra. Kết thúc kiểm tra phải có báo cáo, kết luận về những nội dung kiểm tra và đưa ra những khuyến nghị nhằm nâng cao hiệu quả kinh doanh của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 7,
+          "content": "Trình Thủ tướng Chính phủ phươngán xử lý trong trường hợp doanh nghiệp đã thực hiện các yêu cầu của cơ quan đại diện chủ sở hữu và cơ quan tài chính mà kết quả hoạt động sản xuất kinh doanh và tình hình tài chính của doanh nghiệp không được cải thiện.",
+          "points": []
+        },
+        {
+          "number": 8,
+          "content": "Đánh giá, quyết định đưa doanh nghiệp thuộc diện giám sát tài chính đặc biệt ra khỏi Danh sách giám sát tài chính đặc biệt khi doanh nghiệp đã phục hồi, không còn các dấu hiệu mất an toàn tài chính và thực hiện đầy đủ chế độ báo cáo giám sát theo quy định tại Nghị định này. Cơ quan đại diện chủ sở hữu ban hành quyết định kết thúc giám sát tài chính đặc biệt. Quyết định này được thông báo tới cơ quan tài chính cùng cấp.",
+          "points": []
+        },
+        {
+          "number": 9,
+          "content": "Doanh nghiệp thuộc diện giám sát tài chính đặc biệt sau khi kết thúc thời hạnáp dụng phươngán khắc phục, phươngán cơ cấu lại mà chưa phục hồi được hoạt động sản xuất kinh doanh, tình hình tài chính theo phươngán cơ cấu lại doanh nghiệp, phươngán khắc phục thì phải báo cáo cơ quan có thẩm quyền để thực hiện chuyển đổi sở hữu hoặc sắp xếp lại doanh nghiệp theo quy định.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "title": "Trách nhiệm của Hội đồng thành viên (Chủ tịch Công ty), Tổng giám đốc hoặc Giám đốc doanh nghiệp thuộc diện giám sát tài chính đặc biệt",
+      "content_raw": "Trách nhiệm của Hội đồng thành viên (Chủ tịch Công ty), Tổng giám đốc hoặc Giám đốc doanh nghiệp thuộc diện giám sát tài chính đặc biệt\n1. Lập phươngán khắc phục, phươngán cơ cấu lại tổ chức, hoạt động kinh doanh và tài chính để trình cơ quan đại diện chủ sở hữu trong thời gian 30 ngày kể từ ngày có Quyết định giám sát tài chính đặc biệt.\n2. Báo cáo cơ quan đại diện chủ sở hữu, cơ quan tài chính theo tần suất đã thống nhất với cơ quan đại diện chủ sở hữu về các chỉ tiêu giám sát được phê duyệt trong phươngán khắc phục, phươngán cơ cấu lại tổ chức, hoạt động kinh doanh và tài chính của doanh nghiệp. Mục 5 ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI DOANH NGHIỆP",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Lập phươngán khắc phục, phươngán cơ cấu lại tổ chức, hoạt động kinh doanh và tài chính để trình cơ quan đại diện chủ sở hữu trong thời gian 30 ngày kể từ ngày có Quyết định giám sát tài chính đặc biệt.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Báo cáo cơ quan đại diện chủ sở hữu, cơ quan tài chính theo tần suất đã thống nhất với cơ quan đại diện chủ sở hữu về các chỉ tiêu giám sát được phê duyệt trong phươngán khắc phục, phươngán cơ cấu lại tổ chức, hoạt động kinh doanh và tài chính của doanh nghiệp. Mục 5 ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI DOANH NGHIỆP",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "title": "Các tiêu chí đánh giá hiệu quả hoạt động doanh nghiệp",
+      "content_raw": "Các tiêu chí đánh giá hiệu quả hoạt động doanh nghiệp\n1. Các tiêu chí đánh giá hiệu quả hoạt động của doanh nghiệp: - Tiêu chí 1. Doanh thu. - Tiêu chí 2. Lợi nhuận sau thuế và tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu. - Tiêu chí 3. Nợ phải trả quá hạn, khả năng thanh toán nợ đến hạn. - Tiêu chí 4. Chấp hành pháp luật về đầu tư, quản lý và sử dụng vốn nhà nước tại doanh nghiệp, pháp luật về thuế và các khoản thu nộp ngân sách khác, quy định về chế độ báo cáo tài chính và báo cáo để thực hiện giám sát tài chính. - Tiêu chí 5. Tình hình thực hiện sản phẩm, dịch vụ côngích.\n2. Các tiêu chí quy định tại Khoản 1 Điều này được xác định và tính toán từ số liệu trong các báo cáo tài chính năm đã được kiểm toán, báo cáo thống kê định kỳ theo quy định hiện hành của công ty trách nhiệm hữu hạn một thành viên độc lập và của công ty mẹ. Các tiêu chí 1, 2, 4 và tiêu chí 5 quy định tại Khoản 1 Điều này khi tính toán được xem xét, loại trừ các yếu tố tác động: - Do nguyên nhân khách quan như: Thiên tai, hỏa hoạn, dịch bệnh, chiến tranh và các nguyên nhân bất khả kháng khác; - Do đầu tư mở rộng phát triển sản xuất theo quy hoạch, kế hoạch được cấp có thẩm quyền phê duyệt làmảnh hưởng đến lợi nhuận trong hai năm đầu kể từ năm đưa công trình đầu tư vào sử dụng; - Do Nhà nước điều chỉnh giá (đối với sản phẩm do Nhà nước định giá) làmảnh hưởng đến doanh thu của doanh nghiệp hoặc phải thực hiện các mục tiêu kinh tế - xã hội theo chỉ đạo của Chính phủ, Thủ tướng Chính phủ.\n3. Đối với doanh nghiệp được thành lập và thực tế hoạt động thường xuyênổn định và chủ yếu là cung cấp sản phẩm, dịch vụ côngích, việc xếp loại doanh nghiệp căn cứ từng tiêu chí 1, 3, 4 và tiêu chí 5 quy định tại Khoản 1 Điều này.\n4. Việc đánh giá kết quả hoạt động của Người quản lý doanh nghiệp thực hiện theo quy định của Chính phủ và các tiêu chí sau: - Mức độ hoàn thành chỉ tiêu cơ quan đại diện chủ sở hữu giao về lợi nhuận sau thuế và tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu; - Kết quả xếp loại doanh nghiệp; - Mức độ hoàn thành kế hoạch cungứng sản phẩm, dịch vụ côngích (đối với doanh nghiệp cungứng sản phẩm dịch vụ côngích).",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các tiêu chí đánh giá hiệu quả hoạt động của doanh nghiệp: - Tiêu chí 1. Doanh thu. - Tiêu chí 2. Lợi nhuận sau thuế và tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu. - Tiêu chí 3. Nợ phải trả quá hạn, khả năng thanh toán nợ đến hạn. - Tiêu chí 4. Chấp hành pháp luật về đầu tư, quản lý và sử dụng vốn nhà nước tại doanh nghiệp, pháp luật về thuế và các khoản thu nộp ngân sách khác, quy định về chế độ báo cáo tài chính và báo cáo để thực hiện giám sát tài chính. - Tiêu chí 5. Tình hình thực hiện sản phẩm, dịch vụ côngích.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Các tiêu chí quy định tại Khoản 1 Điều này được xác định và tính toán từ số liệu trong các báo cáo tài chính năm đã được kiểm toán, báo cáo thống kê định kỳ theo quy định hiện hành của công ty trách nhiệm hữu hạn một thành viên độc lập và của công ty mẹ. Các tiêu chí 1, 2, 4 và tiêu chí 5 quy định tại Khoản 1 Điều này khi tính toán được xem xét, loại trừ các yếu tố tác động: - Do nguyên nhân khách quan như: Thiên tai, hỏa hoạn, dịch bệnh, chiến tranh và các nguyên nhân bất khả kháng khác; - Do đầu tư mở rộng phát triển sản xuất theo quy hoạch, kế hoạch được cấp có thẩm quyền phê duyệt làmảnh hưởng đến lợi nhuận trong hai năm đầu kể từ năm đưa công trình đầu tư vào sử dụng; - Do Nhà nước điều chỉnh giá (đối với sản phẩm do Nhà nước định giá) làmảnh hưởng đến doanh thu của doanh nghiệp hoặc phải thực hiện các mục tiêu kinh tế - xã hội theo chỉ đạo của Chính phủ, Thủ tướng Chính phủ.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Đối với doanh nghiệp được thành lập và thực tế hoạt động thường xuyênổn định và chủ yếu là cung cấp sản phẩm, dịch vụ côngích, việc xếp loại doanh nghiệp căn cứ từng tiêu chí 1, 3, 4 và tiêu chí 5 quy định tại Khoản 1 Điều này.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Việc đánh giá kết quả hoạt động của Người quản lý doanh nghiệp thực hiện theo quy định của Chính phủ và các tiêu chí sau: - Mức độ hoàn thành chỉ tiêu cơ quan đại diện chủ sở hữu giao về lợi nhuận sau thuế và tỷ suất lợi nhuận sau thuế trên vốn chủ sở hữu; - Kết quả xếp loại doanh nghiệp; - Mức độ hoàn thành kế hoạch cungứng sản phẩm, dịch vụ côngích (đối với doanh nghiệp cungứng sản phẩm dịch vụ côngích).",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "title": "Căn cứ đánh giá hiệu quả và xếp loại doanh nghiệp",
+      "content_raw": "Căn cứ đánh giá hiệu quả và xếp loại doanh nghiệp\n1. Kế hoạch đầu tư phát triển, kế hoạch sản xuất kinh doanh, kế hoạch tài chính hằng năm của doanh nghiệp;\n2. Kết quả thực hiện kế hoạch định kỳ sáu (06) tháng, hằng năm;\n3. Báo cáo tài chính sáu (06) tháng, hằng năm;\n4. Kết quả giám sát tài chính doanh nghiệp;\n5. Các vấn đề phát sinh có thể tác động đến kết quả thực hiện kế hoạch đầu tư phát triển, kế hoạch sản xuất, kinh doanh, kế hoạch tài chính của doanh nghiệp.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Kế hoạch đầu tư phát triển, kế hoạch sản xuất kinh doanh, kế hoạch tài chính hằng năm của doanh nghiệp;",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Kết quả thực hiện kế hoạch định kỳ sáu (06) tháng, hằng năm;",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Báo cáo tài chính sáu (06) tháng, hằng năm;",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Kết quả giám sát tài chính doanh nghiệp;",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Các vấn đề phát sinh có thể tác động đến kết quả thực hiện kế hoạch đầu tư phát triển, kế hoạch sản xuất, kinh doanh, kế hoạch tài chính của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "title": "Phương thức đánh giá hiệu quả và kết quả xếp loại doanh nghiệp",
+      "content_raw": "Phương thức đánh giá hiệu quả và kết quả xếp loại doanh nghiệp\n1. Căn cứ các tiêu chí đánh giá hiệu quả hoạt động doanh nghiệp quy định tại Điều 28 của Nghị định này, cơ quan đại diện chủ sở hữu giao các chỉ tiêu đánh giá, xếp loại phù hợp với đặc thù hoạt động sản xuất, kinh doanh của từng doanh nghiệp. Các chỉ tiêu này phải giao cho doanh nghiệp bằng văn bản trước ngày 30 tháng 4 của năm kế hoạch và không được điều chỉnh trong suốt kỳ thực hiện kế hoạch (trừ các trường hợp bất khả kháng lớn). Kế hoạch sản xuất kinh doanh, kế hoạch tài chính hằng năm của doanh nghiệp phải được lập căn cứ vào Kế hoạch chiến lược của doanh nghiệp, xu hướng phát triển của ngành, các thay đổi về mặt pháp lý, kết quả hoạt động của năm trước, các nhiệm vụ chiến lược hoặc các nhiệm vụ được giao trong năm kế hoạch, các điều kiện bên trong và bên ngoài doanh nghiệp. Kế hoạch hằng năm phải bao gồm các mục tiêu tài chính cụ thể.\n2. Việc đánh giá hiệu quả và xếp loại doanh nghiệp thực hiện trên cơ sở so sánh giữa kế hoạch, mục tiêu, nhiệm vụ được cơ quan đại diện chủ sở hữu giao với kết quả thực hiện.\n3. Kết quả đánh giá và xếp loại doanh nghiệp được phân loại: Doanh nghiệp xếp loại A, doanh nghiệp xếp loại B, doanh nghiệp xếp loại C theo mức độ hoàn thành các chỉ tiêu đánh giá do cơ quan đại diện chủ sở hữu giao cho từng doanh nghiệp.\na) Đối với doanh nghiệp hoạt động kinh doanh, căn cứ kết quả phân loại cho từng tiêu chí 1, 2, 3 và tiêu chí 4 quy định tại Khoản 1 Điều 28 Nghị định này để xếp loại cho từng doanh nghiệp như sau: - Doanh nghiệp xếp loại A khi không có tiêu chí xếp loại C, trong đó tiêu chí 2 và tiêu chí 4 được xếp loại A; - Doanh nghiệp xếp loại C khi có tiêu chí 2 xếp loại Choặc có tiêu chí, 2 xếp loại B và 3 tiêu chí còn lại xếp loại C; - Doanh nghiệp xếp loại B là doanh nghiệp còn lại không được xếp loại A hoặc loại C.\nb) Đối với doanh nghiệp được thành lập và thực tế hoạt động thường xuyênổn định và chủ yếu là cung cấp sản phẩm, dịch vụ côngích thì căn cứ kết quả xếp loại cho từng tiêu chí 1, 3, 4 và tiêu chí 5 quy định tại Khoản 1 Điều 28 Nghị định này để xếp loại cho từng doanh nghiệp như sau: - Doanh nghiệp xếp loại A khi không có tiêu chí xếp loại C và có tiêu chí 4 và tiêu chí 5 xếp loại A; - Doanh nghiệp xếp loại C khi có tiêu chí 5 xếp loại Choặc có tiêu chí 5 xếp loại B và 3 tiêu chí còn lại xếp loại C; - Doanh nghiệp xếp loại B là doanh nghiệp còn lại không được xếp loại A hoặc loại C.\n4. Bộ Tài chính hướng dẫn cụ thể phương thức đánh giá hiệu quả và xếp loại doanh nghiệp theo quy định tại Điều này.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Căn cứ các tiêu chí đánh giá hiệu quả hoạt động doanh nghiệp quy định tại Điều 28 của Nghị định này, cơ quan đại diện chủ sở hữu giao các chỉ tiêu đánh giá, xếp loại phù hợp với đặc thù hoạt động sản xuất, kinh doanh của từng doanh nghiệp. Các chỉ tiêu này phải giao cho doanh nghiệp bằng văn bản trước ngày 30 tháng 4 của năm kế hoạch và không được điều chỉnh trong suốt kỳ thực hiện kế hoạch (trừ các trường hợp bất khả kháng lớn). Kế hoạch sản xuất kinh doanh, kế hoạch tài chính hằng năm của doanh nghiệp phải được lập căn cứ vào Kế hoạch chiến lược của doanh nghiệp, xu hướng phát triển của ngành, các thay đổi về mặt pháp lý, kết quả hoạt động của năm trước, các nhiệm vụ chiến lược hoặc các nhiệm vụ được giao trong năm kế hoạch, các điều kiện bên trong và bên ngoài doanh nghiệp. Kế hoạch hằng năm phải bao gồm các mục tiêu tài chính cụ thể.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Việc đánh giá hiệu quả và xếp loại doanh nghiệp thực hiện trên cơ sở so sánh giữa kế hoạch, mục tiêu, nhiệm vụ được cơ quan đại diện chủ sở hữu giao với kết quả thực hiện.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Kết quả đánh giá và xếp loại doanh nghiệp được phân loại: Doanh nghiệp xếp loại A, doanh nghiệp xếp loại B, doanh nghiệp xếp loại C theo mức độ hoàn thành các chỉ tiêu đánh giá do cơ quan đại diện chủ sở hữu giao cho từng doanh nghiệp.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đối với doanh nghiệp hoạt động kinh doanh, căn cứ kết quả phân loại cho từng tiêu chí 1, 2, 3 và tiêu chí 4 quy định tại Khoản 1 Điều 28 Nghị định này để xếp loại cho từng doanh nghiệp như sau: - Doanh nghiệp xếp loại A khi không có tiêu chí xếp loại C, trong đó tiêu chí 2 và tiêu chí 4 được xếp loại A; - Doanh nghiệp xếp loại C khi có tiêu chí 2 xếp loại Choặc có tiêu chí, 2 xếp loại B và 3 tiêu chí còn lại xếp loại C; - Doanh nghiệp xếp loại B là doanh nghiệp còn lại không được xếp loại A hoặc loại C."
+            },
+            {
+              "label": "b",
+              "content": "Đối với doanh nghiệp được thành lập và thực tế hoạt động thường xuyênổn định và chủ yếu là cung cấp sản phẩm, dịch vụ côngích thì căn cứ kết quả xếp loại cho từng tiêu chí 1, 3, 4 và tiêu chí 5 quy định tại Khoản 1 Điều 28 Nghị định này để xếp loại cho từng doanh nghiệp như sau: - Doanh nghiệp xếp loại A khi không có tiêu chí xếp loại C và có tiêu chí 4 và tiêu chí 5 xếp loại A; - Doanh nghiệp xếp loại C khi có tiêu chí 5 xếp loại Choặc có tiêu chí 5 xếp loại B và 3 tiêu chí còn lại xếp loại C; - Doanh nghiệp xếp loại B là doanh nghiệp còn lại không được xếp loại A hoặc loại C."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Bộ Tài chính hướng dẫn cụ thể phương thức đánh giá hiệu quả và xếp loại doanh nghiệp theo quy định tại Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "title": "Báo cáo đánh giá và xếp loại doanh nghiệp",
+      "content_raw": "Báo cáo đánh giá và xếp loại doanh nghiệp\n1. Đối với doanh nghiệp:\na) Doanh nghiệp căn cứ các tiêu chí đánh giá hiệu quả hoạt động quy định tại Nghị định này và các chỉ tiêu do cơ quan đại diện chủ sở hữu giao tự đánh giá và xếp loại doanh nghiệp, lập và gửi Báo cáo đánh giá và xếp loại hằng năm cho các cơ quan quy định tại Điểm b Khoản 1 Điều này để thẩm định và công bố xếp loại cho doanh nghiệp;\nb) Doanh nghiệp là công ty mẹ gửi báo cáo đánh giá và xếp loại cho cơ quan đại diện chủ sở hữu và Bộ Tài chính, doanh nghiệp là công ty trách nhiệm hữu hạn một thành viên độc lập do Bộ quản lý ngành hoặcỦy ban nhân dân cấp tỉnh quyết định thành lập gửi báo cáo đánh giá và xếp loại cho cơ quan đại diện chủ sở hữu;\nc) Báo cáo đánh giá và xếp loại doanh nghiệp của các doanh nghiệp phải gửi theo thời gian do cơ quan đại diện chủ sở hữu quy định.\n2. Cơ quan đại diện chủ sở hữu:\na) Quy định thời gian nộp Báo cáo đánh giá và xếp loại của các doanh nghiệp cho cơ quan đại diện chủ sở hữu, đảm bảo cơ quan đại diện chủ sở hữu có đủ thời gian thẩm định kết quả xếp loại trước ngày 31 tháng 5 hằng năm;\nb) Công khai chỉ tiêu đánh giá, xếp loại các doanh nghiệp, đồng thời gửi Bộ Tài chính chỉ tiêu đánh giá, xếp loại các doanh nghiệp để phối hợp đánh giá;\nc) Thẩm định Báo cáo đánh giá hiệu quả hoạt động và xếp loại của các doanh nghiệp do mình thành lập hoặc được giao quản lý;\nd) Lập Báo cáo đánh giá hiệu quả hoạt động và xếp loại doanh nghiệp, tình hình thực hiện nhiệm vụ côngích được giao của các doanh nghiệp nhà nước, gửi lấyý kiến Bộ Tài chính trước ngày 31 tháng 5 của năm tiếp theo;\nđ) Cơ quan đại diện chủ sở hữu công bố kết quả xếp loại doanh nghiệp trước ngày 30 tháng 6 hằng năm.\n3. Bộ Tài chính;\na) Tham giaý kiến với các cơ quan đại diện chủ sở hữu về xếp loại doanh nghiệp trong vòng 10 ngày làm việc kể từ ngày nhận được công văn xiný kiến của cơ quan đại diện chủ sở hữu;\nb) Lập Báo cáo đánh giá hiệu quả hoạt động và xếp loại doanh nghiệp, tình hình thực hiện nhiệm vụ côngích được giao của các doanh nghiệp nhà nước, báo cáo Chính phủ trước ngày 31 tháng 7 hằng năm.",
+      "chapter": "III",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH, ĐÁNH GIÁ HIỆU QUẢ HOẠT ĐỘNG VÀ XẾP LOẠI ĐỐI VỚI DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với doanh nghiệp:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp căn cứ các tiêu chí đánh giá hiệu quả hoạt động quy định tại Nghị định này và các chỉ tiêu do cơ quan đại diện chủ sở hữu giao tự đánh giá và xếp loại doanh nghiệp, lập và gửi Báo cáo đánh giá và xếp loại hằng năm cho các cơ quan quy định tại Điểm b Khoản 1 Điều này để thẩm định và công bố xếp loại cho doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Doanh nghiệp là công ty mẹ gửi báo cáo đánh giá và xếp loại cho cơ quan đại diện chủ sở hữu và Bộ Tài chính, doanh nghiệp là công ty trách nhiệm hữu hạn một thành viên độc lập do Bộ quản lý ngành hoặcỦy ban nhân dân cấp tỉnh quyết định thành lập gửi báo cáo đánh giá và xếp loại cho cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "c",
+              "content": "Báo cáo đánh giá và xếp loại doanh nghiệp của các doanh nghiệp phải gửi theo thời gian do cơ quan đại diện chủ sở hữu quy định."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Quy định thời gian nộp Báo cáo đánh giá và xếp loại của các doanh nghiệp cho cơ quan đại diện chủ sở hữu, đảm bảo cơ quan đại diện chủ sở hữu có đủ thời gian thẩm định kết quả xếp loại trước ngày 31 tháng 5 hằng năm;"
+            },
+            {
+              "label": "b",
+              "content": "Công khai chỉ tiêu đánh giá, xếp loại các doanh nghiệp, đồng thời gửi Bộ Tài chính chỉ tiêu đánh giá, xếp loại các doanh nghiệp để phối hợp đánh giá;"
+            },
+            {
+              "label": "c",
+              "content": "Thẩm định Báo cáo đánh giá hiệu quả hoạt động và xếp loại của các doanh nghiệp do mình thành lập hoặc được giao quản lý;"
+            },
+            {
+              "label": "d",
+              "content": "Lập Báo cáo đánh giá hiệu quả hoạt động và xếp loại doanh nghiệp, tình hình thực hiện nhiệm vụ côngích được giao của các doanh nghiệp nhà nước, gửi lấyý kiến Bộ Tài chính trước ngày 31 tháng 5 của năm tiếp theo;"
+            },
+            {
+              "label": "đ",
+              "content": "Cơ quan đại diện chủ sở hữu công bố kết quả xếp loại doanh nghiệp trước ngày 30 tháng 6 hằng năm."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Bộ Tài chính;",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tham giaý kiến với các cơ quan đại diện chủ sở hữu về xếp loại doanh nghiệp trong vòng 10 ngày làm việc kể từ ngày nhận được công văn xiný kiến của cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "b",
+              "content": "Lập Báo cáo đánh giá hiệu quả hoạt động và xếp loại doanh nghiệp, tình hình thực hiện nhiệm vụ côngích được giao của các doanh nghiệp nhà nước, báo cáo Chính phủ trước ngày 31 tháng 7 hằng năm."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 32,
+      "title": "Chủ thể giám sát",
+      "content_raw": "Chủ thể giám sát\n1. Cơ quan đại diện chủ sở hữu thực hiện chức năng giám sát thông qua Người đại diện đối với công ty cổ phần, công ty trách nhiệm hữu hạn hai thành viên trở lên có vốn góp của Nhà nước.\n2. Cơ quan tài chính:\na) Hằng năm, Bộ Tài chính tổng hợp báo cáo giám sát tài chính của các cơ quan đại diện chủ sở hữu để báo cáo Chính phủ về hiệu quả hoạt động và thực hiện nhiệm vụ côngích được giao của các doanh nghiệp mà Nhà nước nắm giữ trên 50% vốn điều lệ; báo cáo Chính phủ về hiệu quả đầu tư vốn nhà nước tại các doanh nghiệp mà Nhà nước nắm giữ không quá 50% vốn điều lệ;\nb) Sở Tài chính các tỉnh, thành phố là đầu mối giúpỦy ban nhân dân cấp tỉnh tổng hợp báo cáo giám sát đối với các doanh nghiệp có vốn nhà nước thuộcỦy ban nhân dân cấp tỉnh.",
+      "chapter": "IV",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH ĐỐI VỚI DOANH NGHIỆP CÓ VỐN NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ quan đại diện chủ sở hữu thực hiện chức năng giám sát thông qua Người đại diện đối với công ty cổ phần, công ty trách nhiệm hữu hạn hai thành viên trở lên có vốn góp của Nhà nước.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan tài chính:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Hằng năm, Bộ Tài chính tổng hợp báo cáo giám sát tài chính của các cơ quan đại diện chủ sở hữu để báo cáo Chính phủ về hiệu quả hoạt động và thực hiện nhiệm vụ côngích được giao của các doanh nghiệp mà Nhà nước nắm giữ trên 50% vốn điều lệ; báo cáo Chính phủ về hiệu quả đầu tư vốn nhà nước tại các doanh nghiệp mà Nhà nước nắm giữ không quá 50% vốn điều lệ;"
+            },
+            {
+              "label": "b",
+              "content": "Sở Tài chính các tỉnh, thành phố là đầu mối giúpỦy ban nhân dân cấp tỉnh tổng hợp báo cáo giám sát đối với các doanh nghiệp có vốn nhà nước thuộcỦy ban nhân dân cấp tỉnh."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 33,
+      "title": "Nội dung giám sát",
+      "content_raw": "Nội dung giám sát\n1. Đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ\na) Giám sát việc bảo toàn và phát triển vốn nhà nước tại doanh nghiệp.\nb) Giám sát việc quản lý và sử dụng vốn và tài sản nhà nước tại doanh nghiệp theo các nội dung sau: - Hoạt động đầu tư vốn, tài sản tại doanh nghiệp và hoạt động đầu tư vốn ra ngoài doanh nghiệp (nguồn vốn huy động gắn với dựán đầu tư, tiến độ thực hiện dựán đầu tư, tiến độ giải ngân vốn đầu tư); - Tình hình huy động vốn và sử dụng vốn huy động; phát hành trái phiếu; - Tình hình quản lý tài sản, quản lý nợ tại doanh nghiệp, khả năng thanh toán nợ của doanh nghiệp, hệ số nợ phải trả trên vốn chủ sở hữu; - Tình hình lưu chuyển tiền tệ của doanh nghiệp.\nc) Giám sát hoạt động kinh doanh của doanh nghiệp: - Kết quả hoạt động kinh doanh: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA); - Việc thực hiện nghĩa vụ với ngân sách nhà nước.\nd) Giám sát việc thực hiện kế hoạch thoái vốn nhà nước, thu hồi vốn nhà nước, thu lợi nhuận, cổ tức được chia từ doanh nghiệp.\n2. Đối với doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ\na) Giám sát việc bảo toàn và phát triển vốn nhà nước tại doanh nghiệp;\nb) Giám sát tình hình huy động vốn và sử dụng vốn huy động;\nc) Giám sát hoạt động kinh doanh của doanh nghiệp: Kết quả hoạt động kinh doanh: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA);\nd) Giám sát việc thực hiện kế hoạch thoái vốn nhà nước, thu hồi vốn nhà nước, thu lợi nhuận, cổ tức được chia từ doanh nghiệp.\n3. Bộ Tài chính quy định cụ thể các mẫu biểu, chỉ tiêu báo cáo quy định tại Khoản 1 và Khoản 2 Điều này.",
+      "chapter": "IV",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH ĐỐI VỚI DOANH NGHIỆP CÓ VỐN NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ",
+          "points": [
+            {
+              "label": "a",
+              "content": "Giám sát việc bảo toàn và phát triển vốn nhà nước tại doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Giám sát việc quản lý và sử dụng vốn và tài sản nhà nước tại doanh nghiệp theo các nội dung sau: - Hoạt động đầu tư vốn, tài sản tại doanh nghiệp và hoạt động đầu tư vốn ra ngoài doanh nghiệp (nguồn vốn huy động gắn với dựán đầu tư, tiến độ thực hiện dựán đầu tư, tiến độ giải ngân vốn đầu tư); - Tình hình huy động vốn và sử dụng vốn huy động; phát hành trái phiếu; - Tình hình quản lý tài sản, quản lý nợ tại doanh nghiệp, khả năng thanh toán nợ của doanh nghiệp, hệ số nợ phải trả trên vốn chủ sở hữu; - Tình hình lưu chuyển tiền tệ của doanh nghiệp."
+            },
+            {
+              "label": "c",
+              "content": "Giám sát hoạt động kinh doanh của doanh nghiệp: - Kết quả hoạt động kinh doanh: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA); - Việc thực hiện nghĩa vụ với ngân sách nhà nước."
+            },
+            {
+              "label": "d",
+              "content": "Giám sát việc thực hiện kế hoạch thoái vốn nhà nước, thu hồi vốn nhà nước, thu lợi nhuận, cổ tức được chia từ doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối với doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ",
+          "points": [
+            {
+              "label": "a",
+              "content": "Giám sát việc bảo toàn và phát triển vốn nhà nước tại doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Giám sát tình hình huy động vốn và sử dụng vốn huy động;"
+            },
+            {
+              "label": "c",
+              "content": "Giám sát hoạt động kinh doanh của doanh nghiệp: Kết quả hoạt động kinh doanh: Doanh thu, lợi nhuận, tỷ suất lợi nhuận trên vốn chủ sở hữu (ROE), tỷ suất lợi nhuận trên tổng tài sản (ROA);"
+            },
+            {
+              "label": "d",
+              "content": "Giám sát việc thực hiện kế hoạch thoái vốn nhà nước, thu hồi vốn nhà nước, thu lợi nhuận, cổ tức được chia từ doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Bộ Tài chính quy định cụ thể các mẫu biểu, chỉ tiêu báo cáo quy định tại Khoản 1 và Khoản 2 Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 34,
+      "title": "Phương thức giám sát",
+      "content_raw": "Phương thức giám sát\n1. Đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ: Việc giám sát tài chính thực hiện gián tiếp thông qua các báo cáo định kỳ, đột xuất hoặc theo yêu cầu của cơ quan đại diện chủ sở hữu do Người đại diện vốn nhà nước tại doanh nghiệp báo cáo. Trường hợp phát hiện có dấu hiệu vi phạm pháp luật về quản lý tài chính doanh nghiệp, cơ quan đại diện chủ sở hữu chỉ đạo Người đại diện vốn nhà nước tại doanh nghiệp yêu cầu Ban Kiểm soát doanh nghiệp thực hiện kiểm tra về việc chấp hành pháp luật về quản lý, sử dụng, bảo toàn và phát triển vốn của doanh nghiệp. Cơ quan đại diện chủ sở hữu chịu trách nhiệm cuối cùng về giám sát doanh nghiệp, Người đại diện vốn nhà nước tại doanh nghiệp là cá nhân được cơ quan đại diện chủ sở hữu giao thực hiện giám sát doanh nghiệp và chỉ chịu trách nhiệm đối với những việc được cơ quan đại diện chủ sở hữu giao.\n2. Đối với doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ: Việc giám sát tài chính, đánh giá hiệu quả sử dụng vốn nhà nước tại doanh nghiệp thực hiện gián tiếp thông qua các báo cáo định kỳ của Người đại diện vốn nhà nước tại doanh nghiệp.",
+      "chapter": "IV",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH ĐỐI VỚI DOANH NGHIỆP CÓ VỐN NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ: Việc giám sát tài chính thực hiện gián tiếp thông qua các báo cáo định kỳ, đột xuất hoặc theo yêu cầu của cơ quan đại diện chủ sở hữu do Người đại diện vốn nhà nước tại doanh nghiệp báo cáo. Trường hợp phát hiện có dấu hiệu vi phạm pháp luật về quản lý tài chính doanh nghiệp, cơ quan đại diện chủ sở hữu chỉ đạo Người đại diện vốn nhà nước tại doanh nghiệp yêu cầu Ban Kiểm soát doanh nghiệp thực hiện kiểm tra về việc chấp hành pháp luật về quản lý, sử dụng, bảo toàn và phát triển vốn của doanh nghiệp. Cơ quan đại diện chủ sở hữu chịu trách nhiệm cuối cùng về giám sát doanh nghiệp, Người đại diện vốn nhà nước tại doanh nghiệp là cá nhân được cơ quan đại diện chủ sở hữu giao thực hiện giám sát doanh nghiệp và chỉ chịu trách nhiệm đối với những việc được cơ quan đại diện chủ sở hữu giao.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đối với doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ: Việc giám sát tài chính, đánh giá hiệu quả sử dụng vốn nhà nước tại doanh nghiệp thực hiện gián tiếp thông qua các báo cáo định kỳ của Người đại diện vốn nhà nước tại doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 35,
+      "title": "Chế độ báo cáo giám sát tài chính",
+      "content_raw": "Chế độ báo cáo giám sát tài chính\n1. Đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ\na) Báo cáo giám sát tài chính Định kỳ sáu (06) tháng và hằng năm, Người đại diện vốn nhà nước tại doanh nghiệp lập báo cáo giám sát tài chính theo các nội dung quy định tại Khoản 1 Điều 33 Nghị định này và gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính cùng cấp (Bộ Tài chính đối với doanh nghiệp cổ phần hóa, chuyển đổi từ tập đoàn kinh tế, tổng công ty nhà nước, doanh nghiệp cổ phần hóa, chuyển đổi thuộc Bộ; Sở Tài chính đối với doanh nghiệp cổ phần hóa, chuyển đổi từ doanh nghiệp thuộcỦy ban nhân dân cấp tỉnh). Thời gian gửi báo cáo giám sát tài chính sáu (06) tháng và hằng năm thực hiện theo quy định của cơ quan đại diện chủ sở hữu.\nb) Báo cáo kết quả giám sát tài chính - Căn cứ báo cáo giám sát của Người đại diện vốn nhà nước tại doanh nghiệp, Bộ quản lý ngành thực hiện giám sát tài chính đối với các công ty cổ phần, công ty trách nhiệm hữu hạn được chuyển đổi từ doanh nghiệp nhà nước là công ty mẹ, công ty trách nhiệm hữu hạn do Bộ quyết định thành lập hoặc được giao quản lý, Bộ quản lý ngành tổng hợp kết quả giám sát đối với công ty có phần vốn nhà nước vào Báo cáo kết quả giám sát tài chính của Bộ để gửi Bộ Tài chính trước ngày 31 tháng 7 của năm báo cáo đối với báo cáo sáu (06) tháng và trước ngày 31 tháng 5 của năm tiếp theo đối với báo cáo năm. - Căn cứ báo cáo giám sát của Người đại diện vốn nhà nước tại doanh nghiệp, Ủy ban nhân dân cấp tỉnh thực hiện giám sát tài chính đối với các doanh nghiệp chuyển đổi, cổ phần hóa từ doanh nghiệp nhà nước doỦy ban nhân dân cấp tỉnh quyết định thành lập và giao Sở Tài chính tổng hợp kết quả giám sát tài chính và gửi về Bộ Tài chính trước ngày 31 tháng 7 của năm báo cáo đối với báo cáo sáu (06) tháng và trước ngày 31 tháng 5 của năm tiếp theo đối với báo cáo năm. - Bộ Tài chính tổng hợp báo cáo kết quả giám sát của các Bộ quản lý ngành, Ủy ban nhân dân cấp tỉnh để báo cáo Chính phủ trước ngày 30 tháng 9 năm báo cáo đối với báo cáo sáu (06) tháng và trước ngày 31 tháng 7 của năm tiếp theo đối với báo cáo năm. Nội dung báo cáo bao gồm nội dung đánh giá hiệu quả hoạt động và thực hiện nhiệm vụ côngích được giao đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ trong phạm vi toàn quốc.\n2. Đối với doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ\na) Báo cáo giám sát tài chính Định kỳ hằng năm, Người đại diện lập báo cáo giám sát tài chính theo các nội dung quy định tại Khoản 2 Điều 33 và gửi cơ quan đại diện chủ sở hữu. Thời hạn gửi báo cáo thực hiện theo quy định của cơ quan đại diện chủ sở hữu.\nb) Báo cáo Kết quả giám sát tài chính Căn cứ báo cáo giám sát của Người đại diện vốn nhà nước tại doanh nghiệp, cơ quan đại diện chủ sở hữu tổng hợp Báo cáo kết quả giám sát tài chính và gửi Bộ Tài chính trước ngày 31 tháng 5 năm tiếp theo để Bộ Tài chính tổng hợp báo cáo Chính phủ về hiệu quả sử dụng vốn nhà nước tại doanh nghiệp trong phạm vi toàn quốc.",
+      "chapter": "IV",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH ĐỐI VỚI DOANH NGHIỆP CÓ VỐN NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ",
+          "points": [
+            {
+              "label": "a",
+              "content": "Báo cáo giám sát tài chính Định kỳ sáu (06) tháng và hằng năm, Người đại diện vốn nhà nước tại doanh nghiệp lập báo cáo giám sát tài chính theo các nội dung quy định tại Khoản 1 Điều 33 Nghị định này và gửi cơ quan đại diện chủ sở hữu và cơ quan tài chính cùng cấp (Bộ Tài chính đối với doanh nghiệp cổ phần hóa, chuyển đổi từ tập đoàn kinh tế, tổng công ty nhà nước, doanh nghiệp cổ phần hóa, chuyển đổi thuộc Bộ; Sở Tài chính đối với doanh nghiệp cổ phần hóa, chuyển đổi từ doanh nghiệp thuộcỦy ban nhân dân cấp tỉnh). Thời gian gửi báo cáo giám sát tài chính sáu (06) tháng và hằng năm thực hiện theo quy định của cơ quan đại diện chủ sở hữu."
+            },
+            {
+              "label": "b",
+              "content": "Báo cáo kết quả giám sát tài chính - Căn cứ báo cáo giám sát của Người đại diện vốn nhà nước tại doanh nghiệp, Bộ quản lý ngành thực hiện giám sát tài chính đối với các công ty cổ phần, công ty trách nhiệm hữu hạn được chuyển đổi từ doanh nghiệp nhà nước là công ty mẹ, công ty trách nhiệm hữu hạn do Bộ quyết định thành lập hoặc được giao quản lý, Bộ quản lý ngành tổng hợp kết quả giám sát đối với công ty có phần vốn nhà nước vào Báo cáo kết quả giám sát tài chính của Bộ để gửi Bộ Tài chính trước ngày 31 tháng 7 của năm báo cáo đối với báo cáo sáu (06) tháng và trước ngày 31 tháng 5 của năm tiếp theo đối với báo cáo năm. - Căn cứ báo cáo giám sát của Người đại diện vốn nhà nước tại doanh nghiệp, Ủy ban nhân dân cấp tỉnh thực hiện giám sát tài chính đối với các doanh nghiệp chuyển đổi, cổ phần hóa từ doanh nghiệp nhà nước doỦy ban nhân dân cấp tỉnh quyết định thành lập và giao Sở Tài chính tổng hợp kết quả giám sát tài chính và gửi về Bộ Tài chính trước ngày 31 tháng 7 của năm báo cáo đối với báo cáo sáu (06) tháng và trước ngày 31 tháng 5 của năm tiếp theo đối với báo cáo năm. - Bộ Tài chính tổng hợp báo cáo kết quả giám sát của các Bộ quản lý ngành, Ủy ban nhân dân cấp tỉnh để báo cáo Chính phủ trước ngày 30 tháng 9 năm báo cáo đối với báo cáo sáu (06) tháng và trước ngày 31 tháng 7 của năm tiếp theo đối với báo cáo năm. Nội dung báo cáo bao gồm nội dung đánh giá hiệu quả hoạt động và thực hiện nhiệm vụ côngích được giao đối với doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ trong phạm vi toàn quốc."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối với doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ",
+          "points": [
+            {
+              "label": "a",
+              "content": "Báo cáo giám sát tài chính Định kỳ hằng năm, Người đại diện lập báo cáo giám sát tài chính theo các nội dung quy định tại Khoản 2 Điều 33 và gửi cơ quan đại diện chủ sở hữu. Thời hạn gửi báo cáo thực hiện theo quy định của cơ quan đại diện chủ sở hữu."
+            },
+            {
+              "label": "b",
+              "content": "Báo cáo Kết quả giám sát tài chính Căn cứ báo cáo giám sát của Người đại diện vốn nhà nước tại doanh nghiệp, cơ quan đại diện chủ sở hữu tổng hợp Báo cáo kết quả giám sát tài chính và gửi Bộ Tài chính trước ngày 31 tháng 5 năm tiếp theo để Bộ Tài chính tổng hợp báo cáo Chính phủ về hiệu quả sử dụng vốn nhà nước tại doanh nghiệp trong phạm vi toàn quốc."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "title": "Đánh giá kết quả hoạt động của doanh nghiệp có vốn nhà nước",
+      "content_raw": "Đánh giá kết quả hoạt động của doanh nghiệp có vốn nhà nước\nCơ quan đại diện chủ sở hữu căn cứ tiêu chí đánh giá hiệu quả hoạt động của doanh nghiệp nhà nước để nghiên cứu, xây dựng tiêu chí đánh giá hiệu quả đầu tư vốn nhà nước tại các doanh nghiệp có vốn nhà nước theo hai nhóm: Doanh nghiệp do Nhà nước nắm giữ trên 50% vốn điều lệ và doanh nghiệp do Nhà nước nắm giữ không quá 50% vốn điều lệ. Cơ quan đại diện chủ sở hữu căn cứ kết quả đánh giá hiệu quả đầu tư vốn nhà nước tại doanh nghiệp và kết quả hoạt động của doanh nghiệp có vốn nhà nước để xem xét việc tiếp tục đầu tư, mở rộng đầu tư hay thoái vốn nhà nước tại các doanh nghiệp này; đồng thời làm căn cứ đánh giá, khen thưởng đối với Người đại diện vốn nhà nước tại doanh nghiệp và làm cơ sở để xây dựng kế hoạch, giao nhiệm vụ cho Người đại diện vốn nhà nước tại doanh nghiệp trong năm tiếp theo. Mục 1 QUY ĐỊNH CHUNG VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH",
+      "chapter": "IV",
+      "chapter_title": "GIÁM SÁT TÀI CHÍNH ĐỐI VỚI DOANH NGHIỆP CÓ VỐN NHÀ NƯỚC",
+      "clauses": []
+    },
+    {
+      "number": 37,
+      "title": "Đối tượng thực hiện công khai thông tin tài chính",
+      "content_raw": "Đối tượng thực hiện công khai thông tin tài chính\n1. Doanh nghiệp nhà nước thực hiện công khai thông tin tài chính theo quy định tại Mục 2 Chương V Nghị định này và Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước.\n2. Doanh nghiệp có vốn nhà nước thực hiện công khai thông tin tài chính theo quy định của pháp luật và Điều lệ doanh nghiệp.\n3. Cơ quan đại diện chủ sở hữu thực hiện công khai thông tin tài chính doanh nghiệp theo quy định tại Mục 3 Chương V Nghị định này và Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước.\n4. Bộ Tài chính thực hiện công khai thông tin tài chính doanh nghiệp theo quy định tại Mục 4 Chương V Nghị định này và Nghị định về công bố thông tin của doanh nghiệp nhà nước.\n5. Doanh nghiệp hoạt động trong lĩnh vực tài chính, ngân hàng, bảo hiểm, xổ số, Sở giao dịch chứng khoán, Trung tâm lưu ký chứng khoán thực hiện công khai tài chính theo quy định của pháp luật chuyên ngành và quy định tại Nghị định này.\n6. Các doanh nghiệp nhà nước trực tiếp phục vụ quốc phòng, an ninh và doanh nghiệp nhà nước kết hợp kinh tế với quốc phòng, an ninh thực hiện công khai thông tin tài chính theo hướng dẫn của Bộ trưởng Bộ Công an và Bộ trưởng Bộ Quốc phòng.",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp nhà nước thực hiện công khai thông tin tài chính theo quy định tại Mục 2 Chương V Nghị định này và Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp có vốn nhà nước thực hiện công khai thông tin tài chính theo quy định của pháp luật và Điều lệ doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cơ quan đại diện chủ sở hữu thực hiện công khai thông tin tài chính doanh nghiệp theo quy định tại Mục 3 Chương V Nghị định này và Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Bộ Tài chính thực hiện công khai thông tin tài chính doanh nghiệp theo quy định tại Mục 4 Chương V Nghị định này và Nghị định về công bố thông tin của doanh nghiệp nhà nước.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Doanh nghiệp hoạt động trong lĩnh vực tài chính, ngân hàng, bảo hiểm, xổ số, Sở giao dịch chứng khoán, Trung tâm lưu ký chứng khoán thực hiện công khai tài chính theo quy định của pháp luật chuyên ngành và quy định tại Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Các doanh nghiệp nhà nước trực tiếp phục vụ quốc phòng, an ninh và doanh nghiệp nhà nước kết hợp kinh tế với quốc phòng, an ninh thực hiện công khai thông tin tài chính theo hướng dẫn của Bộ trưởng Bộ Công an và Bộ trưởng Bộ Quốc phòng.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 38,
+      "title": "Mục đích và yêu cầu công khai thông tin tài chính",
+      "content_raw": "Mục đích và yêu cầu công khai thông tin tài chính\n1. Mục đích công khai thông tin tài chính\na) Đảm bảo minh bạch, trung thực và khách quan tình hình tài chính của doanh nghiệp nhà nước; phát hiện kịp thời hành vi vi phạm chế độ quản lý tài chính, chế độ kế toán của doanh nghiệp;\nb) Thực hiện quyền hạn và trách nhiệm của chủ sở hữu nhà nước, người lao động trong việc giám sát, kiểm tra và thực hiện quy chế dân chủở doanh nghiệp nhà nước; thực hành tiết kiệm chống lãng phí, chống tham nhũng, nâng cao hiệu quả hoạt động sản xuất kinh doanh, bảo toàn và phát triển vốn Nhà nước.\n2. Yêu cầu công khai thông tin tài chính\na) Cơ sở để thực hiện công khai tài chính doanh nghiệp là báo cáo tài chính, báo cáo quản trị và báo cáo giám sát tài chính hằng năm của doanh nghiệp; báo cáo giám sát tài chính hàng năm của cơ quan đại diện chủ sở hữu;\nb) Việc công khai thông tin tài chính phải đápứng các yêu cầu về thực hiện công bố thông tin theo quy định của Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước. Mục 2 CÔNG KHAI THÔNG TIN TÀI CHÍNH CỦA DOANH NGHIỆP NHÀ NƯỚC",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Mục đích công khai thông tin tài chính",
+          "points": [
+            {
+              "label": "a",
+              "content": "Đảm bảo minh bạch, trung thực và khách quan tình hình tài chính của doanh nghiệp nhà nước; phát hiện kịp thời hành vi vi phạm chế độ quản lý tài chính, chế độ kế toán của doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Thực hiện quyền hạn và trách nhiệm của chủ sở hữu nhà nước, người lao động trong việc giám sát, kiểm tra và thực hiện quy chế dân chủở doanh nghiệp nhà nước; thực hành tiết kiệm chống lãng phí, chống tham nhũng, nâng cao hiệu quả hoạt động sản xuất kinh doanh, bảo toàn và phát triển vốn Nhà nước."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Yêu cầu công khai thông tin tài chính",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cơ sở để thực hiện công khai tài chính doanh nghiệp là báo cáo tài chính, báo cáo quản trị và báo cáo giám sát tài chính hằng năm của doanh nghiệp; báo cáo giám sát tài chính hàng năm của cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "b",
+              "content": "Việc công khai thông tin tài chính phải đápứng các yêu cầu về thực hiện công bố thông tin theo quy định của Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước. Mục 2 CÔNG KHAI THÔNG TIN TÀI CHÍNH CỦA DOANH NGHIỆP NHÀ NƯỚC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 39,
+      "title": "Nội dung thông tin tài chính công khai theo định kỳ",
+      "content_raw": "Nội dung thông tin tài chính công khai theo định kỳ\n1. Doanh nghiệp thực hiện công khai Báo cáo tài chính sáu (06) tháng, Báo cáo tài chính năm (đã được kiểm toán) gồm: Bảng cân đối kế toán; Báo cáo kết quả hoạt động kinh doanh; Báo cáo lưu chuyển tiền tệ; Bản thuyết minh Báo cáo tài chính theo quy định của pháp luật về kế toán. Đối với doanh nghiệp hoạt động theo mô hình công ty mẹ - công ty con, khi công khai Báo cáo tài chính năm (đã được kiểm toán) doanh nghiệp phải thực hiện công khai Báo cáo tài chính năm của công ty mẹ và Báo cáo tài chính năm hợp nhất.\n2. Doanh nghiệp thực hiện công khai Báo cáo tài chính của doanh nghiệp cùng vớiý kiến, kiến nghị của kiểm toán, của cơ quan đại diện chủ sở hữu và cơ quan tài chính về báo cáo tài chính và tình hình tài chính của doanh nghiệp.\n3. Thời hạn công khai Báo cáo tài chính của doanh nghiệp trước ngày 15 tháng 8 của năm báo cáo đối với Báo cáo tài chính sáu (06) tháng và trước ngày 31 tháng 5 của năm tiếp theo đối với Báo cáo tài chính năm.",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp thực hiện công khai Báo cáo tài chính sáu (06) tháng, Báo cáo tài chính năm (đã được kiểm toán) gồm: Bảng cân đối kế toán; Báo cáo kết quả hoạt động kinh doanh; Báo cáo lưu chuyển tiền tệ; Bản thuyết minh Báo cáo tài chính theo quy định của pháp luật về kế toán. Đối với doanh nghiệp hoạt động theo mô hình công ty mẹ - công ty con, khi công khai Báo cáo tài chính năm (đã được kiểm toán) doanh nghiệp phải thực hiện công khai Báo cáo tài chính năm của công ty mẹ và Báo cáo tài chính năm hợp nhất.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp thực hiện công khai Báo cáo tài chính của doanh nghiệp cùng vớiý kiến, kiến nghị của kiểm toán, của cơ quan đại diện chủ sở hữu và cơ quan tài chính về báo cáo tài chính và tình hình tài chính của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thời hạn công khai Báo cáo tài chính của doanh nghiệp trước ngày 15 tháng 8 của năm báo cáo đối với Báo cáo tài chính sáu (06) tháng và trước ngày 31 tháng 5 của năm tiếp theo đối với Báo cáo tài chính năm.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 40,
+      "title": "Phương thức công khai thông tin tài chính theo định kỳ",
+      "content_raw": "Phương thức công khai thông tin tài chính theo định kỳ\n1. Việc công khai thông tin tài chính định kỳ được thực hiện trên trang thông tin điện tử của doanh nghiệp, các Báo cáo bằng văn bản, trên cácấn phẩm khác của doanh nghiệp và công khai tại Hội nghị cán bộ, công nhân, viên chức của doanh nghiệp.\n2. Doanh nghiệp gửi Báo cáo tài chính sáu (06) tháng, Báo cáo tài chính hằng năm đã được kiểm toán đến cơ quan đại diện chủ sở hữu và Bộ Kế hoạch và Đầu tư để thực hiện công khai theo quy định; gửi Báo cáo tài chính sáu (06) tháng, Báo cáo tài chính hằng năm đã được kiểm toán đến Bộ Tài chính để phối hợp giám sát tình hình thực hiện công khai thông tin tài chính của doanh nghiệp.",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Việc công khai thông tin tài chính định kỳ được thực hiện trên trang thông tin điện tử của doanh nghiệp, các Báo cáo bằng văn bản, trên cácấn phẩm khác của doanh nghiệp và công khai tại Hội nghị cán bộ, công nhân, viên chức của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp gửi Báo cáo tài chính sáu (06) tháng, Báo cáo tài chính hằng năm đã được kiểm toán đến cơ quan đại diện chủ sở hữu và Bộ Kế hoạch và Đầu tư để thực hiện công khai theo quy định; gửi Báo cáo tài chính sáu (06) tháng, Báo cáo tài chính hằng năm đã được kiểm toán đến Bộ Tài chính để phối hợp giám sát tình hình thực hiện công khai thông tin tài chính của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 41,
+      "title": "Nội dung thông tin tài chính công khai bất thường",
+      "content_raw": "Nội dung thông tin tài chính công khai bất thường\nDoanh nghiệp thực hiện công khai thông tin tài chính bất thường theo quy định của pháp luật về doanh nghiệp. Mục 3 CÔNG KHAI THÔNG TIN CỦA CƠ QUAN ĐẠI DIỆN CHỦ SỞ HỮU",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": []
+    },
+    {
+      "number": 42,
+      "title": "Nội dung công khai thông tin của cơ quan đại diện chủ sở hữu",
+      "content_raw": "Nội dung công khai thông tin của cơ quan đại diện chủ sở hữu\n1. Cơ quan đại diện chủ sở hữu công khai thường xuyên trên cổng thông tin điện tử của cơ quan danh sách doanh nghiệp do mình thành lập hoặc được giao quản lý và phần vốn góp của Nhà nước tại doanh nghiệp.\n2. Cơ quan đại diện chủ sở hữu công khai Kế hoạch giám sát các doanh nghiệp do mình thành lập hoặc được giao quản lý trước ngày 31 tháng 01 hằng năm, đồng thời gửi Bộ Tài chính để phối hợp giám sát.\n3. Cơ quan đại diện chủ sở hữu công khai Quyết định giao chỉ tiêu đánh giá hằng năm của từng doanh nghiệp do mình thành lập hoặc được giao quản lý trước ngày 31 tháng 5 hằng năm, đồng thời gửi Bộ Tài chính để phối hợp giám sát.\n4. Cơ quan đại diện chủ sở hữu công khai Báo cáo tình hình đầu tư, quản lý, sử dụng vốn nhà nước tại doanh nghiệp trước ngày 30 tháng 6 hằng năm.\n5. Cơ quan đại diện chủ sở hữu công khai Báo cáo tài chính sáu (06) tháng và Báo cáo tài chính năm của doanh nghiệp trong vòng năm (05) ngày làm việc kể từ ngày nhận được các Báo cáo tài chính của doanh nghiệp.\n6. Bộ Tài chính quy định các biểu mẫu công khai thông tin tại Khoản 4 Điều này.",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ quan đại diện chủ sở hữu công khai thường xuyên trên cổng thông tin điện tử của cơ quan danh sách doanh nghiệp do mình thành lập hoặc được giao quản lý và phần vốn góp của Nhà nước tại doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu công khai Kế hoạch giám sát các doanh nghiệp do mình thành lập hoặc được giao quản lý trước ngày 31 tháng 01 hằng năm, đồng thời gửi Bộ Tài chính để phối hợp giám sát.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cơ quan đại diện chủ sở hữu công khai Quyết định giao chỉ tiêu đánh giá hằng năm của từng doanh nghiệp do mình thành lập hoặc được giao quản lý trước ngày 31 tháng 5 hằng năm, đồng thời gửi Bộ Tài chính để phối hợp giám sát.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Cơ quan đại diện chủ sở hữu công khai Báo cáo tình hình đầu tư, quản lý, sử dụng vốn nhà nước tại doanh nghiệp trước ngày 30 tháng 6 hằng năm.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Cơ quan đại diện chủ sở hữu công khai Báo cáo tài chính sáu (06) tháng và Báo cáo tài chính năm của doanh nghiệp trong vòng năm (05) ngày làm việc kể từ ngày nhận được các Báo cáo tài chính của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Bộ Tài chính quy định các biểu mẫu công khai thông tin tại Khoản 4 Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 43,
+      "title": "Phương thức công khai thông tin của cơ quan đại diện chủ sở hữu",
+      "content_raw": "Phương thức công khai thông tin của cơ quan đại diện chủ sở hữu\n1. Cơ quan đại diện chủ sở hữu thực hiện công khai thông tin tài chính doanh nghiệp nhà nước theo phương thức được quy định tại Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước.\n2. Cơ quan đại diện chủ sở hữu phải lập và gửi Bộ Tài chính Báo cáo tình hình thực hiện công khai thông tin tài chính của cơ quan đại diện chủ sở hữu và các doanh nghiệp trước ngày 30 tháng 6 năm tiếp theo. Mục 4 CÔNG KHAI THÔNG TIN CỦA BỘ TÀI CHÍNH",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ quan đại diện chủ sở hữu thực hiện công khai thông tin tài chính doanh nghiệp nhà nước theo phương thức được quy định tại Nghị định về công bố thông tin hoạt động của doanh nghiệp nhà nước.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cơ quan đại diện chủ sở hữu phải lập và gửi Bộ Tài chính Báo cáo tình hình thực hiện công khai thông tin tài chính của cơ quan đại diện chủ sở hữu và các doanh nghiệp trước ngày 30 tháng 6 năm tiếp theo. Mục 4 CÔNG KHAI THÔNG TIN CỦA BỘ TÀI CHÍNH",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 44,
+      "title": "Nội dung công khai thông tin của Bộ Tài chính",
+      "content_raw": "Nội dung công khai thông tin của Bộ Tài chính\n1. Thực hiện công khai Kế hoạch giám sát đầu tư vốn nhà nước vào doanh nghiệp trước ngày 31 tháng 01 hằng năm.\n2. Thực hiện công khai Báo cáo Chính phủ về hoạt động đầu tư, quản lý, sử dụng vốn nhà nước tại doanh nghiệp chậm nhất 10 ngày sau khi Chính phủ báo cáo Quốc hội.\n3. Thực hiện công khai Báo cáo đánh giá kết quả hoạt động và xếp loại doanh nghiệp chậm nhất ngày 30 tháng 10 của năm tiếp theo.\n4. Thực hiện công khai Báo cáo giám sát tình hình thực hiện công khai thông tin tài chính của doanh nghiệp và các cơ quan đại diện chủ sở hữu chậm nhất ngày 30 tháng 10 của năm tiếp theo.\n5. Căn cứ chỉ đạo của Thủ tướng Chính phủ, tiến hành công bố kết quả giám sát đầu tư vốn nhà nước vào doanh nghiệp năm trước.",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thực hiện công khai Kế hoạch giám sát đầu tư vốn nhà nước vào doanh nghiệp trước ngày 31 tháng 01 hằng năm.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Thực hiện công khai Báo cáo Chính phủ về hoạt động đầu tư, quản lý, sử dụng vốn nhà nước tại doanh nghiệp chậm nhất 10 ngày sau khi Chính phủ báo cáo Quốc hội.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thực hiện công khai Báo cáo đánh giá kết quả hoạt động và xếp loại doanh nghiệp chậm nhất ngày 30 tháng 10 của năm tiếp theo.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Thực hiện công khai Báo cáo giám sát tình hình thực hiện công khai thông tin tài chính của doanh nghiệp và các cơ quan đại diện chủ sở hữu chậm nhất ngày 30 tháng 10 của năm tiếp theo.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Căn cứ chỉ đạo của Thủ tướng Chính phủ, tiến hành công bố kết quả giám sát đầu tư vốn nhà nước vào doanh nghiệp năm trước.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 45,
+      "title": "Phương thức công khai thông tin của Bộ Tài chính",
+      "content_raw": "Phương thức công khai thông tin của Bộ Tài chính\n1. Bộ Tài chính mở chuyên mục “Công khai thông tin tài chính của doanh nghiệp” trên cổng thông tin điện tử của Bộ Tài chính để tiếp nhận và thực hiện công khai các thông tin tài chính của doanh nghiệp. Đồng thời, Bộ Tài chính lập một hộp thư điện tử chính thức để tiếp nhận thông tin công khai do các doanh nghiệp và cơ quan đại diện chủ sở hữu gửi.\n2. Trường hợp việc công khai thông tin không thể thực hiện đúng thời hạn vì những lý do bất khả kháng, Bộ Tài chính báo cáo Thủ tướng Chính phủ về lý do tạm hoãn công khai và thời gian dự kiến thực hiện công khai thông tin trở lại. Bộ Tài chính phải thực hiện công khai thông tin ngay sau khi sự kiện bất khả kháng đã được khắc phục hoặc ngay sau khi hết thời hạn được tạm hoãn công khai thông tin.",
+      "chapter": "V",
+      "chapter_title": "QUY ĐỊNH VỀ CÔNG KHAI THÔNG TIN TÀI CHÍNH DOANH NGHIỆP NHÀ NƯỚC",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Bộ Tài chính mở chuyên mục “Công khai thông tin tài chính của doanh nghiệp” trên cổng thông tin điện tử của Bộ Tài chính để tiếp nhận và thực hiện công khai các thông tin tài chính của doanh nghiệp. Đồng thời, Bộ Tài chính lập một hộp thư điện tử chính thức để tiếp nhận thông tin công khai do các doanh nghiệp và cơ quan đại diện chủ sở hữu gửi.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp việc công khai thông tin không thể thực hiện đúng thời hạn vì những lý do bất khả kháng, Bộ Tài chính báo cáo Thủ tướng Chính phủ về lý do tạm hoãn công khai và thời gian dự kiến thực hiện công khai thông tin trở lại. Bộ Tài chính phải thực hiện công khai thông tin ngay sau khi sự kiện bất khả kháng đã được khắc phục hoặc ngay sau khi hết thời hạn được tạm hoãn công khai thông tin.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 46,
+      "title": "Khen thưởng đối với Người quản lý doanh nghiệp",
+      "content_raw": "Khen thưởng đối với Người quản lý doanh nghiệp\n1. Hằng năm căn cứ vào mức độ hoàn thành nhiệm vụ, Người quản lý doanh nghiệp được xét chi thưởng từ Quỹ thưởng Người quản lý doanh nghiệp như sau:\na) Hoàn thành tốt nhiệm vụ: Được thưởng tối đa 1,5 tháng lương thực hiện của Người quản lý doanh nghiệp;\nb) Hoàn thành nhiệm vụ: Được thưởng tối đa 01 tháng lương thực hiện của Người quản lý doanh nghiệp;\nc) Không hoàn thành nhiệm vụ: Không được chi thưởng.\n2. Mức trích lập và sử dụng Quỹ thưởng Người quản lý doanh nghiệp, thẩm quyền quyết định mức thưởng cho Người quản lý doanh nghiệp thực hiện theo quy định của Chính phủ và hướng dẫn của Bộ Tài chính.",
+      "chapter": "VI",
+      "chapter_title": "KHEN THƯỞNG VÀ XỬ LÝ VI PHẠM",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hằng năm căn cứ vào mức độ hoàn thành nhiệm vụ, Người quản lý doanh nghiệp được xét chi thưởng từ Quỹ thưởng Người quản lý doanh nghiệp như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Hoàn thành tốt nhiệm vụ: Được thưởng tối đa 1,5 tháng lương thực hiện của Người quản lý doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Hoàn thành nhiệm vụ: Được thưởng tối đa 01 tháng lương thực hiện của Người quản lý doanh nghiệp;"
+            },
+            {
+              "label": "c",
+              "content": "Không hoàn thành nhiệm vụ: Không được chi thưởng."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Mức trích lập và sử dụng Quỹ thưởng Người quản lý doanh nghiệp, thẩm quyền quyết định mức thưởng cho Người quản lý doanh nghiệp thực hiện theo quy định của Chính phủ và hướng dẫn của Bộ Tài chính.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 47,
+      "title": "Xử lý vi phạm và hình thức kỷ luật",
+      "content_raw": "Xử lý vi phạm và hình thức kỷ luật\n1. Đối với Người quản lý doanh nghiệp Cơ quan đại diện chủ sở hữu xem xét mức độ, hậu quả thiệt hại đến vốn Nhà nước đầu tư tại doanh nghiệp, quyết định các hình thức kỷ luật: Khiển trách, cảnh cáo, hạ bậc lương, buộc thôi việc, cách chức; quyết định mức lương và các lợiích khác đối với Người quản lý doanh nghiệp nếu vi phạm các quy định sau:\na) Không nộp, nộp không đầy đủ, không đúng hạn các báo cáo theo quy định của cơ quan có thẩm quyền, của cơ quan đại diện chủ sở hữu; nội dung báo cáo không trung thực, không đầy đủ;\nb) Không thực hiện chế độ công khai thông tin tài chính đúng thời gian, đúng các nội dung quy định;\nc) Không thực hiện hoặc thực hiện không đầy đủ cácý kiến chỉ đạo, khuyến nghị, giải pháp của cơ quan đại diện chủ sở hữu và cơ quan tài chính.\n2. Đối với Người đại diện phần vốn nhà nước tại doanh nghiệp Cơ quan đại diện chủ sở hữu thực hiện các hình thức xử lý vi phạm theo thẩm quyền đối với Người đại diện vốn nhà nước tại doanh nghiệp do cơ quan đại diện chủ sở hữu cử hoặcủy quyền nếu vi phạm các quy định sau:\na) Không nộp, nộp không đầy đủ, không đúng hạn các báo cáo theo quy định của cơ quan có thẩm quyền, của cơ quan đại diện chủ sở hữu;\nb) Không đánh giá trung thực, đầy đủ về hiệu quả đầu tư vốn nhà nước tại doanh nghiệp.\n3. Đối với cơ quan đại diện chủ sở hữu\na) Cấp có thẩm quyền xem xét, quyết định các hình thức kỷ luật khiển trách, cảnh cáo, miễn nhiệm và cách chức theo quy định của Luật Công chức, Luật Viên chức đối với cá nhân, tổ chức liên quan thực hiện nhiệm vụ cơ quan đại diện chủ sở hữu nếu vi phạm một trong các trường hợp sau: - Không thực hiện giao các chỉ tiêu xếp loại bằng văn bản đúng thời hạn theo quy định của Nghị định này. - Không thực hiện đầy đủ các nội dung giám sát tài chính doanh nghiệp do mình quyết định thành lập hoặc được giao quản lý. - Không kịp thời đưa ra các biện pháp chấn chỉnh và xử lý sai phạm về quản lý tài chính của doanh nghiệp hoặc không báo cáo cơ quan cấp trên và cơ quan quản lý về tài chính doanh nghiệp đối với các trường hợp vi phạm các quy định pháp luật về tài chính doanh nghiệp. - Không nộp báo cáo giám sát tài chính doanh nghiệp cho cơ quan tài chính theo thời gian hoặc nội dung quy định. - Không tổ chức thực hiện các chỉ đạo của Chính phủ, Thủ tướng Chính phủ và các kiến nghị của cơ quan tài chính, cơ quan thanh tra, kiểm tra, kiểm toán về việc xử lý các sai phạm và biện pháp tăng cường giám sát tài chính doanh nghiệp. - Báo cáo không trung thực kết quả giám sát tài chính doanh nghiệp do mình quyết định thành lập hoặc được giao quản lý.\nb) Trường hợp cơ quan đại diện chủ sở hữu vi phạm quy định tại Điểm a Khoản này, Bộ Tài chính báo cáo Thủ tướng Chính phủ xử lý theo quy định của pháp luật.\n4. Đối với doanh nghiệp nhà nước: Công bố hằng năm trên trang thông tin điện tử của cơ quan đại diện chủ sở hữu và gửi Bộ Tài chính trước ngày 30 tháng 6 năm tiếp theo danh sách doanh nghiệp có hành vi vi phạm:\na) Thực hiện việc công khai thông tin chậm quá 20 ngày so với quy định tại Nghị định này;\nb) Nộp Báo cáo phục vụ công tác giám sát tài chính cho cơ quan đại diện chủ sở hữu hoặc Báo cáo đánh giá và xếp loại doanh nghiệp chậm quá 20 ngày so với quy định tại Nghị định này.",
+      "chapter": "VI",
+      "chapter_title": "KHEN THƯỞNG VÀ XỬ LÝ VI PHẠM",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đối với Người quản lý doanh nghiệp Cơ quan đại diện chủ sở hữu xem xét mức độ, hậu quả thiệt hại đến vốn Nhà nước đầu tư tại doanh nghiệp, quyết định các hình thức kỷ luật: Khiển trách, cảnh cáo, hạ bậc lương, buộc thôi việc, cách chức; quyết định mức lương và các lợiích khác đối với Người quản lý doanh nghiệp nếu vi phạm các quy định sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Không nộp, nộp không đầy đủ, không đúng hạn các báo cáo theo quy định của cơ quan có thẩm quyền, của cơ quan đại diện chủ sở hữu; nội dung báo cáo không trung thực, không đầy đủ;"
+            },
+            {
+              "label": "b",
+              "content": "Không thực hiện chế độ công khai thông tin tài chính đúng thời gian, đúng các nội dung quy định;"
+            },
+            {
+              "label": "c",
+              "content": "Không thực hiện hoặc thực hiện không đầy đủ cácý kiến chỉ đạo, khuyến nghị, giải pháp của cơ quan đại diện chủ sở hữu và cơ quan tài chính."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Đối với Người đại diện phần vốn nhà nước tại doanh nghiệp Cơ quan đại diện chủ sở hữu thực hiện các hình thức xử lý vi phạm theo thẩm quyền đối với Người đại diện vốn nhà nước tại doanh nghiệp do cơ quan đại diện chủ sở hữu cử hoặcủy quyền nếu vi phạm các quy định sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Không nộp, nộp không đầy đủ, không đúng hạn các báo cáo theo quy định của cơ quan có thẩm quyền, của cơ quan đại diện chủ sở hữu;"
+            },
+            {
+              "label": "b",
+              "content": "Không đánh giá trung thực, đầy đủ về hiệu quả đầu tư vốn nhà nước tại doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Đối với cơ quan đại diện chủ sở hữu",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cấp có thẩm quyền xem xét, quyết định các hình thức kỷ luật khiển trách, cảnh cáo, miễn nhiệm và cách chức theo quy định của Luật Công chức, Luật Viên chức đối với cá nhân, tổ chức liên quan thực hiện nhiệm vụ cơ quan đại diện chủ sở hữu nếu vi phạm một trong các trường hợp sau: - Không thực hiện giao các chỉ tiêu xếp loại bằng văn bản đúng thời hạn theo quy định của Nghị định này. - Không thực hiện đầy đủ các nội dung giám sát tài chính doanh nghiệp do mình quyết định thành lập hoặc được giao quản lý. - Không kịp thời đưa ra các biện pháp chấn chỉnh và xử lý sai phạm về quản lý tài chính của doanh nghiệp hoặc không báo cáo cơ quan cấp trên và cơ quan quản lý về tài chính doanh nghiệp đối với các trường hợp vi phạm các quy định pháp luật về tài chính doanh nghiệp. - Không nộp báo cáo giám sát tài chính doanh nghiệp cho cơ quan tài chính theo thời gian hoặc nội dung quy định. - Không tổ chức thực hiện các chỉ đạo của Chính phủ, Thủ tướng Chính phủ và các kiến nghị của cơ quan tài chính, cơ quan thanh tra, kiểm tra, kiểm toán về việc xử lý các sai phạm và biện pháp tăng cường giám sát tài chính doanh nghiệp. - Báo cáo không trung thực kết quả giám sát tài chính doanh nghiệp do mình quyết định thành lập hoặc được giao quản lý."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp cơ quan đại diện chủ sở hữu vi phạm quy định tại Điểm a Khoản này, Bộ Tài chính báo cáo Thủ tướng Chính phủ xử lý theo quy định của pháp luật."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Đối với doanh nghiệp nhà nước: Công bố hằng năm trên trang thông tin điện tử của cơ quan đại diện chủ sở hữu và gửi Bộ Tài chính trước ngày 30 tháng 6 năm tiếp theo danh sách doanh nghiệp có hành vi vi phạm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Thực hiện việc công khai thông tin chậm quá 20 ngày so với quy định tại Nghị định này;"
+            },
+            {
+              "label": "b",
+              "content": "Nộp Báo cáo phục vụ công tác giám sát tài chính cho cơ quan đại diện chủ sở hữu hoặc Báo cáo đánh giá và xếp loại doanh nghiệp chậm quá 20 ngày so với quy định tại Nghị định này."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 48,
+      "title": "Hiệu lực thi hành",
+      "content_raw": "Hiệu lực thi hành\n1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 12 năm 2015 vàáp dụng cho năm tài chính 2016 trở đi; đồng thời thay thế Nghị định số 61/2013/NĐ-CP ngày 25 tháng 6 năm 2013 của Chính phủ về việc ban hành Quy chế giám sát tài chính và đánh giá hiệu quả hoạt động và công khai thông tin tài chính đối với doanh nghiệp do Nhà nước làm chủ sở hữu và doanh nghiệp có vốn nhà nước.\n2. Việc công khai thông tin tài chính năm 2015 của doanh nghiệp nhà nước thực hiện theo quy định tại Nghị định này.\n3. Trong thời gian 01 năm kể từ ngày Nghị định này có hiệu lực thi hành, cơ quan đại diện chủ sở hữu có trách nhiệm tổ chức đơn vị làm đầu mối thực hiện công tác giám sát tài chính và đánh giá hiệu quả hoạt động của doanh nghiệp, đảm bảo đơn vị đầu mối này có đủ số lượng cán bộ có chuyên môn về tài chính kế toán doanh nghiệp và kiến thức về ngành nghề của doanh nghiệp.",
+      "chapter": "VII",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nghị định này có hiệu lực thi hành từ ngày 01 tháng 12 năm 2015 vàáp dụng cho năm tài chính 2016 trở đi; đồng thời thay thế Nghị định số 61/2013/NĐ-CP ngày 25 tháng 6 năm 2013 của Chính phủ về việc ban hành Quy chế giám sát tài chính và đánh giá hiệu quả hoạt động và công khai thông tin tài chính đối với doanh nghiệp do Nhà nước làm chủ sở hữu và doanh nghiệp có vốn nhà nước.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Việc công khai thông tin tài chính năm 2015 của doanh nghiệp nhà nước thực hiện theo quy định tại Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong thời gian 01 năm kể từ ngày Nghị định này có hiệu lực thi hành, cơ quan đại diện chủ sở hữu có trách nhiệm tổ chức đơn vị làm đầu mối thực hiện công tác giám sát tài chính và đánh giá hiệu quả hoạt động của doanh nghiệp, đảm bảo đơn vị đầu mối này có đủ số lượng cán bộ có chuyên môn về tài chính kế toán doanh nghiệp và kiến thức về ngành nghề của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 49,
+      "title": "Tổ thức thực hiện",
+      "content_raw": "Tổ thức thực hiện\n1. Bộ Tài chính chủ trì cùng các Bộ, ngành hướng dẫn, tổ chức thực hiện và kiểm tra việc thực hiện Nghị định này.\n2. Bộ Lao động - Thương binh và Xã hội chủ trì, phối hợp các cơ quan liên quan thực hiện giám sát, đánh giá tình hình thực hiện chính sách đối với người lao động trong doanh nghiệp.\n3. Công ty mẹ các tập đoàn, tổng công ty, công ty hoạt động theo mô hình công ty mẹ - công ty con căn cứ vào Nghị định này để xây dựng và thực hiện quy chế giám sát và đánh giá hiệu quả hoạt động của công ty con và công ty liên kết.\n4. Tổ chức chính trị - xã hội căn cứ vào cơ chế giám sát tài chính doanh nghiệp quy định tại Nghị định này để tổ chức thực hiện giám sát các doanh nghiệp thuộc lĩnh vực mình quản lý.\n5. Các Bộ trưởng, Thủ trưởng cơ quan đại diện chủ sở hữu, Chủ tịch Hội đồng thành viên hoặc Chủ tịch công ty, Tổng Giám đốc, Giám đốc doanh nghiệp chịu trách nhiệm thi hành Nghị định này./.",
+      "chapter": "VII",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Bộ Tài chính chủ trì cùng các Bộ, ngành hướng dẫn, tổ chức thực hiện và kiểm tra việc thực hiện Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Bộ Lao động - Thương binh và Xã hội chủ trì, phối hợp các cơ quan liên quan thực hiện giám sát, đánh giá tình hình thực hiện chính sách đối với người lao động trong doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Công ty mẹ các tập đoàn, tổng công ty, công ty hoạt động theo mô hình công ty mẹ - công ty con căn cứ vào Nghị định này để xây dựng và thực hiện quy chế giám sát và đánh giá hiệu quả hoạt động của công ty con và công ty liên kết.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Tổ chức chính trị - xã hội căn cứ vào cơ chế giám sát tài chính doanh nghiệp quy định tại Nghị định này để tổ chức thực hiện giám sát các doanh nghiệp thuộc lĩnh vực mình quản lý.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Các Bộ trưởng, Thủ trưởng cơ quan đại diện chủ sở hữu, Chủ tịch Hội đồng thành viên hoặc Chủ tịch công ty, Tổng Giám đốc, Giám đốc doanh nghiệp chịu trách nhiệm thi hành Nghị định này./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}

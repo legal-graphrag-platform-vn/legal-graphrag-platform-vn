@@ -1,0 +1,700 @@
+{
+  "document": {
+    "id": "ND96_2015",
+    "title": "Nghị định số 96/2015/NĐ-CP Quy định chi tiết một số điều của Luật Doanh nghiệp",
+    "number": "96/2015/NĐ-CP",
+    "doc_type": "Decree",
+    "issued_by": "CHÍNH PHỦ",
+    "issued_date": "2015-10-19",
+    "effective_from": "2015-12-08",
+    "status": "Hết hiệu lực toàn bộ"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi điều chỉnh và đối tượngáp dụng",
+      "content_raw": "Phạm vi điều chỉnh và đối tượngáp dụng\n1. Nghị định này quy định chi tiết Điều 10, Điều 44, Điều 189 và Điều 208 của Luật Doanh nghiệp.\n2. Nghị định nàyáp dụng đối với các doanh nghiệp, cơ quan, tổ chức, cá nhân quy định tại Điều 2 Luật Doanh nghiệp.\n3. Quy định về con dấu trong Nghị định nàyáp dụng đối với công ty cổ phần, công ty trách nhiệm hữu hạn, công ty hợp danh và doanh nghiệp tư nhân đăng ký doanh nghiệp theo quy định của Luật Doanh nghiệp, Luật Đầu tư. Tổ chức, đơn vị được thành lập theo các luật sau đây khôngáp dụng quy định về con dấu trong Nghị định này mà thực hiện theo quy định hiện hành về quản lý và sử dụng con dấu:\na) Luật Công chứng;\nb) Luật Luật sư;\nc) Luật Giám định tư pháp;\nd) Luật Kinh doanh bảo hiểm;\nđ) Luật Chứng khoán;\ne) Luật Hợp tác xã.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nghị định này quy định chi tiết Điều 10, Điều 44, Điều 189 và Điều 208 của Luật Doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Nghị định nàyáp dụng đối với các doanh nghiệp, cơ quan, tổ chức, cá nhân quy định tại Điều 2 Luật Doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Quy định về con dấu trong Nghị định nàyáp dụng đối với công ty cổ phần, công ty trách nhiệm hữu hạn, công ty hợp danh và doanh nghiệp tư nhân đăng ký doanh nghiệp theo quy định của Luật Doanh nghiệp, Luật Đầu tư. Tổ chức, đơn vị được thành lập theo các luật sau đây khôngáp dụng quy định về con dấu trong Nghị định này mà thực hiện theo quy định hiện hành về quản lý và sử dụng con dấu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Luật Công chứng;"
+            },
+            {
+              "label": "b",
+              "content": "Luật Luật sư;"
+            },
+            {
+              "label": "c",
+              "content": "Luật Giám định tư pháp;"
+            },
+            {
+              "label": "d",
+              "content": "Luật Kinh doanh bảo hiểm;"
+            },
+            {
+              "label": "đ",
+              "content": "Luật Chứng khoán;"
+            },
+            {
+              "label": "e",
+              "content": "Luật Hợp tác xã."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Chính sách phát triển đối với doanh nghiệp xã hội",
+      "content_raw": "Chính sách phát triển đối với doanh nghiệp xã hội\n1. Nhà nước khuyến khích và tạo điều kiện cho các tổ chức, cá nhân thành lập doanh nghiệp xã hội có mục tiêu hoạt động nhằm giải quyết các vấn đề xã hội, môi trường vì lợiích cộng đồng.\n2. Doanh nghiệp xã hội được hưởng cácưu đãi và hỗ trợ đầu tư theo quy định của pháp luật.\n3. Doanh nghiệp xã hội thực hiện đầy đủ quyền và nghĩa vụ tươngứng đối với từng loại hình doanh nghiệp và các quyền, nghĩa vụ khác theo quy định của Luật Doanh nghiệp và Nghị định này.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Nhà nước khuyến khích và tạo điều kiện cho các tổ chức, cá nhân thành lập doanh nghiệp xã hội có mục tiêu hoạt động nhằm giải quyết các vấn đề xã hội, môi trường vì lợiích cộng đồng.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp xã hội được hưởng cácưu đãi và hỗ trợ đầu tư theo quy định của pháp luật.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Doanh nghiệp xã hội thực hiện đầy đủ quyền và nghĩa vụ tươngứng đối với từng loại hình doanh nghiệp và các quyền, nghĩa vụ khác theo quy định của Luật Doanh nghiệp và Nghị định này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Tiếp nhận viện trợ, tài trợ",
+      "content_raw": "Tiếp nhận viện trợ, tài trợ\n1. Doanh nghiệp xã hội tiếp nhận viện trợ phi chính phủ nước ngoài để thực hiện mục tiêu giải quyết các vấn đề xã hội, môi trường theo quy định của pháp luật về tiếp nhận viện trợ phi chính phủ nước ngoài.\n2. Ngoài các khoản viện trợ quy định tại Khoản 1 Điều này, doanh nghiệp xã hội được tiếp nhận tài trợ bằng tài sản, tài chính hoặc hỗ trợ kỹ thuật từ các cá nhân, cơ quan, tổ chức trong nước và tổ chức nước ngoài đã đăng ký hoạt động tại Việt Nam để thực hiện mục tiêu giải quyết vấn đề xã hội, môi trường.\n3. Trình tự, thủ tục tiếp nhận các khoản tài trợ quy định tại Khoản 2 Điều này được thực hiện như sau:\na) Việc tiếp nhận tài trợ phải lập thành văn bản. Văn bản tiếp nhận tài trợ phải có các nội dung: Thông tin về cá nhân, tổ chức tài trợ, loại tài sản, giá trị tài sản hoặc tiền tài trợ, thời điểm thực hiện tài trợ, yêu cầu đối với doanh nghiệp tiếp nhận tài trợ, họ, tên và chữ ký của người đại diện có thẩm quyền của các bên.\nb) Trong thời hạn 05 ngày làm việc kể từ ngày văn bản tiếp nhận tài trợ được ký kết, doanh nghiệp phải thông báo cho Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương (sau đây gọi tắt làỦy ban nhân dân cấp tỉnh) nơi doanh nghiệp có trụ sở chính về việc tiếp nhận tài trợ; kèm theo thông báo phải có bản sao Văn bản tiếp nhận tài trợ.\n4. Trường hợp nội dung văn bản tiếp nhận tài trợ quy định tại Điểm a Khoản 3 Điều này có thay đổi, doanh nghiệp xã hội phải thông báo cho Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh nơi doanh nghiệp có trụ sở chính về những nội dung thay đổi theo trình tự, thủ tục quy định tại Điểm b Khoản 3 Điều này.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp xã hội tiếp nhận viện trợ phi chính phủ nước ngoài để thực hiện mục tiêu giải quyết các vấn đề xã hội, môi trường theo quy định của pháp luật về tiếp nhận viện trợ phi chính phủ nước ngoài.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Ngoài các khoản viện trợ quy định tại Khoản 1 Điều này, doanh nghiệp xã hội được tiếp nhận tài trợ bằng tài sản, tài chính hoặc hỗ trợ kỹ thuật từ các cá nhân, cơ quan, tổ chức trong nước và tổ chức nước ngoài đã đăng ký hoạt động tại Việt Nam để thực hiện mục tiêu giải quyết vấn đề xã hội, môi trường.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trình tự, thủ tục tiếp nhận các khoản tài trợ quy định tại Khoản 2 Điều này được thực hiện như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Việc tiếp nhận tài trợ phải lập thành văn bản. Văn bản tiếp nhận tài trợ phải có các nội dung: Thông tin về cá nhân, tổ chức tài trợ, loại tài sản, giá trị tài sản hoặc tiền tài trợ, thời điểm thực hiện tài trợ, yêu cầu đối với doanh nghiệp tiếp nhận tài trợ, họ, tên và chữ ký của người đại diện có thẩm quyền của các bên."
+            },
+            {
+              "label": "b",
+              "content": "Trong thời hạn 05 ngày làm việc kể từ ngày văn bản tiếp nhận tài trợ được ký kết, doanh nghiệp phải thông báo cho Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân tỉnh, thành phố trực thuộc Trungương (sau đây gọi tắt làỦy ban nhân dân cấp tỉnh) nơi doanh nghiệp có trụ sở chính về việc tiếp nhận tài trợ; kèm theo thông báo phải có bản sao Văn bản tiếp nhận tài trợ."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Trường hợp nội dung văn bản tiếp nhận tài trợ quy định tại Điểm a Khoản 3 Điều này có thay đổi, doanh nghiệp xã hội phải thông báo cho Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh nơi doanh nghiệp có trụ sở chính về những nội dung thay đổi theo trình tự, thủ tục quy định tại Điểm b Khoản 3 Điều này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Đăng ký doanh nghiệp xã hội",
+      "content_raw": "Đăng ký doanh nghiệp xã hội\n1. Doanh nghiệp xã hội thực hiện đăng ký doanh nghiệp theo trình tự, thủ tục và hồ sơ tươngứng đối với từng loại hình doanh nghiệp quy định tại Luật Doanh nghiệp.\n2. Tên doanh nghiệp xã hội được đặt theo quy định tại các Điều 38, 39, 40 và 42 Luật Doanh nghiệp và có thể bổ sung thêm cụm từ \"xã hội\" vào tên riêng của doanh nghiệp.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp xã hội thực hiện đăng ký doanh nghiệp theo trình tự, thủ tục và hồ sơ tươngứng đối với từng loại hình doanh nghiệp quy định tại Luật Doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tên doanh nghiệp xã hội được đặt theo quy định tại các Điều 38, 39, 40 và 42 Luật Doanh nghiệp và có thể bổ sung thêm cụm từ \"xã hội\" vào tên riêng của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Công khai Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội",
+      "content_raw": "Công khai Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội\n1. Doanh nghiệp xã hội phải thông báo Cam kết thực hiện mục tiêu xã hội, môi trường cho cơ quan đăng ký kinh doanh để công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp khi thành lập doanh nghiệp hoặc trong quá trình hoạt động.\n2. Trường hợp nội dung Cam kết thực hiện mục tiêu xã hội, môi trường có sự thay đổi, doanh nghiệp xã hội phải thông báo với cơ quan đăng ký kinh doanh về nội dung thay đổi trong thời hạn 05 ngày làm việc kể từ ngày quyết định thay đổi để công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp. Kèm theo thông báo phải có Cam kết thực hiện mục tiêu xã hội, môi trường đã được sửa đổi, bổ sung.\n3. Cơ quan đăng ký kinh doanh thực hiện cập nhật thông tin vào hồ sơ doanh nghiệp và công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo theo các Khoản 1 và 2 Điều này.\n4. Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội được lập theo mẫu và phải bao gồm các nội dung sau đây:\na) Các vấn đề xã hội, môi trường; phương thức mà doanh nghiệp dự định thực hiện nhằm giải quyết vấn đề xã hội, môi trường đó.\nb) Thời hạn thực hiện các hoạt động nhằm mục tiêu giải quyết các vấn đề xã hội, môi trường.\nc) Mức tỷ lệ phần trăm (%) lợi nhuận giữ lại hằng năm được tái đầu tư để giải quyết vấn đề xã hội, môi trường.\nd) Nguyên tắc và phương thức sử dụng các khoản viện trợ, tài trợ từ tổ chức và cá nhân; nguyên tắc và phương thức xử lý các khoản viện trợ, tài trợ còn dư khi doanh nghiệp giải thể hoặc chuyển đổi thành doanh nghiệp thông thường (nếu có).\nđ) Họ, tên, chữ ký của chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân; thành viên hợp danh đối với công ty hợp danh; thành viên, cổ đông là cá nhân, người đại diện theo pháp luật hoặc người đại diện theoủy quyền của thành viên, cổ đông là tổ chức đối với công ty trách nhiệm hữu hạn và công ty cổ phần.\n5. Quyết định của Hội đồng thành viên, Đại hội đồng cổ đông về thay đổi nội dung Cam kết thực hiện mục tiêu xã hội, môi trường phải được thông qua theo tỷ lệ biểu quyết quy định tại Điểm b Khoản 3 Điều 60 và Khoản 1 Điều 144 Luật Doanh nghiệp đối với doanh nghiệp xã hội hoạt động theo hình thức công ty trách nhiệm hữu hạn và công ty cổ phần.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp xã hội phải thông báo Cam kết thực hiện mục tiêu xã hội, môi trường cho cơ quan đăng ký kinh doanh để công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp khi thành lập doanh nghiệp hoặc trong quá trình hoạt động.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp nội dung Cam kết thực hiện mục tiêu xã hội, môi trường có sự thay đổi, doanh nghiệp xã hội phải thông báo với cơ quan đăng ký kinh doanh về nội dung thay đổi trong thời hạn 05 ngày làm việc kể từ ngày quyết định thay đổi để công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp. Kèm theo thông báo phải có Cam kết thực hiện mục tiêu xã hội, môi trường đã được sửa đổi, bổ sung.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cơ quan đăng ký kinh doanh thực hiện cập nhật thông tin vào hồ sơ doanh nghiệp và công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo theo các Khoản 1 và 2 Điều này.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội được lập theo mẫu và phải bao gồm các nội dung sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Các vấn đề xã hội, môi trường; phương thức mà doanh nghiệp dự định thực hiện nhằm giải quyết vấn đề xã hội, môi trường đó."
+            },
+            {
+              "label": "b",
+              "content": "Thời hạn thực hiện các hoạt động nhằm mục tiêu giải quyết các vấn đề xã hội, môi trường."
+            },
+            {
+              "label": "c",
+              "content": "Mức tỷ lệ phần trăm (%) lợi nhuận giữ lại hằng năm được tái đầu tư để giải quyết vấn đề xã hội, môi trường."
+            },
+            {
+              "label": "d",
+              "content": "Nguyên tắc và phương thức sử dụng các khoản viện trợ, tài trợ từ tổ chức và cá nhân; nguyên tắc và phương thức xử lý các khoản viện trợ, tài trợ còn dư khi doanh nghiệp giải thể hoặc chuyển đổi thành doanh nghiệp thông thường (nếu có)."
+            },
+            {
+              "label": "đ",
+              "content": "Họ, tên, chữ ký của chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân; thành viên hợp danh đối với công ty hợp danh; thành viên, cổ đông là cá nhân, người đại diện theo pháp luật hoặc người đại diện theoủy quyền của thành viên, cổ đông là tổ chức đối với công ty trách nhiệm hữu hạn và công ty cổ phần."
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "content": "Quyết định của Hội đồng thành viên, Đại hội đồng cổ đông về thay đổi nội dung Cam kết thực hiện mục tiêu xã hội, môi trường phải được thông qua theo tỷ lệ biểu quyết quy định tại Điểm b Khoản 3 Điều 60 và Khoản 1 Điều 144 Luật Doanh nghiệp đối với doanh nghiệp xã hội hoạt động theo hình thức công ty trách nhiệm hữu hạn và công ty cổ phần.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội",
+      "content_raw": "Chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội\n1. Doanh nghiệp xã hội chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường trong các trường hợp sau đây:\na) Hết thời hạn Cam kết thực hiện mục tiêu xã hội, môi trường.\nb) Vấn đề xã hội, môi trường trong Cam kết thực hiện mục tiêu xã hội, môi trường đã thay đổi hoặc không còn nữa.\nc) Không thực hiện hoặc thực hiện không đầy đủ Cam kết thực hiện mục tiêu xã hội, môi trường và mức lợi nhuận giữ lại tái đầu tư.\nd) Trường hợp khác theo quyết định của doanh nghiệp hoặc cơ quan nhà nước có thẩm quyền.\n2. Trong trường hợp chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội, toàn bộ số dư tài sản hoặc tài chính còn lại của các khoản viện trợ, tài trợ đã được nhận phải chuyển lại cho cá nhân, cơ quan, tổ chức đã viện trợ, tài trợ hoặc chuyển cho các doanh nghiệp xã hội khác, tổ chức khác có mục tiêu xã hội tương tự. Doanh nghiệp xã hội chỉ được chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường nếu vẫn bảo đảm thanh toán đủ các khoản nợ và nghĩa vụ tài sản khác sau khi đã xử lý số dư của khoản viện trợ, tài trợ mà doanh nghiệp đã nhận.\n3. Quyết định của Hội đồng thành viên, Đại hội đồng cổ đông về chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường phải được thông qua theo tỷ lệ biểu quyết quy định tại Điểm b Khoản 3 Điều 60 và Khoản 1 Điều 144 Luật Doanh nghiệp đối với doanh nghiệp xã hội hoạt động theo hình thức công ty trách nhiệm hữu hạn và công ty cổ phần.\n4. Doanh nghiệp xã hội phải thông báo với Cơ quan đăng ký kinh doanh về việc chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường trong thời hạn 05 ngày làm việc kể từ ngày có quyết định chấm dứt để công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp. Kèm theo thông báo phải có các tài liệu sau đây:\na) Quyết định và bản sao biên bản họp của doanh nghiệp hoặc quyết định của cơ quan nhà nước có thẩm quyền (nếu có), trong đó nêu rõ lý do chấm dứt.\nb) Thỏa thuận với cá nhân, tổ chức liên quan về xử lý số dư tài sản hoặc tài chính đối với nguồn viện trợ, tài trợ mà doanh nghiệp xã hội đã nhận (nếu còn).\n5. Cơ quan đăng ký kinh doanh thực hiện cập nhật thông tin vào hồ sơ doanh nghiệp và công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp xã hội chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường trong các trường hợp sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Hết thời hạn Cam kết thực hiện mục tiêu xã hội, môi trường."
+            },
+            {
+              "label": "b",
+              "content": "Vấn đề xã hội, môi trường trong Cam kết thực hiện mục tiêu xã hội, môi trường đã thay đổi hoặc không còn nữa."
+            },
+            {
+              "label": "c",
+              "content": "Không thực hiện hoặc thực hiện không đầy đủ Cam kết thực hiện mục tiêu xã hội, môi trường và mức lợi nhuận giữ lại tái đầu tư."
+            },
+            {
+              "label": "d",
+              "content": "Trường hợp khác theo quyết định của doanh nghiệp hoặc cơ quan nhà nước có thẩm quyền."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trong trường hợp chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường của doanh nghiệp xã hội, toàn bộ số dư tài sản hoặc tài chính còn lại của các khoản viện trợ, tài trợ đã được nhận phải chuyển lại cho cá nhân, cơ quan, tổ chức đã viện trợ, tài trợ hoặc chuyển cho các doanh nghiệp xã hội khác, tổ chức khác có mục tiêu xã hội tương tự. Doanh nghiệp xã hội chỉ được chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường nếu vẫn bảo đảm thanh toán đủ các khoản nợ và nghĩa vụ tài sản khác sau khi đã xử lý số dư của khoản viện trợ, tài trợ mà doanh nghiệp đã nhận.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Quyết định của Hội đồng thành viên, Đại hội đồng cổ đông về chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường phải được thông qua theo tỷ lệ biểu quyết quy định tại Điểm b Khoản 3 Điều 60 và Khoản 1 Điều 144 Luật Doanh nghiệp đối với doanh nghiệp xã hội hoạt động theo hình thức công ty trách nhiệm hữu hạn và công ty cổ phần.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Doanh nghiệp xã hội phải thông báo với Cơ quan đăng ký kinh doanh về việc chấm dứt Cam kết thực hiện mục tiêu xã hội, môi trường trong thời hạn 05 ngày làm việc kể từ ngày có quyết định chấm dứt để công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp. Kèm theo thông báo phải có các tài liệu sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Quyết định và bản sao biên bản họp của doanh nghiệp hoặc quyết định của cơ quan nhà nước có thẩm quyền (nếu có), trong đó nêu rõ lý do chấm dứt."
+            },
+            {
+              "label": "b",
+              "content": "Thỏa thuận với cá nhân, tổ chức liên quan về xử lý số dư tài sản hoặc tài chính đối với nguồn viện trợ, tài trợ mà doanh nghiệp xã hội đã nhận (nếu còn)."
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "content": "Cơ quan đăng ký kinh doanh thực hiện cập nhật thông tin vào hồ sơ doanh nghiệp và công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Chuyển cơ sở bảo trợ xã hội, quỹ xã hội và quỹ từ thiện thành doanh nghiệp xã hội",
+      "content_raw": "Chuyển cơ sở bảo trợ xã hội, quỹ xã hội và quỹ từ thiện thành doanh nghiệp xã hội\n1. Cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện được dùng toàn bộ tài sản, quyền và nghĩa vụ để đăng ký doanh nghiệp xã hội sau khi có Quyết định cho phép chuyển đổi thành doanh nghiệp xã hội bằng văn bản của cơ quan có thẩm quyền đã cấp giấy phép thành lập cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện.\n2. Doanh nghiệp xã hội sau khi được đăng ký đương nhiên kế thừa toàn bộ các quyền và lợiích hợp pháp, chịu trách nhiệm về các khoản nợ, gồm cả nợ thuế, hợp đồng lao động và các nghĩa vụ khác của cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện. Cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện chấm dứt hoạt động kể từ ngày doanh nghiệp xã hội được cấp Giấy chứng nhận đăng ký doanh nghiệp.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện được dùng toàn bộ tài sản, quyền và nghĩa vụ để đăng ký doanh nghiệp xã hội sau khi có Quyết định cho phép chuyển đổi thành doanh nghiệp xã hội bằng văn bản của cơ quan có thẩm quyền đã cấp giấy phép thành lập cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp xã hội sau khi được đăng ký đương nhiên kế thừa toàn bộ các quyền và lợiích hợp pháp, chịu trách nhiệm về các khoản nợ, gồm cả nợ thuế, hợp đồng lao động và các nghĩa vụ khác của cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện. Cơ sở bảo trợ xã hội, quỹ xã hội, quỹ từ thiện chấm dứt hoạt động kể từ ngày doanh nghiệp xã hội được cấp Giấy chứng nhận đăng ký doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Chia, tách, hợp nhất, sáp nhập, giải thể đối với doanh nghiệp xã hội",
+      "content_raw": "Chia, tách, hợp nhất, sáp nhập, giải thể đối với doanh nghiệp xã hội\n1. Chia, tách, hợp nhất, sáp nhập đối với doanh nghiệp xã hội được thực hiện trong các trường hợp sau đây:\na) Doanh nghiệp xã hội được chia hoặc tách thành các doanh nghiệp xã hội.\nb) Các doanh nghiệp, doanh nghiệp xã hội hợp nhất thành doanh nghiệp xã hội.\nc) Sáp nhập doanh nghiệp, doanh nghiệp xã hội vào doanh nghiệp xã hội.\n2. Hồ sơ, trình tự, thủ tục chia, tách, hợp nhất, sáp nhập đối với doanh nghiệp xã hội thực hiện theo quy định tươngứng của Luật Doanh nghiệp.\n3. Trường hợp giải thể doanh nghiệp xã hội, số dư tài sản hoặc tài chính còn lại đối với nguồn tài sản, tài chính mà doanh nghiệp xã hội đã nhận phải được trả lại cho cá nhân, cơ quan, tổ chức đã viện trợ, tài trợ hoặc chuyển cho các doanh nghiệp xã hội khác, tổ chức khác có mục tiêu xã hội tương tự. Hồ sơ, trình tự, thủ tục giải thể doanh nghiệp xã hội được thực hiện theo quy định tươngứng của Luật Doanh nghiệp về giải thể doanh nghiệp. Trường hợp doanh nghiệp xã hội còn số dư tài sản hoặc tài chính đối với nguồn viện trợ, tài trợ đã nhận, thì hồ sơ giải thể phải có Thỏa thuận với cá nhân, tổ chức liên quan về xử lý số dư tài sản hoặc tài chính đối với nguồn viện trợ, tài trợ mà doanh nghiệp xã hội đã nhận.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chia, tách, hợp nhất, sáp nhập đối với doanh nghiệp xã hội được thực hiện trong các trường hợp sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Doanh nghiệp xã hội được chia hoặc tách thành các doanh nghiệp xã hội."
+            },
+            {
+              "label": "b",
+              "content": "Các doanh nghiệp, doanh nghiệp xã hội hợp nhất thành doanh nghiệp xã hội."
+            },
+            {
+              "label": "c",
+              "content": "Sáp nhập doanh nghiệp, doanh nghiệp xã hội vào doanh nghiệp xã hội."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Hồ sơ, trình tự, thủ tục chia, tách, hợp nhất, sáp nhập đối với doanh nghiệp xã hội thực hiện theo quy định tươngứng của Luật Doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp giải thể doanh nghiệp xã hội, số dư tài sản hoặc tài chính còn lại đối với nguồn tài sản, tài chính mà doanh nghiệp xã hội đã nhận phải được trả lại cho cá nhân, cơ quan, tổ chức đã viện trợ, tài trợ hoặc chuyển cho các doanh nghiệp xã hội khác, tổ chức khác có mục tiêu xã hội tương tự. Hồ sơ, trình tự, thủ tục giải thể doanh nghiệp xã hội được thực hiện theo quy định tươngứng của Luật Doanh nghiệp về giải thể doanh nghiệp. Trường hợp doanh nghiệp xã hội còn số dư tài sản hoặc tài chính đối với nguồn viện trợ, tài trợ đã nhận, thì hồ sơ giải thể phải có Thỏa thuận với cá nhân, tổ chức liên quan về xử lý số dư tài sản hoặc tài chính đối với nguồn viện trợ, tài trợ mà doanh nghiệp xã hội đã nhận.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Trách nhiệm của chủ doanh nghiệp tư nhân, thành viên, cổ đông doanh nghiệp xã hội",
+      "content_raw": "Trách nhiệm của chủ doanh nghiệp tư nhân, thành viên, cổ đông doanh nghiệp xã hội\n1. Chủ doanh nghiệp tư nhân, thành viên và cổ đông doanh nghiệp xã hội chỉ được chuyển nhượng phần vốn góp, cổ phần của mình cho tổ chức, cá nhân khác nếu họ có cam kết tiếp tục thực hiện các mục tiêu xã hội, môi trường.\n2. Cổ đông đã ký tên trong Cam kết thực hiện mục tiêu xã hội, môi trường chỉ được chuyển nhượng cổ phần của mình theo quy định tại Khoản 3 Điều 119 Luật Doanh nghiệp trong thời hạn Cam kết thực hiện mục tiêu xã hội, môi trường.\n3. Doanh nghiệp xã hội phải duy trì mục tiêu xã hội, môi trường, mức lợi nhuận giữ lại để tái đầu tư và nội dung khác ghi tại Cam kết thực hiện mục tiêu xã hội, môi trường trong suốt quá trình hoạt động. Trường hợp không thực hiện hoặc thực hiện không đầy đủ Cam kết thực hiện mục tiêu xã hội, môi trường và mức lợi nhuận giữ lại để tái đầu tư, doanh nghiệp xã hội phải hoàn lại toàn bộ cácưu đãi, khoản viện trợ, tài trợ dành riêng cho doanh nghiệp xã hội. Đồng thời, chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân, thành viên đối với công ty hợp danh và công ty trách nhiệm hữu hạn, cổ đông đối với công ty cổ phần đã ký tên trong Cam kết thực hiện mục tiêu xã hội, môi trường và thành viên Hội đồng quản trị công ty cổ phần chịu trách nhiệm liên đới hoàn lại cácưu đãi, tài trợ đã nhận và bồi thường các thiệt hại phát sinh trong trường hợp doanh nghiệp xã hội vi phạm Khoản này.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chủ doanh nghiệp tư nhân, thành viên và cổ đông doanh nghiệp xã hội chỉ được chuyển nhượng phần vốn góp, cổ phần của mình cho tổ chức, cá nhân khác nếu họ có cam kết tiếp tục thực hiện các mục tiêu xã hội, môi trường.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cổ đông đã ký tên trong Cam kết thực hiện mục tiêu xã hội, môi trường chỉ được chuyển nhượng cổ phần của mình theo quy định tại Khoản 3 Điều 119 Luật Doanh nghiệp trong thời hạn Cam kết thực hiện mục tiêu xã hội, môi trường.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Doanh nghiệp xã hội phải duy trì mục tiêu xã hội, môi trường, mức lợi nhuận giữ lại để tái đầu tư và nội dung khác ghi tại Cam kết thực hiện mục tiêu xã hội, môi trường trong suốt quá trình hoạt động. Trường hợp không thực hiện hoặc thực hiện không đầy đủ Cam kết thực hiện mục tiêu xã hội, môi trường và mức lợi nhuận giữ lại để tái đầu tư, doanh nghiệp xã hội phải hoàn lại toàn bộ cácưu đãi, khoản viện trợ, tài trợ dành riêng cho doanh nghiệp xã hội. Đồng thời, chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân, thành viên đối với công ty hợp danh và công ty trách nhiệm hữu hạn, cổ đông đối với công ty cổ phần đã ký tên trong Cam kết thực hiện mục tiêu xã hội, môi trường và thành viên Hội đồng quản trị công ty cổ phần chịu trách nhiệm liên đới hoàn lại cácưu đãi, tài trợ đã nhận và bồi thường các thiệt hại phát sinh trong trường hợp doanh nghiệp xã hội vi phạm Khoản này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Công khai hoạt động của doanh nghiệp xã hội",
+      "content_raw": "Công khai hoạt động của doanh nghiệp xã hội\n1. Trường hợp nhậnưu đãi, viện trợ, tài trợ, định kỳ hằng năm doanh nghiệp xã hội phải gửi Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh nơi doanh nghiệp xã hội có trụ sở chính Báo cáo đánh giá tác động xã hội đối với các hoạt động doanh nghiệp đã thực hiện chậm nhất là 90 ngày kể từ ngày kết thúc năm tài chính.\n2. Báo cáo đánh giá tác động xã hội được lập theo mẫu và phải có nội dung sau đây:\na) Tên, mã số doanh nghiệp.\nb) Các khoảnưu đãi, viện trợ hoặc tài trợ đã nhận được.\nc) Các hoạt động doanh nghiệp đã thực hiện trong năm; các vấn đề xã hội, môi trường mà doanh nghiệp đã giải quyết.\nd) Các lợiích và tác động xã hội mà doanh nghiệp đã đạt được và các nhóm đối tượng được hưởng lợi tươngứng; nêu rõ các số liệu chứng minh về tác động và lợiích đã đạt được (nếu có).\n3. Tổ chức, cá nhân được quyền yêu cầu Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh nơi doanh nghiệp xã hội có trụ sở chính cung cấp các thông tin, bản sao Báo cáo đánh giá tác động xã hội và Văn bản tiếp nhận viện trợ, tài trợ được lưu giữ tại cơ quan đó. Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh có nghĩa vụ cung cấp đầy đủ và kịp thời các thông tin theo yêu cầu của tổ chức, cá nhân.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp nhậnưu đãi, viện trợ, tài trợ, định kỳ hằng năm doanh nghiệp xã hội phải gửi Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh nơi doanh nghiệp xã hội có trụ sở chính Báo cáo đánh giá tác động xã hội đối với các hoạt động doanh nghiệp đã thực hiện chậm nhất là 90 ngày kể từ ngày kết thúc năm tài chính.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Báo cáo đánh giá tác động xã hội được lập theo mẫu và phải có nội dung sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tên, mã số doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Các khoảnưu đãi, viện trợ hoặc tài trợ đã nhận được."
+            },
+            {
+              "label": "c",
+              "content": "Các hoạt động doanh nghiệp đã thực hiện trong năm; các vấn đề xã hội, môi trường mà doanh nghiệp đã giải quyết."
+            },
+            {
+              "label": "d",
+              "content": "Các lợiích và tác động xã hội mà doanh nghiệp đã đạt được và các nhóm đối tượng được hưởng lợi tươngứng; nêu rõ các số liệu chứng minh về tác động và lợiích đã đạt được (nếu có)."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Tổ chức, cá nhân được quyền yêu cầu Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh nơi doanh nghiệp xã hội có trụ sở chính cung cấp các thông tin, bản sao Báo cáo đánh giá tác động xã hội và Văn bản tiếp nhận viện trợ, tài trợ được lưu giữ tại cơ quan đó. Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh có nghĩa vụ cung cấp đầy đủ và kịp thời các thông tin theo yêu cầu của tổ chức, cá nhân.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Theo dõi, giám sát hoạt động của doanh nghiệp xã hội",
+      "content_raw": "Theo dõi, giám sát hoạt động của doanh nghiệp xã hội\n1. Ủy ban nhân dân cấp tỉnh chịu trách nhiệm theo dõi, giám sát đối với doanh nghiệp xã hội có trụ sở chính đặt tại tỉnh, thành phố mình. Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh là cơ quan đầu mối giúpỦy ban nhân dân cấp tỉnh trong việc theo dõi, giám sát đối với doanh nghiệp xã hội. Việc theo dõi, giám sát hoạt động của doanh nghiệp xã hội thực hiện theo cách thức sau đây:\na) Yêu cầu doanh nghiệp báo cáo về việc tuân thủ Cam kết thực hiện mục tiêu xã hội, môi trường trong trường hợp cần thiết.\nb) Trực tiếp hoặc đề nghị cơ quan nhà nước có thẩm quyền kiểm tra doanh nghiệp theo những nội dung Cam kết thực hiện mục tiêu xã hội, môi trường.\n2. Theo dõi, giám sát đối với doanh nghiệp xã hội tại Khoản 1 Điều này thực hiện theo trình tự, thủ tục sau đây:\na) Yêu cầu báo cáo về việc tuân thủ Cam kết thực hiện mục tiêu xã hội, môi trường phải được lập thành văn bản. Trong đó, nêu rõ lý do, nội dung yêu cầu cụ thể; thời hạn và cách thức thực hiện các yêu cầu.\nb) Cơ quan nhà nước chỉ được trực tiếp tiến hành kiểm tra doanh nghiệpít nhất sau 15 ngày kể từ ngày gửi thông báo yêu cầu kiểm tra cho doanh nghiệp.\nc) Trong thời hạn 05 ngày làm việc kể từ ngày kết thúc việc kiểm tra doanh nghiệp xã hội, cơ quan kiểm tra phải có báo cáo bằng văn bản về kết quả kiểm tra. Báo cáo phải được gửi cho doanh nghiệp xã hội, Ủy ban nhân dân cấp tỉnh và các cơ quan có liên quan thuộcỦy ban nhân dân cấp tỉnh.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Ủy ban nhân dân cấp tỉnh chịu trách nhiệm theo dõi, giám sát đối với doanh nghiệp xã hội có trụ sở chính đặt tại tỉnh, thành phố mình. Sở Kế hoạch và Đầu tư hoặc cơ quan quản lý viện trợ, tài trợ thuộcỦy ban nhân dân cấp tỉnh là cơ quan đầu mối giúpỦy ban nhân dân cấp tỉnh trong việc theo dõi, giám sát đối với doanh nghiệp xã hội. Việc theo dõi, giám sát hoạt động của doanh nghiệp xã hội thực hiện theo cách thức sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Yêu cầu doanh nghiệp báo cáo về việc tuân thủ Cam kết thực hiện mục tiêu xã hội, môi trường trong trường hợp cần thiết."
+            },
+            {
+              "label": "b",
+              "content": "Trực tiếp hoặc đề nghị cơ quan nhà nước có thẩm quyền kiểm tra doanh nghiệp theo những nội dung Cam kết thực hiện mục tiêu xã hội, môi trường."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Theo dõi, giám sát đối với doanh nghiệp xã hội tại Khoản 1 Điều này thực hiện theo trình tự, thủ tục sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Yêu cầu báo cáo về việc tuân thủ Cam kết thực hiện mục tiêu xã hội, môi trường phải được lập thành văn bản. Trong đó, nêu rõ lý do, nội dung yêu cầu cụ thể; thời hạn và cách thức thực hiện các yêu cầu."
+            },
+            {
+              "label": "b",
+              "content": "Cơ quan nhà nước chỉ được trực tiếp tiến hành kiểm tra doanh nghiệpít nhất sau 15 ngày kể từ ngày gửi thông báo yêu cầu kiểm tra cho doanh nghiệp."
+            },
+            {
+              "label": "c",
+              "content": "Trong thời hạn 05 ngày làm việc kể từ ngày kết thúc việc kiểm tra doanh nghiệp xã hội, cơ quan kiểm tra phải có báo cáo bằng văn bản về kết quả kiểm tra. Báo cáo phải được gửi cho doanh nghiệp xã hội, Ủy ban nhân dân cấp tỉnh và các cơ quan có liên quan thuộcỦy ban nhân dân cấp tỉnh."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Số lượng, hình thức, nội dung mẫu con dấu của doanh nghiệp",
+      "content_raw": "Số lượng, hình thức, nội dung mẫu con dấu của doanh nghiệp\n1. Chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân, Hội đồng thành viên đối với công ty hợp danh, Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty trách nhiệm hữu hạn, Hội đồng quản trị đối với công ty cổ phần quyết định số lượng, hình thức, nội dung và mẫu con dấu, việc quản lý và sử dụng con dấu, trừ trường hợp Điều lệ công ty có quy định khác. Nội dung Điều lệ hoặc Quyết định về con dấu của doanh nghiệp phải bao gồm:\na) Mẫu con dấu, gồm: Hình thức, kích cỡ, nội dung, mầu mực dấu.\nb) Số lượng con dấu.\nc) Quy định về quản lý và sử dụng con dấu.\n2. Mẫu con dấu doanh nghiệp được thể hiện dưới một hình thức cụ thể (hình tròn, hình đa giác hoặc hình dạng khác). Mỗi doanh nghiệp có một mẫu con dấu thống nhất về nội dung, hình thức và kích thước.\n3. Thông tin về mã số doanh nghiệp và tên doanh nghiệp trong nội dung mẫu con dấu thực hiện theo quy định tại Điều 30 và Khoản 1 Điều 38 Luật Doanh nghiệp. Ngoài thông tin nêu trên, doanh nghiệp có thể bổ sung thêm ngôn ngữ, hìnhảnh khác vào nội dung mẫu con dấu của doanh nghiệp, trừ các trường hợp quy định tại Điều 14 Nghị định này.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân, Hội đồng thành viên đối với công ty hợp danh, Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty trách nhiệm hữu hạn, Hội đồng quản trị đối với công ty cổ phần quyết định số lượng, hình thức, nội dung và mẫu con dấu, việc quản lý và sử dụng con dấu, trừ trường hợp Điều lệ công ty có quy định khác. Nội dung Điều lệ hoặc Quyết định về con dấu của doanh nghiệp phải bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Mẫu con dấu, gồm: Hình thức, kích cỡ, nội dung, mầu mực dấu."
+            },
+            {
+              "label": "b",
+              "content": "Số lượng con dấu."
+            },
+            {
+              "label": "c",
+              "content": "Quy định về quản lý và sử dụng con dấu."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Mẫu con dấu doanh nghiệp được thể hiện dưới một hình thức cụ thể (hình tròn, hình đa giác hoặc hình dạng khác). Mỗi doanh nghiệp có một mẫu con dấu thống nhất về nội dung, hình thức và kích thước.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Thông tin về mã số doanh nghiệp và tên doanh nghiệp trong nội dung mẫu con dấu thực hiện theo quy định tại Điều 30 và Khoản 1 Điều 38 Luật Doanh nghiệp. Ngoài thông tin nêu trên, doanh nghiệp có thể bổ sung thêm ngôn ngữ, hìnhảnh khác vào nội dung mẫu con dấu của doanh nghiệp, trừ các trường hợp quy định tại Điều 14 Nghị định này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "title": "Số lượng, hình thức, nội dung mẫu con dấu của chi nhánh, văn phòng đại diện",
+      "content_raw": "Số lượng, hình thức, nội dung mẫu con dấu của chi nhánh, văn phòng đại diện\n1. Chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân, Hội đồng thành viên đối với công ty hợp danh, Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty trách nhiệm hữu hạn, Hội đồng quản trị đối với công ty cổ phần quyết định số lượng, hình thức, nội dung và mẫu con dấu, việc quản lý, sử dụng con dấu của chi nhánh, văn phòng đại diện, trừ trường hợp Điều lệ công ty có quy định khác.\n2. Nội dung mẫu con dấu của chi nhánh, văn phòng đại diện phải có tên chi nhánh, văn phòng đại diện theo quy định tại các Khoản 1 và 2 Điều 41 Luật Doanh nghiệp. Ngoài thông tin nêu trên, doanh nghiệp có thể bổ sung thêm ngôn ngữ, hìnhảnh khác vào nội dung mẫu con dấu của chi nhánh, văn phòng đại diện, trừ các trường hợp quy định tại Điều 14 Nghị định này.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Chủ doanh nghiệp tư nhân đối với doanh nghiệp tư nhân, Hội đồng thành viên đối với công ty hợp danh, Hội đồng thành viên hoặc Chủ tịch công ty đối với công ty trách nhiệm hữu hạn, Hội đồng quản trị đối với công ty cổ phần quyết định số lượng, hình thức, nội dung và mẫu con dấu, việc quản lý, sử dụng con dấu của chi nhánh, văn phòng đại diện, trừ trường hợp Điều lệ công ty có quy định khác.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Nội dung mẫu con dấu của chi nhánh, văn phòng đại diện phải có tên chi nhánh, văn phòng đại diện theo quy định tại các Khoản 1 và 2 Điều 41 Luật Doanh nghiệp. Ngoài thông tin nêu trên, doanh nghiệp có thể bổ sung thêm ngôn ngữ, hìnhảnh khác vào nội dung mẫu con dấu của chi nhánh, văn phòng đại diện, trừ các trường hợp quy định tại Điều 14 Nghị định này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Hìnhảnh, ngôn ngữ không được sử dụng trong nội dung mẫu con dấu",
+      "content_raw": "Hìnhảnh, ngôn ngữ không được sử dụng trong nội dung mẫu con dấu\n1. Doanh nghiệp không được sử dụng những hìnhảnh, từ ngữ, ký hiệu sau đây trong nội dung hoặc làm hình thức mẫu con dấu:\na) Quốc kỳ, Quốc huy, Đảng kỳ nước cộng hòa xã hội chủ nghĩa Việt Nam.\nb) Hìnhảnh, biểu tượng, tên của nhà nước, cơ quan nhà nước, đơn vị vũ trang nhân dân, tổ chức chính trị, tổ chức chính trị - xã hội, tổ chức chính trị xã hội - nghề nghiệp, tổ chức xã hội, tổ chức xã hội nghề nghiệp.\nc) Từ ngữ, ký hiệu và hìnhảnh vi phạm truyền thống lịch sử, văn hóa, đạo đức và thuần phong, mỹ tục của dân tộc Việt Nam.\n2. Doanh nghiệp chịu trách nhiệm bảo đảm tuân thủ quy định Khoản 1 Điều này, pháp luật về sở hữu trí tuệ và pháp luật có liên quan khi sử dụng hìnhảnh, từ ngữ, ký hiệu trong nội dung hoặc làm hình thức mẫu con dấu. Tranh chấp giữa doanh nghiệp và các cá nhân, tổ chức khác có liên quan về từ ngữ, ký hiệu và hìnhảnh sử dụng trong nội dung mẫu con dấu của doanh nghiệp được giải quyết tại Tòaán hoặc trọng tài. Doanh nghiệp phải chấm dứt việc sử dụng con dấu có từ ngữ, ký hiệu hoặc hìnhảnh vi phạm quy định tại Điều này và chịu trách nhiệm bồi thường các thiệt hại phát sinh theo quyết định có hiệu lực thi hành của Tòaán hoặc trọng tài.\n3. Cơ quan đăng ký kinh doanh không chịu trách nhiệm thẩm tra nội dung mẫu con dấu của doanh nghiệp khi giải quyết thủ tục thông báo mẫu con dấu cho doanh nghiệp.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Doanh nghiệp không được sử dụng những hìnhảnh, từ ngữ, ký hiệu sau đây trong nội dung hoặc làm hình thức mẫu con dấu:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Quốc kỳ, Quốc huy, Đảng kỳ nước cộng hòa xã hội chủ nghĩa Việt Nam."
+            },
+            {
+              "label": "b",
+              "content": "Hìnhảnh, biểu tượng, tên của nhà nước, cơ quan nhà nước, đơn vị vũ trang nhân dân, tổ chức chính trị, tổ chức chính trị - xã hội, tổ chức chính trị xã hội - nghề nghiệp, tổ chức xã hội, tổ chức xã hội nghề nghiệp."
+            },
+            {
+              "label": "c",
+              "content": "Từ ngữ, ký hiệu và hìnhảnh vi phạm truyền thống lịch sử, văn hóa, đạo đức và thuần phong, mỹ tục của dân tộc Việt Nam."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Doanh nghiệp chịu trách nhiệm bảo đảm tuân thủ quy định Khoản 1 Điều này, pháp luật về sở hữu trí tuệ và pháp luật có liên quan khi sử dụng hìnhảnh, từ ngữ, ký hiệu trong nội dung hoặc làm hình thức mẫu con dấu. Tranh chấp giữa doanh nghiệp và các cá nhân, tổ chức khác có liên quan về từ ngữ, ký hiệu và hìnhảnh sử dụng trong nội dung mẫu con dấu của doanh nghiệp được giải quyết tại Tòaán hoặc trọng tài. Doanh nghiệp phải chấm dứt việc sử dụng con dấu có từ ngữ, ký hiệu hoặc hìnhảnh vi phạm quy định tại Điều này và chịu trách nhiệm bồi thường các thiệt hại phát sinh theo quyết định có hiệu lực thi hành của Tòaán hoặc trọng tài.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cơ quan đăng ký kinh doanh không chịu trách nhiệm thẩm tra nội dung mẫu con dấu của doanh nghiệp khi giải quyết thủ tục thông báo mẫu con dấu cho doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Quản lý và sử dụng con dấu",
+      "content_raw": "Quản lý và sử dụng con dấu\n1. Các doanh nghiệp đã thành lập trước ngày 01 tháng 7 năm 2015 tiếp tục sử dụng con dấu đã được cấp cho doanh nghiệp mà không phải thực hiện thông báo mẫu con dấu cho cơ quan đăng ký kinh doanh. Trường hợp doanh nghiệp làm thêm con dấu, thay đổi màu mực dấu thì thực hiện thủ tục thông báo mẫu con dấu theo quy định về đăng ký doanh nghiệp.\n2. Trường hợp doanh nghiệp đã thành lập trước ngày 01 tháng 7 năm 2015 làm con dấu mới theo quy định tại Nghị định này thì phải nộp lại con dấu và Giấy chứng nhận đăng ký mẫu dấu cho cơ quan công an nơi đã cấp Giấy chứng nhận đăng ký mẫu dấu. Cơ quan công an cấp giấy biên nhận đã nhận lại con dấu tại thời điểm tiếp nhận lại con dấu của doanh nghiệp.\n3. Trường hợp doanh nghiệp đã thành lập trước ngày 01 tháng 7 năm 2015 bị mất con dấu, mất Giấy chứng nhận đăng ký mẫu dấu thì doanh nghiệp được làm con dấu theo quy định tại Nghị định này; đồng thời thông báo việc mất con dấu, mất Giấy chứng nhận đăng ký mẫu dấu cho cơ quan công an nơi đã cấp Giấy chứng nhận đăng ký mẫu dấu.\n4. Doanh nghiệp có trách nhiệm thông báo mẫu con dấu với cơ quan đăng ký kinh doanh nơi doanh nghiệp có trụ sở chính để đăng tải công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp trong các trường hợp sau đây:\na) Làm con dấu lần đầu sau khi đăng ký doanh nghiệp;\nb) Thay đổi số lượng, nội dung, hình thức mẫu con dấu và mầu mực dấu;\nc) Hủy mẫu con dấu.\n5. Trình tự, thủ tục và hồ sơ thông báo mẫu con dấu thực hiện theo quy định về đăng ký doanh nghiệp.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các doanh nghiệp đã thành lập trước ngày 01 tháng 7 năm 2015 tiếp tục sử dụng con dấu đã được cấp cho doanh nghiệp mà không phải thực hiện thông báo mẫu con dấu cho cơ quan đăng ký kinh doanh. Trường hợp doanh nghiệp làm thêm con dấu, thay đổi màu mực dấu thì thực hiện thủ tục thông báo mẫu con dấu theo quy định về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp doanh nghiệp đã thành lập trước ngày 01 tháng 7 năm 2015 làm con dấu mới theo quy định tại Nghị định này thì phải nộp lại con dấu và Giấy chứng nhận đăng ký mẫu dấu cho cơ quan công an nơi đã cấp Giấy chứng nhận đăng ký mẫu dấu. Cơ quan công an cấp giấy biên nhận đã nhận lại con dấu tại thời điểm tiếp nhận lại con dấu của doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp doanh nghiệp đã thành lập trước ngày 01 tháng 7 năm 2015 bị mất con dấu, mất Giấy chứng nhận đăng ký mẫu dấu thì doanh nghiệp được làm con dấu theo quy định tại Nghị định này; đồng thời thông báo việc mất con dấu, mất Giấy chứng nhận đăng ký mẫu dấu cho cơ quan công an nơi đã cấp Giấy chứng nhận đăng ký mẫu dấu.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Doanh nghiệp có trách nhiệm thông báo mẫu con dấu với cơ quan đăng ký kinh doanh nơi doanh nghiệp có trụ sở chính để đăng tải công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp trong các trường hợp sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Làm con dấu lần đầu sau khi đăng ký doanh nghiệp;"
+            },
+            {
+              "label": "b",
+              "content": "Thay đổi số lượng, nội dung, hình thức mẫu con dấu và mầu mực dấu;"
+            },
+            {
+              "label": "c",
+              "content": "Hủy mẫu con dấu."
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "content": "Trình tự, thủ tục và hồ sơ thông báo mẫu con dấu thực hiện theo quy định về đăng ký doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "title": "Hạn chế sở hữu chéo giữa các công ty",
+      "content_raw": "Hạn chế sở hữu chéo giữa các công ty\n1. Góp vốn thành lập doanh nghiệp theo quy định tại Khoản 3 Điều 189 Luật Doanh nghiệp bao gồm góp vốn, mua cổ phần để thành lập doanh nghiệp mới, mua phần vốn góp, cổ phần của doanh nghiệp đã thành lập.\n2. Sở hữu chéo là việc đồng thời hai doanh nghiệp có sở hữu phần vốn góp, cổ phần của nhau.\n3. Cùng nhau góp vốn thành lập doanh nghiệp theo quy định tại Khoản 3 Điều 189 Luật Doanh nghiệp là trường hợp tổng số cổ phần, phần vốn góp của các công ty này sở hữu bằng hoặc lớn hơn 51% vốn điều lệ hoặc tổng số cổ phần phổ thông của công ty có liên quan.\n4. Chủ tịch công ty, Hội đồng thành viên, Hội đồng quản trị của các công ty có liên quan chịu trách nhiệm bảo đảm tuân thủ đúng quy định tại Điều 189 Luật Doanh nghiệp khi quyết định góp vốn, mua cổ phần, phần vốn góp của công ty khác. Trong trường hợp này, Chủ tịch công ty hoặc thành viên Hội đồng thành viên, thành viên Hội đồng quản trị của công ty có liên quan cùng liên đới chịu trách nhiệm bồi thường thiệt hại xảy ra cho công ty khi vi phạm các quy định tại Điều này.\n5. Cơ quan đăng ký kinh doanh từ chối đăng ký thay đổi thành viên, cổ đông công ty nếu trong quá trình thụ lý hồ sơ phát hiện việc góp vốn, mua cổ phần thành lập doanh nghiệp hoặc chuyển nhượng cổ phần, phần vốn góp liên quan vi phạm quy định tại các Khoản 2 và 3 Điều 189 Luật Doanh nghiệp.\n6. Các công ty không có cổ phần, phần vốn góp nhà nước nắm giữ đã thực hiện góp vốn, mua cổ phần trước ngày 01 tháng 7 năm 2015 có quyền mua bán, chuyển nhượng, tăng, giảm phần vốn góp, số cổ phần nhưng không được làm tăng tỷ lệ sở hữu chéo hiện có.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Góp vốn thành lập doanh nghiệp theo quy định tại Khoản 3 Điều 189 Luật Doanh nghiệp bao gồm góp vốn, mua cổ phần để thành lập doanh nghiệp mới, mua phần vốn góp, cổ phần của doanh nghiệp đã thành lập.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Sở hữu chéo là việc đồng thời hai doanh nghiệp có sở hữu phần vốn góp, cổ phần của nhau.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cùng nhau góp vốn thành lập doanh nghiệp theo quy định tại Khoản 3 Điều 189 Luật Doanh nghiệp là trường hợp tổng số cổ phần, phần vốn góp của các công ty này sở hữu bằng hoặc lớn hơn 51% vốn điều lệ hoặc tổng số cổ phần phổ thông của công ty có liên quan.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Chủ tịch công ty, Hội đồng thành viên, Hội đồng quản trị của các công ty có liên quan chịu trách nhiệm bảo đảm tuân thủ đúng quy định tại Điều 189 Luật Doanh nghiệp khi quyết định góp vốn, mua cổ phần, phần vốn góp của công ty khác. Trong trường hợp này, Chủ tịch công ty hoặc thành viên Hội đồng thành viên, thành viên Hội đồng quản trị của công ty có liên quan cùng liên đới chịu trách nhiệm bồi thường thiệt hại xảy ra cho công ty khi vi phạm các quy định tại Điều này.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Cơ quan đăng ký kinh doanh từ chối đăng ký thay đổi thành viên, cổ đông công ty nếu trong quá trình thụ lý hồ sơ phát hiện việc góp vốn, mua cổ phần thành lập doanh nghiệp hoặc chuyển nhượng cổ phần, phần vốn góp liên quan vi phạm quy định tại các Khoản 2 và 3 Điều 189 Luật Doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 6,
+          "content": "Các công ty không có cổ phần, phần vốn góp nhà nước nắm giữ đã thực hiện góp vốn, mua cổ phần trước ngày 01 tháng 7 năm 2015 có quyền mua bán, chuyển nhượng, tăng, giảm phần vốn góp, số cổ phần nhưng không được làm tăng tỷ lệ sở hữu chéo hiện có.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Nguyên tắc quản lý nhà nước đối với doanh nghiệp",
+      "content_raw": "Nguyên tắc quản lý nhà nước đối với doanh nghiệp\n1. Cơ quan nhà nước chịu trách nhiệm hướng dẫn, hỗ trợ, tuyên truyền và tạo điều kiện thuận lợi để các doanh nghiệp tuân thủ đúng quy định pháp luật.\n2. Cán bộ, công chức không được yêu cầu người thành lập doanh nghiệp nộp thêm các giấy tờ, đặt ra thêm các thủ tục, điều kiện ngoài quy định và có hành vi gây khó khăn, phiền hà đối với tổ chức, cá nhân trong tiếp nhận hồ sơ và giải quyết thủ tục cho doanh nghiệp.\n3. Tăng cường phối hợp, chia sẻ thông tin giữa các cơ quan nhà nước về tình hình hoạt động của doanh nghiệp; tạo thuận lợi cho các cá nhân, tổ chức có liên quan trong tiếp cận các thông tin về hoạt động của doanh nghiệp được lưu trữ tại cơ quan, đơn vị, trừ trường hợp phải bảo đảm bí mật theo quy định pháp luật.\n4. Mỗi cơ quan quản lý nhà nước từ trungương đến địa phương, cơ quan đại diện chủ sở hữu chịu trách nhiệm theo dõi, giám sát hoạt động của các doanh nghiệp trong phạm vi chức năng và nhiệm vụ được giao. Hoạt động theo dõi, giám sát, thanh tra, kiểm tra của cơ quan quản lý nhà nước, cơ quan đại diện chủ sở hữu không được gâyảnh hưởng bất lợi hoặc cản trở hoạt động bình thường của doanh nghiệp.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cơ quan nhà nước chịu trách nhiệm hướng dẫn, hỗ trợ, tuyên truyền và tạo điều kiện thuận lợi để các doanh nghiệp tuân thủ đúng quy định pháp luật.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cán bộ, công chức không được yêu cầu người thành lập doanh nghiệp nộp thêm các giấy tờ, đặt ra thêm các thủ tục, điều kiện ngoài quy định và có hành vi gây khó khăn, phiền hà đối với tổ chức, cá nhân trong tiếp nhận hồ sơ và giải quyết thủ tục cho doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Tăng cường phối hợp, chia sẻ thông tin giữa các cơ quan nhà nước về tình hình hoạt động của doanh nghiệp; tạo thuận lợi cho các cá nhân, tổ chức có liên quan trong tiếp cận các thông tin về hoạt động của doanh nghiệp được lưu trữ tại cơ quan, đơn vị, trừ trường hợp phải bảo đảm bí mật theo quy định pháp luật.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Mỗi cơ quan quản lý nhà nước từ trungương đến địa phương, cơ quan đại diện chủ sở hữu chịu trách nhiệm theo dõi, giám sát hoạt động của các doanh nghiệp trong phạm vi chức năng và nhiệm vụ được giao. Hoạt động theo dõi, giám sát, thanh tra, kiểm tra của cơ quan quản lý nhà nước, cơ quan đại diện chủ sở hữu không được gâyảnh hưởng bất lợi hoặc cản trở hoạt động bình thường của doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Phối hợp chia sẻ thông tin về hoạt động của doanh nghiệp giữa các cơ quan, đơn vị",
+      "content_raw": "Phối hợp chia sẻ thông tin về hoạt động của doanh nghiệp giữa các cơ quan, đơn vị\n1. Định kỳ hằng tháng, các cơ quan thuộc: Bộ, cơ quan ngang Bộ, Ủy ban nhân dân cấp tỉnh vàỦy ban nhân dân cấp huyện gửi cơ quan đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp có trụ sở chính các thông tin sau đây:\na) Các loại giấy phép kinh doanh, giấy chứng nhận đủ điều kiện kinh doanh, chứng chỉ hành nghề, giấy chứng nhận hoặc văn bản chấp thuận về điều kiện kinh doanh đã cấp cho doanh nghiệp, chi nhánh, văn phòng đại diện, người quản lý doanh nghiệp.\nb) Quyết định xử lý vi phạm hoạt động kinh doanh của doanh nghiệp, chi nhánh, văn phòng đại diện, người quản lý doanh nghiệp.\nc) Quyết định tạm dừng hoạt động, quyết định chấm dứt việc tạm dừng hoạt động kinh doanh.\nd) Thông tin về vi phạm pháp luật thuế của doanh nghiệp.\n2. Trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông tin theo quy định tại Khoản 1 Điều này, cơ quan đăng ký kinh doanh cập nhật vào hồ sơ đăng ký doanh nghiệp có liên quan.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Định kỳ hằng tháng, các cơ quan thuộc: Bộ, cơ quan ngang Bộ, Ủy ban nhân dân cấp tỉnh vàỦy ban nhân dân cấp huyện gửi cơ quan đăng ký kinh doanh cấp tỉnh nơi doanh nghiệp có trụ sở chính các thông tin sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Các loại giấy phép kinh doanh, giấy chứng nhận đủ điều kiện kinh doanh, chứng chỉ hành nghề, giấy chứng nhận hoặc văn bản chấp thuận về điều kiện kinh doanh đã cấp cho doanh nghiệp, chi nhánh, văn phòng đại diện, người quản lý doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Quyết định xử lý vi phạm hoạt động kinh doanh của doanh nghiệp, chi nhánh, văn phòng đại diện, người quản lý doanh nghiệp."
+            },
+            {
+              "label": "c",
+              "content": "Quyết định tạm dừng hoạt động, quyết định chấm dứt việc tạm dừng hoạt động kinh doanh."
+            },
+            {
+              "label": "d",
+              "content": "Thông tin về vi phạm pháp luật thuế của doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông tin theo quy định tại Khoản 1 Điều này, cơ quan đăng ký kinh doanh cập nhật vào hồ sơ đăng ký doanh nghiệp có liên quan.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "Xây dựng hệ thống quản lý rủi ro về theo dõi và giám sát hoạt động của doanh nghiệp",
+      "content_raw": "Xây dựng hệ thống quản lý rủi ro về theo dõi và giám sát hoạt động của doanh nghiệp\n1. Ủy ban nhân dân cấp tỉnh chủ động xây dựng cơ sở dữ liệu về tình hình hoạt động của doanh nghiệp, phươngán, cách thức trao đổi thông tin với cơ quan có liên quan và công khai thông tin; xây dựng hệ thống quản lý rủi ro về theo dõi và giám sát hoạt động của doanh nghiệp trong phạm vi chức năng quản lý nhà nước của mình.\n2. Hệ thống quản lý rủi ro về theo dõi và giám sát hoạt động của doanh nghiệp bao gồm các nội dung sau đây:\na) Bộ phận đầu mối chịu trách nhiệm quản lý hệ thống rủi ro.\nb) Danh mục các rủi ro cần thiết phải theo dõi, giám sát.\nc) Các mức độ rủi ro cần kiểm soát.\nd) Phương thức cảnh báo, ngăn chặn và xử lý các rủi ro khi phát hiện.\nđ) Cách thức thu thập, trao đổi thông tin và cách thức đánh giá rủi ro.\n3. Định kỳ hằng tháng, Sở Kế hoạch và Đầu tư hoặc cơ quan khác theo quyết định củaỦy ban nhân dân cấp tỉnh làm đầu mối tổng hợp tình hình hoạt động và chấp hành pháp luật của doanh nghiệp để báo cáoỦy ban nhân dân cấp tỉnh; đồng thời gửi các cơ quan thuộcỦy ban nhân dân cấp tỉnh vàỦy ban nhân dân cấp huyện.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Ủy ban nhân dân cấp tỉnh chủ động xây dựng cơ sở dữ liệu về tình hình hoạt động của doanh nghiệp, phươngán, cách thức trao đổi thông tin với cơ quan có liên quan và công khai thông tin; xây dựng hệ thống quản lý rủi ro về theo dõi và giám sát hoạt động của doanh nghiệp trong phạm vi chức năng quản lý nhà nước của mình.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hệ thống quản lý rủi ro về theo dõi và giám sát hoạt động của doanh nghiệp bao gồm các nội dung sau đây:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Bộ phận đầu mối chịu trách nhiệm quản lý hệ thống rủi ro."
+            },
+            {
+              "label": "b",
+              "content": "Danh mục các rủi ro cần thiết phải theo dõi, giám sát."
+            },
+            {
+              "label": "c",
+              "content": "Các mức độ rủi ro cần kiểm soát."
+            },
+            {
+              "label": "d",
+              "content": "Phương thức cảnh báo, ngăn chặn và xử lý các rủi ro khi phát hiện."
+            },
+            {
+              "label": "đ",
+              "content": "Cách thức thu thập, trao đổi thông tin và cách thức đánh giá rủi ro."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Định kỳ hằng tháng, Sở Kế hoạch và Đầu tư hoặc cơ quan khác theo quyết định củaỦy ban nhân dân cấp tỉnh làm đầu mối tổng hợp tình hình hoạt động và chấp hành pháp luật của doanh nghiệp để báo cáoỦy ban nhân dân cấp tỉnh; đồng thời gửi các cơ quan thuộcỦy ban nhân dân cấp tỉnh vàỦy ban nhân dân cấp huyện.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "Hiệu lực thi hành",
+      "content_raw": "Hiệu lực thi hành\nNghị định này thay thế Nghị định số 102/2010/NĐ-CP ngày 01 tháng 10 năm 2010 của Chính phủ hướng dẫn chi tiết thi hành một số điều của Luật Doanh nghiệp và có hiệu lực thi hành kể từ ngày 08 tháng 12 năm 2015.",
+      "clauses": []
+    },
+    {
+      "number": 21,
+      "title": "Tổ chức thực hiện",
+      "content_raw": "Tổ chức thực hiện\n1. Các Bộ trưởng, Thủ trưởng cơ quan ngang Bộ, Thủ trưởng cơ quan thuộc Chính phủ, Chủ tịchỦy ban nhân dân các tỉnh, thành phố trực thuộc Trungương và các đối tượngáp dụng của Nghị định chịu trách nhiệm thi hành Nghị định này.\n2. Bộ Kế hoạch và Đầu tư hướng dẫn và ban hành các biểu mẫu để thực hiện các thủ tục hành chính theo quy định tại Nghị định này.\n3. Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trungương chịu trách nhiệm xây dựng và ban hành quy chế phối hợp giữa các cơ quan trực thuộc vàỦy ban nhân dân cấp dưới về trao đổi thông tin và xây dựng hệ thống quản lý rủi ro trong theo dõi, giám sát hoạt động doanh nghiệp./.",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các Bộ trưởng, Thủ trưởng cơ quan ngang Bộ, Thủ trưởng cơ quan thuộc Chính phủ, Chủ tịchỦy ban nhân dân các tỉnh, thành phố trực thuộc Trungương và các đối tượngáp dụng của Nghị định chịu trách nhiệm thi hành Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Bộ Kế hoạch và Đầu tư hướng dẫn và ban hành các biểu mẫu để thực hiện các thủ tục hành chính theo quy định tại Nghị định này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Ủy ban nhân dân các tỉnh, thành phố trực thuộc Trungương chịu trách nhiệm xây dựng và ban hành quy chế phối hợp giữa các cơ quan trực thuộc vàỦy ban nhân dân cấp dưới về trao đổi thông tin và xây dựng hệ thống quản lý rủi ro trong theo dõi, giám sát hoạt động doanh nghiệp./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}

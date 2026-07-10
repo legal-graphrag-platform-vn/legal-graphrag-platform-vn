@@ -1,0 +1,681 @@
+{
+  "document": {
+    "id": "TT01_2016",
+    "title": "Thông tư liên tịch số 01/2016/TTLT-BKHĐT-BTC Hướng dẫn việc trao đổi thông tin về doanh nghiệp giữa Hệ thống thông tin quổc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế",
+    "number": "01/2016/TTLT-BKHĐT-BTC",
+    "doc_type": "Circular",
+    "issued_date": "2016-02-23",
+    "effective_from": "2016-04-15",
+    "status": "Còn hiệu lực"
+  },
+  "articles": [
+    {
+      "number": 1,
+      "title": "Phạm vi điều chỉnh",
+      "content_raw": "Phạm vi điều chỉnh\nThông tư này hướng dẫn chi tiết về việc trao đổi thông tin giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế, bao gồm thông tin về đăng ký doanh nghiệp, tình hình hoạt động, báo cáo tài chính của doanh nghiệp thành lập và hoạt động theo quy định tại Luật Doanh nghiệp.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": []
+    },
+    {
+      "number": 2,
+      "title": "Đối tượngáp dụng",
+      "content_raw": "Đối tượngáp dụng\nThông tư nàyáp dụng cho các đối tượng sau:\n1. Tổng cục Thuế thuộc Bộ Tài chính;\n2. Cục Quản lý đăng ký kinh doanh thuộc Bộ Kế hoạch và Đầu tư;\n3. Cục Thuế, Chi cục Thuế;\n4. Phòng Đăng ký kinh doanh thuộc Sở Kế hoạch và Đầu tư các tỉnh, thành phố trực thuộc Trungương (sau đây gọi chung là Phòng Đăng ký kinh doanh);\n5. Các tổ chức, cá nhân có liên quan.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổng cục Thuế thuộc Bộ Tài chính;",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Cục Quản lý đăng ký kinh doanh thuộc Bộ Kế hoạch và Đầu tư;",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Cục Thuế, Chi cục Thuế;",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Phòng Đăng ký kinh doanh thuộc Sở Kế hoạch và Đầu tư các tỉnh, thành phố trực thuộc Trungương (sau đây gọi chung là Phòng Đăng ký kinh doanh);",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Các tổ chức, cá nhân có liên quan.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Giải thích từ ngữ",
+      "content_raw": "Giải thích từ ngữ\nTrong Thông tư này, các từ ngữ dưới đây được hiểu như sau:\n1. Đăng ký doanh nghiệp bao gồm đăng ký thành lập doanh nghiệp, đăng ký thay đổi nội dung đăng ký doanh nghiệp và các nghĩa vụ đăng ký, thông báo khác theo quy định tại Khoản 1 Điều 3 Nghị định số 78/2015/NĐ-CP.\n2. Đơn vị trực thuộc của doanh nghiệp bao gồm chi nhánh, văn phòng đại diện, địa điểm kinh doanh.\n3. Hệ thống thông tin thuế bao gồm Hệ thống thông tin đăng ký thuế và Hệ thống thông tin báo cáo tài chính của Tổng cục Thuế, Bộ Tài chính.\n4. Hệ thống thông tin quốc gia về đăng ký doanh nghiệp là hệ thống thông tin nghiệp vụ chuyên môn về đăng ký doanh nghiệp quy định tại Khoản 2 Điều 3 Nghị định số 78/2015/NĐ-CP.\n5. Cơ quan thuế bao gồm Tổng cục thuế, Cục thuế, Chi cục thuế theo quy định tại Khoản 2 Điều 2 Luật Quản lý thuế .",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Đăng ký doanh nghiệp bao gồm đăng ký thành lập doanh nghiệp, đăng ký thay đổi nội dung đăng ký doanh nghiệp và các nghĩa vụ đăng ký, thông báo khác theo quy định tại Khoản 1 Điều 3 Nghị định số 78/2015/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Đơn vị trực thuộc của doanh nghiệp bao gồm chi nhánh, văn phòng đại diện, địa điểm kinh doanh.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hệ thống thông tin thuế bao gồm Hệ thống thông tin đăng ký thuế và Hệ thống thông tin báo cáo tài chính của Tổng cục Thuế, Bộ Tài chính.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Hệ thống thông tin quốc gia về đăng ký doanh nghiệp là hệ thống thông tin nghiệp vụ chuyên môn về đăng ký doanh nghiệp quy định tại Khoản 2 Điều 3 Nghị định số 78/2015/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 5,
+          "content": "Cơ quan thuế bao gồm Tổng cục thuế, Cục thuế, Chi cục thuế theo quy định tại Khoản 2 Điều 2 Luật Quản lý thuế .",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Nguyên tắc trao đổi thông tin",
+      "content_raw": "Nguyên tắc trao đổi thông tin\n1. Các cơ quan quy định tại Khoản 1, 2, 3 và 4 Điều 2 Thông tư này có trách nhiệm như sau:\na) Chịu trách nhiệm về tính chính xác của thông tin cung cấp so với thông tin trong Hệ thống do mình quản lý;\nb) Chịu trách nhiệm thực hiện việc trao đổi thông tin kịp thời, chính xác theo yêu cầu; đảm bảo tính đồng bộ, thống nhất dữ liệu giữa hai Hệ thống;\nc) Chịu trách nhiệm quản lý, sử dụng thông tin được cung cấp theo đúng quy định của pháp luật.\n2. Thông tin trao đổi giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế có giá trị pháp lý như thông tin trao đổi bằng bản giấy.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các cơ quan quy định tại Khoản 1, 2, 3 và 4 Điều 2 Thông tư này có trách nhiệm như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Chịu trách nhiệm về tính chính xác của thông tin cung cấp so với thông tin trong Hệ thống do mình quản lý;"
+            },
+            {
+              "label": "b",
+              "content": "Chịu trách nhiệm thực hiện việc trao đổi thông tin kịp thời, chính xác theo yêu cầu; đảm bảo tính đồng bộ, thống nhất dữ liệu giữa hai Hệ thống;"
+            },
+            {
+              "label": "c",
+              "content": "Chịu trách nhiệm quản lý, sử dụng thông tin được cung cấp theo đúng quy định của pháp luật."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Thông tin trao đổi giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế có giá trị pháp lý như thông tin trao đổi bằng bản giấy.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Hình thức, tần suất trao đổi thông tin",
+      "content_raw": "Hình thức, tần suất trao đổi thông tin\n1. Hình thức trao đổi thông tin: Việc trao đổi thông tin doanh nghiệp được thực hiện thông qua mạng điện tử kết nối giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế. Trong trường hợp cần thiết theo nhu cầu quản lý và sử dụng thông tin hoặc do yếu tố kỹ thuật, các bên có thể trao đổi thông tin qua thư điện tử (email), truyền tập tin (file) dữ liệu điện tử hoặc các hình thức khác.\n2. Tần suất trao đổi thông tin:\na) Việc trao đổi thông tin được thực hiện tự động theo thời gian thực;\nb) Trong các trường hợp cụ thể, để phục vụ công tác quản lý nhà nước, Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh có thể thỏa thuận để thống nhất về thời gian và tần suất trao đổi thông tin.",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hình thức trao đổi thông tin: Việc trao đổi thông tin doanh nghiệp được thực hiện thông qua mạng điện tử kết nối giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế. Trong trường hợp cần thiết theo nhu cầu quản lý và sử dụng thông tin hoặc do yếu tố kỹ thuật, các bên có thể trao đổi thông tin qua thư điện tử (email), truyền tập tin (file) dữ liệu điện tử hoặc các hình thức khác.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tần suất trao đổi thông tin:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Việc trao đổi thông tin được thực hiện tự động theo thời gian thực;"
+            },
+            {
+              "label": "b",
+              "content": "Trong các trường hợp cụ thể, để phục vụ công tác quản lý nhà nước, Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh có thể thỏa thuận để thống nhất về thời gian và tần suất trao đổi thông tin."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Đầu mối trao đổi thông tin",
+      "content_raw": "Đầu mối trao đổi thông tin\nCác đơn vị đầu mối trao đổi thông tin bao gồm:\n1. Cấp Trungương\na) Tổng cục Thuế;\nb) Cục Quản lý đăng ký kinh doanh.\n2. Cấp địa phương\na) Cục Thuế, Chi cục Thuế;\nb) Phòng Đăng ký kinh doanh. TÌNH HÌNH HOẠT ĐỘNG CỦA DOANH NGHIỆP VÀ THÔNG TIN VỀ BÁO CÁO TÀI CHÍNH CỦA DOANH NGHIỆP",
+      "chapter": "I",
+      "chapter_title": "QUY ĐỊNH CHUNG",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Cấp Trungương",
+          "points": [
+            {
+              "label": "a",
+              "content": "Tổng cục Thuế;"
+            },
+            {
+              "label": "b",
+              "content": "Cục Quản lý đăng ký kinh doanh."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Cấp địa phương",
+          "points": [
+            {
+              "label": "a",
+              "content": "Cục Thuế, Chi cục Thuế;"
+            },
+            {
+              "label": "b",
+              "content": "Phòng Đăng ký kinh doanh. TÌNH HÌNH HOẠT ĐỘNG CỦA DOANH NGHIỆP VÀ THÔNG TIN VỀ BÁO CÁO TÀI CHÍNH CỦA DOANH NGHIỆP"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Các thông tin trao đổi giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế",
+      "content_raw": "Các thông tin trao đổi giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế\n1. Các thông tin trao đổi bao gồm:\na) Hệ thống danh mục dùng chung;\nb) Thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc;\nc) Thông tin đăng ký thay đổi nội dung đăng ký doanh nghiệp, nội dung đăng ký hoạt động đơn vị trực thuộc;\nd) Thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc; thông tin về việc vi phạm pháp luật về thuế của người thành lập, quản lý doanh nghiệp;\nđ) Thông tin về báo cáo tài chính của doanh nghiệp.\n2. Căn cứ nhu cầu cụ thể, Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh thỏa thuận về việc sửa đổi, bổ sung danh mục thông tin trao đổi cho phù hợp.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Các thông tin trao đổi bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Hệ thống danh mục dùng chung;"
+            },
+            {
+              "label": "b",
+              "content": "Thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc;"
+            },
+            {
+              "label": "c",
+              "content": "Thông tin đăng ký thay đổi nội dung đăng ký doanh nghiệp, nội dung đăng ký hoạt động đơn vị trực thuộc;"
+            },
+            {
+              "label": "d",
+              "content": "Thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc; thông tin về việc vi phạm pháp luật về thuế của người thành lập, quản lý doanh nghiệp;"
+            },
+            {
+              "label": "đ",
+              "content": "Thông tin về báo cáo tài chính của doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Căn cứ nhu cầu cụ thể, Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh thỏa thuận về việc sửa đổi, bổ sung danh mục thông tin trao đổi cho phù hợp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Trao đổi thông tin về hệ thống danh mục dùng chung",
+      "content_raw": "Trao đổi thông tin về hệ thống danh mục dùng chung\n1. Hệ thống danh mục dùng chung là các danh mục được Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh thống nhất sử dụng nhằm đảm bảo đồng bộ cơ sở dữ liệu phục vụ việc trao đổi thông tin giữa hai Hệ thống.\n2. Hệ thống danh mục dùng chung bao gồm: - Danh mục Quốc gia, Danh mục tỉnh/thành phố, Danh mục quận/huyện, Danh mục phường/xã, Danh mục kho bạc, Danh mục tiền tệ, Danh mục loại thuế, Danh mục chi tiết loại hình kinh tế, Danh mục cơ quan thuế (theo danh mục đang sử dụng trên Hệ thống thông tin đăng ký thuế); - Danh mục giao dịch: giao dịch dùng chung trong quá trình thực hiện trao đổi thông tin giữa 2 Hệ thống theo từng quy trình; quy định chi tiết tại Phụ lục 1 ban hành kèm theo Thông tư này; - Danh mục kết quả trả về từ Hệ thống thông tin đăng ký thuế: quy định chi tiết tại Phụ lục 2 ban hành kèm theo Thông tư này; - Danh mục kết quả trả về từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp: quy định chi tiết tại Phụ lục 3 ban hành kèm theo Thông tư này; - Danh mục ngành, nghề kinh doanh theo Hệ thống ngành kinh tế Việt Nam.\n3. Khi có thông tin thay đổi liên quan đến Danh mục ngành, nghề kinh doanh, Cục Quản lý đăng ký kinh doanh có trách nhiệm cập nhật các nội dung thay đổi và chuyển cho Tổng cục Thuế. Khi có thông tin thay đổi liên quan đến Danh mục quốc gia, Danh mục tỉnh/thành phố, Danh mục quận/huyện, Danh mục phường/xã, Cục Quản lý đăng ký kinh doanh và Tổng cục Thuế có trách nhiệm phối hợp để cập nhật, đồng bộ thông tin giữa hai Hệ thống. Đối với các danh mục dùng chung khác, Tổng cục Thuế có trách nhiệm cập nhật các thông tin thay đổi và chuyển cho Cục Quản lý đăng ký kinh doanh.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Hệ thống danh mục dùng chung là các danh mục được Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh thống nhất sử dụng nhằm đảm bảo đồng bộ cơ sở dữ liệu phục vụ việc trao đổi thông tin giữa hai Hệ thống.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Hệ thống danh mục dùng chung bao gồm: - Danh mục Quốc gia, Danh mục tỉnh/thành phố, Danh mục quận/huyện, Danh mục phường/xã, Danh mục kho bạc, Danh mục tiền tệ, Danh mục loại thuế, Danh mục chi tiết loại hình kinh tế, Danh mục cơ quan thuế (theo danh mục đang sử dụng trên Hệ thống thông tin đăng ký thuế); - Danh mục giao dịch: giao dịch dùng chung trong quá trình thực hiện trao đổi thông tin giữa 2 Hệ thống theo từng quy trình; quy định chi tiết tại Phụ lục 1 ban hành kèm theo Thông tư này; - Danh mục kết quả trả về từ Hệ thống thông tin đăng ký thuế: quy định chi tiết tại Phụ lục 2 ban hành kèm theo Thông tư này; - Danh mục kết quả trả về từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp: quy định chi tiết tại Phụ lục 3 ban hành kèm theo Thông tư này; - Danh mục ngành, nghề kinh doanh theo Hệ thống ngành kinh tế Việt Nam.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Khi có thông tin thay đổi liên quan đến Danh mục ngành, nghề kinh doanh, Cục Quản lý đăng ký kinh doanh có trách nhiệm cập nhật các nội dung thay đổi và chuyển cho Tổng cục Thuế. Khi có thông tin thay đổi liên quan đến Danh mục quốc gia, Danh mục tỉnh/thành phố, Danh mục quận/huyện, Danh mục phường/xã, Cục Quản lý đăng ký kinh doanh và Tổng cục Thuế có trách nhiệm phối hợp để cập nhật, đồng bộ thông tin giữa hai Hệ thống. Đối với các danh mục dùng chung khác, Tổng cục Thuế có trách nhiệm cập nhật các thông tin thay đổi và chuyển cho Cục Quản lý đăng ký kinh doanh.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Quy trình trao đổi thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc",
+      "content_raw": "Quy trình trao đổi thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc\n1. Mã số doanh nghiệp, mã số đơn vị trực thuộc thực hiện theo quy định tại Điều 8 Nghị định số 78/2015/NĐ-CP.\n2. Việc tạo và cấp mã số doanh nghiệp, mã số đơn vị trực thuộc được thực hiện theo quy trình sau:\na) Khi hồ sơ đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc đủ điều kiện để được cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế trong trường hợp đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc quy định chi tiết tại Phụ lục 4, Phụ lục 5 ban hành kèm theo Thông tư này.\nb) Hệ thống thông tin đăng ký thuế nhận thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang và tự động kiểm tra sự phù hợp của thông tin. Trường hợp thông tin phù hợp, Hệ thống thông tin đăng ký thuế tự động tạo mã số doanh nghiệp và thực hiện phân cấp cơ quan thuế quản lý đối với doanh nghiệp; đồng thời truyền thông tin về mã số doanh nghiệp, thông tin cơ quan thuế quản lý đối với doanh nghiệp sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Trường hợp thông tin không phù hợp, Hệ thống thông tin đăng ký thuế tự động phản hồi về việc thông tin không phù hợp và truyền sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục thông tin phản hồi từ Hệ thống thông tin đăng ký thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp quy định chi tiết tại Phụ lục 6 ban hành kèm theo Thông tư này.\nc) Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế cung cấp, Phòng Đăng ký kinh doanh xử lý như sau: Trường hợp nhận được mã số do Hệ thống thông tin đăng ký thuế truyền sang, Phòng Đăng ký kinh doanh cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc và gửi Thông báo về cơ quan thuế quản lý đến doanh nghiệp. Mẫu Thông báo về cơ quan thuế quản lý quy định tại Thông tư số 20/2015/TT-BKHĐT ngày 01/12/2015 của Bộ Kế hoạch và Đầu tư hướng dẫn về đăng ký doanh nghiệp. Trường hợp nhận được phản hồi của Hệ thống thông tin đăng ký thuế về việc thông tin không phù hợp, Phòng Đăng ký kinh doanh kiểm tra lại dữ liệu so với hồ sơ đăng ký của doanh nghiệp, gửi thông báo đề nghị doanh nghiệp sửa đổi, bổ sung hồ sơ theo quy định. Trường hợp Hệ thống thông tin quốc gia về đăng ký doanh nghiệp nhận được mã số từ Hệ thống thông tin đăng ký thuế nhưng Phòng Đăng ký kinh doanh không cấp Giấy chứng nhận cho doanh nghiệp, đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin sang Hệ thống thông tin đăng ký thuế để hủy mã số đã tạo.\nd) Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc cấp Giấy chứng nhận sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế xác nhận việc cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc quy định chi tiết tại Phụ lục 7 ban hành kèm theo Thông tư này.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Mã số doanh nghiệp, mã số đơn vị trực thuộc thực hiện theo quy định tại Điều 8 Nghị định số 78/2015/NĐ-CP.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Việc tạo và cấp mã số doanh nghiệp, mã số đơn vị trực thuộc được thực hiện theo quy trình sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Khi hồ sơ đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc đủ điều kiện để được cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế trong trường hợp đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc quy định chi tiết tại Phụ lục 4, Phụ lục 5 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "b",
+              "content": "Hệ thống thông tin đăng ký thuế nhận thông tin đăng ký thành lập doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang và tự động kiểm tra sự phù hợp của thông tin. Trường hợp thông tin phù hợp, Hệ thống thông tin đăng ký thuế tự động tạo mã số doanh nghiệp và thực hiện phân cấp cơ quan thuế quản lý đối với doanh nghiệp; đồng thời truyền thông tin về mã số doanh nghiệp, thông tin cơ quan thuế quản lý đối với doanh nghiệp sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Trường hợp thông tin không phù hợp, Hệ thống thông tin đăng ký thuế tự động phản hồi về việc thông tin không phù hợp và truyền sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục thông tin phản hồi từ Hệ thống thông tin đăng ký thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp quy định chi tiết tại Phụ lục 6 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "c",
+              "content": "Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế cung cấp, Phòng Đăng ký kinh doanh xử lý như sau: Trường hợp nhận được mã số do Hệ thống thông tin đăng ký thuế truyền sang, Phòng Đăng ký kinh doanh cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc và gửi Thông báo về cơ quan thuế quản lý đến doanh nghiệp. Mẫu Thông báo về cơ quan thuế quản lý quy định tại Thông tư số 20/2015/TT-BKHĐT ngày 01/12/2015 của Bộ Kế hoạch và Đầu tư hướng dẫn về đăng ký doanh nghiệp. Trường hợp nhận được phản hồi của Hệ thống thông tin đăng ký thuế về việc thông tin không phù hợp, Phòng Đăng ký kinh doanh kiểm tra lại dữ liệu so với hồ sơ đăng ký của doanh nghiệp, gửi thông báo đề nghị doanh nghiệp sửa đổi, bổ sung hồ sơ theo quy định. Trường hợp Hệ thống thông tin quốc gia về đăng ký doanh nghiệp nhận được mã số từ Hệ thống thông tin đăng ký thuế nhưng Phòng Đăng ký kinh doanh không cấp Giấy chứng nhận cho doanh nghiệp, đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin sang Hệ thống thông tin đăng ký thuế để hủy mã số đã tạo."
+            },
+            {
+              "label": "d",
+              "content": "Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc cấp Giấy chứng nhận sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế xác nhận việc cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc quy định chi tiết tại Phụ lục 7 ban hành kèm theo Thông tư này."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Quy trình trao đổi thông tin đăng ký thay đổi nội dung đăng ký doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc",
+      "content_raw": "Quy trình trao đổi thông tin đăng ký thay đổi nội dung đăng ký doanh nghiệp, đăng ký hoạt động đơn vị trực thuộc\n1. Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện đăng ký chuyển trụ sở sang quận, huyện, thị xã, tỉnh, thành phố khác\na) Khi hồ sơ đăng ký chuyển trụ sở của doanh nghiệp, chi nhánh, văn phòng đại diện đủ điều kiện để được cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin đăng ký thay đổi sang Hệ thống thông tin đăng ký thuế. Thông tin truyền sang bao gồm các thông tin đăng ký thay đổi của doanh nghiệp, chi nhánh, văn phòng đại diện đã được Phòng Đăng ký kinh doanh cập nhật trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế trong trường hợp doanh nghiệp, đơn vị trực thuộc đăng ký chuyển trụ sở quy định chi tiết tại Phụ lục 8 ban hành kèm theo Thông tư này.\nb) Hệ thống thông tin đăng ký thuế tự động kiểm tra thông tin liên quan đến thủ tục chuyển trụ sở theo quy định của pháp luật về thuế mà không cần sự kiểm tra của cán bộ đăng ký thuế Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện chưa hoàn thành thủ tục chuyển trụ sở tại cơ quan thuế theo quy định, Hệ thống thông tin đăng ký thuế truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để Phòng Đăng ký kinh doanh yêu cầu doanh nghiệp, chi nhánh, văn phòng đại diện hoàn thành thủ tục chuyển trụ sở tại cơ quan thuế trước khi đăng ký thay đổi. Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện đã hoàn thành thủ tục chuyển trụ sở với cơ quan thuế theo quy định, Hệ thống thông tin đăng ký thuế tự động phân cấp cơ quan thuế quản lý, truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục kết quả trả về từ Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 2 ban hành kèm theo Thông tư này.\nc) Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế cung cấp, Phòng Đăng ký kinh doanh cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc và gửi Thông báo về cơ quan thuế quản lý đến doanh nghiệp.\nd) Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc sang Hệ thống thông tin đăng ký thuế.\n2. Trừ trường hợp quy định tại Khoản 1 Điều này, việc trao đổi thông tin đăng ký thay đổi nội dung đăng ký doanh nghiệp, nội dung đăng ký hoạt động đơn vị trực thuộc trong các trường hợp khác thực hiện như sau:\na) Sau khi Phòng Đăng ký kinh doanh thực hiện cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động, dữ liệu thông tin thay đổi của doanh nghiệp và các đơn vị trực thuộc được Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế trường hợp doanh nghiệp đăng ký thay đổi nội dung đăng ký doanh nghiệp quy định chi tiết tại Phụ lục 9 ban hành kèm theo Thông tư này.\nb) Sau khi nhận được dữ liệu, Hệ thống thông tin đăng ký thuế tự động kiểm tra sự phù hợp của thông tin và cập nhật thông tin vào cơ sở dữ liệu.\nc) Đối với các trường hợp Hệ thống thông tin đăng ký thuế không cập nhật được thông tin thay đổi của doanh nghiệp, đơn vị trực thuộc thì Tổng cục Thuế tổng hợp danh sách gửi Cục Quản lý đăng ký kinh doanh để kiểm tra, phối hợp với các Phòng Đăng ký kinh doanh có liên quan để xử lý lỗi dữ liệu hoặc hiệu đính thông tin dữ liệu cho phù hợp với quy định.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện đăng ký chuyển trụ sở sang quận, huyện, thị xã, tỉnh, thành phố khác",
+          "points": [
+            {
+              "label": "a",
+              "content": "Khi hồ sơ đăng ký chuyển trụ sở của doanh nghiệp, chi nhánh, văn phòng đại diện đủ điều kiện để được cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin đăng ký thay đổi sang Hệ thống thông tin đăng ký thuế. Thông tin truyền sang bao gồm các thông tin đăng ký thay đổi của doanh nghiệp, chi nhánh, văn phòng đại diện đã được Phòng Đăng ký kinh doanh cập nhật trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế trong trường hợp doanh nghiệp, đơn vị trực thuộc đăng ký chuyển trụ sở quy định chi tiết tại Phụ lục 8 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "b",
+              "content": "Hệ thống thông tin đăng ký thuế tự động kiểm tra thông tin liên quan đến thủ tục chuyển trụ sở theo quy định của pháp luật về thuế mà không cần sự kiểm tra của cán bộ đăng ký thuế Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện chưa hoàn thành thủ tục chuyển trụ sở tại cơ quan thuế theo quy định, Hệ thống thông tin đăng ký thuế truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để Phòng Đăng ký kinh doanh yêu cầu doanh nghiệp, chi nhánh, văn phòng đại diện hoàn thành thủ tục chuyển trụ sở tại cơ quan thuế trước khi đăng ký thay đổi. Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện đã hoàn thành thủ tục chuyển trụ sở với cơ quan thuế theo quy định, Hệ thống thông tin đăng ký thuế tự động phân cấp cơ quan thuế quản lý, truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục kết quả trả về từ Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 2 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "c",
+              "content": "Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế cung cấp, Phòng Đăng ký kinh doanh cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc và gửi Thông báo về cơ quan thuế quản lý đến doanh nghiệp."
+            },
+            {
+              "label": "d",
+              "content": "Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc sang Hệ thống thông tin đăng ký thuế."
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "content": "Trừ trường hợp quy định tại Khoản 1 Điều này, việc trao đổi thông tin đăng ký thay đổi nội dung đăng ký doanh nghiệp, nội dung đăng ký hoạt động đơn vị trực thuộc trong các trường hợp khác thực hiện như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Sau khi Phòng Đăng ký kinh doanh thực hiện cấp Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động, dữ liệu thông tin thay đổi của doanh nghiệp và các đơn vị trực thuộc được Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế trường hợp doanh nghiệp đăng ký thay đổi nội dung đăng ký doanh nghiệp quy định chi tiết tại Phụ lục 9 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "b",
+              "content": "Sau khi nhận được dữ liệu, Hệ thống thông tin đăng ký thuế tự động kiểm tra sự phù hợp của thông tin và cập nhật thông tin vào cơ sở dữ liệu."
+            },
+            {
+              "label": "c",
+              "content": "Đối với các trường hợp Hệ thống thông tin đăng ký thuế không cập nhật được thông tin thay đổi của doanh nghiệp, đơn vị trực thuộc thì Tổng cục Thuế tổng hợp danh sách gửi Cục Quản lý đăng ký kinh doanh để kiểm tra, phối hợp với các Phòng Đăng ký kinh doanh có liên quan để xử lý lỗi dữ liệu hoặc hiệu đính thông tin dữ liệu cho phù hợp với quy định."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "title": "Quy trình trao đổi thông tin đăng ký tạm ngừng kinh doanh",
+      "content_raw": "Quy trình trao đổi thông tin đăng ký tạm ngừng kinh doanh\nQuy trình trao đổi thông tin đăng ký tạm ngừng kinh doanh, tiếp tục kinh doanh trước thời hạn đã thông báo theo quy định tại Điều 57 Nghị định số 78/2015/NĐ-CP thực hiện như sau:\n1. Phòng đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ đăng ký tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc, cập nhật vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 11 ban hành kèm theo Thông tư này. Hệ thống thông tin đăng ký thuế nhận thông tin đăng ký tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, tự động cập nhật trạng thái tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc. Khi hết thời hạn tạm ngừng kinh doanh mà doanh nghiệp, đơn vị trực thuộc đã đăng ký, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp tự động cập nhật tình trạng pháp lý đang tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 12 ban hành kèm theo Thông tư này. Trên cơ sở thông tin từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, Hệ thống thông tin đăng ký thuế tự động nhận và cập nhật tình trạng pháp lý của doanh nghiệp, đơn vị trực thuộc.\n2. Trường hợp doanh nghiệp, đơn vị trực thuộc đăng ký hoạt động trở lại trước thời hạn đã thông báo, Phòng Đăng ký kinh doanh thực hiện khôi phục trạng thái hoạt động cho doanh nghiệp, đơn vị trực thuộc trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 12 ban hành kèm theo Thông tư này. Hệ thống thông tin đăng ký thuế nhận thông tin khôi phục tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, tự động chuyển trạng thái tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc sang \"đang hoạt động\".",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Phòng đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ đăng ký tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc, cập nhật vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 11 ban hành kèm theo Thông tư này. Hệ thống thông tin đăng ký thuế nhận thông tin đăng ký tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, tự động cập nhật trạng thái tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc. Khi hết thời hạn tạm ngừng kinh doanh mà doanh nghiệp, đơn vị trực thuộc đã đăng ký, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp tự động cập nhật tình trạng pháp lý đang tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 12 ban hành kèm theo Thông tư này. Trên cơ sở thông tin từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, Hệ thống thông tin đăng ký thuế tự động nhận và cập nhật tình trạng pháp lý của doanh nghiệp, đơn vị trực thuộc.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp doanh nghiệp, đơn vị trực thuộc đăng ký hoạt động trở lại trước thời hạn đã thông báo, Phòng Đăng ký kinh doanh thực hiện khôi phục trạng thái hoạt động cho doanh nghiệp, đơn vị trực thuộc trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 12 ban hành kèm theo Thông tư này. Hệ thống thông tin đăng ký thuế nhận thông tin khôi phục tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, tự động chuyển trạng thái tạm ngừng kinh doanh của doanh nghiệp, đơn vị trực thuộc sang \"đang hoạt động\".",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "title": "Quy trình trao đổi thông tin đăng ký giải thể doanh nghiệp, chấm dứt hoạt động đơn vị trực thuộc của doanh nghiệp",
+      "content_raw": "Quy trình trao đổi thông tin đăng ký giải thể doanh nghiệp, chấm dứt hoạt động đơn vị trực thuộc của doanh nghiệp\nQuy trình trao đổi thông tin đăng ký giải thể doanh nghiệp, chấm dứt hoạt động đơn vị trực thuộc của doanh nghiệp thực hiện như sau:\n1. Trường hợp doanh nghiệp nộp quyết định giải thể đến Phòng Đăng ký kinh doanh theo quy định tại Khoản 3 Điều 202 Luật Doanh nghiệp, Phòng Đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ, cập nhật thông tin vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Trên cơ sở thông tin từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, cơ quan thuê tiếp nhận để thực hiện công tác quản lý thuế theo quy định.\n2. Trường hợp doanh nghiệp nộp hồ sơ đăng ký giải thể doanh nghiệp, chấm dứt hoạt động chi nhánh, văn phòng đại diện, Phòng Đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ, nhập thông tin vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 13 ban hành kèm theo Thông tư này. Trên cơ sở thông tin từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, Hệ thống thông tin đăng ký thuế kiểm tra thông tin về tình trạng hoàn thành các nghĩa vụ thuế của doanh nghiệp, chi nhánh, văn phòng đại diện theo quy định của pháp luật về thuế và gửi kết quả phản hồi sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp trong thời hạn 02 ngày làm việc kể từ ngày nhận được thông tin.\na) Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện đã hoàn thành các nghĩa vụ thuế theo quy định của pháp luật về thuế, cơ quan thuế thực hiện thủ tục chấm dứt hiệu lực mã số thuế của doanh nghiệp, chi nhánh, văn phòng đại diện theo quy định; cập nhật trạng thái ngừng hoạt động đã hoàn thành thủ tục đóng mã số thuế cho doanh nghiệp, chi nhánh, văn phòng đại diện và chuyển kết quả hoàn thành việc xử lý chấm dứt hiệu lực mã số thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế truyền sang, Phòng Đăng ký kinh doanh chuyển tình trạng pháp lý của doanh nghiệp, chi nhánh, văn phòng đại diện trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp sang tình trạng giải thể, đã chấm dứt hoạt động và truyền thông tin sang Hệ thống thông tin đăng ký thuế.\nb) Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện chưa hoàn thành các nghĩa vụ thuế theo quy định của pháp luật về thuế, cơ quan thuế cập nhật trạng thái ngừng hoạt động chưa hoàn thành thủ tục đóng mã số thuế trong Hệ thống thông tin đăng ký thuế, gửi phản hồi thông tin doanh nghiệp chưa hoàn thành các nghĩa vụ thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và đề nghị Phòng Đăng ký kinh doanh thông báo cho doanh nghiệp, chi nhánh, văn phòng đại diện phải hoàn thành các nghĩa vụ thuế với cơ quan thuế trước khi đăng ký giải thể, chấm dứt hoạt động. Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế truyền sang, Phòng Đăng ký kinh doanh hướng dẫn doanh nghiệp, chi nhánh, văn phòng đại diện liên hệ với cơ quan thuế để hoàn thành các nghĩa vụ thuế trước khi đăng ký giải thể, chấm dứt hoạt động.\n3. Trường hợp doanh nghiệp nộp hồ sơ chấm dứt hoạt động địa điểm kinh doanh, Phòng Đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ, chuyển tình trạng pháp lý của địa điểm kinh doanh và truyền thông tin sang Hệ thống thông tin đăng ký thuế.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp doanh nghiệp nộp quyết định giải thể đến Phòng Đăng ký kinh doanh theo quy định tại Khoản 3 Điều 202 Luật Doanh nghiệp, Phòng Đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ, cập nhật thông tin vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Trên cơ sở thông tin từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, cơ quan thuê tiếp nhận để thực hiện công tác quản lý thuế theo quy định.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp doanh nghiệp nộp hồ sơ đăng ký giải thể doanh nghiệp, chấm dứt hoạt động chi nhánh, văn phòng đại diện, Phòng Đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ, nhập thông tin vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và truyền thông tin sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 13 ban hành kèm theo Thông tư này. Trên cơ sở thông tin từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang, Hệ thống thông tin đăng ký thuế kiểm tra thông tin về tình trạng hoàn thành các nghĩa vụ thuế của doanh nghiệp, chi nhánh, văn phòng đại diện theo quy định của pháp luật về thuế và gửi kết quả phản hồi sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp trong thời hạn 02 ngày làm việc kể từ ngày nhận được thông tin.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện đã hoàn thành các nghĩa vụ thuế theo quy định của pháp luật về thuế, cơ quan thuế thực hiện thủ tục chấm dứt hiệu lực mã số thuế của doanh nghiệp, chi nhánh, văn phòng đại diện theo quy định; cập nhật trạng thái ngừng hoạt động đã hoàn thành thủ tục đóng mã số thuế cho doanh nghiệp, chi nhánh, văn phòng đại diện và chuyển kết quả hoàn thành việc xử lý chấm dứt hiệu lực mã số thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế truyền sang, Phòng Đăng ký kinh doanh chuyển tình trạng pháp lý của doanh nghiệp, chi nhánh, văn phòng đại diện trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp sang tình trạng giải thể, đã chấm dứt hoạt động và truyền thông tin sang Hệ thống thông tin đăng ký thuế."
+            },
+            {
+              "label": "b",
+              "content": "Trường hợp doanh nghiệp, chi nhánh, văn phòng đại diện chưa hoàn thành các nghĩa vụ thuế theo quy định của pháp luật về thuế, cơ quan thuế cập nhật trạng thái ngừng hoạt động chưa hoàn thành thủ tục đóng mã số thuế trong Hệ thống thông tin đăng ký thuế, gửi phản hồi thông tin doanh nghiệp chưa hoàn thành các nghĩa vụ thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và đề nghị Phòng Đăng ký kinh doanh thông báo cho doanh nghiệp, chi nhánh, văn phòng đại diện phải hoàn thành các nghĩa vụ thuế với cơ quan thuế trước khi đăng ký giải thể, chấm dứt hoạt động. Trên cơ sở thông tin do Hệ thống thông tin đăng ký thuế truyền sang, Phòng Đăng ký kinh doanh hướng dẫn doanh nghiệp, chi nhánh, văn phòng đại diện liên hệ với cơ quan thuế để hoàn thành các nghĩa vụ thuế trước khi đăng ký giải thể, chấm dứt hoạt động."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp doanh nghiệp nộp hồ sơ chấm dứt hoạt động địa điểm kinh doanh, Phòng Đăng ký kinh doanh tiếp nhận, kiểm tra tính hợp lệ của hồ sơ, chuyển tình trạng pháp lý của địa điểm kinh doanh và truyền thông tin sang Hệ thống thông tin đăng ký thuế.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "title": "Quy trình trao đổi thông tin thu hồi Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc",
+      "content_raw": "Quy trình trao đổi thông tin thu hồi Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc\n1. Trong thời hạn 10 ngày làm việc kể từ ngày nhận được văn bản đề nghị thu hồi Giấy chứng nhận đăng ký doanh nghiệp của thủ trưởng cơ quan thuế, Phòng Đăng ký kinh doanh thông báo bằng văn bản về hành vi vi phạm và yêu cầu người đại diện theo pháp luật của doanh nghiệp đến trụ sở của Phòng để giải trình. Trường hợp người được yêu cầu đến giải trình, căn cứ nội dung giải trình, Phòng Đăng ký kinh doanh phối hợp với cơ quan thuế để xem xét, giải quyết theo quy định. Trường hợp người được yêu cầu không đến giải trình, Phòng Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định.\n2. Sau khi Phòng Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc thu hồi Giấy chứng nhận sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 13 ban hành kèm theo Thông tư này.\n3. Hệ thống thông tin đăng ký thuế cập nhật thông tin về việc thu hồi Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang để cơ quan thuế theo dõi, xử lý theo quy định.\n4. Sau thời hạn 180 ngày kể từ ngày Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp mà không nhận được đề nghị của thủ trưởng cơ quan thuế về việc khôi phục tình trạng pháp lý của doanh nghiệp, Phòng Đăng ký kinh doanh cập nhật tình trạng pháp lý của doanh nghiệp trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp theo quy định tại Khoản 5 Điều 203 Luật Doanh nghiệp.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trong thời hạn 10 ngày làm việc kể từ ngày nhận được văn bản đề nghị thu hồi Giấy chứng nhận đăng ký doanh nghiệp của thủ trưởng cơ quan thuế, Phòng Đăng ký kinh doanh thông báo bằng văn bản về hành vi vi phạm và yêu cầu người đại diện theo pháp luật của doanh nghiệp đến trụ sở của Phòng để giải trình. Trường hợp người được yêu cầu đến giải trình, căn cứ nội dung giải trình, Phòng Đăng ký kinh doanh phối hợp với cơ quan thuế để xem xét, giải quyết theo quy định. Trường hợp người được yêu cầu không đến giải trình, Phòng Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Sau khi Phòng Đăng ký kinh doanh ra quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc thu hồi Giấy chứng nhận sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 13 ban hành kèm theo Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Hệ thống thông tin đăng ký thuế cập nhật thông tin về việc thu hồi Giấy chứng nhận đăng ký doanh nghiệp, Giấy chứng nhận đăng ký hoạt động đơn vị trực thuộc từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang để cơ quan thuế theo dõi, xử lý theo quy định.",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Sau thời hạn 180 ngày kể từ ngày Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp mà không nhận được đề nghị của thủ trưởng cơ quan thuế về việc khôi phục tình trạng pháp lý của doanh nghiệp, Phòng Đăng ký kinh doanh cập nhật tình trạng pháp lý của doanh nghiệp trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp theo quy định tại Khoản 5 Điều 203 Luật Doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "title": "Quy trình trao đổi thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp sau khi bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp",
+      "content_raw": "Quy trình trao đổi thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp sau khi bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp\n1. Trong thời hạn 180 ngày kể từ ngày Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp, nếu doanh nghiệp nộp đủ tiền thuế, tiền phạt vào ngân sách nhà nước, thủ trưởng cơ quan thuế gửi văn bản đề nghị Phòng Đăng ký kinh doanh khôi phục tình trạng pháp lý của doanh nghiệp. Trên cơ sở văn bản của thủ trưởng cơ quan thuế, Phòng Đăng ký kinh doanh thực hiện khôi phục tình trạng pháp lý của doanh nghiệp sau khi bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại Điều 64 Nghị định số 78/2015/NĐ-CP và Điều 12 Thông tư số 20/2015/TT-BKHĐT.\n2. Quy trình trao đổi thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp sau khi bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp thực hiện như sau:\na) Sau khi doanh nghiệp đã được khôi phục tình trạng pháp lý trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 4 ban hành kèm theo Thông tư này.\nb) Hệ thống thông tin đăng ký thuế cập nhật thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang để cơ quan thuế xử lý theo quy định.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trong thời hạn 180 ngày kể từ ngày Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp, nếu doanh nghiệp nộp đủ tiền thuế, tiền phạt vào ngân sách nhà nước, thủ trưởng cơ quan thuế gửi văn bản đề nghị Phòng Đăng ký kinh doanh khôi phục tình trạng pháp lý của doanh nghiệp. Trên cơ sở văn bản của thủ trưởng cơ quan thuế, Phòng Đăng ký kinh doanh thực hiện khôi phục tình trạng pháp lý của doanh nghiệp sau khi bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định tại Điều 64 Nghị định số 78/2015/NĐ-CP và Điều 12 Thông tư số 20/2015/TT-BKHĐT.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Quy trình trao đổi thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp sau khi bị thu hồi Giấy chứng nhận đăng ký doanh nghiệp thực hiện như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Sau khi doanh nghiệp đã được khôi phục tình trạng pháp lý trong Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp sang Hệ thống thông tin đăng ký thuế. Danh mục thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin đăng ký thuế quy định chi tiết tại Phụ lục 4 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "b",
+              "content": "Hệ thống thông tin đăng ký thuế cập nhật thông tin về việc khôi phục tình trạng pháp lý của doanh nghiệp từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền sang để cơ quan thuế xử lý theo quy định."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "title": "Quy trình trao đổi thông tin về việc doanh nghiệp không còn hoạt động tại địa chỉ đã đăng ký",
+      "content_raw": "Quy trình trao đổi thông tin về việc doanh nghiệp không còn hoạt động tại địa chỉ đã đăng ký\nTrường hợp doanh nghiệp bị cơ quan thuế ra Thông báo về việc doanh nghiệp không còn hoạt động tại địa chỉ đã đăng ký theo quy định của pháp luật về thuế, cơ quan thuế cập nhật thông tin vào Hệ thống thông tin đăng ký thuế và truyền thông tin sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để Phòng Đăng ký kinh doanh phối hợp theo dõi, xử lý hoặc thu hồi Giấy chứng nhận đăng ký doanh nghiệp theo quy định của pháp luật. Trường hợp cơ quan thuế nhận được đề nghị của doanh nghiệp về việc khôi phục trạng thái mã số thuế sau khi có Thông báo về việc doanh nghiệp không còn hoạt động tại địa chỉ đã đăng ký, cơ quan thuế ra Thông báo khôi phục trạng thái mã số thuế của doanh nghiệp theo quy định của pháp luật về thuế. Hệ thống thông tin đăng ký thuế truyền thông tin về việc doanh nghiệp tiếp tục hoạt động sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": []
+    },
+    {
+      "number": 16,
+      "title": "Quy trình trao đổi thông tin về việc vi phạm pháp luật của người thành lập, quản lý doanh nghiệp",
+      "content_raw": "Quy trình trao đổi thông tin về việc vi phạm pháp luật của người thành lập, quản lý doanh nghiệp\n1. Tổng cục Thuế có trách nhiệm cung cấp thông tin về cá nhân người thành lập doanh nghiệp, người quản lý doanh nghiệp do cơ quan thuế quản lý để Cục Quản lý đăng ký kinh doanh - Bộ Kế hoạch và Đầu tư cập nhật danh sách cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.\n2. Các trường hợp vi phạm pháp luật cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp gồm:\na) Người thành lập, người quản lý doanh nghiệp có dấu hiệu vi phạm pháp luật hình sự, đã bị cơ quan Thuế chuyển cơ quan điều tra theo quy định của pháp luật về tố tụng hình sự và pháp luật về thuế;\nb) Doanh nghiệp có người thành lập, người quản lý doanh nghiệp mà trước đó là người thành lập, người quản lý của doanh nghiệp đã bị cơ quan thuế thông báo không còn kinh doanhở địa chỉ đã đăng ký;\nc) Chủ doanh nghiệp tư nhân, thành viên hợp danh công ty hợp danh vi phạm quy định tại Điều 175, Điều 183 Luật Doanh nghiệp.\n3. Khi tiếp nhận hồ sơ đăng ký thành lập doanh nghiệp, đăng ký thay đổi nội dung đăng ký doanh nghiệp, đăng ký tạm ngừng kinh doanh của doanh nghiệp, Phòng Đăng ký kinh doanh có trách nhiệm kiểm tra, rà soát các trường hợp nêu tại Khoản 2 Điều này để xử lý theo quy định của Luật Doanh nghiệp.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổng cục Thuế có trách nhiệm cung cấp thông tin về cá nhân người thành lập doanh nghiệp, người quản lý doanh nghiệp do cơ quan thuế quản lý để Cục Quản lý đăng ký kinh doanh - Bộ Kế hoạch và Đầu tư cập nhật danh sách cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Các trường hợp vi phạm pháp luật cảnh báo trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Người thành lập, người quản lý doanh nghiệp có dấu hiệu vi phạm pháp luật hình sự, đã bị cơ quan Thuế chuyển cơ quan điều tra theo quy định của pháp luật về tố tụng hình sự và pháp luật về thuế;"
+            },
+            {
+              "label": "b",
+              "content": "Doanh nghiệp có người thành lập, người quản lý doanh nghiệp mà trước đó là người thành lập, người quản lý của doanh nghiệp đã bị cơ quan thuế thông báo không còn kinh doanhở địa chỉ đã đăng ký;"
+            },
+            {
+              "label": "c",
+              "content": "Chủ doanh nghiệp tư nhân, thành viên hợp danh công ty hợp danh vi phạm quy định tại Điều 175, Điều 183 Luật Doanh nghiệp."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Khi tiếp nhận hồ sơ đăng ký thành lập doanh nghiệp, đăng ký thay đổi nội dung đăng ký doanh nghiệp, đăng ký tạm ngừng kinh doanh của doanh nghiệp, Phòng Đăng ký kinh doanh có trách nhiệm kiểm tra, rà soát các trường hợp nêu tại Khoản 2 Điều này để xử lý theo quy định của Luật Doanh nghiệp.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "title": "Quy trình trao đổi thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc",
+      "content_raw": "Quy trình trao đổi thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc\n1. Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh thực hiện việc trao đổi thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc nhằm rà soát, đối chiếu thông tin, phục vụ công tác quản lý nhà nước đối với doanh nghiệp.\n2. Tình hình hoạt động của doanh nghiệp thực hiện trao đổi theo quy định tại điều này là các trạng thái của doanh nghiệp được cơ quan thuế và Phòng Đăng ký kinh doanh quản lý, theo dõi trên hệ thốngứng dụng nhằm phục vụ các yêu cầu quản lý thuế, quản lý doanh nghiệp.\na) Các trạng thái của doanh nghiệp sử dụng chung giữa hai hệ thống bao gồm: - Trạng thái \"Tạm ngừng kinh doanh\": là trạng tháiáp dụng đối với các doanh nghiệp đang tạm ngừng kinh doanh và có Thông báo tạm ngừng kinh doanh gửi Phòng Đăng ký kinh doanh theo Điều 200 Luật Doanh nghiệp. Ngày chuyển trạng thái tạm ngừng kinh doanh trên hệ thốngứng dụng là ngày doanh nghiệp đăng ký bắt đầu tạm ngừng kinh doanh, ngày kết thúc trạng thái tạm ngừng kinh doanh là ngày kết thúc thời gian tạm ngừng kinh doanh đã đăng ký hoặc ngày doanh nghiệp thông báo tiếp tục kinh doanh trước thời hạn. - Trạng thái \"Tạm ngừng hoạt động không đăng ký hoặc Chờ giải thể, phá sản\": là trạng tháiáp dụng đối với các doanh nghiệp đã gửi Quyết định giải thể đến Phòng Đăng ký kinh doanh và cơ quan thuế theo Khoản 3 Điều 202 Luật Doanh nghiệp; doanh nghiệp đã bị Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp; doanh nghiệp bị giải thể theo quyết định giải thể của Tòaán theo Khoản 1 Điều 203 Luật Doanh nghiệp nhưng chưa hoàn thành thủ tục giải thể; doanh nghiệp có Quyết định của Tòaán về việc mở thủ tục phá sản theo quy định của pháp luật về phá sản; doanh nghiệp không còn kinh doanhở địa chỉ đã đăng ký và doanh nghiệp ngừng hoạt động (lý do khác). Thời gian xác định chuyển trạng thái chờ giải thể, phá sản là thời điểm Phòng Đăng ký kinh doanh nhận được Quyết định giải thể doanh nghiệp, Quyết định mở thủ tục phá sản, thời điểm Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp. - Trạng thái \"Đã giải thể, phá sản\": là trạng tháiáp dụng đối với các doanh nghiệp đã hoàn thành thủ tục giải thể theo quy định và được Phòng Đăng ký kinh doanh cập nhập tình trạng pháp lý theo Khoản 8 Điều 202, Khoản 5 Điều 203 Luật Doanh nghiệp; các doanh nghiệp bị chấm dứt tồn tại do bị chia, bị hợp nhất, bị sáp nhập theo Khoản 5 Điều 192, Khoản 6 Điều 194, Khoản 5 Điều 195 Luật Doanh nghiệp; doanh nghiệp có Quyết định tuyên bố phá sản của Tòaán theo quy định của pháp luật về phá sản. Thời gian xác định chuyển trạng thái đã giải thể, phá sản là thời điểm Phòng Đăng ký kinh doanh cập nhập tình trạng pháp lý trên Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp. - Trạng thái \"Đang hoạt động\": là trạng tháiáp dụng đối với các doanh nghiệp đã được cấp Giấy chứng nhận đăng ký doanh nghiệp và không thuộc các trạng thái nêu trên. Các trạng thái hoạt động của doanh nghiệp quy định tại điểm a Khoản 2 điều này là căn cứ để các bên thống nhất số liệu thống kê và báo cáo về tình trạng hoạt động của doanh nghiệp.\nb) Các trạng thái chi tiết phục vụ yêu cầu quản lý của từng cơ quan thực hiện trao đổi giữa hai Hệ thống được quy định tại Phụ lục 14 ban hành kèm theo Thông tư này.\n3. Quy trình trao đổi thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc thực hiện như sau:\na) Trường hợp có sự thay đổi về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc trên Hệ thống thông tin đăng ký thuế, Hệ thống thông tin đăng ký thuế truyền thông tin về tình hình hoạt động của doanh nghiệp, thông tin về việc doanh nghiệp bị cưỡng chế thi hành quyết định hành chính thuế theo quy định của Luật quản lý thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục thông tin trao đổi quy định chi tiết tại Phụ lục 10 ban hành kèm theo Thông tư này. Phòng Đăng ký kinh doanh thực hiện rà soát, cập nhật thông tin vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Sau đó, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin của các doanh nghiệp đã qua rà soát sang Hệ thống thông tin đăng ký thuế để cập nhật tình trạng hoạt động của doanh nghiệp. Danh mục thông tin trao đổi quy định chi tiết tại Phụ lục 4 ban hành kèm theo Thông tư này.\nb) Thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin thuế, bao gồm các thông tin sau: doanh nghiệp đăng ký tạm ngừng kinh doanh, đơn vị trực thuộc đăng ký tạm ngừng hoạt động; doanh nghiệp, đơn vị trực thuộc đăng ký hoạt động trở lại; doanh nghiệp đăng ký giải thể; đơn vị trực thuộc đăng ký chấm dứt hoạt động. Danh mục thông tin trao đổi quy định chi tiết tại Phụ lục 11, Phụ lục 12, Phụ lục 13 ban hành kèm theo Thông tư này.\n4. Danh mục các tình trạng hoạt động của doanh nghiệp, đơn vị trực thuộc trao đổi giữa hai Hệ thống được quy định tại Phụ lục 14 ban hành kèm theo Thông tư này.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh thực hiện việc trao đổi thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc nhằm rà soát, đối chiếu thông tin, phục vụ công tác quản lý nhà nước đối với doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tình hình hoạt động của doanh nghiệp thực hiện trao đổi theo quy định tại điều này là các trạng thái của doanh nghiệp được cơ quan thuế và Phòng Đăng ký kinh doanh quản lý, theo dõi trên hệ thốngứng dụng nhằm phục vụ các yêu cầu quản lý thuế, quản lý doanh nghiệp.",
+          "points": [
+            {
+              "label": "a",
+              "content": "Các trạng thái của doanh nghiệp sử dụng chung giữa hai hệ thống bao gồm: - Trạng thái \"Tạm ngừng kinh doanh\": là trạng tháiáp dụng đối với các doanh nghiệp đang tạm ngừng kinh doanh và có Thông báo tạm ngừng kinh doanh gửi Phòng Đăng ký kinh doanh theo Điều 200 Luật Doanh nghiệp. Ngày chuyển trạng thái tạm ngừng kinh doanh trên hệ thốngứng dụng là ngày doanh nghiệp đăng ký bắt đầu tạm ngừng kinh doanh, ngày kết thúc trạng thái tạm ngừng kinh doanh là ngày kết thúc thời gian tạm ngừng kinh doanh đã đăng ký hoặc ngày doanh nghiệp thông báo tiếp tục kinh doanh trước thời hạn. - Trạng thái \"Tạm ngừng hoạt động không đăng ký hoặc Chờ giải thể, phá sản\": là trạng tháiáp dụng đối với các doanh nghiệp đã gửi Quyết định giải thể đến Phòng Đăng ký kinh doanh và cơ quan thuế theo Khoản 3 Điều 202 Luật Doanh nghiệp; doanh nghiệp đã bị Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp; doanh nghiệp bị giải thể theo quyết định giải thể của Tòaán theo Khoản 1 Điều 203 Luật Doanh nghiệp nhưng chưa hoàn thành thủ tục giải thể; doanh nghiệp có Quyết định của Tòaán về việc mở thủ tục phá sản theo quy định của pháp luật về phá sản; doanh nghiệp không còn kinh doanhở địa chỉ đã đăng ký và doanh nghiệp ngừng hoạt động (lý do khác). Thời gian xác định chuyển trạng thái chờ giải thể, phá sản là thời điểm Phòng Đăng ký kinh doanh nhận được Quyết định giải thể doanh nghiệp, Quyết định mở thủ tục phá sản, thời điểm Phòng Đăng ký kinh doanh ra Quyết định thu hồi Giấy chứng nhận đăng ký doanh nghiệp. - Trạng thái \"Đã giải thể, phá sản\": là trạng tháiáp dụng đối với các doanh nghiệp đã hoàn thành thủ tục giải thể theo quy định và được Phòng Đăng ký kinh doanh cập nhập tình trạng pháp lý theo Khoản 8 Điều 202, Khoản 5 Điều 203 Luật Doanh nghiệp; các doanh nghiệp bị chấm dứt tồn tại do bị chia, bị hợp nhất, bị sáp nhập theo Khoản 5 Điều 192, Khoản 6 Điều 194, Khoản 5 Điều 195 Luật Doanh nghiệp; doanh nghiệp có Quyết định tuyên bố phá sản của Tòaán theo quy định của pháp luật về phá sản. Thời gian xác định chuyển trạng thái đã giải thể, phá sản là thời điểm Phòng Đăng ký kinh doanh cập nhập tình trạng pháp lý trên Cơ sở dữ liệu quốc gia về đăng ký doanh nghiệp. - Trạng thái \"Đang hoạt động\": là trạng tháiáp dụng đối với các doanh nghiệp đã được cấp Giấy chứng nhận đăng ký doanh nghiệp và không thuộc các trạng thái nêu trên. Các trạng thái hoạt động của doanh nghiệp quy định tại điểm a Khoản 2 điều này là căn cứ để các bên thống nhất số liệu thống kê và báo cáo về tình trạng hoạt động của doanh nghiệp."
+            },
+            {
+              "label": "b",
+              "content": "Các trạng thái chi tiết phục vụ yêu cầu quản lý của từng cơ quan thực hiện trao đổi giữa hai Hệ thống được quy định tại Phụ lục 14 ban hành kèm theo Thông tư này."
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "content": "Quy trình trao đổi thông tin về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc thực hiện như sau:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Trường hợp có sự thay đổi về tình hình hoạt động của doanh nghiệp, đơn vị trực thuộc trên Hệ thống thông tin đăng ký thuế, Hệ thống thông tin đăng ký thuế truyền thông tin về tình hình hoạt động của doanh nghiệp, thông tin về việc doanh nghiệp bị cưỡng chế thi hành quyết định hành chính thuế theo quy định của Luật quản lý thuế sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Danh mục thông tin trao đổi quy định chi tiết tại Phụ lục 10 ban hành kèm theo Thông tư này. Phòng Đăng ký kinh doanh thực hiện rà soát, cập nhật thông tin vào Hệ thống thông tin quốc gia về đăng ký doanh nghiệp. Sau đó, Hệ thống thông tin quốc gia về đăng ký doanh nghiệp truyền thông tin của các doanh nghiệp đã qua rà soát sang Hệ thống thông tin đăng ký thuế để cập nhật tình trạng hoạt động của doanh nghiệp. Danh mục thông tin trao đổi quy định chi tiết tại Phụ lục 4 ban hành kèm theo Thông tư này."
+            },
+            {
+              "label": "b",
+              "content": "Thông tin truyền từ Hệ thống thông tin quốc gia về đăng ký doanh nghiệp sang Hệ thống thông tin thuế, bao gồm các thông tin sau: doanh nghiệp đăng ký tạm ngừng kinh doanh, đơn vị trực thuộc đăng ký tạm ngừng hoạt động; doanh nghiệp, đơn vị trực thuộc đăng ký hoạt động trở lại; doanh nghiệp đăng ký giải thể; đơn vị trực thuộc đăng ký chấm dứt hoạt động. Danh mục thông tin trao đổi quy định chi tiết tại Phụ lục 11, Phụ lục 12, Phụ lục 13 ban hành kèm theo Thông tư này."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Danh mục các tình trạng hoạt động của doanh nghiệp, đơn vị trực thuộc trao đổi giữa hai Hệ thống được quy định tại Phụ lục 14 ban hành kèm theo Thông tư này.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "title": "Quy trình trao đổi thông tin về báo cáo tài chính của doanh nghiệp",
+      "content_raw": "Quy trình trao đổi thông tin về báo cáo tài chính của doanh nghiệp\n1. Báo cáo tài chính năm của công ty cổ phần, công ty trách nhiệm hữu hạn, công ty hợp danh, doanh nghiệp tư nhân; báo cáo tài chính hợp nhất năm của nhóm công ty (sau đây gọi chung là báo cáo tài chính) do cơ quan thuế tiếp nhận, lưu trữ tại Hệ thống thông tin báo cáo tài chính được truyền sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.\n2. Định kỳ hàng tháng, Hệ thống thông tin báo cáo tài chính của Tổng cục Thuế truyền toàn bộ dữ liệu mới được cập nhật về thông tin báo cáo tài chính năm của các doanh nghiệp sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.\n3. Nội dung báo cáo tài chính trao đổi giữa hai Hệ thống bao gồm:\na) Bảng cân đối kế toán, Báo cáo kết quả hoạt động sản xuất kinh doanh, Báo cáo lưu chuyển tiền tệ: được trao đổi dưới dạng số hóa vào các trường dữ liệu;\nb) Bản Thuyết minh báo cáo tài chính: được trao đổi dưới dạng tệp tin đính kèm.\n4. Việc sử dụng, cung cấp thông tin về báo cáo tài chính của doanh nghiệp thực hiện theo quy định của pháp luật.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Báo cáo tài chính năm của công ty cổ phần, công ty trách nhiệm hữu hạn, công ty hợp danh, doanh nghiệp tư nhân; báo cáo tài chính hợp nhất năm của nhóm công ty (sau đây gọi chung là báo cáo tài chính) do cơ quan thuế tiếp nhận, lưu trữ tại Hệ thống thông tin báo cáo tài chính được truyền sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Định kỳ hàng tháng, Hệ thống thông tin báo cáo tài chính của Tổng cục Thuế truyền toàn bộ dữ liệu mới được cập nhật về thông tin báo cáo tài chính năm của các doanh nghiệp sang Hệ thống thông tin quốc gia về đăng ký doanh nghiệp.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Nội dung báo cáo tài chính trao đổi giữa hai Hệ thống bao gồm:",
+          "points": [
+            {
+              "label": "a",
+              "content": "Bảng cân đối kế toán, Báo cáo kết quả hoạt động sản xuất kinh doanh, Báo cáo lưu chuyển tiền tệ: được trao đổi dưới dạng số hóa vào các trường dữ liệu;"
+            },
+            {
+              "label": "b",
+              "content": "Bản Thuyết minh báo cáo tài chính: được trao đổi dưới dạng tệp tin đính kèm."
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "content": "Việc sử dụng, cung cấp thông tin về báo cáo tài chính của doanh nghiệp thực hiện theo quy định của pháp luật.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "title": "Các trường hợp không thực hiện trao đổi thông tin giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế",
+      "content_raw": "Các trường hợp không thực hiện trao đổi thông tin giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế\nCác trường hợp không thực hiện trao đổi thông tin giữa hai Hệ thống bao gồm:\n1. Trường hợp cấp đăng ký doanh nghiệp theo quy trình dự phòng quy định tại Điều 12 Nghị định số 78/2015/NĐ-CP;\n2. Trường hợp công ty nhà nước chuyển đổi thành công ty trách nhiệm hữu hạn một thành viên hoặc công ty cổ phần theo quy định của pháp luật;\n3. Trường hợp đăng ký hoạt động đơn vị trực thuộc của doanh nghiệp nhà nước chưa chuyển đổi thành công ty trách nhiệm hữu hạn, công ty cổ phần;\n4. Các trường hợp đặc thù khác theo sự thống nhất giữa Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Trường hợp cấp đăng ký doanh nghiệp theo quy trình dự phòng quy định tại Điều 12 Nghị định số 78/2015/NĐ-CP;",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trường hợp công ty nhà nước chuyển đổi thành công ty trách nhiệm hữu hạn một thành viên hoặc công ty cổ phần theo quy định của pháp luật;",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trường hợp đăng ký hoạt động đơn vị trực thuộc của doanh nghiệp nhà nước chưa chuyển đổi thành công ty trách nhiệm hữu hạn, công ty cổ phần;",
+          "points": []
+        },
+        {
+          "number": 4,
+          "content": "Các trường hợp đặc thù khác theo sự thống nhất giữa Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "title": "Đồng bộ thông tin về doanh nghiệp giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế",
+      "content_raw": "Đồng bộ thông tin về doanh nghiệp giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế\nĐịnh kỳ hàng tháng, quý, năm, Phòng Đăng ký kinh doanh và Cục thuế địa phương có trách nhiệm rà soát, chuẩn hóa dữ liệu để đồng bộ thông tin về doanh nghiệp giữa hai Hệ thống.",
+      "chapter": "II",
+      "chapter_title": "TRAO ĐỔI THÔNG TIN ĐĂNG KÝ DOANH NGHIỆP, THÔNG TIN VỀ",
+      "clauses": []
+    },
+    {
+      "number": 21,
+      "title": "Trách nhiệm của Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh",
+      "content_raw": "Trách nhiệm của Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh\n1. Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh chịu trách nhiệm phối hợp, tổ chức phát triển, vận hành Hệ thống thông tin thuế và Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để thực hiện quy trình trao đổi thông tin đăng ký doanh nghiệp, thông tin về tình hình hoạt động của doanh nghiệp và thông tin về báo cáo tài chính của doanh nghiệp theo quy định tại Thông tư này.\n2. Trong trường hợp cần thiết theo nhu cầu quản lý nhà nước hoặc do điều kiện kỹ thuật, Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh trao đổi, thống nhất sửa đổi, bổ sung hoặc ban hành mới Danh mục thông tin trao đổi giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế.",
+      "chapter": "III",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh chịu trách nhiệm phối hợp, tổ chức phát triển, vận hành Hệ thống thông tin thuế và Hệ thống thông tin quốc gia về đăng ký doanh nghiệp để thực hiện quy trình trao đổi thông tin đăng ký doanh nghiệp, thông tin về tình hình hoạt động của doanh nghiệp và thông tin về báo cáo tài chính của doanh nghiệp theo quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Trong trường hợp cần thiết theo nhu cầu quản lý nhà nước hoặc do điều kiện kỹ thuật, Tổng cục Thuế và Cục Quản lý đăng ký kinh doanh trao đổi, thống nhất sửa đổi, bổ sung hoặc ban hành mới Danh mục thông tin trao đổi giữa Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và Hệ thống thông tin thuế.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "title": "Điều kiện bảo đảm về cơ sở vật chất kỹ thuật và kinh phí",
+      "content_raw": "Điều kiện bảo đảm về cơ sở vật chất kỹ thuật và kinh phí\n1. Tổng cục Thuế, Cục Quản lý đăng ký kinh doanh chịu trách nhiệm chuẩn bị, nâng cấp cơ sở vật chất kỹ thuật phục vụ việc trao đổi thông tin giữa hai Hệ thống theo quy định tại Thông tư này.\n2. Kinh phí bảo đảm việc trao đổi, cung cấp thông tin theo quy định tại Thông tư này được bố trí trong dự toán kinh phí hoạt động thường xuyên, nguồn thu hàng năm của mỗi Bộ, ngành do Nhà nước giao.",
+      "chapter": "III",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Tổng cục Thuế, Cục Quản lý đăng ký kinh doanh chịu trách nhiệm chuẩn bị, nâng cấp cơ sở vật chất kỹ thuật phục vụ việc trao đổi thông tin giữa hai Hệ thống theo quy định tại Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Kinh phí bảo đảm việc trao đổi, cung cấp thông tin theo quy định tại Thông tư này được bố trí trong dự toán kinh phí hoạt động thường xuyên, nguồn thu hàng năm của mỗi Bộ, ngành do Nhà nước giao.",
+          "points": []
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "title": "Phối hợp kiểm tra, xử lý lỗi hệ thống",
+      "content_raw": "Phối hợp kiểm tra, xử lý lỗi hệ thống\nKhi phát hiện sự cố truyền gửi dữ liệu giữa hai Hệ thống, các bên kiểm tra hạ tầng hệ thống mạng, phần cứng và phần mềm để khắc phục lỗi (nếu có). Nếu lỗi xác định không do hệ thống thuộc trách nhiệm quản lý, các bên thông báo kịp thời cho bên kia để phối hợp kiểm tra, xử lý và khắc phục sự cố.",
+      "chapter": "III",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": []
+    },
+    {
+      "number": 24,
+      "title": "Điều khoản thi hành",
+      "content_raw": "Điều khoản thi hành\n1. Thông tư này có hiệu lực thi hành kể từ ngày 15 tháng 4 năm 2016.\n2. Tổng cục Thuế, Cục Quản lý đăng ký kinh doanh, Phòng Đăng ký kinh doanh, Cục Thuế, Chi cục Thuế và các tổ chức, cá nhân có liên quan chịu trách nhiệm thực hiện Thông tư này.\n3. Trong quá trình thực hiện, nếu có vướng mắc đề nghị các tổ chức, cá nhân có liên quan phảnánh về Bộ Kế hoạch và Đầu tư, Bộ Tài chính để nghiên cứu, giải quyết./.",
+      "chapter": "III",
+      "chapter_title": "TỔ CHỨC THỰC HIỆN",
+      "clauses": [
+        {
+          "number": 1,
+          "content": "Thông tư này có hiệu lực thi hành kể từ ngày 15 tháng 4 năm 2016.",
+          "points": []
+        },
+        {
+          "number": 2,
+          "content": "Tổng cục Thuế, Cục Quản lý đăng ký kinh doanh, Phòng Đăng ký kinh doanh, Cục Thuế, Chi cục Thuế và các tổ chức, cá nhân có liên quan chịu trách nhiệm thực hiện Thông tư này.",
+          "points": []
+        },
+        {
+          "number": 3,
+          "content": "Trong quá trình thực hiện, nếu có vướng mắc đề nghị các tổ chức, cá nhân có liên quan phảnánh về Bộ Kế hoạch và Đầu tư, Bộ Tài chính để nghiên cứu, giải quyết./.",
+          "points": []
+        }
+      ]
+    }
+  ]
+}
