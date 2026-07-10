@@ -20,6 +20,7 @@ class SessionProtocol(Protocol):
 
 
 from src.shared.ontology import validators as root_validator
+from src.shared.ontology.payload_consistency_validator import validate_payload_consistency_or_raise
 
 
 def validate_graph_payload(payload: Mapping[str, Any]):
@@ -74,7 +75,11 @@ class GraphIngestionService:
     writer: Neo4jWriter
 
     def ingest(self, payload: Mapping[str, Any] | Any):
-        validated = payload if isinstance(payload, _validated_graph_payload_type()) else validate_graph_payload(payload)
+        if isinstance(payload, _validated_graph_payload_type()):
+            validated = payload
+        else:
+            validate_payload_consistency_or_raise(payload)
+            validated = validate_graph_payload(payload)
         self.writer.write(validated)
         return validated
 

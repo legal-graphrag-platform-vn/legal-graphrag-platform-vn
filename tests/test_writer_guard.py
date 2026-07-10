@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock
 from unittest.mock import patch
 
-from src.database.neo4j_writer import GraphIngestionService, Neo4jWriter, WriteAttemptError
+from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, WriteAttemptError
 from src.shared.ontology.validators import GraphValidationError, OntologyValidator, validate_graph_payload
 from src.shared.ontology.payload_consistency_validator import (
     PayloadConsistencyError,
@@ -14,8 +14,7 @@ class WriterGuardTests(unittest.TestCase):
     def setUp(self) -> None:
         self.session = Mock()
         self.writer = Neo4jWriter(session=self.session)
-        self.validator = OntologyValidator()
-        self.service = GraphIngestionService(validator=self.validator, writer=self.writer)
+        self.service = GraphIngestionService(writer=self.writer)
 
     def test_invalid_payload_never_reaches_merge(self) -> None:
         payload = {
@@ -123,10 +122,9 @@ class WriterGuardTests(unittest.TestCase):
 
     def test_ingest_calls_shared_validation_gate(self) -> None:
         relation_id = deterministic_relation_id("ldn_2020", "CONTAINS", "ldn_2020_art17")
-        with patch.object(
-            self.validator,
-            "validate_graph_payload",
-            wraps=self.validator.validate_graph_payload,
+        with patch(
+            "src.infrastructure.neo4j.writer.validate_graph_payload",
+            wraps=validate_graph_payload,
         ) as validate_spy:
             self.service.ingest(
                 {
@@ -164,7 +162,7 @@ class WriterGuardTests(unittest.TestCase):
         self.assertEqual(validate_spy.call_count, 1)
 
     def test_ingest_does_not_call_ontology_validator_after_consistency_failure(self) -> None:
-        with patch.object(self.validator, "validate_graph_payload") as validate_spy:
+        with patch("src.infrastructure.neo4j.writer.validate_graph_payload") as validate_spy:
             with self.assertRaises(PayloadConsistencyError):
                 self.service.ingest(
                     {
@@ -219,7 +217,7 @@ class WriterGuardTests(unittest.TestCase):
         }
         validated = validate_graph_payload(payload)
 
-        with patch.object(self.validator, "validate_graph_payload") as validate_spy:
+        with patch("src.infrastructure.neo4j.writer.validate_graph_payload") as validate_spy:
             result = self.service.ingest(validated)
 
         self.assertIs(result, validated)

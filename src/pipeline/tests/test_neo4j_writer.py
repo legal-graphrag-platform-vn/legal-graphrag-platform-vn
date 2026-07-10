@@ -4,7 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.pipeline.persistence.neo4j_writer import GraphIngestionService, Neo4jWriter, WriteAttemptError, validate_graph_payload
+from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, WriteAttemptError, validate_graph_payload
+from src.shared.ontology.payload_consistency_validator import deterministic_relation_id
 
 
 def _valid_payload() -> dict:
@@ -34,7 +35,7 @@ def _valid_payload() -> dict:
                 "head_id": "ldn_2020",
                 "type": "CONTAINS",
                 "tail_id": "ldn_2020_art17",
-                "properties": {"relation_id": "rel_1"},
+                "properties": {"relation_id": deterministic_relation_id("ldn_2020", "CONTAINS", "ldn_2020_art17")},
             }
         ],
     }

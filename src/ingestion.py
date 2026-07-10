@@ -1,2 +1,2 @@
-from src.database.neo4j_writer import GraphIngestionService
+from src.infrastructure.neo4j.writer import GraphIngestionService
 

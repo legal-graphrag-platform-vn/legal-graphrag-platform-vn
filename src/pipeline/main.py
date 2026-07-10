@@ -28,7 +28,7 @@ from src.pipeline.embedding.embedding_generator import EmbeddingGenerator, embed
 from src.pipeline.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
-from src.pipeline.persistence.neo4j_writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
+from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
 from src.pipeline.persistence.payload_builder import build_payload_from_paths
 from src.pipeline.pipeline.orchestrator import run_pipeline
 from src.pipeline.reports.graph_quality import GraphQualityReporter, write_graph_quality_report
