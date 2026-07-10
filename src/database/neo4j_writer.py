@@ -16,6 +16,7 @@ from src.validation.ontology_validator import (
     ValidatedNode,
     ValidatedRelation,
 )
+from src.validation.payload_consistency_validator import validate_payload_consistency_or_raise
 
 
 class WriteAttemptError(TypeError):
@@ -53,17 +54,23 @@ class Neo4jWriter:
         self.session.run(cypher, id=node.id, properties=properties)
 
     def _merge_relation(self, relation: ValidatedRelation) -> None:
+        properties = dict(relation.properties)
+        relation_id = properties.get("relation_id")
+        if not relation_id:
+            raise WriteAttemptError(f"Validated relation missing relation_id: {relation.relation_type}")
+
         cypher = (
             "MATCH (head {id: $head_id}) "
             "MATCH (tail {id: $tail_id}) "
-            f"MERGE (head)-[r:{relation.relation_type}]->(tail) "
+            f"MERGE (head)-[r:{relation.relation_type} {{relation_id: $relation_id}}]->(tail) "
             "SET r += $properties"
         )
         self.session.run(
             cypher,
             head_id=relation.head_id,
             tail_id=relation.tail_id,
-            properties=relation.properties,
+            relation_id=relation_id,
+            properties=properties,
         )
 
 
@@ -74,7 +81,11 @@ class GraphIngestionService:
     validator: OntologyValidator
     writer: Neo4jWriter
 
-    def ingest(self, payload: dict[str, Any]) -> ValidatedGraphPayload:
-        validated = self.validator.validate_graph_payload(payload)
+    def ingest(self, payload: dict[str, Any] | ValidatedGraphPayload) -> ValidatedGraphPayload:
+        if isinstance(payload, ValidatedGraphPayload):
+            validated = payload
+        else:
+            validate_payload_consistency_or_raise(payload)
+            validated = self.validator.validate_graph_payload(payload)
         self.writer.write(validated)
         return validated

@@ -73,6 +73,26 @@ LEGACY_RELATION_ALIASES: dict[str, str] = {
     "REFERENCES": "REFERS_TO",
 }
 
+ONTOLOGY_LABEL_MAP: dict[str, str] = {
+    "Entity": "LegalSubject",
+    "Concept": "LegalConcept",
+    "Action": "LegalAction",
+}
+
+PHASE1_PERSISTED_LABELS: set[str] = {
+    "Document",
+    "Issuer",
+    "Chapter",
+    "Article",
+    "Clause",
+    "Point",
+    "LegalConcept",
+    "LegalSubject",
+    "LegalAction",
+}
+
+RUNTIME_ONLY_LABELS: set[str] = {"Obligation", "Right", "Condition", "Exception"}
+
 RELATION_ENUM: set[str] = {
     "ISSUED_BY",
     "CONTAINS",
@@ -87,6 +107,8 @@ RELATION_ENUM: set[str] = {
     "HAS_CONDITION",
     "HAS_EXCEPTION",
 }
+
+PHASE1_RELATION_ENUM: set[str] = RELATION_ENUM - {"HAS_CONDITION", "HAS_EXCEPTION"}
 
 CONSTRAINTS: dict[str, dict[str, Any]] = {
     "ISSUED_BY": {
@@ -155,7 +177,7 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "REQUIRES": {
         "allowed_head": ["LegalSubject"],
-        "allowed_tail": ["LegalConcept", "Obligation"],
+        "allowed_tail": ["LegalConcept"],
         "no_self_loop": True,
         "required_properties": ["confidence", "llm_model", "created_at"],
     },
@@ -344,7 +366,9 @@ class OntologyValidator:
                     node = self.validate_clause(raw_node)
                 elif node_type == "Point":
                     node = self.validate_point(raw_node)
-                elif node_type in {"LegalConcept", "LegalSubject", "LegalAction", "Obligation", "Right", "Condition", "Exception"}:
+                elif node_type in RUNTIME_ONLY_LABELS:
+                    raise GraphValidationError([f"Runtime-only node type is not Phase 1 persistent: {node_type}"])
+                elif node_type in {"LegalConcept", "LegalSubject", "LegalAction"}:
                     node = self.validate_semantic_node(raw_node, node_type)
                 else:
                     raise GraphValidationError([f"Unsupported node type: {node_type}"])

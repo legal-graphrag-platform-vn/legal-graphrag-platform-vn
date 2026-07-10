@@ -145,6 +145,22 @@ class OntologyConsistencyTests(unittest.TestCase):
             ok, error = validate_relation(head_type, relation_type, tail_type, properties=provenance)
             self.assertTrue(ok, error)
 
+        ok, error = validate_relation("LegalSubject", "REQUIRES", "Obligation", properties=provenance)
+        self.assertFalse(ok)
+        self.assertIn("tail type Obligation", error or "")
+
+    def test_runtime_only_nodes_are_not_phase1_persistent(self) -> None:
+        with self.assertRaises(GraphValidationError) as exc:
+            self.validator.validate_graph_payload(
+                {
+                    "nodes": [
+                        {"type": "Obligation", "id": "obligation_1", "name": "Must register"},
+                    ],
+                    "relations": [],
+                }
+            )
+        self.assertIn("Runtime-only node type", str(exc.exception))
+
     def test_temporal_relation_requires_effective_from(self) -> None:
         ok, error = validate_relation("Article", "AMENDS", "Clause", properties={})
         self.assertFalse(ok)

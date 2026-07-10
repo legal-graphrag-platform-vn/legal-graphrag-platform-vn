@@ -10,3 +10,10 @@ from .ontology_validator import (
     validate_graph_payload,
     validate_relation,
 )
+from .payload_consistency_validator import (
+    PayloadConsistencyError,
+    PayloadConsistencyReport,
+    deterministic_relation_id,
+    validate_payload_consistency,
+    validate_payload_consistency_or_raise,
+)

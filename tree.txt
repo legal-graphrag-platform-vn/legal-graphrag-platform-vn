@@ -1,0 +1,806 @@
+.
+├── infra
+│   ├── data
+│   │   └── neo4j
+│   │       ├── data
+│   │       ├── import
+│   │       ├── logs
+│   │       └── plugins
+│   ├── docker-compose.yml
+│   ├── Makefile
+│   ├── neo4j
+│   │   └── init
+│   │       └── 01_schema_init.cypher
+│   └── README.md
+├── plans
+│   ├── 00_architecture_decisions.md
+│   ├── 01_research_contributions.md
+│   ├── 03_architecture.md
+│   ├── 04_graph_construction_pipeline.md
+│   ├── 05_graphrag_retrieval.md
+│   ├── 07_implementation_timeline.md
+│   ├── 08_dataset_and_scope.md
+│   ├── 09_open_questions.md
+│   ├── 10_tech_stack.md
+│   ├── 11_project_phases.md
+│   ├── 12_design_tradeoffs.md
+│   ├── 13_neo4j_integrity_strategy.md
+│   ├── agent-plan-feats
+│   │   └── 04_graph_construction_pipeline_impl_plan.md
+│   ├── archive
+│   │   └── 02_ontology_specification_superseded.md
+│   ├── legal_ontology.md
+│   └── README.md
+├── progress
+├── src
+│   ├── backend
+│   │   ├── AGENTS.md
+│   │   ├── app.py
+│   │   ├── config.py
+│   │   ├── providers
+│   │   │   ├── base.py
+│   │   │   ├── gemini.py
+│   │   │   ├── ollama.py
+│   │   │   ├── openai.py
+│   │   │   └── __pycache__
+│   │   │       ├── base.cpython-314.pyc
+│   │   │       ├── gemini.cpython-314.pyc
+│   │   │       ├── ollama.cpython-314.pyc
+│   │   │       └── openai.cpython-314.pyc
+│   │   ├── __pycache__
+│   │   │   ├── app.cpython-314.pyc
+│   │   │   └── config.cpython-314.pyc
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── services
+│   │       ├── __pycache__
+│   │       │   └── rag_service.cpython-314.pyc
+│   │       └── rag_service.py
+│   ├── database
+│   │   ├── __init__.py
+│   │   ├── neo4j_writer.py
+│   │   └── __pycache__
+│   │       ├── __init__.cpython-314.pyc
+│   │       └── neo4j_writer.cpython-314.pyc
+│   ├── frontend
+│   │   ├── AGENTS.md
+│   │   ├── CLAUDE.md
+│   │   ├── eslint.config.mjs
+│   │   ├── next.config.ts
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   ├── postcss.config.mjs
+│   │   ├── public
+│   │   │   ├── file.svg
+│   │   │   ├── globe.svg
+│   │   │   ├── next.svg
+│   │   │   ├── vercel.svg
+│   │   │   └── window.svg
+│   │   ├── README.md
+│   │   ├── src
+│   │   │   ├── app
+│   │   │   │   ├── favicon.ico
+│   │   │   │   ├── globals.css
+│   │   │   │   ├── layout.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── components
+│   │   │   │   ├── chat
+│   │   │   │   │   ├── MessageItem.tsx
+│   │   │   │   │   ├── SourceCard.tsx
+│   │   │   │   │   └── SourceDetailModal.tsx
+│   │   │   │   └── layout
+│   │   │   │       └── Sidebar.tsx
+│   │   │   ├── hooks
+│   │   │   │   └── useChatStream.ts
+│   │   │   └── types
+│   │   │       └── chat.ts
+│   │   └── tsconfig.json
+│   ├── ingestion.py
+│   ├── __init__.py
+│   ├── legal-graphrag
+│   │   ├── clients
+│   │   │   ├── embedding_client.py
+│   │   │   ├── llm_client.py
+│   │   │   ├── neo4j_client.py
+│   │   │   └── __pycache__
+│   │   │       ├── embedding_client.cpython-314.pyc
+│   │   │       ├── llm_client.cpython-314.pyc
+│   │   │       └── neo4j_client.cpython-314.pyc
+│   │   ├── config.py
+│   │   ├── convert_word_to_txt.py
+│   │   ├── core
+│   │   │   ├── generator.py
+│   │   │   ├── memory.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── generator.cpython-314.pyc
+│   │   │   │   ├── memory.cpython-314.pyc
+│   │   │   │   ├── retriever.cpython-314.pyc
+│   │   │   │   ├── router.cpython-314.pyc
+│   │   │   │   └── traversal_policies.cpython-314.pyc
+│   │   │   ├── retriever.py
+│   │   │   ├── router.py
+│   │   │   └── traversal_policies.py
+│   │   ├── embed_bge_neo4j.py
+│   │   ├── luat_doanh_nghiep.json
+│   │   ├── main.py
+│   │   ├── prompts
+│   │   │   ├── basic_search_system_prompt.txt
+│   │   │   ├── community_report_graph.txt
+│   │   │   ├── community_report_text.txt
+│   │   │   ├── drift_reduce_prompt.txt
+│   │   │   ├── drift_search_system_prompt.txt
+│   │   │   ├── extract_claims.txt
+│   │   │   ├── extract_graph.txt
+│   │   │   ├── global_search_knowledge_system_prompt.txt
+│   │   │   ├── global_search_map_system_prompt.txt
+│   │   │   ├── global_search_reduce_system_prompt.txt
+│   │   │   ├── intent_router.txt
+│   │   │   ├── local_search_system_prompt.txt
+│   │   │   ├── question_gen_system_prompt.txt
+│   │   │   ├── summarize_descriptions.txt
+│   │   │   └── templates.py
+│   │   ├── __pycache__
+│   │   │   ├── config.cpython-314.pyc
+│   │   │   ├── embed_bge_neo4j.cpython-314.pyc
+│   │   │   └── main.cpython-314.pyc
+│   │   ├── README.md
+│   │   ├── settings.yaml
+│   │   └── temp
+│   │       ├── build_neo4j_from_json.py
+│   │       ├── build_neo4j_graph.py
+│   │       ├── embedding.py
+│   │       ├── __pycache__
+│   │       │   ├── build_neo4j_from_json.cpython-314.pyc
+│   │       │   ├── build_neo4j_graph.cpython-314.pyc
+│   │       │   ├── test_final_generation.cpython-314.pyc
+│   │       │   ├── test_graph_traversal.cpython-314.pyc
+│   │       │   ├── test_router_api.cpython-314.pyc
+│   │       │   └── test_vector_search.cpython-314.pyc
+│   │       ├── test_final_generation.py
+│   │       ├── test_graph_traversal.py
+│   │       ├── test_router_api.py
+│   │       ├── test_vector_search.py
+│   │       └── traversal_policies.py
+│   ├── pipeline
+│   │   ├── crawl_filtered.py
+│   │   ├── data
+│   │   │   ├── processed
+│   │   │   │   ├── L13_1999
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── L37_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── L59_2020
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── L60_2005
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── L68_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── L76_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND05_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND102_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND104_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND106_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND109_2008
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND115_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND116_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND116_2020
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND128_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND139_2007
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND14_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND168_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND19_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND194_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND202_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND210_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND23_2022
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND248_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND297_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND365_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND43_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND49_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND50_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND50_2016
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND51_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND56_2009
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND59_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND61_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND66_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND71_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND78_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND81_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND82_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND87_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND90_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND91_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND93_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND96_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND96_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND97_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── ND99_2012
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD14_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD169_2007
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD22_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD328_QĐ-TTg
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD36_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD37_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD419_QĐ-TTg
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD58_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD74_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD77_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── QD982_QĐ-TTg
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── SHORT_TEST
+│   │   │   │   │   ├── extract.jsonl
+│   │   │   │   │   ├── hierarchy.json
+│   │   │   │   │   └── prettier_extract.json
+│   │   │   │   ├── TT01_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT01_2016
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT02_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT04_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT04_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT08_2026
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT10_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT116_2020
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT117_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT119_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT120_2016
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT121_2012
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT127_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT127_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT13_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT134_2016
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT135_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT138_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT138_2012
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT14_2010
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT142_2012
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT147_2014
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT183_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT194_2013
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT196_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT20_2015
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT202_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT42_2021
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT68_2025
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   ├── TT79_2011
+│   │   │   │   │   └── hierarchy.json
+│   │   │   │   └── TT82_2025
+│   │   │   │       └── hierarchy.json
+│   │   │   ├── raw
+│   │   │   │   ├── L13_1999
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── L37_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── L59_2020
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── L60_2005
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── L68_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── L76_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND05_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND102_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND104_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND106_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND109_2008
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND115_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND116_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND116_2020
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND128_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND139_2007
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND14_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND168_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND19_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND194_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND202_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND210_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND23_2022
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND248_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND297_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND365_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND43_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND49_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND50_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND50_2016
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND51_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND56_2009
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND59_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND61_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND66_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND71_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND78_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND81_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND82_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND87_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND90_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND91_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND93_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND96_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND96_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND97_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── ND99_2012
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD14_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD169_2007
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD22_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD328_QĐ-TTg
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD36_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD37_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD419_QĐ-TTg
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD58_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD74_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD77_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── QD982_QĐ-TTg
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT01_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT01_2016
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT02_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT04_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT04_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT08_2026
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT10_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT116_2020
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT117_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT119_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT120_2016
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT121_2012
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT127_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT127_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT13_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT134_2016
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT135_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT138_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT138_2012
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT14_2010
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT142_2012
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT147_2014
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT183_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT194_2013
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT196_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT20_2015
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT202_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT42_2021
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT68_2025
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   ├── TT79_2011
+│   │   │   │   │   ├── metadata.json
+│   │   │   │   │   └── source.txt
+│   │   │   │   └── TT82_2025
+│   │   │   │       ├── metadata.json
+│   │   │   │       └── source.txt
+│   │   │   └── VanBanGoc_59.signed.pdf
+│   │   ├── docs
+│   │   │   ├── ai_extract_workflow.md
+│   │   │   ├── data
+│   │   │   │   ├── l1_filtered.md
+│   │   │   │   ├── l1.md
+│   │   │   │   ├── l2_filtered.md
+│   │   │   │   ├── l2.md
+│   │   │   │   ├── l3_filtered.md
+│   │   │   │   ├── l3.md
+│   │   │   │   ├── l4_filtered.md
+│   │   │   │   ├── l4.md
+│   │   │   │   ├── l5_filtered.md
+│   │   │   │   ├── l5.md
+│   │   │   │   ├── l6_filtered.md
+│   │   │   │   ├── l6.md
+│   │   │   │   ├── l7_filtered.md
+│   │   │   │   └── l7.md
+│   │   │   ├── filter_vbpl.py
+│   │   │   ├── ontology_review.md
+│   │   │   └── parse_workflow.md
+│   │   ├── GUILD.md
+│   │   ├── main.py
+│   │   ├── __pycache__
+│   │   │   └── main.cpython-314.pyc
+│   │   ├── README.md
+│   │   ├── REPORT.md
+│   │   ├── requirements.txt
+│   │   ├── src
+│   │   │   ├── config.py
+│   │   │   ├── crawler
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── models.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   │   ├── models.cpython-314.pyc
+│   │   │   │   │   └── vbpl_crawler.cpython-314.pyc
+│   │   │   │   └── vbpl_crawler.py
+│   │   │   ├── embedding
+│   │   │   │   ├── embedding_generator.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── neo4j_embedding_writer.py
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── embedding_generator.cpython-314.pyc
+│   │   │   │       ├── __init__.cpython-314.pyc
+│   │   │   │       └── neo4j_embedding_writer.cpython-314.pyc
+│   │   │   ├── extraction
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── llm_extractor.py
+│   │   │   │   ├── models.py
+│   │   │   │   ├── prompts.py
+│   │   │   │   ├── providers
+│   │   │   │   │   ├── base.py
+│   │   │   │   │   ├── gemini_provider.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── openai_provider.py
+│   │   │   │   │   └── __pycache__
+│   │   │   │   │       ├── base.cpython-314.pyc
+│   │   │   │   │       ├── gemini_provider.cpython-314.pyc
+│   │   │   │   │       ├── __init__.cpython-314.pyc
+│   │   │   │   │       └── openai_provider.cpython-314.pyc
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── __init__.cpython-314.pyc
+│   │   │   │       ├── llm_extractor.cpython-314.pyc
+│   │   │   │       ├── models.cpython-314.pyc
+│   │   │   │       └── prompts.cpython-314.pyc
+│   │   │   ├── __init__.py
+│   │   │   ├── parser
+│   │   │   │   ├── hierarchy_parser.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── models.py
+│   │   │   │   ├── patterns.py
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── hierarchy_parser.cpython-314.pyc
+│   │   │   │       ├── __init__.cpython-314.pyc
+│   │   │   │       ├── models.cpython-314.pyc
+│   │   │   │       └── patterns.cpython-314.pyc
+│   │   │   ├── persistence
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── neo4j_writer.py
+│   │   │   │   ├── payload_builder.py
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── __init__.cpython-314.pyc
+│   │   │   │       ├── neo4j_writer.cpython-314.pyc
+│   │   │   │       └── payload_builder.cpython-314.pyc
+│   │   │   ├── pipeline
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── orchestrator.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   │   ├── orchestrator.cpython-314.pyc
+│   │   │   │   │   └── review_queue.cpython-314.pyc
+│   │   │   │   └── review_queue.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── config.cpython-314.pyc
+│   │   │   │   └── __init__.cpython-314.pyc
+│   │   │   ├── reports
+│   │   │   │   ├── graph_quality.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── graph_quality.cpython-314.pyc
+│   │   │   │       └── __init__.cpython-314.pyc
+│   │   │   ├── scoring
+│   │   │   │   ├── confidence_scorer.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── confidence_scorer.cpython-314.pyc
+│   │   │   │       └── __init__.cpython-314.pyc
+│   │   │   ├── validation
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── ontology_validator.py
+│   │   │   │   ├── payload_consistency_validator.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   │   ├── ontology_validator.cpython-314.pyc
+│   │   │   │   │   ├── payload_consistency_validator.cpython-314.pyc
+│   │   │   │   │   ├── record_consistency_validator.cpython-314.pyc
+│   │   │   │   │   └── schema_validator.cpython-314.pyc
+│   │   │   │   ├── record_consistency_validator.py
+│   │   │   │   └── schema_validator.py
+│   │   │   └── writer
+│   │   ├── tessdata
+│   │   │   └── vie.traineddata
+│   │   └── tests
+│   │       ├── fixtures
+│   │       │   ├── sample_law.txt
+│   │       │   └── vbpl_rendered_body.txt
+│   │       ├── __init__.py
+│   │       ├── __pycache__
+│   │       │   ├── __init__.cpython-314.pyc
+│   │       │   ├── test_confidence_scorer.cpython-314.pyc
+│   │       │   ├── test_confidence_scorer.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_crawler.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_embedding_generator.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_extractor.cpython-314.pyc
+│   │       │   ├── test_extractor.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_graph_quality_report.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_neo4j_writer.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_ontology_consistency.cpython-314.pyc
+│   │       │   ├── test_ontology_consistency.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_orchestrator.cpython-314.pyc
+│   │       │   ├── test_orchestrator.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_parser_cli.cpython-314.pyc
+│   │       │   ├── test_parser_cli.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_parser.cpython-314.pyc
+│   │       │   ├── test_parser.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_payload_builder.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_payload_consistency_validator.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_record_consistency_validator.cpython-314-pytest-9.1.1.pyc
+│   │       │   ├── test_run_pipeline_paths.cpython-314-pytest-9.1.1.pyc
+│   │       │   └── test_write_cli.cpython-314-pytest-9.1.1.pyc
+│   │       ├── test_confidence_scorer.py
+│   │       ├── test_crawler.py
+│   │       ├── test_embedding_generator.py
+│   │       ├── test_extractor.py
+│   │       ├── test_graph_quality_report.py
+│   │       ├── test_neo4j_writer.py
+│   │       ├── test_ontology_consistency.py
+│   │       ├── test_orchestrator.py
+│   │       ├── test_parser_cli.py
+│   │       ├── test_parser.py
+│   │       ├── test_payload_builder.py
+│   │       ├── test_payload_consistency_validator.py
+│   │       ├── test_record_consistency_validator.py
+│   │       ├── test_run_pipeline_paths.py
+│   │       └── test_write_cli.py
+│   ├── __pycache__
+│   │   └── __init__.cpython-314.pyc
+│   └── validation
+│       ├── __init__.py
+│       ├── ontology_validator.py
+│       ├── payload_consistency_validator.py
+│       └── __pycache__
+│           ├── __init__.cpython-314.pyc
+│           ├── ontology_validator.cpython-314.pyc
+│           └── payload_consistency_validator.cpython-314.pyc
+├── tasks
+│   └── task-1.graph-construction-pipeline.md
+├── tests
+│   ├── __pycache__
+│   │   ├── test_ontology_consistency.cpython-314.pyc
+│   │   ├── test_validator_contract_parity.cpython-314.pyc
+│   │   └── test_writer_guard.cpython-314.pyc
+│   ├── test_ontology_consistency.py
+│   ├── test_validator_contract_parity.py
+│   └── test_writer_guard.py
+└── tree.txt
+
+260 directories, 544 files
