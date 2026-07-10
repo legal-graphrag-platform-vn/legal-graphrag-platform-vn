@@ -16,7 +16,7 @@
 | **LLM (main)** | Gemini **2.5** Flash | Cost-effective, hỗ trợ Vietnamese tốt | GPT-4o-mini |
 | **LLM (judge)** | Gemini **2.5** Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
 | **LLM SDK** | `google-genai` | SDK mới (thay `google-generativeai` đã deprecated) | — |
-| **Embedding** | `bkai-foundation-models/vietnamese-bi-encoder` | Tiếng Việt native, 768-dim khớp vector index | `BAAI/bge-m3` sau khi verify dimension |
+| **Embedding** | `BAAI/bge-m3` via `FlagEmbedding` | Smoke test tốt hơn BKAI trên query pháp luật doanh nghiệp; multilingual dense vector 1024-dim | BKAI Vietnamese bi-encoder 768-dim baseline |
 | **Hierarchy Parser** | Raw text parser | Khớp với `source.txt` từ crawler; retry/fallback selector nếu crawl lỗi | — |
 | **Framework** | **Custom Pipeline** (không dùng LlamaIndex) | LlamaIndex không có direct support cho cấu trúc hà văn bản pháp luật VN | LlamaIndex |
 | **Backend** | FastAPI | Async, OpenAPI docs tự động | Flask |
@@ -63,7 +63,7 @@ CREATE VECTOR INDEX clause_embedding
 FOR (c:Clause) ON c.embedding
 OPTIONS {
   indexConfig: {
-    `vector.dimensions`: 768,
+    `vector.dimensions`: 1024,
     `vector.similarity_function`: 'cosine'
   }
 };
@@ -72,7 +72,7 @@ CREATE VECTOR INDEX article_embedding
 FOR (a:Article) ON a.embedding
 OPTIONS {
   indexConfig: {
-    `vector.dimensions`: 768,
+    `vector.dimensions`: 1024,
     `vector.similarity_function`: 'cosine'
   }
 };
@@ -101,15 +101,28 @@ ORDER BY score DESC
 ### Embedding Model
 
 ```python
-# Vietnamese-specific embedding
-from sentence_transformers import SentenceTransformer
+# Primary dense embedding contract (ADR-20)
+from FlagEmbedding import BGEM3FlagModel
 
-model = SentenceTransformer(
-    "bkai-foundation-models/vietnamese-bi-encoder"
-)
+model = BGEM3FlagModel("BAAI/bge-m3", use_fp16=True)
+EMBEDDING_DIM = 1024
 
-# Fallback: BAAI/bge-m3 chỉ dùng sau khi verify dimension và cập nhật vector index nếu cần.
+# Explicit baseline only:
+# bkai-foundation-models/vietnamese-bi-encoder via sentence-transformers
+# EMBEDDING_DIM = 768
 ```
+
+Configuration contract:
+
+```text
+EMBEDDING_MODEL=BAAI/bge-m3
+EMBEDDING_PROVIDER=flag_embedding
+EMBEDDING_DIM=1024
+```
+
+Model output, application config, and Neo4j vector index dimension must match.
+Changing dimension requires an ADR, ontology version bump, vector-index recreation,
+and re-embedding all Article/Clause nodes.
 
 ---
 
@@ -122,7 +135,7 @@ This table is the canonical model-selection map for implementation and thesis de
 | Information Extraction | Gemini 2.5 Flash structured output | Gemini 2.5 Pro for hard cases; GPT-4o-mini; Qwen3-8B local | Optional LoRA local LLM | Needs reliable JSON/Pydantic output, Vietnamese legal text handling, low cost for batch extraction |
 | Answer Generation | Gemini 2.5 Flash | Gemini 2.5 Pro for hard cases; Qwen3-8B local | Not priority | Generation is grounded by retrieved graph evidence; fine-tuning is less important than citation discipline |
 | Judge / Evaluation | Gemini 2.5 Pro | GPT-4o; Gemini Flash smoke test | No | Judge should be stronger and more stable than the default generation model |
-| Embedding | `bkai-foundation-models/vietnamese-bi-encoder` | `Qwen3-Embedding-0.6B`; `BAAI/bge-m3` after dimension check | Yes, after query-positive pairs exist | Primary is Vietnamese-focused and 768-dim; alternatives are for retrieval ablation |
+| Embedding | `BAAI/bge-m3` via `FlagEmbedding`, 1024-dim | BKAI Vietnamese bi-encoder 768-dim baseline; `Qwen3-Embedding-0.6B` future candidate | Yes, after query-positive pairs exist | BGE-M3 won the project smoke test on Vietnamese enterprise-law queries; BKAI is retained for ablation |
 | Intent Classifier | Gemini 2.5 Flash few-shot | PhoBERT-base-v2; XLM-R; BamiBERT | Yes, PhoBERT fine-tune | Six-class intent task can start with few-shot LLM; fine-tune only after labeled query set exists |
 | Temporal Extractor | Rule-based date regex/parser + Gemini 2.5 Flash fallback | Gemini 2.5 Pro for hard cases; BERT classifier | Not priority | Legal temporal expressions are often deterministic; LLM fallback handles ambiguous wording |
 | Reranker | Not enabled in M3 | `bge-reranker-v2-m3`; `Qwen3-Reranker-0.6B`; `gte-multilingual-reranker-base` | Yes, after retrieval dataset exists | Reranker belongs to Phase 2.5 ablation, not Neo4j Writer M3 |
@@ -198,6 +211,8 @@ python >= 3.11
 # Required packages (không có qdrant-client hoặc llama-index — dùng Neo4j native vector + custom pipeline)
 pip install \
   neo4j \
+  torch \
+  FlagEmbedding \
   sentence-transformers \
   fastapi \
   uvicorn \

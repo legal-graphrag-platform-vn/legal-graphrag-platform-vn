@@ -1,8 +1,8 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.4.0  
-> **Frozen date**: 2026-07-07  
+> **Version**: 1.5.0
+> **Frozen date**: 2026-07-10
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
 This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
@@ -97,7 +97,7 @@ Rules:
 | `Issuer.id` | Slug of normalized issuer name; this is the `MERGE` key, not `name` |
 | Temporal denormalization | `Article` and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
 | Point temporal scope | Phase 1 does not store temporal fields on `Point`; point-level amendments are normalized to the nearest `Clause` |
-| Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[768]`; `Point` has no embedding |
+| Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[1024]` under the current BGE-M3 contract; `Point` has no embedding |
 
 ### 2.2 Semantic Nodes
 
@@ -243,7 +243,7 @@ The bootstrap script must create only:
 | Temporal indexes | `effective_from`, `effective_to` filters |
 | Relationship property indexes | `AMENDS`, `REPEALS`, `REPLACES` temporal lookup |
 | Full-text indexes | `content_raw`, `title` search |
-| Vector indexes | `Article.embedding`, `Clause.embedding` with 768 dimensions |
+| Vector indexes | `Article.embedding`, `Clause.embedding` with the selected concrete schema dimension; current contract is BGE-M3/1024 |
 
 The database bootstrap must not be treated as a full ontology validator in Community Edition.
 
@@ -274,13 +274,18 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 
 `infra/neo4j/init/01_schema_init.cypher` must match this contract:
 
+> **Migration status (2026-07-10)**: ADR-20 and ontology v1.5.0 select
+> BGE-M3/1024. Existing code or databases still configured for BKAI/768 are in a
+> migration state and are not Milestone A compliant. Recreate both vector indexes
+> and re-embed Article/Clause before writing BGE-M3 vectors.
+
 | Area | Expected state |
 |---|---|
 | Structural uniqueness | `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point` by `id` |
 | Phase 1 semantic uniqueness | `LegalConcept`, `LegalSubject`, `LegalAction` by `id` |
 | Runtime reasoning labels | No bootstrap requirement until persisted by a runtime reasoning component |
 | Relation indexes | `AMENDS.effective_from`, `REPEALS.effective_from`, `REPLACES.effective_from` |
-| Vector indexes | `article_embedding`, `clause_embedding`, 768 dimensions, cosine |
+| Vector indexes | `article_embedding`, `clause_embedding`, 1024 dimensions, cosine |
 
 ---
 
@@ -293,6 +298,7 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 5. Denormalized temporal fields exist for retrieval performance and must remain consistent with temporal relations.
 6. Every persisted semantic edge carries provenance.
 7. The ontology contract leads implementation; bootstrap scripts and validators follow it.
+8. Embedding model output dimension, application configuration, and Neo4j vector index dimension must match before embedding writes.
 
 ---
 
@@ -305,3 +311,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.2.0 | 2026-07-06 | Added nullable `embedding: float[768]` to `Article` and `Clause`; clarified `Point` has no embedding | Retrieval schema alignment |
 | 1.3.0 | 2026-07-07 | Aligned with Neo4j Community Edition integrity strategy and denormalized temporal fields | Write-path implementation |
 | 1.4.0 | 2026-07-07 | Rewrote as canonical contract; added validation stack, relation matrix, enforcement boundaries, and legacy alias quarantine | Remove ambiguity between frozen spec, schema bootstrap, and validators |
+| 1.5.0 | 2026-07-10 | Selected BGE-M3/1024 as the primary embedding contract; retained BKAI/768 as an explicit baseline | Model-selection smoke test and ADR-20 |

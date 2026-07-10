@@ -1,6 +1,6 @@
 # Infra — Legal GraphRAG
 
-Docker Compose setup cho Neo4j 5.15 Community — graph database + vector index của hệ thống Legal GraphRAG.
+Docker Compose setup cho Neo4j 5.26.28 Community — graph database + vector index của hệ thống Legal GraphRAG.
 
 ---
 
@@ -28,7 +28,7 @@ cp .env.example .env
 # 2. Khởi động Neo4j (tự chờ đến khi healthy)
 make up
 
-# 3. Khởi tạo schema (chạy 1 lần duy nhất)
+# 3. Khởi tạo schema (idempotent, có thể chạy lại)
 make init-schema
 
 # 4. Verify
@@ -38,7 +38,7 @@ make verify-schema
 Sau bước 4, kết quả mong đợi:
 - `9` uniqueness constraints cho `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction`
 - `10+` indexes (lookup + temporal + fulltext + vector)
-- `2` vector indexes (`article_embedding`, `clause_embedding` — 768 dims, cosine)
+- `2` vector indexes (`article_embedding`, `clause_embedding` — 1024 dims, cosine)
 
 ---
 
@@ -70,15 +70,15 @@ Credentials: `neo4j` / giá trị `NEO4J_PASSWORD` trong `.env`
 
 ## Schema overview
 
-Toàn bộ spec hiện hành tại [`plans/legal_ontology.md`](../plans/legal_ontology.md). [`plans/02_ontology_specification.md`](../plans/02_ontology_specification.md) chỉ là tài liệu lịch sử.
+Toàn bộ spec hiện hành tại [`plans/legal_ontology.md`](../plans/legal_ontology.md). [`plans/archive/02_ontology_specification_superseded.md`](../plans/archive/02_ontology_specification_superseded.md) chỉ là tài liệu lịch sử.
 
 ### Node types
 ```
 :Document
 :Issuer
 :Chapter
-:Article    (embedding 768d)
-:Clause     (embedding 768d — unit retrieval chính)
+:Article    (embedding 1024d)
+:Clause     (embedding 1024d — unit retrieval chính)
 :Point
 :LegalConcept
 :LegalSubject

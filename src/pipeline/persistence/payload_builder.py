@@ -227,7 +227,7 @@ def _issuer_node(issuer_name: str | None) -> dict[str, Any]:
         raise PayloadBuildError("Document.issuer_name is required to build Issuer node")
     return {
         "type": "Issuer",
-        "id": f"issuer_{_slug(issuer_name)}",
+        "id": _slug(issuer_name),
         "name": issuer_name,
         "branch": _issuer_branch(issuer_name),
     }

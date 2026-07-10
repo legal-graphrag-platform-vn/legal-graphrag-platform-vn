@@ -3,7 +3,7 @@
 > **Tên đề tài**: Xây dựng nền tảng AI khai thác tri thức pháp luật doanh nghiệp Việt Nam dựa trên Knowledge Graph và Temporal GraphRAG  
 > **Loại**: Đồ án tốt nghiệp  
 > **Domain**: Pháp luật doanh nghiệp Việt Nam  
-> **Trạng thái**: Đang triển khai — Ontology FROZEN v1.4.0
+> **Trạng thái**: Đang triển khai — Ontology FROZEN v1.5.0; BGE-M3/1024 implementation migration pending
 
 ---
 
@@ -13,7 +13,7 @@
 
 | File | Nội dung | Ưu Tiên |
 |---|---|---|
-| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.4.0 — Source of Truth** | 🔴 Đọc trước |
+| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.5.0 — Source of Truth** | 🔴 Đọc trước |
 | [00_architecture_decisions.md](./00_architecture_decisions.md) | ADR — các quyết định kiến trúc | 🔴 Đọc trước |
 | [01_research_contributions.md](./01_research_contributions.md) | 5 đóng góp nghiên cứu chính | 🔴 Đọc trước |
 | [03_architecture.md](./03_architecture.md) | Kiến trúc hệ thống tổng thể | 🟡 Review |
@@ -63,9 +63,9 @@
 
 ## Trạng Thái Thảo Luận
 
-- [x] RC1 — Ontology: **FROZEN v1.4.0** — xem [legal_ontology.md](./legal_ontology.md)
+- [x] RC1 — Ontology: **FROZEN v1.5.0** — xem [legal_ontology.md](./legal_ontology.md)
 - [ ] RC2 — Pipeline: **Đang triển khai** M3 (Neo4j Writer)
 - [ ] RC3 — GraphRAG: **Đã chốt intent taxonomy 6 lớp** — xem [05_graphrag_retrieval.md](./05_graphrag_retrieval.md)
 - [ ] RC4 — Temporal: **Tương đối rõ** — edge timestamps + legal_status
 - [ ] RC5 — Evaluation: **Chưa chốt** ai tạo ground truth dataset
-- [ ] Dataset: **Chưa chốt** chọn 4 văn bản bắt buộc hay mở rộng lên 10 văn bản
+- [x] Dataset: **Chốt 10 văn bản curated**; 4 văn bản là minimum demo, 89 văn bản crawl hiện có chỉ là discovery pool — xem [08_dataset_and_scope.md](./08_dataset_and_scope.md)

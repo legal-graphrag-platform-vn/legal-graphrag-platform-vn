@@ -20,6 +20,9 @@
 //   v3 (2026-07-07) — aligned comments with legal_ontology.md v1.4.0:
 //     - Community Edition bootstrap = uniqueness constraints + indexes only
 //     - Required properties and relation endpoint rules are application-layer validation
+//   v4 (2026-07-10) — ADR-20 embedding migration:
+//     - BGE-M3 primary model
+//     - Article/Clause vector indexes changed from 768 to 1024 dimensions
 // =============================================================================
 // =============================================================================
 // SECTION 1: UNIQUENESS CONSTRAINTS
@@ -191,7 +194,7 @@ ON EACH [p.content_raw];
 
 // =============================================================================
 // SECTION 5: VECTOR INDEXES (Neo4j 5.11+ native)
-// 768 dims — khớp với vietnamese-bi-encoder (bkai-foundation-models).
+// 1024 dims — khớp với BAAI/bge-m3 (ADR-20, ontology v1.5.0).
 // Cosine similarity — standard cho semantic search.
 //
 // ADR-08: Unified storage — không dùng Qdrant riêng biệt.
@@ -201,14 +204,14 @@ ON EACH [p.content_raw];
 //   - Point: quá ngắn, không đủ ngữ cảnh để embed có ý nghĩa (ADR-02)
 //   - Nullable: Writer ghi node trước (Tuần 1 M3), Embedding Generator fill sau (Tuần 2 M3)
 //
-// ⚠️  DIMENSION CONTRACT: 768 dim là schema contract, không phải tech detail.
+// ⚠️  DIMENSION CONTRACT: 1024 dim là schema contract, không phải tech detail.
 //     Đổi embedding model → phải DROP INDEX + re-embed toàn bộ → cần ADR mới.
 // =============================================================================
 
 CREATE VECTOR INDEX article_embedding IF NOT EXISTS FOR (a:Article) ON (a.embedding)
 OPTIONS {
   indexConfig: {
-    `vector.dimensions`: 768,
+    `vector.dimensions`: 1024,
     `vector.similarity_function`: 'cosine'
   }
 };
@@ -216,7 +219,7 @@ OPTIONS {
 CREATE VECTOR INDEX clause_embedding IF NOT EXISTS FOR (c:Clause) ON (c.embedding)
 OPTIONS {
   indexConfig: {
-    `vector.dimensions`: 768,
+    `vector.dimensions`: 1024,
     `vector.similarity_function`: 'cosine'
   }
 };

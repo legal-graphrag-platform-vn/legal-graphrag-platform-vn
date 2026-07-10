@@ -5,7 +5,7 @@
 
 > [!CAUTION]
 > **Không dùng file này làm implementation contract.**
-> Xem **[legal_ontology.md v1.4.0](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
+> Xem **[legal_ontology.md v1.5.0](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
 >
 > | Nội dung | Trạng thái |
 > |---|---|
@@ -358,7 +358,7 @@ Level 4: Temporal & XAI Quality
 | **RC1** | Legal Ontology Design | `plans/legal_ontology.md` (Design doc là thành phẩm chính) |
 | **RC2** | Graph Construction Pipeline | `src/pipeline/` (chứa crawler, parser, extraction, validator, neo4j_writer) |
 | **RC3** | Intent-based Traversal GraphRAG | `src/retrieval/` (chứa classifier, graph_traversal, vector_search) |
-| **RC4** | Temporal GraphRAG | `src/retrieval/temporal/` và `src/pipeline/src/neo4j_writer/` |
+| **RC4** | Temporal GraphRAG | `src/retrieval/` và `src/infrastructure/neo4j/` |
 | **RC5** | Legal Evaluation Framework | `src/evaluation/` (chứa ground_truth builder, RAGAS integration, metrics) |
 
 > **Lưu ý cho hội đồng**: Việc cấu trúc thư mục code map 1-1 với cấu trúc lý thuyết giúp việc đánh giá chéo (cross-evaluation) minh bạch và dễ dàng thẩm định.

@@ -25,7 +25,20 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
 
 ---
 
-## Danh Sách Văn Bản Dự Kiến (Cần Xác Nhận)
+## Curated Research Corpus (Đã Chốt)
+
+Corpus được chia thành các phạm vi độc lập để không đánh đồng dữ liệu đã crawl
+với dữ liệu được kiểm soát chất lượng cho nghiên cứu:
+
+| Phạm vi | Quy mô | Mục đích |
+|---|---:|---|
+| Crawl/discovery pool | 89 văn bản tại thời điểm chốt | Nguồn ứng viên; có thể thay đổi và không mặc định được ingest/evaluate |
+| Curated research corpus | 10 văn bản | Phạm vi chính thức cho graph construction, retrieval và QA evaluation |
+| Minimum demo corpus | 4 văn bản cốt lõi | Mốc tối thiểu nếu thiếu thời gian |
+| Gold graph corpus | 3 văn bản thuộc curated corpus | Annotation thủ công cho Graph Construction Quality |
+
+Chỉ curated corpus được tính vào scope nghiên cứu. Crawl pool là runtime data có
+thể tái tạo, nằm dưới `data/`, và không được commit vào Git.
 
 ### Nhóm 1 — Văn Bản Cốt Lõi (BẮT BUỘC)
 
@@ -36,7 +49,7 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
 | 3 | 47/2021/NĐ-CP | NĐ sửa đổi NĐ 01/2021 | NĐ | Temporal test |
 | 4 | 01/2021/TT-BKHĐT | TT hướng dẫn đăng ký DN | TT | Hướng dẫn NĐ 01 |
 
-### Nhóm 2 — Mở Rộng (NẾU ĐỦ THỜI GIAN)
+### Nhóm 2 — Curated Mở Rộng
 
 | STT | Số Hiệu | Tên Văn Bản | Loại | Ghi Chú |
 |---|---|---|---|---|
@@ -44,12 +57,16 @@ Luật Doanh nghiệp 2020 (59/2020/QH14)
 | 6 | 78/2015/NĐ-CP | NĐ đăng ký DN 2015 | NĐ | Temporal: trước 2021 |
 | 7 | 108/2018/NĐ-CP | NĐ sửa đổi NĐ 78/2015 | NĐ | Temporal: 2018-2020 |
 | 8 | 155/2020/NĐ-CP | NĐ về chứng khoán/DN đại chúng | NĐ | Mở rộng |
-| 9 | 35/2020/QH14 | Luật Đầu tư 2020 | Luật | Related law |
+| 9 | 61/2020/QH14 | Luật Đầu tư 2020 | Luật | Related law |
 | 10 | 31/2021/NĐ-CP | NĐ chi tiết Luật Đầu tư | NĐ | Liên quan |
 
-> **Tổng tối thiểu**: 4 văn bản (đủ demo)  
-> **Tổng mục tiêu**: 10 văn bản  
-> **Không nên quá**: 20 văn bản (mất kiểm soát chất lượng)
+> **Scope chính thức**: 10 văn bản curated
+>
+> **Minimum demo**: 4 văn bản cốt lõi
+>
+> **Gold annotation**: 3 văn bản thuộc curated corpus
+>
+> **Crawl pool không phải evaluation scope** và không thay đổi giới hạn curated corpus.
 
 ---
 

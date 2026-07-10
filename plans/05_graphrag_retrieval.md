@@ -1,12 +1,17 @@
 # GraphRAG Retrieval — Chi Tiết Kỹ Thuật
 
-> **Phiên bản**: 0.2  
+> **Phiên bản**: 0.3
 > **Liên quan đến**: RC3 + RC4
-> **Depends on**: [legal_ontology.md v1.4.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.5.0](./legal_ontology.md)
 
 ---
 
 ## Tổng Quan Pipeline
+
+> **Embedding contract (ADR-20)**: indexed document vectors and query vectors use
+> `BAAI/bge-m3`, 1024 dimensions, and the same normalization policy. BKAI/768 is an
+> explicit baseline requiring its own matching index/re-embedding run; vectors from
+> different models or dimensions must never be mixed.
 
 ```
 User Query (Vietnamese NL)

@@ -70,6 +70,8 @@ def test_build_graph_payload_uses_canonical_ids_and_relation_id() -> None:
     assert "ldn_2020_art17_cl1" in node_ids
     assert "ldn_2020_art17_cl1_pa" in node_ids
     assert "von_dieu_le" in node_ids
+    assert "quoc_hoi" in node_ids
+    assert "issuer_quoc_hoi" not in node_ids
     defines = next(relation for relation in payload["relations"] if relation["type"] == "DEFINES")
     assert defines["head_id"] == "ldn_2020_art17"
     assert defines["tail_id"] == "von_dieu_le"

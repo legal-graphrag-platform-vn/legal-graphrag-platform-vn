@@ -85,7 +85,7 @@ Xây dựng pipeline tự động chuyển đổi văn bản pháp luật từ w
 | C1-5 | Graph có ≥ 500 nodes và ≥ 300 relations hợp lệ | Cypher: `MATCH (n) RETURN count(n)` và `MATCH ()-[r]->() RETURN count(r)` |
 | C1-6 | Confidence threshold được chọn dựa trên PR curve | PR curve plot tồn tại trong `results/phase1_pr_curve.png` |
 | C1-7 | Pipeline chạy không crash trên 4 văn bản bắt buộc | Pipeline exit code 0, log không có unhandled exception |
-| C1-8 | Vector embedding được lưu vào Neo4j cho Article và Clause | `MATCH (a:Article) WHERE a.embedding IS NOT NULL RETURN count(a)` > 0 |
+| C1-8 | Article/Clause embedding coverage đạt 100% và dimension khớp schema contract | Graph-quality coverage = 1.0; model output/config/vector index cùng dimension |
 
 ---
 

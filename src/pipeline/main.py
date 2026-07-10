@@ -1,9 +1,9 @@
 """CLI entrypoint cho Graph Construction Pipeline (Milestone 1+2).
 
-    python main.py crawl --url <vbpl_url> --doc-id LDN2020 --number 59/2020/QH14
-    python main.py parse --doc-id LDN2020
-    python main.py extract --doc-id LDN2020
-    python main.py ingest --url <vbpl_url> --doc-id LDN2020 --number 59/2020/QH14
+    python -m src.pipeline.main crawl --url <vbpl_url> --raw-doc-code L59_2020 --number 59/2020/QH14
+    python -m src.pipeline.main parse --raw-doc-code L59_2020
+    python -m src.pipeline.main extract --raw-doc-code L59_2020
+    python -m src.pipeline.main ingest --url <vbpl_url> --raw-doc-code L59_2020 --number 59/2020/QH14
 
 `extract` cần GEMINI_API_KEY trong .env (xem .env.example và README).
 """
@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Annotated
 
@@ -29,10 +30,19 @@ from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
 from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
-from src.pipeline.persistence.payload_builder import build_payload_from_paths
+from src.pipeline.persistence.payload_builder import PayloadBuildError, build_payload_from_paths
 from src.pipeline.pipeline.orchestrator import run_pipeline
-from src.pipeline.reports.graph_quality import GraphQualityReporter, write_graph_quality_report
+from src.pipeline.reports.graph_quality import (
+    GraphQualityReporter,
+    decision_stats_from_paths,
+    write_graph_quality_report,
+)
+from src.pipeline.validation.data_readiness import (
+    load_curated_manifest,
+    validate_document_readiness,
+)
 from src.shared.ontology.payload_consistency_validator import validate_payload_consistency
+from src.shared.ontology.validators import GraphValidationError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -40,22 +50,9 @@ logger = logging.getLogger(__name__)
 app = typer.Typer(help="Legal GraphRAG — Graph Construction Pipeline (Milestone 1+2)")
 
 
-def _legal_status_from_raw(raw_status: str | None) -> str:
-    normalized = (raw_status or "active").strip().lower()
-    if normalized in {"active", "còn hiệu lực", "con hieu luc"}:
-        return "ACTIVE"
-    if normalized in {"chưa có hiệu lực", "chua co hieu luc"}:
-        return "NOT_YET_EFFECTIVE"
-    if normalized in {"hết hiệu lực một phần", "het hieu luc mot phan"}:
-        return "PARTIALLY_EFFECTIVE"
-    if normalized in {"hết hiệu lực toàn bộ", "het hieu luc toan bo"}:
-        return "EXPIRED"
-    return "ACTIVE"
-
-
-def _document_info_from_metadata(meta: dict, fallback_id: str | None = None) -> DocumentInfo:
+def _document_info_from_metadata(meta: dict) -> DocumentInfo:
     return DocumentInfo(
-        id=meta.get("graph_id") or meta.get("doc_id") or fallback_id,
+        id=meta["graph_id"],
         title=meta["title"],
         number=meta["number"],
         doc_type=meta.get("doc_type") or meta.get("type"),
@@ -65,47 +62,57 @@ def _document_info_from_metadata(meta: dict, fallback_id: str | None = None) -> 
         issued_date=meta.get("issued_date"),
         effective_from=meta.get("effective_from"),
         effective_to=meta.get("effective_to"),
-        legal_status=meta.get("legal_status") or _legal_status_from_raw(meta.get("status")),
+        legal_status=meta["legal_status"],
     )
 
 
+def _ready_metadata(raw_doc_code: str) -> dict:
+    readiness = validate_document_readiness(
+        raw_doc_code,
+        settings.data_raw_dir,
+        manifest_path=settings.curated_manifest_path,
+    )
+    if not readiness.valid:
+        raise ValueError("; ".join(readiness.errors))
+    return readiness.normalized_metadata
+
+
 # Lấy đường dẫn thư mục lưu trữ dữ liệu thô (raw data) của văn bản.
-def _raw_dir(doc_id: str) -> Path:
-    return settings.data_raw_dir / doc_id
+def _raw_dir(raw_doc_code: str) -> Path:
+    return settings.data_raw_dir / raw_doc_code
 
 
 # Lấy đường dẫn thư mục lưu trữ dữ liệu đã xử lý (processed data) của văn bản.
-def _processed_dir(doc_id: str) -> Path:
-    return settings.data_processed_dir / doc_id
+def _processed_dir(raw_doc_code: str) -> Path:
+    return settings.data_processed_dir / raw_doc_code
 
 
-def _parse_folder_worker(folder_name: str) -> bool:
+def _parse_folder_worker(raw_doc_code: str) -> bool:
     """Worker xử lý parse cho 1 thư mục đơn lẻ."""
     try:
-        raw_dir = settings.data_raw_dir / folder_name
+        raw_dir = settings.data_raw_dir / raw_doc_code
         metadata_path = raw_dir / "metadata.json"
         source_path = raw_dir / "source.txt"
 
         if not source_path.exists() or not metadata_path.exists():
-            typer.echo(f"Thư mục {folder_name} thiếu source.txt hoặc metadata.json", err=True)
+            typer.echo(f"Thư mục {raw_doc_code} thiếu source.txt hoặc metadata.json", err=True)
             return False
 
-        meta = json.loads(metadata_path.read_text(encoding="utf-8"))
-        doc_info = _document_info_from_metadata(meta, fallback_id=folder_name)
+        doc_info = _document_info_from_metadata(_ready_metadata(raw_doc_code))
 
         text = source_path.read_text(encoding="utf-8")
         parsed = parse_text(text, doc_info)
 
-        out_dir = settings.data_processed_dir / folder_name
+        out_dir = settings.data_processed_dir / raw_doc_code
         out_dir.mkdir(parents=True, exist_ok=True)
         # Ghi đè file hierarchy.json nếu đã tồn tại
         (out_dir / "hierarchy.json").write_text(
             parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
         )
-        typer.echo(f"Parsed thành công {folder_name} -> {out_dir / 'hierarchy.json'}")
+        typer.echo(f"Parsed thành công {raw_doc_code} -> {out_dir / 'hierarchy.json'}")
         return True
     except Exception as e:
-        typer.echo(f"Lỗi khi parse thư mục {folder_name}: {e}", err=True)
+        typer.echo(f"Lỗi khi parse thư mục {raw_doc_code}: {e}", err=True)
         return False
 
 
@@ -113,12 +120,12 @@ def _parse_folder_worker(folder_name: str) -> bool:
 @app.command()
 def crawl(
     url: Annotated[str, typer.Option(help="URL trang chi tiết vbpl.vn")],
-    doc_id: Annotated[str, typer.Option(help="Document ID, vd 'LDN2020'")],
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
     number: Annotated[str, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'")],
 ) -> None:
-    """Crawl văn bản từ vbpl.vn -> data/raw/<doc_id>/{source.txt,metadata.json}."""
-    metadata = crawl_and_save(url, doc_id=doc_id, number=number, raw_dir=settings.data_raw_dir)
-    typer.echo(f"Đã crawl {doc_id}: {metadata.title} ({metadata.status})")
+    """Crawl văn bản từ vbpl.vn -> data/raw/<raw_doc_code>/{source.txt,metadata.json}."""
+    metadata = crawl_and_save(url, doc_id=raw_doc_code, number=number, raw_dir=settings.data_raw_dir)
+    typer.echo(f"Đã crawl {raw_doc_code}: {metadata.title} ({metadata.status})")
 
 
 # Lệnh CLI để cào hàng loạt văn bản pháp luật dựa trên từ khóa tìm kiếm trên vbpl.vn.
@@ -135,9 +142,9 @@ def crawl_search(
 # Lệnh CLI để phân tách cấu trúc văn bản pháp luật (Chương/Điều/Khoản/Điểm) từ file thô hoặc Text.
 @app.command()
 def parse(
-    doc_id: Annotated[
+    raw_doc_code: Annotated[
         str | None,
-        typer.Option(help="Document ID, vd 'LDN2020'. Nếu không truyền, mặc định parse toàn bộ thư mục trong data/raw/"),
+        typer.Option(help="Filesystem document code, vd 'L59_2020'. Nếu không truyền, parse curated folders trong data/raw/"),
     ] = None,
     txt: Annotated[
         Path | None,
@@ -150,25 +157,28 @@ def parse(
         str | None, typer.Option(help="Tiêu đề văn bản (chỉ cần khi dùng --txt mà chưa có metadata.json)")
     ] = None,
 ) -> None:
-    """Parse văn bản -> data/processed/<doc_id>/hierarchy.json.
+    """Parse văn bản -> data/processed/<raw_doc_code>/hierarchy.json.
 
-    Mặc định đọc data/raw/<doc_id>/source.txt (output của `crawl`, lấy từ HTML body).
+    Mặc định đọc data/raw/<raw_doc_code>/source.txt (output của `crawl`, lấy từ HTML body).
     Dùng `--txt <path>` để parse trực tiếp từ file text (.txt).
-    Nếu không truyền --doc-id và không dùng --txt, sẽ parse tất cả thư mục trong data/raw.
+    Nếu không truyền --raw-doc-code và không dùng --txt, chỉ parse các thư mục thuộc curated manifest.
     """
     # 1.   Nếu dùng --txt để parse trực tiếp từ file text tự chọn
     if txt is not None:
         if not txt.exists():
             typer.echo(f"File text không tồn tại: {txt}", err=True)
             raise typer.Exit(code=1)
-        if not doc_id:
-            typer.echo("Khi dùng --txt, bắt buộc phải truyền --doc-id để xác định định danh văn bản.", err=True)
+        if not raw_doc_code:
+            typer.echo("Khi dùng --txt, bắt buộc phải truyền --raw-doc-code.", err=True)
             raise typer.Exit(code=1)
 
-        metadata_path = settings.data_raw_dir / doc_id / "metadata.json"
+        metadata_path = settings.data_raw_dir / raw_doc_code / "metadata.json"
         if metadata_path.exists():
-            meta = json.loads(metadata_path.read_text(encoding="utf-8"))
-            doc_info = _document_info_from_metadata(meta, fallback_id=doc_id)
+            try:
+                doc_info = _document_info_from_metadata(_ready_metadata(raw_doc_code))
+            except ValueError as exc:
+                typer.echo(str(exc), err=True)
+                raise typer.Exit(code=1) from exc
         else:
             if not number:
                 typer.echo(
@@ -176,28 +186,32 @@ def parse(
                     err=True,
                 )
                 raise typer.Exit(code=1)
+            manifest_entry = load_curated_manifest(settings.curated_manifest_path).get(raw_doc_code)
+            if manifest_entry is None:
+                typer.echo(f"raw_doc_code không nằm trong curated manifest: {raw_doc_code}", err=True)
+                raise typer.Exit(code=1)
             doc_info = DocumentInfo(
-                id=doc_id,
-                title=title or doc_id,
+                id=manifest_entry["graph_id"],
+                title=title or raw_doc_code,
                 number=number,
-                doc_type="Law",
+                doc_type=manifest_entry["doc_type"],
                 normative=True,
                 legal_status="ACTIVE",
             )
 
         text = txt.read_text(encoding="utf-8")
         parsed = parse_text(text, doc_info)
-        out_dir = settings.data_processed_dir / doc_id
+        out_dir = settings.data_processed_dir / raw_doc_code
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "hierarchy.json").write_text(
             parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
         )
-        typer.echo(f"Parsed {doc_id}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}")
+        typer.echo(f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}")
         return
 
-    # 2.   Nếu không dùng --txt và truyền --doc-id cụ thể để parse một thư mục
-    if doc_id is not None:
-        raw_dir = _raw_dir(doc_id)
+    # 2. Nếu không dùng --txt và truyền --raw-doc-code cụ thể để parse một thư mục
+    if raw_doc_code is not None:
+        raw_dir = _raw_dir(raw_doc_code)
         metadata_path = raw_dir / "metadata.json"
         source_path = raw_dir / "source.txt"
 
@@ -205,25 +219,29 @@ def parse(
             typer.echo(f"Thiếu {source_path} hoặc {metadata_path} — chạy `crawl` trước (hoặc dùng --txt).", err=True)
             raise typer.Exit(code=1)
 
-        meta = json.loads(metadata_path.read_text(encoding="utf-8"))
-        doc_info = _document_info_from_metadata(meta, fallback_id=doc_id)
+        try:
+            doc_info = _document_info_from_metadata(_ready_metadata(raw_doc_code))
+        except ValueError as exc:
+            typer.echo(str(exc), err=True)
+            raise typer.Exit(code=1) from exc
 
         text = source_path.read_text(encoding="utf-8")
         parsed = parse_text(text, doc_info)
-        out_dir = _processed_dir(doc_id)
+        out_dir = _processed_dir(raw_doc_code)
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "hierarchy.json").write_text(
             parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
         )
-        typer.echo(f"Parsed {doc_id}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}")
+        typer.echo(f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}")
         return
 
-    # 3.   Nếu không truyền cả --txt và --doc-id, tự động quét và parse tất cả thư mục trong data/raw/
+    # 3. Nếu không truyền --txt/--raw-doc-code, parse các thư mục curated trong data/raw/
     if not settings.data_raw_dir.exists():
         typer.echo(f"Thư mục nguồn {settings.data_raw_dir} không tồn tại.", err=True)
         raise typer.Exit(code=1)
 
-    subdirs = [p for p in settings.data_raw_dir.iterdir() if p.is_dir()]
+    curated_codes = set(load_curated_manifest(settings.curated_manifest_path))
+    subdirs = [p for p in settings.data_raw_dir.iterdir() if p.is_dir() and p.name in curated_codes]
     valid_folders = [p.name for p in subdirs if (p / "source.txt").exists() and (p / "metadata.json").exists()]
 
     if not valid_folders:
@@ -256,7 +274,7 @@ def parse(
 
 # Lệnh CLI để trích xuất thực thể, quan hệ từ cấu trúc đã phân tách sử dụng mô hình LLM.
 @app.command()
-def extract(doc_id: Annotated[str, typer.Option(help="Document ID, vd 'LDN2020'")]) -> None:
+def extract(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")]) -> None:
     """Chạy LLM Extraction + Validation + Scoring trên hierarchy.json đã parse."""
     try:
         settings.require_api_key()
@@ -264,17 +282,97 @@ def extract(doc_id: Annotated[str, typer.Option(help="Document ID, vd 'LDN2020'"
         typer.echo(str(e), err=True)
         raise typer.Exit(code=1) from e
 
-    hierarchy_path = _processed_dir(doc_id) / "hierarchy.json"
+    hierarchy_path = _processed_dir(raw_doc_code) / "hierarchy.json"
     if not hierarchy_path.exists():
         typer.echo(f"Thiếu {hierarchy_path} — chạy `parse` trước.", err=True)
         raise typer.Exit(code=1)
 
     parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
-    run_pipeline(parsed, settings.data_processed_dir, raw_doc_code=doc_id)
+    run_pipeline(parsed, settings.data_processed_dir, raw_doc_code=raw_doc_code)
     typer.echo(
-        f"Extraction xong cho {doc_id}: xem data/processed/{doc_id}/"
+        f"Extraction xong cho {raw_doc_code}: xem data/processed/{raw_doc_code}/"
         "{extract.jsonl, accepted.jsonl, review.jsonl, rejected.jsonl, entity_index.json}"
     )
+
+
+@app.command("validate-data")
+def validate_data(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+) -> None:
+    """Validate curated metadata and canonical graph identity before parsing."""
+    readiness = validate_document_readiness(
+        raw_doc_code,
+        settings.data_raw_dir,
+        manifest_path=settings.curated_manifest_path,
+    )
+    if not readiness.valid:
+        for error in readiness.errors:
+            typer.echo(f"Data readiness error: {error}", err=True)
+        raise typer.Exit(code=1)
+    metadata = readiness.normalized_metadata
+    typer.echo(
+        json.dumps(
+            {
+                "raw_doc_code": raw_doc_code,
+                "graph_id": metadata["graph_id"],
+                "doc_type": metadata["doc_type"],
+                "legal_status": metadata["legal_status"],
+                "effective_from": metadata["effective_from"],
+                "issuer_name": metadata["issuer_name"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@app.command("validate-payload")
+def validate_payload(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+) -> None:
+    """Build and validate a graph payload without opening a Neo4j connection."""
+    try:
+        payload = build_payload_from_paths(_processed_dir(raw_doc_code))
+    except PayloadBuildError as exc:
+        typer.echo(f"Payload build error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+
+    node_counts = Counter(node.get("type") for node in payload.get("nodes", []))
+    relation_counts = Counter(relation.get("type") for relation in payload.get("relations", []))
+    
+    consistency = validate_payload_consistency(payload)
+    dangling_endpoint_count = sum(1 for err in consistency.errors if "dangling" in err.lower())
+    
+    ontology_violation_count = 0
+    ontology_errors = []
+    try:
+        validate_graph_payload(payload)
+    except GraphValidationError as exc:
+        ontology_errors = exc.errors
+        ontology_violation_count = len(exc.errors)
+
+    report = {
+        "raw_doc_code": raw_doc_code,
+        "graph_id": _graph_id(payload),
+        "node_count_by_label": dict(sorted(node_counts.items())),
+        "relation_count_by_type": dict(sorted(relation_counts.items())),
+        "embedding_target_count": sum(
+            node_counts.get(label, 0) for label in ("Article", "Clause")
+        ),
+        "duplicate_node_id_count": consistency.duplicate_node_id_count,
+        "duplicate_relation_identity_count": consistency.duplicate_relation_identity_count,
+        "dangling_endpoint_count": dangling_endpoint_count,
+        "ontology_violation_count": ontology_violation_count,
+    }
+    typer.echo(json.dumps(report, ensure_ascii=False, indent=2))
+
+    has_errors = not consistency.valid or ontology_violation_count > 0
+    if has_errors:
+        for err in consistency.errors:
+            typer.echo(f"Consistency error: {err}", err=True)
+        for err in ontology_errors:
+            typer.echo(f"Ontology error: {err}", err=True)
+        raise typer.Exit(code=1)
 
 
 @app.command("write")
@@ -297,7 +395,7 @@ def write_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name unde
 
 @app.command("embed")
 def embed_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")]) -> None:
-    """Generate and write 768-dim Article/Clause embeddings as a post-write step."""
+    """Generate and write configured-dimension Article/Clause embeddings."""
     payload = _validated_payload_for_raw_doc_code(raw_doc_code)
     texts_by_node_id = embedding_texts_by_node_id(payload)
     node_ids = list(texts_by_node_id)
@@ -334,19 +432,29 @@ def graph_quality(raw_doc_code: Annotated[str, typer.Option(help="Folder name un
         close = getattr(session, "close", None)
         if callable(close):
             close()
+    report["extraction_decisions"] = decision_stats_from_paths(_processed_dir(raw_doc_code))
     out_dir = settings.data_reports_dir / raw_doc_code
     write_graph_quality_report(report, out_dir)
     typer.echo(f"Wrote graph quality report -> {out_dir}")
 
 
 def _validated_payload_for_raw_doc_code(raw_doc_code: str) -> dict:
-    payload = build_payload_from_paths(_processed_dir(raw_doc_code))
+    try:
+        payload = build_payload_from_paths(_processed_dir(raw_doc_code))
+    except PayloadBuildError as exc:
+        typer.echo(f"Payload build error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
     consistency = validate_payload_consistency(payload)
     if not consistency.valid:
         for error in consistency.errors:
             typer.echo(f"Payload consistency error: {error}", err=True)
         raise typer.Exit(code=1)
-    validate_graph_payload(payload)
+    try:
+        validate_graph_payload(payload)
+    except GraphValidationError as exc:
+        for error in exc.errors:
+            typer.echo(f"Ontology validation error: {error}", err=True)
+        raise typer.Exit(code=1) from exc
     return payload
 
 
@@ -361,13 +469,13 @@ def _graph_id(payload: dict) -> str:
 @app.command()
 def ingest(
     url: Annotated[str, typer.Option(help="URL trang chi tiết vbpl.vn")],
-    doc_id: Annotated[str, typer.Option(help="Document ID, vd 'LDN2020'")],
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
     number: Annotated[str, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'")],
 ) -> None:
     """Full pipeline: crawl -> parse -> extract."""
-    crawl(url, doc_id, number)
-    parse(doc_id)
-    extract(doc_id)
+    crawl(url, raw_doc_code, number)
+    parse(raw_doc_code)
+    extract(raw_doc_code)
 
 
 if __name__ == "__main__":

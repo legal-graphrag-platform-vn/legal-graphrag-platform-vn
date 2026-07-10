@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "documents": [
+    {"raw_doc_code": "L59_2020", "graph_id": "ldn_2020", "number": "59/2020/QH14", "doc_type": "Law", "required": true, "gold_annotation": true},
+    {"raw_doc_code": "ND01_2021", "graph_id": "nd_01_2021", "number": "01/2021/NĐ-CP", "doc_type": "Decree", "required": true, "gold_annotation": true},
+    {"raw_doc_code": "ND47_2021", "graph_id": "nd_47_2021", "number": "47/2021/NĐ-CP", "doc_type": "Decree", "required": true, "gold_annotation": true},
+    {"raw_doc_code": "TT01_2021", "graph_id": "tt_01_2021", "number": "01/2021/TT-BKHĐT", "doc_type": "Circular", "required": true, "gold_annotation": false},
+    {"raw_doc_code": "L68_2014", "graph_id": "ldn_2014", "number": "68/2014/QH13", "doc_type": "Law", "required": false, "gold_annotation": false},
+    {"raw_doc_code": "ND78_2015", "graph_id": "nd_78_2015", "number": "78/2015/NĐ-CP", "doc_type": "Decree", "required": false, "gold_annotation": false},
+    {"raw_doc_code": "ND108_2018", "graph_id": "nd_108_2018", "number": "108/2018/NĐ-CP", "doc_type": "Decree", "required": false, "gold_annotation": false},
+    {"raw_doc_code": "ND155_2020", "graph_id": "nd_155_2020", "number": "155/2020/NĐ-CP", "doc_type": "Decree", "required": false, "gold_annotation": false},
+    {"raw_doc_code": "L61_2020", "graph_id": "ldt_2020", "number": "61/2020/QH14", "doc_type": "Law", "required": false, "gold_annotation": false},
+    {"raw_doc_code": "ND31_2021", "graph_id": "nd_31_2021", "number": "31/2021/NĐ-CP", "doc_type": "Decree", "required": false, "gold_annotation": false}
+  ]
+}

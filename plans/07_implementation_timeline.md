@@ -1,9 +1,9 @@
 # Implementation Timeline — Legal GraphRAG
 
-> **Cập nhật**: 2026-07-07  
+> **Cập nhật**: 2026-07-10
 > **Đánh giá**: Research ⭐⭐⭐⭐⭐ | Engineering ⭐⭐⭐⭐☆ | Hoàn thành ⭐⭐⭐⭐☆  
 > **Triết lý**: Ưu tiên giá trị nghiên cứu → Experiment → Portal.
-> **Depends on**: [legal_ontology.md v1.4.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.5.0](./legal_ontology.md)
 
 ---
 
@@ -74,7 +74,7 @@ Phase 5 — Portal              ❌ CHƯA
 
 ### Tuần 1: Neo4j Writer
 
-- [ ] Implement `src/writer/neo4j_writer.py`
+- [x] Implement `src/infrastructure/neo4j/writer.py`
   - Map JSONL → Cypher `MERGE` (document, article, clause, point nodes)
   - Tạo relationships từ validated relations
   - Gắn `effective_from`, `effective_to`, `legal_status`, `doc_type` đúng schema
@@ -83,9 +83,11 @@ Phase 5 — Portal              ❌ CHƯA
 
 ### Tuần 2: Embedding Generator + Vector Index
 
-- [ ] Dùng embedding model chính: `bkai-foundation-models/vietnamese-bi-encoder` (768-dim, khớp Neo4j vector index)
-- [ ] Fallback nếu chất lượng không đủ: `BAAI/bge-m3` sau khi verify dimension và cập nhật vector index nếu khác 768
-- [ ] Implement `src/writer/embedding_generator.py` — batch processing, 768-dim
+- [ ] Migrate primary embedding contract theo ADR-20: `BAAI/bge-m3` via `FlagEmbedding`, 1024-dim
+- [ ] Giữ `bkai-foundation-models/vietnamese-bi-encoder`, 768-dim làm baseline/ablation; không dùng chung vector index với BGE-M3
+- [x] Implement `src/pipeline/embedding/embedding_generator.py` and `src/infrastructure/neo4j/embedding_writer.py` — batch processing, dimension validation
+- [ ] Đồng bộ `EMBEDDING_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_DIM` với ontology và Neo4j schema
+- [ ] Drop/recreate vector indexes 1024-dim và re-embed toàn bộ Article/Clause nếu DB đã dùng schema 768 cũ
 - [ ] Load vào Neo4j vector index (`article_embedding`, `clause_embedding`)
 - [ ] Verify: `CALL db.index.vector.queryNodes(...)` trả về kết quả
 
@@ -110,7 +112,7 @@ Phase 5 — Portal              ❌ CHƯA
 |---|---|---|
 | A-1 | 218 Article nodes | `MATCH (a:Article) RETURN count(a)` = 218 |
 | A-2 | Relations được ghi | `MATCH ()-[r]->() RETURN type(r), count(r)` |
-| A-3 | Vector search hoạt động | Top-5 query trả về đúng Article |
+| A-3 | BGE-M3/1024 vector search hoạt động | Config/model/index dimension parity pass; Top-5 query trả về Article phù hợp |
 | A-4 | Schema constraints 0 violation | `SHOW CONSTRAINTS` |
 | A-5 | Graph Quality Report hoàn chỉnh | File report tồn tại |
 

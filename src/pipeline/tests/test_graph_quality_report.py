@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from unittest.mock import Mock
 
-from src.pipeline.reports.graph_quality import GraphQualityReporter, build_graph_quality_report
+from src.pipeline.reports.graph_quality import (
+    GraphQualityReporter,
+    build_graph_quality_report,
+    decision_stats_from_paths,
+)
 from src.shared.ontology.payload_consistency_validator import deterministic_relation_id
 
 
@@ -56,7 +60,7 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
             {
                 "node_ids": [
                     "ldn_2020",
-                    "issuer_quoc_hoi",
+                    "quoc_hoi",
                     "ldn_2020_art17",
                     "ldn_2020_art18",
                     "ldn_2020_art17_cl1",
@@ -77,6 +81,7 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
         [{"total": 2, "embedded": 2}],
         [{"total": 1, "embedded": 0}],
         [{"count": 1}],
+        [{"count": 0}],
         [
             {
                 "source": "ldn_2020",
@@ -96,7 +101,7 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
                 "relation_type": "ISSUED_BY",
                 "properties": {"relation_id": "issued"},
                 "relation_id": "issued",
-                "target": "issuer_quoc_hoi",
+                "target": "quoc_hoi",
                 "target_labels": ["Issuer"],
                 "target_doc_type": None,
             },
@@ -163,7 +168,29 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
     assert report["relation_count_by_type"]["REQUIRES"] == 1
     assert report["duplicate_node_id_count"] == 1
     assert report["duplicate_relation_identity_count"] == 1
+    assert report["dangling_endpoint_count"] == 0
     assert report["orphan_node_count"] == 2
+    assert report["article_semantic_coverage"] == 0.5
+    assert report["graph_density"] == 6 / (8 * 7)
+    assert report["average_degree"] == 1.5
     assert report["connected_component_count"] == 3
     assert report["ontology_violation_count"] == 1
     assert report["ontology_violation_rate"] == 1 / 6
+
+
+def test_decision_stats_are_separate_from_database_ontology_rate(tmp_path) -> None:
+    (tmp_path / "accepted.jsonl").write_text('{"decision":"accepted"}\n', encoding="utf-8")
+    (tmp_path / "review.jsonl").write_text(
+        '{"decision":"review","review_reason":"low_confidence"}\n', encoding="utf-8"
+    )
+    (tmp_path / "rejected.jsonl").write_text(
+        '{"decision":"rejected","rejection_reason":"invalid_endpoint"}\n', encoding="utf-8"
+    )
+
+    stats = decision_stats_from_paths(tmp_path)
+
+    assert stats["extracted_relation_total"] == 3
+    assert stats["acceptance_rate"] == 1 / 3
+    assert stats["review_rate"] == 1 / 3
+    assert stats["rejection_rate"] == 1 / 3
+    assert stats["decision_reason_counts"] == {"low_confidence": 1, "invalid_endpoint": 1}

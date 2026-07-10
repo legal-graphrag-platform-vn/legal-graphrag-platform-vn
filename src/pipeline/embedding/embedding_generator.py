@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import sqrt
 from typing import Iterable, Protocol
 
 from src.pipeline.config import settings
@@ -16,9 +17,14 @@ class EmbeddingDimensionError(ValueError):
     """Raised when an embedding model returns a vector with the wrong dimension."""
 
 
+class EmbeddingProviderError(ValueError):
+    """Raised when the configured embedding provider is unsupported or unavailable."""
+
+
 @dataclass(slots=True)
 class EmbeddingGenerator:
     model_name: str = settings.embedding_model
+    provider: str = settings.embedding_provider
     expected_dimension: int = settings.embedding_dimension
     normalize_embeddings: bool = True
     encoder: EncoderProtocol | None = None
@@ -31,11 +37,21 @@ class EmbeddingGenerator:
         return vectors
 
     def _load_encoder(self) -> EncoderProtocol:
-        try:
-            from sentence_transformers import SentenceTransformer
-        except ImportError as exc:
-            raise RuntimeError("Install sentence-transformers to use the embed command") from exc
-        return SentenceTransformer(self.model_name)
+        if self.provider == "flag_embedding":
+            try:
+                from FlagEmbedding import BGEM3FlagModel
+            except ImportError as exc:
+                raise RuntimeError("Install FlagEmbedding and torch to use the BGE-M3 embed command") from exc
+            return _FlagEmbeddingEncoder(BGEM3FlagModel(self.model_name, use_fp16=True))
+
+        if self.provider == "sentence_transformers":
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError as exc:
+                raise RuntimeError("Install sentence-transformers to use the embedding baseline") from exc
+            return SentenceTransformer(self.model_name)
+
+        raise EmbeddingProviderError(f"Unsupported embedding provider: {self.provider}")
 
 
 def embedding_text_for_node(node: dict) -> str | None:
@@ -99,3 +115,27 @@ def validate_embedding_dimension(vector: list[float], expected_dimension: int = 
 
 def _clean_parts(*parts: object) -> list[str]:
     return [str(part).strip() for part in parts if str(part or "").strip()]
+
+
+class _FlagEmbeddingEncoder:
+    def __init__(self, model: object) -> None:
+        self.model = model
+
+    def encode(self, texts: list[str], normalize_embeddings: bool = True) -> list[list[float]]:
+        result = self.model.encode(
+            texts,
+            return_dense=True,
+            return_sparse=False,
+            return_colbert_vecs=False,
+        )
+        vectors = [list(map(float, vector)) for vector in result["dense_vecs"]]
+        if not normalize_embeddings:
+            return vectors
+        return [_normalize(vector) for vector in vectors]
+
+
+def _normalize(vector: list[float]) -> list[float]:
+    norm = sqrt(sum(value * value for value in vector))
+    if norm == 0:
+        return vector
+    return [value / norm for value in vector]

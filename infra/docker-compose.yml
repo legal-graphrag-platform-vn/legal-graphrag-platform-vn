@@ -19,6 +19,8 @@ services:
       NEO4J_server_memory_pagecache_size: "512m"
       # Cho phép vector index (mặc định bật từ 5.11+)
       NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*"
+      # Bật Vector API để tối ưu HNSW index và tránh warning lúc khởi động
+      NEO4J_server_jvm_additional: "--add-modules jdk.incubator.vector"
       # Log level
       NEO4J_dbms_logs_query_enabled: "INFO"
     volumes:

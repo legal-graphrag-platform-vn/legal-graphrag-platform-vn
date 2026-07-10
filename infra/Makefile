@@ -65,7 +65,7 @@ verify-schema:
 	@echo "🔍 Indexes (including vector):"
 	@docker exec graphrag-neo4j cypher-shell \
 		-u neo4j -p "$(NEO4J_PASSWORD)" --format plain \
-		"SHOW INDEXES YIELD name, type, state, labelsOrTypes ORDER BY type RETURN name, type, state, labelsOrTypes;"
+		"SHOW INDEXES YIELD name, type, state, labelsOrTypes RETURN name, type, state, labelsOrTypes ORDER BY type, name;"
 
 ## ─── Debug ───────────────────────────────────────────────────────────────────
 

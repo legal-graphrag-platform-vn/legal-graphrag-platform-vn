@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     data_raw_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "raw")
     data_processed_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "processed")
     data_reports_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "reports")
+    curated_manifest_path: Path = Field(
+        default=Path(__file__).resolve().parents[2] / "configs" / "corpus" / "curated_v1.json"
+    )
     extraction_max_workers: int = Field(default=10, ge=1, le=50, description="Số lượng luồng gọi LLM API song song")
 
     confidence_threshold_auto: float = Field(default=0.8, ge=0.0, le=1.0)
@@ -53,17 +56,9 @@ class Settings(BaseSettings):
     neo4j_user: str = Field(default="neo4j")
     neo4j_password: str = Field(default="")
 
-    embedding_model: str = Field(default="bkai-foundation-models/vietnamese-bi-encoder")
-    embedding_dimension: int = Field(default=768, ge=1)
-
-    tesseract_cmd: str = Field(
-        default="", description="Đường dẫn tesseract.exe nếu không nằm trong PATH (vd Windows)."
-    )
-    tessdata_dir: str = Field(
-        default="",
-        description="Thư mục chứa *.traineddata (vd gói ngôn ngữ vie.traineddata tải riêng, "
-        "không ghi được vào thư mục cài đặt Tesseract mặc định do thiếu quyền admin).",
-    )
+    embedding_model: str = Field(default="BAAI/bge-m3")
+    embedding_provider: str = Field(default="flag_embedding")
+    embedding_dimension: int = Field(default=1024, ge=1, validation_alias="EMBEDDING_DIM")
 
     def require_gemini_api_key(self) -> str:
         """Trả về API key hoặc raise lỗi rõ ràng nếu thiếu (dành cho backward compatibility)."""

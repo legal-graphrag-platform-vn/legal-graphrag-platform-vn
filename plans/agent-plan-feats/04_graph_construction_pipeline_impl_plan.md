@@ -1,8 +1,8 @@
 # Detailed Implementation Plan — Graph Construction Pipeline
 
 > Target spec: `plans/04_graph_construction_pipeline.md`  
-> Canonical ontology: `plans/legal_ontology.md` v1.4.0  
-> Status: implementation plan for M3 graph write + embedding integration
+> Canonical ontology: `plans/legal_ontology.md` v1.5.0
+> Status: implemented M3 contract; paths updated after monorepo package flattening
 
 ---
 
@@ -29,9 +29,9 @@ web crawl -> raw source.txt + metadata.json
   -> embedding fill
 ```
 
-The existing `src/pipeline` code already covers crawl, parse, extract, schema validation, relation enrichment, label normalization, ontology validation, scoring, and JSON output. The missing implementation work is the M3 bridge from accepted extraction records to validated Neo4j writes and embeddings.
+The active source now covers crawl, parse, extract, schema validation, relation enrichment, label normalization, ontology validation, scoring, JSON output, guarded Neo4j writes, embeddings, and graph-quality reporting. Remaining M3 work is runtime verification against Neo4j and Milestone A acceptance.
 
-`src/legal-graphrag` is prototype/reference code only. It must not become the active graph-construction implementation without cleanup and contract migration.
+`prototypes/legal_graphrag_legacy` is prototype/reference code only. It must not become active graph-construction code without explicit migration and contract validation.
 
 ---
 
@@ -41,15 +41,15 @@ Use these modules as the implementation anchors:
 
 | Area | Current source | Role |
 |---|---|---|
-| CLI | `src/pipeline/main.py` | Active crawl/parse/extract/ingest entrypoint |
-| Crawler | `src/pipeline/src/crawler/` | Web crawl -> `data/raw/<doc_id>` |
-| Parser | `src/pipeline/src/parser/` | `source.txt` + metadata -> `hierarchy.json` |
-| Extraction | `src/pipeline/src/extraction/` | two-pass LLM extraction |
-| Pipeline orchestration | `src/pipeline/src/pipeline/orchestrator.py` | validation, enrichment, scoring, JSONL output |
-| Pipeline validator | `src/pipeline/src/validation/ontology_validator.py` | extraction-stage relation validation |
-| Write-time validator | `src/validation/ontology_validator.py` | canonical payload validation before writer |
-| Neo4j writer | `src/database/neo4j_writer.py` | guarded `MERGE` writer |
-| Prototype | `src/legal-graphrag/` | quarantine; reference only |
+| CLI | `src/pipeline/main.py` | Active crawl/parse/extract/write/embed/graph-quality/ingest entrypoint |
+| Crawler | `src/pipeline/crawler/` | Web crawl -> `data/raw/<doc_id>` |
+| Parser | `src/pipeline/parser/` | `source.txt` + metadata -> `hierarchy.json` |
+| Extraction | `src/pipeline/extraction/` | two-pass LLM extraction |
+| Pipeline orchestration | `src/pipeline/pipeline/orchestrator.py` | validation, enrichment, scoring, JSONL output |
+| Shared ontology contract | `src/shared/ontology/contract.py` | canonical constants for extraction and write validation |
+| Write-time validator | `src/shared/ontology/validators.py` | canonical payload validation before writer |
+| Neo4j writer | `src/infrastructure/neo4j/writer.py` | guarded `MERGE` writer |
+| Prototype | `prototypes/legal_graphrag_legacy/` | quarantined reference only |
 
 Implementation rule: Neo4j writes must go through `GraphIngestionService.ingest(...)` or an equivalent shared validation gate. No active pipeline code may call the Neo4j driver directly for graph writes.
 
@@ -57,25 +57,24 @@ Implementation rule: Neo4j writes must go through `GraphIngestionService.ingest(
 
 ## 3. Implementation Changes
 
-### 3.1 Quarantine `src/legal-graphrag`
+### 3.1 Quarantine `prototypes/legal_graphrag_legacy`
 
-Before using anything from `src/legal-graphrag`, clean and isolate it.
+The former `src/legal-graphrag` prototype is isolated under `prototypes/legal_graphrag_legacy`.
 
 Required actions:
 
-- Remove nested `.git` from `src/legal-graphrag` before staging in the parent repo.
+- Remove nested `.git` from the prototype before staging in the parent repo.
 - Remove generated `__pycache__` files.
 - Remove hardcoded API key material from `temp/test_router_api.py`.
-- Rotate/revoke any real API key that has already appeared in `src/legal-graphrag`.
+- Rotate/revoke any real API key that has already appeared in the prototype.
 - Keep `temp/` scripts out of active imports.
-- Do not import `src/legal-graphrag` from `src/pipeline`, `src/database`, or `src/backend`.
+- Do not import `prototypes/legal_graphrag_legacy` from `src/` or `apps/`.
 
 Explicitly forbidden active patterns:
 
 - `BaseNode`
 - `entity_vector`
-- BGE-M3 as the default embedding model
-- 1024-dim vector index
+- embedding model/dimension outside the canonical configured contract
 - `MATCH (n) DETACH DELETE n`
 - direct dynamic-label `MERGE` from raw JSON
 - legacy uppercase graph IDs such as `LDN2020_D17`
@@ -91,20 +90,20 @@ Those ideas belong in retrieval/reasoning work, not M3 graph construction.
 
 ### 3.2 Align Pipeline and Write-Time Validators
 
-The repo currently has two validation layers:
+The repo uses two validation stages backed by one shared ontology contract:
 
-- extraction-stage validator in `src/pipeline/src/validation/ontology_validator.py`
-- write-time validator in `src/validation/ontology_validator.py`
+- extraction-stage validation through `src/shared/ontology/extraction_validator.py`
+- write-time validation through `src/shared/ontology/validators.py`
 
 They must agree on Phase 1 persistence.
 
 Required changes:
 
-- Treat `src/validation/ontology_validator.py` as the write-time authority.
+- Treat `src/shared/ontology/contract.py` as the constants authority and `src/shared/ontology/validators.py` as the write-time validation authority.
 - Keep pipeline validator focused on relation validation before scoring.
 - Ensure both validators reject legacy aliases.
 - Ensure both validators reject extraction labels after Step 3.6.
-- Add either a shared ontology contract module or contract parity tests to prevent drift between validators.
+- Keep shared-contract and parity tests to prevent drift between validation stages.
 - Ensure Phase 1 rejects runtime-only persistence:
   - `Obligation`
   - `Right`
@@ -133,7 +132,7 @@ Add a graph payload builder after extraction and before writer validation.
 Suggested module:
 
 ```text
-src/pipeline/src/persistence/payload_builder.py
+src/pipeline/persistence/payload_builder.py
 ```
 
 Input:
@@ -351,8 +350,8 @@ Run payload-level consistency validation again after graph payload building and 
 Suggested modules:
 
 ```text
-src/pipeline/src/validation/record_consistency_validator.py
-src/pipeline/src/validation/payload_consistency_validator.py
+src/pipeline/validation/record_consistency_validator.py
+src/shared/ontology/payload_consistency_validator.py
 ```
 
 Record-level checks:
@@ -387,7 +386,7 @@ Extend `src/pipeline/main.py` with a write command.
 CLI:
 
 ```bash
-python main.py write --raw-doc-code <raw_doc_code>
+python -m src.pipeline.main write --raw-doc-code <raw_doc_code>
 ```
 
 Behavior:
@@ -409,7 +408,7 @@ Do not:
 Optional later CLI:
 
 ```bash
-python main.py ingest --url <url> --raw-doc-code <raw_doc_code> --number <number> --write
+python -m src.pipeline.main ingest --url <url> --doc-id <raw_doc_code> --number <number>
 ```
 
 Keep this optional until `write` is tested in isolation.
@@ -421,27 +420,28 @@ Add embedding as a separate post-write step.
 Suggested modules:
 
 ```text
-src/pipeline/src/embedding/embedding_generator.py
-src/pipeline/src/embedding/neo4j_embedding_writer.py
+src/pipeline/embedding/embedding_generator.py
+src/infrastructure/neo4j/embedding_writer.py
 ```
 
 CLI:
 
 ```bash
-python main.py embed --raw-doc-code <raw_doc_code>
+python -m src.pipeline.main embed --raw-doc-code <raw_doc_code>
 ```
 
 Contract:
 
-- Primary model: `bkai-foundation-models/vietnamese-bi-encoder`
-- Required dimension: 768
+- Primary model: `BAAI/bge-m3` via `FlagEmbedding`
+- Required configured dimension: 1024
+- Explicit baseline: BKAI Vietnamese bi-encoder, 768-dim, with a matching baseline index run
 - Write only:
   - `Article.embedding`
   - `Clause.embedding`
 - Do not embed `Point`.
 - Do not create `BaseNode`.
 - Do not create `entity_vector`.
-- Fail fast if embedding dimension is not 768.
+- Fail fast if embedding output dimension differs from configured schema dimension.
 - Verify Neo4j vector indexes exist before writing embeddings.
 - Update only `Article` and `Clause` nodes belonging to the current canonical document ID/prefix.
 - Normalize embeddings if required by the selected embedding model and cosine retrieval behavior.
@@ -453,7 +453,7 @@ Embedding text:
 
 ### 3.8 Keep Retrieval Prototype Out of M3
 
-Do not connect `src/legal-graphrag/core/retriever.py` to the M3 graph writer.
+Do not connect `prototypes/legal_graphrag_legacy/core/retriever.py` to the M3 graph writer.
 
 Retrieval will be implemented later against the canonical Neo4j schema:
 
@@ -480,7 +480,7 @@ Add a lightweight graph quality report after write and embedding.
 Optional CLI:
 
 ```bash
-python main.py graph-quality --raw-doc-code <raw_doc_code>
+python -m src.pipeline.main graph-quality --raw-doc-code <raw_doc_code>
 ```
 
 Minimum metrics:
@@ -515,19 +515,19 @@ data/reports/<raw_doc_code>/graph_quality.md
 Add:
 
 ```bash
-python main.py write --raw-doc-code <raw_doc_code>
-python main.py embed --raw-doc-code <raw_doc_code>
-python main.py graph-quality --raw-doc-code <raw_doc_code>
+python -m src.pipeline.main write --raw-doc-code <raw_doc_code>
+python -m src.pipeline.main embed --raw-doc-code <raw_doc_code>
+python -m src.pipeline.main graph-quality --raw-doc-code <raw_doc_code>
 ```
 
 Keep existing:
 
 ```bash
-python main.py crawl ...
-python main.py crawl-search ...
-python main.py parse ...
-python main.py extract ...
-python main.py ingest ...
+python -m src.pipeline.main crawl ...
+python -m src.pipeline.main crawl-search ...
+python -m src.pipeline.main parse ...
+python -m src.pipeline.main extract ...
+python -m src.pipeline.main ingest ...
 ```
 
 ### Payload Builder Interface
@@ -619,8 +619,8 @@ Required scenarios:
 - Raw writer call raises `WriteAttemptError`.
 - `write` CLI uses validated payload objects and guarded writer boundary, not direct Neo4j driver calls.
 - Relation writes are idempotent by deterministic relation identity.
-- Embedding generator accepts 768-dim vectors.
-- Embedding generator rejects non-768 vectors.
+- Embedding generator accepts vectors matching configured schema dimension.
+- Embedding generator rejects model/config/schema dimension mismatch.
 - `embed` verifies required vector indexes exist before updates.
 - `graph-quality` writes `data/reports/<raw_doc_code>/graph_quality.json` and optionally `.md`.
 - No active code path references `BaseNode` or `entity_vector`.
@@ -650,7 +650,7 @@ M3 is complete when:
 - `crawl -> parse -> extract -> write` can write a document graph to Neo4j using only validated payloads.
 - Re-running `write` does not create duplicate nodes or duplicate relations.
 - Relations are merge-safe by `(head_id, relation_type, tail_id)` and temporal relations include `effective_from` in identity.
-- `embed` fills `Article.embedding` and `Clause.embedding` with 768-dim vectors.
+- `embed` fills `Article.embedding` and `Clause.embedding` with configured-dimension vectors.
 - `graph-quality` can generate metrics after write/embed.
 - `graph-quality` writes reports under `data/reports/<raw_doc_code>/`.
 - Payload builder cannot write semantic nodes unless they are present in `entity_index.json`.
@@ -664,7 +664,7 @@ M3 is complete when:
 
 ## 7. Implementation Order
 
-1. Clean/quarantine `src/legal-graphrag`.
+1. Clean/quarantine `prototypes/legal_graphrag_legacy`.
 2. Align Phase 1 behavior in pipeline and root validators.
 3. Add shared contract or parity tests for validator drift.
 4. Add record-level consistency validator before decision gate.
@@ -685,6 +685,6 @@ M3 is complete when:
 - Neo4j Community Edition remains bootstrap-only for constraints and indexes.
 - Required properties, relation endpoints, and type semantics are enforced in Python before writes.
 - `src/pipeline` remains the active graph-construction implementation.
-- `src/legal-graphrag` remains prototype/reference code until explicitly migrated.
-- Embedding model remains BKAI Vietnamese bi-encoder with 768 dimensions.
+- `prototypes/legal_graphrag_legacy` remains prototype/reference code until explicitly migrated.
+- Embedding primary remains BGE-M3/1024; BKAI/768 remains an explicit baseline only.
 - Thresholds are provisional until evaluated against manually annotated gold triples.

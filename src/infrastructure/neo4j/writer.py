@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from dataclasses import dataclass
-from pathlib import Path
+from datetime import date, datetime
 from typing import Any, Mapping, Protocol
 
 from src.pipeline.config import settings
@@ -17,6 +15,8 @@ class WriteAttemptError(TypeError):
 
 class SessionProtocol(Protocol):
     def run(self, cypher: str, **parameters: Any) -> Any: ...
+
+    def close(self) -> None: ...
 
 
 from src.shared.ontology import validators as root_validator
@@ -48,25 +48,33 @@ class Neo4jWriter:
             self._merge_relation(relation)
 
     def _merge_node(self, node: Any) -> None:
-        cypher = f"MERGE (n:{node.node_type} {{id: $id}}) SET n += $properties"
-        self.session.run(cypher, id=node.id, properties=node.properties)
+        properties, temporal_cypher, temporal_parameters = _neo4j_properties("n", node.properties)
+        cypher = f"MERGE (n:{node.node_type} {{id: $id}}) SET n += $properties {temporal_cypher}"
+        self.session.run(
+            cypher,
+            id=node.id,
+            properties=properties,
+            **temporal_parameters,
+        )
 
     def _merge_relation(self, relation: Any) -> None:
         relation_id = relation.properties.get("relation_id")
         if not relation_id:
             raise WriteAttemptError(f"Validated relation missing relation_id: {relation.relation_type}")
+        properties, temporal_cypher, temporal_parameters = _neo4j_properties("r", relation.properties)
         cypher = (
             "MATCH (head {id: $head_id}) "
             "MATCH (tail {id: $tail_id}) "
             f"MERGE (head)-[r:{relation.relation_type} {{relation_id: $relation_id}}]->(tail) "
-            "SET r += $properties"
+            f"SET r += $properties {temporal_cypher}"
         )
         self.session.run(
             cypher,
             head_id=relation.head_id,
             tail_id=relation.tail_id,
             relation_id=relation_id,
-            properties=relation.properties,
+            properties=properties,
+            **temporal_parameters,
         )
 
 
@@ -84,6 +92,21 @@ class GraphIngestionService:
         return validated
 
 
+@dataclass(slots=True)
+class ManagedNeo4jSession:
+    driver: Any
+    session: SessionProtocol
+
+    def run(self, cypher: str, **parameters: Any) -> Any:
+        return self.session.run(cypher, **parameters)
+
+    def close(self) -> None:
+        try:
+            self.session.close()
+        finally:
+            self.driver.close()
+
+
 def create_neo4j_session() -> SessionProtocol:
     if not settings.neo4j_password:
         raise RuntimeError("Missing NEO4J_PASSWORD for write/embed command")
@@ -93,4 +116,50 @@ def create_neo4j_session() -> SessionProtocol:
         raise RuntimeError("Install neo4j Python driver to use write/embed commands") from exc
 
     driver = GraphDatabase.driver(settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password))
-    return driver.session()
+    return ManagedNeo4jSession(driver=driver, session=driver.session())
+
+
+DATE_PROPERTIES = {"effective_from", "effective_to", "issued_date"}
+DATETIME_PROPERTIES = {"created_at", "updated_at"}
+
+
+def _neo4j_properties(alias: str, raw_properties: Mapping[str, Any]) -> tuple[dict[str, Any], str, dict[str, str]]:
+    properties = dict(raw_properties)
+    assignments: list[str] = []
+    parameters: dict[str, str] = {}
+    for field in sorted(DATE_PROPERTIES | DATETIME_PROPERTIES):
+        value = properties.pop(field, None)
+        if value in (None, ""):
+            continue
+        parameter = f"{alias}_{field}"
+        if field in DATE_PROPERTIES:
+            serialized = _iso_date(value, field)
+            assignments.append(f"SET {alias}.{field} = date(${parameter})")
+        else:
+            serialized = _iso_datetime(value, field)
+            assignments.append(f"SET {alias}.{field} = datetime(${parameter})")
+        parameters[parameter] = serialized
+    return properties, " ".join(assignments), parameters
+
+
+def _iso_date(value: Any, field: str) -> str:
+    if isinstance(value, datetime):
+        value = value.date()
+    if isinstance(value, date):
+        return value.isoformat()
+    text = str(value)
+    try:
+        return date.fromisoformat(text).isoformat()
+    except ValueError as exc:
+        raise WriteAttemptError(f"{field} must be ISO YYYY-MM-DD: {value}") from exc
+
+
+def _iso_datetime(value: Any, field: str) -> str:
+    if isinstance(value, datetime):
+        return value.isoformat()
+    text = str(value)
+    try:
+        datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise WriteAttemptError(f"{field} must be an ISO datetime: {value}") from exc
+    return text

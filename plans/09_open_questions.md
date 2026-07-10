@@ -65,7 +65,9 @@ Nhóm cần quyết định **3 sub-question** này cùng lúc:
 | 4 văn bản bắt buộc | LDN2020 + NĐ01 + NĐ47 + TT01 | Đủ demo, graph nhỏ |
 | 10 văn bản | +LDN2014 + NĐ78 + NĐ108 + ... | Graph phong phú hơn, tốn thêm 2 tuần parsing |
 
-**Quyết định Q2c**: _______________
+**Quyết định Q2c**: Chọn **10 văn bản curated** làm research corpus; 4 văn bản
+là minimum demo. 89 văn bản đã crawl là discovery pool, không mặc định thuộc
+curated/evaluation scope và không được commit vào Git.
 
 ---
 
@@ -331,7 +333,7 @@ VLSP legal NLP shared task
 | Q1 | Phân công nhóm | TBD — cần họp nhóm | — | — |
 | Q2a | UI: React hay Gradio? | TBD — phụ thuộc số người | — | — |
 | Q2b | Ground truth: 100 hay 50 câu? | **50 QA + 25 temporal** (giảm scope) | 11_project_phases.md | 2026-07 |
-| Q2c | Dataset: 4 hay 10 văn bản? | TBD | — | — |
+| Q2c | Dataset: 4 hay 10 văn bản? | **10 curated; 4 minimum demo; crawl pool tách khỏi evaluation scope** | 08_dataset_and_scope.md | 2026-07 |
 | Q3 | Baseline: 1 hay 2? | **1 baseline (Vector RAG)** | ADR-07 | 2026-07 |
 | Q4 | Confidence: rule-based hay N=3? | **Rule-based** (JSON valid + Ontology valid + Evidence + Entities resolve) | ADR-06 | 2026-07 |
 | Q5 | Intent: few-shot + PhoBERT ablation? | **Few-shot LLM main, PhoBERT là ablation** nếu còn thời gian | ADR-05 | 2026-07 |

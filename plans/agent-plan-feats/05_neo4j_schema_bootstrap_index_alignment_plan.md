@@ -1,8 +1,8 @@
 # Detailed Implementation Plan — Neo4j Schema Bootstrap Index Alignment
 
 > Target file: `infra/neo4j/init/01_schema_init.cypher`  
-> Canonical ontology: `plans/legal_ontology.md` v1.4.0  
-> Status: bootstrap-only schema alignment for M3 write-path integrity
+> Canonical ontology: `plans/legal_ontology.md` v1.5.0
+> Status: v1.4 bootstrap indexes implemented; ADR-20 vector migration to 1024 pending
 
 ---
 
@@ -17,7 +17,7 @@ idempotent bootstrap
   -> uniqueness constraints
   -> lookup indexes
   -> temporal indexes
-  -> full-text index
+  -> full-text indexes
   -> vector indexes
   -> semantic lookup indexes
   -> relation_id indexes
@@ -35,10 +35,10 @@ Use these files as the contract anchors:
 |---|---|---|
 | Ontology contract | `plans/legal_ontology.md` | Canonical labels, relations, required properties, validation boundaries |
 | Schema bootstrap | `infra/neo4j/init/01_schema_init.cypher` | Community Edition constraints and indexes only |
-| Write-path validation | `src/validation/ontology_validator.py` | Required fields, relation rules, and payload validation before MERGE |
-| Payload consistency | `src/validation/payload_consistency_validator.py` | Duplicate IDs, relation identity, dangling endpoints, structural integrity |
-| Root writer | `src/database/neo4j_writer.py` | Guarded MERGE path using validated payloads |
-| Pipeline writer | `src/pipeline/src/persistence/neo4j_writer.py` | Same write contract for pipeline M3 path |
+| Ontology constants | `src/shared/ontology/contract.py` | Single source of truth for labels, relations, and required properties |
+| Write-path validation | `src/shared/ontology/validators.py` | Required fields, relation rules, and payload validation before MERGE |
+| Payload consistency | `src/shared/ontology/payload_consistency_validator.py` | Duplicate IDs, relation identity, dangling endpoints, structural integrity |
+| Neo4j writer | `src/infrastructure/neo4j/writer.py` | Guarded MERGE path using validated payloads |
 
 Implementation rule: if the schema change would need ontology knowledge, it does not belong in Neo4j bootstrap unless it is a pure index/constraint already supported by Community Edition and the current write contract.
 
@@ -191,6 +191,14 @@ Do not add property existence constraints or type constraints for temporal field
 - Ensure no ontology logic is introduced into the Cypher file.
 - Ensure no legacy aliases or runtime labels are added.
 
+### Step 6: Apply ADR-20 vector dimension migration
+
+- Change `article_embedding` and `clause_embedding` to 1024 dimensions.
+- Drop/recreate existing 768-dimensional vector indexes on disposable/dev databases.
+- Re-embed every Article and Clause after index recreation.
+- Add a parity test between ontology/config dimension and schema bootstrap.
+- Keep BKAI/768 only as an explicit baseline using a matching separate index run.
+
 ---
 
 ## 6. Verification
@@ -218,6 +226,7 @@ Expected outcomes:
 - semantic lookup indexes exist for `LegalConcept`, `LegalSubject`, and `LegalAction`
 - `relation_id` indexes exist for the canonical M3 relations
 - vector indexes for `Article.embedding` and `Clause.embedding` remain online
+- vector indexes use the current ontology dimension: BGE-M3/1024
 
 ---
 
@@ -228,6 +237,7 @@ This plan is complete when:
 - the bootstrap comment matches idempotent behavior
 - semantic lookup indexes are present
 - `relation_id` indexes are present
+- Article and Clause vector indexes use 1024 dimensions under ADR-20
+- ontology/config/schema dimension parity test passes
 - schema bootstrap still avoids runtime ontology enforcement
-- the current M3 write contract remains unchanged
-
+- the guarded M3 write boundary remains unchanged

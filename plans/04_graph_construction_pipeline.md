@@ -1,8 +1,8 @@
 # Graph Construction Pipeline — Chi Tiết Kỹ Thuật
 
-> **Phiên bản**: 0.3
+> **Phiên bản**: 0.4
 > **Liên quan đến**: RC2
-> **Depends on**: [legal_ontology.md v1.4.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.5.0](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
@@ -144,8 +144,54 @@ stateDiagram-v2
 > **Contract**: LLM chỉ được phép trả về JSON. Các key `entities` và `relations` luôn tồn tại (dù có thể rỗng rỗng). `type` của entity phải nằm trong danh sách Enum (Entity, Concept, Action).
 
 ### 4. Validator & Writer Contract
-> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.4.0. Nếu có lỗi, relation bị drop hoặc raise error.
+> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.5.0. Nếu có lỗi, relation bị drop hoặc raise error.
 > **Writer Guarantee (Neo4j)**: Quá trình MERGE mang tính Idempotent. Việc chạy lại cùng một file JSON 10 lần sẽ không sinh ra duplicate node hay edge nào trong đồ thị.
+
+### 5. Embedding Contract
+
+Theo ADR-20, embedding contract hiện hành là:
+
+```text
+Primary model: BAAI/bge-m3
+Provider: FlagEmbedding
+EMBEDDING_DIM: 1024
+normalize_embeddings: true
+```
+
+BKAI Vietnamese bi-encoder 768-dim chỉ là baseline/ablation. Article và Clause
+được embed; Point và semantic nodes không được embed trong Phase 1.
+
+Rules:
+
+- model output dimension phải bằng `EMBEDDING_DIM`
+- `article_embedding` và `clause_embedding` phải dùng cùng concrete dimension
+- dimension mismatch là hard failure trước database update
+- đổi dimension bắt buộc recreate vector indexes và re-embed toàn bộ Article/Clause
+- application config, ontology contract và Neo4j schema phải được test parity
+
+### 6. CLI Identity Contract
+
+Mọi CLI command dùng filesystem folder phải nhận `--raw-doc-code`. `graph_id` là
+canonical Neo4j ID lấy từ metadata, không phải CLI folder argument.
+
+```text
+raw_doc_code = L59_2020   -> data/raw/L59_2020, data/processed/L59_2020
+graph_id = ldn_2020       -> (:Document {id: "ldn_2020"})
+```
+
+Target command surface:
+
+```bash
+python -m src.pipeline.main crawl --raw-doc-code L59_2020 ...
+python -m src.pipeline.main parse --raw-doc-code L59_2020
+python -m src.pipeline.main extract --raw-doc-code L59_2020
+python -m src.pipeline.main write --raw-doc-code L59_2020
+python -m src.pipeline.main embed --raw-doc-code L59_2020
+python -m src.pipeline.main graph-quality --raw-doc-code L59_2020
+```
+
+`--doc-id` is superseded for folder-scoped pipeline commands and must not remain as
+a hidden compatibility branch after implementation and docs migrate.
 
 ---
 
@@ -446,7 +492,7 @@ ONTOLOGY_LABEL_MAP = {
 ## Step 4: Ontology Validation
 
 > [!IMPORTANT]
-> Source of truth: `legal_ontology.md` v1.4.0.
+> Source of truth: `legal_ontology.md` v1.5.0.
 > ADR-15: `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j. Numeric precedence/level rules are legacy and must not be used in the current validator.
 > ADR-17: Tất cả relation names dùng active voice.
 
@@ -566,8 +612,8 @@ CONSTRAINTS = {
 # Tốc độ: <1ms, không cần DB hay LLM
 # ADR-17: Tất cả relation names dùng active voice
 
-from src.validation.ontology_validator import (
-    CONSTRAINTS, GUIDES_WHITELIST, RELATION_ENUM, validate_relation,
+from src.shared.ontology.validators import (
+    CONSTRAINTS, RELATION_ENUM, validate_relation,
 )
 
 def test_all_relations_have_constraints():
