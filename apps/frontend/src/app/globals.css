@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+
+/* 1.   Design Tokens System (Biến CSS toàn cục - Phong cách ChatGPT Minimalist) */
+:root {
+   /* Light Theme (Mặc định - Trắng sáng sạch sẽ) */
+   --background: #ffffff;
+   --foreground: #0d0d0d;
+
+   --card-bg: #ffffff;
+   --border-color: #e5e5e5;
+   --sidebar-bg: #f9f9f9; /* Nền xám nhạt nhẹ nhàng */
+
+   /* Brand Tokens */
+   --brand-primary: #10b981;
+   --brand-primary-hover: #059669;
+
+   /* Message Bubble Design Tokens */
+   --user-bubble: #f4f4f5; /* zinc-100 */
+   --user-bubble-text: #09090b; /* zinc-950 */
+   --code-bg: #f4f4f5;
+   --code-border: #e4e4e7;
+   --code-header: #f4f4f5;
+
+   /* Typography & Layout */
+   --font-sans: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
+   --font-mono: var(--font-geist-mono), SFMono-Regular, monospace;
+}
+
+/* 2.   Dark Theme support */
+@media (prefers-color-scheme: dark) {
+   :root {
+      --background: #212121; /* Nền tối dịu của ChatGPT mới */
+      --foreground: #ececec;
+
+      --card-bg: #2f2f2f;
+      --border-color: #383838;
+      --sidebar-bg: #171717; /* Sidebar tối nhẹ */
+
+      --brand-primary-light: #064e3b;
+
+      /* Dark Mode Message Bubble Design Tokens */
+      --user-bubble: #2f2f2f; /* dark grey matching ChatGPT new bubble style */
+      --user-bubble-text: #ececec;
+      --code-bg: #0d0d0d;
+      --code-border: #2f2f2f;
+      --code-header: #171717;
+   }
+}
+
+/* 3.   Tailwind v4 Theme Extensions Mapping */
+@theme inline {
+   --color-background: var(--background);
+   --color-foreground: var(--foreground);
+   --color-card: var(--card-bg);
+   --color-border: var(--border-color);
+   --color-sidebar: var(--sidebar-bg);
+   --color-brand: var(--brand-primary);
+   --color-brand-hover: var(--brand-primary-hover);
+
+   --color-user-bubble: var(--user-bubble);
+   --color-user-bubble-text: var(--user-bubble-text);
+   --color-code-bg: var(--code-bg);
+   --color-code-border: var(--code-border);
+   --color-code-header: var(--code-header);
+
+   --font-sans: var(--font-sans);
+   --font-mono: var(--font-mono);
+}
+
+/* 4.   Base Reset & Scrollbars */
+body {
+   background: var(--background);
+   color: var(--foreground);
+   font-family: var(--font-sans);
+   overflow-x: hidden;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+   width: 8px;
+   height: 8px;
+}
+
+::-webkit-scrollbar-track {
+   background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+   background: rgba(0, 0, 0, 0.08);
+   border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+   background: rgba(255, 255, 255, 0.08);
+}
+
+::-webkit-scrollbar-thumb:hover {
+   background: rgba(0, 0, 0, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+   background: rgba(255, 255, 255, 0.15);
+}
