@@ -33,3 +33,6 @@ tree.txt
 
 .env
 .env.*
+# uv
+.venv/
+

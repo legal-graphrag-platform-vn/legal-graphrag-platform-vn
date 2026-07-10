@@ -1,7 +1,9 @@
+# Legacy fallback. Prefer root pyproject.toml + uv.lock.
 # Core
 pydantic>=2.7
 pydantic-settings>=2.3
 typer>=0.12
+neo4j>=5.26
 
 # Crawler
 httpx>=0.27
@@ -9,16 +11,15 @@ beautifulsoup4>=4.12
 lxml>=5.2
 playwright>=1.45
 
-# Parser
-pymupdf>=1.24
-pypdf>=6.0             # backend trích text thay thế cho PDF có text layer thật (xem --backend pypdf)
-pytesseract>=0.3.13   # OCR binding — yêu cầu cài Tesseract OCR engine riêng (binary), xem README
-Pillow>=10.0           # chuyển PyMuPDF pixmap -> ảnh cho pytesseract
-
 # LLM extraction
 google-genai>=0.3
 openai>=2.0.0
 tenacity>=8.3
+
+# Embedding (ADR-20)
+torch>=2.2
+FlagEmbedding>=1.3
+sentence-transformers>=3.0  # explicit BKAI/768 baseline only
 
 # Dev / test
 pytest>=8.2

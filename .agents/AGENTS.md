@@ -108,3 +108,15 @@ Forbidden:
 `prototypes/` contains archived or experimental code only.
 
 Code in `prototypes/` may be read for ideas, but must not become part of the active runtime or pipeline without being migrated into the proper package and made compliant with these import rules.
+
+## Python Dependency Management
+
+Use `uv` for Python dependency and environment management.
+
+- Add runtime dependencies to `pyproject.toml`.
+- Add development/test dependencies to the `dev` dependency group.
+- Add embedding/model dependencies to the `embedding` dependency group.
+- Do not run or document ad-hoc `pip install ...` commands unless explicitly debugging.
+- Commit `uv.lock`.
+- Do not commit `.venv/`.
+- Use `uv run` for project commands.
