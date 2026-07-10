@@ -1,0 +1,164 @@
+{
+  "entities": [
+    {
+      "id": "LDN2020",
+      "type": "Document",
+      "name": "Luật Doanh nghiệp 2020",
+      "code": "59/2020/QH14",
+      "doc_type": "Luật",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "ND01_2021",
+      "type": "Document",
+      "name": "Nghị định 01/2021/NĐ-CP về đăng ký doanh nghiệp",
+      "code": "01/2021/NĐ-CP",
+      "doc_type": "Nghị định",
+      "effective_from": "2021-01-04",
+      "effective_to": null
+    },
+    {
+      "id": "LDN2020_D7",
+      "type": "Article",
+      "name": "Điều 7. Quyền của doanh nghiệp",
+      "text": "1. Tự do kinh doanh ngành, nghề mà luật không cấm. 2. Tự chủ kinh doanh và lựa chọn hình thức tổ chức kinh doanh; chủ động lựa chọn ngành, nghề, địa bàn, hình thức kinh doanh; chủ động điều chỉnh quy mô và ngành, nghề kinh doanh. 3. Lựa chọn hình thức, phương thức huy động, phân bổ và sử dụng vốn. 4. Tự do tìm kiếm thị trường, khách hàng và ký kết hợp đồng.",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "LDN2020_D17",
+      "type": "Article",
+      "name": "Điều 17. Quyền thành lập, góp vốn, mua cổ phần, mua phần vốn góp và quản lý doanh nghiệp",
+      "text": "1. Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp tại Việt Nam theo quy định của Luật này, trừ trường hợp quy định tại khoản 2 Điều này. 2. Tổ chức, cá nhân sau đây không có quyền thành lập và quản lý doanh nghiệp tại Việt Nam: a) Cơ quan nhà nước, đơn vị lực lượng vũ trang nhân dân sử dụng tài sản nhà nước để thành lập doanh nghiệp kinh doanh thu lợi riêng cho cơ quan, đơn vị mình; b) Cán bộ, công chức, viên chức theo quy định của Luật Cán bộ, công chức và Luật Viên chức; đ) Người chưa thành niên; người bị hạn chế năng lực hành vi dân sự; người bị mất năng lực hành vi dân sự.",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "LDN2020_D22",
+      "type": "Article",
+      "name": "Điều 22. Hồ sơ đăng ký công ty cổ phần",
+      "text": "Hồ sơ đăng ký công ty cổ phần bao gồm: Giấy đề nghị đăng ký doanh nghiệp; Điều lệ công ty; Danh sách cổ đông sáng lập và cổ đông là nhà đầu tư nước ngoài; bản sao giấy tờ pháp lý của cá nhân, tổ chức đối với người đại diện theo pháp luật, cổ đông sáng lập.",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "LDN2020_D26",
+      "type": "Article",
+      "name": "Điều 26. Trình tự, thủ tục đăng ký doanh nghiệp",
+      "text": "Người thành lập doanh nghiệp hoặc người được ủy quyền thực hiện đăng ký doanh nghiệp với Cơ quan đăng ký kinh doanh theo phương thức: nộp hồ sơ trực tiếp, qua dịch vụ bưu chính, hoặc qua mạng thông tin điện tử.",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "LDN2020_D34",
+      "type": "Article",
+      "name": "Điều 34. Tài sản góp vốn",
+      "text": "Tài sản góp vốn là Đồng Việt Nam, ngoại tệ tự do chuyển đổi, vàng, quyền sử dụng đất, quyền sở hữu trí tuệ, công nghệ, bí quyết kỹ thuật, tài sản khác có thể định giá được bằng Đồng Việt Nam.",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "LDN2020_D4_K34",
+      "type": "Article",
+      "name": "Điều 4, khoản 34. Giải thích từ ngữ - Vốn điều lệ",
+      "text": "Vốn điều lệ là tổng giá trị tài sản do các thành viên công ty, chủ sở hữu công ty đã góp hoặc cam kết góp khi thành lập công ty trách nhiệm hữu hạn, công ty hợp danh; là tổng mệnh giá cổ phần đã bán hoặc được đăng ký mua khi thành lập công ty cổ phần.",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    },
+    {
+      "id": "DEMO_OLD_D17",
+      "type": "Article",
+      "name": "[DEMO - giả lập] Điều 17 phiên bản cũ (minh họa cơ chế AMENDS, không phải dữ liệu lịch sử thật)",
+      "text": "Nội dung giả lập dùng để minh họa việc điều luật cũ được sửa đổi bởi điều luật mới.",
+      "description": "Bản ghi dùng để thử nghiệm tính năng versioning (truy vết lịch sử) trên đồ thị.",
+      "effective_from": "2015-01-01",
+      "effective_to": "2020-12-31"
+    },
+    {
+      "id": "TN_VonDieuLe",
+      "type": "Term",
+      "name": "Vốn điều lệ",
+      "description": "Là tổng giá trị tài sản do các thành viên, chủ sở hữu đã góp hoặc cam kết góp khi thành lập công ty."
+    },
+    {
+      "id": "TN_TaiSanGopVon",
+      "type": "Term",
+      "name": "Tài sản góp vốn",
+      "description": "Các loại tài sản hợp pháp được dùng để góp vốn vào công ty như tiền, vàng, quyền sử dụng đất, tài sản trí tuệ..."
+    },
+    {
+      "id": "TT_DangKyCongTyCoPhan",
+      "type": "Procedure",
+      "name": "Thủ tục đăng ký thành lập công ty cổ phần",
+      "description": "Quy trình nộp và xử lý hồ sơ để cơ quan nhà nước cấp giấy chứng nhận đăng ký doanh nghiệp cho công ty cổ phần."
+    },
+    {
+      "id": "CT_ToChucCaNhan",
+      "type": "Actor",
+      "name": "Tổ chức, cá nhân (chủ thể có quyền thành lập DN)",
+      "description": "Mọi tổ chức, cá nhân nói chung đáp ứng đủ điều kiện pháp lý để thành lập và quản lý doanh nghiệp."
+    },
+    {
+      "id": "CT_CoQuanNhaNuoc",
+      "type": "Actor",
+      "name": "Cơ quan nhà nước (chủ thể bị hạn chế theo Điều 17 khoản 2)",
+      "description": "Các cơ quan, đơn vị lực lượng vũ trang thuộc bộ máy nhà nước, bị cấm sử dụng tài sản nhà nước để lập doanh nghiệp thu lợi riêng."
+    },
+    {
+      "id": "LDN2014",
+      "type": "Document",
+      "name": "Luật Doanh nghiệp 2014",
+      "code": "68/2014/QH13",
+      "doc_type": "Luật",
+      "effective_from": "2015-07-01",
+      "effective_to": "2020-12-31"
+    },
+    {
+      "id": "LDN2014_D44",
+      "type": "Article",
+      "name": "Điều 44. Con dấu của doanh nghiệp (Luật DN 2014)",
+      "text": "Doanh nghiệp có quyền quyết định về hình thức, số lượng và nội dung con dấu. Trước khi sử dụng, doanh nghiệp có nghĩa vụ thông báo mẫu con dấu với cơ quan đăng ký kinh doanh để đăng tải công khai trên Cổng thông tin quốc gia.",
+      "effective_from": "2015-07-01",
+      "effective_to": "2020-12-31"
+    },
+    {
+      "id": "LDN2020_D43",
+      "type": "Article",
+      "name": "Điều 43. Dấu của doanh nghiệp (Luật DN 2020)",
+      "text": "Dấu bao gồm dấu được làm tại cơ sở khắc dấu hoặc dấu dưới hình thức chữ ký số. Doanh nghiệp quyết định loại dấu, số lượng, hình thức và nội dung dấu. (Không bắt buộc thông báo mẫu dấu trước khi sử dụng).",
+      "effective_from": "2021-01-01",
+      "effective_to": null
+    }
+  ],
+
+  "relations": [
+    { "source": "LDN2020", "target": "LDN2020_D7",  "type": "CONTAINS" },
+    { "source": "LDN2020", "target": "LDN2020_D17", "type": "CONTAINS" },
+    { "source": "LDN2020", "target": "LDN2020_D22", "type": "CONTAINS" },
+    { "source": "LDN2020", "target": "LDN2020_D26", "type": "CONTAINS" },
+    { "source": "LDN2020", "target": "LDN2020_D34", "type": "CONTAINS" },
+    { "source": "LDN2020", "target": "LDN2020_D4_K34", "type": "CONTAINS" },
+
+    { "source": "LDN2020_D4_K34", "target": "TN_VonDieuLe",    "type": "DEFINES" },
+    { "source": "LDN2020_D34",    "target": "TN_TaiSanGopVon", "type": "DEFINES" },
+
+    { "source": "LDN2020_D17", "target": "LDN2020_D34", "type": "REFERS_TO", "note": "Điều 17 nói tới việc góp vốn, liên quan Điều 34 (tài sản góp vốn)" },
+    { "source": "LDN2020_D22", "target": "LDN2020_D26", "type": "REFERS_TO", "note": "Hồ sơ đăng ký (Điều 22) là một phần của trình tự đăng ký (Điều 26)" },
+
+    { "source": "LDN2020_D22", "target": "TT_DangKyCongTyCoPhan", "type": "REGULATES" },
+    { "source": "LDN2020_D26", "target": "TT_DangKyCongTyCoPhan", "type": "REGULATES" },
+    { "source": "LDN2020_D17", "target": "CT_ToChucCaNhan",        "type": "REGULATES", "note": "khoản 1 - chủ thể có quyền" },
+    { "source": "LDN2020_D17", "target": "CT_CoQuanNhaNuoc",       "type": "REGULATES", "note": "khoản 2 điểm a - chủ thể bị hạn chế" },
+
+    { "source": "TT_DangKyCongTyCoPhan", "target": "LDN2020_D22", "type": "REQUIRES", "note": "thủ tục đăng ký yêu cầu hồ sơ theo Điều 22" },
+
+    { "source": "ND01_2021", "target": "LDN2020_D26", "type": "GUIDES", "note": "Nghị định 01/2021 hướng dẫn chi tiết trình tự đăng ký doanh nghiệp" },
+
+    { "source": "DEMO_OLD_D17", "target": "LDN2020_D17", "type": "AMENDS",
+      "effective_from": "2021-01-01", "amendment_type": "full", "note": "DEMO giả lập, không phải lịch sử sửa đổi thật" },
+    { "source": "LDN2014", "target": "LDN2014_D44", "type": "CONTAINS" },
+    { "source": "LDN2020", "target": "LDN2020_D43", "type": "CONTAINS" },
+    { "source": "LDN2014_D44", "target": "LDN2020_D43", "type": "REPLACES", "note": "Luật DN 2020 thay thế quy định về con dấu của Luật DN 2014" }
+  ]
+}
