@@ -1,4 +1,8 @@
 
+# Python cache artifacts
+__pycache__/
+*.pyc
+
 # Neo4j local data (bind mounts) — ignore data, keep folder structure
 infra/data/neo4j/data/*
 infra/data/neo4j/logs/*
