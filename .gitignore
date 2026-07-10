@@ -1,11 +1,32 @@
-
-# Python cache artifacts
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.env
+.env.*
 
-# Neo4j local data (bind mounts) — ignore data, keep folder structure
+# Neo4j bind mounts
 infra/data/neo4j/data/*
 infra/data/neo4j/logs/*
 infra/data/neo4j/import/*
 infra/data/neo4j/plugins/*
 !infra/data/neo4j/**/.gitkeep
+
+# Runtime data (generated, not committed)
+data/raw/
+data/processed/
+data/reports/
+
+# Frontend build artifacts
+apps/frontend/.next/
+apps/frontend/node_modules/
+src/frontend/.next/
+src/frontend/node_modules/
+
+# Misc
+*.log
+.DS_Store
+tree.txt
