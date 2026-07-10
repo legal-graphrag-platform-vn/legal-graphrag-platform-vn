@@ -41,9 +41,9 @@ class Settings(BaseSettings):
     ollama_model: str = Field(default="qwen3:8b")
     ollama_base_url: str = Field(default="http://localhost:11434/v1")
 
-    data_raw_dir: Path = Field(default=Path("data/raw"))
-    data_processed_dir: Path = Field(default=Path("data/processed"))
-    data_reports_dir: Path = Field(default=Path("data/reports"))
+    data_raw_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "raw")
+    data_processed_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "processed")
+    data_reports_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "reports")
     extraction_max_workers: int = Field(default=10, ge=1, le=50, description="Số lượng luồng gọi LLM API song song")
 
     confidence_threshold_auto: float = Field(default=0.8, ge=0.0, le=1.0)
