@@ -25,7 +25,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 from src.pipeline.config import settings
 from src.pipeline.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
 from src.pipeline.embedding.embedding_generator import EmbeddingGenerator, embedding_texts_by_node_id
-from src.pipeline.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
+from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
 from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload

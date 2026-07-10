@@ -11,7 +11,7 @@ from src.pipeline.embedding.embedding_generator import (
     embedding_texts_by_node_id,
     validate_embedding_dimension,
 )
-from src.pipeline.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
+from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 
 
 def test_embedding_targets_include_only_article_and_clause() -> None:

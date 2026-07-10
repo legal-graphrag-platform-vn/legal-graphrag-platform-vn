@@ -1,4 +1,62 @@
 .
+├── apps
+│   ├── backend
+│   │   ├── AGENTS.md
+│   │   ├── app.py
+│   │   ├── providers
+│   │   │   ├── base.py
+│   │   │   ├── gemini.py
+│   │   │   ├── ollama.py
+│   │   │   ├── openai.py
+│   │   │   └── __pycache__
+│   │   │       ├── base.cpython-314.pyc
+│   │   │       ├── gemini.cpython-314.pyc
+│   │   │       ├── ollama.cpython-314.pyc
+│   │   │       └── openai.cpython-314.pyc
+│   │   ├── __pycache__
+│   │   │   ├── app.cpython-314.pyc
+│   │   │   └── settings.cpython-314.pyc
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   ├── services
+│   │   │   ├── __pycache__
+│   │   │   │   └── query_service.cpython-314.pyc
+│   │   │   └── query_service.py
+│   │   └── settings.py
+│   └── frontend
+│       ├── AGENTS.md
+│       ├── CLAUDE.md
+│       ├── eslint.config.mjs
+│       ├── next.config.ts
+│       ├── package.json
+│       ├── package-lock.json
+│       ├── postcss.config.mjs
+│       ├── public
+│       │   ├── file.svg
+│       │   ├── globe.svg
+│       │   ├── next.svg
+│       │   ├── vercel.svg
+│       │   └── window.svg
+│       ├── README.md
+│       ├── src
+│       │   ├── app
+│       │   │   ├── favicon.ico
+│       │   │   ├── globals.css
+│       │   │   ├── layout.tsx
+│       │   │   └── page.tsx
+│       │   ├── components
+│       │   │   ├── chat
+│       │   │   │   ├── MessageItem.tsx
+│       │   │   │   ├── SourceCard.tsx
+│       │   │   │   └── SourceDetailModal.tsx
+│       │   │   └── layout
+│       │   │       └── Sidebar.tsx
+│       │   ├── hooks
+│       │   │   └── useChatStream.ts
+│       │   └── types
+│       │       └── chat.ts
+│       └── tsconfig.json
+├── data
 ├── infra
 │   ├── data
 │   │   └── neo4j
@@ -26,142 +84,85 @@
 │   ├── 12_design_tradeoffs.md
 │   ├── 13_neo4j_integrity_strategy.md
 │   ├── agent-plan-feats
-│   │   └── 04_graph_construction_pipeline_impl_plan.md
+│   │   ├── 04_graph_construction_pipeline_impl_plan.md
+│   │   └── 05_neo4j_schema_bootstrap_index_alignment_plan.md
 │   ├── archive
 │   │   └── 02_ontology_specification_superseded.md
 │   ├── legal_ontology.md
 │   └── README.md
-├── progress
-├── src
-│   ├── backend
-│   │   ├── AGENTS.md
-│   │   ├── app.py
-│   │   ├── config.py
-│   │   ├── providers
-│   │   │   ├── base.py
-│   │   │   ├── gemini.py
-│   │   │   ├── ollama.py
-│   │   │   ├── openai.py
-│   │   │   └── __pycache__
-│   │   │       ├── base.cpython-314.pyc
-│   │   │       ├── gemini.cpython-314.pyc
-│   │   │       ├── ollama.cpython-314.pyc
-│   │   │       └── openai.cpython-314.pyc
-│   │   ├── __pycache__
-│   │   │   ├── app.cpython-314.pyc
-│   │   │   └── config.cpython-314.pyc
-│   │   ├── README.md
-│   │   ├── requirements.txt
-│   │   └── services
-│   │       ├── __pycache__
-│   │       │   └── rag_service.cpython-314.pyc
-│   │       └── rag_service.py
-│   ├── database
+├── prototypes
+│   ├── legacy_database
 │   │   ├── __init__.py
 │   │   ├── neo4j_writer.py
 │   │   └── __pycache__
 │   │       ├── __init__.cpython-314.pyc
 │   │       └── neo4j_writer.cpython-314.pyc
-│   ├── frontend
-│   │   ├── AGENTS.md
-│   │   ├── CLAUDE.md
-│   │   ├── eslint.config.mjs
-│   │   ├── next.config.ts
-│   │   ├── package.json
-│   │   ├── package-lock.json
-│   │   ├── postcss.config.mjs
-│   │   ├── public
-│   │   │   ├── file.svg
-│   │   │   ├── globe.svg
-│   │   │   ├── next.svg
-│   │   │   ├── vercel.svg
-│   │   │   └── window.svg
-│   │   ├── README.md
-│   │   ├── src
-│   │   │   ├── app
-│   │   │   │   ├── favicon.ico
-│   │   │   │   ├── globals.css
-│   │   │   │   ├── layout.tsx
-│   │   │   │   └── page.tsx
-│   │   │   ├── components
-│   │   │   │   ├── chat
-│   │   │   │   │   ├── MessageItem.tsx
-│   │   │   │   │   ├── SourceCard.tsx
-│   │   │   │   │   └── SourceDetailModal.tsx
-│   │   │   │   └── layout
-│   │   │   │       └── Sidebar.tsx
-│   │   │   ├── hooks
-│   │   │   │   └── useChatStream.ts
-│   │   │   └── types
-│   │   │       └── chat.ts
-│   │   └── tsconfig.json
+│   └── legal_graphrag_legacy
+│       ├── clients
+│       │   ├── embedding_client.py
+│       │   ├── llm_client.py
+│       │   └── neo4j_client.py
+│       ├── config.py
+│       ├── convert_word_to_txt.py
+│       ├── core
+│       │   ├── generator.py
+│       │   ├── memory.py
+│       │   ├── retriever.py
+│       │   ├── router.py
+│       │   └── traversal_policies.py
+│       ├── embed_bge_neo4j.py
+│       ├── luat_doanh_nghiep.json
+│       ├── main.py
+│       ├── prompts
+│       │   ├── basic_search_system_prompt.txt
+│       │   ├── community_report_graph.txt
+│       │   ├── community_report_text.txt
+│       │   ├── drift_reduce_prompt.txt
+│       │   ├── drift_search_system_prompt.txt
+│       │   ├── extract_claims.txt
+│       │   ├── extract_graph.txt
+│       │   ├── global_search_knowledge_system_prompt.txt
+│       │   ├── global_search_map_system_prompt.txt
+│       │   ├── global_search_reduce_system_prompt.txt
+│       │   ├── intent_router.txt
+│       │   ├── local_search_system_prompt.txt
+│       │   ├── question_gen_system_prompt.txt
+│       │   ├── summarize_descriptions.txt
+│       │   └── templates.py
+│       ├── README.md
+│       ├── settings.yaml
+│       └── temp
+│           ├── build_neo4j_from_json.py
+│           ├── build_neo4j_graph.py
+│           ├── embedding.py
+│           ├── test_final_generation.py
+│           ├── test_graph_traversal.py
+│           ├── test_router_api.py
+│           ├── test_vector_search.py
+│           └── traversal_policies.py
+├── src
+│   ├── infrastructure
+│   │   ├── __init__.py
+│   │   ├── neo4j
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   └── writer.cpython-314.pyc
+│   │   │   └── writer.py
+│   │   └── __pycache__
+│   │       └── __init__.cpython-314.pyc
 │   ├── ingestion.py
 │   ├── __init__.py
-│   ├── legal-graphrag
-│   │   ├── clients
-│   │   │   ├── embedding_client.py
-│   │   │   ├── llm_client.py
-│   │   │   ├── neo4j_client.py
-│   │   │   └── __pycache__
-│   │   │       ├── embedding_client.cpython-314.pyc
-│   │   │       ├── llm_client.cpython-314.pyc
-│   │   │       └── neo4j_client.cpython-314.pyc
-│   │   ├── config.py
-│   │   ├── convert_word_to_txt.py
-│   │   ├── core
-│   │   │   ├── generator.py
-│   │   │   ├── memory.py
-│   │   │   ├── __pycache__
-│   │   │   │   ├── generator.cpython-314.pyc
-│   │   │   │   ├── memory.cpython-314.pyc
-│   │   │   │   ├── retriever.cpython-314.pyc
-│   │   │   │   ├── router.cpython-314.pyc
-│   │   │   │   └── traversal_policies.cpython-314.pyc
-│   │   │   ├── retriever.py
-│   │   │   ├── router.py
-│   │   │   └── traversal_policies.py
-│   │   ├── embed_bge_neo4j.py
-│   │   ├── luat_doanh_nghiep.json
-│   │   ├── main.py
-│   │   ├── prompts
-│   │   │   ├── basic_search_system_prompt.txt
-│   │   │   ├── community_report_graph.txt
-│   │   │   ├── community_report_text.txt
-│   │   │   ├── drift_reduce_prompt.txt
-│   │   │   ├── drift_search_system_prompt.txt
-│   │   │   ├── extract_claims.txt
-│   │   │   ├── extract_graph.txt
-│   │   │   ├── global_search_knowledge_system_prompt.txt
-│   │   │   ├── global_search_map_system_prompt.txt
-│   │   │   ├── global_search_reduce_system_prompt.txt
-│   │   │   ├── intent_router.txt
-│   │   │   ├── local_search_system_prompt.txt
-│   │   │   ├── question_gen_system_prompt.txt
-│   │   │   ├── summarize_descriptions.txt
-│   │   │   └── templates.py
-│   │   ├── __pycache__
-│   │   │   ├── config.cpython-314.pyc
-│   │   │   ├── embed_bge_neo4j.cpython-314.pyc
-│   │   │   └── main.cpython-314.pyc
-│   │   ├── README.md
-│   │   ├── settings.yaml
-│   │   └── temp
-│   │       ├── build_neo4j_from_json.py
-│   │       ├── build_neo4j_graph.py
-│   │       ├── embedding.py
-│   │       ├── __pycache__
-│   │       │   ├── build_neo4j_from_json.cpython-314.pyc
-│   │       │   ├── build_neo4j_graph.cpython-314.pyc
-│   │       │   ├── test_final_generation.cpython-314.pyc
-│   │       │   ├── test_graph_traversal.cpython-314.pyc
-│   │       │   ├── test_router_api.cpython-314.pyc
-│   │       │   └── test_vector_search.cpython-314.pyc
-│   │       ├── test_final_generation.py
-│   │       ├── test_graph_traversal.py
-│   │       ├── test_router_api.py
-│   │       ├── test_vector_search.py
-│   │       └── traversal_policies.py
 │   ├── pipeline
+│   │   ├── config.py
+│   │   ├── crawler
+│   │   │   ├── __init__.py
+│   │   │   ├── models.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   ├── models.cpython-314.pyc
+│   │   │   │   └── vbpl_crawler.cpython-314.pyc
+│   │   │   └── vbpl_crawler.py
 │   │   ├── crawl_filtered.py
 │   │   ├── data
 │   │   │   ├── processed
@@ -635,172 +636,180 @@
 │   │   │   │   └── l7.md
 │   │   │   ├── filter_vbpl.py
 │   │   │   ├── ontology_review.md
-│   │   │   └── parse_workflow.md
+│   │   │   ├── parse_workflow.md
+│   │   │   └── __pycache__
+│   │   │       └── filter_vbpl.cpython-314.pyc
+│   │   ├── embedding
+│   │   │   ├── embedding_generator.py
+│   │   │   ├── __init__.py
+│   │   │   ├── neo4j_embedding_writer.py
+│   │   │   └── __pycache__
+│   │   │       ├── embedding_generator.cpython-314.pyc
+│   │   │       ├── __init__.cpython-314.pyc
+│   │   │       └── neo4j_embedding_writer.cpython-314.pyc
+│   │   ├── extraction
+│   │   │   ├── __init__.py
+│   │   │   ├── llm_extractor.py
+│   │   │   ├── models.py
+│   │   │   ├── prompts.py
+│   │   │   ├── providers
+│   │   │   │   ├── base.py
+│   │   │   │   ├── gemini_provider.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── openai_provider.py
+│   │   │   │   └── __pycache__
+│   │   │   │       ├── base.cpython-314.pyc
+│   │   │   │       ├── gemini_provider.cpython-314.pyc
+│   │   │   │       ├── __init__.cpython-314.pyc
+│   │   │   │       └── openai_provider.cpython-314.pyc
+│   │   │   └── __pycache__
+│   │   │       ├── __init__.cpython-314.pyc
+│   │   │       ├── llm_extractor.cpython-314.pyc
+│   │   │       ├── models.cpython-314.pyc
+│   │   │       └── prompts.cpython-314.pyc
 │   │   ├── GUILD.md
+│   │   ├── __init__.py
 │   │   ├── main.py
+│   │   ├── parser
+│   │   │   ├── hierarchy_parser.py
+│   │   │   ├── __init__.py
+│   │   │   ├── models.py
+│   │   │   ├── patterns.py
+│   │   │   └── __pycache__
+│   │   │       ├── hierarchy_parser.cpython-314.pyc
+│   │   │       ├── __init__.cpython-314.pyc
+│   │   │       ├── models.cpython-314.pyc
+│   │   │       └── patterns.cpython-314.pyc
+│   │   ├── persistence
+│   │   │   ├── __init__.py
+│   │   │   ├── payload_builder.py
+│   │   │   └── __pycache__
+│   │   │       ├── __init__.cpython-314.pyc
+│   │   │       ├── neo4j_writer.cpython-314.pyc
+│   │   │       └── payload_builder.cpython-314.pyc
+│   │   ├── pipeline
+│   │   │   ├── __init__.py
+│   │   │   ├── orchestrator.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   ├── orchestrator.cpython-314.pyc
+│   │   │   │   └── review_queue.cpython-314.pyc
+│   │   │   └── review_queue.py
 │   │   ├── __pycache__
+│   │   │   ├── config.cpython-314.pyc
+│   │   │   ├── crawl_filtered.cpython-314.pyc
+│   │   │   ├── __init__.cpython-314.pyc
 │   │   │   └── main.cpython-314.pyc
 │   │   ├── README.md
 │   │   ├── REPORT.md
-│   │   ├── requirements.txt
-│   │   ├── src
-│   │   │   ├── config.py
-│   │   │   ├── crawler
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── models.py
-│   │   │   │   ├── __pycache__
-│   │   │   │   │   ├── __init__.cpython-314.pyc
-│   │   │   │   │   ├── models.cpython-314.pyc
-│   │   │   │   │   └── vbpl_crawler.cpython-314.pyc
-│   │   │   │   └── vbpl_crawler.py
-│   │   │   ├── embedding
-│   │   │   │   ├── embedding_generator.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── neo4j_embedding_writer.py
-│   │   │   │   └── __pycache__
-│   │   │   │       ├── embedding_generator.cpython-314.pyc
-│   │   │   │       ├── __init__.cpython-314.pyc
-│   │   │   │       └── neo4j_embedding_writer.cpython-314.pyc
-│   │   │   ├── extraction
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── llm_extractor.py
-│   │   │   │   ├── models.py
-│   │   │   │   ├── prompts.py
-│   │   │   │   ├── providers
-│   │   │   │   │   ├── base.py
-│   │   │   │   │   ├── gemini_provider.py
-│   │   │   │   │   ├── __init__.py
-│   │   │   │   │   ├── openai_provider.py
-│   │   │   │   │   └── __pycache__
-│   │   │   │   │       ├── base.cpython-314.pyc
-│   │   │   │   │       ├── gemini_provider.cpython-314.pyc
-│   │   │   │   │       ├── __init__.cpython-314.pyc
-│   │   │   │   │       └── openai_provider.cpython-314.pyc
-│   │   │   │   └── __pycache__
-│   │   │   │       ├── __init__.cpython-314.pyc
-│   │   │   │       ├── llm_extractor.cpython-314.pyc
-│   │   │   │       ├── models.cpython-314.pyc
-│   │   │   │       └── prompts.cpython-314.pyc
+│   │   ├── reports
+│   │   │   ├── graph_quality.py
 │   │   │   ├── __init__.py
-│   │   │   ├── parser
-│   │   │   │   ├── hierarchy_parser.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── models.py
-│   │   │   │   ├── patterns.py
-│   │   │   │   └── __pycache__
-│   │   │   │       ├── hierarchy_parser.cpython-314.pyc
-│   │   │   │       ├── __init__.cpython-314.pyc
-│   │   │   │       ├── models.cpython-314.pyc
-│   │   │   │       └── patterns.cpython-314.pyc
-│   │   │   ├── persistence
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── neo4j_writer.py
-│   │   │   │   ├── payload_builder.py
-│   │   │   │   └── __pycache__
-│   │   │   │       ├── __init__.cpython-314.pyc
-│   │   │   │       ├── neo4j_writer.cpython-314.pyc
-│   │   │   │       └── payload_builder.cpython-314.pyc
-│   │   │   ├── pipeline
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── orchestrator.py
-│   │   │   │   ├── __pycache__
-│   │   │   │   │   ├── __init__.cpython-314.pyc
-│   │   │   │   │   ├── orchestrator.cpython-314.pyc
-│   │   │   │   │   └── review_queue.cpython-314.pyc
-│   │   │   │   └── review_queue.py
-│   │   │   ├── __pycache__
-│   │   │   │   ├── config.cpython-314.pyc
-│   │   │   │   └── __init__.cpython-314.pyc
-│   │   │   ├── reports
-│   │   │   │   ├── graph_quality.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── __pycache__
-│   │   │   │       ├── graph_quality.cpython-314.pyc
-│   │   │   │       └── __init__.cpython-314.pyc
-│   │   │   ├── scoring
-│   │   │   │   ├── confidence_scorer.py
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── __pycache__
-│   │   │   │       ├── confidence_scorer.cpython-314.pyc
-│   │   │   │       └── __init__.cpython-314.pyc
-│   │   │   ├── validation
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── ontology_validator.py
-│   │   │   │   ├── payload_consistency_validator.py
-│   │   │   │   ├── __pycache__
-│   │   │   │   │   ├── __init__.cpython-314.pyc
-│   │   │   │   │   ├── ontology_validator.cpython-314.pyc
-│   │   │   │   │   ├── payload_consistency_validator.cpython-314.pyc
-│   │   │   │   │   ├── record_consistency_validator.cpython-314.pyc
-│   │   │   │   │   └── schema_validator.cpython-314.pyc
-│   │   │   │   ├── record_consistency_validator.py
-│   │   │   │   └── schema_validator.py
-│   │   │   └── writer
+│   │   │   └── __pycache__
+│   │   │       ├── graph_quality.cpython-314.pyc
+│   │   │       └── __init__.cpython-314.pyc
+│   │   ├── requirements.txt
+│   │   ├── scoring
+│   │   │   ├── confidence_scorer.py
+│   │   │   ├── __init__.py
+│   │   │   └── __pycache__
+│   │   │       ├── confidence_scorer.cpython-314.pyc
+│   │   │       └── __init__.cpython-314.pyc
 │   │   ├── tessdata
 │   │   │   └── vie.traineddata
-│   │   └── tests
-│   │       ├── fixtures
-│   │       │   ├── sample_law.txt
-│   │       │   └── vbpl_rendered_body.txt
+│   │   ├── tests
+│   │   │   ├── fixtures
+│   │   │   │   ├── sample_law.txt
+│   │   │   │   └── vbpl_rendered_body.txt
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   ├── test_confidence_scorer.cpython-314.pyc
+│   │   │   │   ├── test_confidence_scorer.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_crawler.cpython-314.pyc
+│   │   │   │   ├── test_crawler.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_embedding_generator.cpython-314.pyc
+│   │   │   │   ├── test_embedding_generator.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_extractor.cpython-314.pyc
+│   │   │   │   ├── test_extractor.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_graph_quality_report.cpython-314.pyc
+│   │   │   │   ├── test_graph_quality_report.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_neo4j_writer.cpython-314.pyc
+│   │   │   │   ├── test_neo4j_writer.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_ontology_consistency.cpython-314.pyc
+│   │   │   │   ├── test_ontology_consistency.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_orchestrator.cpython-314.pyc
+│   │   │   │   ├── test_orchestrator.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_parser_cli.cpython-314.pyc
+│   │   │   │   ├── test_parser_cli.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_parser.cpython-314.pyc
+│   │   │   │   ├── test_parser.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_payload_builder.cpython-314.pyc
+│   │   │   │   ├── test_payload_builder.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_payload_consistency_validator.cpython-314.pyc
+│   │   │   │   ├── test_payload_consistency_validator.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_record_consistency_validator.cpython-314.pyc
+│   │   │   │   ├── test_record_consistency_validator.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_run_pipeline_paths.cpython-314.pyc
+│   │   │   │   ├── test_run_pipeline_paths.cpython-314-pytest-9.1.1.pyc
+│   │   │   │   ├── test_write_cli.cpython-314.pyc
+│   │   │   │   └── test_write_cli.cpython-314-pytest-9.1.1.pyc
+│   │   │   ├── test_confidence_scorer.py
+│   │   │   ├── test_crawler.py
+│   │   │   ├── test_embedding_generator.py
+│   │   │   ├── test_extractor.py
+│   │   │   ├── test_graph_quality_report.py
+│   │   │   ├── test_neo4j_writer.py
+│   │   │   ├── test_ontology_consistency.py
+│   │   │   ├── test_orchestrator.py
+│   │   │   ├── test_parser_cli.py
+│   │   │   ├── test_parser.py
+│   │   │   ├── test_payload_builder.py
+│   │   │   ├── test_payload_consistency_validator.py
+│   │   │   ├── test_record_consistency_validator.py
+│   │   │   ├── test_run_pipeline_paths.py
+│   │   │   └── test_write_cli.py
+│   │   └── validation
 │   │       ├── __init__.py
 │   │       ├── __pycache__
 │   │       │   ├── __init__.cpython-314.pyc
-│   │       │   ├── test_confidence_scorer.cpython-314.pyc
-│   │       │   ├── test_confidence_scorer.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_crawler.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_embedding_generator.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_extractor.cpython-314.pyc
-│   │       │   ├── test_extractor.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_graph_quality_report.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_neo4j_writer.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_ontology_consistency.cpython-314.pyc
-│   │       │   ├── test_ontology_consistency.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_orchestrator.cpython-314.pyc
-│   │       │   ├── test_orchestrator.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_parser_cli.cpython-314.pyc
-│   │       │   ├── test_parser_cli.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_parser.cpython-314.pyc
-│   │       │   ├── test_parser.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_payload_builder.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_payload_consistency_validator.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_record_consistency_validator.cpython-314-pytest-9.1.1.pyc
-│   │       │   ├── test_run_pipeline_paths.cpython-314-pytest-9.1.1.pyc
-│   │       │   └── test_write_cli.cpython-314-pytest-9.1.1.pyc
-│   │       ├── test_confidence_scorer.py
-│   │       ├── test_crawler.py
-│   │       ├── test_embedding_generator.py
-│   │       ├── test_extractor.py
-│   │       ├── test_graph_quality_report.py
-│   │       ├── test_neo4j_writer.py
-│   │       ├── test_ontology_consistency.py
-│   │       ├── test_orchestrator.py
-│   │       ├── test_parser_cli.py
-│   │       ├── test_parser.py
-│   │       ├── test_payload_builder.py
-│   │       ├── test_payload_consistency_validator.py
-│   │       ├── test_record_consistency_validator.py
-│   │       ├── test_run_pipeline_paths.py
-│   │       └── test_write_cli.py
+│   │       │   ├── record_consistency_validator.cpython-314.pyc
+│   │       │   └── schema_validator.cpython-314.pyc
+│   │       ├── record_consistency_validator.py
+│   │       └── schema_validator.py
 │   ├── __pycache__
+│   │   ├── ingestion.cpython-314.pyc
 │   │   └── __init__.cpython-314.pyc
+│   ├── shared
+│   │   ├── __init__.py
+│   │   ├── ontology
+│   │   │   ├── contract.py
+│   │   │   ├── extraction_validator.py
+│   │   │   ├── __init__.py
+│   │   │   ├── payload_consistency_validator.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── contract.cpython-314.pyc
+│   │   │   │   ├── extraction_validator.cpython-314.pyc
+│   │   │   │   ├── __init__.cpython-314.pyc
+│   │   │   │   ├── payload_consistency_validator.cpython-314.pyc
+│   │   │   │   └── validators.cpython-314.pyc
+│   │   │   └── validators.py
+│   │   └── __pycache__
+│   │       └── __init__.cpython-314.pyc
 │   └── validation
 │       ├── __init__.py
-│       ├── ontology_validator.py
-│       ├── payload_consistency_validator.py
 │       └── __pycache__
-│           ├── __init__.cpython-314.pyc
-│           ├── ontology_validator.cpython-314.pyc
-│           └── payload_consistency_validator.cpython-314.pyc
-├── tasks
-│   └── task-1.graph-construction-pipeline.md
+│           └── __init__.cpython-314.pyc
 ├── tests
 │   ├── __pycache__
 │   │   ├── test_ontology_consistency.cpython-314.pyc
-│   │   ├── test_validator_contract_parity.cpython-314.pyc
-│   │   └── test_writer_guard.cpython-314.pyc
+│   │   ├── test_ontology_consistency.cpython-314-pytest-9.1.1.pyc
+│   │   ├── test_validator_contract_parity.cpython-314-pytest-9.1.1.pyc
+│   │   ├── test_writer_guard.cpython-314.pyc
+│   │   └── test_writer_guard.cpython-314-pytest-9.1.1.pyc
 │   ├── test_ontology_consistency.py
 │   ├── test_validator_contract_parity.py
 │   └── test_writer_guard.py
 └── tree.txt
 
-260 directories, 544 files
+263 directories, 550 files

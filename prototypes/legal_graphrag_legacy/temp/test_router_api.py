@@ -10,7 +10,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 from traversal_policies import INTENT_CLASSIFICATION_PROMPT, TEMPORAL_EXTRACTION_PROMPT
 
 # Sử dụng DeepSeek API Key mới
-API_KEY = "sk-ba0521e3d7a04685928500490d1149d4"
+API_KEY = "sk-..."
 
 print("Đã nhận DeepSeek API Key. Đang kết nối với DeepSeek API (Direct HTTP)...")
 
