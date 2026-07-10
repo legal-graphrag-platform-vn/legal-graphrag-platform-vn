@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from src.extraction.models import ExtractedEntity, ExtractedRelation
+from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation
 
 class BaseProvider(ABC):
     """Lớp cơ sở cho các LLM Extractor Providers."""

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-from src.crawler.models import DocumentMetadata
+from src.pipeline.crawler.models import DocumentMetadata
 
 logger = logging.getLogger(__name__)
 

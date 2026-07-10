@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from src.config import settings
-from src.extraction.providers.base import BaseProvider
-from src.extraction.providers.gemini_provider import GeminiProvider
-from src.extraction.providers.openai_provider import OpenAICompatibleProvider
+from src.pipeline.config import settings
+from src.pipeline.extraction.providers.base import BaseProvider
+from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
+from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
 
 
 def get_provider() -> BaseProvider:

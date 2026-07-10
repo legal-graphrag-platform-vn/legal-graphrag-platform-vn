@@ -3,9 +3,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 from datetime import date
 
-from src.parser.models import Article, DocumentInfo
-from src.extraction.models import ExtractedEntity, ExtractedRelation, ExtractionResult
-from src.pipeline.orchestrator import process_article
+from src.pipeline.parser.models import Article, DocumentInfo
+from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation, ExtractionResult
+from src.pipeline.pipeline.orchestrator import process_article
 
 
 def test_process_article_temporal_relations_properties() -> None:
@@ -60,7 +60,7 @@ def test_process_article_temporal_relations_properties() -> None:
     )
 
     # 3.   Execute process_article with extract_article mocked
-    with patch("src.pipeline.orchestrator.extract_article", return_value=mock_result):
+    with patch("src.pipeline.pipeline.orchestrator.extract_article", return_value=mock_result):
         all_records = []
         process_article(article, document, all_records)
 

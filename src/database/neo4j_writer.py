@@ -9,14 +9,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from src.validation.ontology_validator import (
+from src.shared.ontology.validators import (
     OntologyValidator,
     _VALIDATION_TOKEN,
     ValidatedGraphPayload,
     ValidatedNode,
     ValidatedRelation,
 )
-from src.validation.payload_consistency_validator import validate_payload_consistency_or_raise
+from src.shared.ontology.payload_consistency_validator import validate_payload_consistency_or_raise
 
 
 class WriteAttemptError(TypeError):

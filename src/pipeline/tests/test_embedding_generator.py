@@ -4,14 +4,14 @@ import pytest
 
 from unittest.mock import Mock
 
-from src.embedding.embedding_generator import (
+from src.pipeline.embedding.embedding_generator import (
     EmbeddingDimensionError,
     build_clause_embedding_text,
     embedding_targets,
     embedding_texts_by_node_id,
     validate_embedding_dimension,
 )
-from src.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
+from src.pipeline.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
 
 
 def test_embedding_targets_include_only_article_and_clause() -> None:

@@ -5,8 +5,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from typer.testing import CliRunner
 
-from main import app
-from src.config import settings
+from src.pipeline.main import app
+from src.pipeline.config import settings
 
 runner = CliRunner()
 

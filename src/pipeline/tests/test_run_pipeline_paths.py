@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import date
 from unittest.mock import patch
 
-from src.extraction.models import ExtractionResult
-from src.parser.models import Article, DocumentInfo, ParsedDocument
-from src.pipeline.orchestrator import run_pipeline
+from src.pipeline.extraction.models import ExtractionResult
+from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
+from src.pipeline.pipeline.orchestrator import run_pipeline
 
 
 def test_run_pipeline_writes_decision_files_under_raw_doc_code(tmp_path) -> None:
@@ -24,7 +24,7 @@ def test_run_pipeline_writes_decision_files_under_raw_doc_code(tmp_path) -> None
     )
 
     with patch(
-        "src.pipeline.orchestrator.extract_article",
+        "src.pipeline.pipeline.orchestrator.extract_article",
         return_value=ExtractionResult(article_number=17, entities=[], relations=[]),
     ):
         run_pipeline(parsed, tmp_path, raw_doc_code="LDN2020")

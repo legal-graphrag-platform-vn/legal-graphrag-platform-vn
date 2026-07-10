@@ -3,8 +3,8 @@ import sys
 import logging
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from src.crawler.vbpl_crawler import crawl_and_save, _USER_AGENT
-from src.config import settings
+from src.pipeline.crawler.vbpl_crawler import crawl_and_save, _USER_AGENT
+from src.pipeline.config import settings
 
 # Đảm bảo in tiếng Việt không lỗi font trên console Windows
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":

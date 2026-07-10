@@ -3,8 +3,8 @@ from unittest.mock import Mock
 from unittest.mock import patch
 
 from src.database.neo4j_writer import GraphIngestionService, Neo4jWriter, WriteAttemptError
-from src.validation.ontology_validator import GraphValidationError, OntologyValidator, validate_graph_payload
-from src.validation.payload_consistency_validator import (
+from src.shared.ontology.validators import GraphValidationError, OntologyValidator, validate_graph_payload
+from src.shared.ontology.payload_consistency_validator import (
     PayloadConsistencyError,
     deterministic_relation_id,
 )

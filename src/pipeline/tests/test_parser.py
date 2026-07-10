@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from src.parser.hierarchy_parser import parse_text
-from src.parser.models import DocumentInfo
+from src.pipeline.parser.hierarchy_parser import parse_text
+from src.pipeline.parser.models import DocumentInfo
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_law.txt"
 
@@ -66,7 +66,7 @@ def test_does_not_crash_on_empty_text() -> None:
 
 
 def test_clean_vietnamese_spacing() -> None:
-    from src.parser.hierarchy_parser import clean_vietnamese_spacing
+    from src.pipeline.parser.hierarchy_parser import clean_vietnamese_spacing
     
     assert clean_vietnamese_spacing("Công ty trách nhi ệm h ữu h ạn") == "Công ty trách nhiệm hữu hạn"
     assert clean_vietnamese_spacing("hợp cuộc họp được triệu tập t heo quy định") == "hợp cuộc họp được triệu tập theo quy định"
@@ -76,7 +76,7 @@ def test_clean_vietnamese_spacing() -> None:
 
 
 def test_should_skip_line() -> None:
-    from src.parser.hierarchy_parser import should_skip_line
+    from src.pipeline.parser.hierarchy_parser import should_skip_line
 
     assert should_skip_line("4") is True
     assert should_skip_line("123") is True

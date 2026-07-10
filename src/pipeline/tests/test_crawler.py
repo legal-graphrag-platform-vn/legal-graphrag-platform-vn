@@ -2,7 +2,7 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.crawler.vbpl_crawler import (
+from src.pipeline.crawler.vbpl_crawler import (
     _extract_body_lines,
     _extract_metadata,
     _infer_doc_type,
@@ -43,8 +43,8 @@ def test_infer_doc_type() -> None:
     assert _infer_doc_type("01/2021/TT-BKHDT") == "Circular"
 
 
-@patch("src.crawler.vbpl_crawler.sync_playwright")
-@patch("src.crawler.vbpl_crawler.crawl_and_save")
+@patch("src.pipeline.crawler.vbpl_crawler.sync_playwright")
+@patch("src.pipeline.crawler.vbpl_crawler.crawl_and_save")
 def test_crawl_by_search_mocked(mock_crawl_and_save: MagicMock, mock_sync_playwright: MagicMock) -> None:
     # 1.   Mock playwright browser, context, page, and locator
     mock_playwright = MagicMock()

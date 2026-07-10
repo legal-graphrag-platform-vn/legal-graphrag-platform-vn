@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from pydantic import ValidationError
 
-from src.extraction.models import ExtractedEntity, ExtractedRelation
+from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation
 
 
 def validate_entity(raw: dict) -> tuple[ExtractedEntity | None, str | None]:

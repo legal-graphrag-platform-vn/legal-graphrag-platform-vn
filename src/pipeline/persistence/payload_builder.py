@@ -8,8 +8,8 @@ import unicodedata
 from pathlib import Path
 from typing import Any, Mapping
 
-from src.parser.models import ParsedDocument
-from src.validation.payload_consistency_validator import deterministic_relation_id
+from src.pipeline.parser.models import ParsedDocument
+from src.shared.ontology.payload_consistency_validator import deterministic_relation_id
 
 
 SEMANTIC_LABEL_MAP = {

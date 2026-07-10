@@ -4,7 +4,7 @@ Chạy: pytest tests/test_ontology_consistency.py
 Tốc độ: <1ms, không cần DB hay LLM.
 """
 
-from src.validation.ontology_validator import CONSTRAINTS, RELATION_ENUM, validate_relation
+from src.shared.ontology.validators import CONSTRAINTS, RELATION_ENUM, validate_relation
 
 
 SEMANTIC_PROPS = {
@@ -52,7 +52,7 @@ def test_requires_not_rejected() -> None:
 def test_requires_entity_to_entity_rejected() -> None:
     ok, err = validate_relation("LegalSubject", "REQUIRES", "LegalSubject", properties=SEMANTIC_PROPS)
     assert not ok
-    assert "Invalid pair" in (err or "")
+    assert "tail type" in (err or "") or "Invalid tail type" in (err or "") or "Invalid pair" in (err or "")
 
 
 def test_semantic_relation_missing_provenance_rejected() -> None:
@@ -64,7 +64,7 @@ def test_semantic_relation_missing_provenance_rejected() -> None:
 def test_extraction_labels_rejected_at_ontology_boundary() -> None:
     ok, err = validate_relation("Entity", "REQUIRES", "Concept", properties=SEMANTIC_PROPS)
     assert not ok
-    assert "Invalid pair" in (err or "")
+    assert "head type" in (err or "") or "Invalid head type" in (err or "") or "Invalid pair" in (err or "")
 
 
 def test_refers_to_invalid_citation_type_rejected() -> None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.validation.payload_consistency_validator import deterministic_relation_id, validate_payload_consistency
+from src.shared.ontology.payload_consistency_validator import deterministic_relation_id, validate_payload_consistency
 
 
 def test_payload_consistency_detects_dangling_relation() -> None:

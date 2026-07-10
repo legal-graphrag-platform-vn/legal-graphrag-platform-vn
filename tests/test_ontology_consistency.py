@@ -1,6 +1,6 @@
 import unittest
 
-from src.validation.ontology_validator import (
+from src.shared.ontology.validators import (
     CONSTRAINTS,
     RELATION_ENUM,
     GraphValidationError,

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Protocol
 
-from src.config import settings
+from src.pipeline.config import settings
 
 
 class WriteAttemptError(TypeError):
@@ -19,33 +19,19 @@ class SessionProtocol(Protocol):
     def run(self, cypher: str, **parameters: Any) -> Any: ...
 
 
-_root_validator_module = None
-
-
-def _root_validator():
-    global _root_validator_module
-    if _root_validator_module is None:
-        root_path = Path(__file__).resolve().parents[3] / "validation" / "ontology_validator.py"
-        spec = importlib.util.spec_from_file_location("legal_graphrag_root_ontology_validator", root_path)
-        if spec is None or spec.loader is None:
-            raise RuntimeError(f"Cannot load root ontology validator from {root_path}")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-        _root_validator_module = module
-    return _root_validator_module
+from src.shared.ontology import validators as root_validator
 
 
 def validate_graph_payload(payload: Mapping[str, Any]):
-    return _root_validator().OntologyValidator().validate_graph_payload(payload)
+    return root_validator.OntologyValidator().validate_graph_payload(payload)
 
 
 def _validated_graph_payload_type():
-    return _root_validator().ValidatedGraphPayload
+    return root_validator.ValidatedGraphPayload
 
 
 def _validation_token():
-    return _root_validator()._VALIDATION_TOKEN
+    return root_validator._VALIDATION_TOKEN
 
 
 @dataclass(slots=True)

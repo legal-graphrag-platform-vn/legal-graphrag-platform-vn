@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.persistence.neo4j_writer import GraphIngestionService, Neo4jWriter, WriteAttemptError, validate_graph_payload
+from src.pipeline.persistence.neo4j_writer import GraphIngestionService, Neo4jWriter, WriteAttemptError, validate_graph_payload
 
 
 def _valid_payload() -> dict:
@@ -53,7 +53,8 @@ def test_pipeline_ingestion_uses_root_validated_payload() -> None:
 
     validated = service.ingest(_valid_payload())
 
-    assert validated.__class__.__module__ == "legal_graphrag_root_ontology_validator"
+    assert validated.__class__.__name__ == "ValidatedGraphPayload"
+    assert validated.__class__.__module__ == "src.shared.ontology.validators"
     assert session.run.call_count == 3
 
 

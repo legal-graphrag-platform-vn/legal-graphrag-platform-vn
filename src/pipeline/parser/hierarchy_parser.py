@@ -9,8 +9,8 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from src.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
-from src.parser.patterns import (
+from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
+from src.pipeline.parser.patterns import (
     looks_like_title,
     match_article,
     match_chapter,
@@ -108,7 +108,7 @@ class _ArticleBuilder:
             if not line_str:
                 continue
             
-            from src.parser.patterns import match_clause, match_point
+            from src.pipeline.parser.patterns import match_clause, match_point
             
             is_new_element = (
                 not joined_lines or 

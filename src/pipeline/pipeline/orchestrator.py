@@ -21,14 +21,14 @@ from pathlib import Path
 import re
 import unicodedata
 
-from src.config import settings
-from src.extraction.llm_extractor import extract_article
-from src.extraction.models import ExtractedEntity
-from src.parser.models import Article, DocumentInfo, ParsedDocument
-from src.scoring.confidence_scorer import score
-from src.validation.ontology_validator import validate_relation as validate_ontology
-from src.validation.record_consistency_validator import validate_record_relation
-from src.validation.schema_validator import validate_relation as validate_schema
+from src.pipeline.config import settings
+from src.pipeline.extraction.llm_extractor import extract_article
+from src.pipeline.extraction.models import ExtractedEntity
+from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
+from src.pipeline.scoring.confidence_scorer import score
+from src.shared.ontology.validators import validate_relation as validate_ontology
+from src.pipeline.validation.record_consistency_validator import validate_record_relation
+from src.pipeline.validation.schema_validator import validate_relation as validate_schema
 
 logger = logging.getLogger(__name__)
 

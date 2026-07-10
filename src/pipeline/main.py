@@ -22,17 +22,17 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
 
-from src.config import settings
-from src.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
-from src.embedding.embedding_generator import EmbeddingGenerator, embedding_texts_by_node_id
-from src.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
-from src.parser.hierarchy_parser import parse_text
-from src.parser.models import DocumentInfo, ParsedDocument
-from src.persistence.neo4j_writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
-from src.persistence.payload_builder import build_payload_from_paths
-from src.pipeline.orchestrator import run_pipeline
-from src.reports.graph_quality import GraphQualityReporter, write_graph_quality_report
-from src.validation.payload_consistency_validator import validate_payload_consistency
+from src.pipeline.config import settings
+from src.pipeline.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
+from src.pipeline.embedding.embedding_generator import EmbeddingGenerator, embedding_texts_by_node_id
+from src.pipeline.embedding.neo4j_embedding_writer import Neo4jEmbeddingWriter
+from src.pipeline.parser.hierarchy_parser import parse_text
+from src.pipeline.parser.models import DocumentInfo, ParsedDocument
+from src.pipeline.persistence.neo4j_writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
+from src.pipeline.persistence.payload_builder import build_payload_from_paths
+from src.pipeline.pipeline.orchestrator import run_pipeline
+from src.pipeline.reports.graph_quality import GraphQualityReporter, write_graph_quality_report
+from src.shared.ontology.payload_consistency_validator import validate_payload_consistency
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)

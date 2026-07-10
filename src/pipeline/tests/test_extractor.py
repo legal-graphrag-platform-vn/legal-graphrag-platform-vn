@@ -3,11 +3,11 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 import pytest
 
-from src.config import settings
-from src.extraction.models import ExtractedEntity, ExtractedRelation
-from src.extraction.providers import get_provider
-from src.extraction.providers.gemini_provider import GeminiProvider
-from src.extraction.providers.openai_provider import OpenAICompatibleProvider
+from src.pipeline.config import settings
+from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation
+from src.pipeline.extraction.providers import get_provider
+from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
+from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
 
 
 def test_provider_factory() -> None:
@@ -40,7 +40,7 @@ def test_provider_factory() -> None:
             get_provider()
 
 
-@patch("src.extraction.providers.openai_provider.OpenAI")
+@patch("src.pipeline.extraction.providers.openai_provider.OpenAI")
 def test_openai_provider_minimax_config(mock_openai_class: MagicMock) -> None:
     mock_client = MagicMock()
     mock_openai_class.return_value = mock_client
@@ -58,7 +58,7 @@ def test_openai_provider_minimax_config(mock_openai_class: MagicMock) -> None:
         assert model == "test-model-minimax"
 
 
-@patch("src.extraction.providers.openai_provider.OpenAI")
+@patch("src.pipeline.extraction.providers.openai_provider.OpenAI")
 def test_openai_provider_ollama_config(mock_openai_class: MagicMock) -> None:
     mock_client = MagicMock()
     mock_openai_class.return_value = mock_client

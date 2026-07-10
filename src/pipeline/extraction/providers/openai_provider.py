@@ -7,15 +7,15 @@ from openai import OpenAI
 from openai import APIError as OpenAIAPIError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from src.config import settings
-from src.extraction.models import (
+from src.pipeline.config import settings
+from src.pipeline.extraction.models import (
     EntityExtractionResult,
     ExtractedEntity,
     ExtractedRelation,
     RelationExtractionResult,
 )
-from src.extraction.prompts import ENTITY_EXTRACTION_PROMPT, RELATION_EXTRACTION_PROMPT
-from src.extraction.providers.base import BaseProvider
+from src.pipeline.extraction.prompts import ENTITY_EXTRACTION_PROMPT, RELATION_EXTRACTION_PROMPT
+from src.pipeline.extraction.providers.base import BaseProvider
 
 logger = logging.getLogger(__name__)
 

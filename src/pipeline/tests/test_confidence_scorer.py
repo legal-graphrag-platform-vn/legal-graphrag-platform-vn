@@ -1,4 +1,4 @@
-from src.scoring.confidence_scorer import (
+from src.pipeline.scoring.confidence_scorer import (
     WEIGHTS,
     score,
     score_entities_resolvable,

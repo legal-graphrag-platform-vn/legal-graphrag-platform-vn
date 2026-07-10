@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.validation.record_consistency_validator import validate_record_relation
+from src.pipeline.validation.record_consistency_validator import validate_record_relation
 
 
 def test_record_consistency_rejects_temporal_self_loop() -> None:

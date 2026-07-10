@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 from datetime import date
 
-from src.parser.models import Article, DocumentInfo, ParsedDocument
+from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 
 
 def test_validated_payload_helper_uses_raw_doc_code_directory(tmp_path, monkeypatch) -> None:
-    import main
+    import src.pipeline.main as main
 
     raw_doc_code = "LDN2020"
     processed_dir = tmp_path / raw_doc_code

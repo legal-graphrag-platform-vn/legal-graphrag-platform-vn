@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from unittest.mock import Mock
 
-from src.reports.graph_quality import GraphQualityReporter, build_graph_quality_report
-from src.validation.payload_consistency_validator import deterministic_relation_id
+from src.pipeline.reports.graph_quality import GraphQualityReporter, build_graph_quality_report
+from src.shared.ontology.payload_consistency_validator import deterministic_relation_id
 
 
 def test_graph_quality_report_counts_nodes_and_relations() -> None:

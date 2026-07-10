@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import logging
 
-from src.extraction.models import ExtractedEntity, ExtractedRelation, ExtractionResult
-from src.extraction.providers import get_provider
+from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation, ExtractionResult
+from src.pipeline.extraction.providers import get_provider
 
 logger = logging.getLogger(__name__)
 

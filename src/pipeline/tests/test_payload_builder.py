@@ -4,8 +4,8 @@ from datetime import date
 
 import pytest
 
-from src.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
-from src.persistence.payload_builder import PayloadBuildError, build_graph_payload
+from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
+from src.pipeline.persistence.payload_builder import PayloadBuildError, build_graph_payload
 
 
 def _parsed() -> ParsedDocument:

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Protocol
 
-from src.config import settings
+from src.pipeline.config import settings
 
 
 class EncoderProtocol(Protocol):
