@@ -1,0 +1,40 @@
+# -----------------------------------------------------------------------------
+# Python / Flask .gitignore
+# -----------------------------------------------------------------------------
+
+# Môi trường ảo (Virtual Environments)
+venv/
+.venv/
+env/
+ENV/
+lib/
+pip-selfcheck.json
+
+# Cấu hình chứa thông tin nhạy cảm (API Keys, Credentials)
+.env
+
+# Cache của Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Logs và Dữ liệu tạm
+*.log
+logs/
+tmp/
+
+# Cấu hình IDE (VS Code, PyCharm...)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Tệp sinh ra bởi Hệ điều hành
+.DS_Store
+Thumbs.db
+desktop.ini
