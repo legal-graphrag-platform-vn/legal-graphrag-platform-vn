@@ -1,8 +1,21 @@
 'use client'
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
 import type { FilterState, DocumentLegalStatus } from '@/types/documents'
 
-const DOC_TYPES = ['Law', 'Ordinance', 'Decree', 'Decision', 'Circular', 'JointCircular', 'Resolution']
+const DOC_TYPES = [
+  { value: 'Law', label: 'Luật' },
+  { value: 'Ordinance', label: 'Pháp lệnh' },
+  { value: 'Decree', label: 'Nghị định' },
+  { value: 'Decision', label: 'Quyết định' },
+  { value: 'Circular', label: 'Thông tư' },
+  { value: 'JointCircular', label: 'Thông tư liên tịch' },
+  { value: 'Resolution', label: 'Nghị quyết' },
+]
+
 const STATUSES: { value: DocumentLegalStatus; label: string }[] = [
   { value: 'ACTIVE', label: 'Còn hiệu lực' },
   { value: 'NOT_YET_EFFECTIVE', label: 'Chưa có hiệu lực' },
@@ -21,48 +34,61 @@ export function FilterBar({ filters, onFilterChange }: FilterBarProps) {
   const update = (partial: Partial<FilterState>) =>
     onFilterChange({ ...filters, ...partial })
 
-  return (
-    <div className="flex flex-col gap-2 p-3 border-b border-border">
-      {/* Loại văn bản */}
-      <select
-        className="w-full text-xs bg-card border border-border rounded px-2 py-1.5 text-foreground focus:outline-none focus:border-brand"
-        value={filters.doc_type ?? ''}
-        onChange={(e) => update({ doc_type: e.target.value || undefined })}
-      >
-        <option value="">Tất cả loại văn bản</option>
-        {DOC_TYPES.map((t) => (
-          <option key={t} value={t}>{t}</option>
-        ))}
-      </select>
+  const hasFilters = Object.values(filters).some(Boolean)
 
-      {/* Trạng thái */}
-      <select
-        className="w-full text-xs bg-card border border-border rounded px-2 py-1.5 text-foreground focus:outline-none focus:border-brand"
+  return (
+    <div className="flex flex-col gap-2 p-3 border-b border-border bg-muted/30">
+      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+        Bộ lọc
+      </p>
+
+      <Select
+        value={filters.doc_type ?? ''}
+        onValueChange={(v) => update({ doc_type: v === '_all' ? undefined : (v || undefined) })}
+      >
+        <SelectTrigger className="h-8 text-xs">
+          <SelectValue placeholder="Tất cả loại văn bản" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="_all">Tất cả loại văn bản</SelectItem>
+          {DOC_TYPES.map((t) => (
+            <SelectItem key={t.value} value={t.value} className="text-xs">
+              {t.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
         value={filters.status ?? ''}
-        onChange={(e) =>
-          update({ status: (e.target.value as DocumentLegalStatus) || undefined })
+        onValueChange={(v) =>
+          update({ status: (v === '_all' ? undefined : v) as DocumentLegalStatus | undefined })
         }
       >
-        <option value="">Tất cả trạng thái</option>
-        {STATUSES.map((s) => (
-          <option key={s.value} value={s.value}>{s.label}</option>
-        ))}
-      </select>
+        <SelectTrigger className="h-8 text-xs">
+          <SelectValue placeholder="Tất cả trạng thái" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="_all">Tất cả trạng thái</SelectItem>
+          {STATUSES.map((s) => (
+            <SelectItem key={s.value} value={s.value} className="text-xs">
+              {s.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-      {/* Cơ quan ban hành */}
-      <input
-        type="text"
+      <Input
+        className="h-8 text-xs"
         placeholder="Cơ quan ban hành..."
-        className="w-full text-xs bg-card border border-border rounded px-2 py-1.5 text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-brand"
         value={filters.issuer ?? ''}
         onChange={(e) => update({ issuer: e.target.value || undefined })}
       />
 
-      {/* Năm */}
-      <input
+      <Input
         type="number"
+        className="h-8 text-xs"
         placeholder="Năm ban hành..."
-        className="w-full text-xs bg-card border border-border rounded px-2 py-1.5 text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-brand"
         value={filters.year ?? ''}
         min={1945}
         max={new Date().getFullYear()}
@@ -71,14 +97,16 @@ export function FilterBar({ filters, onFilterChange }: FilterBarProps) {
         }
       />
 
-      {/* Reset */}
-      {Object.values(filters).some(Boolean) && (
-        <button
+      {hasFilters && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs text-muted-foreground justify-start px-1"
           onClick={() => onFilterChange({})}
-          className="text-xs text-brand hover:text-brand-hover text-left"
         >
+          <X className="w-3 h-3 mr-1" />
           Xóa bộ lọc
-        </button>
+        </Button>
       )}
     </div>
   )
