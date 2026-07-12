@@ -1,5 +1,6 @@
-import { PanelLeftClose, Settings, SquarePen, Trash2, X } from 'lucide-react'
+import { PanelLeftClose, Settings, SquarePen, Trash2, X, BookOpen } from 'lucide-react'
 import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { ChatSession } from '../../types/chat'
 
 interface SidebarProps {
@@ -24,6 +25,8 @@ export function Sidebar({
    onToggle,
 }: SidebarProps) {
    const [showSettings, setShowSettings] = useState(false)
+   const pathname = usePathname()
+   const router = useRouter()
 
    return (
       <div
@@ -62,6 +65,19 @@ export function Sidebar({
                >
                   <SquarePen size={17} className="text-zinc-600 dark:text-zinc-400" />
                   <span>New chat</span>
+               </button>
+
+               {/* Document Explorer */}
+               <button
+                  onClick={() => router.push('/explorer')}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                     pathname?.startsWith('/explorer')
+                        ? 'bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-900 dark:text-white'
+                        : 'hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200'
+                  }`}
+               >
+                  <BookOpen size={17} className="text-zinc-600 dark:text-zinc-400" />
+                  <span>Tra cứu văn bản</span>
                </button>
             </div>
 

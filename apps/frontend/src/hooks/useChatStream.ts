@@ -1,98 +1,101 @@
 import { useState } from 'react'
 import { Message, Source } from '../types/chat'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+/**
+ * Parse SSE named-event stream từ FastAPI.
+ * Format mới:
+ *   event: metadata
+ *   data: {"sources":[...],"intent":"factual","retrieval_mode":"mock"}
+ *
+ *   event: token
+ *   data: {"content":"Vốn "}
+ *
+ *   event: error
+ *   data: {"code":"STREAM_ERROR","message":"..."}
+ *
+ *   event: done
+ *   data: {}
+ */
 export function useChatStream(initialMessages: Message[] = []) {
    const [messages, setMessages] = useState<Message[]>(initialMessages)
    const [isStreaming, setIsStreaming] = useState(false)
 
-   const sendMessage = async (text: string, currentMessages: Message[]) => {
+   const sendMessage = async (
+      text: string,
+      currentMessages: Message[],
+      temporalDate?: string,
+   ) => {
       if (!text.trim() || isStreaming) return
 
-      // 1. Create and add user message
+      // 1. Add user message
       const userMessage: Message = {
          id: crypto.randomUUID(),
          role: 'user',
          content: text,
          timestamp: new Date().toISOString(),
       }
-
       const updatedMessages = [...currentMessages, userMessage]
       setMessages(updatedMessages)
       setIsStreaming(true)
 
-      // 2. Add empty assistant message that will be updated in real-time
-      const assistantMessageId = crypto.randomUUID()
+      // 2. Placeholder assistant message
+      const assistantId = crypto.randomUUID()
       const assistantMessage: Message = {
-         id: assistantMessageId,
+         id: assistantId,
          role: 'assistant',
          content: '',
          sources: [],
          timestamp: new Date().toISOString(),
       }
-
       setMessages((prev) => [...prev, assistantMessage])
 
-      // Variables to manage smooth typewriter effect
-      let rawTextFromServer = ''
-      let displayedContent = ''
-      let streamFinished = false
-      let sourcesList: Source[] = []
+      // 3. Typewriter buffer
+      let rawText = ''
+      let displayed = ''
+      let streamDone = false
 
-      // 3. Start typewriter interval (runs every 20ms)
       const typewriterInterval = setInterval(() => {
-         const remainingLength = rawTextFromServer.length - displayedContent.length
-
-         if (remainingLength > 0) {
-            // Dynamic speed control: if network is ahead, print more characters at once
-            const charsToAppend =
-               remainingLength > 40 ? 5 : remainingLength > 20 ? 3 : remainingLength > 8 ? 2 : 1
-
-            displayedContent += rawTextFromServer.slice(
-               displayedContent.length,
-               displayedContent.length + charsToAppend,
-            )
-
+         const remaining = rawText.length - displayed.length
+         if (remaining > 0) {
+            const charsToAdd = remaining > 40 ? 5 : remaining > 20 ? 3 : remaining > 8 ? 2 : 1
+            displayed += rawText.slice(displayed.length, displayed.length + charsToAdd)
             setMessages((prev) =>
                prev.map((msg) =>
-                  msg.id === assistantMessageId ? { ...msg, content: displayedContent } : msg,
+                  msg.id === assistantId ? { ...msg, content: displayed } : msg,
                ),
             )
-         } else if (streamFinished) {
-            // Stream completed and typewriter fully caught up
+         } else if (streamDone) {
             clearInterval(typewriterInterval)
             setIsStreaming(false)
          }
       }, 20)
 
       try {
-         // 4. Request SSE stream from Flask server
-         const response = await fetch(`${API_URL}/api/chat`, {
+         // 4. POST đến FastAPI /api/v1/chat
+         const body: Record<string, unknown> = {
+            message: text,
+            history: currentMessages.map((m) => ({ role: m.role, content: m.content })),
+         }
+         if (temporalDate) body.temporal_date = temporalDate
+
+         const response = await fetch(`${API_URL}/api/v1/chat`, {
             method: 'POST',
-            headers: {
-               'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-               message: text,
-               history: currentMessages.map((msg) => ({
-                  role: msg.role,
-                  content: msg.content,
-               })),
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
          })
 
          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            throw new Error(`HTTP ${response.status}`)
          }
 
          const reader = response.body?.getReader()
-         if (!reader) {
-            throw new Error('ReadableStream not supported or no body returned')
-         }
+         if (!reader) throw new Error('ReadableStream not supported')
 
          const decoder = new TextDecoder()
          let buffer = ''
+         let currentEvent = ''
 
          while (true) {
             const { done, value } = await reader.read()
@@ -100,57 +103,108 @@ export function useChatStream(initialMessages: Message[] = []) {
 
             buffer += decoder.decode(value, { stream: true })
             const lines = buffer.split('\n')
-
-            // Keep the last partial line in the buffer
             buffer = lines.pop() || ''
 
             for (const line of lines) {
                const trimmed = line.trim()
-               if (!trimmed) continue
 
-               if (trimmed.startsWith('data: ')) {
-                  const dataStr = trimmed.slice(6)
-                  if (dataStr === '[DONE]') {
-                     break
-                  }
+               // 5. Parse named SSE events
+               if (trimmed.startsWith('event: ')) {
+                  currentEvent = trimmed.slice(7).trim()
+                  continue
+               }
 
-                  try {
-                     const data = JSON.parse(dataStr)
-                     if (data.type === 'metadata' && data.sources) {
-                        sourcesList = data.sources
+               if (!trimmed.startsWith('data: ')) continue
+
+               const dataStr = trimmed.slice(6)
+
+               // Backward compat với Flask [DONE]
+               if (dataStr === '[DONE]') {
+                  streamDone = true
+                  break
+               }
+
+               try {
+                  const payload = JSON.parse(dataStr)
+
+                  if (currentEvent === 'metadata') {
+                     // Map RetrievedUnitDTO → Source (backward compat)
+                     const sources: Source[] = (payload.sources ?? []).map(
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (s: any) => ({
+                           id: s.id,
+                           title: s.citation_label ?? s.id,
+                           content: s.content_raw ?? '',
+                           citation_label: s.citation_label,
+                           label: s.label,
+                           document_id: s.document_id,
+                           document_number: s.document_number,
+                           article_id: s.article_id,
+                           clause_id: s.clause_id,
+                           effective_from: s.effective_from,
+                           effective_to: s.effective_to,
+                           final_score: s.final_score,
+                        }),
+                     )
+                     setMessages((prev) =>
+                        prev.map((msg) =>
+                           msg.id === assistantId
+                              ? {
+                                   ...msg,
+                                   sources,
+                                   intent: payload.intent,
+                                   retrieval_mode: payload.retrieval_mode,
+                                }
+                              : msg,
+                        ),
+                     )
+                  } else if (currentEvent === 'token') {
+                     // Accumulate — typewriter interval sẽ animate
+                     rawText += payload.content ?? ''
+                  } else if (currentEvent === 'error') {
+                     setMessages((prev) =>
+                        prev.map((msg) =>
+                           msg.id === assistantId
+                              ? {
+                                   ...msg,
+                                   error: payload.message ?? 'Đã xảy ra lỗi',
+                                   content: `❌ ${payload.message ?? 'Đã xảy ra lỗi'}`,
+                                }
+                              : msg,
+                        ),
+                     )
+                  } else if (currentEvent === 'done') {
+                     streamDone = true
+                  } else if (!currentEvent) {
+                     // Backward compat: Flask format không có named event
+                     if (payload.type === 'metadata' && payload.sources) {
+                        const sources: Source[] = payload.sources
                         setMessages((prev) =>
                            prev.map((msg) =>
-                              msg.id === assistantMessageId
-                                 ? { ...msg, sources: sourcesList }
-                                 : msg,
+                              msg.id === assistantId ? { ...msg, sources } : msg,
                            ),
                         )
-                     } else if (data.type === 'content' && data.content) {
-                        // Accumulate incoming text in background; typewriter interval will animate it
-                        rawTextFromServer += data.content
+                     } else if (payload.type === 'content' && payload.content) {
+                        rawText += payload.content
                      }
-                  } catch (err) {
-                     console.warn('Error parsing JSON chunk:', err, trimmed)
                   }
+               } catch (err) {
+                  console.warn('SSE parse error:', err, trimmed)
                }
             }
          }
 
-         // Signal stream completion; interval will stop once queue is empty
-         streamFinished = true
+         streamDone = true
       } catch (error) {
-         console.error('Error during streaming:', error)
+         console.error('Chat stream error:', error)
          clearInterval(typewriterInterval)
          setIsStreaming(false)
-
-         // Update assistant message with error state immediately
          setMessages((prev) =>
             prev.map((msg) =>
-               msg.id === assistantMessageId
+               msg.id === assistantId
                   ? {
                        ...msg,
-                       content:
-                          '❌ Có lỗi xảy ra trong quá trình kết nối với server. Vui lòng thử lại sau.',
+                       content: '❌ Có lỗi xảy ra khi kết nối server. Vui lòng thử lại.',
                     }
                   : msg,
             ),
@@ -158,15 +212,7 @@ export function useChatStream(initialMessages: Message[] = []) {
       }
    }
 
-   const clearMessages = () => {
-      setMessages([])
-   }
+   const clearMessages = () => setMessages([])
 
-   return {
-      messages,
-      setMessages,
-      isStreaming,
-      sendMessage,
-      clearMessages,
-   }
+   return { messages, setMessages, isStreaming, sendMessage, clearMessages }
 }
