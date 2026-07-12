@@ -1,6 +1,7 @@
 import { PanelLeftClose, Settings, SquarePen, Trash2, X, BookOpen } from 'lucide-react'
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { ThemeToggle } from './ThemeToggle'
 import { ChatSession } from '../../types/chat'
 
 interface SidebarProps {
@@ -129,14 +130,15 @@ export function Sidebar({
          </div>
 
          {/* Sidebar Footer with Settings */}
-         <div className="p-3 border-t border-border relative">
+         <div className="p-3 border-t border-border relative flex items-center gap-2">
             <button
                onClick={() => setShowSettings(!showSettings)}
-               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer text-sm font-medium"
+               className="flex-1 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer text-sm font-medium"
             >
                <Settings size={17} className="text-zinc-650 dark:text-zinc-400" />
                <span>Settings</span>
             </button>
+            <ThemeToggle />
 
             {/* Settings Modal (Centered on Screen) */}
             {showSettings && (

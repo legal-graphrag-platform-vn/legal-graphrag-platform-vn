@@ -37,6 +37,22 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
                   </div>
 
                   <div className="flex-1 flex flex-col space-y-3 min-w-0">
+                     {/* Metadata Badges */}
+                     {(message.intent || message.retrieval_mode) && (
+                        <div className="flex flex-wrap gap-2 mb-1">
+                           {message.intent && (
+                              <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                                 {message.intent}
+                              </span>
+                           )}
+                           {message.retrieval_mode && (
+                              <span className="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 dark:bg-blue-500/10 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-500/20">
+                                 {message.retrieval_mode}
+                              </span>
+                           )}
+                        </div>
+                     )}
+
                      {/* Markdown Content / Thinking Indicator */}
                      <div className="prose dark:prose-invert prose-zinc max-w-none text-zinc-900 dark:text-zinc-100 leading-relaxed text-[15px] space-y-4">
                         {isLast && isStreaming && !message.content ? (

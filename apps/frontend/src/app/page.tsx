@@ -13,10 +13,19 @@ import {
   MessageSquare,
   BarChart3,
   Check,
+  Menu,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
+import { buttonVariants, Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 
 export const metadata: Metadata = {
   title: 'LegalGraph AI — Tra cứu pháp luật Việt Nam bằng AI',
@@ -145,12 +154,48 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="/explorer" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
-              Tra cứu
-            </Link>
-            <Link href="/chat" className={cn(buttonVariants({ size: 'sm' }), 'bg-emerald-600 hover:bg-emerald-700 text-white')}>
-              Thử ngay <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Link>
+            <div className="hidden sm:flex items-center gap-2">
+              <ThemeToggle />
+              <Link href="/explorer" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}>
+                Tra cứu
+              </Link>
+              <Link href="/chat" className={cn(buttonVariants({ size: 'sm' }), 'bg-emerald-600 hover:bg-emerald-700 text-white')}>
+                Thử ngay <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Link>
+            </div>
+
+            {/* Mobile menu */}
+            <div className="sm:hidden flex items-center gap-1">
+              <ThemeToggle />
+              <Sheet>
+                <SheetTrigger className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), "shrink-0 text-muted-foreground")}>
+                  <Menu className="w-5 h-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </SheetTrigger>
+                <SheetContent side="right">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2 mb-4">
+                      <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center">
+                        <Scale className="w-3 h-3 text-white" />
+                      </div>
+                      <span>LegalGraph AI</span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col gap-4 text-sm font-medium">
+                    <Link href="#features" className="hover:text-emerald-500">Tính năng</Link>
+                    <Link href="#usecases" className="hover:text-emerald-500">Ứng dụng</Link>
+                    <Link href="#pricing" className="hover:text-emerald-500">Bảng giá</Link>
+                    <div className="h-px bg-border my-2" />
+                    <Link href="/explorer" className="hover:text-emerald-500 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4" /> Tra cứu văn bản
+                    </Link>
+                    <Link href="/chat" className="text-emerald-600 hover:text-emerald-700 flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4" /> Chat với AI
+                    </Link>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </header>
