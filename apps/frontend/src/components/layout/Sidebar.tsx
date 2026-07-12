@@ -60,8 +60,12 @@ export function Sidebar({
             <div className="px-2.5 py-1.5 space-y-0.5 text-sm font-medium">
                {/* New Chat */}
                <button
-                  onClick={onNewChat}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer"
+                  onClick={() => { onNewChat(); router.push('/chat') }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors cursor-pointer ${
+                     pathname === '/chat'
+                        ? 'bg-zinc-200/60 dark:bg-zinc-800/80 text-zinc-900 dark:text-white'
+                        : 'hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200'
+                  }`}
                >
                   <SquarePen size={17} className="text-zinc-600 dark:text-zinc-400" />
                   <span>New chat</span>
