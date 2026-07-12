@@ -3,6 +3,8 @@ from src.pipeline.config import settings
 from src.infrastructure.neo4j.writer import create_neo4j_session
 from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 
+pytestmark = pytest.mark.integration
+
 def test_neo4j_constraints_and_indexes():
     session = create_neo4j_session()
     try:
@@ -44,3 +46,6 @@ def test_neo4j_constraints_and_indexes():
 
     finally:
         session.close()
+import pytest
+
+pytestmark = pytest.mark.integration

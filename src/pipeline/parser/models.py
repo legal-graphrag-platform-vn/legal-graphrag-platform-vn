@@ -9,8 +9,11 @@ tái dùng làm input cho LLM Extraction (extraction/llm_extractor.py) để tr�
 from __future__ import annotations
 
 from datetime import date
+from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
+
+LegalNumber = Annotated[str, BeforeValidator(lambda value: str(value).strip())]
 
 class Point(BaseModel):
     """Điểm — đơn vị nhỏ nhất trong cấu trúc văn bản pháp luật VN."""
@@ -22,15 +25,29 @@ class Point(BaseModel):
 class Clause(BaseModel):
     """Khoản — unit cơ bản nhất cho retrieval (ADR-02)."""
 
-    number: int
+    number: LegalNumber
     content: str
     points: list[Point] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def point_labels_must_be_unique(self) -> "Clause":
+        seen: set[str] = set()
+        duplicates: set[str] = set()
+        for point in self.points:
+            label = point.label.strip().lower()
+            if label in seen:
+                duplicates.add(label)
+            seen.add(label)
+        if duplicates:
+            labels = ", ".join(sorted(duplicates))
+            raise ValueError(f"Duplicate Point label(s) in Clause {self.number}: {labels}")
+        return self
 
 
 class Article(BaseModel):
     """Điều."""
 
-    number: int
+    number: LegalNumber
     title: str | None = None
     content_raw: str
     chapter: str | None = Field(default=None, description="Số chương La Mã, vd 'II'")

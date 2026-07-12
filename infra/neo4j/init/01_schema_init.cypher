@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.4.0 (FROZEN 2026-07-07)
+// Source of truth: plans/legal_ontology.md v1.5.0 (FROZEN 2026-07-10)
 //
 // Script idempotent nhờ IF NOT EXISTS.
 // Có thể chạy lại sau khi Neo4j khởi động:

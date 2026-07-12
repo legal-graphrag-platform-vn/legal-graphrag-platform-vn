@@ -40,9 +40,9 @@ def test_build_graph_payload_uses_canonical_ids_and_relation_id() -> None:
             {
                 "decision": "accepted",
                 "relation": {
-                    "head": "dieu_17",
+                    "head": "ldn_2020_art17",
                     "relation": "DEFINES",
-                    "tail": "concept_von",
+                    "tail": "von_dieu_le",
                     "properties": {
                         "confidence": 0.91,
                         "llm_model": "gemini:gemini-2.5-flash",
@@ -52,7 +52,7 @@ def test_build_graph_payload_uses_canonical_ids_and_relation_id() -> None:
             }
         ],
         {
-            "concept_von": {
+            "von_dieu_le": {
                 "id": "von_dieu_le",
                 "type": "LegalConcept",
                 "label": "Vốn điều lệ",
@@ -84,7 +84,30 @@ def test_build_graph_payload_fails_for_missing_entity_index_entry() -> None:
     with pytest.raises(PayloadBuildError, match="missing entity"):
         build_graph_payload(
             _parsed(),
-            [{"decision": "accepted", "relation": {"head": "dieu_17", "relation": "DEFINES", "tail": "missing"}}],
+            [{"decision": "accepted", "relation": {"head": "ldn_2020_art17", "relation": "DEFINES", "tail": "missing"}}],
             {},
             raw_doc_code="LDN2020",
+        )
+
+
+def test_point_d_and_dd_do_not_collide() -> None:
+    parsed = _parsed()
+    parsed.articles[0].clauses[0].points = [
+        Point(label="d", content="Điểm d"),
+        Point(label="đ", content="Điểm đ"),
+    ]
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+    point_ids = {node["id"] for node in payload["nodes"] if node["type"] == "Point"}
+
+    assert point_ids == {"ldn_2020_art17_cl1_pd", "ldn_2020_art17_cl1_pdd"}
+
+
+def test_build_graph_payload_rejects_raw_structural_alias() -> None:
+    with pytest.raises(PayloadBuildError, match="missing entity"):
+        build_graph_payload(
+            _parsed(),
+            [{"decision": "accepted", "relation": {"head": "dieu_17", "relation": "DEFINES", "tail": "von_dieu_le"}}],
+            {"von_dieu_le": {"id": "von_dieu_le", "type": "LegalConcept", "name": "Vốn điều lệ"}},
+            raw_doc_code="L59_2020",
         )

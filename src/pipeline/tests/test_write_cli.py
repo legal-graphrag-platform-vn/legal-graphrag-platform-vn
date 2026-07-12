@@ -31,9 +31,9 @@ def test_validated_payload_helper_uses_raw_doc_code_directory(tmp_path, monkeypa
     accepted_record = {
         "decision": "accepted",
         "relation": {
-            "head": "dieu_17",
+            "head": "ldn_2020_art17",
             "relation": "DEFINES",
-            "tail": "concept_von",
+                "tail": "von_dieu_le",
             "properties": {
                 "confidence": 0.9,
                 "llm_model": "gemini:gemini-2.5-flash",
@@ -42,10 +42,13 @@ def test_validated_payload_helper_uses_raw_doc_code_directory(tmp_path, monkeypa
         },
     }
     (processed_dir / "accepted.jsonl").write_text(json.dumps(accepted_record, ensure_ascii=False) + "\n", encoding="utf-8")
+    (processed_dir / "extract.jsonl").write_text(json.dumps(accepted_record, ensure_ascii=False) + "\n", encoding="utf-8")
+    (processed_dir / "review.jsonl").write_text("", encoding="utf-8")
+    (processed_dir / "rejected.jsonl").write_text("", encoding="utf-8")
     (processed_dir / "entity_index.json").write_text(
         json.dumps(
             {
-                "concept_von": {
+                    "von_dieu_le": {
                     "id": "von_dieu_le",
                     "type": "LegalConcept",
                     "label": "Vốn điều lệ",

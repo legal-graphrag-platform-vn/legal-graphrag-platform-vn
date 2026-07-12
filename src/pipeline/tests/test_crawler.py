@@ -37,6 +37,13 @@ def test_extract_body_lines_strips_nav_and_tabs() -> None:
     assert "Điều 1. Phạm vi điều chỉnh" in joined
 
 
+def test_extract_body_lines_removes_vbpl_amendment_annotations() -> None:
+    body = _body_text() + "\nĐiều khoản được sửa đổi, bổ sung\nĐiều khoản được bổ sung"
+    joined = "\n".join(_extract_body_lines(body))
+    assert "Điều khoản được sửa đổi, bổ sung" not in joined
+    assert "Điều khoản được bổ sung" not in joined
+
+
 def test_infer_doc_type() -> None:
     assert _infer_doc_type("59/2020/QH14") == "Law"
     assert _infer_doc_type("01/2021/NĐ-CP") == "Decree"

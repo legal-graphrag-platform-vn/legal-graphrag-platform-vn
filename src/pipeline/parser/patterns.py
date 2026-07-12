@@ -9,7 +9,7 @@ import re
 
 
 # Pattern nhận diện dòng bắt đầu một Điều luật có chứa tối đa 2 ký tự nhiễu ở đầu (dành cho OCR).
-ARTICLE_RE_LENIENT = re.compile(r"^[^\wĐ]{0,2}Điều\s+(\d+)(?:\.|\s*$)\s*(.*)$")
+ARTICLE_RE_LENIENT = re.compile(r"^[^\wĐ]{0,2}Điều\s+(\d+[a-z]?)(?:\.|\s*$)\s*(.*)$", re.IGNORECASE)
 
 #===================================================================================================
 
@@ -19,10 +19,10 @@ UPPERCASE_TITLE_RE = re.compile(
 )
 
 # Pattern nhận diện dòng bắt đầu một Điều luật chính xác (không chứa ký tự nhiễu).
-ARTICLE_RE = re.compile(r"^Điều\s+(\d+)(?:\.|\s*$)\s*(.*)$")
+ARTICLE_RE = re.compile(r"^Điều\s+(\d+[a-z]?)(?:\.|\s*$)\s*(.*)$", re.IGNORECASE)
 
 # Pattern nhận diện dòng bắt đầu một Khoản luật (ví dụ: "1. ", "2. ").
-CLAUSE_RE = re.compile(r"^(\d+)\.\s*(.*)$")
+CLAUSE_RE = re.compile(r"^(\d+[a-z]?)\.\s*(.*)$", re.IGNORECASE)
 
 # Pattern nhận diện dòng bắt đầu một Điểm luật (ví dụ: "a) ", "b) ").
 POINT_RE = re.compile(r"^([a-zđ])\)\s*(.*)$")
@@ -33,20 +33,20 @@ CHAPTER_RE = re.compile(r"^Chương\s+([IVXLCDM]+)\s*$", re.IGNORECASE)
 
 
 # Thực hiện khớp và bóc tách thông tin Điều luật (số thứ tự và nội dung).
-def match_article(line: str, lenient: bool = False) -> tuple[int, str] | None:
+def match_article(line: str, lenient: bool = False) -> tuple[str, str] | None:
     pattern = ARTICLE_RE_LENIENT if lenient else ARTICLE_RE
     m = pattern.match(line.strip())
     if not m:
         return None
-    return int(m.group(1)), m.group(2).strip()
+    return m.group(1).lower(), m.group(2).strip()
 
 
 # Thực hiện khớp và bóc tách thông tin Khoản luật (số thứ tự và nội dung).
-def match_clause(line: str) -> tuple[int, str] | None:
+def match_clause(line: str) -> tuple[str, str] | None:
     m = CLAUSE_RE.match(line.strip())
     if not m:
         return None
-    return int(m.group(1)), m.group(2).strip()
+    return m.group(1).lower(), m.group(2).strip()
 
 
 # Thực hiện khớp và bóc tách thông tin Điểm luật (ký hiệu chữ cái và nội dung).

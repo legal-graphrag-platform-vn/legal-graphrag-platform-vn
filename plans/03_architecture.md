@@ -182,7 +182,7 @@ Pass 2: Relation Extraction
 ```
 
 **Model selection:**
-- Primary: **Gemini 2.5 Flash** (cost-effective, supports Vietnamese) — REPORT.md B2
+- Primary extraction model: **Gemini Flash Lite latest** (available structured output, low batch cost)
 - SDK: `google-genai` (thay `google-generativeai` deprecated)
 - Structured output: JSON mode / function calling
 

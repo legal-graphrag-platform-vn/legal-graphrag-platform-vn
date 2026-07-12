@@ -97,7 +97,7 @@ def build_graph_payload(
     _add_node(nodes, issuer_node)
     _add_relation(relations, document_node["id"], "ISSUED_BY", issuer_node["id"], {})
 
-    article_ids: dict[str, str] = {}
+    structural_ids: dict[str, str] = {document_node["id"]: document_node["id"]}
     chapter_ids: dict[str, str] = {}
     content_status = CONTENT_STATUS_FALLBACK.get(parsed.document.legal_status, "ACTIVE")
     effective_from = str(parsed.document.effective_from)
@@ -121,8 +121,7 @@ def build_graph_payload(
             parent_id = chapter_id
 
         article_id = f"{document_node['id']}_art{article.number}"
-        article_ids[f"dieu_{article.number}"] = article_id
-        article_ids[str(article.number)] = article_id
+        structural_ids[article_id] = article_id
         _add_node(
             nodes,
             {
@@ -140,6 +139,7 @@ def build_graph_payload(
 
         for clause in article.clauses:
             clause_id = f"{article_id}_cl{clause.number}"
+            structural_ids[clause_id] = clause_id
             _add_node(
                 nodes,
                 {
@@ -155,8 +155,9 @@ def build_graph_payload(
             _add_relation(relations, article_id, "CONTAINS", clause_id, {})
 
             for point in clause.points:
-                point_label = _slug(point.label)
+                point_label = _normalize_point_label(point.label)
                 point_id = f"{clause_id}_p{point_label}"
+                structural_ids[point_id] = point_id
                 _add_node(
                     nodes,
                     {
@@ -170,8 +171,8 @@ def build_graph_payload(
 
     for record in accepted_records:
         relation = record.get("relation") or {}
-        head_id = _resolve_endpoint_id(relation.get("head"), article_ids, entity_index)
-        tail_id = _resolve_endpoint_id(relation.get("tail"), article_ids, entity_index)
+        head_id = _resolve_endpoint_id(relation.get("head"), structural_ids, entity_index)
+        tail_id = _resolve_endpoint_id(relation.get("tail"), structural_ids, entity_index)
 
         _ensure_semantic_node(nodes, relation.get("head"), entity_index)
         _ensure_semantic_node(nodes, relation.get("tail"), entity_index)
@@ -286,10 +287,13 @@ def _resolve_endpoint_id(
 
 def _add_node(nodes: dict[str, dict[str, Any]], node: dict[str, Any]) -> None:
     node_id = str(node["id"])
+    normalized_node = {key: value for key, value in node.items() if value is not None}
     existing = nodes.get(node_id)
-    if existing and existing.get("type") != node.get("type"):
-        raise PayloadBuildError(f"Node id collision with different type: {node_id}")
-    nodes[node_id] = {key: value for key, value in node.items() if value is not None}
+    if existing is not None:
+        if existing != normalized_node:
+            raise PayloadBuildError(f"Duplicate node id with different payload: {node_id}")
+        return
+    nodes[node_id] = normalized_node
 
 
 def _add_relation(
@@ -335,6 +339,13 @@ def _normalize_chapter_number(value: str) -> str:
                 prev = current
         return str(total)
     return _slug(value)
+
+
+def _normalize_point_label(value: str) -> str:
+    normalized = value.strip().lower()
+    if normalized == "đ":
+        return "dd"
+    return _slug(normalized)
 
 
 def _slug(value: Any) -> str:

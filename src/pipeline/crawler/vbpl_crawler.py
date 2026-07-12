@@ -168,7 +168,8 @@ def _extract_body_lines(full_text: str) -> list[str]:
     if truncate_index != -1:
         body_lines = body_lines[:truncate_index]
         
-    return body_lines
+    annotation_markers = {"Điều khoản được sửa đổi, bổ sung", "Điều khoản được bổ sung"}
+    return [line for line in body_lines if line.strip() not in annotation_markers]
 
 
 def fetch_document(url: str, doc_id: str, number: str, timeout_ms: int = 30000) -> tuple[str, DocumentMetadata]:
@@ -346,4 +347,3 @@ def crawl_by_search(
             logger.error("Lỗi khi crawl tài liệu %s từ %s: %s", doc_id_val, url_val, e)
             
     return results_metadata
-

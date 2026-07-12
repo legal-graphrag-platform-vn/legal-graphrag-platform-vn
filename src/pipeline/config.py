@@ -20,7 +20,8 @@ class Settings(BaseSettings):
 
     # Gemini
     gemini_api_key: str = Field(default="", description="API key cho Gemini, lấy tại aistudio.google.com/apikey")
-    gemini_model: str = Field(default="gemini-2.5-flash")
+    gemini_model: str = Field(default="gemini-flash-lite-latest")
+    gemini_min_request_interval_seconds: float = Field(default=7.0, ge=0.0)
 
     # MiniMax
     minimax_api_key: str = Field(default="")
@@ -47,7 +48,7 @@ class Settings(BaseSettings):
     curated_manifest_path: Path = Field(
         default=Path(__file__).resolve().parents[2] / "configs" / "corpus" / "curated_v1.json"
     )
-    extraction_max_workers: int = Field(default=10, ge=1, le=50, description="Số lượng luồng gọi LLM API song song")
+    extraction_max_workers: int = Field(default=1, ge=1, le=50, description="Số lượng luồng gọi LLM API song song")
 
     confidence_threshold_auto: float = Field(default=0.8, ge=0.0, le=1.0)
     confidence_threshold_review: float = Field(default=0.55, ge=0.0, le=1.0)

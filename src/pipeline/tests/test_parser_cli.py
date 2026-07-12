@@ -67,7 +67,7 @@ def test_parse_cli_single_folder(tmp_path: Path) -> None:
         assert parsed_data["document"]["legal_status"] == "ACTIVE"
         assert "status" not in parsed_data["document"]
         assert len(parsed_data["articles"]) == 1
-        assert parsed_data["articles"][0]["number"] == 1
+        assert parsed_data["articles"][0]["number"] == "1"
 
 
 def test_parse_cli_bulk_folders(tmp_path: Path) -> None:

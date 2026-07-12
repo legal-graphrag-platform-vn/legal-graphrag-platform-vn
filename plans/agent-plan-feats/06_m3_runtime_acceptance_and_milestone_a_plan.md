@@ -4,8 +4,42 @@
 > Current canonical ontology: `plans/legal_ontology.md` v1.5.0  
 > Pipeline contract: `plans/04_graph_construction_pipeline.md`  
 > Dataset contract: `plans/08_dataset_and_scope.md`  
-> Embedding contract: BGE-M3/1024 approved by ADR-20; implementation/schema migration pending  
-> Status: next implementation phase; must pass before Phase 2 retrieval starts
+> Embedding contract: BGE-M3/1024 approved by ADR-20
+> Status: BLOCKED; must pass before Phase 2 retrieval starts
+> Official blocker register: `06_m3_blocker_register.md`
+
+## Current Status — STOP
+
+```text
+Phase 1 M3: BLOCKED
+Milestone A: NOT PASSED
+Phase 2: BLOCKED / prototype only
+Canonical graph: STALE
+Graph-quality report: STALE
+Neo4j evidence: STALE
+```
+
+Official open blockers are maintained in `06_m3_blocker_register.md`. Current
+summary:
+
+- Gate 2 extraction is blocked by model availability/quota and empty artifacts.
+- The current Neo4j graph, embeddings, graph-quality report, and evidence are stale.
+- Integration tests, Milestone A evidence, and the four-document corpus remain open.
+- Phase 2 remains blocked until every register item is closed.
+
+Existing Phase 2 code may remain as prototype code, but it must not be counted as
+active Phase 2 progress or accepted Milestone B work. The current graph, quality
+report, and Neo4j results are disposable stale evidence and must not be used for
+Milestone A reporting.
+
+Resolution order:
+
+1. Run extraction until accepted semantic relation count is greater than zero.
+2. Validate the payload, rebuild Neo4j, and prove write idempotency.
+3. Re-embed Article/Clause nodes with BGE-M3/1024 and run top-5 vector smoke checks.
+4. Regenerate graph-quality, run disposable-database integration tests, and create
+   the tracked Milestone A summary.
+5. Complete the four-document minimum corpus, then sign off Milestone A.
 
 ---
 
@@ -76,7 +110,7 @@ the curated research corpus or bulk-ingested automatically.
 | Write validation | `src/shared/ontology/validators.py` | Produces guarded `ValidatedGraphPayload` |
 | Payload consistency | `src/shared/ontology/payload_consistency_validator.py` | Checks IDs, endpoints, relation identity |
 | Neo4j writer | `src/infrastructure/neo4j/writer.py` | MERGE-safe guarded writer |
-| Embedding generator | `src/pipeline/embedding/embedding_generator.py` | Validates vectors against configured schema dimension |
+| Embedding generator | `src/infrastructure/embedding/embedding_generator.py` | Validates vectors against configured schema dimension |
 | Embedding writer | `src/infrastructure/neo4j/embedding_writer.py` | Verifies vector indexes before update |
 | Graph quality | `src/pipeline/reports/graph_quality.py` | Reads written graph from Neo4j |
 | Schema bootstrap | `infra/neo4j/init/01_schema_init.cypher` | CE constraints and indexes |
@@ -92,16 +126,16 @@ data/raw/L59_2020/
 data/processed/L59_2020/
 ```
 
-Current parsed baseline:
+Canonical parsed baseline after local raw-source cleanup:
 
 ```text
 Article = 218
 Chapter = 10
 Clause = 897
-Point = 823
+Point = 822
 ```
 
-Expected structural graph before semantic extraction:
+Structural graph count contract before semantic extraction:
 
 ```text
 Document = 1
@@ -109,11 +143,15 @@ Issuer = 1
 Chapter = 10
 Article = 218
 Clause = 897
-Point = 823
+Point = 822
 Article + Clause embedding targets = 1,115
 ```
 
-### Known blockers
+### Historical blockers at plan creation
+
+This list records the implementation state when the plan was written. Current
+gate status must be established by the acceptance commands and tracked Milestone A
+evidence, not inferred from this historical list.
 
 1. `data/raw/L59_2020/metadata.json` has `doc_id = L59_2020` but no canonical
    `raw_doc_code` or `graph_id`.
@@ -507,13 +545,15 @@ Expected pilot baseline:
 Document = 1
 Article = 218
 Clause = 897
-Point = 823
+Point = 822
 Issuer = 1
 missing relation_id = 0
 ```
 
 Chapter and lower-level counts may change only when parser corrections are recorded.
-Any difference from the baseline must be explained before Milestone A sign-off.
+The previous 823-Point observation included a duplicated Point `c` around a VBPL
+amendment annotation in Article 215, Clause 4. Canonical local reparse produces 822
+Points with no duplicate labels.
 
 Idempotency acceptance:
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Literal
 
 from pydantic import BaseModel, Field
+from src.pipeline.parser.models import LegalNumber
 
 EntityType = Literal["Document", "Chapter", "Article", "Clause", "Point", "Concept", "Entity", "Action"]
 
@@ -52,6 +53,8 @@ class RelationExtractionResult(BaseModel):
 class ExtractionResult(BaseModel):
     """Output gộp của 2-pass extraction cho 1 Article — input cho Step 3 Schema Validation."""
 
-    article_number: int
+    article_number: LegalNumber
+    raw_entities: list[ExtractedEntity] = Field(default_factory=list)
+    resolved_model: str | None = None
     entities: list[ExtractedEntity] = Field(default_factory=list)
     relations: list[ExtractedRelation] = Field(default_factory=list)

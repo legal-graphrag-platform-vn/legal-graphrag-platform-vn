@@ -15,6 +15,7 @@ toàn có chủ đích, không phải bug.
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,6 +25,15 @@ import unicodedata
 from src.pipeline.config import settings
 from src.pipeline.extraction.llm_extractor import extract_article
 from src.pipeline.extraction.models import ExtractedEntity
+from src.pipeline.extraction.models import ExtractionResult
+from src.pipeline.extraction.providers.base import ExtractionProviderError
+from src.pipeline.extraction.structural_context import (
+    ENDPOINT_CONTRACT_VERSION,
+    PROMPT_VERSION,
+    DocumentRegistry,
+    EndpointResolution,
+    StructuralRegistry,
+)
 from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.scoring.confidence_scorer import score
 from src.shared.ontology.validators import validate_relation as validate_ontology
@@ -66,6 +76,69 @@ def _entity_index_entry(entity: ExtractedEntity) -> dict | None:
     }
 
 
+def _resolve_endpoint(
+    raw_id: str,
+    entity_types: dict[str, str],
+    entities: list[ExtractedEntity],
+    semantic_entries: dict[str, dict],
+    registry: StructuralRegistry,
+    document_registry: DocumentRegistry,
+    article_number: str,
+) -> EndpointResolution:
+    if raw_id in semantic_entries:
+        entry = semantic_entries[raw_id]
+        return EndpointResolution(
+            raw_id=raw_id,
+            canonical_id=entry["id"],
+            canonical_type=entry["type"],
+            status="resolved",
+            method="semantic_entity_index",
+        )
+
+    entity = next((candidate for candidate in entities if candidate.id == raw_id), None)
+    entity_type = entity_types.get(raw_id)
+    resolution = registry.resolve(
+        raw_id,
+        current_article=article_number,
+        entity_type=entity_type,
+        entity_label=entity.label if entity else None,
+    )
+    if resolution.status == "resolved":
+        return resolution
+    if entity_type == "Document":
+        external = document_registry.resolve(raw_id, entity.label if entity else None)
+        if external:
+            graph_id, _ = external
+            return EndpointResolution(
+                raw_id,
+                graph_id,
+                "Document",
+                "review",
+                "document_registry",
+                "external_document_requires_registry_lookup",
+            )
+        return EndpointResolution(
+            raw_id=raw_id,
+            canonical_id=None,
+            canonical_type="Document",
+            status="review",
+            method="document_registry",
+            reason="missing_external_document_registry",
+        )
+    return resolution
+
+
+def _resolution_dict(resolution: EndpointResolution) -> dict:
+    return {
+        "raw_id": resolution.raw_id,
+        "canonical_id": resolution.canonical_id,
+        "canonical_type": resolution.canonical_type,
+        "status": resolution.status,
+        "method": resolution.method,
+        "reason": resolution.reason,
+    }
+
+
 def _configured_llm_model() -> str:
     provider = settings.llm_provider.lower()
     model_by_provider = {
@@ -105,29 +178,55 @@ def process_article(
     document: DocumentInfo,
     all_records: list[dict],
     entity_index: dict[str, dict] | None = None,
+    *,
+    registry: StructuralRegistry | None = None,
+    extraction_result: ExtractionResult | None = None,
+    document_registry: DocumentRegistry | None = None,
 ) -> int:
     """Chạy Pass 1+2 extraction + validation + scoring cho 1 Article. Trả về số relations xử lý."""
     article_text = article.content_raw
-    result = extract_article(article.number, article_text)
+    registry = registry or StructuralRegistry.from_parsed_document(
+        ParsedDocument(document=document, articles=[article]), raw_doc_code=document.id
+    )
+    context = registry.context_for_article(article)
+    document_registry = document_registry or DocumentRegistry.from_manifest(settings.curated_manifest_path)
+    result = extraction_result or extract_article(article.number, article_text, context=context)
 
     entity_types = _entity_type_lookup(result.entities)
     if entity_index is not None:
         for entity in result.entities:
             entry = _entity_index_entry(entity)
             if entry:
-                entity_index[entity.id] = entry
+                existing = entity_index.get(entry["id"])
+                if existing is not None and existing != entry:
+                    raise ValueError(f"Conflicting semantic entity normalization: {entry['id']}")
+                entity_index[entry["id"]] = entry
 
-    self_id = f"dieu_{article.number}"
-    entity_types[self_id] = "Article"
-    known_ids = set(entity_types.keys())
+    semantic_entries: dict[str, dict] = {}
+    for entity in result.entities:
+        entry = _entity_index_entry(entity)
+        if entry:
+            semantic_entries[entity.id] = entry
+    known_ids = set(registry.types) | {entry["id"] for entry in semantic_entries.values()}
 
     for raw_relation in result.relations:
+        raw_relation_dict = raw_relation.model_dump()
+        head_resolution = _resolve_endpoint(
+            raw_relation.head, entity_types, result.entities, semantic_entries, registry, document_registry, article.number
+        )
+        tail_resolution = _resolve_endpoint(
+            raw_relation.tail, entity_types, result.entities, semantic_entries, registry, document_registry, article.number
+        )
         relation_dict = raw_relation.model_dump()
+        if head_resolution.canonical_id:
+            relation_dict["head"] = head_resolution.canonical_id
+        if tail_resolution.canonical_id:
+            relation_dict["tail"] = tail_resolution.canonical_id
         parsed_relation, schema_err = validate_schema(relation_dict)
         schema_valid = parsed_relation is not None
 
-        head_type = _ontology_label(entity_types.get(raw_relation.head, "Entity"))
-        tail_type = _ontology_label(entity_types.get(raw_relation.tail, "Entity"))
+        head_type = head_resolution.canonical_type or _ontology_label(entity_types.get(raw_relation.head, "Entity"))
+        tail_type = tail_resolution.canonical_type or _ontology_label(entity_types.get(raw_relation.tail, "Entity"))
         head_doc_type = document.doc_type if head_type == "Document" else None
         tail_doc_type = document.doc_type if tail_type == "Document" else None
 
@@ -137,21 +236,26 @@ def process_article(
         # 2.   Enrich the relation dictionary with actual properties
         relation_dict["properties"] = relation_properties
 
-        ontology_ok, ontology_err = validate_ontology(
-            head_type,
-            raw_relation.relation,
-            tail_type,
-            head_id=raw_relation.head,
-            tail_id=raw_relation.tail,
-            properties=relation_properties,
-            head_doc_type=head_doc_type,
-            tail_doc_type=tail_doc_type,
-        )
+        if raw_relation.relation == "CONTAINS":
+            ontology_ok, ontology_err = False, "llm_structural_relation_forbidden"
+        elif head_resolution.status == "rejected" or tail_resolution.status == "rejected":
+            ontology_ok, ontology_err = False, head_resolution.reason or tail_resolution.reason
+        else:
+            ontology_ok, ontology_err = validate_ontology(
+                head_type,
+                raw_relation.relation,
+                tail_type,
+                head_id=relation_dict["head"],
+                tail_id=relation_dict["tail"],
+                properties=relation_properties,
+                head_doc_type=head_doc_type,
+                tail_doc_type=tail_doc_type,
+            )
 
         consistency = validate_record_relation(
             relation_type=raw_relation.relation,
-            head_id=raw_relation.head,
-            tail_id=raw_relation.tail,
+            head_id=relation_dict["head"],
+            tail_id=relation_dict["tail"],
             properties=relation_properties,
             known_entity_ids=known_ids,
             ontology_valid=ontology_ok,
@@ -164,15 +268,20 @@ def process_article(
             ontology_valid=ontology_ok,
             evidence=raw_relation.evidence,
             article_text=article_text,
-            head_id=raw_relation.head,
-            tail_id=raw_relation.tail,
+            head_id=relation_dict["head"],
+            tail_id=relation_dict["tail"],
             known_entity_ids=known_ids,
         )
 
         record = {
             "document_id": document.id,
             "article_number": article.number,
+            "raw_relation": raw_relation_dict,
             "relation": relation_dict,
+            "endpoint_resolution": {
+                "head": _resolution_dict(head_resolution),
+                "tail": _resolution_dict(tail_resolution),
+            },
             "schema_valid": schema_valid,
             "schema_error": schema_err,
             "ontology_valid": ontology_ok,
@@ -188,49 +297,129 @@ def process_article(
     return len(result.relations)
 
 
-def _process_article_worker(article: Article, document: DocumentInfo) -> tuple[list[dict], dict[str, dict]]:
+def _process_article_worker(
+    article: Article,
+    document: DocumentInfo,
+    registry: StructuralRegistry,
+    document_registry: DocumentRegistry,
+    checkpoint: dict | None = None,
+) -> tuple[list[dict], dict[str, dict], dict]:
     records = []
     entity_index: dict[str, dict] = {}
-    process_article(article, document, records, entity_index)
-    return records, entity_index
+    context = registry.context_for_article(article)
+    result = _result_from_checkpoint(checkpoint) if checkpoint else extract_article(
+        article.number, article.content_raw, context=context
+    )
+    process_article(
+        article,
+        document,
+        records,
+        entity_index,
+        registry=registry,
+        extraction_result=result,
+        document_registry=document_registry,
+    )
+    return records, entity_index, _checkpoint_row(result, context, article.content_raw)
 
 
-def run_pipeline(parsed: ParsedDocument, processed_dir: Path, *, raw_doc_code: str) -> None:
+def run_pipeline(
+    parsed: ParsedDocument,
+    processed_dir: Path,
+    *,
+    raw_doc_code: str,
+    provider_calls_allowed: bool = True,
+    article_numbers: set[str] | None = None,
+) -> None:
     if not raw_doc_code:
         raise ValueError("raw_doc_code is required for pipeline output path")
 
     out_dir = processed_dir / raw_doc_code
     out_dir.mkdir(parents=True, exist_ok=True)
     
-    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
     all_records = []
     entity_index: dict[str, dict] = {}
+    registry = StructuralRegistry.from_parsed_document(parsed, raw_doc_code)
+    selected_articles = [
+        article for article in parsed.articles if article_numbers is None or article.number in article_numbers
+    ]
+    if article_numbers is not None:
+        found = {article.number for article in selected_articles}
+        missing_selection = sorted(article_numbers - found)
+        if missing_selection:
+            raise ValueError(f"Selected Article(s) not found in hierarchy: {missing_selection}")
+    if not selected_articles:
+        raise ValueError("Extraction requires at least one selected Article")
+    document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
+    checkpoint_path = out_dir / "article_extractions.jsonl"
+    checkpoints = _load_checkpoints(checkpoint_path, registry, parsed)
+    if not provider_calls_allowed:
+        missing = [article.number for article in selected_articles if article.number not in checkpoints]
+        if missing:
+            raise ValueError(f"Missing valid Article extraction checkpoints: {missing[:10]}")
     max_workers = settings.extraction_max_workers
     logger.info("Bắt đầu trích xuất tri thức song song với %d workers...", max_workers)
 
     results_by_article = {}
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_article = {
-            executor.submit(_process_article_worker, article, parsed.document): article
-            for article in parsed.articles
-        }
+    articles = iter(selected_articles)
+    total = len(selected_articles)
+    completed = 0
+    executor = ThreadPoolExecutor(max_workers=max_workers)
+    future_to_article = {}
 
-        total = len(parsed.articles)
-        completed = 0
-        for future in as_completed(future_to_article):
-            article = future_to_article[future]
-            completed += 1
-            try:
-                records, article_entity_index = future.result()
+    def submit_next() -> bool:
+        article = next(articles, None)
+        if article is None:
+            return False
+        checkpoint = checkpoints.get(article.number)
+        future = executor.submit(
+            _process_article_worker, article, parsed.document, registry, document_registry, checkpoint
+        )
+        future_to_article[future] = article
+        return True
+
+    for _ in range(min(max_workers, total)):
+        submit_next()
+
+    try:
+        while future_to_article:
+            done, _ = wait(tuple(future_to_article), return_when=FIRST_COMPLETED)
+            for future in done:
+                article = future_to_article.pop(future)
+                try:
+                    records, article_entity_index, checkpoint_row = future.result()
+                except Exception as exc:
+                    for pending in future_to_article:
+                        pending.cancel()
+                    _write_extraction_blocked(out_dir, exc)
+                    logger.error("Extraction blocked at Điều %s: %s", article.number, exc)
+                    if isinstance(exc, ExtractionProviderError):
+                        raise
+                    raise RuntimeError(f"Extraction failed at Article {article.number}: {exc}") from exc
+
+                completed += 1
                 results_by_article[article.number] = records
                 entity_index.update(article_entity_index)
-                logger.info("Đã trích xuất xong Điều %d / %d", article.number, total)
-            except Exception as e:
-                logger.error("Lỗi khi trích xuất Điều %d: %s", article.number, e)
+                existing_models = {
+                    row.get("resolved_model") for row in checkpoints.values() if row.get("resolved_model")
+                }
+                if checkpoint_row.get("resolved_model") and existing_models and checkpoint_row["resolved_model"] not in existing_models:
+                    error = RuntimeError(
+                        "Resolved model changed within extraction checkpoints: "
+                        f"existing={sorted(existing_models)}, new={checkpoint_row['resolved_model']}"
+                    )
+                    _write_extraction_blocked(out_dir, error)
+                    raise error
+                checkpoints[article.number] = checkpoint_row
+                _write_checkpoints(checkpoint_path, checkpoints)
+                logger.info("Đã trích xuất xong Điều %s (%d/%d)", article.number, completed, total)
+                submit_next()
+    finally:
+        executor.shutdown(wait=True, cancel_futures=True)
 
     # Đảm bảo giữ đúng thứ tự các Điều trong văn bản gốc
-    for article in parsed.articles:
+    for article in selected_articles:
         if article.number in results_by_article:
             all_records.extend(results_by_article[article.number])
 
@@ -250,6 +439,121 @@ def run_pipeline(parsed: ParsedDocument, processed_dir: Path, *, raw_doc_code: s
     _write_jsonl(out_dir / "rejected.jsonl", [record for record in all_records if record["decision"] == "rejected"])
     (out_dir / "entity_index.json").write_text(
         json.dumps(entity_index, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+    (out_dir / "extraction_run.json").write_text(
+        json.dumps(
+            {
+                "raw_doc_code": raw_doc_code,
+                "graph_id": parsed.document.id,
+                "selected_articles": [article.number for article in selected_articles],
+                "document_article_count": len(parsed.articles),
+                "complete_document": len(selected_articles) == len(parsed.articles),
+                "prompt_version": PROMPT_VERSION,
+                "endpoint_contract_version": ENDPOINT_CONTRACT_VERSION,
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (out_dir / "extraction_blocked.json").unlink(missing_ok=True)
+
+
+def _checkpoint_fingerprint(context, article_text: str) -> str:
+    source = "|".join(
+        [
+            context.to_prompt_json(),
+            article_text,
+            settings.llm_provider,
+            _configured_llm_model(),
+            PROMPT_VERSION,
+            ENDPOINT_CONTRACT_VERSION,
+        ]
+    )
+    return hashlib.sha256(source.encode("utf-8")).hexdigest()
+
+
+def _checkpoint_row(result: ExtractionResult, context, article_text: str) -> dict:
+    return {
+        "raw_doc_code": context.raw_doc_code,
+        "graph_id": context.graph_id,
+        "article_number": context.article_number,
+        "fingerprint": _checkpoint_fingerprint(context, article_text),
+        "provider": settings.llm_provider,
+        "configured_model": _configured_llm_model(),
+        "resolved_model": result.resolved_model,
+        "prompt_version": PROMPT_VERSION,
+        "endpoint_contract_version": ENDPOINT_CONTRACT_VERSION,
+        "content_hash": hashlib.sha256(article_text.encode("utf-8")).hexdigest(),
+        "raw_entities": [entity.model_dump() for entity in result.raw_entities],
+        "entities": [entity.model_dump() for entity in result.entities],
+        "relations": [relation.model_dump() for relation in result.relations],
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def _result_from_checkpoint(row: dict | None) -> ExtractionResult:
+    if not row:
+        raise ValueError("Missing checkpoint row")
+    return ExtractionResult.model_validate(
+        {
+            "article_number": row["article_number"],
+            "raw_entities": row.get("raw_entities", []),
+            "entities": row.get("entities", []),
+            "relations": row.get("relations", []),
+            "resolved_model": row.get("resolved_model"),
+        }
+    )
+
+
+def _load_checkpoints(path: Path, registry: StructuralRegistry, parsed: ParsedDocument) -> dict[str, dict]:
+    if not path.exists():
+        return {}
+    articles = {article.number: article for article in parsed.articles}
+    contexts = {number: registry.context_for_article(article) for number, article in articles.items()}
+    valid: dict[str, dict] = {}
+    seen_articles: set[str] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        article_number = str(row.get("article_number", ""))
+        if article_number in seen_articles:
+            raise ValueError(f"Duplicate Article checkpoint: {article_number}")
+        seen_articles.add(article_number)
+        context = contexts.get(article_number)
+        if context and row.get("fingerprint") == _checkpoint_fingerprint(
+            context, articles[article_number].content_raw
+        ):
+            valid[article_number] = row
+    return valid
+
+
+def _write_checkpoints(path: Path, checkpoints: dict[str, dict]) -> None:
+    temporary = path.with_suffix(".jsonl.tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        for article_number in sorted(checkpoints):
+            handle.write(json.dumps(checkpoints[article_number], ensure_ascii=False, default=str) + "\n")
+    temporary.replace(path)
+
+
+def _write_extraction_blocked(out_dir: Path, exc: Exception) -> None:
+    for name in ("extract.jsonl", "accepted.jsonl", "review.jsonl", "rejected.jsonl"):
+        (out_dir / name).write_text("", encoding="utf-8")
+    (out_dir / "entity_index.json").write_text("{}", encoding="utf-8")
+    blocked = {
+        "blocked": True,
+        "stage": "extraction",
+        "reason": str(exc),
+        "provider": settings.llm_provider,
+        "model": _configured_llm_model(),
+        "accepted_semantic_relation_count": 0,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    (out_dir / "extraction_blocked.json").write_text(
+        json.dumps(blocked, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 

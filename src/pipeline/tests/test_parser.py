@@ -1,7 +1,10 @@
 from pathlib import Path
 
+import pytest
+from pydantic import ValidationError
+
 from src.pipeline.parser.hierarchy_parser import parse_text
-from src.pipeline.parser.models import DocumentInfo
+from src.pipeline.parser.models import Clause, DocumentInfo, Point
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_law.txt"
 
@@ -19,7 +22,7 @@ def test_parses_two_articles() -> None:
     text = FIXTURE.read_text(encoding="utf-8")
     parsed = parse_text(text, _doc_info())
     assert len(parsed.articles) == 3
-    assert [a.number for a in parsed.articles] == [1, 2, 17]
+    assert [a.number for a in parsed.articles] == ["1", "2", "17"]
 
 
 def test_article_title_extracted() -> None:
@@ -43,12 +46,21 @@ def test_clauses_and_points_under_article_17() -> None:
     text = FIXTURE.read_text(encoding="utf-8")
     parsed = parse_text(text, _doc_info())
     art17 = parsed.articles[2]
-    assert [c.number for c in art17.clauses] == [1, 2]
+    assert [c.number for c in art17.clauses] == ["1", "2"]
     clause1 = art17.clauses[0]
     assert len(clause1.points) == 2
     assert clause1.points[0].label == "a"
     assert clause1.points[1].label == "b"
     assert "Cơ quan nhà nước" in clause1.points[0].content
+
+
+def test_parser_supports_suffixed_article_and_clause_numbers() -> None:
+    parsed = parse_text(
+        "Điều 5a. Điều bổ sung\n1b. Khoản bổ sung",
+        _doc_info(),
+    )
+    assert parsed.articles[0].number == "5a"
+    assert parsed.articles[0].clauses[0].number == "1b"
 
 
 def test_clause_content_not_empty() -> None:
@@ -62,6 +74,30 @@ def test_clause_content_not_empty() -> None:
 def test_does_not_crash_on_empty_text() -> None:
     parsed = parse_text("", _doc_info())
     assert parsed.articles == []
+
+
+def test_clause_rejects_duplicate_point_labels() -> None:
+    with pytest.raises(ValidationError, match="Duplicate Point label.*c"):
+        Clause(
+            number=4,
+            content="Khoản 4",
+            points=[Point(label="c", content="Bản một"), Point(label="c", content="Bản hai")],
+        )
+
+
+def test_parser_rejects_duplicate_point_labels_in_same_clause() -> None:
+    text = "Điều 1. Test\n1. Khoản\nc) Bản một\nc) Bản hai"
+    with pytest.raises(ValueError, match="Duplicate Point label.*different content"):
+        parse_text(text, _doc_info())
+
+
+def test_parser_deduplicates_identical_point_around_vbpl_annotation() -> None:
+    text = (
+        "Điều 1. Test\n1. Khoản\nc) Nội dung\n"
+        "Điều khoản được sửa đổi, bổ sung\nc) Nội dung"
+    )
+    parsed = parse_text(text, _doc_info())
+    assert [(point.label, point.content) for point in parsed.articles[0].clauses[0].points] == [("c", "Nội dung")]
 
 
 
@@ -87,5 +123,3 @@ def test_should_skip_line() -> None:
     assert should_skip_line("CÔNG BÁO/Số 1175 + 1176/Ngày 30-12-2014") is True
     assert should_skip_line("Điều 1. Phạm vi điều chỉnh") is False
     assert should_skip_line("1. Các doanh nghiệp.") is False
-
-

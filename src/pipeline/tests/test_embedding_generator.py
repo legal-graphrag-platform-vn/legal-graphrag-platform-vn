@@ -4,7 +4,7 @@ import pytest
 
 from unittest.mock import Mock
 
-from src.pipeline.embedding.embedding_generator import (
+from src.infrastructure.embedding.embedding_generator import (
     EmbeddingDimensionError,
     EmbeddingGenerator,
     EmbeddingProviderError,

@@ -1,4 +1,6 @@
 import pytest
+
+pytestmark = pytest.mark.integration
 from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session
 from src.pipeline.reports.graph_quality import GraphQualityReporter
 from src.shared.ontology.payload_consistency_validator import deterministic_relation_id

@@ -64,7 +64,12 @@ def validate_document_readiness(
         return DataReadinessResult(raw_doc_code, {}, tuple(errors))
 
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    normalized = normalize_metadata(metadata, raw_doc_code=raw_doc_code, manifest_entry=manifest_entry)
+    errors.extend(_manifest_identity_errors(metadata, raw_doc_code, manifest_entry))
+    try:
+        normalized = normalize_metadata(metadata, raw_doc_code=raw_doc_code, manifest_entry=manifest_entry)
+    except ValueError as exc:
+        errors.append(str(exc))
+        return DataReadinessResult(raw_doc_code, {}, tuple(errors))
     errors.extend(_metadata_errors(normalized, raw_doc_code))
     return DataReadinessResult(raw_doc_code, normalized, tuple(errors))
 
@@ -92,7 +97,7 @@ def normalize_metadata(
 
 
 def legal_status_from_raw(raw_status: Any) -> str:
-    normalized = _ascii(str(raw_status or "active")).lower().strip()
+    normalized = _ascii(str(raw_status or "")).lower().strip()
     mapping = {
         "active": "ACTIVE",
         "con hieu luc": "ACTIVE",
@@ -102,7 +107,26 @@ def legal_status_from_raw(raw_status: Any) -> str:
         "bi thay the": "REPLACED",
         "bi bai bo": "REPEALED",
     }
-    return mapping.get(normalized, "ACTIVE")
+    if normalized not in mapping:
+        raise ValueError(f"Unknown legal status: {raw_status!r}; refusing to default to ACTIVE")
+    return mapping[normalized]
+
+
+def _manifest_identity_errors(
+    metadata: Mapping[str, Any], raw_doc_code: str, manifest_entry: Mapping[str, Any]
+) -> list[str]:
+    errors: list[str] = []
+    actual_raw_code = metadata.get("raw_doc_code") or metadata.get("doc_id")
+    comparisons = {
+        "raw_doc_code": (actual_raw_code, raw_doc_code),
+        "graph_id": (metadata.get("graph_id"), manifest_entry.get("graph_id")),
+        "number": (metadata.get("number"), manifest_entry.get("number")),
+        "doc_type": (metadata.get("doc_type") or metadata.get("type"), manifest_entry.get("doc_type")),
+    }
+    for field, (actual, expected) in comparisons.items():
+        if actual not in (None, "") and expected not in (None, "") and actual != expected:
+            errors.append(f"Metadata mismatch for {field}: metadata={actual!r}, manifest={expected!r}")
+    return errors
 
 
 def issuer_branch(issuer_name: Any) -> str:

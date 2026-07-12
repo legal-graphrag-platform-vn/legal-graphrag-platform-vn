@@ -132,7 +132,7 @@ This table is the canonical model-selection map for implementation and thesis de
 
 | Component | Primary | Candidate / Fallback | Future fine-tune? | Why this fits |
 |---|---|---|---|---|
-| Information Extraction | Gemini 2.5 Flash structured output | Gemini 2.5 Pro for hard cases; GPT-4o-mini; Qwen3-8B local | Optional LoRA local LLM | Needs reliable JSON/Pydantic output, Vietnamese legal text handling, low cost for batch extraction |
+| Information Extraction | Gemini Flash Lite latest structured output | Gemini Pro for hard cases; GPT-4o-mini; Qwen3-8B local | Optional LoRA local LLM | Available structured output, Vietnamese legal text handling, and low batch cost |
 | Answer Generation | Gemini 2.5 Flash | Gemini 2.5 Pro for hard cases; Qwen3-8B local | Not priority | Generation is grounded by retrieved graph evidence; fine-tuning is less important than citation discipline |
 | Judge / Evaluation | Gemini 2.5 Pro | GPT-4o; Gemini Flash smoke test | No | Judge should be stronger and more stable than the default generation model |
 | Embedding | `BAAI/bge-m3` via `FlagEmbedding`, 1024-dim | BKAI Vietnamese bi-encoder 768-dim baseline; `Qwen3-Embedding-0.6B` future candidate | Yes, after query-positive pairs exist | BGE-M3 won the project smoke test on Vietnamese enterprise-law queries; BKAI is retained for ablation |
@@ -230,7 +230,7 @@ pip install pytest pytest-asyncio black ruff
 
 | Model | Usage | Estimate/Month |
 |---|---|---|
-| Gemini 2.5 Flash | Extraction (20 docs, two-pass entity + relation extraction, rule-based confidence) | ~$1-3 |
+| Gemini Flash Lite latest | Extraction (20 docs, two-pass entity + relation extraction, rule-based confidence) | Recalculate from measured Milestone A usage |
 | Gemini 2.5 Flash | Query answering (dev/test) | ~$3-10 |
 | Gemini 2.5 Pro | Evaluation (RAGAS judge) | ~$5-15 |
 | **Tổng** | | **~$10-30/month** |

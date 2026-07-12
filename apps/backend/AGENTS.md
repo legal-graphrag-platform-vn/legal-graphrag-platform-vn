@@ -1,53 +1,126 @@
-# Nguyên Tắc Phát Triển Máy Chủ (Backend Developer & Agent Guidelines)
+# Backend Developer Guidelines
 
-Tài liệu này định nghĩa cấu trúc thư mục, quy tắc viết code và hướng dẫn dành cho AI Agents khi tham gia phát triển repo `chat-server`.
+Backend dùng **FastAPI** (không còn Flask).
 
 ---
 
-## 1. Cấu Trúc Thư Mục (Server Structure)
+## 1. Cấu trúc thư mục
 
 ```text
-chat-server/
-├── AGENTS.md                  # Hướng dẫn lập trình Backend (nằm trong repo này)
-├── requirements.txt           # Quản lý dependencies (flask, flask-cors, httpx, python-dotenv)
-├── app.py                     # Entry point chính, cấu hình CORS & API Router
-├── config.py                  # Đọc và xác thực cấu hình từ biến môi trường (ENV)
-├── providers/                 # LLM Providers (Hỗ trợ đa cung cấp)
-│   ├── base.py                # Abstract Base Provider
-│   ├── ollama.py              # Ollama Local Provider (Mặc định)
-│   ├── openai.py              # OpenAI API Provider
-│   └── gemini.py              # Google Gemini API Provider
-└── services/                  # Logic nghiệp vụ bổ trợ
-    └── rag_service.py         # Tìm kiếm, trích xuất ngữ cảnh (Mock/Thực tế)
+apps/backend/
+├── main.py                    # FastAPI app factory — create_app(settings)
+├── settings.py                # pydantic-settings — APP_MODE, NEO4J_*, LLM_*, CORS_ORIGINS
+├── container.py               # DI Container — build_container(settings) → app.state.container
+├── dependencies.py            # FastAPI Depends helpers — get_rag_service(request)
+├── api/
+│   ├── models.py              # Pydantic request/response schemas (contract)
+│   └── routes/
+│       ├── chat.py            # POST /api/v1/chat — SSE stream
+│       ├── query.py           # POST /api/v1/query — retrieval (non-streaming)
+│       └── documents.py       # GET /api/v1/documents, /articles
+├── services/
+│   ├── interfaces.py          # RAGService Protocol
+│   └── mock_rag_service.py    # Mock implementation (APP_MODE=mock)
+├── mock_data/                 # JSON fixtures cho mock mode
+└── tests/
+    └── test_contracts.py      # 25 contract tests — chạy: pytest tests/ -v
 ```
 
 ---
 
-## 2. Quy Tắc Lập Trình (Server Coding Rules)
+## 2. Chạy backend
 
-### 2.1. Quy tắc viết comment theo bước (Bắt buộc cho Backend)
-Khi viết các logic nghiệp vụ hoặc xử lý từng bước ở server, tất cả comment cho từng bước phải bắt đầu bằng số thứ tự được canh lề rõ ràng để dễ đọc luồng xử lý:
-```python
-# 1.   Khởi tạo connection tới LLM provider
-# 2.   Truy vấn Vector Database để lấy context liên quan
-# 3.   Tạo prompt template kết hợp câu hỏi và context
-# 4.   Gọi LLM và trả về stream
+```bash
+# Từ apps/backend/
+PYTHONPATH=. uvicorn main:app --reload --port 8000
 ```
 
-### 2.2. Bảo mật & Quản lý Biến Môi Trường (Environment Variables)
-* **Tuyệt đối không hardcode** API Key, mật khẩu, Token hoặc cấu hình nhạy cảm vào code.
-* Nếu thiếu các cấu hình môi trường quan trọng khi khởi động (ví dụ: `OPENAI_API_KEY` khi chọn dùng OpenAI, hoặc `GEMINI_API_KEY` khi chọn dùng Gemini), hệ thống phải ném ra một ngoại lệ rõ ràng (`ConfigurationError` hoặc `ValueError`) để ngăn chặn server chạy với cấu hình sai lệch, thay vì sử dụng một giá trị giả lập mặc định.
+Hoặc từ project root với uv:
 
-### 2.3. Thiết Kế Đa Cung Cấp (Multi-provider LLM)
-* Mọi Provider kết nối mô hình ngôn ngữ phải kế thừa từ lớp trừu tượng `BaseLLMProvider` trong `providers/base.py`.
-* Định nghĩa phương thức `stream_chat(prompt, context, history)` nhận vào prompt, ngữ cảnh RAG và lịch sử chat, trả về một Python Generator sinh ra các text chunk.
+```bash
+cd apps/backend && PYTHONPATH=. uv run uvicorn main:app --reload --port 8000
+```
 
-### 2.4. Server-Sent Events (SSE) Streaming
-* API Endpoint `/api/chat` nhận dữ liệu JSON chứa câu hỏi (`message`) và lịch sử (`history`), trả về `Response(generator(), mimetype='text/event-stream')`.
-* Dữ liệu sinh ra từ generator bắt buộc tuân thủ định dạng chunk SSE sau:
-  * Chunk chứa thông tin nguồn tài liệu trích dẫn (gửi đầu tiên):
-    `data: {"type": "metadata", "sources": [{"id": "...", "title": "...", "content": "...", "page": "...", "url": "..."}]}\n\n`
-  * Chunk chứa nội dung text (gửi liên tiếp):
-    `data: {"type": "content", "content": "..."}\n\n`
-  * Chunk kết thúc stream (gửi cuối cùng):
-    `data: [DONE]\n\n`
+Docs: http://localhost:8000/docs
+
+---
+
+## 3. Quy tắc coding
+
+### 3.1. App factory — không instantiate Settings nhiều lần
+
+```python
+# ✅ Đúng
+app = create_app(Settings())
+
+# ❌ Sai — Settings() trong mỗi route
+@router.get("/")
+def route():
+    settings = Settings()  # KHÔNG làm thế này
+```
+
+### 3.2. DI — lấy service từ app.state
+
+```python
+def get_rag_service(request: Request) -> RAGService:
+    return request.app.state.container.rag_service
+```
+
+### 3.3. SSE format — bắt buộc dùng named events
+
+```text
+event: metadata
+data: {"sources": [...], "intent": "factual", "retrieval_mode": "mock"}
+
+event: token
+data: {"content": "Vốn "}
+
+event: error
+data: {"code": "STREAM_ERROR", "message": "..."}
+
+event: done
+data: {}
+```
+
+Dùng `encode_sse(event, data)` từ `api/models.py`. Không tự format string.
+
+### 3.4. Sync calls trong async routes
+
+```python
+from starlette.concurrency import run_in_threadpool
+
+result = await run_in_threadpool(sync_function, arg1, arg2)
+```
+
+### 3.5. Comment bước (bắt buộc)
+
+```python
+# 1.   Validate input
+# 2.   Fetch từ service
+# 3.   Transform DTO
+# 4.   Return response
+```
+
+### 3.6. Không viết Cypher trong routes
+
+Cypher queries phải nằm trong `src/infrastructure/neo4j/`. Routes chỉ gọi service.
+
+---
+
+## 4. APP_MODE
+
+| Mode | Mô tả |
+|---|---|
+| `mock` | Không cần Neo4j. Load fixture từ `mock_data/`. Dùng để dev FE. |
+| `graphrag` | 🔒 Locked — cần Milestone A pass. Cần NEO4J_*, LLM_* config. |
+
+---
+
+## 5. Contract tests
+
+```bash
+cd apps/backend && PYTHONPATH=. pytest tests/ -v
+# Expected: 25 passed
+```
+
+Tests cover: startup, SSE format, SSE unicode, query schema, document list/filter/detail/graph/article, ontology parity.

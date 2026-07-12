@@ -12,8 +12,10 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
 import sys
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
 
@@ -25,7 +27,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from src.pipeline.config import settings
 from src.pipeline.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
-from src.pipeline.embedding.embedding_generator import EmbeddingGenerator, embedding_texts_by_node_id
+from src.pipeline.extraction.providers.base import ExtractionProviderError
+from src.infrastructure.embedding.embedding_generator import EmbeddingGenerator, embedding_texts_by_node_id
 from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
@@ -40,6 +43,10 @@ from src.pipeline.reports.graph_quality import (
 from src.pipeline.validation.data_readiness import (
     load_curated_manifest,
     validate_document_readiness,
+)
+from src.pipeline.validation.extraction_readiness import (
+    ExtractionReadinessError,
+    validate_extraction_readiness,
 )
 from src.shared.ontology.payload_consistency_validator import validate_payload_consistency
 from src.shared.ontology.validators import GraphValidationError
@@ -101,7 +108,11 @@ def _parse_folder_worker(raw_doc_code: str) -> bool:
         doc_info = _document_info_from_metadata(_ready_metadata(raw_doc_code))
 
         text = source_path.read_text(encoding="utf-8")
-        parsed = parse_text(text, doc_info)
+        try:
+            parsed = parse_text(text, doc_info)
+        except ValueError as exc:
+            typer.echo(f"Parse validation error: {exc}", err=True)
+            raise typer.Exit(code=1) from exc
 
         out_dir = settings.data_processed_dir / raw_doc_code
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -150,12 +161,6 @@ def parse(
         Path | None,
         typer.Option(help="Parse trực tiếp từ file text (.txt) tự chọn."),
     ] = None,
-    number: Annotated[
-        str | None, typer.Option(help="Số hiệu văn bản (chỉ cần khi dùng --txt mà chưa có metadata.json)")
-    ] = None,
-    title: Annotated[
-        str | None, typer.Option(help="Tiêu đề văn bản (chỉ cần khi dùng --txt mà chưa có metadata.json)")
-    ] = None,
 ) -> None:
     """Parse văn bản -> data/processed/<raw_doc_code>/hierarchy.json.
 
@@ -180,27 +185,18 @@ def parse(
                 typer.echo(str(exc), err=True)
                 raise typer.Exit(code=1) from exc
         else:
-            if not number:
-                typer.echo(
-                    "Không có metadata.json — cần truyền --number (và tuỳ chọn --title) khi dùng --txt.",
-                    err=True,
-                )
-                raise typer.Exit(code=1)
-            manifest_entry = load_curated_manifest(settings.curated_manifest_path).get(raw_doc_code)
-            if manifest_entry is None:
-                typer.echo(f"raw_doc_code không nằm trong curated manifest: {raw_doc_code}", err=True)
-                raise typer.Exit(code=1)
-            doc_info = DocumentInfo(
-                id=manifest_entry["graph_id"],
-                title=title or raw_doc_code,
-                number=number,
-                doc_type=manifest_entry["doc_type"],
-                normative=True,
-                legal_status="ACTIVE",
+            typer.echo(
+                "metadata.json hợp lệ là bắt buộc khi dùng --txt; không tạo hierarchy thiếu legal metadata.",
+                err=True,
             )
+            raise typer.Exit(code=1)
 
         text = txt.read_text(encoding="utf-8")
-        parsed = parse_text(text, doc_info)
+        try:
+            parsed = parse_text(text, doc_info)
+        except ValueError as exc:
+            typer.echo(f"Parse validation error: {exc}", err=True)
+            raise typer.Exit(code=1) from exc
         out_dir = settings.data_processed_dir / raw_doc_code
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "hierarchy.json").write_text(
@@ -226,7 +222,11 @@ def parse(
             raise typer.Exit(code=1) from exc
 
         text = source_path.read_text(encoding="utf-8")
-        parsed = parse_text(text, doc_info)
+        try:
+            parsed = parse_text(text, doc_info)
+        except ValueError as exc:
+            typer.echo(f"Parse validation error: {exc}", err=True)
+            raise typer.Exit(code=1) from exc
         out_dir = _processed_dir(raw_doc_code)
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "hierarchy.json").write_text(
@@ -274,7 +274,13 @@ def parse(
 
 # Lệnh CLI để trích xuất thực thể, quan hệ từ cấu trúc đã phân tách sử dụng mô hình LLM.
 @app.command()
-def extract(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")]) -> None:
+def extract(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    articles: Annotated[
+        str | None,
+        typer.Option(help="Comma-separated Article numbers for smoke extraction; omitted means full document."),
+    ] = None,
+) -> None:
     """Chạy LLM Extraction + Validation + Scoring trên hierarchy.json đã parse."""
     try:
         settings.require_api_key()
@@ -288,11 +294,102 @@ def extract(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document 
         raise typer.Exit(code=1)
 
     parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
-    run_pipeline(parsed, settings.data_processed_dir, raw_doc_code=raw_doc_code)
+    selected = {value.strip().lower() for value in articles.split(",") if value.strip()} if articles else None
+    try:
+        run_pipeline(
+            parsed,
+            settings.data_processed_dir,
+            raw_doc_code=raw_doc_code,
+            article_numbers=selected,
+        )
+    except (ExtractionProviderError, ValueError) as exc:
+        typer.echo(f"Extraction blocked: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
     typer.echo(
         f"Extraction xong cho {raw_doc_code}: xem data/processed/{raw_doc_code}/"
         "{extract.jsonl, accepted.jsonl, review.jsonl, rejected.jsonl, entity_index.json}"
     )
+
+
+@app.command("normalize-extraction")
+def normalize_extraction(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    articles: Annotated[
+        str | None,
+        typer.Option(help="Comma-separated checkpoint Article numbers; omitted means full document."),
+    ] = None,
+) -> None:
+    """Regenerate decision artifacts from valid per-Article checkpoints without LLM calls."""
+    hierarchy_path = _processed_dir(raw_doc_code) / "hierarchy.json"
+    if not hierarchy_path.exists():
+        typer.echo(f"Thiếu {hierarchy_path} — chạy `parse` trước.", err=True)
+        raise typer.Exit(code=1)
+    parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
+    selected = {value.strip().lower() for value in articles.split(",") if value.strip()} if articles else None
+    try:
+        run_pipeline(
+            parsed,
+            settings.data_processed_dir,
+            raw_doc_code=raw_doc_code,
+            provider_calls_allowed=False,
+            article_numbers=selected,
+        )
+    except (ExtractionProviderError, ValueError) as exc:
+        typer.echo(f"Extraction normalization blocked: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Decision artifacts regenerated from checkpoints for {raw_doc_code}")
+
+
+@app.command("archive-extraction")
+def archive_extraction(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+) -> None:
+    """Archive current decision artifacts that must not enter the writer."""
+    processed_dir = _processed_dir(raw_doc_code)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    archive_dir = processed_dir / "runs" / f"pre_endpoint_normalization_{timestamp}"
+    names = (
+        "extract.jsonl",
+        "accepted.jsonl",
+        "review.jsonl",
+        "rejected.jsonl",
+        "entity_index.json",
+        "prettier_extract.json",
+    )
+    existing = [processed_dir / name for name in names if (processed_dir / name).exists()]
+    if not existing:
+        typer.echo(f"Không có extraction artifacts để archive tại {processed_dir}", err=True)
+        raise typer.Exit(code=1)
+    archive_dir.mkdir(parents=True, exist_ok=False)
+    for source in existing:
+        shutil.move(str(source), archive_dir / source.name)
+    def _line_count(name: str) -> int:
+        path = archive_dir / name
+        return sum(1 for line in path.read_text(encoding="utf-8").splitlines() if line.strip()) if path.exists() else 0
+
+    entity_path = archive_dir / "entity_index.json"
+    entity_total = len(json.loads(entity_path.read_text(encoding="utf-8"))) if entity_path.exists() else 0
+    manifest = {
+        "status": "invalid_for_write",
+        "reason": "accepted records contain unresolved noncanonical structural endpoints",
+        "archived_at": datetime.now(timezone.utc).isoformat(),
+        "raw_doc_code": raw_doc_code,
+        "files": [path.name for path in existing],
+        "counts": {
+            "extracted": _line_count("extract.jsonl"),
+            "accepted": _line_count("accepted.jsonl"),
+            "review": _line_count("review.jsonl"),
+            "rejected": _line_count("rejected.jsonl"),
+            "entities": entity_total,
+        },
+        "known_failure": "Accepted relation references missing entity: khoan_1_1",
+        "unresolved_endpoint_ids": 189,
+        "unresolved_endpoint_references": 718,
+    }
+    (archive_dir / "audit_manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    typer.echo(f"Archived invalid extraction artifacts to {archive_dir}")
 
 
 @app.command("validate-data")
@@ -331,8 +428,14 @@ def validate_payload(
     raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
 ) -> None:
     """Build and validate a graph payload without opening a Neo4j connection."""
+    processed_dir = _processed_dir(raw_doc_code)
     try:
-        payload = build_payload_from_paths(_processed_dir(raw_doc_code))
+        validate_extraction_readiness(processed_dir)
+    except ExtractionReadinessError as exc:
+        typer.echo(f"Extraction readiness error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    try:
+        payload = build_payload_from_paths(processed_dir)
     except PayloadBuildError as exc:
         typer.echo(f"Payload build error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -419,7 +522,13 @@ def embed_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name unde
 @app.command("graph-quality")
 def graph_quality(raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")]) -> None:
     """Generate graph quality metrics from the canonical graph payload."""
-    hierarchy_path = _processed_dir(raw_doc_code) / "hierarchy.json"
+    processed_dir = _processed_dir(raw_doc_code)
+    try:
+        validate_extraction_readiness(processed_dir)
+    except ExtractionReadinessError as exc:
+        typer.echo(f"Extraction readiness error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    hierarchy_path = processed_dir / "hierarchy.json"
     if not hierarchy_path.exists():
         typer.echo(f"Thiếu {hierarchy_path} — chạy `parse` trước.", err=True)
         raise typer.Exit(code=1)
@@ -439,8 +548,14 @@ def graph_quality(raw_doc_code: Annotated[str, typer.Option(help="Folder name un
 
 
 def _validated_payload_for_raw_doc_code(raw_doc_code: str) -> dict:
+    processed_dir = _processed_dir(raw_doc_code)
     try:
-        payload = build_payload_from_paths(_processed_dir(raw_doc_code))
+        validate_extraction_readiness(processed_dir)
+    except ExtractionReadinessError as exc:
+        typer.echo(f"Extraction readiness error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    try:
+        payload = build_payload_from_paths(processed_dir)
     except PayloadBuildError as exc:
         typer.echo(f"Payload build error: {exc}", err=True)
         raise typer.Exit(code=1) from exc

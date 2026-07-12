@@ -80,6 +80,8 @@ def should_skip_line(line: str) -> bool:
     # 3. Tiêu đề Công Báo đứng riêng dòng
     if "CÔNG BÁO/Số" in line or "CONG BAO/So" in line:
         return True
+    if line in {"Điều khoản được sửa đổi, bổ sung", "Điều khoản được bổ sung"}:
+        return True
     return False
 
 
@@ -92,7 +94,7 @@ class LineRecord:
 
 @dataclass
 class _ArticleBuilder:
-    number: int
+    number: str
     title: str | None
     chapter: str | None
     chapter_title: str | None
@@ -172,7 +174,17 @@ def parse_lines(lines: list[str]) -> list[Article]:
     def flush_point() -> None:
         nonlocal current_point
         if current_point is not None and current_clause is not None:
-            current_clause.points.append(current_point)
+            duplicate = next(
+                (point for point in current_clause.points if point.label.strip().lower() == current_point.label.strip().lower()),
+                None,
+            )
+            if duplicate is None:
+                current_clause.points.append(current_point)
+            elif duplicate.content.strip() != current_point.content.strip():
+                raise ValueError(
+                    f"Duplicate Point label {current_point.label!r} with different content "
+                    f"in Clause {current_clause.number}"
+                )
         current_point = None
 
     pending_chapter_title = False
@@ -265,5 +277,18 @@ def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
     """Parse từ văn bản text thuần."""
     lines = text.splitlines()
     articles = parse_lines(lines)
+    _validate_unique_point_labels(articles)
     return ParsedDocument(document=document, articles=articles)
 
+
+def _validate_unique_point_labels(articles: list[Article]) -> None:
+    for article in articles:
+        for clause in article.clauses:
+            seen: set[str] = set()
+            for point in clause.points:
+                label = point.label.strip().lower()
+                if label in seen:
+                    raise ValueError(
+                        f"Duplicate Point label {label!r} in Article {article.number}, Clause {clause.number}"
+                    )
+                seen.add(label)

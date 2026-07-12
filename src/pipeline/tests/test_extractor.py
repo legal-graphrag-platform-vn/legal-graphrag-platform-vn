@@ -4,10 +4,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.pipeline.config import settings
-from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation
+from src.pipeline.extraction.models import ExtractedEntity
 from src.pipeline.extraction.providers import get_provider
 from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
+from src.pipeline.extraction.providers.gemini_provider import _raise_classified_provider_error
+from src.pipeline.extraction.providers.base import FatalExtractionProviderError
 from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
+from src.pipeline.extraction.llm_extractor import extract_article, normalize_entities_for_relations
+from src.pipeline.extraction.structural_context import ArticleExtractionContext
 
 
 def test_provider_factory() -> None:
@@ -97,3 +101,80 @@ def test_normalize_id() -> None:
     assert provider._normalize_id("doanh_nghiep_moi_gioi_bao_hiểm") == "doanh_nghiep_moi_gioi_bao_hiem"
     assert provider._normalize_id("  Luật  doanh   nghiệp ") == "luat_doanh_nghiep"
     assert provider._normalize_id("a-b-c!123") == "a_b_c_123"
+
+
+@pytest.mark.parametrize(
+    ("message", "reason"),
+    [
+        ("404 NOT_FOUND: model not found", "model_unavailable"),
+        ("429 RESOURCE_EXHAUSTED: GenerateRequestsPerDay limit: 20", "quota_exhausted"),
+    ],
+)
+def test_gemini_fatal_errors_are_not_retryable(message: str, reason: str) -> None:
+    with pytest.raises(FatalExtractionProviderError, match=reason):
+        _raise_classified_provider_error(RuntimeError(message), "gemini-test")
+
+
+def test_gemini_transient_rate_limit_is_retryable() -> None:
+    from src.pipeline.extraction.providers.base import RetryableExtractionProviderError
+
+    with pytest.raises(RetryableExtractionProviderError, match="rate_limited"):
+        _raise_classified_provider_error(
+            RuntimeError("429 RESOURCE_EXHAUSTED: per-minute request limit; retry in 5s"),
+            "gemini-test",
+        )
+
+
+def test_gemini_requests_use_global_minimum_interval(monkeypatch) -> None:
+    import src.pipeline.extraction.providers.gemini_provider as module
+
+    clock = MagicMock(side_effect=[10.0, 12.0])
+    sleeper = MagicMock()
+    monkeypatch.setattr(settings, "gemini_min_request_interval_seconds", 2.0)
+    monkeypatch.setattr(module, "_last_request_at", 9.0)
+    monkeypatch.setattr(module.time, "monotonic", clock)
+    monkeypatch.setattr(module.time, "sleep", sleeper)
+
+    module._wait_for_request_slot()
+
+    sleeper.assert_called_once_with(1.0)
+    assert module._last_request_at == 12.0
+
+
+def test_semantic_entities_are_canonical_before_relation_pass() -> None:
+    raw_entities = [
+        ExtractedEntity(id="raw_1", type="Concept", label="Bình đẳng trước pháp luật"),
+        ExtractedEntity(id="khoan_1", type="Clause", label="Khoản 1"),
+    ]
+    assert normalize_entities_for_relations(raw_entities) == [
+        ExtractedEntity(
+            id="binh_dang_truoc_phap_luat",
+            type="Concept",
+            label="Bình đẳng trước pháp luật",
+        )
+    ]
+
+
+def test_extract_article_passes_canonical_entities_to_relation_provider() -> None:
+    provider = MagicMock()
+    provider.resolved_model = "gemini-flash-lite-001"
+    provider.extract_entities.return_value = [
+        ExtractedEntity(id="raw_concept", type="Concept", label="Vốn điều lệ")
+    ]
+    provider.extract_relations.return_value = []
+    context = ArticleExtractionContext(
+        raw_doc_code="L59_2020",
+        graph_id="ldn_2020",
+        article_number="5",
+        article_id="ldn_2020_art5",
+        clause_ids={},
+        point_ids={},
+    )
+    with patch("src.pipeline.extraction.llm_extractor.get_provider", return_value=provider):
+        result = extract_article("5", "Điều 5", context=context)
+
+    relation_entities = provider.extract_relations.call_args.args[1]
+    assert relation_entities[0].id == "von_dieu_le"
+    assert result.raw_entities[0].id == "raw_concept"
+    assert result.entities[0].id == "von_dieu_le"
+    assert result.resolved_model == "gemini-flash-lite-001"

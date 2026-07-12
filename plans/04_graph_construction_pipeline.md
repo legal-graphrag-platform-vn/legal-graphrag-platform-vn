@@ -311,6 +311,12 @@ PATTERNS = {
 
 ## Step 2: LLM Information Extraction
 
+Structural identity is parser-owned. The relation prompt receives canonical
+Article/Clause/Point IDs from `hierarchy.json`; the LLM must not emit `CONTAINS`
+or invent structural IDs. Every proposed endpoint is normalized before ontology
+validation. Raw LLM endpoint IDs are audit data only and can never enter an
+accepted record or graph payload.
+
 > [!NOTE]
 > **Phase 1 scope**: LLM extraction hiện tại chỉ cover 3 semantic type (`Entity/Concept/Action` → `LegalSubject/LegalConcept/LegalAction`). `Obligation/Right/Condition/Exception` thuộc Future work — xem `legal_ontology.md` §2.2 để biết rationale và điều kiện triển khai.
 > Phase 1 validator chỉ cho phép `REQUIRES: LegalSubject -> LegalConcept` (`Entity -> Concept` trong extraction schema). `LegalSubject -> Obligation` thuộc runtime/future phase, không persist trong graph construction M1-M3.
@@ -634,7 +640,7 @@ def test_refers_to_not_rejected():
     assert ok, f"REFERS_TO bị reject: {err}"
 
 def test_requires_canonical_labels_only():
-    props = {"confidence": 0.8, "llm_model": "gemini:gemini-2.5-flash", "created_at": "2026-07-09T00:00:00+00:00"}
+    props = {"confidence": 0.8, "llm_model": "gemini:gemini-flash-lite-latest", "created_at": "2026-07-09T00:00:00+00:00"}
     ok, err = validate_relation("LegalSubject", "REQUIRES", "LegalConcept", properties=props)
     assert ok, f"REQUIRES bị reject: {err}"
     ok, _ = validate_relation("Entity", "REQUIRES", "Concept", properties=props)

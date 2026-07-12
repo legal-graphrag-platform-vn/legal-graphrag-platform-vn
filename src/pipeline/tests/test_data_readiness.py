@@ -78,3 +78,35 @@ def test_readiness_rejects_document_outside_curated_manifest(tmp_path: Path) -> 
 
     assert not result.valid
     assert "curated manifest" in result.errors[0]
+
+
+def test_readiness_rejects_unknown_status_instead_of_defaulting_active(tmp_path: Path) -> None:
+    raw_root = tmp_path / "raw"
+    document_dir = raw_root / "L59_2020"
+    document_dir.mkdir(parents=True)
+    (document_dir / "source.txt").write_text("text", encoding="utf-8")
+    (document_dir / "metadata.json").write_text(
+        json.dumps({"doc_id": "L59_2020", "status": "khong ro", "number": "59/2020/QH14", "doc_type": "Law"}),
+        encoding="utf-8",
+    )
+
+    result = validate_document_readiness("L59_2020", raw_root, manifest_path=_manifest(tmp_path))
+
+    assert not result.valid
+    assert any("refusing to default to ACTIVE" in error for error in result.errors)
+
+
+def test_readiness_rejects_manifest_identity_mismatch(tmp_path: Path) -> None:
+    raw_root = tmp_path / "raw"
+    document_dir = raw_root / "L59_2020"
+    document_dir.mkdir(parents=True)
+    (document_dir / "source.txt").write_text("text", encoding="utf-8")
+    (document_dir / "metadata.json").write_text(
+        json.dumps({"doc_id": "L59_2020", "status": "active", "number": "WRONG", "doc_type": "Law"}),
+        encoding="utf-8",
+    )
+
+    result = validate_document_readiness("L59_2020", raw_root, manifest_path=_manifest(tmp_path))
+
+    assert not result.valid
+    assert any("Metadata mismatch for number" in error for error in result.errors)

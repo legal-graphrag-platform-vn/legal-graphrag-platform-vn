@@ -16,6 +16,7 @@ from src.pipeline.extraction.models import (
 )
 from src.pipeline.extraction.prompts import ENTITY_EXTRACTION_PROMPT, RELATION_EXTRACTION_PROMPT
 from src.pipeline.extraction.providers.base import BaseProvider
+from src.pipeline.extraction.structural_context import ArticleExtractionContext
 
 logger = logging.getLogger(__name__)
 
@@ -76,9 +77,11 @@ class OpenAICompatibleProvider(BaseProvider):
         return client, model
 
     @_retry_llm_call
-    def extract_entities(self, article_text: str) -> list[ExtractedEntity]:
+    def extract_entities(self, article_text: str, *, context: ArticleExtractionContext) -> list[ExtractedEntity]:
         client, model = self._get_client_and_model()
-        prompt = ENTITY_EXTRACTION_PROMPT.format(article_text=article_text)
+        prompt = ENTITY_EXTRACTION_PROMPT.format(
+            article_text=article_text, structural_context=context.to_prompt_json()
+        )
 
         system_instruction = (
             "Bạn là trợ lý ảo hỗ trợ trích xuất thông tin pháp luật Việt Nam. "
@@ -96,6 +99,7 @@ class OpenAICompatibleProvider(BaseProvider):
                 ],
                 response_format=EntityExtractionResult,
             )
+            self.resolved_model = getattr(response, "model", None) or model
             parsed = response.choices[0].message.parsed
             if parsed is None:
                 raise ValueError("Kết quả trả về rỗng hoặc không thể parse.")
@@ -117,6 +121,7 @@ class OpenAICompatibleProvider(BaseProvider):
                 ],
                 response_format={"type": "json_object"},
             )
+            self.resolved_model = getattr(response, "model", None) or model
             content = response.choices[0].message.content
             if not content:
                 raise ValueError("API trả về nội dung rỗng.")
@@ -130,12 +135,16 @@ class OpenAICompatibleProvider(BaseProvider):
             return result.entities
 
     @_retry_llm_call
-    def extract_relations(self, article_text: str, entities: list[ExtractedEntity]) -> list[ExtractedRelation]:
-        if not entities:
-            return []
+    def extract_relations(
+        self, article_text: str, entities: list[ExtractedEntity], *, context: ArticleExtractionContext
+    ) -> list[ExtractedRelation]:
         client, model = self._get_client_and_model()
         entities_json = EntityExtractionResult(entities=entities).model_dump_json()
-        prompt = RELATION_EXTRACTION_PROMPT.format(article_text=article_text, entities_json=entities_json)
+        prompt = RELATION_EXTRACTION_PROMPT.format(
+            article_text=article_text,
+            entities_json=entities_json,
+            structural_context=context.to_prompt_json(),
+        )
 
         system_instruction = (
             "Bạn là trợ lý ảo hỗ trợ trích xuất thông tin pháp luật Việt Nam. "
@@ -153,6 +162,7 @@ class OpenAICompatibleProvider(BaseProvider):
                 ],
                 response_format=RelationExtractionResult,
             )
+            self.resolved_model = getattr(response, "model", None) or model
             parsed = response.choices[0].message.parsed
             if parsed is None:
                 raise ValueError("Kết quả trả về rỗng hoặc không thể parse.")
@@ -174,6 +184,7 @@ class OpenAICompatibleProvider(BaseProvider):
                 ],
                 response_format={"type": "json_object"},
             )
+            self.resolved_model = getattr(response, "model", None) or model
             content = response.choices[0].message.content
             if not content:
                 raise ValueError("API trả về nội dung rỗng.")

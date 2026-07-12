@@ -1,7 +1,9 @@
 import pytest
-from src.pipeline.embedding.embedding_generator import EmbeddingGenerator
+from src.infrastructure.embedding.embedding_generator import EmbeddingGenerator
 from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 from src.infrastructure.neo4j.writer import create_neo4j_session
+
+pytestmark = pytest.mark.integration
 
 @pytest.fixture(autouse=True)
 def setup_test_nodes():
