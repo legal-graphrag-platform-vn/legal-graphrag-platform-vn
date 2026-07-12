@@ -2,16 +2,18 @@ from __future__ import annotations
 
 from src.pipeline.config import settings
 from src.pipeline.extraction.providers.base import BaseProvider
-from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
-from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
 
 
 def get_provider() -> BaseProvider:
     """Factory function trả về provider trích xuất LLM tương ứng với settings."""
     provider_name = settings.llm_provider.lower()
     if provider_name == "gemini":
+        from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
+
         return GeminiProvider()
     elif provider_name in ("minimax", "qwen", "openai", "ollama"):
+        from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
+
         return OpenAICompatibleProvider(provider_type=provider_name)
     else:
         raise ValueError(

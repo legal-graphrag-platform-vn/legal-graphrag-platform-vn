@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.1
 > **Ngày chốt**: 2026-07-07
-> **Depends on**: [legal_ontology.md v1.5.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.5.1](./legal_ontology.md)
 
 Tài liệu này đóng vai trò như một "Executive Summary", tổng hợp các quyết định lớn nhất (đã được ghi nhận chi tiết tại `00_architecture_decisions.md`) phục vụ riêng cho việc trình bày và bảo vệ luận văn trước hội đồng. Trong kiến trúc phần mềm, không có giải pháp hoàn hảo, chỉ có sự đánh đổi (trade-offs) phù hợp nhất với context của dự án.
 

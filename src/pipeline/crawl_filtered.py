@@ -178,7 +178,7 @@ def search_and_crawl_document(item: dict, raw_dir: Path, timeout_ms: int = 30000
                 # Kiểm tra xem có chứa thông báo "Không tìm thấy" trong body không
                 body_text = page.inner_text("body")
                 if "Không tìm thấy" in body_text:
-                    logger.warning(f"Không tìm thấy kết quả cho chiến lược này.")
+                    logger.warning("Không tìm thấy kết quả cho chiến lược này.")
                     continue
 
                 # Lấy danh sách kết quả

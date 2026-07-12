@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime, timezone
 
 from src.shared.ontology.validators import (
     CONSTRAINTS,
@@ -120,7 +121,18 @@ class OntologyConsistencyTests(unittest.TestCase):
             ("Chapter", "CONTAINS", "Article", {}),
             ("Document", "REPEALS", "Article", {"effective_from": "2021-01-01"}),
             ("Document", "REPLACES", "Document", {"effective_from": "2021-01-01"}),
-            ("Article", "REFERS_TO", "Document", {"citation_text": "Điều 4", "citation_type": "DIRECT"}),
+            (
+                "Article",
+                "REFERS_TO",
+                "Document",
+                {
+                    "confidence": 0.9,
+                    "llm_model": "gemini:gemini-3.1-flash-lite",
+                    "created_at": "2026-07-12T00:00:00Z",
+                    "citation_text": "Điều 4",
+                    "citation_type": "DIRECT",
+                },
+            ),
         ]
 
         for head_type, relation_type, tail_type, properties in cases:
@@ -148,6 +160,17 @@ class OntologyConsistencyTests(unittest.TestCase):
         ok, error = validate_relation("LegalSubject", "REQUIRES", "Obligation", properties=provenance)
         self.assertFalse(ok)
         self.assertIn("tail type Obligation", error or "")
+
+    def test_write_time_relation_validation_accepts_database_datetime_object(self) -> None:
+        properties = {
+            "confidence": 0.9,
+            "llm_model": "gemini:model",
+            "created_at": datetime(2026, 7, 12, tzinfo=timezone.utc),
+            "citation_text": "Điều 17",
+            "citation_type": "DIRECT",
+        }
+        ok, error = validate_relation("Article", "REFERS_TO", "Article", properties=properties)
+        self.assertTrue(ok, error)
 
     def test_runtime_only_nodes_are_not_phase1_persistent(self) -> None:
         with self.assertRaises(GraphValidationError) as exc:

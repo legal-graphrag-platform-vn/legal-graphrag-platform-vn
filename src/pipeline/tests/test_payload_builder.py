@@ -111,3 +111,26 @@ def test_build_graph_payload_rejects_raw_structural_alias() -> None:
             {"von_dieu_le": {"id": "von_dieu_le", "type": "LegalConcept", "name": "Vốn điều lệ"}},
             raw_doc_code="L59_2020",
         )
+
+
+def test_requires_relations_preserve_distinct_source_articles() -> None:
+    entity_index = {
+        "cong_ty": {"id": "cong_ty", "type": "LegalSubject", "name": "Công ty"},
+        "so_dang_ky": {"id": "so_dang_ky", "type": "LegalConcept", "name": "Sổ đăng ký"},
+    }
+    records = [
+        {
+            "decision": "accepted",
+            "relation": {
+                "head": "cong_ty",
+                "relation": "REQUIRES",
+                "tail": "so_dang_ky",
+                "properties": {"source_article": source_article},
+            },
+        }
+        for source_article in ("ldn_2020_art122", "ldn_2020_art124")
+    ]
+    payload = build_graph_payload(_parsed(), records, entity_index, raw_doc_code="L59_2020")
+    requires = [relation for relation in payload["relations"] if relation["type"] == "REQUIRES"]
+    assert len(requires) == 2
+    assert len({relation["id"] for relation in requires}) == 2

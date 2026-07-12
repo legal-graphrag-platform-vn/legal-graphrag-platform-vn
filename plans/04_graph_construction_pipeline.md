@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Liên quan đến**: RC2
-> **Depends on**: [legal_ontology.md v1.5.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.5.1](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
@@ -443,10 +443,10 @@ LLM output intentionally stays small: `head`, `relation`, `tail`, `evidence`, `c
 
 | Relation | Input | Output properties |
 |---|---|---|
-| `REFERS_TO` | `evidence`, parser citation context | `citation_text = evidence`, `citation_type = DIRECT` when citation is explicit; otherwise `INDIRECT` or `RANGE` |
-| `DEFINES` | `confidence`, LLM provider config | `confidence`, `llm_model`, `created_at` |
-| `REGULATES` | `confidence`, LLM provider config | `confidence`, `llm_model`, `created_at` |
-| `REQUIRES` | `confidence`, LLM provider config, article context | `confidence`, `llm_model`, `created_at`, `source_article` |
+| `REFERS_TO` | `evidence`, raw confidence, parser citation context, Article checkpoint | `confidence`, checkpoint-derived `llm_model` and `created_at`, `citation_text`, `citation_type` |
+| `DEFINES` | raw confidence, Article checkpoint | `confidence`, checkpoint-derived `llm_model`, `created_at` |
+| `REGULATES` | raw confidence, Article checkpoint | `confidence`, checkpoint-derived `llm_model`, `created_at` |
+| `REQUIRES` | raw confidence, Article checkpoint, article context | `confidence`, checkpoint-derived `llm_model`, `created_at`, `source_article` |
 | `AMENDS`, `REPEALS`, `REPLACES` | document metadata | `effective_from`; `source_doc_id` when relation is emitted from the current document |
 
 ```python
@@ -457,7 +457,7 @@ def enrich_relation(raw_relation, *, document, article, llm_model, created_at):
     if raw_relation.relation == "REFERS_TO":
         props["citation_text"] = raw_relation.evidence
         props["citation_type"] = "DIRECT"
-    if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES"}:
+    if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES", "REFERS_TO"}:
         props["confidence"] = raw_relation.confidence
         props["llm_model"] = llm_model
         props["created_at"] = created_at
@@ -467,6 +467,7 @@ def enrich_relation(raw_relation, *, document, article, llm_model, created_at):
 ```
 
 > **Rule**: Ontology validation receives enriched properties, not raw LLM output. The writer must never fill these required ontology properties silently after validation.
+> `llm_model` and `created_at` come from the immutable Article checkpoint, not the current environment or normalization time.
 
 ---
 
@@ -581,7 +582,7 @@ CONSTRAINTS = {
             ("Point",   "Point"),
             ("Point",   "Document"),
         ],
-        "required_properties": ["citation_text", "citation_type"]
+        "required_properties": ["confidence", "llm_model", "created_at", "citation_text", "citation_type"]
     },
     "DEFINES": {
         "valid_pairs": [
@@ -635,7 +636,13 @@ def test_refers_to_not_rejected():
         "Article",
         "REFERS_TO",
         "Article",
-        properties={"citation_text": "theo Điều 17", "citation_type": "DIRECT"},
+        properties={
+            "confidence": 0.8,
+            "llm_model": "gemini:gemini-3.1-flash-lite",
+            "created_at": "2026-07-12T00:00:00Z",
+            "citation_text": "theo Điều 17",
+            "citation_type": "DIRECT",
+        },
     )
     assert ok, f"REFERS_TO bị reject: {err}"
 

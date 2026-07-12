@@ -6,6 +6,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.shared.ontology.contract import ONTOLOGY_VERSION
+
 
 class ExtractionReadinessError(RuntimeError):
     """Raised when extraction artifacts cannot support a Milestone A run."""
@@ -26,8 +28,14 @@ def validate_extraction_readiness(processed_dir: Path) -> ExtractionReadiness:
         raise ExtractionReadinessError(f"Extraction is blocked: {blocked.get('reason', 'unknown provider failure')}")
 
     run_path = processed_dir / "extraction_run.json"
+    if (processed_dir / "current_extraction").exists() and not run_path.exists():
+        raise ExtractionReadinessError("Atomic extraction artifact set is missing extraction_run.json")
     if run_path.exists():
         run = json.loads(run_path.read_text(encoding="utf-8"))
+        if (processed_dir / "current_extraction").exists() and run.get("ontology_version") != ONTOLOGY_VERSION:
+            raise ExtractionReadinessError(
+                f"Extraction artifact ontology version {run.get('ontology_version')!r} does not match {ONTOLOGY_VERSION}"
+            )
         if not run.get("complete_document"):
             raise ExtractionReadinessError(
                 "Extraction artifacts are from a smoke subset; complete the full document before Gate 2"

@@ -3,8 +3,16 @@ from __future__ import annotations
 import json
 import logging
 import re
-from openai import OpenAI
-from openai import APIError as OpenAIAPIError
+from typing import Any
+
+try:
+    from openai import APIError as OpenAIAPIError
+    from openai import OpenAI
+except ModuleNotFoundError:  # Optional provider dependency.
+    OpenAI = None  # type: ignore[assignment,misc]
+
+    class OpenAIAPIError(Exception):
+        pass
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from src.pipeline.config import settings
@@ -58,7 +66,9 @@ class OpenAICompatibleProvider(BaseProvider):
         s = re.sub(r'_+', '_', s)
         return s.strip('_')
 
-    def _get_client_and_model(self) -> tuple[OpenAI, str]:
+    def _get_client_and_model(self) -> tuple[Any, str]:
+        if OpenAI is None:
+            raise RuntimeError("OpenAI-compatible extraction requires the `llm` dependency group")
         api_key = settings.require_api_key()
         if self.provider_type == "minimax":
             base_url = settings.minimax_base_url

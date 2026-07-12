@@ -8,14 +8,16 @@ pre-writer extraction labels (`Entity`, `Concept`, `Action`) to
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from src.shared.ontology.contract import (
     CONSTRAINTS,
     GUIDES_WHITELIST,
     LEGACY_RELATION_ALIASES,
-    ONTOLOGY_LABEL_MAP,
-    PHASE1_PERSISTED_LABELS,
-    RELATION_ENUM,
-    RUNTIME_ONLY_LABELS,
+    ONTOLOGY_LABEL_MAP as ONTOLOGY_LABEL_MAP,
+    PHASE1_PERSISTED_LABELS as PHASE1_PERSISTED_LABELS,
+    RELATION_ENUM as RELATION_ENUM,
+    RUNTIME_ONLY_LABELS as RUNTIME_ONLY_LABELS,
 )
 
 
@@ -58,6 +60,24 @@ def validate_relation(
         missing = [p for p in required_props if p not in props or props[p] is None or props[p] == ""]
         if missing:
             return False, f"Missing required properties for {relation}: {missing}"
+
+    for key, expected in constraint.get("property_types", {}).items():
+        value = (properties or {}).get(key)
+        if value is None:
+            continue
+        if expected == "float" and (isinstance(value, bool) or not isinstance(value, (int, float))):
+            return False, f"Invalid property type for {relation}.{key}: expected float"
+        if expected == "string" and not isinstance(value, str):
+            return False, f"Invalid property type for {relation}.{key}: expected string"
+        if expected == "datetime":
+            if not isinstance(value, str):
+                return False, f"Invalid property type for {relation}.{key}: expected datetime"
+            try:
+                parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            except ValueError:
+                return False, f"Invalid property type for {relation}.{key}: expected datetime"
+            if parsed.tzinfo is None:
+                return False, f"Invalid property type for {relation}.{key}: timezone required"
 
     if relation == "REFERS_TO":
         citation_type = (properties or {}).get("citation_type")

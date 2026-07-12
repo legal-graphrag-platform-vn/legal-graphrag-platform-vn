@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 from math import sqrt
 from typing import Iterable, Protocol
 
@@ -30,7 +31,9 @@ class EmbeddingGenerator:
     encoder: EncoderProtocol | None = None
 
     def encode(self, texts: list[str]) -> list[list[float]]:
-        encoder = self.encoder or self._load_encoder()
+        if self.encoder is None:
+            self.encoder = self._load_encoder()
+        encoder = self.encoder
         vectors = [list(vector) for vector in encoder.encode(texts, normalize_embeddings=self.normalize_embeddings)]
         for vector in vectors:
             validate_embedding_dimension(vector, self.expected_dimension)
@@ -86,6 +89,10 @@ def embedding_texts_by_node_id(payload: dict) -> dict[str, str]:
         else:
             texts[node_id] = build_clause_embedding_text(parent_article_by_clause_id.get(node_id, {}), node)
     return texts
+
+
+def embedding_content_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def build_article_embedding_text(article: dict) -> str:

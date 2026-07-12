@@ -1,0 +1,318 @@
+{
+  "generated_at": "2026-07-12T22:31:27.947293Z",
+  "k": 5,
+  "runs": [
+    {
+      "query_id": "q1",
+      "query": "quyền thành lập và quản lý doanh nghiệp",
+      "index_name": "article_embedding",
+      "results": [
+        {
+          "rank": 1,
+          "node_id": "ldn_2020_art17",
+          "label": "Article",
+          "number": "17",
+          "title": "Quyền thành lập, góp vốn, mua cổ phần, mua phần vốn góp và quản lý doanh nghiệp",
+          "content_raw": "Quyền thành lập, góp vốn, mua cổ phần, mua phần vốn góp và quản lý doanh nghiệp\n1. Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp tại Việt Nam theo quy định của Luật này, trừ trường hợp quy định tại khoản 2 Điều này.\n2. Tổ chức, cá nhân sau đây không có quyền thành lập và quản lý doanh nghiệp tại Việt Nam:\na) Cơ quan nhà nước, đơn vị lực lượng vũ trang nhân dân sử dụng tài sản nhà nước để thành lập doanh nghiệp kinh doanh thu lợi riêng cho cơ quan, đơn vị mình;\nb) Cán bộ, công chức, viên chức theo quy định của Luật Cán bộ, công chức và Luật Viên chức;\nc) Sĩ quan, hạ sĩ quan, quân nhân chuyên nghiệp, công nhân, viên chức quốc phòng trong các cơ quan, đơn vị thuộc Quân đội nhân dân Việt Nam; sĩ quan, hạ sĩ quan chuyên nghiệp, công nhân công an trong các cơ quan, đơn vị thuộc Công an nhân dân Việt Nam, trừ người được cử làm đại diện theoủy quyền để quản lý phần vốn góp của Nhà nước tại doanh nghiệp hoặc quản lý tại doanh nghiệp nhà nước;\nd) Cán bộ lãnh đạo, quản lý nghiệp vụ trong doanh nghiệp nhà nước theo quy định tại điểm a khoản 1 Điều 88 của Luật này, trừ người được cử làm đại diện theoủy quyền để quản lý phần vốn góp của Nhà nước tại doanh nghiệp khác;\nđ) Người chưa thành niên; người bị hạn chế năng lực hành vi dân sự; người bị mất năng lực hành vi dân sự; người có khó khăn trong nhận thức, làm chủ hành vi; tổ chức không có tư cách pháp nhân;\ne) Người đang bị truy cứu trách nhiệm hình sự, bị tạm giam, đang chấp hành hình phạt tù, đang chấp hành biện pháp xử lý hành chính tại cơ sở cai nghiện bắt buộc, cơ sở giáo dục bắt buộc hoặc đang bị Tòaán cấm đảm nhiệm chức vụ, cấm hành nghề hoặc làm công việc nhất định; các trường hợp khác theo quy định của Luật Phá sản, Luật Phòng, chống tham nhũng. Trường hợp Cơ quan đăng ký kinh doanh có yêu cầu, người đăng ký thành lập doanh nghiệp phải nộp Phiếu lý lịch tư pháp cho Cơ quan đăng ký kinh doanh;\ng) Tổ chức là pháp nhân thương mại bị cấm kinh doanh, cấm hoạt động trong một số lĩnh vực nhất định theo quy định của Bộ luật Hình sự.\n3. Tổ chức, cá nhân có quyền góp vốn, mua cổ phần, mua phần vốn góp vào công ty cổ phần, công ty trách nhiệm hữu hạn, công ty hợp danh theo quy định của Luật này, trừ trường hợp sau đây:\na) Cơ quan nhà nước, đơn vị lực lượng vũ trang nhân dân sử dụng tài sản nhà nước góp vốn vào doanh nghiệp để thu lợi riêng cho cơ quan, đơn vị mình;\nb) Đối tượng không được góp vốn vào doanh nghiệp theo quy định của Luật Cán bộ, công chức, Luật Viên chức, Luật Phòng, chống tham nhũng.\n4. Thu lợi riêng cho cơ quan, đơn vị mình quy định tại điểm a khoản 2 và điểm a khoản 3 Điều này là việc sử dụng thu nhập dưới mọi hình thức có được từ hoạt động kinh doanh, từ góp vốn, mua cổ phần, mua phần vốn góp vào một trong các mục đích sau đây:\na) Chia dưới mọi hình thức cho một số hoặc tất cả những người quy định tại điểm b và điểm c khoản 2 Điều này;\nb) Bổ sung vào ngân sách hoạt động của cơ quan, đơn vị trái với quy định của pháp luật về ngân sách nhà nước;\nc) Lập quỹ hoặc bổ sung vào quỹ phục vụ lợiích riêng của cơ quan, đơn vị.",
+          "score": 0.8752446174621582
+        },
+        {
+          "rank": 2,
+          "node_id": "ldn_2020_art7",
+          "label": "Article",
+          "number": "7",
+          "title": "Quyền của doanh nghiệp",
+          "content_raw": "Quyền của doanh nghiệp\n1. Tự do kinh doanh ngành, nghề mà luật không cấm.\n2. Tự chủ kinh doanh và lựa chọn hình thức tổ chức kinh doanh; chủ động lựa chọn ngành, nghề, địa bàn, hình thức kinh doanh; chủ động điều chỉnh quy mô và ngành, nghề kinh doanh.\n3. Lựa chọn hình thức, phương thức huy động, phân bổ và sử dụng vốn.\n4. Tự do tìm kiếm thị trường, khách hàng và ký kết hợp đồng.\n5. Kinh doanh xuất khẩu, nhập khẩu.\n6. Tuyển dụng, thuê và sử dụng lao động theo quy định của pháp luật về lao động.\n7. Chủ độngứng dụng khoa học và công nghệ để nâng cao hiệu quả kinh doanh và khả năng cạnh tranh; được bảo hộ quyền sở hữu trí tuệ theo quy định của pháp luật về sở hữu trí tuệ.\n8. Chiếm hữu, sử dụng, định đoạt tài sản của doanh nghiệp.\n9. Từ chối yêu cầu của cơ quan, tổ chức, cá nhân về cung cấp nguồn lực không theo quy định của pháp luật.\n10. Khiếu nại, tham gia tố tụng theo quy định của pháp luật.\n11. Quyền khác theo quy định của pháp luật.",
+          "score": 0.8190927505493164
+        },
+        {
+          "rank": 3,
+          "node_id": "ldn_2020_art76",
+          "label": "Article",
+          "number": "76",
+          "title": "Quyền của chủ sở hữu công ty",
+          "content_raw": "Quyền của chủ sở hữu công ty\n1. Chủ sở hữu công ty là tổ chức có quyền sau đây:\na) Quyết định nội dung Điều lệ công ty, sửa đổi, bổ sung Điều lệ công ty;\nb) Quyết định chiến lược phát triển và kế hoạch kinh doanh hằng năm của công ty;\nc) Quyết định cơ cấu tổ chức quản lý công ty, bổ nhiệm, miễn nhiệm, bãi nhiệm người quản lý, Kiểm soát viên của công ty;\nd) Quyết định dựán đầu tư phát triển;\nđ) Quyết định các giải pháp phát triển thị trường, tiếp thị và công nghệ;\ne) Thông qua hợp đồng vay, cho vay, bán tài sản và các hợp đồng khác do Điều lệ công ty quy định có giá trị từ 50% tổng giá trị tài sản trở lên được ghi trong báo cáo tài chính gần nhất của công ty hoặc một tỷ lệ hoặc giá trị khác nhỏ hơn quy định tại Điều lệ công ty;\ng) Thông qua báo cáo tài chính của công ty;\nh) Quyết định tăng vốn điều lệ của công ty; chuyển nhượng một phần hoặc toàn bộ vốn điều lệ của công ty cho tổ chức, cá nhân khác; quyết định phát hành trái phiếu;\ni) Quyết định thành lập công ty con, góp vốn vào công ty khác;\nk) Tổ chức giám sát và đánh giá hoạt động kinh doanh của công ty;\nl) Quyết định việc sử dụng lợi nhuận sau khi đã hoàn thành nghĩa vụ thuế và các nghĩa vụ tài chính khác của công ty;\nm) Quyết định tổ chức lại, giải thể và yêu cầu phá sản công ty;\nn) Thu hồi toàn bộ giá trị tài sản của công ty sau khi công ty hoàn thành giải thể hoặc phá sản;\no) Quyền khác theo quy định của Luật này và Điều lệ công ty.\n2. Chủ sở hữu công ty là cá nhân có quyền quy định tại các điểm a, h, l, m, n và o khoản 1 Điều này; quyết định đầu tư, kinh doanh và quản trị nội bộ công ty, trừ trường hợp Điều lệ công ty có quy định khác.",
+          "score": 0.8106412887573242
+        },
+        {
+          "rank": 4,
+          "node_id": "ldn_2020_art92",
+          "label": "Article",
+          "number": "92",
+          "title": "Quyền và nghĩa vụ của Hội đồng thành viên",
+          "content_raw": "Quyền và nghĩa vụ của Hội đồng thành viên\n1. Hội đồng thành viên nhân danh công ty thực hiện quyền, nghĩa vụ của chủ sở hữu, cổ đông, thành viên đối với công ty do công ty làm chủ sở hữu hoặc sở hữu cổ phần, phần vốn góp.\n2. Hội đồng thành viên có quyền và nghĩa vụ sau đây:\na) Quyết định các nội dung theo quy định tại Luật Quản lý, sử dụng vốn nhà nước đầu tư vào sản xuất, kinh doanh tại doanh nghiệp;\nb) Quyết định thành lập, tổ chức lại, giải thể chi nhánh, văn phòng đại diện và các đơn vị hạch toán phụ thuộc;\nc) Quyết định kế hoạch sản xuất, kinh doanh hằng năm, chủ trương phát triển thị trường, tiếp thị và công nghệ của công ty;\nd) Tổ chức hoạt động kiểm toán nội bộ và quyết định thành lập đơn vị kiểm toán nội bộ của công ty;\nđ) Quyền và nghĩa vụ khác theo quy định của Điều lệ công ty, Luật này và quy định khác của pháp luật có liên quan.",
+          "score": 0.807319164276123
+        },
+        {
+          "rank": 5,
+          "node_id": "ldn_2020_art187",
+          "label": "Article",
+          "number": "187",
+          "title": "Quyền và nghĩa vụ của thành viên góp vốn",
+          "content_raw": "Quyền và nghĩa vụ của thành viên góp vốn\n1. Thành viên góp vốn có quyền sau đây:\na) Tham gia họp, thảo luận và biểu quyết tại Hội đồng thành viên về việc sửa đổi, bổ sung Điều lệ công ty, sửa đổi, bổ sung các quyền và nghĩa vụ của thành viên góp vốn, về tổ chức lại, giải thể công ty và nội dung khác của Điều lệ công ty có liên quan trực tiếp đến quyền và nghĩa vụ của họ;\nb) Được chia lợi nhuận hằng năm tươngứng với tỷ lệ phần vốn góp trong vốn điều lệ của công ty;\nc) Được cung cấp báo cáo tài chính hằng năm của công ty; có quyền yêu cầu Chủ tịch Hội đồng thành viên, thành viên hợp danh cung cấp đầy đủ và trung thực thông tin về tình hình và kết quả kinh doanh của công ty; xem xét sổ kế toán, biên bản, hợp đồng, giao dịch, hồ sơ và tài liệu khác của công ty;\nd) Chuyển nhượng phần vốn góp của mình tại công ty cho người khác;\nđ) Nhân danh cá nhân hoặc nhân danh người khác tiến hành kinh doanh ngành, nghề kinh doanh của công ty;\ne) Định đoạt phần vốn góp của mình bằng cách để thừa kế, tặng cho, thế chấp, cầm cố và các hình thức khác theo quy định của pháp luật và Điều lệ công ty; trường hợp chết thì người thừa kế thay thế thành viên đã chết trở thành thành viên góp vốn của công ty;\ng) Được chia một phần giá trị tài sản còn lại của công ty tươngứng với tỷ lệ phần vốn góp trong vốn điều lệ công ty khi công ty giải thể hoặc phá sản;\nh) Quyền khác theo quy định của Luật này và Điều lệ công ty.\n2. Thành viên góp vốn có nghĩa vụ sau đây:\na) Chịu trách nhiệm về các khoản nợ và nghĩa vụ tài sản khác của công ty trong phạm vi số vốn đã cam kết góp;\nb) Không được tham gia quản lý công ty, không được tiến hành công việc kinh doanh nhân danh công ty;\nc) Tuân thủ Điều lệ công ty, nghị quyết và quyết định của Hội đồng thành viên;\nd) Nghĩa vụ khác theo quy định của Luật này và Điều lệ công ty.",
+          "score": 0.7983694076538086
+        }
+      ]
+    },
+    {
+      "query_id": "q1",
+      "query": "quyền thành lập và quản lý doanh nghiệp",
+      "index_name": "clause_embedding",
+      "results": [
+        {
+          "rank": 1,
+          "node_id": "ldn_2020_art17_cl1",
+          "label": "Clause",
+          "number": "1",
+          "title": null,
+          "content_raw": "Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp tại Việt Nam theo quy định của Luật này, trừ trường hợp quy định tại khoản 2 Điều này.",
+          "score": 0.8720064163208008
+        },
+        {
+          "rank": 2,
+          "node_id": "ldn_2020_art17_cl2",
+          "label": "Clause",
+          "number": "2",
+          "title": null,
+          "content_raw": "Tổ chức, cá nhân sau đây không có quyền thành lập và quản lý doanh nghiệp tại Việt Nam:",
+          "score": 0.8448257446289062
+        },
+        {
+          "rank": 3,
+          "node_id": "ldn_2020_art17_cl3",
+          "label": "Clause",
+          "number": "3",
+          "title": null,
+          "content_raw": "Tổ chức, cá nhân có quyền góp vốn, mua cổ phần, mua phần vốn góp vào công ty cổ phần, công ty trách nhiệm hữu hạn, công ty hợp danh theo quy định của Luật này, trừ trường hợp sau đây:",
+          "score": 0.8138341903686523
+        },
+        {
+          "rank": 4,
+          "node_id": "ldn_2020_art7_cl8",
+          "label": "Clause",
+          "number": "8",
+          "title": null,
+          "content_raw": "Chiếm hữu, sử dụng, định đoạt tài sản của doanh nghiệp.",
+          "score": 0.8137454986572266
+        },
+        {
+          "rank": 5,
+          "node_id": "ldn_2020_art7_cl2",
+          "label": "Clause",
+          "number": "2",
+          "title": null,
+          "content_raw": "Tự chủ kinh doanh và lựa chọn hình thức tổ chức kinh doanh; chủ động lựa chọn ngành, nghề, địa bàn, hình thức kinh doanh; chủ động điều chỉnh quy mô và ngành, nghề kinh doanh.",
+          "score": 0.8115711212158203
+        }
+      ]
+    },
+    {
+      "query_id": "q2",
+      "query": "vốn điều lệ của công ty trách nhiệm hữu hạn",
+      "index_name": "article_embedding",
+      "results": [
+        {
+          "rank": 1,
+          "node_id": "ldn_2020_art75",
+          "label": "Article",
+          "number": "75",
+          "title": "Góp vốn thành lập công ty",
+          "content_raw": "Góp vốn thành lập công ty\n1. Vốn điều lệ của công ty trách nhiệm hữu hạn một thành viên khi đăng ký thành lập doanh nghiệp là tổng giá trị tài sản do chủ sở hữu công ty cam kết góp và ghi trong Điều lệ công ty.\n2. Chủ sở hữu công ty phải góp vốn cho công ty đủ và đúng loại tài sản đã cam kết khi đăng ký thành lập doanh nghiệp trong thời hạn 90 ngày kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp, không kể thời gian vận chuyển, nhập khẩu tài sản góp vốn, thực hiện thủ tục hành chính để chuyển quyền sở hữu tài sản. Trong thời hạn này, chủ sở hữu công ty có các quyền và nghĩa vụ tươngứng với phần vốn góp đã cam kết.\n3. Trường hợp không góp đủ vốn điều lệ trong thời hạn quy định tại khoản 2 Điều này, chủ sở hữu công ty phải đăng ký thay đổi vốn điều lệ bằng giá trị số vốn đã góp trong thời hạn 30 ngày kể từ ngày cuối cùng phải góp đủ vốn điều lệ. Trường hợp này, chủ sở hữu phải chịu trách nhiệm tươngứng với phần vốn góp đã cam kết đối với các nghĩa vụ tài chính của công ty phát sinh trong thời gian trước ngày cuối cùng công ty đăng ký thay đổi vốn điều lệ theo quy định tại khoản này.\n4. Chủ sở hữu công ty chịu trách nhiệm bằng toàn bộ tài sản của mình đối với các nghĩa vụ tài chính của công ty, thiệt hại xảy ra do không góp, không góp đủ, không góp đúng hạn vốn điều lệ theo quy định tại Điều này.",
+          "score": 0.8531570434570312
+        },
+        {
+          "rank": 2,
+          "node_id": "ldn_2020_art87",
+          "label": "Article",
+          "number": "87",
+          "title": "Tăng, giảm vốn điều lệ",
+          "content_raw": "Tăng, giảm vốn điều lệ\n1. Công ty trách nhiệm hữu hạn một thành viên tăng vốn điều lệ thông qua việc chủ sở hữu công ty góp thêm vốn hoặc huy động thêm vốn góp của người khác. Chủ sở hữu công ty quyết định hình thức tăng và mức tăng vốn điều lệ.\n2. Trường hợp tăng vốn điều lệ bằng việc huy động thêm phần vốn góp của người khác, công ty phải tổ chức quản lý theo loại hình công ty trách nhiệm hữu hạn hai thành viên trở lên hoặc công ty cổ phần. Việc tổ chức quản lý công ty được thực hiện như sau:\na) Trường hợp tổ chức quản lý theo loại hình công ty trách nhiệm hữu hạn hai thành viên trở lên thì công ty phải thông báo thay đổi nội dung đăng ký doanh nghiệp trong thời hạn 10 ngày kể từ ngày hoàn thành việc thay đổi vốn điều lệ;\nb) Trường hợp chuyển đổi thành công ty cổ phần thì công ty thực hiện theo quy định tại Điều 202 của Luật này.\n3. Công ty trách nhiệm hữu hạn một thành viên giảm vốn điều lệ trong trường hợp sau đây:\na) Hoàn trả một phần vốn góp cho chủ sở hữu công ty nếu công ty đã hoạt động kinh doanh liên tục từ 02 năm trở lên kể từ ngày đăng ký thành lập doanh nghiệp và bảo đảm thanh toán đủ các khoản nợ và nghĩa vụ tài sản khác sau khi đã hoàn trả phần vốn góp cho chủ sở hữu công ty;\nb) Vốn điều lệ không được chủ sở hữu công ty thanh toán đầy đủ và đúng hạn theo quy định tại Điều 75 của Luật này.",
+          "score": 0.8523788452148438
+        },
+        {
+          "rank": 3,
+          "node_id": "ldn_2020_art47",
+          "label": "Article",
+          "number": "47",
+          "title": "Góp vốn thành lập công ty và cấp giấy chứng nhận phần vốn góp",
+          "content_raw": "Góp vốn thành lập công ty và cấp giấy chứng nhận phần vốn góp\n1. Vốn điều lệ của công ty trách nhiệm hữu hạn hai thành viên trở lên khi đăng ký thành lập doanh nghiệp là tổng giá trị phần vốn góp của các thành viên cam kết góp và ghi trong Điều lệ công ty.\n2. Thành viên phải góp vốn cho công ty đủ và đúng loại tài sản đã cam kết khi đăng ký thành lập doanh nghiệp trong thời hạn 90 ngày kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp, không kể thời gian vận chuyển, nhập khẩu tài sản góp vốn, thực hiện thủ tục hành chính để chuyển quyền sở hữu tài sản. Trong thời hạn này, thành viên có các quyền và nghĩa vụ tươngứng với tỷ lệ phần vốn góp đã cam kết. Thành viên công ty chỉ được góp vốn cho công ty bằng loại tài sản khác với tài sản đã cam kết nếu được sự tán thành của trên 50% số thành viên còn lại.\n3. Sau thời hạn quy định tại khoản 2 Điều này mà vẫn có thành viên chưa góp vốn hoặc chưa góp đủ phần vốn góp đã cam kết thì được xử lý như sau:\na) Thành viên chưa góp vốn theo cam kết đương nhiên không còn là thành viên của công ty;\nb) Thành viên chưa góp đủ phần vốn góp đã cam kết có các quyền tươngứng với phần vốn góp đã góp;\nc) Phần vốn góp chưa góp của các thành viên được chào bán theo nghị quyết, quyết định của Hội đồng thành viên.\n4. Trường hợp có thành viên chưa góp vốn hoặc chưa góp đủ số vốn đã cam kết, công ty phải đăng ký thay đổi vốn điều lệ, tỷ lệ phần vốn góp của các thành viên bằng số vốn đã góp trong thời hạn 30 ngày kể từ ngày cuối cùng phải góp đủ phần vốn góp theo quy định tại khoản 2 Điều này. Các thành viên chưa góp vốn hoặc chưa góp đủ số vốn đã cam kết phải chịu trách nhiệm tươngứng với tỷ lệ phần vốn góp đã cam kết đối với các nghĩa vụ tài chính của công ty phát sinh trong thời gian trước ngày công ty đăng ký thay đổi vốn điều lệ và tỷ lệ phần vốn góp của thành viên.\n5. Trừ trường hợp quy định tại khoản 2 Điều này, người góp vốn trở thành thành viên của công ty kể từ thời điểm đã thanh toán phần vốn góp và những thông tin về người góp vốn quy định tại các điểm b, c và đ khoản 2 Điều 48 của Luật này được ghi đầy đủ vào sổ đăng ký thành viên. Tại thời điểm góp đủ phần vốn góp, công ty phải cấp giấy chứng nhận phần vốn góp cho thành viên tươngứng với giá trị phần vốn đã góp.\n6. Giấy chứng nhận phần vốn góp phải bao gồm các nội dung chủ yếu sau đây:\na) Tên, mã số doanh nghiệp, địa chỉ trụ sở chính của công ty;\nb) Vốn điều lệ của công ty;\nc) Họ, tên, địa chỉ liên lạc, quốc tịch, số giấy tờ pháp lý của cá nhân đối với thành viên là cá nhân; tên, mã số doanh nghiệp hoặc số giấy tờ pháp lý của tổ chức, địa chỉ trụ sở chính đối với thành viên là tổ chức;\nd) Phần vốn góp, tỷ lệ phần vốn góp của thành viên;\nđ) Số và ngày cấp giấy chứng nhận phần vốn góp;\ne) Họ, tên, chữ ký của người đại diện theo pháp luật của công ty.\n7. Trường hợp giấy chứng nhận phần vốn góp bị mất, bị hư hỏng hoặc bị hủy hoại dưới hình thức khác, thành viên được công ty cấp lại giấy chứng nhận phần vốn góp theo trình tự, thủ tục quy định tại Điều lệ công ty.",
+          "score": 0.836181640625
+        },
+        {
+          "rank": 4,
+          "node_id": "ldn_2020_art112",
+          "label": "Article",
+          "number": "112",
+          "title": "Vốn của công ty cổ phần",
+          "content_raw": "Vốn của công ty cổ phần\n1. Vốn điều lệ của công ty cổ phần là tổng mệnh giá cổ phần các loại đã bán. Vốn điều lệ của công ty cổ phần khi đăng ký thành lập doanh nghiệp là tổng mệnh giá cổ phần các loại đã được đăng ký mua và được ghi trong Điều lệ công ty.\n2. Cổ phần đã bán là cổ phần được quyền chào bán đã được các cổ đông thanh toán đủ cho công ty. Khi đăng ký thành lập doanh nghiệp, cổ phần đã bán là tổng số cổ phần các loại đã được đăng ký mua.\n3. Cổ phần được quyền chào bán của công ty cổ phần là tổng số cổ phần các loại mà Đại hội đồng cổ đông quyết định sẽ chào bán để huy động vốn. Số cổ phần được quyền chào bán của công ty cổ phần khi đăng ký thành lập doanh nghiệp là tổng số cổ phần các loại mà công ty sẽ chào bán để huy động vốn, bao gồm cổ phần đã được đăng ký mua và cổ phần chưa được đăng ký mua.\n4. Cổ phần chưa bán là cổ phần được quyền chào bán và chưa được thanh toán cho công ty. Khi đăng ký thành lập doanh nghiệp, cổ phần chưa bán là tổng số cổ phần các loại chưa được đăng ký mua.\n5. Công ty có thể giảm vốn điều lệ trong trường hợp sau đây:\na) Theo quyết định của Đại hội đồng cổ đông, công ty hoàn trả một phần vốn góp cho cổ đông theo tỷ lệ sở hữu cổ phần của họ trong công ty nếu công ty đã hoạt động kinh doanh liên tục từ 02 năm trở lên kể từ ngày đăng ký thành lập doanh nghiệp và bảo đảm thanh toán đủ các khoản nợ và nghĩa vụ tài sản khác sau khi đã hoàn trả cho cổ đông;\nb) Công ty mua lại cổ phần đã bán theo quy định tại Điều 132 và Điều 133 của Luật này;\nc) Vốn điều lệ không được các cổ đông thanh toán đầy đủ và đúng hạn theo quy định tại Điều 113 của Luật này.",
+          "score": 0.820897102355957
+        },
+        {
+          "rank": 5,
+          "node_id": "ldn_2020_art74",
+          "label": "Article",
+          "number": "74",
+          "title": "Công ty trách nhiệm hữu hạn một thành viên",
+          "content_raw": "Công ty trách nhiệm hữu hạn một thành viên\n1. Công ty trách nhiệm hữu hạn một thành viên là doanh nghiệp do một tổ chức hoặc một cá nhân làm chủ sở hữu (sau đây gọi là chủ sở hữu công ty). Chủ sở hữu công ty chịu trách nhiệm về các khoản nợ và nghĩa vụ tài sản khác của công ty trong phạm vi số vốn điều lệ của công ty.\n2. Công ty trách nhiệm hữu hạn một thành viên có tư cách pháp nhân kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp.\n3. Công ty trách nhiệm hữu hạn một thành viên không được phát hành cổ phần, trừ trường hợp để chuyển đổi thành công ty cổ phần.\n4. Công ty trách nhiệm hữu hạn một thành viên được phát hành trái phiếu theo quy định của Luật này và quy định khác của pháp luật có liên quan; việc phát hành trái phiếu riêng lẻ theo quy định tại Điều 128 và Điều 129 của Luật này.",
+          "score": 0.8199644088745117
+        }
+      ]
+    },
+    {
+      "query_id": "q2",
+      "query": "vốn điều lệ của công ty trách nhiệm hữu hạn",
+      "index_name": "clause_embedding",
+      "results": [
+        {
+          "rank": 1,
+          "node_id": "ldn_2020_art75_cl1",
+          "label": "Clause",
+          "number": "1",
+          "title": null,
+          "content_raw": "Vốn điều lệ của công ty trách nhiệm hữu hạn một thành viên khi đăng ký thành lập doanh nghiệp là tổng giá trị tài sản do chủ sở hữu công ty cam kết góp và ghi trong Điều lệ công ty.",
+          "score": 0.8893671035766602
+        },
+        {
+          "rank": 2,
+          "node_id": "ldn_2020_art47_cl1",
+          "label": "Clause",
+          "number": "1",
+          "title": null,
+          "content_raw": "Vốn điều lệ của công ty trách nhiệm hữu hạn hai thành viên trở lên khi đăng ký thành lập doanh nghiệp là tổng giá trị phần vốn góp của các thành viên cam kết góp và ghi trong Điều lệ công ty.",
+          "score": 0.8762722015380859
+        },
+        {
+          "rank": 3,
+          "node_id": "ldn_2020_art87_cl1",
+          "label": "Clause",
+          "number": "1",
+          "title": null,
+          "content_raw": "Công ty trách nhiệm hữu hạn một thành viên tăng vốn điều lệ thông qua việc chủ sở hữu công ty góp thêm vốn hoặc huy động thêm vốn góp của người khác. Chủ sở hữu công ty quyết định hình thức tăng và mức tăng vốn điều lệ.",
+          "score": 0.8605232238769531
+        },
+        {
+          "rank": 4,
+          "node_id": "ldn_2020_art4_cl34",
+          "label": "Clause",
+          "number": "34",
+          "title": null,
+          "content_raw": "Vốn điều lệ là tổng giá trị tài sản do các thành viên công ty, chủ sở hữu công ty đã góp hoặc cam kết góp khi thành lập công ty trách nhiệm hữu hạn, công ty hợp danh; là tổng mệnh giá cổ phần đã bán hoặc được đăng ký mua khi thành lập công ty cổ phần.",
+          "score": 0.8503365516662598
+        },
+        {
+          "rank": 5,
+          "node_id": "ldn_2020_art21_cl2",
+          "label": "Clause",
+          "number": "2",
+          "title": null,
+          "content_raw": "Điều lệ công ty.",
+          "score": 0.8424797058105469
+        }
+      ]
+    },
+    {
+      "query_id": "q3",
+      "query": "đăng ký thay đổi nội dung đăng ký doanh nghiệp",
+      "index_name": "article_embedding",
+      "results": [
+        {
+          "rank": 1,
+          "node_id": "ldn_2020_art30",
+          "label": "Article",
+          "number": "30",
+          "title": "Đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp",
+          "content_raw": "Đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp\n1. Doanh nghiệp phải đăng ký với Cơ quan đăng ký kinh doanh khi thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp quy định tại Điều 28 của Luật này.\n2. Doanh nghiệp chịu trách nhiệm đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp trong thời hạn 10 ngày kể từ ngày có thay đổi.\n3. Trong thời hạn 03 ngày làm việc kể từ ngày nhận hồ sơ, Cơ quan đăng ký kinh doanh có trách nhiệm xem xét tính hợp lệ của hồ sơ và cấp Giấy chứng nhận đăng ký doanh nghiệp mới; trường hợp hồ sơ chưa hợp lệ, Cơ quan đăng ký kinh doanh phải thông báo bằng văn bản nội dung cần sửa đổi, bổ sung cho doanh nghiệp. Trường hợp từ chối cấp Giấy chứng nhận đăng ký doanh nghiệp mới thì phải thông báo bằng văn bản cho doanh nghiệp và nêu rõ lý do.\n4. Đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp theo quyết định của Tòaán hoặc Trọng tài thực hiện theo trình tự, thủ tục sau đây:\na) Người đề nghị đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp gửi đề nghị đăng ký thay đổi đến Cơ quan đăng ký kinh doanh có thẩm quyền trong thời hạn 15 ngày kể từ ngày bảnán, quyết định của Tòaán có hiệu lực pháp luật hoặc phán quyết của Trọng tài có hiệu lực. Kèm theo hồ sơ đăng ký phải gồm bản sao bảnán, quyết định của Tòaán đã có hiệu lực pháp luật hoặc phán quyết của Trọng tài có hiệu lực;\nb) Trong thời hạn 03 ngày làm việc kể từ ngày nhận được đề nghị đăng ký quy định tại điểm a khoản này, Cơ quan đăng ký kinh doanh có trách nhiệm xem xét và cấp Giấy chứng nhận đăng ký doanh nghiệp mới theo nội dung bảnán, quyết định của Tòaán đã có hiệu lực pháp luật hoặc phán quyết của Trọng tài có hiệu lực; trường hợp hồ sơ chưa hợp lệ, Cơ quan đăng ký kinh doanh phải thông báo bằng văn bản nội dung cần sửa đổi, bổ sung cho người đề nghị đăng ký thay đổi. Trường hợp từ chối cấp Giấy chứng nhận đăng ký doanh nghiệp mới thì phải thông báo bằng văn bản cho người đề nghị đăng ký thay đổi và nêu rõ lý do.\n5. Chính phủ quy định về hồ sơ, trình tự, thủ tục đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp.",
+          "score": 0.8843722343444824
+        },
+        {
+          "rank": 2,
+          "node_id": "ldn_2020_art31",
+          "label": "Article",
+          "number": "31",
+          "title": "Thông báo thay đổi nội dung đăng ký doanh nghiệp",
+          "content_raw": "Thông báo thay đổi nội dung đăng ký doanh nghiệp\n1. Doanh nghiệp phải thông báo với Cơ quan đăng ký kinh doanh khi thay đổi một trong những nội dung sau đây:\na) Ngành, nghề kinh doanh;\nb) Cổ đông sáng lập và cổ đông là nhà đầu tư nước ngoài đối với công ty cổ phần, trừ trường hợp đối với công ty niêm yết;\nc) Nội dung khác trong hồ sơ đăng ký doanh nghiệp.\n2. Doanh nghiệp chịu trách nhiệm thông báo thay đổi nội dung đăng ký doanh nghiệp trong thời hạn 10 ngày kể từ ngày có thay đổi.\n3. Công ty cổ phần phải thông báo bằng văn bản đến Cơ quan đăng ký kinh doanh nơi công ty đặt trụ sở chính trong thời hạn 10 ngày kể từ ngày có thay đổi đối với cổ đông là nhà đầu tư nước ngoài được đăng ký trong sổ đăng ký cổ đông của công ty. Thông báo phải bao gồm các nội dung sau đây:\na) Tên, mã số doanh nghiệp, địa chỉ trụ sở chính;\nb) Đối với cổ đông là nhà đầu tư nước ngoài chuyển nhượng cổ phần: tên, địa chỉ trụ sở chính của cổ đông là tổ chức; họ, tên, quốc tịch, địa chỉ liên lạc của cổ đông là cá nhân; số cổ phần, loại cổ phần và tỷ lệ sở hữu cổ phần hiện có của họ trong công ty; số cổ phần và loại cổ phần chuyển nhượng;\nc) Đối với cổ đông là nhà đầu tư nước ngoài nhận chuyển nhượng cổ phần: tên, địa chỉ trụ sở chính của cổ đông là tổ chức; họ, tên, quốc tịch, địa chỉ liên lạc của cổ đông là cá nhân; số cổ phần và loại cổ phần nhận chuyển nhượng; số cổ phần, loại cổ phần và tỷ lệ sở hữu cổ phần tươngứng của họ trong công ty;\nd) Họ, tên, chữ ký của người đại diện theo pháp luật của công ty.\n4. Trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo, Cơ quan đăng ký kinh doanh có trách nhiệm xem xét tính hợp lệ và thực hiện thay đổi nội dung đăng ký doanh nghiệp; trường hợp hồ sơ chưa hợp lệ, Cơ quan đăng ký kinh doanh phải thông báo bằng văn bản nội dung cần sửa đổi, bổ sung cho doanh nghiệp. Trường hợp từ chối sửa đổi, bổ sung thông tin theo nội dung thông báo thay đổi đăng ký doanh nghiệp thì phải thông báo bằng văn bản cho doanh nghiệp và nêu rõ lý do.\n5. Thông báo thay đổi nội dung đăng ký doanh nghiệp theo quyết định của Tòaán hoặc Trọng tài thực hiện theo trình tự, thủ tục sau đây:\na) Tổ chức, cá nhân đề nghị thay đổi nội dung đăng ký doanh nghiệp gửi thông báo thay đổi nội dung đăng ký đến Cơ quan đăng ký kinh doanh có thẩm quyền trong thời hạn 10 ngày kể từ ngày bảnán, quyết định của Tòaán có hiệu lực pháp luật hoặc phán quyết của Trọng tài có hiệu lực. Kèm theo thông báo phải gồm bản sao bảnán, quyết định của Tòaán có hiệu lực pháp luật hoặc phán quyết của Trọng tài có hiệu lực;\nb) Trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo, Cơ quan đăng ký kinh doanh có trách nhiệm xem xét và thực hiện thay đổi nội dung đăng ký doanh nghiệp theo nội dung bảnán, quyết định của Tòaán có hiệu lực pháp luật hoặc phán quyết của Trọng tài có hiệu lực; trường hợp hồ sơ chưa hợp lệ, Cơ quan đăng ký kinh doanh phải thông báo bằng văn bản nội dung cần sửa đổi, bổ sung cho người đề nghị đăng ký thay đổi. Trường hợp từ chối sửa đổi, bổ sung thông tin theo nội dung thông báo thay đổi đăng ký doanh nghiệp thì phải thông báo bằng văn bản cho người đề nghị đăng ký thay đổi và nêu rõ lý do.",
+          "score": 0.8646068572998047
+        },
+        {
+          "rank": 3,
+          "node_id": "ldn_2020_art32",
+          "label": "Article",
+          "number": "32",
+          "title": "Công bố nội dung đăng ký doanh nghiệp",
+          "content_raw": "Công bố nội dung đăng ký doanh nghiệp\n1. Doanh nghiệp sau khi được cấp Giấy chứng nhận đăng ký doanh nghiệp phải thông báo công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp và phải nộp phí theo quy định của pháp luật. Nội dung công bố bao gồm các nội dung Giấy chứng nhận đăng ký doanh nghiệp và các thông tin sau đây:\na) Ngành, nghề kinh doanh;\nb) Danh sách cổ đông sáng lập; danh sách cổ đông là nhà đầu tư nước ngoài đối với công ty cổ phần (nếu có).\n2. Trường hợp thay đổi nội dung đăng ký doanh nghiệp, những thay đổi tươngứng phải được thông báo công khai trên Cổng thông tin quốc gia về đăng ký doanh nghiệp.\n3. Thời hạn thông báo công khai thông tin về doanh nghiệp quy định tại khoản 1 và khoản 2 Điều này là 30 ngày kể từ ngày được công khai.",
+          "score": 0.8361005783081055
+        },
+        {
+          "rank": 4,
+          "node_id": "ldn_2020_art33",
+          "label": "Article",
+          "number": "33",
+          "title": "Cung cấp thông tin về nội dung đăng ký doanh nghiệp",
+          "content_raw": "Cung cấp thông tin về nội dung đăng ký doanh nghiệp\n1. Tổ chức, cá nhân có quyền đề nghị Cơ quan quản lý nhà nước về đăng ký kinh doanh và Cơ quan đăng ký kinh doanh cung cấp thông tin được lưu giữ trên Hệ thống thông tin quốc gia về đăng ký doanh nghiệp và phải nộp phí theo quy định của pháp luật.\n2. Cơ quan quản lý nhà nước về đăng ký kinh doanh và Cơ quan đăng ký kinh doanh có nghĩa vụ cung cấp đầy đủ và kịp thời thông tin theo quy định tại khoản 1 Điều này.\n3. Chính phủ quy định chi tiết Điều này.",
+          "score": 0.8335938453674316
+        },
+        {
+          "rank": 5,
+          "node_id": "ldn_2020_art26",
+          "label": "Article",
+          "number": "26",
+          "title": "Trình tự, thủ tục đăng ký doanh nghiệp",
+          "content_raw": "Trình tự, thủ tục đăng ký doanh nghiệp\n1. Người thành lập doanh nghiệp hoặc người đượcủy quyền thực hiện đăng ký doanh nghiệp với Cơ quan đăng ký kinh doanh theo phương thức sau đây:\na) Đăng ký doanh nghiệp trực tiếp tại Cơ quan đăng ký kinh doanh;\nb) Đăng ký doanh nghiệp qua dịch vụ bưu chính;\nc) Đăng ký doanh nghiệp qua mạng thông tin điện tử.\n2. Đăng ký doanh nghiệp qua mạng thông tin điện tử là việc người thành lập doanh nghiệp nộp hồ sơ đăng ký doanh nghiệp qua mạng thông tin điện tử tại Cổng thông tin quốc gia về đăng ký doanh nghiệp. Hồ sơ đăng ký doanh nghiệp qua mạng thông tin điện tử bao gồm các dữ liệu theo quy định của Luật này và được thể hiện dưới dạng văn bản điện tử. Hồ sơ đăng ký doanh nghiệp qua mạng thông tin điện tử có giá trị pháp lý tương đương hồ sơ đăng ký doanh nghiệp bằng bản giấy. Điều khoản được bãi bỏ\n3. Tổ chức, cá nhân có quyền lựa chọn sử dụng chữ ký số theo quy định của pháp luật về giao dịch điện tử hoặc sử dụng tài khoản đăng ký kinh doanh để đăng ký doanh nghiệp qua mạng thông tin điện tử. Điều khoản được bãi bỏ\n4. Tài khoản đăng ký kinh doanh là tài khoản được tạo bởi Hệ thống thông tin quốc gia về đăng ký doanh nghiệp, cấp cho cá nhân để thực hiện đăng ký doanh nghiệp qua mạng thông tin điện tử. Cá nhân được cấp tài khoản đăng ký kinh doanh chịu trách nhiệm trước pháp luật về việc đăng ký để được cấp và việc sử dụng tài khoản đăng ký kinh doanh để đăng ký doanh nghiệp qua mạng thông tin điện tử.\n5. Trong thời hạn 03 ngày làm việc kể từ ngày nhận hồ sơ, Cơ quan đăng ký kinh doanh có trách nhiệm xem xét tính hợp lệ của hồ sơ đăng ký doanh nghiệp và cấp đăng ký doanh nghiệp; trường hợp hồ sơ chưa hợp lệ, Cơ quan đăng ký kinh doanh phải thông báo bằng văn bản nội dung cần sửa đổi, bổ sung cho người thành lập doanh nghiệp. Trường hợp từ chối đăng ký doanh nghiệp thì phải thông báo bằng văn bản cho người thành lập doanh nghiệp và nêu rõ lý do.\n6. Chính phủ quy định về hồ sơ, trình tự, thủ tục, liên thông trong đăng ký doanh nghiệp.",
+          "score": 0.8198013305664062
+        }
+      ]
+    },
+    {
+      "query_id": "q3",
+      "query": "đăng ký thay đổi nội dung đăng ký doanh nghiệp",
+      "index_name": "clause_embedding",
+      "results": [
+        {
+          "rank": 1,
+          "node_id": "ldn_2020_art30_cl4",
+          "label": "Clause",
+          "number": "4",
+          "title": null,
+          "content_raw": "Đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp theo quyết định của Tòaán hoặc Trọng tài thực hiện theo trình tự, thủ tục sau đây:",
+          "score": 0.8728861808776855
+        },
+        {
+          "rank": 2,
+          "node_id": "ldn_2020_art30_cl1",
+          "label": "Clause",
+          "number": "1",
+          "title": null,
+          "content_raw": "Doanh nghiệp phải đăng ký với Cơ quan đăng ký kinh doanh khi thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp quy định tại Điều 28 của Luật này.",
+          "score": 0.8703889846801758
+        },
+        {
+          "rank": 3,
+          "node_id": "ldn_2020_art30_cl5",
+          "label": "Clause",
+          "number": "5",
+          "title": null,
+          "content_raw": "Chính phủ quy định về hồ sơ, trình tự, thủ tục đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp.",
+          "score": 0.860872745513916
+        },
+        {
+          "rank": 4,
+          "node_id": "ldn_2020_art31_cl4",
+          "label": "Clause",
+          "number": "4",
+          "title": null,
+          "content_raw": "Trong thời hạn 03 ngày làm việc kể từ ngày nhận được thông báo, Cơ quan đăng ký kinh doanh có trách nhiệm xem xét tính hợp lệ và thực hiện thay đổi nội dung đăng ký doanh nghiệp; trường hợp hồ sơ chưa hợp lệ, Cơ quan đăng ký kinh doanh phải thông báo bằng văn bản nội dung cần sửa đổi, bổ sung cho doanh nghiệp. Trường hợp từ chối sửa đổi, bổ sung thông tin theo nội dung thông báo thay đổi đăng ký doanh nghiệp thì phải thông báo bằng văn bản cho doanh nghiệp và nêu rõ lý do.",
+          "score": 0.8597517013549805
+        },
+        {
+          "rank": 5,
+          "node_id": "ldn_2020_art31_cl5",
+          "label": "Clause",
+          "number": "5",
+          "title": null,
+          "content_raw": "Thông báo thay đổi nội dung đăng ký doanh nghiệp theo quyết định của Tòaán hoặc Trọng tài thực hiện theo trình tự, thủ tục sau đây:",
+          "score": 0.8586363792419434
+        }
+      ]
+    }
+  ]
+}

@@ -62,6 +62,10 @@ def test_process_article_temporal_relations_properties() -> None:
     ]
     mock_result = ExtractionResult(
         article_number=17,
+        provider="gemini",
+        configured_model="gemini:configured-alias",
+        resolved_model="gemini-3.1-flash-lite",
+        completed_at="2026-07-12T02:00:00+07:00",
         entities=mock_entities,
         relations=mock_relations,
     )
@@ -92,14 +96,17 @@ def test_process_article_temporal_relations_properties() -> None:
         requires_record = next(r for r in all_records if r["relation"]["relation"] == "REQUIRES")
         assert requires_record["relation"]["properties"]["source_article"] == "ldn_2020_art17"
         assert requires_record["relation"]["properties"]["confidence"] == 0.8
-        assert requires_record["relation"]["properties"]["llm_model"] == "gemini:gemini-flash-lite-latest"
-        assert requires_record["relation"]["properties"]["created_at"]
+        assert requires_record["relation"]["properties"]["llm_model"] == "gemini:gemini-3.1-flash-lite"
+        assert requires_record["relation"]["properties"]["created_at"] == "2026-07-11T19:00:00Z"
 
         # 7.   Check REFERS_TO citation properties
         refers_record = next(r for r in all_records if r["relation"]["relation"] == "REFERS_TO")
         assert refers_record["ontology_valid"] is True
         assert refers_record["relation"]["properties"]["citation_text"] == "Theo Điều 18 của Luật này"
         assert refers_record["relation"]["properties"]["citation_type"] == "DIRECT"
+        assert refers_record["relation"]["properties"]["confidence"] == 0.7
+        assert refers_record["relation"]["properties"]["llm_model"] == "gemini:gemini-3.1-flash-lite"
+        assert refers_record["relation"]["properties"]["created_at"] == "2026-07-11T19:00:00Z"
 
 
 def test_process_article_rejects_llm_contains_and_normalizes_clause() -> None:
@@ -113,6 +120,9 @@ def test_process_article_rejects_llm_contains_and_normalizes_clause() -> None:
     )
     result = ExtractionResult(
         article_number=5,
+        provider="gemini",
+        resolved_model="gemini-3.1-flash-lite",
+        completed_at="2026-07-12T00:00:00Z",
         entities=[
             ExtractedEntity(id="khoan_1_1", type="Clause", label="Khoản 1"),
             ExtractedEntity(id="doanh_nghiep", type="Entity", label="Doanh nghiệp"),
@@ -271,3 +281,45 @@ def test_resolved_model_change_blocks_mixed_checkpoints(tmp_path) -> None:
     ):
         with pytest.raises(RuntimeError, match="Resolved model changed"):
             run_pipeline(expanded, tmp_path, raw_doc_code="L59_2020")
+
+
+def test_global_semantic_type_conflict_moves_relations_to_review(tmp_path) -> None:
+    parsed = ParsedDocument(
+        document=DocumentInfo(
+            id="ldn_2020", title="Luật Doanh nghiệp", number="59/2020/QH14", doc_type="Law"
+        ),
+        articles=[Article(number="1", content_raw="Điều 1"), Article(number="2", content_raw="Điều 2")],
+    )
+    results = [
+        ExtractionResult(
+            article_number="1",
+            resolved_model="gemini-3.1-flash-lite",
+            entities=[ExtractedEntity(id="doanh_nghiep", type="Entity", label="Doanh nghiệp")],
+            relations=[
+                ExtractedRelation(
+                    head="ldn_2020_art1", relation="REGULATES", tail="doanh_nghiep", evidence="Doanh nghiệp", confidence=1
+                )
+            ],
+        ),
+        ExtractionResult(
+            article_number="2",
+            resolved_model="gemini-3.1-flash-lite",
+            entities=[ExtractedEntity(id="doanh_nghiep", type="Concept", label="Doanh nghiệp")],
+            relations=[
+                ExtractedRelation(
+                    head="ldn_2020_art2", relation="DEFINES", tail="doanh_nghiep", evidence="Doanh nghiệp", confidence=1
+                )
+            ],
+        ),
+    ]
+    with patch.object(settings, "extraction_max_workers", 1), patch(
+        "src.pipeline.pipeline.orchestrator.extract_article", side_effect=results
+    ):
+        run_pipeline(parsed, tmp_path, raw_doc_code="L59_2020")
+
+    out = tmp_path / "L59_2020"
+    review = [json.loads(line) for line in (out / "review.jsonl").read_text(encoding="utf-8").splitlines()]
+    entity_index = json.loads((out / "entity_index.json").read_text(encoding="utf-8"))
+    assert len(review) == 2
+    assert {record["review_reason"] for record in review} == {"semantic_type_conflict"}
+    assert "doanh_nghiep" not in entity_index

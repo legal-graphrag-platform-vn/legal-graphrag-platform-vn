@@ -1,0 +1,302 @@
+[
+  {
+    "query_id": "q1",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art17",
+    "rank": 1,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định quyền thành lập và quản lý doanh nghiệp, đúng trọng tâm truy vấn.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art7",
+    "rank": 2,
+    "judgement": "not_relevant",
+    "reason": "Quy định quyền của doanh nghiệp sau khi thành lập, không trực tiếp trả lời quyền thành lập và quản lý doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art76",
+    "rank": 3,
+    "judgement": "not_relevant",
+    "reason": "Quy định quyền của chủ sở hữu công ty, không phải quyền thành lập và quản lý doanh nghiệp nói chung.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art92",
+    "rank": 4,
+    "judgement": "not_relevant",
+    "reason": "Quy định quyền và nghĩa vụ của Hội đồng thành viên, không trực tiếp liên quan quyền thành lập doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art187",
+    "rank": 5,
+    "judgement": "not_relevant",
+    "reason": "Quy định quyền và nghĩa vụ của thành viên góp vốn, chỉ liên quan quản trị nội bộ một loại hình doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art17_cl1",
+    "rank": 1,
+    "judgement": "relevant",
+    "reason": "Trực tiếp xác lập tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp tại Việt Nam.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art17_cl2",
+    "rank": 2,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định các trường hợp không có quyền thành lập và quản lý doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art17_cl3",
+    "rank": 3,
+    "judgement": "not_relevant",
+    "reason": "Chủ yếu quy định quyền góp vốn, mua cổ phần và phần vốn góp, không trực tiếp về quyền thành lập và quản lý.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art7_cl8",
+    "rank": 4,
+    "judgement": "not_relevant",
+    "reason": "Chỉ quy định quyền định đoạt tài sản của doanh nghiệp, không trả lời truy vấn.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q1",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art7_cl2",
+    "rank": 5,
+    "judgement": "not_relevant",
+    "reason": "Quy định quyền tự chủ kinh doanh của doanh nghiệp đã tồn tại, không phải quyền thành lập và quản lý.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art75",
+    "rank": 1,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định vốn điều lệ và nghĩa vụ góp vốn của công ty trách nhiệm hữu hạn một thành viên.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art87",
+    "rank": 2,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định tăng, giảm vốn điều lệ của công ty trách nhiệm hữu hạn một thành viên.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art47",
+    "rank": 3,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định vốn điều lệ và góp vốn của công ty trách nhiệm hữu hạn hai thành viên trở lên.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art112",
+    "rank": 4,
+    "judgement": "not_relevant",
+    "reason": "Quy định vốn của công ty cổ phần, không phải công ty trách nhiệm hữu hạn.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art74",
+    "rank": 5,
+    "judgement": "not_relevant",
+    "reason": "Mô tả đặc điểm công ty trách nhiệm hữu hạn một thành viên nhưng không trực tiếp xác định hoặc điều chỉnh vốn điều lệ.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art75_cl1",
+    "rank": 1,
+    "judgement": "relevant",
+    "reason": "Định nghĩa trực tiếp vốn điều lệ của công ty trách nhiệm hữu hạn một thành viên khi đăng ký thành lập.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art47_cl1",
+    "rank": 2,
+    "judgement": "relevant",
+    "reason": "Định nghĩa trực tiếp vốn điều lệ của công ty trách nhiệm hữu hạn hai thành viên trở lên.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art87_cl1",
+    "rank": 3,
+    "judgement": "relevant",
+    "reason": "Quy định trực tiếp cách tăng vốn điều lệ của công ty trách nhiệm hữu hạn một thành viên.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art4_cl34",
+    "rank": 4,
+    "judgement": "relevant",
+    "reason": "Cung cấp định nghĩa pháp lý chung về vốn điều lệ, bao gồm công ty trách nhiệm hữu hạn.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q2",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art21_cl2",
+    "rank": 5,
+    "judgement": "not_relevant",
+    "reason": "Chỉ nêu 'Điều lệ công ty', không cung cấp thông tin về vốn điều lệ.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art30",
+    "rank": 1,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định đăng ký thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art31",
+    "rank": 2,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định thông báo thay đổi các nội dung đăng ký doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art32",
+    "rank": 3,
+    "judgement": "relevant",
+    "reason": "Quy định nghĩa vụ công bố công khai khi nội dung đăng ký doanh nghiệp thay đổi, là căn cứ pháp lý liên quan trực tiếp sau thay đổi.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art33",
+    "rank": 4,
+    "judgement": "not_relevant",
+    "reason": "Quy định cung cấp thông tin đăng ký doanh nghiệp, không điều chỉnh thủ tục thay đổi nội dung đăng ký.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "article_embedding",
+    "node_id": "ldn_2020_art26",
+    "rank": 5,
+    "judgement": "not_relevant",
+    "reason": "Quy định thủ tục đăng ký doanh nghiệp nói chung, không trực tiếp về thay đổi nội dung đăng ký.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art30_cl4",
+    "rank": 1,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định trường hợp đăng ký thay đổi theo quyết định của Tòa án hoặc Trọng tài.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art30_cl1",
+    "rank": 2,
+    "judgement": "relevant",
+    "reason": "Trực tiếp xác lập nghĩa vụ đăng ký khi thay đổi nội dung Giấy chứng nhận đăng ký doanh nghiệp.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art30_cl5",
+    "rank": 3,
+    "judgement": "relevant",
+    "reason": "Trực tiếp dẫn chiếu thẩm quyền quy định hồ sơ và thủ tục đăng ký thay đổi.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art31_cl4",
+    "rank": 4,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định việc cơ quan đăng ký kinh doanh xử lý thông báo thay đổi nội dung đăng ký.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  },
+  {
+    "query_id": "q3",
+    "index_name": "clause_embedding",
+    "node_id": "ldn_2020_art31_cl5",
+    "rank": 5,
+    "judgement": "relevant",
+    "reason": "Trực tiếp quy định thông báo thay đổi theo quyết định của Tòa án hoặc Trọng tài.",
+    "reviewer": "lamdx4",
+    "reviewed_at": "2026-07-12T23:03:32Z"
+  }
+]

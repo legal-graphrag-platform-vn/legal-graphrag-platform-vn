@@ -5,7 +5,7 @@
 
 > [!CAUTION]
 > **Không dùng file này làm implementation contract.**
-> Xem **[legal_ontology.md v1.5.0](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
+> Xem **[legal_ontology.md v1.5.1](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
 >
 > | Nội dung | Trạng thái |
 > |---|---|

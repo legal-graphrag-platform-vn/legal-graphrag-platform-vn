@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.5.0 (FROZEN 2026-07-10)
+// Source of truth: plans/legal_ontology.md v1.5.1 (FROZEN 2026-07-12)
 //
 // Script idempotent nhờ IF NOT EXISTS.
 // Có thể chạy lại sau khi Neo4j khởi động:
@@ -194,7 +194,7 @@ ON EACH [p.content_raw];
 
 // =============================================================================
 // SECTION 5: VECTOR INDEXES (Neo4j 5.11+ native)
-// 1024 dims — khớp với BAAI/bge-m3 (ADR-20, ontology v1.5.0).
+// 1024 dims — khớp với BAAI/bge-m3 (ADR-20, ontology v1.5.1).
 // Cosine similarity — standard cho semantic search.
 //
 // ADR-08: Unified storage — không dùng Qdrant riêng biệt.

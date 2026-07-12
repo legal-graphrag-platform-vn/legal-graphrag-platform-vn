@@ -38,6 +38,7 @@ class GraphQualityReporter:
         ontology_report = self._ontology_violation_report(edges)
         node_count = len(node_ids)
         edge_count = len(edges)
+        semantic_metrics = _semantic_graph_metrics(edges)
 
         return {
             "document_count": label_counts.get("Document", 0),
@@ -68,6 +69,7 @@ class GraphQualityReporter:
                 "Clause": clause_stats["coverage"],
             },
             "connected_component_count": connected_component_count,
+            "semantic_graph": semantic_metrics,
             "source": "neo4j",
         }
 
@@ -270,6 +272,9 @@ def write_graph_quality_report(report: dict, out_dir: Path) -> None:
         f"- graph_density: {report['graph_density']}",
         f"- average_degree: {report['average_degree']}",
         f"- connected_component_count: {report['connected_component_count']}",
+        f"- article_clause_semantic_orphan_count: {report['semantic_graph']['article_clause_semantic_orphan_count']}",
+        f"- semantic_entity_orphan_count: {report['semantic_graph']['semantic_entity_orphan_count']}",
+        f"- semantic_connected_component_count: {report['semantic_graph']['connected_component_count']}",
     ]
     decisions = report.get("extraction_decisions")
     if decisions:
@@ -413,6 +418,63 @@ def _orphan_node_count(node_ids: set[str], edges: list[dict[str, Any]]) -> int:
             degree[source] += 1
             degree[target] += 1
     return sum(1 for node_id in node_ids if degree[node_id] == 0)
+
+
+def _semantic_graph_metrics(edges: list[dict[str, Any]]) -> dict[str, Any]:
+    semantic_relation_types = {
+        "DEFINES", "REGULATES", "REQUIRES", "REFERS_TO",
+        "AMENDS", "REPEALS", "REPLACES", "GUIDES",
+    }
+    article_clause_nodes: set[str] = set()
+    semantic_entity_nodes: set[str] = set()
+    document_nodes: set[str] = set()
+    node_labels: dict[str, set[str]] = {}
+    for edge in edges:
+        node_labels.setdefault(str(edge["source"]), set()).update(edge.get("source_labels", []))
+        node_labels.setdefault(str(edge["target"]), set()).update(edge.get("target_labels", []))
+    for node_id, labels in node_labels.items():
+        if labels & {"Article", "Clause"}:
+            article_clause_nodes.add(node_id)
+        if labels & {"LegalConcept", "LegalSubject", "LegalAction"}:
+            semantic_entity_nodes.add(node_id)
+
+    semantic_edges = [edge for edge in edges if edge.get("relation_type") in semantic_relation_types]
+    for edge in semantic_edges:
+        for endpoint, labels_key in (("source", "source_labels"), ("target", "target_labels")):
+            if "Document" in edge.get(labels_key, []):
+                document_nodes.add(str(edge[endpoint]))
+
+    universe = article_clause_nodes | semantic_entity_nodes | document_nodes
+    degree: Counter[str] = Counter()
+    edge_pairs: list[list[str]] = []
+    included_by_type: Counter[str] = Counter()
+    excluded_by_type: Counter[str] = Counter()
+    for edge in semantic_edges:
+        source = str(edge["source"])
+        target = str(edge["target"])
+        if source in universe and target in universe:
+            degree[source] += 1
+            degree[target] += 1
+            edge_pairs.append([source, target])
+            included_by_type[str(edge["relation_type"])] += 1
+        else:
+            excluded_by_type[str(edge["relation_type"])] += 1
+
+    return {
+        "node_count": len(universe),
+        "edge_count": len(edge_pairs),
+        "article_clause_semantic_orphan_count": sum(degree[node_id] == 0 for node_id in article_clause_nodes),
+        "semantic_entity_orphan_count": sum(degree[node_id] == 0 for node_id in semantic_entity_nodes),
+        "connected_component_count": _count_components(universe, edge_pairs),
+        "density": _directed_density(len(universe), len(edge_pairs)),
+        "average_degree": _average_degree(len(universe), len(edge_pairs)),
+        "semantic_relation_total": len(semantic_edges),
+        "included_edge_count_by_type": dict(sorted(included_by_type.items())),
+        "excluded_edge_count_by_type": dict(sorted(excluded_by_type.items())),
+        "edge_accounting_reconciles": len(semantic_edges) == len(edge_pairs) + sum(excluded_by_type.values()),
+        "exclusion_reason": "Endpoints outside semantic topology universe (for example Point endpoints)",
+        "excluded_relations": ["CONTAINS", "ISSUED_BY"],
+    }
 
 
 def _canonical_label(labels: list[str]) -> str:

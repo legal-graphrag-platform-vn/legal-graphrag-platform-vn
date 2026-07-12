@@ -79,6 +79,7 @@ def test_crawl_by_search_mocked(mock_crawl_and_save: MagicMock, mock_sync_playwr
     mock_search_btn_locator = MagicMock()
     mock_search_btn_nth = MagicMock()
     mock_search_btn_locator.nth.return_value = mock_search_btn_nth
+    mock_next_btn = MagicMock()
     
     def locator_side_effect(selector, **kwargs):
         if "DocumentCard_documentTitle__" in selector:

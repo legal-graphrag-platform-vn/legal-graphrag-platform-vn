@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from google import genai
-from google.genai import types
+from typing import Any
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from src.pipeline.config import settings
@@ -42,11 +41,15 @@ _retry_llm_call = retry(
 class GeminiProvider(BaseProvider):
     """Provider trích xuất sử dụng Google Gemini SDK."""
 
-    def _client(self) -> genai.Client:
+    def _client(self) -> Any:
+        from google import genai
+
         return genai.Client(api_key=settings.require_api_key())
 
     @_retry_llm_call
     def extract_entities(self, article_text: str, *, context: ArticleExtractionContext) -> list[ExtractedEntity]:
+        from google.genai import types
+
         client = self._client()
         prompt = ENTITY_EXTRACTION_PROMPT.format(
             article_text=article_text, structural_context=context.to_prompt_json()
@@ -71,6 +74,8 @@ class GeminiProvider(BaseProvider):
     def extract_relations(
         self, article_text: str, entities: list[ExtractedEntity], *, context: ArticleExtractionContext
     ) -> list[ExtractedRelation]:
+        from google.genai import types
+
         client = self._client()
         entities_json = EntityExtractionResult(entities=entities).model_dump_json()
         prompt = RELATION_EXTRACTION_PROMPT.format(

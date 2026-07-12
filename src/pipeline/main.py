@@ -28,8 +28,16 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 from src.pipeline.config import settings
 from src.pipeline.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
 from src.pipeline.extraction.providers.base import ExtractionProviderError
-from src.infrastructure.embedding.embedding_generator import EmbeddingGenerator, embedding_texts_by_node_id
+from src.infrastructure.embedding.embedding_generator import (
+    EmbeddingGenerator,
+    embedding_content_hash,
+    embedding_texts_by_node_id,
+)
 from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
+from src.infrastructure.neo4j.graph_snapshot import generate_snapshot, write_snapshot
+from src.infrastructure.neo4j.m3_runtime import M3RuntimeGuardError, validate_disposable_uri
+from src.infrastructure.neo4j.schema_verifier import SchemaVerificationError, verify_canonical_schema
+from src.infrastructure.neo4j.vector_smoke import SMOKE_QUERIES, run_vector_smoke, write_vector_smoke_evidence
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
 from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
@@ -39,6 +47,11 @@ from src.pipeline.reports.graph_quality import (
     GraphQualityReporter,
     decision_stats_from_paths,
     write_graph_quality_report,
+)
+from src.pipeline.reports.milestone_a import (
+    MilestoneAReportError,
+    generate_milestone_a_report,
+    write_milestone_a_report,
 )
 from src.pipeline.validation.data_readiness import (
     load_curated_manifest,
@@ -497,26 +510,45 @@ def write_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name unde
 
 
 @app.command("embed")
-def embed_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")]) -> None:
+def embed_graph(
+    raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")],
+    batch_size: Annotated[int, typer.Option(min=1, help="Embedding batch size")] = 32,
+) -> None:
     """Generate and write configured-dimension Article/Clause embeddings."""
     payload = _validated_payload_for_raw_doc_code(raw_doc_code)
     texts_by_node_id = embedding_texts_by_node_id(payload)
-    node_ids = list(texts_by_node_id)
-    texts = list(texts_by_node_id.values())
-    vectors = EmbeddingGenerator().encode(texts)
     graph_id = _graph_id(payload)
-    vectors_by_node_id = {node_id: vector for node_id, vector in zip(node_ids, vectors, strict=True)}
+    content_hashes = {node_id: embedding_content_hash(text) for node_id, text in texts_by_node_id.items()}
 
     session = create_neo4j_session()
     try:
         writer = Neo4jEmbeddingWriter(session=session)
         writer.verify_vector_indexes()
-        writer.write_embeddings(vectors_by_node_id, graph_id=graph_id)
+        stale_ids = writer.stale_target_ids(
+            graph_id,
+            content_hashes,
+            model=settings.embedding_model,
+            provider=settings.embedding_provider,
+            normalized=True,
+        )
+        generator = EmbeddingGenerator()
+        for start in range(0, len(stale_ids), batch_size):
+            batch_ids = stale_ids[start : start + batch_size]
+            vectors = generator.encode([texts_by_node_id[node_id] for node_id in batch_ids])
+            writer.write_embeddings(
+                dict(zip(batch_ids, vectors, strict=True)),
+                graph_id=graph_id,
+                content_hashes={node_id: content_hashes[node_id] for node_id in batch_ids},
+                model=settings.embedding_model,
+                provider=settings.embedding_provider,
+                normalized=True,
+            )
+            typer.echo(f"Embedded {min(start + len(batch_ids), len(stale_ids))}/{len(stale_ids)} stale targets")
     finally:
         close = getattr(session, "close", None)
         if callable(close):
             close()
-    typer.echo(f"Wrote {len(vectors_by_node_id)} embeddings for {raw_doc_code}")
+    typer.echo(f"Embedding complete for {raw_doc_code}: updated={len(stale_ids)}, skipped={len(texts_by_node_id) - len(stale_ids)}")
 
 
 @app.command("graph-quality")
@@ -545,6 +577,90 @@ def graph_quality(raw_doc_code: Annotated[str, typer.Option(help="Folder name un
     out_dir = settings.data_reports_dir / raw_doc_code
     write_graph_quality_report(report, out_dir)
     typer.echo(f"Wrote graph quality report -> {out_dir}")
+
+
+@app.command("verify-m3-schema")
+def verify_m3_schema() -> None:
+    """Verify the canonical schema on the dedicated disposable M3 database."""
+    try:
+        safe_uri = validate_disposable_uri(settings.neo4j_uri)
+    except M3RuntimeGuardError as exc:
+        typer.echo(f"M3 runtime guard error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    session = create_neo4j_session()
+    try:
+        report = verify_canonical_schema(session)
+    except SchemaVerificationError as exc:
+        typer.echo(f"Schema verification error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    finally:
+        session.close()
+    typer.echo(json.dumps({"uri": safe_uri, "constraints": report.constraints, "indexes": report.user_indexes}, indent=2))
+
+
+@app.command("graph-snapshot")
+def graph_snapshot(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    output: Annotated[str | None, typer.Option(help="Evidence file name under snapshots/")] = None,
+) -> None:
+    """Capture a read-only payload-to-graph digest snapshot from disposable Neo4j."""
+    try:
+        safe_uri = validate_disposable_uri(settings.neo4j_uri)
+    except M3RuntimeGuardError as exc:
+        typer.echo(f"M3 runtime guard error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    payload = _validated_payload_for_raw_doc_code(raw_doc_code)
+    graph_id = _graph_id(payload)
+    session = create_neo4j_session()
+    try:
+        snapshot = generate_snapshot(session, payload, graph_id=graph_id, uri=safe_uri)
+    finally:
+        session.close()
+    output_name = output or datetime.now(timezone.utc).strftime("snapshot_%Y%m%dT%H%M%SZ.json")
+    try:
+        path = write_snapshot(snapshot, settings.data_reports_dir / raw_doc_code / "snapshots", output_name)
+    except ValueError as exc:
+        typer.echo(f"Snapshot output error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"Wrote graph snapshot -> {path}")
+
+
+@app.command("vector-smoke")
+def vector_smoke(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code")]) -> None:
+    """Run the fixed top-5 Milestone A queries against both vector indexes."""
+    try:
+        validate_disposable_uri(settings.neo4j_uri)
+    except M3RuntimeGuardError as exc:
+        typer.echo(f"M3 runtime guard error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    vectors = EmbeddingGenerator().encode(list(SMOKE_QUERIES.values()))
+    session = create_neo4j_session()
+    try:
+        Neo4jEmbeddingWriter(session=session).verify_vector_indexes()
+        report = run_vector_smoke(session, vectors, k=5)
+    finally:
+        session.close()
+    results_path, judgements_path = write_vector_smoke_evidence(
+        report, settings.data_reports_dir / raw_doc_code / "vector_smoke"
+    )
+    typer.echo(f"Vector smoke results -> {results_path}")
+    typer.echo(f"Manual judgement template -> {judgements_path}")
+
+
+@app.command("milestone-a-report")
+def milestone_a_report(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code")]) -> None:
+    """Validate pilot evidence without promoting the four-document corpus gate."""
+    try:
+        report = generate_milestone_a_report(raw_doc_code, settings.data_reports_dir)
+    except MilestoneAReportError as exc:
+        typer.echo(f"Milestone A evidence error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    json_path, md_path = write_milestone_a_report(report, settings.data_reports_dir / raw_doc_code)
+    typer.echo(json.dumps(report, ensure_ascii=False, indent=2))
+    typer.echo(f"Report JSON -> {json_path}")
+    typer.echo(f"Report Markdown -> {md_path}")
+    if not report["pilot_evidence_pass"]:
+        raise typer.Exit(code=1)
 
 
 def _validated_payload_for_raw_doc_code(raw_doc_code: str) -> dict:

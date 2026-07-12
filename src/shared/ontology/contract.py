@@ -9,6 +9,9 @@ from __future__ import annotations
 from typing import Any
 
 
+ONTOLOGY_VERSION = "1.5.1"
+
+
 DOCUMENT_TYPES: set[str] = {
     "Constitution",
     "Law",
@@ -160,7 +163,14 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         "allowed_head": ["Article", "Clause", "Point"],
         "allowed_tail": ["Article", "Clause", "Point", "Document"],
         "no_self_loop": False,
-        "required_properties": ["citation_text", "citation_type"],
+        "required_properties": ["confidence", "llm_model", "created_at", "citation_text", "citation_type"],
+        "property_types": {
+            "confidence": "float",
+            "llm_model": "string",
+            "created_at": "datetime",
+            "citation_text": "string",
+            "citation_type": "string",
+        },
         "property_enums": {"citation_type": CITATION_TYPES},
     },
     "DEFINES": {

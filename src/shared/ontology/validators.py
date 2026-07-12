@@ -10,7 +10,6 @@ from datetime import date, datetime
 from typing import Any, Mapping, Sequence
 
 from src.shared.ontology.contract import (
-    CITATION_TYPES,
     CONSTRAINTS,
     DOCUMENT_LEGAL_STATUSES,
     DOCUMENT_TYPES,
@@ -18,17 +17,47 @@ from src.shared.ontology.contract import (
     GUIDES_WHITELIST,
     ISSUER_BRANCHES,
     LEGACY_RELATION_ALIASES,
-    ONTOLOGY_LABEL_MAP,
-    PHASE1_PERSISTED_LABELS,
-    PHASE1_RELATION_ENUM,
+    ONTOLOGY_LABEL_MAP as ONTOLOGY_LABEL_MAP,
+    PHASE1_PERSISTED_LABELS as PHASE1_PERSISTED_LABELS,
     RELATION_ENUM,
     RUNTIME_ONLY_LABELS,
-    NODE_REQUIRED_FIELDS,
-    NODE_ENUMS,
 )
 
 
 _VALIDATION_TOKEN = object()
+
+
+def _validate_property_types(
+    relation_type: str,
+    properties: Mapping[str, Any],
+    property_types: Mapping[str, str],
+) -> str | None:
+    for key, expected in property_types.items():
+        value = properties.get(key)
+        if value is None:
+            continue
+        if expected == "float" and (isinstance(value, bool) or not isinstance(value, (int, float))):
+            return f"{relation_type}.{key} must be a float"
+        if expected == "string" and not isinstance(value, str):
+            return f"{relation_type}.{key} must be a string"
+        if expected == "datetime":
+            if isinstance(value, datetime):
+                parsed = value
+            elif hasattr(value, "iso_format") and callable(value.iso_format):
+                try:
+                    parsed = datetime.fromisoformat(value.iso_format().replace("Z", "+00:00"))
+                except ValueError:
+                    return f"{relation_type}.{key} must be an ISO-8601 datetime"
+            elif isinstance(value, str):
+                try:
+                    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                except ValueError:
+                    return f"{relation_type}.{key} must be an ISO-8601 datetime string"
+            else:
+                return f"{relation_type}.{key} must be an ISO-8601 datetime"
+            if parsed.tzinfo is None:
+                return f"{relation_type}.{key} must include a timezone"
+    return None
 
 
 class GraphValidationError(ValueError):
@@ -157,6 +186,10 @@ class OntologyValidator:
             if value is not None and value not in allowed_values:
                 return False, f"{relation_type}.{key} must be one of: {', '.join(sorted(allowed_values))}"
 
+        type_error = _validate_property_types(relation_type, properties, constraint.get("property_types", {}))
+        if type_error:
+            return False, type_error
+
         valid_pairs = constraint.get("valid_pairs")
         if valid_pairs is not None and (head_type, tail_type) not in valid_pairs:
             return False, f"{relation_type} does not allow {head_type} -> {tail_type}"
@@ -178,7 +211,6 @@ class OntologyValidator:
                 return False, f"GUIDES does not allow {head_doc_type} -> {tail_doc_type}"
 
         return True, None
-
     def validate_graph_payload(self, payload: Mapping[str, Any]) -> ValidatedGraphPayload:
         errors: list[str] = []
         nodes: list[ValidatedNode] = []

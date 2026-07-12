@@ -1,32 +1,23 @@
 import pytest
-
-pytestmark = pytest.mark.integration
 from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session
 from src.shared.ontology.payload_consistency_validator import deterministic_relation_id
 
-@pytest.fixture(autouse=True)
-def cleanup_neo4j():
-    session = create_neo4j_session()
-    try:
-        # Clean before test
-        session.run("MATCH (n) WHERE n.id STARTS WITH 'test_idemp_' DETACH DELETE n")
-        yield
-        # Clean after test
-        session.run("MATCH (n) WHERE n.id STARTS WITH 'test_idemp_' DETACH DELETE n")
-    finally:
-        session.close()
+pytestmark = pytest.mark.integration
 
-def test_idempotent_writes():
+def test_idempotent_writes(isolated_neo4j_prefix):
+    prefix = isolated_neo4j_prefix
+    doc_id = f"{prefix}doc"
+    article_id = f"{prefix}art1"
     session = create_neo4j_session()
     try:
         service = GraphIngestionService(writer=Neo4jWriter(session=session))
 
-        relation_id = deterministic_relation_id("test_idemp_doc", "CONTAINS", "test_idemp_art1")
+        relation_id = deterministic_relation_id(doc_id, "CONTAINS", article_id)
         payload = {
             "nodes": [
                 {
                     "type": "Document",
-                    "id": "test_idemp_doc",
+                    "id": doc_id,
                     "doc_type": "Law",
                     "number": "99/2026/QH15",
                     "normative": True,
@@ -36,7 +27,7 @@ def test_idempotent_writes():
                 },
                 {
                     "type": "Article",
-                    "id": "test_idemp_art1",
+                    "id": article_id,
                     "number": "1",
                     "content_raw": "Test Article Content",
                     "effective_from": "2026-01-01",
@@ -45,9 +36,9 @@ def test_idempotent_writes():
             ],
             "relations": [
                 {
-                    "head_id": "test_idemp_doc",
+                    "head_id": doc_id,
                     "type": "CONTAINS",
-                    "tail_id": "test_idemp_art1",
+                    "tail_id": article_id,
                     "properties": {"relation_id": relation_id},
                 }
             ],
@@ -58,10 +49,10 @@ def test_idempotent_writes():
 
         # Count nodes and relations
         result_nodes = list(session.run(
-            "MATCH (n) WHERE n.id STARTS WITH 'test_idemp_' RETURN count(n) as cnt"
+            "MATCH (n) WHERE n.id STARTS WITH $prefix RETURN count(n) as cnt", prefix=prefix
         ))
         result_rels = list(session.run(
-            "MATCH (n)-[r]->() WHERE n.id STARTS WITH 'test_idemp_' RETURN count(r) as cnt"
+            "MATCH (n)-[r]->() WHERE n.id STARTS WITH $prefix RETURN count(r) as cnt", prefix=prefix
         ))
         
         node_count_1 = result_nodes[0]["cnt"]
@@ -75,10 +66,10 @@ def test_idempotent_writes():
 
         # Count nodes and relations again
         result_nodes_2 = list(session.run(
-            "MATCH (n) WHERE n.id STARTS WITH 'test_idemp_' RETURN count(n) as cnt"
+            "MATCH (n) WHERE n.id STARTS WITH $prefix RETURN count(n) as cnt", prefix=prefix
         ))
         result_rels_2 = list(session.run(
-            "MATCH (n)-[r]->() WHERE n.id STARTS WITH 'test_idemp_' RETURN count(r) as cnt"
+            "MATCH (n)-[r]->() WHERE n.id STARTS WITH $prefix RETURN count(r) as cnt", prefix=prefix
         ))
         
         assert result_nodes_2[0]["cnt"] == node_count_1, "Node count changed (not idempotent)"

@@ -55,6 +55,9 @@ class ExtractionResult(BaseModel):
 
     article_number: LegalNumber
     raw_entities: list[ExtractedEntity] = Field(default_factory=list)
+    provider: str | None = None
+    configured_model: str | None = None
     resolved_model: str | None = None
+    completed_at: str | None = None
     entities: list[ExtractedEntity] = Field(default_factory=list)
     relations: list[ExtractedRelation] = Field(default_factory=list)

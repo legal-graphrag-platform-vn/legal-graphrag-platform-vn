@@ -32,7 +32,11 @@ def test_refers_to_not_rejected() -> None:
         "Article",
         "REFERS_TO",
         "Article",
-        properties={"citation_text": "theo Điều 17", "citation_type": "DIRECT"},
+        properties={
+            **SEMANTIC_PROPS,
+            "citation_text": "theo Điều 17",
+            "citation_type": "DIRECT",
+        },
     )
     assert ok, f"REFERS_TO bị reject: {err}"
 
@@ -72,7 +76,7 @@ def test_refers_to_invalid_citation_type_rejected() -> None:
         "Article",
         "REFERS_TO",
         "Article",
-        properties={"citation_text": "theo Điều 17", "citation_type": "FOO"},
+        properties={**SEMANTIC_PROPS, "citation_text": "theo Điều 17", "citation_type": "FOO"},
     )
     assert not ok
     assert "citation_type" in (err or "")

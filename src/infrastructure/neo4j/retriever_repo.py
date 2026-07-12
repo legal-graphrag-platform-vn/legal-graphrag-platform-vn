@@ -19,7 +19,7 @@ class Neo4jRetrieverRepo:
         # Node label phụ thuộc vào index. article_embedding -> Article, clause_embedding -> Clause.
         # Ta dùng OPTIONAL MATCH (d:Document)-[:CONTAINS*1..2]->(node) để lấy thông tin văn bản gốc.
         
-        query = f"""
+        query = """
         CALL db.index.vector.queryNodes($index_name, $k, $query_embedding)
         YIELD node, score
         OPTIONAL MATCH (d:Document)-[:CONTAINS*1..2]->(node)
@@ -45,7 +45,7 @@ class Neo4jRetrieverRepo:
         Thực thi FullText Search (BM25) trên index tương ứng.
         Lấy kèm theo context của Document.
         """
-        query = f"""
+        query = """
         CALL db.index.fulltext.queryNodes($index_name, $text_query, {{limit: $k}})
         YIELD node, score
         OPTIONAL MATCH (d:Document)-[:CONTAINS*1..2]->(node)

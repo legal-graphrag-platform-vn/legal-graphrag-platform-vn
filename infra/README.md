@@ -9,6 +9,7 @@ Docker Compose setup cho Neo4j 5.26.28 Community — graph database + vector ind
 ```
 infra/
 ├── docker-compose.yml              # Neo4j service definition
+├── docker-compose.m3.yml           # Dedicated disposable Milestone A runtime
 ├── .env.example                    # Template env vars
 ├── Makefile                        # Shortcut commands
 └── neo4j/
@@ -55,6 +56,44 @@ Sau bước 4, kết quả mong đợi:
 | `make shell-neo4j` | Mở cypher-shell interactive |
 | `make clean` | Xóa toàn bộ data volumes (⚠️ không phục hồi được) |
 
+## Disposable M3 runtime
+
+Milestone A không dùng development database ở port `7687`. Runtime riêng có
+container `graphrag-neo4j-m3`, named volume `graphrag-neo4j-m3-data`, Browser
+port `7475`, và Bolt port `7688`.
+
+```bash
+make m3-up
+make m3-init-schema
+make m3-verify-schema
+make m3-status
+make m3-snapshot OUTPUT=empty.json
+make m3-write
+make m3-snapshot OUTPUT=write_1.json
+make m3-embed
+make m3-vector-smoke
+make m3-graph-quality
+make m3-integration
+```
+
+Reset là destructive nhưng chỉ áp dụng cho named volume M3. Cả hai opt-in là bắt buộc:
+
+```bash
+RUN_M3_DESTRUCTIVE=1 CONFIRM_M3_RESET=YES make m3-reset
+```
+
+Integration tests cũng fail-closed và chỉ nhận disposable URI:
+
+```bash
+cd ..
+RUN_NEO4J_INTEGRATION=1 \
+NEO4J_URI=bolt://localhost:7688 \
+uv run pytest tests/integration -q -m integration
+```
+
+Không dùng `RUN_NEO4J_INTEGRATION` để cấp quyền reset và không dùng
+`RUN_M3_DESTRUCTIVE` để bỏ qua integration guard.
+
 ---
 
 ## Truy cập
@@ -63,6 +102,8 @@ Sau bước 4, kết quả mong đợi:
 |---|---|---|
 | Neo4j Browser | http://localhost:7474 | Viết Cypher, xem graph visual |
 | Bolt (driver) | bolt://localhost:7687 | Python/pipeline kết nối |
+| M3 Neo4j Browser | http://localhost:7475 | Disposable Milestone A only |
+| M3 Bolt | bolt://localhost:7688 | Guarded M3 write/test/snapshot |
 
 Credentials: `neo4j` / giá trị `NEO4J_PASSWORD` trong `.env`
 

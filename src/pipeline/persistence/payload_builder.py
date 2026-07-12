@@ -9,7 +9,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from src.pipeline.parser.models import ParsedDocument
-from src.shared.ontology.payload_consistency_validator import deterministic_relation_id
+from src.shared.ontology.payload_consistency_validator import (
+    deterministic_relation_id,
+    relation_identity_discriminator,
+)
 
 
 SEMANTIC_LABEL_MAP = {
@@ -179,8 +182,8 @@ def build_graph_payload(
 
         relation_type = relation.get("relation")
         properties = dict(relation.get("properties") or {})
-        effective_from_for_identity = properties.get("effective_from") if relation_type in {"AMENDS", "REPEALS", "REPLACES"} else None
-        _add_relation(relations, head_id, relation_type, tail_id, properties, effective_from_for_identity)
+        discriminator = relation_identity_discriminator(relation_type, properties)
+        _add_relation(relations, head_id, relation_type, tail_id, properties, discriminator)
 
     return {
         "metadata": {
@@ -302,10 +305,10 @@ def _add_relation(
     relation_type: str,
     tail_id: str,
     properties: dict[str, Any] | None,
-    effective_from: str | None = None,
+    discriminator: str | None = None,
 ) -> None:
     props = dict(properties or {})
-    relation_id = deterministic_relation_id(head_id, relation_type, tail_id, effective_from)
+    relation_id = deterministic_relation_id(head_id, relation_type, tail_id, discriminator)
     props.setdefault("relation_id", relation_id)
     relation = {
         "id": relation_id,
@@ -314,7 +317,7 @@ def _add_relation(
         "tail_id": tail_id,
         "properties": props,
     }
-    identity = "|".join([head_id, relation_type, tail_id, effective_from or ""])
+    identity = "|".join([head_id, relation_type, tail_id, discriminator or ""])
     relations[identity] = relation
 
 

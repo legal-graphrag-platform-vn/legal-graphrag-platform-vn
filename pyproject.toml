@@ -50,6 +50,7 @@ torch = { index = "pytorch-cpu" }
 
 [tool.pytest.ini_options]
 testpaths = ["src/pipeline/tests", "src/retrieval/tests", "tests"]
+pythonpath = ["."]
 addopts = "-m 'not integration'"
 markers = [
   "integration: requires a disposable local Neo4j instance and optional model runtime",

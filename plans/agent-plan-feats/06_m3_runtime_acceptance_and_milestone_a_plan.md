@@ -172,7 +172,7 @@ evidence, not inferred from this historical list.
 8. `infra/README.md` still describes an older Neo4j version and contains stale
    bootstrap wording; `infra/Makefile` schema verification must be checked against
    Neo4j 5.26 syntax.
-9. ADR-20, ontology v1.5.0, and tech stack select BGE-M3/1024, while pipeline
+9. ADR-20, ontology v1.5.1, and tech stack select BGE-M3/1024, while pipeline
    settings and Neo4j schema still bind runtime implementation to BKAI/768.
 10. Active CLI commands use `--doc-id` for parse/extract but `--raw-doc-code` for
     later M3 commands, creating ambiguity with canonical `graph_id`.
@@ -420,7 +420,7 @@ Artifact rules:
 - `extract.jsonl` remains an audit log and is never writer input
 - accepted relations use only canonical relation names
 - semantic relation properties contain `confidence`, `llm_model`, and `created_at`
-- `REFERS_TO` contains `citation_text` and `citation_type`
+- `REFERS_TO` contains checkpoint-derived `confidence`, `llm_model`, `created_at`, plus `citation_text` and `citation_type`
 - temporal relations contain `effective_from`
 - entity index resolves every semantic endpoint used by accepted relations
 - no runtime-only ontology labels are persisted
@@ -579,7 +579,7 @@ existing destructive infra command and manual confirmation.
 
 ## 9. Embedding Contract Decision
 
-The embedding model is schema-bound. ADR-20 and ontology v1.5.0 approve BGE-M3 as
+The embedding model is schema-bound. ADR-20 and ontology v1.5.1 approve BGE-M3 as
 the default target and retain BKAI as the retrieval baseline; runtime implementation
 and schema migration must complete before Gate 5.
 
@@ -618,7 +618,7 @@ Approved plan contract and remaining implementation migration:
 1. Preserve the ADR/model-selection evidence and add measured runtime/hardware
    details to the tracked experiment report.
 2. Update pipeline config defaults, provider implementation, requirements, and
-   embedding tests to match ontology v1.5.0.
+   embedding tests to match ontology v1.5.1.
 3. Update `infra/neo4j/init/01_schema_init.cypher` to create both vector indexes at
    1024 dimensions.
 4. Add a contract test that compares configured dimension with the concrete

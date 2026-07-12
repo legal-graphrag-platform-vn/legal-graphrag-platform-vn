@@ -229,7 +229,7 @@ Semantic relation generation rules:
 - Read accepted extraction records.
 - Use enriched relation properties from `orchestrator.py`.
 - Preserve required properties:
-  - `REFERS_TO`: `citation_text`, `citation_type`
+  - `REFERS_TO`: `confidence`, `llm_model`, `created_at`, `citation_text`, `citation_type`
   - semantic relations: `confidence`, `llm_model`, `created_at`
   - temporal relations: `effective_from`
 - Do not invent missing required properties inside the writer.
@@ -608,7 +608,7 @@ Required scenarios:
 - `LegalSubject -> LegalConcept` `REQUIRES` passes.
 - `Entity -> Entity` `REQUIRES` fails.
 - `LegalSubject -> Obligation` fails in Phase 1.
-- `REFERS_TO` without `citation_text` or `citation_type` fails.
+- `REFERS_TO` without checkpoint-derived `confidence`, `llm_model`, `created_at`, `citation_text`, or `citation_type` fails.
 - Semantic relation without `confidence`, `llm_model`, or `created_at` fails.
 - Temporal relation without `effective_from` fails.
 - Legacy aliases fail.

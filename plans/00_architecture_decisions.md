@@ -554,7 +554,7 @@ MERGE (doc)-[:ISSUED_BY]->(i)
 **Trạng thái**: FROZEN
 
 ### Decision
-`GUIDES_WHITELIST` chỉ sống trong Validator rule engine Python code, không phải property trong Neo4j node. Numeric `DOCUMENT_LEVELS`/precedence là legacy option và không dùng trong ontology v1.5.0.
+`GUIDES_WHITELIST` chỉ sống trong Validator rule engine Python code, không phải property trong Neo4j node. Numeric `DOCUMENT_LEVELS`/precedence là legacy option và không dùng trong ontology v1.5.1.
 
 ### Rationale
 Ontology mô hình hóa thực thể của thế giới pháp lý, không phải logic kiểm tra. `level=3` trên Issuer node là implementation artifact, không phải ontology concept.
@@ -603,11 +603,11 @@ Prompt đơn giản → LLM output ổn định hơn. Writer là nơi normalize,
 
 ### Decision
 1. **Denormalization**: Gắn `effective_from`, `effective_to`, `legal_status` trực tiếp lên `Article` và `Clause` nodes (không chỉ ở Document). Neo4j Writer sẽ tự tính toán (cascade) các property này khi insert các relation `AMENDS`, `REPEALS`.
-2. **Future Extension**: Định hướng tương lai cho large-scale deployment là sử dụng Snapshot Builder (FRBR-style) làm cache view phục vụ retrieval siêu tốc mà không phá vỡ Raw Graph (Source of truth). Không thêm `Snapshot` vào ontology v1.5.0; Snapshot Builder là future architecture, không thuộc ontology hiện tại.
+2. **Future Extension**: Định hướng tương lai cho large-scale deployment là sử dụng Snapshot Builder (FRBR-style) làm cache view phục vụ retrieval siêu tốc mà không phá vỡ Raw Graph (Source of truth). Không thêm `Snapshot` vào ontology v1.5.1; Snapshot Builder là future architecture, không thuộc ontology hiện tại.
 
 ### Rationale
 - **Với đồ án hiện tại**: Sử dụng Denormalized Graph làm Source of Truth cân bằng giữa độ phức tạp và giá trị nghiên cứu. Tránh việc kéo dài thêm thời gian với một khối lượng code khổng lồ của Snapshot Builder (RC6).
-- **Với kiến trúc tương lai**: `Snapshot` layer có thể được thiết kế như projection/cache riêng, đảm bảo Hybrid Retriever có thể kết hợp Raw Graph (cho reasoning) và Snapshot (cho querying) sau này mà không làm sai ontology v1.5.0.
+- **Với kiến trúc tương lai**: `Snapshot` layer có thể được thiết kế như projection/cache riêng, đảm bảo Hybrid Retriever có thể kết hợp Raw Graph (cho reasoning) và Snapshot (cho querying) sau này mà không làm sai ontology v1.5.1.
 
 ---
 
@@ -708,3 +708,60 @@ hành.
 - Cần `torch` và `FlagEmbedding` cho primary provider.
 - BKAI/768 chỉ chạy khi được chọn rõ cho baseline và dùng schema/index tương ứng.
 - M3 không được nghiệm thu nếu code/config/schema còn lệch dimension.
+
+---
+
+## ADR-21: `REFERS_TO` Provenance and Citation Identity
+
+**Ngày**: 2026-07-12
+**Trạng thái**: FROZEN
+
+### Decision
+
+`REFERS_TO` tuân theo provenance contract chung của semantic relations và bắt buộc có:
+
+```text
+confidence
+llm_model
+created_at
+citation_text
+citation_type
+```
+
+Nguồn của provenance là checkpoint đã tạo candidate relation:
+
+```text
+confidence  = raw extracted relation confidence
+llm_model   = <checkpoint.provider>:<checkpoint.resolved_model>
+created_at  = checkpoint.completed_at normalized to UTC
+```
+
+Normalizer không được thay bằng model đang cấu hình, `datetime.now()`, hoặc confidence mặc định.
+Thiếu bất kỳ provenance bắt buộc nào là hard failure. `created_at` là thời điểm hoàn tất extraction,
+không phải thời điểm pháp lý có hiệu lực (`effective_from`).
+
+Mỗi citation khác nhau giữa cùng hai endpoint được giữ thành relation riêng. Stable discriminator là:
+
+```text
+citation_type + "|" + normalize_citation_text(citation_text)
+```
+
+`normalize_citation_text` dùng Unicode NFC, trim và collapse whitespace, nhưng giữ nguyên nội dung tiếng Việt.
+`confidence`, `llm_model`, và `created_at` không tham gia `relation_id`. Hai citation giống nhau sau normalization
+được merge deterministic.
+
+### Migration
+
+1. Bump ontology contract lên v1.5.1.
+2. Mở rộng executable shared relation contract và write-time validation.
+3. Archive decision artifacts v1.5.0 với trạng thái `superseded`.
+4. Regenerate decision artifacts từ Article checkpoints; không gọi provider.
+5. Chạy normalization hai lần và so sánh decision, entity-index, relation-ID và payload projection digests.
+6. Chạy lại Gate 2 và Gate 3 trước khi mở Gate 4.
+
+### Consequences
+
+- Artifacts Gate 2/Gate 3 v1.5.0 chỉ còn là historical baseline.
+- Checkpoint thiếu provider, resolved model hoặc completed timestamp không thể tái sử dụng.
+- Cùng endpoint pair có thể có nhiều `REFERS_TO`, nhưng chỉ khi citation discriminator khác nhau.
+- Gate 4 vẫn bị block cho đến khi artifacts v1.5.1 được regenerate và validate thành công.

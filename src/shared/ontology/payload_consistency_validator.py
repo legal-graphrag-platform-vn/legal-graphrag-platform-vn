@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import re
+import unicodedata
 from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Iterable, Mapping
@@ -38,22 +40,40 @@ class PayloadConsistencyReport:
 
 
 def relation_identity(relation: Mapping) -> str:
-    effective_from = (relation.get("properties") or {}).get("effective_from", "")
-    if relation.get("type") not in TEMPORAL_RELATIONS:
-        effective_from = ""
+    discriminator = relation_identity_discriminator(
+        str(relation.get("type", "")), relation.get("properties") or {}
+    )
     return "|".join(
         [
             str(relation.get("head_id", "")),
             str(relation.get("type", "")),
             str(relation.get("tail_id", "")),
-            str(effective_from or ""),
+            discriminator,
         ]
     )
 
 
-def deterministic_relation_id(head_id: str, relation_type: str, tail_id: str, effective_from: str | None = None) -> str:
-    source = "|".join([head_id, relation_type, tail_id, effective_from or ""])
+def deterministic_relation_id(head_id: str, relation_type: str, tail_id: str, discriminator: str | None = None) -> str:
+    source = "|".join([head_id, relation_type, tail_id, discriminator or ""])
     return hashlib.sha1(source.encode("utf-8")).hexdigest()
+
+
+def relation_identity_discriminator(relation_type: str, properties: Mapping) -> str:
+    if relation_type in TEMPORAL_RELATIONS:
+        return str(properties.get("effective_from") or "")
+    if relation_type == "REQUIRES":
+        return str(properties.get("source_article") or "")
+    if relation_type == "REFERS_TO":
+        citation_type = str(properties.get("citation_type") or "")
+        citation_text = normalize_citation_text(str(properties.get("citation_text") or ""))
+        return f"{citation_type}|{citation_text}"
+    return ""
+
+
+def normalize_citation_text(value: str) -> str:
+    """Canonicalize citation identity without removing Vietnamese characters."""
+    normalized = unicodedata.normalize("NFC", value).strip()
+    return re.sub(r"\s+", " ", normalized)
 
 
 def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
@@ -91,8 +111,8 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
             errors.append(f"Duplicate relation identity: {identity}")
         seen_relation_identities.add(identity)
 
-        effective_from = (relation.get("properties") or {}).get("effective_from") if relation_type in TEMPORAL_RELATIONS else None
-        expected_relation_id = deterministic_relation_id(head_id, relation_type, tail_id, effective_from)
+        discriminator = relation_identity_discriminator(relation_type, relation.get("properties") or {})
+        expected_relation_id = deterministic_relation_id(head_id, relation_type, tail_id, discriminator)
         actual_relation_id = (relation.get("properties") or {}).get("relation_id")
         if not actual_relation_id:
             errors.append(f"Missing relation_id for {identity}")

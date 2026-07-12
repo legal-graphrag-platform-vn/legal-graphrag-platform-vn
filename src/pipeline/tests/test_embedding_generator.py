@@ -9,6 +9,7 @@ from src.infrastructure.embedding.embedding_generator import (
     EmbeddingGenerator,
     EmbeddingProviderError,
     build_clause_embedding_text,
+    embedding_content_hash,
     embedding_targets,
     embedding_texts_by_node_id,
     validate_embedding_dimension,
@@ -72,6 +73,50 @@ def test_embedding_texts_by_node_id_uses_parent_article_context() -> None:
 
     assert "Quyền thành lập" in texts["ldn_2020_art17_cl1"]
     assert "Khoản 1" in texts["ldn_2020_art17_cl1"]
+
+
+def test_embedding_content_hash_changes_with_exact_encoder_text() -> None:
+    assert embedding_content_hash("Điều 17") != embedding_content_hash("Điều 17 ")
+
+
+def test_embedding_resume_requires_all_metadata_and_reachability() -> None:
+    session = Mock()
+    session.run.return_value = [
+        {
+            "id": "ldn_2020_art17",
+            "vector_size": 1024,
+            "model": "BAAI/bge-m3",
+            "provider": "flag_embedding",
+            "dimension": 1024,
+            "normalized": True,
+            "content_hash": "same",
+        }
+    ]
+    writer = Neo4jEmbeddingWriter(session=session)
+
+    assert writer.stale_target_ids(
+        "ldn_2020",
+        {"ldn_2020_art17": "same"},
+        model="BAAI/bge-m3",
+        provider="flag_embedding",
+        normalized=True,
+    ) == []
+    assert writer.stale_target_ids(
+        "ldn_2020",
+        {"ldn_2020_art17": "changed"},
+        model="BAAI/bge-m3",
+        provider="flag_embedding",
+        normalized=True,
+    ) == ["ldn_2020_art17"]
+
+    with pytest.raises(ValueError, match="not reachable"):
+        writer.stale_target_ids(
+            "ldn_2020",
+            {"outside": "hash"},
+            model="BAAI/bge-m3",
+            provider="flag_embedding",
+            normalized=True,
+        )
 
 
 def test_vector_index_verification_fails_when_required_index_missing() -> None:

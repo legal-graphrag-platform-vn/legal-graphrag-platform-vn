@@ -7,6 +7,8 @@ from datetime import date, datetime
 from typing import Any, Mapping, Protocol
 
 from src.pipeline.config import settings
+from src.shared.ontology import validators as root_validator
+from src.shared.ontology.payload_consistency_validator import validate_payload_consistency_or_raise
 
 
 class WriteAttemptError(TypeError):
@@ -17,10 +19,6 @@ class SessionProtocol(Protocol):
     def run(self, cypher: str, **parameters: Any) -> Any: ...
 
     def close(self) -> None: ...
-
-
-from src.shared.ontology import validators as root_validator
-from src.shared.ontology.payload_consistency_validator import validate_payload_consistency_or_raise
 
 
 def validate_graph_payload(payload: Mapping[str, Any]):

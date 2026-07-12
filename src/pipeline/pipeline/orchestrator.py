@@ -34,13 +34,22 @@ from src.pipeline.extraction.structural_context import (
     EndpointResolution,
     StructuralRegistry,
 )
+from src.pipeline.pipeline.artifact_store import (
+    create_staging_artifact_dir,
+    discard_staging_artifacts,
+    publish_staged_artifacts,
+)
 from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.scoring.confidence_scorer import score
 from src.shared.ontology.validators import validate_relation as validate_ontology
+from src.shared.ontology.contract import ONTOLOGY_VERSION
 from src.pipeline.validation.record_consistency_validator import validate_record_relation
 from src.pipeline.validation.schema_validator import validate_relation as validate_schema
 
 logger = logging.getLogger(__name__)
+
+NORMALIZER_VERSION = "structural-endpoint-v2"
+RELATION_ENRICHER_VERSION = "checkpoint-provenance-v1"
 
 
 def _entity_type_lookup(entities: list[ExtractedEntity]) -> dict[str, str]:
@@ -152,9 +161,33 @@ def _configured_llm_model() -> str:
     return f"{provider}:{model}" if model else provider
 
 
-def _relation_properties(raw_relation, article: Article, document: DocumentInfo) -> dict:
+def _normalize_checkpoint_timestamp(value: str | None) -> str:
+    if not value:
+        raise ValueError("Extraction checkpoint is missing completed_at")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"Invalid checkpoint completed_at: {value!r}") from exc
+    if parsed.tzinfo is None:
+        raise ValueError("Extraction checkpoint completed_at must include a timezone")
+    return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _checkpoint_llm_model(result: ExtractionResult) -> str:
+    if not result.provider:
+        raise ValueError("Extraction checkpoint is missing provider")
+    if not result.resolved_model:
+        raise ValueError("Extraction checkpoint is missing resolved_model")
+    return f"{result.provider.lower()}:{result.resolved_model}"
+
+
+def _relation_properties(
+    raw_relation,
+    article: Article,
+    document: DocumentInfo,
+    extraction_result: ExtractionResult,
+) -> dict:
     relation_properties = {}
-    created_at = datetime.now(timezone.utc).isoformat()
 
     if raw_relation.relation in {"AMENDS", "REPEALS", "REPLACES"} and document.effective_from:
         relation_properties["effective_from"] = str(document.effective_from)
@@ -163,10 +196,10 @@ def _relation_properties(raw_relation, article: Article, document: DocumentInfo)
     if raw_relation.relation == "REFERS_TO":
         relation_properties["citation_text"] = raw_relation.evidence
         relation_properties["citation_type"] = "DIRECT"
-    if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES"}:
+    if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES", "REFERS_TO"}:
         relation_properties["confidence"] = raw_relation.confidence
-        relation_properties["llm_model"] = _configured_llm_model()
-        relation_properties["created_at"] = created_at
+        relation_properties["llm_model"] = _checkpoint_llm_model(extraction_result)
+        relation_properties["created_at"] = _normalize_checkpoint_timestamp(extraction_result.completed_at)
     if raw_relation.relation == "REQUIRES":
         relation_properties["source_article"] = f"{document.id}_art{article.number}"
 
@@ -231,7 +264,7 @@ def process_article(
         tail_doc_type = document.doc_type if tail_type == "Document" else None
 
         # 1.   Construct actual relationship properties from document metadata and context
-        relation_properties = _relation_properties(raw_relation, article, document)
+        relation_properties = _relation_properties(raw_relation, article, document, result)
 
         # 2.   Enrich the relation dictionary with actual properties
         relation_dict["properties"] = relation_properties
@@ -307,9 +340,17 @@ def _process_article_worker(
     records = []
     entity_index: dict[str, dict] = {}
     context = registry.context_for_article(article)
-    result = _result_from_checkpoint(checkpoint) if checkpoint else extract_article(
-        article.number, article.content_raw, context=context
-    )
+    if checkpoint:
+        result = _result_from_checkpoint(checkpoint)
+    else:
+        extracted = extract_article(article.number, article.content_raw, context=context)
+        result = extracted.model_copy(
+            update={
+                "provider": settings.llm_provider,
+                "configured_model": _configured_llm_model(),
+                "completed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            }
+        )
     process_article(
         article,
         document,
@@ -340,6 +381,7 @@ def run_pipeline(
 
     all_records = []
     entity_index: dict[str, dict] = {}
+    semantic_type_conflicts: set[str] = set()
     registry = StructuralRegistry.from_parsed_document(parsed, raw_doc_code)
     selected_articles = [
         article for article in parsed.articles if article_numbers is None or article.number in article_numbers
@@ -354,6 +396,9 @@ def run_pipeline(
     document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
     checkpoint_path = out_dir / "article_extractions.jsonl"
     checkpoints = _load_checkpoints(checkpoint_path, registry, parsed)
+    provider_called = provider_calls_allowed and any(
+        article.number not in checkpoints for article in selected_articles
+    )
     if not provider_calls_allowed:
         missing = [article.number for article in selected_articles if article.number not in checkpoints]
         if missing:
@@ -400,7 +445,12 @@ def run_pipeline(
 
                 completed += 1
                 results_by_article[article.number] = records
-                entity_index.update(article_entity_index)
+                for entity_id, entry in article_entity_index.items():
+                    existing = entity_index.get(entity_id)
+                    if existing is not None and existing.get("type") != entry.get("type"):
+                        semantic_type_conflicts.add(entity_id)
+                    elif entity_id not in semantic_type_conflicts:
+                        entity_index[entity_id] = entry
                 existing_models = {
                     row.get("resolved_model") for row in checkpoints.values() if row.get("resolved_model")
                 }
@@ -423,51 +473,79 @@ def run_pipeline(
         if article.number in results_by_article:
             all_records.extend(results_by_article[article.number])
 
+    for entity_id in semantic_type_conflicts:
+        entity_index.pop(entity_id, None)
+    for record in all_records:
+        relation = record.get("relation") or {}
+        conflicted = sorted(
+            endpoint for endpoint in (relation.get("head"), relation.get("tail")) if endpoint in semantic_type_conflicts
+        )
+        if conflicted and record.get("schema_valid") and record.get("ontology_valid"):
+            record["consistency_valid"] = False
+            record["consistency_error"] = f"Conflicting semantic type for endpoint(s): {conflicted}"
+            record["review_reason"] = "semantic_type_conflict"
+            record["blocking"] = False
+
     all_records = [_apply_decision_gate(record) for record in all_records]
 
-    # 1. Ghi tất cả ra file extract.jsonl (mỗi dòng 1 bản ghi JSON)
-    extract_jsonl_path = out_dir / "extract.jsonl"
-    _write_jsonl(extract_jsonl_path, all_records)
-
-    # 2. Ghi ra file prettier_extract.json (định dạng đẹp, dễ đọc)
-    prettier_json_path = out_dir / "prettier_extract.json"
-    with prettier_json_path.open("w", encoding="utf-8") as f:
-        json.dump(all_records, f, ensure_ascii=False, indent=2, default=str)
-
-    _write_jsonl(out_dir / "accepted.jsonl", [record for record in all_records if record["decision"] == "accepted"])
-    _write_jsonl(out_dir / "review.jsonl", [record for record in all_records if record["decision"] == "review"])
-    _write_jsonl(out_dir / "rejected.jsonl", [record for record in all_records if record["decision"] == "rejected"])
-    (out_dir / "entity_index.json").write_text(
-        json.dumps(entity_index, ensure_ascii=False, indent=2, default=str),
-        encoding="utf-8",
-    )
-    (out_dir / "extraction_run.json").write_text(
-        json.dumps(
-            {
-                "raw_doc_code": raw_doc_code,
-                "graph_id": parsed.document.id,
-                "selected_articles": [article.number for article in selected_articles],
-                "document_article_count": len(parsed.articles),
-                "complete_document": len(selected_articles) == len(parsed.articles),
-                "prompt_version": PROMPT_VERSION,
-                "endpoint_contract_version": ENDPOINT_CONTRACT_VERSION,
-                "completed_at": datetime.now(timezone.utc).isoformat(),
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    artifact_set_id, staging = create_staging_artifact_dir(out_dir)
+    try:
+        _write_jsonl(staging / "extract.jsonl", all_records)
+        (staging / "prettier_extract.json").write_text(
+            json.dumps(all_records, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+        )
+        _write_jsonl(staging / "accepted.jsonl", [r for r in all_records if r["decision"] == "accepted"])
+        _write_jsonl(staging / "review.jsonl", [r for r in all_records if r["decision"] == "review"])
+        _write_jsonl(staging / "rejected.jsonl", [r for r in all_records if r["decision"] == "rejected"])
+        (staging / "entity_index.json").write_text(
+            json.dumps(entity_index, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+        )
+        (staging / "extraction_run.json").write_text(
+            json.dumps(
+                {
+                    "artifact_set_id": artifact_set_id,
+                    "raw_doc_code": raw_doc_code,
+                    "graph_id": parsed.document.id,
+                    "ontology_version": ONTOLOGY_VERSION,
+                    "adr": "ADR-21",
+                    "normalizer_version": NORMALIZER_VERSION,
+                    "relation_enricher_version": RELATION_ENRICHER_VERSION,
+                    "source": "article_extractions.jsonl checkpoints",
+                    "provider_called": provider_called,
+                    "selected_articles": [article.number for article in selected_articles],
+                    "document_article_count": len(parsed.articles),
+                    "complete_document": len(selected_articles) == len(parsed.articles),
+                    "prompt_version": PROMPT_VERSION,
+                    "endpoint_contract_version": ENDPOINT_CONTRACT_VERSION,
+                    "semantic_type_conflict_count": len(semantic_type_conflicts),
+                    "semantic_type_conflicts": sorted(semantic_type_conflicts),
+                    "completed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        publish_staged_artifacts(out_dir, artifact_set_id, staging)
+    except Exception:
+        discard_staging_artifacts(staging)
+        raise
     (out_dir / "extraction_blocked.json").unlink(missing_ok=True)
 
 
-def _checkpoint_fingerprint(context, article_text: str) -> str:
+def _checkpoint_fingerprint(
+    context,
+    article_text: str,
+    *,
+    provider: str | None = None,
+    configured_model: str | None = None,
+) -> str:
     source = "|".join(
         [
             context.to_prompt_json(),
             article_text,
-            settings.llm_provider,
-            _configured_llm_model(),
+            provider or settings.llm_provider,
+            configured_model or _configured_llm_model(),
             PROMPT_VERSION,
             ENDPOINT_CONTRACT_VERSION,
         ]
@@ -480,9 +558,14 @@ def _checkpoint_row(result: ExtractionResult, context, article_text: str) -> dic
         "raw_doc_code": context.raw_doc_code,
         "graph_id": context.graph_id,
         "article_number": context.article_number,
-        "fingerprint": _checkpoint_fingerprint(context, article_text),
-        "provider": settings.llm_provider,
-        "configured_model": _configured_llm_model(),
+        "fingerprint": _checkpoint_fingerprint(
+            context,
+            article_text,
+            provider=result.provider,
+            configured_model=result.configured_model,
+        ),
+        "provider": result.provider,
+        "configured_model": result.configured_model,
         "resolved_model": result.resolved_model,
         "prompt_version": PROMPT_VERSION,
         "endpoint_contract_version": ENDPOINT_CONTRACT_VERSION,
@@ -490,7 +573,7 @@ def _checkpoint_row(result: ExtractionResult, context, article_text: str) -> dic
         "raw_entities": [entity.model_dump() for entity in result.raw_entities],
         "entities": [entity.model_dump() for entity in result.entities],
         "relations": [relation.model_dump() for relation in result.relations],
-        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "completed_at": _normalize_checkpoint_timestamp(result.completed_at),
     }
 
 
@@ -503,7 +586,10 @@ def _result_from_checkpoint(row: dict | None) -> ExtractionResult:
             "raw_entities": row.get("raw_entities", []),
             "entities": row.get("entities", []),
             "relations": row.get("relations", []),
+            "provider": row.get("provider"),
+            "configured_model": row.get("configured_model"),
             "resolved_model": row.get("resolved_model"),
+            "completed_at": _normalize_checkpoint_timestamp(row.get("completed_at")),
         }
     )
 
@@ -525,7 +611,10 @@ def _load_checkpoints(path: Path, registry: StructuralRegistry, parsed: ParsedDo
         seen_articles.add(article_number)
         context = contexts.get(article_number)
         if context and row.get("fingerprint") == _checkpoint_fingerprint(
-            context, articles[article_number].content_raw
+            context,
+            articles[article_number].content_raw,
+            provider=row.get("provider"),
+            configured_model=row.get("configured_model"),
         ):
             valid[article_number] = row
     return valid
@@ -540,9 +629,6 @@ def _write_checkpoints(path: Path, checkpoints: dict[str, dict]) -> None:
 
 
 def _write_extraction_blocked(out_dir: Path, exc: Exception) -> None:
-    for name in ("extract.jsonl", "accepted.jsonl", "review.jsonl", "rejected.jsonl"):
-        (out_dir / name).write_text("", encoding="utf-8")
-    (out_dir / "entity_index.json").write_text("{}", encoding="utf-8")
     blocked = {
         "blocked": True,
         "stage": "extraction",
