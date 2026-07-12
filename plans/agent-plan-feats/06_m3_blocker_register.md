@@ -7,12 +7,12 @@
 ## Current State
 
 ```text
-Phase 1 M3: BLOCKED at Gate 5 manual review / corpus completion
+Phase 1 M3: pilot signed off; BLOCKED on corpus completion
 Milestone A: NOT PASSED
 Phase 2: BLOCKED / prototype only
 Canonical Neo4j pilot graph: VERIFIED on disposable M3 runtime
 Graph-quality report: CURRENT
-Neo4j pilot evidence: DRAFT, pending manual vector judgement
+Neo4j pilot evidence: SIGNED OFF from source commit 3ab2baa
 ```
 
 Do not run or count Phase 2 work as active progress until every blocker marked
@@ -22,7 +22,6 @@ Do not run or count Phase 2 work as active progress until every blocker marked
 
 | ID | Problem | Status | Dependency | Close condition |
 |---|---|---|---|---|
-| M3-B12 | Milestone A evidence summary awaits clean-commit sign-off | MILESTONE BLOCKER | M3-B09 | Create a clean evidence commit, regenerate a commit-bound final snapshot, and sign `results/milestone_a/L59_2020_summary.md` |
 | M3-B13 | Four-document minimum corpus is incomplete | MILESTONE BLOCKER | Pilot sign-off | All four required documents complete the pipeline end to end with per-document reports |
 
 ## Closed Milestone Blockers
@@ -35,6 +34,7 @@ Do not run or count Phase 2 work as active progress until every blocker marked
 | M3-B09 | 30/30 human judgements; q1–q3 and both indexes relevant@5 pass | pilot | CLOSED |
 | M3-B10 | Online report: zero ontology, duplicate, and dangling violations | pilot | CLOSED |
 | M3-B11 | 4 integration tests passed; pre/post pilot digests identical | pilot | CLOSED |
+| M3-B12 | Source commit `3ab2baa`; clean-at-runtime evidence; signed summary; evidence ref `m3-pilot-L59_2020` | pilot | CLOSED |
 
 ## Current Evidence
 

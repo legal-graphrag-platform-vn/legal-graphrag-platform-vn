@@ -1,8 +1,10 @@
 # Milestone A Pilot Evidence — L59_2020
 
-> Status: PILOT GATES PASS — clean evidence commit and four-document corpus remain open
+> Status: PILOT RUNTIME ACCEPTANCE PASS — four-document corpus remains open
 > Generated: 2026-07-13
-> Git commit: `3e18d8e2e02af3f52e99ee7a95334878de9022aa` plus current uncommitted implementation
+> Source commit: `3ab2baa6d0822b9fccc1130e832b800f17454429`
+> Working tree before runtime evidence generation: `clean`
+> Evidence commit ref: `m3-pilot-L59_2020`
 
 ## Contract
 
@@ -112,7 +114,6 @@ The semantic orphan metrics are quality observations, not schema violations.
 
 ## Remaining Gates
 
-1. Create a clean evidence commit and regenerate the final commit-bound snapshot.
-2. Sign off this pilot summary.
-3. Complete the four-document minimum corpus and external-reference reconciliation.
-4. Do not start Phase 2 until Milestone A is explicitly signed off.
+1. Complete the four-document minimum corpus and external-reference reconciliation.
+2. Close `M3-B13` only after corpus-level evidence passes.
+3. Milestone A remains `NOT PASSED` and Phase 2 remains `BLOCKED` until then.

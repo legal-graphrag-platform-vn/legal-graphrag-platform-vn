@@ -1,0 +1,40 @@
+{
+  "raw_doc_code": "L59_2020",
+  "judgement_summary": {
+    "expected_count": 30,
+    "complete_count": 30,
+    "keys_match_results": true,
+    "query_relevant_at_5": {
+      "q1": true,
+      "q2": true,
+      "q3": true
+    },
+    "index_relevant_at_5": {
+      "article_embedding": true,
+      "clause_embedding": true
+    },
+    "pass": true
+  },
+  "semantic_edge_accounting": {
+    "semantic_relation_total": 775,
+    "topology_edge_count": 746,
+    "excluded_edge_count_by_type": {
+      "REFERS_TO": 29
+    },
+    "reconciles": true
+  },
+  "gates": {
+    "gate_4_write_idempotency": true,
+    "gate_5_embedding": true,
+    "gate_5_vector_review": true,
+    "gate_6_graph_quality": true,
+    "integration_preserved_pilot": true
+  },
+  "pilot_evidence_pass": true,
+  "corpus_gate_pass": false,
+  "milestone_a_pass": false,
+  "remaining": [
+    "four_document_corpus",
+    "external_reference_reconciliation"
+  ]
+}

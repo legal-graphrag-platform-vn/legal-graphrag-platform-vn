@@ -1,0 +1,73 @@
+{
+  "timestamp": "2026-07-12T23:18:24.722663Z",
+  "git_commit": "3ab2baa6d0822b9fccc1130e832b800f17454429",
+  "neo4j_uri_without_credentials": "bolt://localhost:7688",
+  "graph_id": "ldn_2020",
+  "snapshot_scope": "pilot_document",
+  "scope_ids": [
+    "ldn_2020"
+  ],
+  "scope_membership_rule": "validated payload node IDs and relationships whose endpoints are both in that set",
+  "node_id_count": 2333,
+  "node_id_sha256": "44391892a03c671c9bd7bcf09b868660bb1b37f4feffde48bf146464a2466675",
+  "relation_id_count": 2723,
+  "relation_id_sha256": "35faac7b85225ab70cc5ee8ccc8c72799ff37612987388dedc2740d9ef37047f",
+  "payload_projection_sha256": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091",
+  "graph_projection_sha256": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091",
+  "projection_match": true,
+  "projection_diagnostics": {
+    "missing_node_ids": [],
+    "extra_node_ids": [],
+    "changed_node_count": 0,
+    "changed_node_sample": null,
+    "missing_relation_ids": [],
+    "extra_relation_ids": [],
+    "changed_relation_count": 0,
+    "changed_relation_sample": null
+  },
+  "embedding_state_sha256": "18d63fd1fdde659ca4d10b066882ff1e359ce7dccae4ad33daa57800652da5e4",
+  "node_count_by_label": {
+    "Article": 218,
+    "Chapter": 10,
+    "Clause": 897,
+    "Document": 1,
+    "Issuer": 1,
+    "LegalAction": 209,
+    "LegalConcept": 102,
+    "LegalSubject": 73,
+    "Point": 822
+  },
+  "relation_count_by_type": {
+    "CONTAINS": 1947,
+    "DEFINES": 120,
+    "ISSUED_BY": 1,
+    "REFERS_TO": 67,
+    "REGULATES": 535,
+    "REQUIRES": 53
+  },
+  "missing_relation_id_count": 0,
+  "duplicate_node_id_count": 0,
+  "duplicate_relation_id_count": 0,
+  "legacy_label_count": 0,
+  "legacy_relation_count": 0,
+  "temporal_property_type_breakdown": {
+    "node.effective_from:DATE NOT NULL": 1116,
+    "node.issued_date:DATE NOT NULL": 1,
+    "relation.created_at:ZONED DATETIME NOT NULL": 775
+  },
+  "embedding_coverage": {
+    "Article": {
+      "total": 218,
+      "embedded": 218,
+      "coverage": 1.0
+    },
+    "Clause": {
+      "total": 897,
+      "embedded": 897,
+      "coverage": 1.0
+    }
+  },
+  "article_count": 218,
+  "clause_count": 897,
+  "point_count": 822
+}

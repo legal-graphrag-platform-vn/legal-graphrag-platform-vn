@@ -1,0 +1,13 @@
+{
+  "raw_doc_code": "L59_2020",
+  "graph_id": "ldn_2020",
+  "source_commit": "3ab2baa6d0822b9fccc1130e832b800f17454429",
+  "working_tree_at_runtime": "clean",
+  "evidence_commit_ref": "m3-pilot-L59_2020",
+  "fast_tests": "174 passed, 4 integration deselected",
+  "integration_tests": "4 passed",
+  "pilot_runtime_acceptance": "PASS",
+  "milestone_a": "NOT_PASSED",
+  "open_blocker": "M3-B13",
+  "phase_2": "BLOCKED"
+}
