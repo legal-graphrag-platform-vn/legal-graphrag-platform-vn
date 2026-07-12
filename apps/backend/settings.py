@@ -1,45 +1,53 @@
-import os
-from dotenv import load_dotenv
+"""
+Settings — pydantic-settings cho toàn bộ backend config.
+Không hardcode password default. Validate runtime trước khi serve.
+"""
+from __future__ import annotations
 
-load_dotenv()
+from typing import Literal
 
-class ConfigurationError(Exception):
-    """Exception raised when a critical configuration is missing."""
-    pass
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Config:
-    # 1.   Load LLM Provider configuration (ollama, openai, gemini)
-    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
-    
-    # 2.   Load Ollama specific configuration
-    OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3") # Default model
-    
-    # 3.   Load OpenAI specific configuration (Throw exception if selected but missing key)
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-    # 4.   Load Gemini specific configuration (Throw exception if selected but missing key)
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+class Settings(BaseSettings):
+    # 1.   App mode: "mock" không cần Neo4j, "graphrag" cần full config
+    app_mode: Literal["mock", "graphrag"] = "mock"
 
-    @classmethod
-    def validate(cls):
-        # 1.   Validate OpenAI configuration if selected
-        if cls.LLM_PROVIDER == "openai":
-            if not cls.OPENAI_API_KEY:
-                raise ConfigurationError(
-                    "Cấu hình thiếu: Biến môi trường 'OPENAI_API_KEY' bắt buộc phải có khi sử dụng LLM_PROVIDER='openai'."
-                )
-        # 2.   Validate Ollama configuration if selected
-        elif cls.LLM_PROVIDER == "ollama":
-            if not cls.OLLAMA_BASE_URL:
-                raise ConfigurationError(
-                    "Cấu hình thiếu: Biến môi trường 'OLLAMA_BASE_URL' không được để trống khi sử dụng LLM_PROVIDER='ollama'."
-                )
-        # 3.   Validate Gemini configuration if selected
-        elif cls.LLM_PROVIDER == "gemini":
-            if not cls.GEMINI_API_KEY:
-                raise ConfigurationError(
-                    "Cấu hình thiếu: Biến môi trường 'GEMINI_API_KEY' bắt buộc phải có khi sử dụng LLM_PROVIDER='gemini'."
+    # 2.   Neo4j — chỉ required khi app_mode="graphrag"
+    neo4j_uri: str | None = None
+    neo4j_user: str | None = None
+    neo4j_password: str | None = None    # Không có default — nếu thiếu phải fail rõ ràng
+
+    # 3.   LLM Providers
+    llm_provider: Literal["gemini", "deepseek", "openai", "ollama"] = "ollama"
+    llm_model: str = "llama3"
+    ollama_base_url: str = "http://localhost:11434"
+    gemini_api_key: str | None = None
+    deepseek_api_key: str | None = None
+    openai_api_key: str | None = None
+
+    # 4.   CORS — không dùng ["*"] trong production
+    cors_origins: list[str] = Field(default=["http://localhost:3000"])
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    def validate_runtime(self) -> None:
+        """
+        Raise RuntimeError sớm nếu config thiếu cho mode đang chạy.
+        Gọi trong lifespan() trước khi build container.
+        """
+        if self.app_mode == "graphrag":
+            missing = [
+                name
+                for name, val in {
+                    "NEO4J_URI": self.neo4j_uri,
+                    "NEO4J_USER": self.neo4j_user,
+                    "NEO4J_PASSWORD": self.neo4j_password,
+                }.items()
+                if not val
+            ]
+            if missing:
+                raise RuntimeError(
+                    f"APP_MODE=graphrag yêu cầu phải set: {', '.join(missing)}"
                 )

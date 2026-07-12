@@ -1,0 +1,29 @@
+{
+  "nodes": [
+    { "id": "ldn_2020", "label": "Document", "properties": { "number": "59/2020/QH14", "title": "Luật Doanh nghiệp", "status": "ACTIVE" } },
+    { "id": "ldn_2020_art111", "label": "Article", "properties": { "number": "111", "title": "Khái niệm và đặc điểm công ty cổ phần" } },
+    { "id": "ldn_2020_art112", "label": "Article", "properties": { "number": "112", "title": "Quyền thành lập, góp vốn" } },
+    { "id": "nd01_2021", "label": "Document", "properties": { "number": "01/2021/NĐ-CP", "title": "Nghị định về đăng ký doanh nghiệp", "status": "ACTIVE" } },
+    { "id": "nd01_2021_art22", "label": "Article", "properties": { "number": "22", "title": "Hồ sơ đăng ký công ty cổ phần" } },
+    { "id": "nd47_2021", "label": "Document", "properties": { "number": "47/2021/NĐ-CP", "title": "Nghị định chi tiết Luật Doanh nghiệp", "status": "ACTIVE" } },
+    { "id": "ldn_2014", "label": "Document", "properties": { "number": "68/2014/QH13", "title": "Luật Doanh nghiệp 2014", "status": "REPLACED" } },
+    { "id": "concept_von_dieu_le", "label": "LegalConcept", "properties": { "name": "Vốn điều lệ" } },
+    { "id": "concept_co_phan", "label": "LegalConcept", "properties": { "name": "Cổ phần" } },
+    { "id": "issuer_quoc_hoi", "label": "Issuer", "properties": { "name": "Quốc hội", "branch": "LEGISLATIVE" } }
+  ],
+  "edges": [
+    { "source": "ldn_2020", "target": "ldn_2020_art111", "relation_type": "CONTAINS" },
+    { "source": "ldn_2020", "target": "ldn_2020_art112", "relation_type": "CONTAINS" },
+    { "source": "ldn_2020", "target": "nd01_2021", "relation_type": "GUIDES" },
+    { "source": "ldn_2020", "target": "nd47_2021", "relation_type": "GUIDES" },
+    { "source": "ldn_2020", "target": "ldn_2014", "relation_type": "REPLACES" },
+    { "source": "nd01_2021", "target": "nd01_2021_art22", "relation_type": "CONTAINS" },
+    { "source": "nd01_2021_art22", "target": "ldn_2020_art111", "relation_type": "REFERS_TO" },
+    { "source": "ldn_2020_art111", "target": "concept_von_dieu_le", "relation_type": "DEFINES" },
+    { "source": "ldn_2020_art111", "target": "concept_co_phan", "relation_type": "DEFINES" },
+    { "source": "ldn_2020", "target": "issuer_quoc_hoi", "relation_type": "ISSUED_BY" }
+  ],
+  "truncated": false,
+  "total_nodes": 10,
+  "total_edges": 10
+}

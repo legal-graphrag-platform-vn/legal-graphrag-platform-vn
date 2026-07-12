@@ -1,0 +1,46 @@
+{
+  "query": "Điều kiện thành lập công ty cổ phần là gì?",
+  "retrieved_units": [
+    {
+      "id": "ldn_2020_art111",
+      "label": "Article",
+      "content_raw": "Công ty cổ phần là doanh nghiệp trong đó: Vốn điều lệ được chia thành các phần bằng nhau gọi là cổ phần; Cổ đông có thể là tổ chức, cá nhân; số lượng cổ đông tối thiểu là 03 và không hạn chế số lượng tối đa. Cổ đông chỉ chịu trách nhiệm về các khoản nợ và nghĩa vụ tài sản khác của doanh nghiệp trong phạm vi số vốn đã góp vào doanh nghiệp.",
+      "citation_label": "Điều 111, Luật Doanh nghiệp 59/2020/QH14",
+      "document_id": "ldn_2020",
+      "document_number": "59/2020/QH14",
+      "article_id": "ldn_2020_art111",
+      "clause_id": null,
+      "effective_from": "2021-01-01",
+      "effective_to": null,
+      "final_score": 0.95
+    },
+    {
+      "id": "nd01_2021_art22",
+      "label": "Article",
+      "content_raw": "Hồ sơ đăng ký doanh nghiệp đối với công ty cổ phần bao gồm: a) Giấy đề nghị đăng ký doanh nghiệp; b) Điều lệ công ty; c) Danh sách cổ đông sáng lập và cổ đông là nhà đầu tư nước ngoài; d) Bản sao giấy tờ pháp lý của cá nhân đối với cổ đông sáng lập.",
+      "citation_label": "Điều 22, Nghị định 01/2021/NĐ-CP",
+      "document_id": "nd01_2021",
+      "document_number": "01/2021/NĐ-CP",
+      "article_id": "nd01_2021_art22",
+      "clause_id": null,
+      "effective_from": "2021-01-04",
+      "effective_to": null,
+      "final_score": 0.88
+    }
+  ],
+  "intent": "factual",
+  "retrieval_mode": "mock",
+  "graph_paths": [
+    {
+      "nodes": ["ldn_2020", "ldn_2020_art111", "nd01_2021"],
+      "relations": ["CONTAINS", "REFERS_TO"],
+      "path_description": "Luật Doanh nghiệp 2020 -> Điều 111 -> Nghị định 01/2021 (tham chiếu)"
+    }
+  ],
+  "metrics": {
+    "vector_hits": 5,
+    "bm25_hits": 3,
+    "graph_paths_count": 1,
+    "total_pipeline_latency_ms": 42
+  }
+}

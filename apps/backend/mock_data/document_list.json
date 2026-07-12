@@ -1,0 +1,59 @@
+{
+  "items": [
+    {
+      "id": "ldn_2020",
+      "number": "59/2020/QH14",
+      "title": "Luật Doanh nghiệp",
+      "doc_type": "Law",
+      "issuer_name": "Quốc hội",
+      "issued_date": "2020-06-17",
+      "effective_from": "2021-01-01",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "nd01_2021",
+      "number": "01/2021/NĐ-CP",
+      "title": "Nghị định về đăng ký doanh nghiệp",
+      "doc_type": "Decree",
+      "issuer_name": "Chính phủ",
+      "issued_date": "2021-01-04",
+      "effective_from": "2021-01-04",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "nd47_2021",
+      "number": "47/2021/NĐ-CP",
+      "title": "Nghị định quy định chi tiết một số điều của Luật Doanh nghiệp",
+      "doc_type": "Decree",
+      "issuer_name": "Chính phủ",
+      "issued_date": "2021-04-01",
+      "effective_from": "2021-04-01",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "tt01_2021",
+      "number": "01/2021/TT-BKHĐT",
+      "title": "Thông tư hướng dẫn về đăng ký doanh nghiệp",
+      "doc_type": "Circular",
+      "issuer_name": "Bộ Kế hoạch và Đầu tư",
+      "issued_date": "2021-03-16",
+      "effective_from": "2021-05-01",
+      "status": "ACTIVE"
+    },
+    {
+      "id": "ldn_2014",
+      "number": "68/2014/QH13",
+      "title": "Luật Doanh nghiệp 2014",
+      "doc_type": "Law",
+      "issuer_name": "Quốc hội",
+      "issued_date": "2014-11-26",
+      "effective_from": "2015-07-01",
+      "status": "REPLACED"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 5
+  }
+}

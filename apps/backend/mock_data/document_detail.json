@@ -1,0 +1,113 @@
+{
+  "id": "ldn_2020",
+  "number": "59/2020/QH14",
+  "title": "Luật Doanh nghiệp",
+  "doc_type": "Law",
+  "issuer_name": "Quốc hội",
+  "issued_date": "2020-06-17",
+  "effective_from": "2021-01-01",
+  "status": "ACTIVE",
+  "chapters": [
+    {
+      "id": "ldn_2020_ch1",
+      "number": "I",
+      "title": "Quy định chung",
+      "articles": [
+        {
+          "id": "ldn_2020_art1",
+          "number": "1",
+          "title": "Phạm vi điều chỉnh",
+          "content_raw": "Luật này quy định về việc thành lập, tổ chức quản lý, tổ chức lại, giải thể và hoạt động có liên quan của doanh nghiệp.",
+          "clauses": []
+        },
+        {
+          "id": "ldn_2020_art4",
+          "number": "4",
+          "title": "Giải thích từ ngữ",
+          "content_raw": "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:",
+          "clauses": [
+            {
+              "id": "ldn_2020_art4_cl1",
+              "number": "1",
+              "content_raw": "Doanh nghiệp là tổ chức có tên riêng, có tài sản, có trụ sở giao dịch, được thành lập hoặc đăng ký thành lập theo quy định của pháp luật nhằm mục đích kinh doanh.",
+              "points": []
+            },
+            {
+              "id": "ldn_2020_art4_cl7",
+              "number": "7",
+              "content_raw": "Vốn điều lệ là tổng giá trị tài sản do các thành viên công ty, chủ sở hữu công ty đã góp hoặc cam kết góp khi thành lập công ty trách nhiệm hữu hạn, công ty hợp danh.",
+              "points": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ldn_2020_ch5",
+      "number": "V",
+      "title": "Công ty cổ phần",
+      "articles": [
+        {
+          "id": "ldn_2020_art111",
+          "number": "111",
+          "title": "Khái niệm và đặc điểm công ty cổ phần",
+          "content_raw": "Công ty cổ phần là doanh nghiệp trong đó:",
+          "clauses": [
+            {
+              "id": "ldn_2020_art111_cl1",
+              "number": "1",
+              "content_raw": "Vốn điều lệ được chia thành các phần bằng nhau gọi là cổ phần;",
+              "points": []
+            },
+            {
+              "id": "ldn_2020_art111_cl2",
+              "number": "2",
+              "content_raw": "Cổ đông có thể là tổ chức, cá nhân; số lượng cổ đông tối thiểu là 03 và không hạn chế số lượng tối đa;",
+              "points": []
+            },
+            {
+              "id": "ldn_2020_art111_cl3",
+              "number": "3",
+              "content_raw": "Cổ đông chỉ chịu trách nhiệm về các khoản nợ và nghĩa vụ tài sản khác của doanh nghiệp trong phạm vi số vốn đã góp vào doanh nghiệp;",
+              "points": []
+            },
+            {
+              "id": "ldn_2020_art111_cl4",
+              "number": "4",
+              "content_raw": "Cổ đông có quyền tự do chuyển nhượng cổ phần của mình cho người khác, trừ trường hợp quy định tại khoản 3 Điều 120 và khoản 1 Điều 127 của Luật này.",
+              "points": []
+            }
+          ]
+        },
+        {
+          "id": "ldn_2020_art112",
+          "number": "112",
+          "title": "Quyền thành lập, góp vốn, mua cổ phần, mua phần vốn góp và quản lý doanh nghiệp",
+          "content_raw": "Tổ chức, cá nhân sau đây có quyền thành lập và quản lý doanh nghiệp tại Việt Nam...",
+          "clauses": []
+        }
+      ]
+    }
+  ],
+  "ungrouped_articles": [],
+  "relations": [
+    {
+      "doc_id": "nd01_2021",
+      "doc_number": "01/2021/NĐ-CP",
+      "relation_type": "GUIDES",
+      "affected_units": []
+    },
+    {
+      "doc_id": "nd47_2021",
+      "doc_number": "47/2021/NĐ-CP",
+      "relation_type": "GUIDES",
+      "affected_units": []
+    },
+    {
+      "doc_id": "ldn_2014",
+      "doc_number": "68/2014/QH13",
+      "relation_type": "REPLACES",
+      "affected_units": []
+    }
+  ]
+}
