@@ -12,8 +12,12 @@ class BGEReranker(BaseReranker):
         model_name: str,
         *,
         use_fp16: bool = False,
+        max_length: int = 512,
+        normalize: bool = True,
         reranker: Any | None = None,
     ) -> None:
+        if max_length < 1:
+            raise ValueError("max_length must be positive")
         if reranker is None:
             try:
                 from FlagEmbedding import FlagReranker
@@ -21,7 +25,12 @@ class BGEReranker(BaseReranker):
                 raise RuntimeError(
                     "Install the embedding dependency group to use BGE reranking"
                 ) from exc
-            reranker = FlagReranker(model_name, use_fp16=use_fp16)
+            reranker = FlagReranker(
+                model_name,
+                use_fp16=use_fp16,
+                max_length=max_length,
+                normalize=normalize,
+            )
         self._reranker = reranker
 
     def rerank(

@@ -29,7 +29,8 @@ dev = [
 embedding = [
   "torch",
   "sentence-transformers",
-  "FlagEmbedding",
+  "FlagEmbedding==1.4.0",
+  "transformers==4.57.6",
 ]
 
 llm = [

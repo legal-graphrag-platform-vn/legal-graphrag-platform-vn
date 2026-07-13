@@ -155,6 +155,8 @@ def create_retrieval_runtime(
             reranker = reranker_factory(
                 runtime_config.reranker_model,
                 use_fp16=runtime_config.reranker_fp16,
+                max_length=runtime_config.reranker_max_length,
+                normalize=runtime_config.reranker_normalize,
             )
 
         runtime = RetrievalRuntime(

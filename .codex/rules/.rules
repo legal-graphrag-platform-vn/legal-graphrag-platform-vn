@@ -41,3 +41,194 @@
 - Confirm there is no remaining prompt/validator mismatch.
 - Confirm new code has a single clear path for the common case.
 - Confirm there are no dead branches left from older behavior.
+
+Thực hiện task này theo chuẩn production-quality và test-driven verification.
+
+## Nguyên tắc bắt buộc
+
+Không chỉ làm cho happy path chạy được. Trước khi sửa code, hãy:
+
+1. Đọc conventions, kiến trúc, contracts và tests hiện có trong repository.
+2. Xác định public behavior cần giữ và behavior mới cần thêm.
+3. Lập test matrix cho task.
+4. Viết hoặc cập nhật tests trước khi hoàn tất implementation.
+5. Không sửa test chỉ để che lỗi implementation.
+6. Không mock quá sâu khiến test không còn kiểm tra behavior thật.
+7. Không trả fake result, nuốt exception hoặc fallback im lặng để làm test pass.
+
+## Test matrix bắt buộc
+
+Với mỗi public function, service, endpoint hoặc workflow bị ảnh hưởng, phải kiểm tra tối thiểu:
+
+### Happy paths
+
+* Input hợp lệ.
+* Các configuration/profile hợp lệ.
+* Kết quả đúng schema và đúng contract.
+* Metadata, status, IDs và ordering đúng.
+* Resource được mở và đóng đúng ownership.
+
+### Boundary cases
+
+* Giá trị nhỏ nhất và lớn nhất.
+* Danh sách rỗng.
+* Một phần tử.
+* Duplicate input.
+* Optional field không truyền.
+* Null/None khi contract cho phép.
+* Stable ordering khi score bằng nhau.
+* Date boundary và half-open interval nếu có temporal logic.
+
+### Invalid inputs
+
+* Sai type hoặc enum.
+* Missing required field.
+* Empty string hoặc whitespace-only.
+* Limit ngoài phạm vi.
+* Filters xung đột.
+* Contract version không hỗ trợ.
+* Date hoặc identifier không hợp lệ.
+
+### Failure paths
+
+* Database unavailable.
+* Index/provider/model thiếu.
+* Provider timeout hoặc trả payload sai.
+* Repository exception.
+* Capability unsupported.
+* Empty result phải khác unsupported capability.
+* Partial construction failure phải cleanup resource.
+* Không được đổi failure thành kết quả rỗng hoặc factual fallback.
+
+### Security và integrity
+
+* User input không được nối trực tiếp vào Cypher/SQL.
+* Query phải parameterized.
+* Không log secrets, credentials, vectors hoặc provider payload nhạy cảm.
+* Không cho path traversal với file output.
+* Atomic write không để lại file dở.
+* Fixture cleanup không được chạm dữ liệu ngoài namespace.
+* Read-only test không được làm thay đổi graph.
+
+### Determinism
+
+* Kết quả giống nhau với cùng input/config/snapshot.
+* Tie-break rõ và ổn định.
+* Không phụ thuộc iteration order của set/dict.
+* Graph expansion không chạy nhiều hơn contract.
+* Fusion/reranking không làm mất citation, provenance hoặc deep link.
+
+## Loại test cần có
+
+Tùy phạm vi task, hãy bổ sung:
+
+1. Unit tests cho pure logic, DTO validation, router, mapping và error handling.
+2. Contract tests cho ports/adapters.
+3. Integration tests cho database/index/provider boundaries.
+4. API tests cho status code, response schema và typed error mapping.
+5. Lifecycle tests cho startup, shutdown và partial failure cleanup.
+6. Regression test cho mọi bug phát hiện trong quá trình làm.
+7. Static architecture test cho dependency direction nếu task thay đổi imports/layers.
+
+Không dùng integration test để thay thế toàn bộ unit test. Không dùng mock-only test để tuyên bố database integration đã được kiểm tra.
+
+## Yêu cầu riêng cho async/backend
+
+Nếu tích hợp sync retrieval vào async FastAPI:
+
+* Không chạy blocking retrieval trực tiếp trên event loop.
+* Test xác nhận thread boundary được sử dụng.
+* Test timeout và cancellation.
+* Test dependency lifecycle.
+* Test concurrent requests không dùng chung mutable request state.
+* Test typed domain errors được map đúng HTTP status.
+* Test response không lộ stack trace hoặc internal credentials.
+
+## Yêu cầu riêng cho answer generation
+
+Nếu task liên quan answer generation:
+
+* Test prompt chỉ chứa evidence được phép.
+* Test model không được tạo citation không có trong RetrievalContext.
+* Test citation mapping và citation completeness.
+* Test unsupported/no-results/insufficient-evidence.
+* Test hallucinated Article/Clause bị reject.
+* Test provider timeout, malformed output và empty output.
+* Test deterministic post-processing.
+* Test grounding validator độc lập với model provider.
+* Không dùng LLM thật trong fast unit tests.
+* Integration test với provider thật phải có marker riêng và không nằm trong fast suite mặc định.
+
+## Chất lượng test
+
+Mỗi test phải:
+
+* Có tên mô tả behavior, không mô tả implementation detail.
+* Theo Arrange–Act–Assert rõ ràng.
+* Chỉ kiểm tra một contract chính.
+* Dùng fixture nhỏ, dễ hiểu.
+* Không phụ thuộc thứ tự chạy test.
+* Không dùng sleep để chờ async/concurrency nếu có cách deterministic.
+* Không dùng assertion quá yếu như chỉ kiểm tra `result is not None`.
+* Kiểm tra cả giá trị, side effect và call count khi chúng thuộc contract.
+* Có message hoặc dữ liệu đủ để debug khi fail.
+
+Không được:
+
+* thêm `skip`, `xfail` hoặc nới assertion để né lỗi mà không giải thích;
+* mock chính function đang được kiểm tra;
+* patch quá nhiều internal details;
+* hard-code pilot ID trong domain/runtime code;
+* thay đổi production behavior chỉ để dễ test.
+
+## Verification bắt buộc
+
+Sau implementation, chạy ít nhất:
+
+```bash
+uv run pytest -q
+uv run ruff check <changed-python-files>
+uv run ruff format --check <changed-python-files>
+git diff --check
+```
+
+Nếu có integration scope, chạy thêm đúng integration suite và marker tương ứng.
+
+Khi một command fail:
+
+1. Đọc nguyên nhân.
+2. Sửa implementation hoặc test contract đúng chỗ.
+3. Chạy lại targeted tests.
+4. Chạy lại full suite.
+5. Không tuyên bố hoàn thành nếu còn failure không được giải thích.
+
+## Self-review cuối task
+
+Trước khi báo hoàn thành, tự kiểm tra:
+
+* Mỗi acceptance requirement có ít nhất một test tương ứng chưa?
+* Có failure path nào chỉ được mô tả nhưng chưa test không?
+* Có branch mới nào chưa được cover không?
+* Test có đang phụ thuộc quá nhiều vào mocks không?
+* Có regression test cho bug vừa sửa không?
+* Có test nào pass dù implementation sai không?
+* Có resource, file hoặc fixture nào có thể bị leak không?
+* Có thay đổi nào ngoài phạm vi task không?
+
+## Output cuối
+
+Báo lại theo format:
+
+```text
+Files changed
+Implementation decisions
+Test matrix
+Tests added/updated
+Happy/boundary/invalid/failure cases covered
+Integration evidence
+Commands executed and exact results
+Remaining untested risks
+Intentionally deferred items
+```
+
+Không ghi “done” hoặc “complete” nếu chưa chạy full verification.

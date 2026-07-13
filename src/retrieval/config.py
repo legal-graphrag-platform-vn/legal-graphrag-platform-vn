@@ -26,6 +26,8 @@ class RetrievalConfig(BaseSettings):
     reranker_enabled: bool = False
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
     reranker_fp16: bool = False
+    reranker_max_length: int = Field(default=512, ge=1, le=8192)
+    reranker_normalize: bool = True
     hierarchy_vector_enabled: bool = False
     query_max_length: int = Field(default=4000, ge=1, le=10000)
 

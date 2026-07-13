@@ -1,0 +1,900 @@
+{
+  "evaluation_scope": "pilot_development",
+  "dataset_hash": "979ca695a074ae1eec44bff5af204530ecfad47c5d6ab3260c205206aa75b77f",
+  "dataset_schema_version": "retrieval-evaluation-dataset-v1",
+  "dataset_name": "L59_2020 retrieval runtime v1 approved 30-query dataset",
+  "dataset_review": {
+    "reviewer": "lamdx4",
+    "status": "approved",
+    "reviewed_at": "2026-07-13T22:00:00+07:00"
+  },
+  "official_source_dataset_eligible": true,
+  "dataset_case_count": 30,
+  "dataset_intent_distribution": {
+    "factual": 5,
+    "validity": 5,
+    "hierarchy": 5,
+    "comparison": 5,
+    "definition": 5,
+    "multi_hop": 5
+  },
+  "source_commit": "52412fd244f06dc8b0f13000f46386d43794191a",
+  "working_tree_state": "clean",
+  "runtime_contract_version": "retrieval-runtime-v1",
+  "router_config_hash": "5681d5c7b09ff38745a2828e2416222cfb846c6ecbaa7af16a72c47469682e49",
+  "embedding_contract": "flag_embedding:BAAI/bge-m3:1024",
+  "reranker_contract": "disabled",
+  "neo4j_graph_snapshot_hash": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091",
+  "profiles": {
+    "vector_graph": {
+      "metrics": {
+        "sample_size": 20,
+        "Recall@5": 0.95,
+        "MRR": 0.925,
+        "nDCG@5": 0.8949471380219631,
+        "no_results_rate": 0.0
+      },
+      "supported_count": 20,
+      "unsupported_count": 10,
+      "expectation_mismatch_count": 0,
+      "outcomes_by_intent": {
+        "factual": {
+          "supported": 5,
+          "unsupported": 0
+        },
+        "validity": {
+          "supported": 2,
+          "unsupported": 3
+        },
+        "hierarchy": {
+          "supported": 3,
+          "unsupported": 2
+        },
+        "comparison": {
+          "supported": 0,
+          "unsupported": 5
+        },
+        "definition": {
+          "supported": 5,
+          "unsupported": 0
+        },
+        "multi_hop": {
+          "supported": 5,
+          "unsupported": 0
+        }
+      },
+      "metric_unit": "relevance_group",
+      "graph_path_hit_rate": 0.8,
+      "temporal_decision_accuracy": 0.5,
+      "temporal_evidence_completeness": 1.0,
+      "hierarchy_relation_hit_rate": 1.0,
+      "development_latency_distribution": {
+        "sample_size": 30,
+        "p50_ms": 1196.244070499688,
+        "p95_ms": 1383.076525999968
+      },
+      "cases": [
+        {
+          "query_id": "factual_01",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "factual",
+          "actual_intent": "factual",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art7_cl1",
+            "ldn_2020_art7",
+            "ldn_2020_art7_cl2",
+            "ldn_2020_art78_cl7",
+            "ldn_2020_art188"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art7",
+            "unjudged:ldn_2020_art7_cl2",
+            "unjudged:ldn_2020_art78_cl7",
+            "unjudged:ldn_2020_art188"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art7": 3,
+            "unjudged:ldn_2020_art7_cl2": 0,
+            "unjudged:ldn_2020_art78_cl7": 0,
+            "unjudged:ldn_2020_art188": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "factual_02",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "factual",
+          "actual_intent": "factual",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art8_cl3",
+            "ldn_2020_art26_cl5",
+            "ldn_2020_art31_cl4",
+            "ldn_2020_art33",
+            "ldn_2020_art26"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art8",
+            "unjudged:ldn_2020_art26_cl5",
+            "unjudged:ldn_2020_art31_cl4",
+            "unjudged:ldn_2020_art33",
+            "unjudged:ldn_2020_art26"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art8": 3,
+            "unjudged:ldn_2020_art26_cl5": 0,
+            "unjudged:ldn_2020_art31_cl4": 0,
+            "unjudged:ldn_2020_art33": 0,
+            "unjudged:ldn_2020_art26": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "factual_03",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "factual",
+          "actual_intent": "factual",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art17_cl2",
+            "ldn_2020_art17",
+            "ldn_2020_art17_cl1",
+            "ldn_2020_art188_cl4",
+            "ldn_2020_art188"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art17",
+            "unjudged:ldn_2020_art17_cl1",
+            "unjudged:ldn_2020_art188_cl4",
+            "unjudged:ldn_2020_art188"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art17": 3,
+            "unjudged:ldn_2020_art17_cl1": 0,
+            "unjudged:ldn_2020_art188_cl4": 0,
+            "unjudged:ldn_2020_art188": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "factual_04",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "factual",
+          "actual_intent": "factual",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art10",
+            "ldn_2020_art10_cl3",
+            "ldn_2020_art70",
+            "ldn_2020_art218",
+            "ldn_2020_art69"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art10",
+            "unjudged:ldn_2020_art10_cl3",
+            "unjudged:ldn_2020_art70",
+            "unjudged:ldn_2020_art218",
+            "unjudged:ldn_2020_art69"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art10": 2,
+            "unjudged:ldn_2020_art10_cl3": 0,
+            "unjudged:ldn_2020_art70": 0,
+            "unjudged:ldn_2020_art218": 0,
+            "unjudged:ldn_2020_art69": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "factual_05",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "factual",
+          "actual_intent": "factual",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art207",
+            "ldn_2020_art207_cl2",
+            "ldn_2020_art208",
+            "ldn_2020_art207_cl1",
+            "ldn_2020_art208_cl1"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art207",
+            "unjudged:ldn_2020_art208",
+            "unjudged:ldn_2020_art208_cl1"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art207": 3,
+            "unjudged:ldn_2020_art208": 0,
+            "unjudged:ldn_2020_art208_cl1": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "definition_01",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "definition",
+          "actual_intent": "definition",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art4_cl3",
+            "ldn_2020_art138",
+            "ldn_2020_art111",
+            "ldn_2020_art119",
+            "ldn_2020_art138_cl1"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art4",
+            "unjudged:ldn_2020_art138",
+            "unjudged:ldn_2020_art111",
+            "unjudged:ldn_2020_art119",
+            "unjudged:ldn_2020_art138_cl1"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art4": 3,
+            "unjudged:ldn_2020_art138": 0,
+            "unjudged:ldn_2020_art111": 0,
+            "unjudged:ldn_2020_art119": 0,
+            "unjudged:ldn_2020_art138_cl1": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "definition_02",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "definition",
+          "actual_intent": "definition",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art4_cl34",
+            "ldn_2020_art112_cl1",
+            "ldn_2020_art112",
+            "ldn_2020_art75_cl1",
+            "ldn_2020_art47_cl1"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art4",
+            "unjudged:ldn_2020_art112_cl1",
+            "unjudged:ldn_2020_art112",
+            "unjudged:ldn_2020_art75_cl1",
+            "unjudged:ldn_2020_art47_cl1"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art4": 3,
+            "unjudged:ldn_2020_art112_cl1": 0,
+            "unjudged:ldn_2020_art112": 0,
+            "unjudged:ldn_2020_art75_cl1": 0,
+            "unjudged:ldn_2020_art47_cl1": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "definition_03",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "definition",
+          "actual_intent": "definition",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art4_cl10",
+            "ldn_2020_art4_cl12",
+            "ldn_2020_art188_cl1",
+            "ldn_2020_art88",
+            "ldn_2020_art188"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art4",
+            "unjudged:ldn_2020_art4_cl12",
+            "unjudged:ldn_2020_art188_cl1",
+            "unjudged:ldn_2020_art88",
+            "unjudged:ldn_2020_art188"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art4": 3,
+            "unjudged:ldn_2020_art4_cl12": 0,
+            "unjudged:ldn_2020_art188_cl1": 0,
+            "unjudged:ldn_2020_art88": 0,
+            "unjudged:ldn_2020_art188": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "definition_04",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "definition",
+          "actual_intent": "definition",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art4_cl18",
+            "ldn_2020_art4_cl27",
+            "ldn_2020_art47",
+            "ldn_2020_art75",
+            "ldn_2020_art178"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art4",
+            "unjudged:ldn_2020_art4_cl27",
+            "unjudged:ldn_2020_art47",
+            "unjudged:ldn_2020_art75",
+            "unjudged:ldn_2020_art178"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art4": 3,
+            "unjudged:ldn_2020_art4_cl27": 0,
+            "unjudged:ldn_2020_art47": 0,
+            "unjudged:ldn_2020_art75": 0,
+            "unjudged:ldn_2020_art178": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "definition_05",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "definition",
+          "actual_intent": "definition",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art12_cl1",
+            "ldn_2020_art12",
+            "ldn_2020_art12_cl2",
+            "ldn_2020_art12_cl5",
+            "ldn_2020_art13"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art12",
+            "unjudged:ldn_2020_art12_cl2",
+            "unjudged:ldn_2020_art12_cl5",
+            "unjudged:ldn_2020_art13"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art12": 3,
+            "unjudged:ldn_2020_art12_cl2": 0,
+            "unjudged:ldn_2020_art12_cl5": 0,
+            "unjudged:ldn_2020_art13": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "multi_hop_01",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "multi_hop",
+          "actual_intent": "multi_hop",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art38_cl1",
+            "ldn_2020_art41_cl2",
+            "ldn_2020_art41",
+            "ldn_2020_art41_cl1",
+            "ldn_2020_art41_cl3"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art38",
+            "legal_basis:ldn_2020_art41",
+            "unjudged:ldn_2020_art41_cl1",
+            "unjudged:ldn_2020_art41_cl3"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art38": 3,
+            "legal_basis:ldn_2020_art41": 3,
+            "unjudged:ldn_2020_art41_cl1": 0,
+            "unjudged:ldn_2020_art41_cl3": 0
+          },
+          "graph_path_required": true,
+          "graph_case_type": "multi_edge_traversal",
+          "graph_path_hit": true,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "multi_hop_02",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "multi_hop",
+          "actual_intent": "multi_hop",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art145_cl2",
+            "ldn_2020_art143_cl3",
+            "ldn_2020_art145_cl3",
+            "ldn_2020_art58_cl2",
+            "ldn_2020_art58"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art145",
+            "unjudged:ldn_2020_art143_cl3",
+            "unjudged:ldn_2020_art58_cl2",
+            "unjudged:ldn_2020_art58"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art145": 3,
+            "unjudged:ldn_2020_art143_cl3": 0,
+            "unjudged:ldn_2020_art58_cl2": 0,
+            "unjudged:ldn_2020_art58": 0
+          },
+          "graph_path_required": true,
+          "graph_case_type": "multi_edge_traversal",
+          "graph_path_hit": true,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "multi_hop_03",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "multi_hop",
+          "actual_intent": "multi_hop",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art57_cl1",
+            "ldn_2020_art49_cl2",
+            "ldn_2020_art80_cl4",
+            "ldn_2020_art57_cl6",
+            "ldn_2020_art57_cl3"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art57",
+            "legal_basis:ldn_2020_art49",
+            "unjudged:ldn_2020_art80_cl4",
+            "unjudged:ldn_2020_art57_cl6",
+            "unjudged:ldn_2020_art57_cl3"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art57": 3,
+            "legal_basis:ldn_2020_art49": 3,
+            "unjudged:ldn_2020_art80_cl4": 0,
+            "unjudged:ldn_2020_art57_cl6": 0,
+            "unjudged:ldn_2020_art57_cl3": 0
+          },
+          "graph_path_required": true,
+          "graph_case_type": "multi_edge_traversal",
+          "graph_path_hit": true,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "multi_hop_04",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "multi_hop",
+          "actual_intent": "multi_hop",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art52",
+            "ldn_2020_art52_cl2",
+            "ldn_2020_art68_cl2",
+            "ldn_2020_art52_cl1",
+            "ldn_2020_art53_cl4"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art52",
+            "unjudged:ldn_2020_art52_cl2",
+            "legal_basis:ldn_2020_art68",
+            "unjudged:ldn_2020_art53_cl4"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art52": 3,
+            "unjudged:ldn_2020_art52_cl2": 0,
+            "legal_basis:ldn_2020_art68": 3,
+            "unjudged:ldn_2020_art53_cl4": 0
+          },
+          "graph_path_required": true,
+          "graph_case_type": "multi_edge_traversal",
+          "graph_path_hit": false,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "multi_hop_05",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "multi_hop",
+          "actual_intent": "multi_hop",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art52_cl1",
+            "ldn_2020_art53_cl4",
+            "ldn_2020_art53_cl7",
+            "ldn_2020_art53_cl6",
+            "ldn_2020_art53"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art52",
+            "unjudged:ldn_2020_art53_cl4",
+            "legal_basis:ldn_2020_art53",
+            "unjudged:ldn_2020_art53"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art52": 3,
+            "unjudged:ldn_2020_art53_cl4": 0,
+            "legal_basis:ldn_2020_art53": 3,
+            "unjudged:ldn_2020_art53": 0
+          },
+          "graph_path_required": true,
+          "graph_case_type": "branching_reference",
+          "graph_path_hit": true,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "validity_01",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "validity",
+          "reason": "Scoped graph does not provide required capability: corpus_complete_current_validity",
+          "required_capability": "corpus_complete_current_validity",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "validity_02",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "validity",
+          "reason": "Scoped graph does not provide required capability: corpus_complete_current_validity",
+          "required_capability": "corpus_complete_current_validity",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "validity_03",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "validity",
+          "actual_intent": "validity",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art217",
+            "ldn_2020_art217_cl1",
+            "ldn_2020_art217_cl2",
+            "ldn_2020_art217_cl3",
+            "ldn_2020_art29_cl1"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art217",
+            "unjudged:ldn_2020_art217_cl2",
+            "unjudged:ldn_2020_art217_cl3",
+            "unjudged:ldn_2020_art29_cl1"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art217": 3,
+            "unjudged:ldn_2020_art217_cl2": 0,
+            "unjudged:ldn_2020_art217_cl3": 0,
+            "unjudged:ldn_2020_art29_cl1": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": {
+            "subject_retrieval_hit": true,
+            "temporal_decision_correct": true,
+            "temporal_evidence_complete": true,
+            "temporal_evidence_source_type": "document_metadata",
+            "temporal_evidence_source_id": "ldn_2020"
+          },
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "validity_04",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "validity",
+          "reason": "Scoped graph does not provide required capability: corpus_complete_current_validity",
+          "required_capability": "corpus_complete_current_validity",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "validity_05",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "validity",
+          "actual_intent": "validity",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art217",
+            "ldn_2020_art217_cl2",
+            "ldn_2020_art217_cl1",
+            "ldn_2020_art217_cl3",
+            "ldn_2020_art30_cl3"
+          ],
+          "retrieved_relevance_groups": [
+            "unjudged:ldn_2020_art217",
+            "unjudged:ldn_2020_art217_cl2",
+            "unjudged:ldn_2020_art217_cl1",
+            "unjudged:ldn_2020_art217_cl3",
+            "unjudged:ldn_2020_art30_cl3"
+          ],
+          "returned_relevance_by_group": {
+            "unjudged:ldn_2020_art217": 0,
+            "unjudged:ldn_2020_art217_cl2": 0,
+            "unjudged:ldn_2020_art217_cl1": 0,
+            "unjudged:ldn_2020_art217_cl3": 0,
+            "unjudged:ldn_2020_art30_cl3": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": {
+            "subject_retrieval_hit": false,
+            "temporal_decision_correct": false,
+            "temporal_evidence_complete": true,
+            "temporal_evidence_source_type": "document_metadata",
+            "temporal_evidence_source_id": "ldn_2020"
+          },
+          "hierarchy_relation_hit": null
+        },
+        {
+          "query_id": "hierarchy_01",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "hierarchy",
+          "reason": "Scoped graph does not provide required capability: guides_relations",
+          "required_capability": "guides_relations",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "hierarchy_02",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "hierarchy",
+          "reason": "Scoped graph does not provide required capability: guides_relations",
+          "required_capability": "guides_relations",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "hierarchy_03",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "hierarchy",
+          "actual_intent": "hierarchy",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art17",
+            "ldn_2020_art17_cl2",
+            "ldn_2020_art17_cl1",
+            "ldn_2020_art53_cl9",
+            "ldn_2020_art17_cl3"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art17",
+            "unjudged:ldn_2020_art17_cl1",
+            "unjudged:ldn_2020_art53_cl9",
+            "unjudged:ldn_2020_art17_cl3"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art17": 3,
+            "unjudged:ldn_2020_art17_cl1": 0,
+            "unjudged:ldn_2020_art53_cl9": 0,
+            "unjudged:ldn_2020_art17_cl3": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": true
+        },
+        {
+          "query_id": "hierarchy_04",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "hierarchy",
+          "actual_intent": "hierarchy",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art30_cl5",
+            "ldn_2020_art30_cl4",
+            "ldn_2020_art31_cl5",
+            "ldn_2020_art31",
+            "ldn_2020_art30"
+          ],
+          "retrieved_relevance_groups": [
+            "unjudged:ldn_2020_art30_cl5",
+            "legal_basis:ldn_2020_art30",
+            "unjudged:ldn_2020_art31_cl5",
+            "unjudged:ldn_2020_art31"
+          ],
+          "returned_relevance_by_group": {
+            "unjudged:ldn_2020_art30_cl5": 0,
+            "legal_basis:ldn_2020_art30": 3,
+            "unjudged:ldn_2020_art31_cl5": 0,
+            "unjudged:ldn_2020_art31": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": true
+        },
+        {
+          "query_id": "hierarchy_05",
+          "status": "supported",
+          "expected_status": "supported",
+          "expectation_match": true,
+          "expected_intent": "hierarchy",
+          "actual_intent": "hierarchy",
+          "intent_match": true,
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art17",
+            "ldn_2020_art17_cl2",
+            "ldn_2020_art17_cl4",
+            "ldn_2020_art17_cl1",
+            "ldn_2020_art218"
+          ],
+          "retrieved_relevance_groups": [
+            "legal_basis:ldn_2020_art17",
+            "unjudged:ldn_2020_art17_cl4",
+            "unjudged:ldn_2020_art17_cl1",
+            "unjudged:ldn_2020_art218"
+          ],
+          "returned_relevance_by_group": {
+            "legal_basis:ldn_2020_art17": 3,
+            "unjudged:ldn_2020_art17_cl4": 0,
+            "unjudged:ldn_2020_art17_cl1": 0,
+            "unjudged:ldn_2020_art218": 0
+          },
+          "graph_path_required": false,
+          "graph_case_type": null,
+          "graph_path_hit": null,
+          "temporal_evaluation": null,
+          "hierarchy_relation_hit": true
+        },
+        {
+          "query_id": "comparison_01",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "comparison",
+          "reason": "Scoped graph does not provide required capability: multiple_versions",
+          "required_capability": "multiple_versions",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "comparison_02",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "comparison",
+          "reason": "Scoped graph does not provide required capability: multiple_versions",
+          "required_capability": "multiple_versions",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "comparison_03",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "comparison",
+          "reason": "Scoped graph does not provide required capability: multiple_versions",
+          "required_capability": "multiple_versions",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "comparison_04",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "comparison",
+          "reason": "Scoped graph does not provide required capability: multiple_versions",
+          "required_capability": "multiple_versions",
+          "available_capability": "none",
+          "force_intent_used": false
+        },
+        {
+          "query_id": "comparison_05",
+          "status": "unsupported",
+          "expected_status": "unsupported",
+          "expectation_match": true,
+          "expected_intent": "comparison",
+          "reason": "Scoped graph does not provide required capability: multiple_versions",
+          "required_capability": "multiple_versions",
+          "available_capability": "none",
+          "force_intent_used": false
+        }
+      ]
+    }
+  },
+  "Gate 7": "OPEN",
+  "M3-B13": "OPEN",
+  "Milestone A": "NOT PASSED",
+  "Milestone B acceptance": "NOT STARTED"
+}

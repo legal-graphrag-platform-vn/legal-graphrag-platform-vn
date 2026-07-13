@@ -78,6 +78,46 @@ def test_disabled_dependencies_are_not_required_or_loaded() -> None:
     assert driver.closed == 1
 
 
+def test_factory_passes_explicit_reranker_contract() -> None:
+    driver = FakeDriver(
+        [
+            {
+                "name": "legal_article_clause_fulltext",
+                "type": "FULLTEXT",
+                "state": "ONLINE",
+                "options": {},
+            }
+        ]
+    )
+    calls = []
+
+    def reranker_factory(model_name, **kwargs):
+        calls.append((model_name, kwargs))
+        return object()
+
+    handle = create_retrieval_runtime(
+        RetrievalConfig(
+            vector_enabled=False,
+            fulltext_enabled=True,
+            reranker_enabled=True,
+            reranker_fp16=False,
+            reranker_max_length=384,
+            reranker_normalize=True,
+        ),
+        RetrievalApplicationSettings(NEO4J_URI="bolt://example:7687"),
+        driver_factory=lambda uri, auth: driver,
+        reranker_factory=reranker_factory,
+    )
+    handle.close()
+
+    assert calls == [
+        (
+            "BAAI/bge-reranker-v2-m3",
+            {"use_fp16": False, "max_length": 384, "normalize": True},
+        )
+    ]
+
+
 def test_vector_index_dimension_mismatch_fails_startup(monkeypatch) -> None:
     indexes = [
         {
