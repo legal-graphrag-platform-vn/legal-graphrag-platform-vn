@@ -54,4 +54,6 @@ pythonpath = ["."]
 addopts = "-m 'not integration'"
 markers = [
   "integration: requires a disposable local Neo4j instance and optional model runtime",
+  "retrieval_readonly: read-only retrieval checks against the disposable pilot graph",
+  "retrieval_fixture: mutating retrieval mechanics isolated by a UUID namespace",
 ]

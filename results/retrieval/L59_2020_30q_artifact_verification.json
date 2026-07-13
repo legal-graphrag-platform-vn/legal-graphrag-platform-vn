@@ -1,0 +1,752 @@
+{
+  "contract_version": "retrieval-evaluation-artifact-verification-v1",
+  "generated_at": "2026-07-13T15:06:20.899084Z",
+  "verifier_contract_version": "retrieval-evaluation-artifact-verification-v1",
+  "source_commit": "91b222ce0c14cd9cc95a91c710429b4b57cd03cf",
+  "verifier_source_commit": "91b222ce0c14cd9cc95a91c710429b4b57cd03cf",
+  "working_tree_state": "dirty",
+  "technical_checks_status": "PASS",
+  "evidence_tier": "development",
+  "official_evidence_eligible": false,
+  "verification_command_hash": "61c28775256ecd758e849f0a8121b4751b742cc6d19d36d7b751298a89426c99",
+  "runtime_config_hash": "f41db2873d038575e317ab62f1231f71da03d2d92faf330fba30cdf41d756430",
+  "capability_query_version": "neo4j-retrieval-capability-v1",
+  "capability_query_hash": "f3594f5f77036db122c564fdd35b31c57fc92b318c6bdd3e504e6144ec780fc8",
+  "neo4j_runtime": {
+    "database_name": "neo4j",
+    "components": [
+      {
+        "name": "Neo4j Kernel",
+        "versions": [
+          "5.26.28"
+        ],
+        "edition": "community"
+      }
+    ]
+  },
+  "document_ids": [
+    "ldn_2020"
+  ],
+  "input_hashes": {
+    "dataset_sha256": "979ca695a074ae1eec44bff5af204530ecfad47c5d6ab3260c205206aa75b77f",
+    "accepted_relations_sha256": "e353b866bc08a5599e03e92dfc45c7a91360bb81a34785562ee24d8a2b8b3432",
+    "hierarchy_sha256": "8ef26f54e98055286b91a127bf0bec437666b891fd2d2daf6d3fa6ffc62675c5",
+    "graph_snapshot_sha256": "a0e04cee9461102c4663bcb920c08aed3b30f577a1a1f1eb95564c0a9bcd3288",
+    "graph_projection_sha256": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091"
+  },
+  "accepted_refers_to_records": [
+    {
+      "source_id": "ldn_2020_art145_cl2",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art145_cl1",
+      "source_relation_id": null,
+      "relation_id": "1ff70eabe43ca2f602f12009932c0d8896327ba1",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+      "properties": {
+        "citation_text": "Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:25.413766Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    },
+    {
+      "source_id": "ldn_2020_art145_cl3",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art145_cl2",
+      "source_relation_id": null,
+      "relation_id": "b12574461cbfe6c5cc5fa808ac2678a41fde91a2",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+      "properties": {
+        "citation_text": "Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:25.413766Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    },
+    {
+      "source_id": "ldn_2020_art38_cl1",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art41",
+      "source_relation_id": null,
+      "relation_id": "aba8af2a5f330a167047f6ea81210138488983aa",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+      "properties": {
+        "citation_text": "Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:24.185249Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    },
+    {
+      "source_id": "ldn_2020_art52_cl1",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art53_cl6",
+      "source_relation_id": null,
+      "relation_id": "2d329a8970427479e48d81b9ddf2c5bc2b3c4e9e",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+      "properties": {
+        "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:24.339279Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    },
+    {
+      "source_id": "ldn_2020_art52_cl1",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art53_cl7",
+      "source_relation_id": null,
+      "relation_id": "b87c493c85b789ff9e7f423efcc5d7309a1cf7bc",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+      "properties": {
+        "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:24.339279Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    },
+    {
+      "source_id": "ldn_2020_art57_cl1",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art49",
+      "source_relation_id": null,
+      "relation_id": "8b9caf8edb8c3a749a9a81b9af64744d5c2b6a3a",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
+      "properties": {
+        "citation_text": "Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:24.432635Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    },
+    {
+      "source_id": "ldn_2020_art68_cl2",
+      "relation_type": "REFERS_TO",
+      "target_id": "ldn_2020_art52",
+      "source_relation_id": null,
+      "relation_id": "95cb38a870d4a67024b94151257cd1f3ccc9a34e",
+      "relation_id_source": "derived_canonical_contract",
+      "identity_discriminator": "DIRECT|Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+      "properties": {
+        "citation_text": "Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+        "citation_type": "DIRECT",
+        "confidence": 1.0,
+        "llm_model": "gemini:gemini-3.1-flash-lite",
+        "created_at": "2026-07-12T06:52:24.551403Z"
+      },
+      "source_artifact": "accepted.jsonl"
+    }
+  ],
+  "graph_path_checks": [
+    {
+      "query_id": "multi_hop_01",
+      "graph_case_type": "multi_edge_traversal",
+      "expected": {
+        "source_id": "ldn_2020_art38_cl1",
+        "relation_types": [
+          "REFERS_TO",
+          "CONTAINS"
+        ],
+        "target_id": "ldn_2020_art41_cl2"
+      },
+      "matched": true,
+      "resolved_path": {
+        "nodes": [
+          "ldn_2020_art38_cl1",
+          "ldn_2020_art41",
+          "ldn_2020_art41_cl2"
+        ],
+        "edges": [
+          {
+            "source_id": "ldn_2020_art38_cl1",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art41",
+            "source_relation_id": null,
+            "relation_id": "aba8af2a5f330a167047f6ea81210138488983aa",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+            "properties": {
+              "citation_text": "Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:24.185249Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          },
+          {
+            "source_id": "ldn_2020_art41",
+            "relation_type": "CONTAINS",
+            "target_id": "ldn_2020_art41_cl2",
+            "relation_id": null,
+            "properties": {},
+            "source_artifact": "hierarchy.json"
+          }
+        ]
+      }
+    },
+    {
+      "query_id": "multi_hop_02",
+      "graph_case_type": "multi_edge_traversal",
+      "expected": {
+        "source_id": "ldn_2020_art145_cl3",
+        "relation_types": [
+          "REFERS_TO",
+          "REFERS_TO"
+        ],
+        "target_id": "ldn_2020_art145_cl1"
+      },
+      "matched": true,
+      "resolved_path": {
+        "nodes": [
+          "ldn_2020_art145_cl3",
+          "ldn_2020_art145_cl2",
+          "ldn_2020_art145_cl1"
+        ],
+        "edges": [
+          {
+            "source_id": "ldn_2020_art145_cl3",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art145_cl2",
+            "source_relation_id": null,
+            "relation_id": "b12574461cbfe6c5cc5fa808ac2678a41fde91a2",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+            "properties": {
+              "citation_text": "Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:25.413766Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          },
+          {
+            "source_id": "ldn_2020_art145_cl2",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art145_cl1",
+            "source_relation_id": null,
+            "relation_id": "1ff70eabe43ca2f602f12009932c0d8896327ba1",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+            "properties": {
+              "citation_text": "Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:25.413766Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          }
+        ]
+      }
+    },
+    {
+      "query_id": "multi_hop_03",
+      "graph_case_type": "multi_edge_traversal",
+      "expected": {
+        "source_id": "ldn_2020_art57_cl1",
+        "relation_types": [
+          "REFERS_TO",
+          "CONTAINS"
+        ],
+        "target_id": "ldn_2020_art49_cl2"
+      },
+      "matched": true,
+      "resolved_path": {
+        "nodes": [
+          "ldn_2020_art57_cl1",
+          "ldn_2020_art49",
+          "ldn_2020_art49_cl2"
+        ],
+        "edges": [
+          {
+            "source_id": "ldn_2020_art57_cl1",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art49",
+            "source_relation_id": null,
+            "relation_id": "8b9caf8edb8c3a749a9a81b9af64744d5c2b6a3a",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
+            "properties": {
+              "citation_text": "Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:24.432635Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          },
+          {
+            "source_id": "ldn_2020_art49",
+            "relation_type": "CONTAINS",
+            "target_id": "ldn_2020_art49_cl2",
+            "relation_id": null,
+            "properties": {},
+            "source_artifact": "hierarchy.json"
+          }
+        ]
+      }
+    },
+    {
+      "query_id": "multi_hop_04",
+      "graph_case_type": "multi_edge_traversal",
+      "expected": {
+        "source_id": "ldn_2020_art68_cl2",
+        "relation_types": [
+          "REFERS_TO",
+          "CONTAINS"
+        ],
+        "target_id": "ldn_2020_art52_cl1"
+      },
+      "matched": true,
+      "resolved_path": {
+        "nodes": [
+          "ldn_2020_art68_cl2",
+          "ldn_2020_art52",
+          "ldn_2020_art52_cl1"
+        ],
+        "edges": [
+          {
+            "source_id": "ldn_2020_art68_cl2",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art52",
+            "source_relation_id": null,
+            "relation_id": "95cb38a870d4a67024b94151257cd1f3ccc9a34e",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+            "properties": {
+              "citation_text": "Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:24.551403Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          },
+          {
+            "source_id": "ldn_2020_art52",
+            "relation_type": "CONTAINS",
+            "target_id": "ldn_2020_art52_cl1",
+            "relation_id": null,
+            "properties": {},
+            "source_artifact": "hierarchy.json"
+          }
+        ]
+      }
+    },
+    {
+      "query_id": "multi_hop_05",
+      "graph_case_type": "branching_reference",
+      "expected": {
+        "source_id": "ldn_2020_art52_cl1",
+        "relation_types": [
+          "REFERS_TO"
+        ],
+        "target_id": "ldn_2020_art53_cl6"
+      },
+      "matched": true,
+      "resolved_path": {
+        "nodes": [
+          "ldn_2020_art52_cl1",
+          "ldn_2020_art53_cl6"
+        ],
+        "edges": [
+          {
+            "source_id": "ldn_2020_art52_cl1",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art53_cl6",
+            "source_relation_id": null,
+            "relation_id": "2d329a8970427479e48d81b9ddf2c5bc2b3c4e9e",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+            "properties": {
+              "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:24.339279Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          }
+        ]
+      }
+    },
+    {
+      "query_id": "multi_hop_05",
+      "graph_case_type": "branching_reference",
+      "expected": {
+        "source_id": "ldn_2020_art52_cl1",
+        "relation_types": [
+          "REFERS_TO"
+        ],
+        "target_id": "ldn_2020_art53_cl7"
+      },
+      "matched": true,
+      "resolved_path": {
+        "nodes": [
+          "ldn_2020_art52_cl1",
+          "ldn_2020_art53_cl7"
+        ],
+        "edges": [
+          {
+            "source_id": "ldn_2020_art52_cl1",
+            "relation_type": "REFERS_TO",
+            "target_id": "ldn_2020_art53_cl7",
+            "source_relation_id": null,
+            "relation_id": "b87c493c85b789ff9e7f423efcc5d7309a1cf7bc",
+            "relation_id_source": "derived_canonical_contract",
+            "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+            "properties": {
+              "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
+              "citation_type": "DIRECT",
+              "confidence": 1.0,
+              "llm_model": "gemini:gemini-3.1-flash-lite",
+              "created_at": "2026-07-12T06:52:24.339279Z"
+            },
+            "source_artifact": "accepted.jsonl"
+          }
+        ]
+      }
+    }
+  ],
+  "hierarchy_relation_checks": [
+    {
+      "query_id": "hierarchy_03",
+      "expected": {
+        "parent_id": "ldn_2020_art17",
+        "relation_type": "CONTAINS",
+        "child_id": "ldn_2020_art17_cl2"
+      },
+      "matched": true,
+      "record": {
+        "source_id": "ldn_2020_art17",
+        "relation_type": "CONTAINS",
+        "target_id": "ldn_2020_art17_cl2",
+        "relation_id": null,
+        "properties": {},
+        "source_artifact": "hierarchy.json"
+      }
+    },
+    {
+      "query_id": "hierarchy_04",
+      "expected": {
+        "parent_id": "ldn_2020_art30",
+        "relation_type": "CONTAINS",
+        "child_id": "ldn_2020_art30_cl1"
+      },
+      "matched": true,
+      "record": {
+        "source_id": "ldn_2020_art30",
+        "relation_type": "CONTAINS",
+        "target_id": "ldn_2020_art30_cl1",
+        "relation_id": null,
+        "properties": {},
+        "source_artifact": "hierarchy.json"
+      }
+    },
+    {
+      "query_id": "hierarchy_04",
+      "expected": {
+        "parent_id": "ldn_2020_art30",
+        "relation_type": "CONTAINS",
+        "child_id": "ldn_2020_art30_cl4"
+      },
+      "matched": true,
+      "record": {
+        "source_id": "ldn_2020_art30",
+        "relation_type": "CONTAINS",
+        "target_id": "ldn_2020_art30_cl4",
+        "relation_id": null,
+        "properties": {},
+        "source_artifact": "hierarchy.json"
+      }
+    },
+    {
+      "query_id": "hierarchy_05",
+      "expected": {
+        "parent_id": "ldn_2020_art17",
+        "relation_type": "CONTAINS",
+        "child_id": "ldn_2020_art17_cl2"
+      },
+      "matched": true,
+      "record": {
+        "source_id": "ldn_2020_art17",
+        "relation_type": "CONTAINS",
+        "target_id": "ldn_2020_art17_cl2",
+        "relation_id": null,
+        "properties": {},
+        "source_artifact": "hierarchy.json"
+      }
+    },
+    {
+      "query_id": "hierarchy_05",
+      "expected": {
+        "parent_id": "ldn_2020_art17_cl2",
+        "relation_type": "CONTAINS",
+        "child_id": "ldn_2020_art17_cl2_pa"
+      },
+      "matched": true,
+      "record": {
+        "source_id": "ldn_2020_art17_cl2",
+        "relation_type": "CONTAINS",
+        "target_id": "ldn_2020_art17_cl2_pa",
+        "relation_id": null,
+        "properties": {},
+        "source_artifact": "hierarchy.json"
+      }
+    }
+  ],
+  "document_metadata": {
+    "id": "ldn_2020",
+    "title": "Luật doanh nghiệp số 59/2020/QH14",
+    "number": "59/2020/QH14",
+    "doc_type": "Law",
+    "normative": true,
+    "issued_by": "QUỐC HỘI",
+    "issued_date": "2020-07-01",
+    "effective_from": "2021-01-01",
+    "issuer_name": "QUỐC HỘI",
+    "legal_status": "PARTIALLY_EFFECTIVE"
+  },
+  "temporal_evidence_checks": [
+    {
+      "query_id": "validity_03",
+      "source_id": "ldn_2020",
+      "source_type": "document_metadata",
+      "required_fields": [
+        "effective_from",
+        "effective_to",
+        "legal_status"
+      ],
+      "values": {
+        "effective_from": "2021-01-01",
+        "effective_to": null,
+        "legal_status": "PARTIALLY_EFFECTIVE"
+      },
+      "field_presence": {
+        "effective_from": true,
+        "effective_to": false,
+        "legal_status": true
+      },
+      "normalization": {
+        "missing_effective_to_means": "open_ended"
+      },
+      "subject_snapshot": {
+        "id": "ldn_2020",
+        "labels": [
+          "Document"
+        ],
+        "field_presence": {
+          "effective_from": true,
+          "effective_to": false,
+          "legal_status": true
+        },
+        "effective_from": "2021-01-01",
+        "effective_to": null,
+        "legal_status": "PARTIALLY_EFFECTIVE"
+      },
+      "predicate_evaluation": {
+        "query_date": "2021-01-01",
+        "interval_convention": "effective_from <= query_date AND (effective_to IS NULL OR effective_to > query_date)",
+        "legal_status_rule": {
+          "subject_label": "Document",
+          "allowed_statuses": [
+            "ACTIVE",
+            "PARTIALLY_EFFECTIVE"
+          ],
+          "document_partially_effective_scope": "PARTIALLY_EFFECTIVE permits document-scoped evaluation but child units are decided from their own persisted metadata"
+        },
+        "effective_from_check": true,
+        "effective_to_check": true,
+        "legal_status_check": true,
+        "computed_valid": true,
+        "expected_valid": true,
+        "matched": true
+      },
+      "matched": true
+    },
+    {
+      "query_id": "validity_05",
+      "source_id": "ldn_2020",
+      "source_type": "document_metadata",
+      "required_fields": [
+        "effective_from",
+        "effective_to",
+        "legal_status"
+      ],
+      "values": {
+        "effective_from": "2021-01-01",
+        "effective_to": null,
+        "legal_status": "PARTIALLY_EFFECTIVE"
+      },
+      "field_presence": {
+        "effective_from": true,
+        "effective_to": false,
+        "legal_status": true
+      },
+      "normalization": {
+        "missing_effective_to_means": "open_ended"
+      },
+      "subject_snapshot": {
+        "id": "ldn_2020_art30",
+        "labels": [
+          "Article"
+        ],
+        "field_presence": {
+          "effective_from": true,
+          "effective_to": false,
+          "legal_status": true
+        },
+        "effective_from": "2021-01-01",
+        "effective_to": null,
+        "legal_status": "ACTIVE"
+      },
+      "predicate_evaluation": {
+        "query_date": "2022-07-01",
+        "interval_convention": "effective_from <= query_date AND (effective_to IS NULL OR effective_to > query_date)",
+        "legal_status_rule": {
+          "subject_label": "Article",
+          "allowed_statuses": [
+            "ACTIVE",
+            "AMENDED"
+          ],
+          "document_partially_effective_scope": "PARTIALLY_EFFECTIVE permits document-scoped evaluation but child units are decided from their own persisted metadata"
+        },
+        "effective_from_check": true,
+        "effective_to_check": true,
+        "legal_status_check": true,
+        "computed_valid": true,
+        "expected_valid": true,
+        "matched": true
+      },
+      "matched": true
+    }
+  ],
+  "capability_snapshot": {
+    "vector_article_index_available": true,
+    "vector_clause_index_available": true,
+    "fulltext_index_available": true,
+    "scoped_temporal_metadata_available": true,
+    "corpus_complete_current_validity_available": false,
+    "temporal_relations_available": false,
+    "guides_relations_available": false,
+    "structural_hierarchy_available": true,
+    "multiple_versions_available": false,
+    "definition_relations_available": true,
+    "semantic_multi_hop_graph_available": true,
+    "canonical_relation_types_available": [
+      "CONTAINS",
+      "DEFINES",
+      "ISSUED_BY",
+      "REFERS_TO",
+      "REGULATES"
+    ]
+  },
+  "capability_checks": [
+    {
+      "capability": "corpus_complete_current_validity",
+      "expected_available": false,
+      "actual_available": false,
+      "source_fields": {
+        "corpus_complete_current_validity_available": false
+      },
+      "matched": true
+    },
+    {
+      "capability": "guides_relations",
+      "expected_available": false,
+      "actual_available": false,
+      "source_fields": {
+        "guides_relations_available": false
+      },
+      "matched": true
+    },
+    {
+      "capability": "hybrid_seed_and_semantic_graph",
+      "expected_available": true,
+      "actual_available": true,
+      "source_fields": {
+        "vector_article_index_available": true,
+        "vector_clause_index_available": true,
+        "fulltext_index_available": true,
+        "semantic_multi_hop_graph_available": true
+      },
+      "matched": true
+    },
+    {
+      "capability": "lexical_definition",
+      "expected_available": true,
+      "actual_available": true,
+      "source_fields": {
+        "fulltext_index_available": true
+      },
+      "matched": true
+    },
+    {
+      "capability": "multiple_versions",
+      "expected_available": false,
+      "actual_available": false,
+      "source_fields": {
+        "multiple_versions_available": false
+      },
+      "matched": true
+    },
+    {
+      "capability": "scoped_temporal_metadata",
+      "expected_available": true,
+      "actual_available": true,
+      "source_fields": {
+        "scoped_temporal_metadata_available": true
+      },
+      "matched": true
+    },
+    {
+      "capability": "semantic_multi_hop_graph",
+      "expected_available": true,
+      "actual_available": true,
+      "source_fields": {
+        "semantic_multi_hop_graph_available": true
+      },
+      "matched": true
+    },
+    {
+      "capability": "structural_hierarchy",
+      "expected_available": true,
+      "actual_available": true,
+      "source_fields": {
+        "structural_hierarchy_available": true
+      },
+      "matched": true
+    }
+  ],
+  "verification": {
+    "graph_paths_pass": true,
+    "hierarchy_relations_pass": true,
+    "temporal_evidence_pass": true,
+    "capabilities_pass": true,
+    "status": "PASS"
+  },
+  "Gate 7": "OPEN",
+  "M3-B13": "OPEN",
+  "Milestone A": "NOT PASSED",
+  "official_evaluation": "NOT STARTED"
+}

@@ -9,14 +9,16 @@
 ```text
 Phase 1 M3: pilot signed off; BLOCKED on corpus completion
 Milestone A: NOT PASSED
-Phase 2: BLOCKED / prototype only
+Phase 2 implementation: ACTIVE on signed-off pilot data
+Phase 2 acceptance: BLOCKED by M3-B13
 Canonical Neo4j pilot graph: VERIFIED on disposable M3 runtime
 Graph-quality report: CURRENT
 Neo4j pilot evidence: SIGNED OFF from source commit 3ab2baa
 ```
 
-Do not run or count Phase 2 work as active progress until every blocker marked
-`MILESTONE BLOCKER` below is closed and the Milestone A evidence is signed off.
+Retrieval development and pilot-only evaluation may proceed on `L59_2020`.
+Do not close Milestone A, accept Milestone B, or report corpus-level Phase 2
+results until every `MILESTONE BLOCKER` below is closed.
 
 ## Open Blockers
 
@@ -114,7 +116,8 @@ semantic edge accounting = 775 total = 746 topology + 29 Point-endpoint REFERS_T
 6. Pass the disposable-database integration suite without changing the pilot graph.
 7. Generate and review the tracked Milestone A evidence summary.
 8. Complete the four-document minimum corpus and reconcile external references.
-9. Sign off Milestone A, then explicitly unblock Phase 2.
+9. Sign off Milestone A, then explicitly unblock Phase 2 corpus evaluation and
+   Milestone B acceptance.
 
 ## Required Vector Smoke Queries
 
@@ -198,5 +201,5 @@ For each query, record the top-5 node IDs, scores, and a manual
 ## Sign-off Rule
 
 Milestone A is all-or-nothing. It remains `NOT PASSED` while any `M3-B*` row is
-open. Existing retrieval code may remain in the repository only as prototype code;
-it is not accepted Phase 2 or Milestone B progress.
+open. Pilot retrieval work is development evidence only; it is not accepted
+Milestone B or corpus-level Phase 2 evidence.

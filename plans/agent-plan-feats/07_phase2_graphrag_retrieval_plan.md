@@ -3,23 +3,40 @@
 Đây là bản thiết kế kỹ thuật (Technical Design) cho Phase 2, bám sát kiến trúc Clean Architecture, Import Rules (AGENTS.md) và Timeline dự án (tập trung 100% vào Retrieval & Ablation, không lấn sang Phase 3 Generation).
 
 ## 0. Preconditions (Điều kiện tiên quyết)
-- **Milestone A status: NOT PASSED.** Implementation must not begin until plan 06 is signed off.
-- Existing code under `src/retrieval/` is prototype-only. It must not be counted as
-  active Phase 2 progress or accepted Milestone B work.
+- **Milestone A status: NOT PASSED. Gate 7 and M3-B13 remain OPEN.**
+- Retrieval development is explicitly allowed against the signed-off `L59_2020`
+  pilot graph. This exception unblocks implementation and local evaluation only;
+  it does not close Gate 7, complete Milestone A, or constitute Milestone B
+  acceptance.
+- The retrieval architecture must remain corpus-agnostic. `L59_2020` may appear in
+  fixtures and development commands, but never in repository queries, traversal
+  policies, filters, citation builders, or runtime defaults.
 - Current blockers are maintained in `06_m3_blocker_register.md`.
 - Deferred retrieval findings are maintained in
-  `07_phase2_retrieval_prototype_review.md`; do not implement them before Milestone A.
+  `07_phase2_retrieval_prototype_review.md` and form the active pilot fix register.
 - Neo4j graph có canonical IDs.
 - Article/Clause embeddings đã được tạo và khớp dimension (1024).
 - Vector indexes `article_embedding` và `clause_embedding` ở trạng thái ONLINE.
 - Báo cáo Graph-quality không có lỗi ontology và không có duplicate relation identity.
 
+### Development status contract
+
+```text
+Retrieval implementation: ACTIVE on the L59_2020 pilot
+Gate 7 / M3-B13: OPEN
+Milestone A: NOT PASSED
+Milestone B acceptance: NOT STARTED
+Phase 2 evaluation scope: pilot-only until the four-document corpus passes
+```
+
 ---
 
 ## 1. Yêu cầu Kiến trúc & Phụ thuộc
-Theo `AGENTS.md`:
-- `src/retrieval/` **chỉ được phép** import từ `src/infrastructure/` và `src/shared/`.
-- TUYỆT ĐỐI KHÔNG import từ `src/pipeline/` hay `apps/`.
+Theo execution contract tại Plan 09:
+- `src/retrieval/` chỉ được import `src/shared/` và retrieval-owned domain ports.
+- `src/infrastructure/` implements ports bằng structural typing và không import retrieval runtime.
+- `src/application/retrieval_factory.py` là composition root duy nhất được import cả retrieval và infrastructure.
+- TUYỆT ĐỐI KHÔNG import từ `src/pipeline/`, `apps/` hay `prototypes/` trong retrieval.
 - Provider cho Intent sẽ được thiết kế chuẩn Interface, không hardcode Gemini (ưu tiên default là DeepSeek).
 - Reranker (`bge-reranker-v2-m3`) là dependency optional, test dùng fake implementation.
 
@@ -93,7 +110,8 @@ class RetrievalContext(BaseModel):
         "vector_only",
         "vector_graph",
         "hybrid",
-        "text_only_fallback"
+        "fulltext_only",
+        "no_results"
     ]
     confidence_penalty: bool = False
 ```
@@ -145,7 +163,7 @@ src/retrieval/
   ```cypher
   CALL db.index.vector.queryNodes('article_embedding', $k, $query_embedding)
   YIELD node, score
-  OPTIONAL MATCH (d:Document)-[:CONTAINS|CONTAINS*1..2]->(node)
+  MATCH (d:Document)-[:CONTAINS*1..3]->(node)
   RETURN
     node.id AS id,
     'Article' AS label,
@@ -154,10 +172,15 @@ src/retrieval/
     node.number AS article_number,
     d.id AS document_id,
     d.number AS document_number,
+    d.source_url AS source_url,
     node.effective_from AS effective_from,
     node.effective_to AS effective_to,
     score
   ```
+
+All channels use one filter contract: `document_ids`, `doc_types`,
+`legal_statuses`, and `query_date`. Repository queries resolve document
+membership through `CONTAINS`; they never use document-specific ID prefixes.
 
 ### 2.4. Traversal Direction Rules (Chính sách Duyệt Đồ thị)
 Dựa theo ontology (`newer legal unit -> older affected legal unit`):
@@ -200,6 +223,9 @@ DEEPSEEK_INTENT_MODEL=deepseek-v4-flash
 - Fulltext index returns `Article`/`Clause`.
 - Graph expansion returns `CONTAINS`/`REFERS_TO`/`AMENDS` paths.
 - Phase 2 benchmark produces Recall@5, MRR, nDCG.
+
+Pilot benchmark results from `L59_2020` are development evidence only. Corpus
+evaluation and Milestone B acceptance remain blocked by M3-B13.
 
 ---
 

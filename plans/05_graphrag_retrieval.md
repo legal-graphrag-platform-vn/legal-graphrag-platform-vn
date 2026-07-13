@@ -26,7 +26,9 @@ User Query (Vietnamese NL)
              ▼
 ┌─────────────────────────┐
 │   Hybrid Retriever      │
-│  ├── Vector Search      │  → Entry points (top-K articles)
+│  ├── Vector Search      │  → Article/Clause entry points
+│  ├── Full-text Search   │  → Lexical Article/Clause entry points
+│  ├── RRF Fusion         │  → Deterministic channel fusion
 │  └── Graph Expansion    │  → Traversal Policy
 └────────────┬────────────┘
              │
@@ -126,6 +128,11 @@ Ngày hiện tại: {today}
 
 ## 2. Traversal Policy
 
+Every retrieval channel accepts the same corpus-independent filters:
+`document_ids`, `doc_types`, `legal_statuses`, and `query_date`. Runtime code
+must not infer document membership from ID prefixes or contain a default
+document ID.
+
 ```python
 TRAVERSAL_POLICIES = {
     "factual": {
@@ -214,6 +221,8 @@ class TextChunk:
     effective_from: date
     effective_to: date | None
     relevance_score: float
+    source_url: str | None       # optional when persisted by the corpus
+    deep_link: str               # /documents/{document_id}/units/{unit_id}
 
 @dataclass
 class GraphPath:
@@ -222,6 +231,12 @@ class GraphPath:
     path_description: str      # Human-readable: "Điều 46 viện dẫn Điều 29"
     is_temporal_valid: bool
 ```
+
+Citation labels are generated from returned Document/Article/Clause metadata.
+Deep links use canonical graph IDs, never filesystem `raw_doc_code` values.
+When graph expansion reaches a `Point`, the path keeps the Point endpoint for
+explanation while retrieval context is lifted to its parent `Clause`; Point
+nodes are not added to the vector index.
 
 ---
 

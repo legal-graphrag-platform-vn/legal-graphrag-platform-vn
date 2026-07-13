@@ -1,0 +1,38 @@
+[
+  {
+    "query_id": "q1",
+    "query": "quyền thành lập và quản lý doanh nghiệp",
+    "expected_ids": [
+      "ldn_2020_art17",
+      "ldn_2020_art17_cl1",
+      "ldn_2020_art17_cl2"
+    ]
+  },
+  {
+    "query_id": "q2",
+    "query": "vốn điều lệ của công ty trách nhiệm hữu hạn",
+    "expected_ids": [
+      "ldn_2020_art47",
+      "ldn_2020_art47_cl1",
+      "ldn_2020_art4_cl34",
+      "ldn_2020_art75",
+      "ldn_2020_art75_cl1",
+      "ldn_2020_art87",
+      "ldn_2020_art87_cl1"
+    ]
+  },
+  {
+    "query_id": "q3",
+    "query": "đăng ký thay đổi nội dung đăng ký doanh nghiệp",
+    "expected_ids": [
+      "ldn_2020_art30",
+      "ldn_2020_art30_cl1",
+      "ldn_2020_art30_cl4",
+      "ldn_2020_art30_cl5",
+      "ldn_2020_art31",
+      "ldn_2020_art31_cl4",
+      "ldn_2020_art31_cl5",
+      "ldn_2020_art32"
+    ]
+  }
+]

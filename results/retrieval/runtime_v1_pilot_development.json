@@ -1,0 +1,71 @@
+{
+  "evaluation_scope": "pilot_development",
+  "dataset_hash": "5394b2f6cd8c71148c6e9b408a4098e5eabe9960f710bdcf261a4803b9c5f09e",
+  "source_commit": "91b222ce0c14cd9cc95a91c710429b4b57cd03cf",
+  "working_tree_state": "dirty",
+  "runtime_contract_version": "retrieval-runtime-v1",
+  "router_config_hash": "3a4239708e055db41ba1b9527a78218f5777a43c5009447f2867fd1e444fab0c",
+  "embedding_contract": "flag_embedding:BAAI/bge-m3:1024",
+  "reranker_contract": "disabled",
+  "neo4j_graph_snapshot_hash": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091",
+  "profiles": {
+    "hybrid": {
+      "metrics": {
+        "sample_size": 3,
+        "Recall@5": 0.6011904761904762,
+        "MRR": 1.0,
+        "nDCG@5": 0.7846601832304706,
+        "no_results_rate": 0.0
+      },
+      "supported_count": 3,
+      "unsupported_count": 0,
+      "development_latency_distribution": {
+        "sample_size": 3,
+        "p50_ms": 353.125399999044,
+        "p95_ms": 353.125399999044
+      },
+      "cases": [
+        {
+          "query_id": "q1",
+          "status": "supported",
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art17",
+            "ldn_2020_art17_cl2",
+            "ldn_2020_art92",
+            "ldn_2020_art190",
+            "ldn_2020_art17_cl1"
+          ]
+        },
+        {
+          "query_id": "q2",
+          "status": "supported",
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art87",
+            "ldn_2020_art75",
+            "ldn_2020_art74",
+            "ldn_2020_art24",
+            "ldn_2020_art47"
+          ]
+        },
+        {
+          "query_id": "q3",
+          "status": "supported",
+          "force_intent_used": false,
+          "retrieved_ids": [
+            "ldn_2020_art30",
+            "ldn_2020_art31",
+            "ldn_2020_art32",
+            "ldn_2020_art33",
+            "ldn_2020_art23"
+          ]
+        }
+      ]
+    }
+  },
+  "Gate 7": "OPEN",
+  "M3-B13": "OPEN",
+  "Milestone A": "NOT PASSED",
+  "Milestone B acceptance": "NOT STARTED"
+}

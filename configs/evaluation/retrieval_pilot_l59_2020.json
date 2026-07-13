@@ -1,0 +1,922 @@
+{
+  "schema_version": "retrieval-evaluation-dataset-v1",
+  "evaluation_scope": "pilot_development",
+  "name": "L59_2020 retrieval runtime v1 approved 30-query dataset",
+  "document_ids": [
+    "ldn_2020"
+  ],
+  "target_query_count": 30,
+  "review": {
+    "reviewer": "lamdx4",
+    "status": "approved",
+    "reviewed_at": "2026-07-13T22:00:00+07:00"
+  },
+  "cases": [
+    {
+      "query_id": "factual_01",
+      "query": "Doanh nghiệp có quyền tự do kinh doanh ngành nghề mà luật không cấm không?",
+      "intent": "factual",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "hybrid_seed_and_semantic_graph",
+        "expected_available": true,
+        "reason": "Pilot has Article/Clause vectors, full-text indexes, and semantic relations."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art7_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 trực tiếp quy định quyền tự do kinh doanh ngành, nghề mà luật không cấm."
+        },
+        {
+          "unit_id": "ldn_2020_art7",
+          "relevance": 2,
+          "reason": "Điều 7 tập hợp các quyền của doanh nghiệp."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "factual_02",
+      "query": "Doanh nghiệp phải xử lý thế nào khi thông tin đăng ký đã kê khai thiếu chính xác?",
+      "intent": "factual",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "hybrid_seed_and_semantic_graph",
+        "expected_available": true,
+        "reason": "Pilot supports lexical and semantic retrieval over enterprise obligations."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art8_cl3",
+          "relevance": 3,
+          "reason": "Khoản 3 yêu cầu kịp thời sửa đổi, bổ sung thông tin thiếu chính xác hoặc chưa đầy đủ."
+        },
+        {
+          "unit_id": "ldn_2020_art8",
+          "relevance": 2,
+          "reason": "Điều 8 quy định nghĩa vụ của doanh nghiệp."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "factual_03",
+      "query": "Những tổ chức, cá nhân nào không có quyền thành lập và quản lý doanh nghiệp?",
+      "intent": "factual",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "hybrid_seed_and_semantic_graph",
+        "expected_available": true,
+        "reason": "The restriction is present in a canonical Clause and its parent Article."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art17_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 liệt kê các đối tượng không có quyền thành lập và quản lý doanh nghiệp."
+        },
+        {
+          "unit_id": "ldn_2020_art17",
+          "relevance": 2,
+          "reason": "Điều 17 là điều luật trực tiếp về quyền thành lập và quản lý doanh nghiệp."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "factual_04",
+      "query": "Doanh nghiệp xã hội phải sử dụng tối thiểu bao nhiêu phần trăm lợi nhuận sau thuế để tái đầu tư?",
+      "intent": "factual",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "hybrid_seed_and_semantic_graph",
+        "expected_available": true,
+        "reason": "The pilot contains the social-enterprise criteria at Clause level."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art10_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 chứa tiêu chí sử dụng ít nhất 51% tổng lợi nhuận sau thuế để tái đầu tư."
+        },
+        {
+          "unit_id": "ldn_2020_art10",
+          "relevance": 2,
+          "reason": "Điều 10 quy định tiêu chí, quyền và nghĩa vụ của doanh nghiệp xã hội."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "factual_05",
+      "query": "Doanh nghiệp được giải thể khi đáp ứng những điều kiện nào?",
+      "intent": "factual",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "hybrid_seed_and_semantic_graph",
+        "expected_available": true,
+        "reason": "Dissolution cases and conditions are indexed in the pilot graph."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art207_cl1",
+          "relevance": 2,
+          "reason": "Khoản 1 liệt kê các trường hợp doanh nghiệp bị giải thể."
+        },
+        {
+          "unit_id": "ldn_2020_art207_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 quy định điều kiện thanh toán nợ và không có tranh chấp đang giải quyết."
+        },
+        {
+          "unit_id": "ldn_2020_art207",
+          "relevance": 2,
+          "reason": "Điều 207 là điều luật tổng hợp về trường hợp và điều kiện giải thể."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "definition_01",
+      "query": "Cổ đông là gì?",
+      "intent": "definition",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "lexical_definition",
+        "expected_available": true,
+        "reason": "The statutory definition is present in Article/Clause text; accepted DEFINES evidence for this exact gold unit is not assumed."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art4_cl3",
+          "relevance": 3,
+          "reason": "Khoản 3 định nghĩa trực tiếp cổ đông."
+        },
+        {
+          "unit_id": "ldn_2020_art4",
+          "relevance": 2,
+          "reason": "Điều 4 là điều giải thích từ ngữ."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "definition_02",
+      "query": "Vốn điều lệ là gì?",
+      "intent": "definition",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "lexical_definition",
+        "expected_available": true,
+        "reason": "The statutory definition is present in Article/Clause text; accepted DEFINES evidence for this exact gold unit is not assumed."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art4_cl34",
+          "relevance": 3,
+          "reason": "Khoản 34 định nghĩa trực tiếp vốn điều lệ."
+        },
+        {
+          "unit_id": "ldn_2020_art4",
+          "relevance": 2,
+          "reason": "Điều 4 là điều giải thích từ ngữ."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "definition_03",
+      "query": "Doanh nghiệp được hiểu thế nào?",
+      "intent": "definition",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "lexical_definition",
+        "expected_available": true,
+        "reason": "The statutory definition is present in Article/Clause text; accepted DEFINES evidence for this exact gold unit is not assumed."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art4_cl10",
+          "relevance": 3,
+          "reason": "Khoản 10 định nghĩa trực tiếp doanh nghiệp."
+        },
+        {
+          "unit_id": "ldn_2020_art4",
+          "relevance": 2,
+          "reason": "Điều 4 là điều giải thích từ ngữ."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "definition_04",
+      "query": "Góp vốn là gì?",
+      "intent": "definition",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "lexical_definition",
+        "expected_available": true,
+        "reason": "The statutory definition is present in Article/Clause text; accepted DEFINES evidence for this exact gold unit is not assumed."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art4_cl18",
+          "relevance": 3,
+          "reason": "Khoản 18 định nghĩa trực tiếp việc góp vốn."
+        },
+        {
+          "unit_id": "ldn_2020_art4",
+          "relevance": 2,
+          "reason": "Điều 4 là điều giải thích từ ngữ."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "definition_05",
+      "query": "Người đại diện theo pháp luật của doanh nghiệp là gì?",
+      "intent": "definition",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "lexical_definition",
+        "expected_available": true,
+        "reason": "The statutory definition is present in Article/Clause text; accepted DEFINES evidence for this exact gold unit is not assumed."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art12_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 mô tả trực tiếp khái niệm và vai trò người đại diện theo pháp luật."
+        },
+        {
+          "unit_id": "ldn_2020_art12",
+          "relevance": 2,
+          "reason": "Điều 12 quy định về người đại diện theo pháp luật."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "multi_hop_01",
+      "query": "Điều 38 dẫn chiếu Điều 41 và khoản nào tại Điều 41 xác định tên gây nhầm lẫn?",
+      "intent": "multi_hop",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "semantic_multi_hop_graph",
+        "expected_available": true,
+        "reason": "Pilot contains accepted REFERS_TO from ldn_2020_art38_cl1 to ldn_2020_art41 and structural CONTAINS from that Article to its Clauses."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art38_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 Điều 38 contains the citation."
+        },
+        {
+          "unit_id": "ldn_2020_art41",
+          "relevance": 3,
+          "reason": "Điều 41 is the cited rule on duplicate and confusing names."
+        },
+        {
+          "unit_id": "ldn_2020_art41_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 trực tiếp quy định các trường hợp tên gây nhầm lẫn."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "requires_graph_path": true,
+      "minimum_hops": 2,
+      "graph_case_type": "multi_edge_traversal",
+      "gold_paths": [
+        {
+          "source_id": "ldn_2020_art38_cl1",
+          "relation_types": [
+            "REFERS_TO",
+            "CONTAINS"
+          ],
+          "target_id": "ldn_2020_art41_cl2"
+        }
+      ]
+    },
+    {
+      "query_id": "multi_hop_02",
+      "query": "Từ quy định về cuộc họp lần thứ ba tại Khoản 3 Điều 145, hãy lần theo các dẫn chiếu để xác định điều kiện của lần họp thứ hai và lần họp thứ nhất.",
+      "intent": "multi_hop",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "semantic_multi_hop_graph",
+        "expected_available": true,
+        "reason": "Pilot contains accepted REFERS_TO chain ldn_2020_art145_cl3 to ldn_2020_art145_cl2 to ldn_2020_art145_cl1 with citation provenance."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art145_cl3",
+          "relevance": 3,
+          "reason": "Khoản 3 covers the third meeting after the second meeting fails."
+        },
+        {
+          "unit_id": "ldn_2020_art145_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 covers the second meeting after the first meeting fails."
+        },
+        {
+          "unit_id": "ldn_2020_art145_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 states the first-meeting condition."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "requires_graph_path": true,
+      "minimum_hops": 2,
+      "graph_case_type": "multi_edge_traversal",
+      "gold_paths": [
+        {
+          "source_id": "ldn_2020_art145_cl3",
+          "relation_types": [
+            "REFERS_TO",
+            "REFERS_TO"
+          ],
+          "target_id": "ldn_2020_art145_cl1"
+        }
+      ]
+    },
+    {
+      "query_id": "multi_hop_03",
+      "query": "Điều 57 dẫn chiếu quyền yêu cầu của thành viên tại Điều nào, và khoản nào của điều đó quy định quyền của nhóm thành viên đủ điều kiện?",
+      "intent": "multi_hop",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "semantic_multi_hop_graph",
+        "expected_available": true,
+        "reason": "Pilot contains accepted REFERS_TO from ldn_2020_art57_cl1 to ldn_2020_art49 and structural CONTAINS to the member-rights Clauses."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art57_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 Điều 57 contains the citation."
+        },
+        {
+          "unit_id": "ldn_2020_art49",
+          "relevance": 3,
+          "reason": "Điều 49 is the cited source of member request rights."
+        },
+        {
+          "unit_id": "ldn_2020_art49_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 trực tiếp quy định quyền của thành viên hoặc nhóm thành viên đủ điều kiện."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "requires_graph_path": true,
+      "minimum_hops": 2,
+      "graph_case_type": "multi_edge_traversal",
+      "gold_paths": [
+        {
+          "source_id": "ldn_2020_art57_cl1",
+          "relation_types": [
+            "REFERS_TO",
+            "CONTAINS"
+          ],
+          "target_id": "ldn_2020_art49_cl2"
+        }
+      ]
+    },
+    {
+      "query_id": "multi_hop_04",
+      "query": "Khoản 2 Điều 68 dẫn chiếu điều nào về chuyển nhượng phần vốn góp, và khoản nào của điều đó quy định trình tự chào bán phần vốn góp?",
+      "intent": "multi_hop",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "semantic_multi_hop_graph",
+        "expected_available": true,
+        "reason": "Pilot contains accepted REFERS_TO from ldn_2020_art68_cl2 to ldn_2020_art52 and structural CONTAINS to its transfer Clause."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art68_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 Điều 68 contains the citation."
+        },
+        {
+          "unit_id": "ldn_2020_art52",
+          "relevance": 3,
+          "reason": "Điều 52 is the cited transfer rule."
+        },
+        {
+          "unit_id": "ldn_2020_art52_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 trực tiếp quy định trình tự chào bán phần vốn góp."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "requires_graph_path": true,
+      "minimum_hops": 2,
+      "graph_case_type": "multi_edge_traversal",
+      "gold_paths": [
+        {
+          "source_id": "ldn_2020_art68_cl2",
+          "relation_types": [
+            "REFERS_TO",
+            "CONTAINS"
+          ],
+          "target_id": "ldn_2020_art52_cl1"
+        }
+      ]
+    },
+    {
+      "query_id": "multi_hop_05",
+      "query": "Khoản 1 Điều 52 dẫn chiếu những trường hợp xử lý phần vốn góp tại Điều 53 như thế nào?",
+      "intent": "multi_hop",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "semantic_multi_hop_graph",
+        "expected_available": true,
+        "reason": "Pilot contains accepted REFERS_TO relations from ldn_2020_art52_cl1 to both ldn_2020_art53_cl6 and ldn_2020_art53_cl7 with citation provenance."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art52_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 Điều 52 contains the citations."
+        },
+        {
+          "unit_id": "ldn_2020_art53_cl6",
+          "relevance": 3,
+          "reason": "Khoản 6 Điều 53 is one cited case."
+        },
+        {
+          "unit_id": "ldn_2020_art53_cl7",
+          "relevance": 3,
+          "reason": "Khoản 7 Điều 53 is the other cited case."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "requires_graph_path": true,
+      "minimum_hops": 1,
+      "graph_case_type": "branching_reference",
+      "gold_paths": [
+        {
+          "source_id": "ldn_2020_art52_cl1",
+          "relation_types": [
+            "REFERS_TO"
+          ],
+          "target_id": "ldn_2020_art53_cl6"
+        },
+        {
+          "source_id": "ldn_2020_art52_cl1",
+          "relation_types": [
+            "REFERS_TO"
+          ],
+          "target_id": "ldn_2020_art53_cl7"
+        }
+      ]
+    },
+    {
+      "query_id": "validity_01",
+      "query": "Luật Doanh nghiệp 2020 còn hiệu lực hiện nay không?",
+      "intent": "validity",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "corpus_complete_current_validity",
+        "expected_available": false,
+        "reason": "Pilot contains one document version and no AMENDS, REPEALS, or REPLACES chain."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "validity_02",
+      "query": "Điều 17 Luật Doanh nghiệp 2020 đang có hiệu lực không?",
+      "intent": "validity",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "corpus_complete_current_validity",
+        "expected_available": false,
+        "reason": "Current pilot cannot verify validity through a temporal relation chain."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "validity_03",
+      "query": "Tại ngày 01 tháng 01 năm 2021 Luật Doanh nghiệp 2020 đang có hiệu lực không?",
+      "intent": "validity",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "scoped_temporal_metadata",
+        "expected_available": true,
+        "reason": "The explicit historical date can be checked against scoped effective_from, effective_to, and legal_status metadata."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art217_cl1",
+          "relevance": 3,
+          "reason": "Khoản 1 quy định ngày Luật có hiệu lực."
+        },
+        {
+          "unit_id": "ldn_2020_art217",
+          "relevance": 2,
+          "reason": "Điều 217 là điều khoản thi hành chứa mốc hiệu lực."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "gold_temporal": {
+        "query_date": "2021-01-01",
+        "subject_unit_id": "ldn_2020",
+        "temporal_scope_document_id": "ldn_2020",
+        "expected_valid": true,
+        "required_metadata": [
+          "effective_from",
+          "effective_to",
+          "legal_status"
+        ],
+        "legal_basis_unit_ids": [
+          "ldn_2020_art217_cl1"
+        ],
+        "temporal_evidence": {
+          "source_type": "document_metadata",
+          "source_id": "ldn_2020",
+          "required_fields": [
+            "effective_from",
+            "effective_to",
+            "legal_status"
+          ]
+        }
+      }
+    },
+    {
+      "query_id": "validity_04",
+      "query": "Điều 217 hiện nay còn hiệu lực không?",
+      "intent": "validity",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "corpus_complete_current_validity",
+        "expected_available": false,
+        "reason": "The pilot has no version chain to establish current validity of the provision."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "validity_05",
+      "query": "Ngày 01 tháng 07 năm 2022, Điều 30 Luật Doanh nghiệp 2020 có hiệu lực không?",
+      "intent": "validity",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "scoped_temporal_metadata",
+        "expected_available": true,
+        "reason": "The explicit point-in-time query is scoped to persisted pilot temporal metadata."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art30",
+          "relevance": 3,
+          "reason": "Điều 30 is the legal unit whose scoped validity is requested."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "gold_temporal": {
+        "query_date": "2022-07-01",
+        "subject_unit_id": "ldn_2020_art30",
+        "temporal_scope_document_id": "ldn_2020",
+        "expected_valid": true,
+        "required_metadata": [
+          "effective_from",
+          "effective_to",
+          "legal_status"
+        ],
+        "legal_basis_unit_ids": [],
+        "temporal_evidence": {
+          "source_type": "document_metadata",
+          "source_id": "ldn_2020",
+          "required_fields": [
+            "effective_from",
+            "effective_to",
+            "legal_status"
+          ]
+        }
+      }
+    },
+    {
+      "query_id": "hierarchy_01",
+      "query": "Văn bản nào hướng dẫn Điều 10 về doanh nghiệp xã hội?",
+      "intent": "hierarchy",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "guides_relations",
+        "expected_available": false,
+        "reason": "Pilot contains no GUIDES relation to an implementing document."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "hierarchy_02",
+      "query": "Văn bản nào hướng dẫn thủ tục đăng ký doanh nghiệp tại Điều 26?",
+      "intent": "hierarchy",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "guides_relations",
+        "expected_available": false,
+        "reason": "The implementing-document relation is unavailable in the one-document pilot."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "hierarchy_03",
+      "query": "Khoản 2 quy định các đối tượng không được thành lập doanh nghiệp thuộc Điều nào?",
+      "intent": "hierarchy",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "structural_hierarchy",
+        "expected_available": true,
+        "reason": "The Document-Article-Clause CONTAINS hierarchy exists in the pilot."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art17_cl2",
+          "relevance": 3,
+          "reason": "Khoản 2 contains the described restriction."
+        },
+        {
+          "unit_id": "ldn_2020_art17",
+          "relevance": 2,
+          "reason": "Điều 17 is the parent provision."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "gold_hierarchy": [
+        {
+          "parent_id": "ldn_2020_art17",
+          "relation_type": "CONTAINS",
+          "child_id": "ldn_2020_art17_cl2"
+        }
+      ]
+    },
+    {
+      "query_id": "hierarchy_04",
+      "query": "Khoản quy định nghĩa vụ đăng ký thay đổi và khoản quy định trường hợp thay đổi theo quyết định của Tòa án thuộc Điều nào?",
+      "intent": "hierarchy",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "structural_hierarchy",
+        "expected_available": true,
+        "reason": "The Article-Clause CONTAINS hierarchy is available."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art30",
+          "relevance": 3,
+          "reason": "Điều 30 is the parent Article for the described clauses."
+        },
+        {
+          "unit_id": "ldn_2020_art30_cl1",
+          "relevance": 2,
+          "reason": "Khoản 1 states the registration obligation."
+        },
+        {
+          "unit_id": "ldn_2020_art30_cl4",
+          "relevance": 2,
+          "reason": "Khoản 4 states the court/arbitration procedure."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "gold_hierarchy": [
+        {
+          "parent_id": "ldn_2020_art30",
+          "relation_type": "CONTAINS",
+          "child_id": "ldn_2020_art30_cl1"
+        },
+        {
+          "parent_id": "ldn_2020_art30",
+          "relation_type": "CONTAINS",
+          "child_id": "ldn_2020_art30_cl4"
+        }
+      ]
+    },
+    {
+      "query_id": "hierarchy_05",
+      "query": "Điểm a về cơ quan nhà nước không được thành lập doanh nghiệp thuộc Khoản và Điều nào?",
+      "intent": "hierarchy",
+      "expected_status": "supported",
+      "capability_requirement": {
+        "name": "structural_hierarchy",
+        "expected_available": true,
+        "reason": "The Point-Clause-Article CONTAINS hierarchy is available; Point evidence is lifted to Clause/Article results."
+      },
+      "gold_relevance": [
+        {
+          "unit_id": "ldn_2020_art17_cl2",
+          "relevance": 3,
+          "reason": "Điểm a belongs to Khoản 2."
+        },
+        {
+          "unit_id": "ldn_2020_art17",
+          "relevance": 2,
+          "reason": "Khoản 2 belongs to Điều 17."
+        }
+      ],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      },
+      "gold_hierarchy": [
+        {
+          "parent_id": "ldn_2020_art17",
+          "relation_type": "CONTAINS",
+          "child_id": "ldn_2020_art17_cl2"
+        },
+        {
+          "parent_id": "ldn_2020_art17_cl2",
+          "relation_type": "CONTAINS",
+          "child_id": "ldn_2020_art17_cl2_pa"
+        }
+      ]
+    },
+    {
+      "query_id": "comparison_01",
+      "query": "So sánh quy định về quyền thành lập doanh nghiệp năm 2020 và năm 2021 khác nhau thế nào?",
+      "intent": "comparison",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "multiple_versions",
+        "expected_available": false,
+        "reason": "Pilot contains only the 2020 Law graph and no comparable version chain."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "comparison_02",
+      "query": "Quy định vốn điều lệ trước và sau năm 2021 khác nhau như thế nào?",
+      "intent": "comparison",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "multiple_versions",
+        "expected_available": false,
+        "reason": "No previous and subsequent legal versions are present in the pilot graph."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "comparison_03",
+      "query": "So sánh điều kiện giải thể doanh nghiệp năm 2021 và năm 2022?",
+      "intent": "comparison",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "multiple_versions",
+        "expected_available": false,
+        "reason": "The pilot cannot compare provisions across legal versions."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "comparison_04",
+      "query": "Quy định về công ty trách nhiệm hữu hạn trước và sau năm 2021 khác nhau ra sao?",
+      "intent": "comparison",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "multiple_versions",
+        "expected_available": false,
+        "reason": "Only one legal version is available in the scoped pilot graph."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    },
+    {
+      "query_id": "comparison_05",
+      "query": "So sánh thủ tục đăng ký doanh nghiệp năm 2021 với năm 2023 khác nhau thế nào?",
+      "intent": "comparison",
+      "expected_status": "unsupported",
+      "capability_requirement": {
+        "name": "multiple_versions",
+        "expected_available": false,
+        "reason": "The pilot lacks multiple versions and temporal change relations for comparison."
+      },
+      "gold_relevance": [],
+      "review": {
+        "reviewer": "lamdx4",
+        "status": "approved",
+        "reviewed_at": "2026-07-13T22:00:00+07:00"
+      }
+    }
+  ]
+}

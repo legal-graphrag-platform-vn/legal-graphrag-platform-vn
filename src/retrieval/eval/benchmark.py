@@ -1,57 +1,73 @@
+"""Deterministic retrieval benchmark and ablation runner."""
+
 import json
-import logging
-from typing import Dict, List
+from pathlib import Path
+from typing import Protocol
 
-from src.retrieval.eval.metrics import calculate_mrr, calculate_ndcg_at_k, calculate_recall_at_k
-from src.retrieval.retriever.hybrid import HybridRetriever
+from src.retrieval.eval.metrics import (
+    calculate_mrr,
+    calculate_ndcg_at_k,
+    calculate_recall_at_k,
+)
+from src.retrieval.models import RetrievalContext
 
-logger = logging.getLogger(__name__)
+
+class RetrieverProtocol(Protocol):
+    def retrieve(self, query: str, *, top_k: int, final_k: int) -> RetrievalContext: ...
+
+
+class BenchmarkDatasetError(ValueError):
+    """Raised when retrieval benchmark data does not satisfy the evaluation contract."""
 
 
 class BenchmarkRunner:
-    """
-    Chạy bộ câu hỏi chuẩn (dev split) qua Retriever và tính toán các chỉ số Ablation.
-    """
+    def __init__(self, retrievers: dict[str, RetrieverProtocol]):
+        if not retrievers:
+            raise ValueError("At least one retrieval variant is required")
+        self._retrievers = retrievers
 
-    def __init__(self, retriever: HybridRetriever):
-        self.retriever = retriever
-
-    def run(self, dataset_path: str, top_k: int = 5) -> Dict[str, float]:
-        """
-        Chạy benchmark. 
-        Dataset format: [{"query": "...", "expected_ids": ["id1", "id2"]}]
-        """
-        with open(dataset_path, "r", encoding="utf-8") as f:
-            dataset = json.load(f)
-            
-        total_queries = len(dataset)
-        sum_recall = 0.0
-        sum_mrr = 0.0
-        sum_ndcg = 0.0
-        
-        for item in dataset:
-            query = item["query"]
-            expected_ids = item["expected_ids"]
-            
-            # Gọi Retriever
-            context = self.retriever.retrieve(query, top_k=20, final_k=top_k)
-            retrieved_ids = [unit.id for unit in context.retrieved_units]
-            
-            # Tính metrics cho từng câu hỏi
-            recall = calculate_recall_at_k(retrieved_ids, expected_ids, k=top_k)
-            mrr = calculate_mrr(retrieved_ids, expected_ids)
-            ndcg = calculate_ndcg_at_k(retrieved_ids, expected_ids, k=top_k)
-            
-            sum_recall += recall
-            sum_mrr += mrr
-            sum_ndcg += ndcg
-            
-        # Trả về kết quả trung bình
-        results = {
-            f"Recall@{top_k}": sum_recall / total_queries if total_queries else 0.0,
-            "MRR": sum_mrr / total_queries if total_queries else 0.0,
-            f"nDCG@{top_k}": sum_ndcg / total_queries if total_queries else 0.0,
-            "Total_Queries": total_queries
+    def run(
+        self, dataset_path: str | Path, top_k: int = 5
+    ) -> dict[str, dict[str, float]]:
+        dataset = _load_dataset(dataset_path)
+        return {
+            variant: _evaluate(retriever, dataset, top_k)
+            for variant, retriever in sorted(self._retrievers.items())
         }
-        
-        return results
+
+
+def _load_dataset(dataset_path: str | Path) -> list[dict[str, object]]:
+    with Path(dataset_path).open(encoding="utf-8") as stream:
+        payload = json.load(stream)
+    if not isinstance(payload, list) or not payload:
+        raise BenchmarkDatasetError("Benchmark dataset must be a non-empty JSON list")
+    for index, item in enumerate(payload):
+        if not isinstance(item, dict) or not str(item.get("query", "")).strip():
+            raise BenchmarkDatasetError(f"Benchmark item {index} has no query")
+        expected_ids = item.get("expected_ids")
+        if not isinstance(expected_ids, list) or not expected_ids:
+            raise BenchmarkDatasetError(f"Benchmark item {index} has no expected_ids")
+    return payload
+
+
+def _evaluate(
+    retriever: RetrieverProtocol,
+    dataset: list[dict[str, object]],
+    top_k: int,
+) -> dict[str, float]:
+    totals = {"recall": 0.0, "mrr": 0.0, "ndcg": 0.0}
+    for item in dataset:
+        query = str(item["query"])
+        expected_ids = [str(value) for value in item["expected_ids"]]
+        context = retriever.retrieve(query, top_k=max(top_k, 20), final_k=top_k)
+        retrieved_ids = [unit.id for unit in context.retrieved_units]
+        totals["recall"] += calculate_recall_at_k(retrieved_ids, expected_ids, k=top_k)
+        totals["mrr"] += calculate_mrr(retrieved_ids, expected_ids)
+        totals["ndcg"] += calculate_ndcg_at_k(retrieved_ids, expected_ids, k=top_k)
+    count = len(dataset)
+    return {
+        f"Recall@{top_k}": totals["recall"] / count,
+        "MRR": totals["mrr"] / count,
+        f"nDCG@{top_k}": totals["ndcg"] / count,
+        "Total_Queries": float(count),
+    }

@@ -13,21 +13,35 @@ def test_temporal_filter_no_temporal():
 
     units = [
         RetrievedUnit(
-            id="1", label="Article", content_raw="Bản cũ", document_id="doc1", 
-            document_number="L102", article_number="Điều 1", citation_label="Điều 1, L102",
-            effective_from=date(2010, 1, 1), effective_to=date(2020, 12, 31)
+            id="1",
+            label="Article",
+            content_raw="Bản cũ",
+            document_id="doc1",
+            document_number="L102",
+            article_number="Điều 1",
+            citation_label="Điều 1, L102",
+            effective_from=date(2010, 1, 1),
+            effective_to=date(2020, 12, 31),
+            version_family_id="law_article_1",
         ),
         RetrievedUnit(
-            id="2", label="Article", content_raw="Bản mới", document_id="doc2", 
-            document_number="L102", article_number="Điều 1", citation_label="Điều 1, L102",
-            effective_from=date(2021, 1, 1), effective_to=None
+            id="2",
+            label="Article",
+            content_raw="Bản mới",
+            document_id="doc2",
+            document_number="L102",
+            article_number="Điều 1",
+            citation_label="Điều 1, L102",
+            effective_from=date(2021, 1, 1),
+            effective_to=None,
+            version_family_id="law_article_1",
         ),
     ]
 
     resolved = filter_obj.filter_and_resolve(units, temporal)
-    
+
     assert len(resolved) == 1
-    assert resolved[0].id == "2" # Phải ưu tiên bản mới nhất
+    assert resolved[0].id == "2"  # Phải ưu tiên bản mới nhất
 
 
 def test_temporal_filter_with_target_date():
@@ -36,27 +50,41 @@ def test_temporal_filter_with_target_date():
     """
     filter_obj = TemporalFilter()
     temporal = TemporalQuery(
-        has_temporal=True, 
-        resolved_from=date(2015, 6, 1) # Hỏi về năm 2015
+        has_temporal=True,
+        resolved_from=date(2015, 6, 1),  # Hỏi về năm 2015
     )
 
     units = [
         RetrievedUnit(
-            id="1", label="Article", content_raw="Bản cũ", document_id="doc1", 
-            document_number="L102", article_number="Điều 1", citation_label="Điều 1, L102",
-            effective_from=date(2010, 1, 1), effective_to=date(2020, 12, 31)
+            id="1",
+            label="Article",
+            content_raw="Bản cũ",
+            document_id="doc1",
+            document_number="L102",
+            article_number="Điều 1",
+            citation_label="Điều 1, L102",
+            effective_from=date(2010, 1, 1),
+            effective_to=date(2020, 12, 31),
         ),
         RetrievedUnit(
-            id="2", label="Article", content_raw="Bản mới", document_id="doc2", 
-            document_number="L102", article_number="Điều 1", citation_label="Điều 1, L102",
-            effective_from=date(2021, 1, 1), effective_to=None
+            id="2",
+            label="Article",
+            content_raw="Bản mới",
+            document_id="doc2",
+            document_number="L102",
+            article_number="Điều 1",
+            citation_label="Điều 1, L102",
+            effective_from=date(2021, 1, 1),
+            effective_to=None,
         ),
     ]
 
     resolved = filter_obj.filter_and_resolve(units, temporal)
-    
+
     assert len(resolved) == 1
-    assert resolved[0].id == "1" # Năm 2015 thì bản cũ còn hiệu lực, bản mới chưa có hiệu lực
+    assert (
+        resolved[0].id == "1"
+    )  # Năm 2015 thì bản cũ còn hiệu lực, bản mới chưa có hiệu lực
 
 
 def test_temporal_filter_conflict_resolution():
@@ -70,20 +98,67 @@ def test_temporal_filter_conflict_resolution():
     units = [
         # Cả 2 bản đều chưa hết hiệu lực hoặc lỗi data (không có effective_to)
         RetrievedUnit(
-            id="1", label="Article", content_raw="Bản gốc", document_id="doc1", 
-            document_number="L102", article_number="Điều 1", citation_label="Điều 1, L102",
-            effective_from=date(2010, 1, 1), effective_to=None
+            id="1",
+            label="Article",
+            content_raw="Bản gốc",
+            document_id="doc1",
+            document_number="L102",
+            article_number="Điều 1",
+            citation_label="Điều 1, L102",
+            effective_from=date(2010, 1, 1),
+            effective_to=None,
+            version_family_id="law_article_1",
         ),
         RetrievedUnit(
-            id="2", label="Article", content_raw="Bản sửa đổi", document_id="doc2", 
-            document_number="L102", article_number="Điều 1", citation_label="Điều 1, L102",
-            effective_from=date(2021, 1, 1), effective_to=None
+            id="2",
+            label="Article",
+            content_raw="Bản sửa đổi",
+            document_id="doc2",
+            document_number="L102",
+            article_number="Điều 1",
+            citation_label="Điều 1, L102",
+            effective_from=date(2021, 1, 1),
+            effective_to=None,
+            version_family_id="law_article_1",
         ),
     ]
 
     resolved = filter_obj.filter_and_resolve(units, temporal)
-    
+
     # Cả 2 đều qua bước filter vì effective_from <= 2022 và effective_to is None
     # Nhưng ở bước _resolve_conflicts, bản "Bản sửa đổi" (2021) sẽ ghi đè bản 2010
     assert len(resolved) == 1
     assert resolved[0].id == "2"
+
+
+def test_year_interval_includes_units_effective_later_in_the_year():
+    filter_obj = TemporalFilter()
+    temporal = TemporalQuery(
+        has_temporal=True,
+        resolved_from=date(2022, 1, 1),
+        resolved_to=date(2022, 12, 31),
+        granularity="year",
+    )
+    unit = RetrievedUnit(
+        id="later",
+        label="Article",
+        content_raw="Có hiệu lực giữa năm",
+        document_id="doc",
+        citation_label="Điều 1",
+        effective_from=date(2022, 7, 1),
+    )
+
+    assert filter_obj.filter([unit], temporal) == [unit]
+
+
+def test_temporal_query_rejects_unit_with_unknown_effective_from():
+    unit = RetrievedUnit(
+        id="unknown",
+        label="Article",
+        content_raw="Thiếu metadata",
+        document_id="doc",
+        citation_label="Điều 1",
+    )
+    temporal = TemporalQuery(has_temporal=True, resolved_from=date(2022, 1, 1))
+
+    assert TemporalFilter().filter([unit], temporal) == []

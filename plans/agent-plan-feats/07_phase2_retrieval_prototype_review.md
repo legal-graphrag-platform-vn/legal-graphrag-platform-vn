@@ -4,22 +4,23 @@
 > Parent plan: `07_phase2_graphrag_retrieval_plan.md`
 > Canonical ontology: `plans/legal_ontology.md` v1.5.0
 > Canonical retrieval contract: `plans/05_graphrag_retrieval.md`
-> Status: DEFERRED; do not implement until Milestone A is signed off
+> Status: ACTIVE FIX REGISTER; implementation is allowed on the signed-off
+> `L59_2020` pilot while Gate 7 and M3-B13 remain open.
 
 ## Status
 
 ```text
 Phase 1 M3: BLOCKED
 Milestone A: NOT PASSED
-Phase 2: BLOCKED / prototype only
+Phase 2 implementation: ACTIVE on pilot data
+Phase 2 acceptance: BLOCKED by Gate 7 / M3-B13
 Retrieval prototype runtime readiness: FAIL
 Temporal/legal correctness: UNSAFE
 ```
 
-The files under `src/retrieval/` are architecture prototypes only. They must not
-be counted as active Phase 2 progress or accepted Milestone B work. Do not fix or
-promote them while `06_m3_blocker_register.md` still contains open Milestone A
-blockers.
+The files under `src/retrieval/` are being promoted from prototype to the
+canonical retrieval implementation. Pilot results are development evidence only
+and must not be reported as Milestone B acceptance until Gate 7 passes.
 
 ## Deferred Findings
 
@@ -82,7 +83,7 @@ multi_hop:
 enum from `src/shared/ontology/contract.py`, excluding legacy aliases and any
 non-ontology operational relationship.
 
-## Required Fix Order After Milestone A
+## Active Pilot Fix Order
 
 1. Fix vector embedding shape, full-text index names, and Document path depth.
 2. Create the canonical six-intent traversal policy registry.
@@ -97,15 +98,17 @@ non-ontology operational relationship.
 
 ## Promotion Gate
 
-The prototype may become active Phase 2 code only when:
+The implementation may be used for pilot development when:
 
-- Milestone A is signed off;
 - every High finding above has a passing contract test;
 - no retrieval module imports from `src/pipeline/`, `apps/`, or `prototypes/`;
 - schema/index names match the live Neo4j bootstrap;
 - temporal queries cannot silently accept unknown validity metadata;
 - graph-expanded units affect final ranked results;
 - benchmark variants are reproducible and use a held-out dataset.
+
+Milestone B acceptance additionally requires Gate 7/M3-B13 and Milestone A to
+pass; pilot-only results cannot satisfy that acceptance condition.
 
 ## Review Verification
 

@@ -1,74 +1,169 @@
+"""Internal retrieval DTOs built on the versioned shared contract."""
+
+from __future__ import annotations
+
 from datetime import date
-from enum import Enum
-from typing import Dict, List, Literal, Optional
+from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
+from src.shared.retrieval_contract import (
+    IntentType,
+    RetrievalChannel,
+    RetrievalCapability,
+    RetrievalDecisionReasonCode,
+    RetrievalFilters,
+    RetrievalRequest,
+    RetrievalStrategyType,
+    TemporalSource,
+)
 
-class IntentType(str, Enum):
-    FACTUAL = "factual"
-    VALIDITY = "validity"
-    HIERARCHY = "hierarchy"
-    COMPARISON = "comparison"
-    DEFINITION = "definition"
-    MULTI_HOP = "multi_hop"
+__all__ = [
+    "IntentType",
+    "RetrievalChannel",
+    "RetrievalCapability",
+    "RetrievalDecisionReasonCode",
+    "RetrievalFilters",
+    "RetrievalRequest",
+    "RetrievalStrategyType",
+    "TemporalSource",
+]
 
 
 class TemporalQuery(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     has_temporal: bool
-    expression: Optional[str] = None
-    resolved_from: Optional[date] = None
-    resolved_to: Optional[date] = None
-    granularity: Optional[str] = None
+    expression: str | None = None
+    resolved_from: date | None = None
+    resolved_to: date | None = None
+    granularity: str | None = None
+    parse_error: str | None = None
+    requests_current_validity: bool = False
 
 
 class RetrievedUnit(BaseModel):
     id: str
     label: Literal["Article", "Clause", "Point"]
     content_raw: str
-    title: Optional[str] = None
+    title: str | None = None
     document_id: str
-    document_number: Optional[str] = None
-    article_number: Optional[str] = None
-    clause_number: Optional[str] = None
-    effective_from: Optional[date] = None
-    effective_to: Optional[date] = None
-    vector_score: Optional[float] = None
-    bm25_score: Optional[float] = None
-    graph_score: Optional[float] = None
-    rerank_score: Optional[float] = None
-    final_score: Optional[float] = None
+    document_number: str | None = None
+    document_title: str | None = None
+    source_url: str | None = None
+    article_number: str | None = None
+    clause_number: str | None = None
+    version_family_id: str | None = None
+    effective_from: date | None = None
+    effective_to: date | None = None
+    legal_status: str | None = None
+    vector_score: float | None = None
+    bm25_score: float | None = None
+    graph_score: float | None = None
+    rerank_score: float | None = None
+    final_score: float | None = None
     citation_label: str
+    deep_link: str = ""
+    retrieval_sources: list[Literal["vector", "fulltext", "graph"]] = Field(
+        default_factory=list
+    )
 
 
 class GraphPath(BaseModel):
-    nodes: List[str]
-    relations: List[str]
+    nodes: list[str]
+    relations: list[str]
+    relation_ids: list[str] = Field(default_factory=list)
     path_description: str
     is_temporal_valid: bool
+
+
+class GraphExpansion(BaseModel):
+    paths: list[GraphPath] = Field(default_factory=list)
+    units: list[RetrievedUnit] = Field(default_factory=list)
 
 
 class EvidenceItem(BaseModel):
     unit_id: str
     evidence_type: Literal["vector", "bm25", "graph", "temporal", "rerank"]
-    matched_text: Optional[str] = None
-    score: Optional[float] = None
-    source_path_id: Optional[str] = None
+    matched_text: str | None = None
+    score: float | None = None
+    source_path_id: str | None = None
     is_sufficient: bool = False
 
 
+class CapabilitySnapshot(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    vector_article_index_available: bool = False
+    vector_clause_index_available: bool = False
+    fulltext_index_available: bool = False
+    scoped_temporal_metadata_available: bool = False
+    corpus_complete_current_validity_available: bool = False
+    temporal_relations_available: bool = False
+    structural_hierarchy_available: bool = False
+    guides_relations_available: bool = False
+    multiple_versions_available: bool = False
+    definition_relations_available: bool = False
+    semantic_multi_hop_graph_available: bool = False
+    canonical_relation_types_available: frozenset[str] = frozenset()
+
+
+class RetrievalDecision(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    contract_version: Literal["retrieval-runtime-v1"]
+    intent: IntentType
+    strategy: RetrievalStrategyType
+    seed_channels: tuple[RetrievalChannel, ...]
+    graph_enabled: bool
+    graph_policy_intent: IntentType | None
+    candidate_k: int
+    graph_entry_k: int
+    final_k: int
+    apply_temporal_filter: bool
+    preserve_versions: bool
+    require_temporal_point: bool
+    enable_reranker: bool
+    force_intent_used: bool
+    temporal_source: TemporalSource
+    decision_reason_code: RetrievalDecisionReasonCode
+    decision_reason: str
+    required_capability: RetrievalCapability | None = None
+
+
+class RoutingResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    decision: RetrievalDecision
+    temporal: TemporalQuery
+    filters: RetrievalFilters
+
+
 class RetrievalContext(BaseModel):
+    contract_version: Literal["retrieval-runtime-v1"] = "retrieval-runtime-v1"
     query: str
     intent: IntentType
+    strategy: RetrievalStrategyType = RetrievalStrategyType.FACTUAL_HYBRID
     temporal: TemporalQuery
-    retrieved_units: List[RetrievedUnit]
-    graph_paths: List[GraphPath]
-    evidence: List[EvidenceItem]
-    metrics: Dict[str, int]
+    temporal_source: TemporalSource = TemporalSource.NONE
+    decision_reason_code: RetrievalDecisionReasonCode = (
+        RetrievalDecisionReasonCode.FACTUAL_DEFAULT
+    )
+    decision_reason: str = "Legacy context without routing decision"
+    force_intent_used: bool = False
+    executed_channels: list[RetrievalChannel] = Field(default_factory=list)
+    filters_applied: RetrievalFilters = Field(default_factory=RetrievalFilters)
+    reranker_applied: bool = False
+    capability_status: Literal["supported", "no_results"] = "supported"
+    retrieved_units: list[RetrievedUnit]
+    graph_paths: list[GraphPath]
+    evidence: list[EvidenceItem]
+    metrics: dict[str, Any]
     retrieval_mode: Literal[
         "vector_only",
         "vector_graph",
+        "fulltext_only",
         "hybrid",
-        "text_only_fallback"
+        "no_results",
     ]
     confidence_penalty: bool = False

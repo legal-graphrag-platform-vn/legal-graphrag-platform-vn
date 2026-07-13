@@ -1,54 +1,59 @@
-from typing import List
+"""Build source-preserving evidence records from retrieval results."""
 
 from src.retrieval.models import EvidenceItem, GraphPath, RetrievedUnit
 
 
+_EVIDENCE_TYPE = {"vector": "vector", "fulltext": "bm25", "graph": "graph"}
+
+
 class EvidenceVerifier:
-    """
-    Đánh giá độ tin cậy và mức độ đầy đủ của bằng chứng (Evidence) thu thập được.
-    """
-
-    def __init__(self, score_threshold: float = 0.5):
-        self.score_threshold = score_threshold
-
-    def verify_and_build(self, units: List[RetrievedUnit], graph_paths: List[GraphPath]) -> List[EvidenceItem]:
-        """
-        Từ các unit đã rerank và graph path, tạo danh sách EvidenceItem.
-        Đánh dấu xem evidence có đủ mạnh (is_sufficient) để trả lời không.
-        """
-        evidence_list = []
-        
-        # 1. Thu thập từ RetrievedUnits
+    def verify_and_build(
+        self, units: list[RetrievedUnit], graph_paths: list[GraphPath]
+    ) -> list[EvidenceItem]:
+        evidence: list[EvidenceItem] = []
         for unit in units:
-            is_sufficient = False
-            # Nếu unit có final_score cao hơn threshold, coi là đủ mạnh
-            if unit.final_score is not None and unit.final_score >= self.score_threshold:
-                is_sufficient = True
-                
-            evidence_type = "rerank" if unit.rerank_score is not None else "vector"
-                
-            evidence = EvidenceItem(
-                unit_id=unit.id,
-                evidence_type=evidence_type,
-                matched_text=unit.content_raw,
-                score=unit.final_score,
-                is_sufficient=is_sufficient
-            )
-            evidence_list.append(evidence)
-            
-        # 2. Thu thập từ GraphPaths
-        for path in graph_paths:
-            # Gán evidence type là graph
-            # Mỗi node trong path có thể coi là 1 evidence liên quan
+            for source in unit.retrieval_sources:
+                evidence.append(
+                    EvidenceItem(
+                        unit_id=unit.id,
+                        evidence_type=_EVIDENCE_TYPE[source],
+                        matched_text=unit.content_raw,
+                        score=_score_for_source(unit, source),
+                        is_sufficient=bool(unit.content_raw.strip()),
+                    )
+                )
+            if unit.rerank_score is not None:
+                evidence.append(
+                    EvidenceItem(
+                        unit_id=unit.id,
+                        evidence_type="rerank",
+                        matched_text=unit.content_raw,
+                        score=unit.rerank_score,
+                        is_sufficient=bool(unit.content_raw.strip()),
+                    )
+                )
+
+        existing_ids = {item.unit_id for item in evidence}
+        for path_index, path in enumerate(graph_paths):
             for node_id in path.nodes:
-                # Tránh trùng lặp nếu node_id đã có trong units
-                if not any(e.unit_id == node_id for e in evidence_list):
-                    evidence = EvidenceItem(
+                if node_id in existing_ids:
+                    continue
+                evidence.append(
+                    EvidenceItem(
                         unit_id=node_id,
                         evidence_type="graph",
                         matched_text=path.path_description,
-                        is_sufficient=path.is_temporal_valid # Nếu graph path thoả mãn temporal -> đủ mạnh một phần
+                        source_path_id=f"path-{path_index}",
+                        is_sufficient=path.is_temporal_valid,
                     )
-                    evidence_list.append(evidence)
-                    
-        return evidence_list
+                )
+                existing_ids.add(node_id)
+        return evidence
+
+
+def _score_for_source(unit: RetrievedUnit, source: str) -> float | None:
+    if source == "vector":
+        return unit.vector_score
+    if source == "fulltext":
+        return unit.bm25_score
+    return unit.graph_score
