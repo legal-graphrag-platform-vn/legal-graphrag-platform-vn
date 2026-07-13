@@ -54,6 +54,20 @@ Required before implementation starts:
 
 Answer generation must not import Neo4j or execute retrieval channels directly.
 
+Plan 10 must expose one internal boundary shared by query and answer services:
+
+```python
+class RetrievalApplicationPort(Protocol):
+    async def retrieve_context(
+        self,
+        request: RetrievalRequest,
+    ) -> RetrievalContext: ...
+```
+
+`POST /query` maps `RetrievalContext` to `RetrievalResponse`. Answer generation
+consumes the original `RetrievalContext` directly. It must never reverse-map an
+API `RetrievalResponse` into domain evidence.
+
 ## 3. Scope
 
 ### In scope
@@ -127,7 +141,7 @@ answer_factory composition root
 -> may import generation and LLM infrastructure
 
 backend service
--> receives retrieval service + answer generator
+-> receives RetrievalApplicationPort + answer generator
 -> does not construct provider/model per request
 ```
 
@@ -144,14 +158,15 @@ Canonical stages:
 1. Retrieve evidence.
 2. Classify retrieval outcome: supported / no_results / unsupported / failure.
 3. Evaluate evidence sufficiency.
-4. Project bounded context and citation allowlist.
+4. Project bounded context, citation allowlist, and trusted path IDs.
 5. Call structured-output provider.
 6. Parse and validate output schema.
 7. Validate every citation against allowlist.
 8. Validate answer claims are grounded in cited evidence.
 9. Validate reasoning paths against RetrievalContext graph paths.
-10. Validate temporal note against resolved temporal context.
-11. Format final response or SSE events.
+10. Validate structured temporal assertions against resolved context.
+11. Trusted code renders reasoning explanations and temporal notes.
+12. Format final response or SSE events.
 ```
 
 Do not create a separate `/chat` implementation that bypasses the validated
@@ -172,8 +187,8 @@ class AnswerGenerationRequest(BaseModel):
 
 Rules:
 
-- Query must match the query used to build `RetrievalContext`, unless a
-  documented follow-up-query contract explicitly rebuilds retrieval.
+- Query must exactly match the standalone query used to build
+  `RetrievalContext`. V1 performs no follow-up query rewriting.
 - History is bounded by count and total characters/tokens.
 - History cannot add legal evidence to the citation allowlist.
 - System/user content is clearly separated.
@@ -186,22 +201,37 @@ Recommended model output:
 
 ```python
 class AnswerCandidate(BaseModel):
-    answer: str
-    citation_ids: list[str]
-    reasoning_paths: list[AnswerReasoningPath]
-    temporal_note: str | None
+    claims: list[AnswerClaim]
+    reasoning_path_ids: list[str]
+    temporal_assertions: list[TemporalAssertion]
     confidence: float = Field(ge=0.0, le=1.0)
     cannot_answer: bool
     insufficiency_reason: str | None
 ```
 
 ```python
-class AnswerReasoningPath(BaseModel):
-    source_id: str
-    relation_types: list[str]
-    target_id: str
-    explanation: str
+class AnswerClaim(BaseModel):
+    claim_id: str
+    text: str
+    citation_ids: list[str]
+
+class TemporalAssertion(BaseModel):
+    subject_unit_id: str
+    query_date: date
+    asserted_valid: bool
+    scope: Literal["unit", "document", "scoped_pilot", "corpus_complete"]
 ```
+
+Every substantive claim requires one or more citation IDs. When
+`cannot_answer=true`, claims must be empty; trusted code renders any limitation
+message from the insufficiency reason.
+
+`reasoning_path_ids` reference deterministic IDs assigned by trusted context
+projection. The model does not return free-form structural paths. Trusted code
+maps IDs to exact nodes, relations, relation IDs, and descriptions.
+
+`temporal_assertions` are machine-readable. The model does not supply the final
+free-text temporal note; trusted code renders it after validation.
 
 Final API DTO additionally includes source details derived by trusted code:
 
@@ -216,8 +246,9 @@ class AnswerCitation(BaseModel):
     quoted_text: str | None
 ```
 
-The LLM does not generate deep links or trusted metadata. Code maps citation IDs
-back to retrieved units.
+The LLM does not generate deep links, trusted metadata, final reasoning paths,
+or final temporal notes. Code maps validated IDs/assertions back to trusted
+retrieval context.
 
 ## 8. Evidence Sufficiency Gate
 
@@ -240,12 +271,50 @@ Outcomes:
 
 - Unsupported capability: return typed unsupported response; do not call LLM.
 - No results/insufficient evidence: return deterministic `cannot_answer=true`
-  response; LLM call is optional only if it cannot add legal claims.
+  response rendered by trusted code; do not call LLM.
 - Provider failure: return typed generation failure; do not fabricate answer.
 - Sufficient evidence: call provider.
 
 Sufficiency logic is deterministic and tested. It must not use a model score
 threshold without documented calibration.
+
+### 8.1 Intent-specific sufficiency policy
+
+```text
+factual
+-> at least one sufficient Article/Clause evidence item
+-> at least one claim-supporting citation candidate
+
+definition
+-> lexical or accepted definition evidence for the requested term
+-> unit containing the defining text
+
+hierarchy
+-> verified CONTAINS path covering the requested parent/child relation
+-> requested units present in evidence
+
+multi_hop
+-> verified graph path meeting the routing/evaluation hop requirement
+-> source and target legal units available
+
+validity with explicit/scoped date
+-> resolved query date
+-> subject unit/document temporal metadata
+-> interval predicate evaluated successfully
+-> scoped temporal capability available
+
+current validity
+-> corpus-complete current-validity capability available
+-> otherwise return unsupported without provider call
+
+comparison
+-> multiple-version/comparison capability available
+-> at least two distinct versioned evidence groups
+-> otherwise return unsupported without provider call
+```
+
+The policy uses routing intent/capability and verified evidence, not duplicated
+query-keyword rules in generation code.
 
 ## 9. Prompt and Context Projection
 
@@ -294,6 +363,15 @@ allowed unit IDs = retrieved_units IDs
 + graph path node IDs that resolve to legal units included as evidence
 ```
 
+Claim-level contract:
+
+```text
+each substantive claim has citation_ids
+each citation supports that claim, not merely the answer in general
+answer-level citation union is derived from claims by trusted code
+uncited substantive claims are a hard grounding failure
+```
+
 Every output citation must:
 
 - be canonical;
@@ -318,30 +396,27 @@ Grounding validation is independent from the provider.
 Minimum checks:
 
 ```text
-answer is non-empty unless cannot_answer=true
+claims are non-empty unless cannot_answer=true
 cannot_answer response contains no affirmative legal conclusion
-all citation IDs are allowlisted
-at least one citation for a substantive supported answer
+all claim citation IDs are allowlisted
+every substantive claim has at least one citation
 quoted text, if present, occurs in the cited evidence after normalization
 reasoning path matches a verified RetrievalContext path
 temporal claims match query date and evidence interval
 no citation to filtered/temporally invalid evidence
 ```
 
-Recommended claim-level validation for v1:
-
-- Require provider to return answer segments/claims with citation IDs, or
-- split deterministic answer sections and verify each substantive section has
-  at least one citation.
+Claim-level structured output is mandatory in v1. Do not infer claim boundaries
+from a free-form answer after generation.
 
 Do not claim semantic entailment is proven solely by string overlap. If an LLM
 judge is used later, report it separately from hard citation validation.
 
 ## 12. Reasoning Path Validation
 
-The model may explain only graph paths already present in `RetrievalContext`.
+The model may select only graph path IDs projected from `RetrievalContext`.
 
-Validation key:
+Trusted path identity is derived deterministically from:
 
 ```text
 source_id
@@ -355,8 +430,8 @@ Rules:
 - Preserve direction.
 - Preserve parallel edges/provenance when they are distinct in context.
 - Do not accept a relation type absent from the verified path.
-- Human-readable explanation may be generated, but structural path fields come
-  from trusted context after matching.
+- Human-readable explanation is rendered by trusted code from the selected
+  path. The LLM does not provide authoritative path text.
 - An answer may omit graph reasoning when none is required; it may not invent
   one to look explainable.
 
@@ -375,29 +450,39 @@ Rules:
   use unit-level metadata when available.
 - Current-validity answer must not be generated when corpus-complete capability
   is unavailable.
-- Temporal note is required when answer depends on a date/version.
-- Temporal note must not claim dates outside evidence.
+- A structured temporal assertion is required when a claim depends on a
+  date/version.
+- Each assertion must match subject, query date, interval decision, and scope.
+- Trusted code renders the final temporal note from validated assertions.
+- Rendered notes must not claim dates outside evidence.
 
 ## 14. Provider Port
 
-Recommended protocol:
+The v1 provider port is asynchronous:
 
 ```python
 class AnswerProviderPort(Protocol):
-    def generate_structured(
+    async def generate_structured(
         self,
         request: ProviderAnswerRequest,
     ) -> AnswerCandidate: ...
 
-    def close(self) -> None: ...
+    async def aclose(self) -> None: ...
 ```
 
 Provider requirements:
 
 - Structured JSON/schema output.
 - Explicit model and provider config.
-- Configured timeout and retry policy.
-- Retry only transient failures; never retry schema/grounding failure blindly.
+- One application-scoped provider concurrency limiter.
+- End-to-end timeout includes limiter queue wait and retries.
+- Bounded retry count with deterministic backoff policy.
+- Retry only transient transport/rate-limit failures inside the original
+  timeout budget.
+- Never retry authentication, model-not-found, schema, citation, or grounding
+  failures blindly.
+- Cancellation propagates to the provider SDK when supported; otherwise stop
+  awaiting and schedule no retry.
 - No silent fallback to a different model.
 - If fallback is enabled later, record provider/model used in response metadata.
 - Provider client is created once per app lifespan, not per token/request.
@@ -415,6 +500,8 @@ ANSWER_CONTRACT_VERSION=answer-generation-v1
 ANSWER_PROVIDER
 ANSWER_MODEL
 ANSWER_TIMEOUT_SECONDS
+ANSWER_MAX_CONCURRENCY
+ANSWER_MAX_RETRIES
 ANSWER_MAX_OUTPUT_TOKENS
 ANSWER_TEMPERATURE=0
 ANSWER_CONTEXT_MAX_CHARS or token budget
@@ -427,6 +514,7 @@ Rules:
 
 - Temperature/defaults are explicit.
 - Token/context limits are positive and bounded.
+- Concurrency and retry limits are bounded and application-scoped.
 - Credentials remain provider-specific backend secrets.
 - No model/API key in source.
 - Config hash is recorded in evaluation reports without secrets.
@@ -441,7 +529,23 @@ Implement and test:
 GraphRAGAnswerService.answer(ChatRequest) -> AnswerResponse
 ```
 
-This method invokes retrieval once and generation once at most.
+This method invokes `RetrievalApplicationPort.retrieve_context()` once and one
+logical generation operation, excluding bounded transient retries inside the
+provider adapter.
+
+### Conversation history policy for v1
+
+History may influence tone and avoid repeated prose, but:
+
+- it cannot contribute legal evidence;
+- it cannot add citation/path IDs;
+- it cannot rewrite or resolve an ambiguous follow-up query;
+- it cannot change document filters, query date, intent, or capability;
+- the current message must be a standalone retrievable legal question.
+
+If the current message depends on unresolved pronouns or an omitted legal
+subject, return a typed request asking for a standalone question. Follow-up
+query rewriting/retrieval is deferred.
 
 ### SSE path second
 
@@ -452,7 +556,7 @@ event: metadata
 data: retrieval intent, strategy, verified sources, contract versions
 
 event: token
-data: answer text chunks only after or during validated generation policy
+data: validated answer text chunks only
 
 event: citation
 data: trusted citation DTOs
@@ -461,15 +565,17 @@ event: done
 data: final status/metrics
 ```
 
-If provider streaming cannot be grounded before tokens are exposed, prefer one
-of these explicit designs:
+The only allowed v1 contract is:
 
-1. Generate structured answer fully, validate, then stream validated text; or
-2. Stream as provisional events and emit no legal answer to clients until final
-   validation, if frontend supports that contract.
+```text
+generate complete structured candidate
+-> validate every claim/citation/path/temporal assertion
+-> render trusted final answer
+-> stream validated answer chunks
+```
 
-For v1, prefer generate -> validate -> stream validated text. Correctness is
-more important than first-token latency.
+No answer token may be emitted before grounding validation passes. Correctness
+is more important than first-token latency.
 
 On mid-stream failure:
 
@@ -549,10 +655,11 @@ Expected behavior:
 
 - Valid structured candidate accepted.
 - Contract-version mismatch rejected.
-- Blank answer rules for `cannot_answer` tested.
+- Empty claims for `cannot_answer` tested.
 - Confidence bounds enforced.
 - Duplicate citations normalized deterministically.
 - Invalid canonical IDs rejected.
+- Every substantive claim requires citations.
 
 ### 20.2 Sufficiency tests
 
@@ -561,12 +668,15 @@ Expected behavior:
 - Unsupported capability avoids provider call.
 - Temporal intent without required evidence avoids provider call.
 - Dependency failure is propagated, not changed to insufficiency.
+- Factual, definition, hierarchy, multi-hop, validity, and comparison policies
+  are covered independently.
 
 ### 20.3 Context/prompt tests
 
 - Prompt includes only allowed retrieval evidence.
 - Deterministic order and truncation.
 - Temporal and routing metadata included correctly.
+- Trusted path IDs and allowed temporal subjects are included.
 - History is bounded and cannot add citations.
 - Prompt-injection text remains delimited evidence.
 - No credentials/vectors/raw provider payload.
@@ -581,6 +691,7 @@ Expected behavior:
 - `cannot_answer` cannot contain unsupported affirmative conclusion.
 - Quoted text must match cited source when quote field is used.
 - Parent/child citation behavior follows documented rule.
+- Citation on claim A does not ground uncited claim B.
 
 ### 20.5 Reasoning and temporal tests
 
@@ -589,9 +700,10 @@ Expected behavior:
 - Invented relation rejected.
 - Invented intermediate node rejected.
 - Parallel path identity preserved.
-- Temporal note matches resolved date.
+- Structured temporal assertion matches resolved date and trusted rendered note.
 - Current-validity claim blocked without corpus capability.
 - No direct `date.today()` dependency.
+- Free-form path or temporal-note provider fields are rejected by schema.
 
 ### 20.6 Provider adapter tests
 
@@ -603,14 +715,19 @@ Expected behavior:
 - Empty output.
 - Provider returns unknown citation.
 - Client cleanup on success and partial startup failure.
+- Async timeout includes limiter queue wait and bounded retries.
+- Provider concurrency never exceeds configured maximum.
+- Cancellation schedules no additional retry.
 - Real provider integration is separately marked and opt-in.
 
 ### 20.7 Backend/SSE tests
 
 - Retrieval called once.
-- Provider called at most once for supported request.
+- One logical provider operation occurs; only bounded transient retries are
+  permitted inside the adapter.
 - Blocking work is outside event loop.
 - Metadata event sent once.
+- No token event is emitted before grounding validation completes.
 - Only validated text is streamed.
 - Citation event contains trusted DTOs.
 - Unicode Vietnamese preserved.
@@ -760,6 +877,10 @@ Do not place secrets in commands committed to documentation.
 | AG-14 | Hard validators cannot be overridden by judge score | Evaluation test |
 | AG-15 | Pilot report preserves open milestone statuses | Report test |
 | AG-16 | Full tests, Ruff, format, and diff checks pass | Command output |
+| AG-17 | Query and answer services share RetrievalApplicationPort | Architecture test |
+| AG-18 | Async provider has bounded timeout/retry/concurrency | Provider tests |
+| AG-19 | Model emits claim citations and trusted path IDs | Schema/grounding tests |
+| AG-20 | History cannot rewrite query or add evidence | Request tests |
 
 ## 27. Stop Conditions
 
@@ -827,4 +948,3 @@ resume four-document Gate 7 corpus
 
 Implementation completion alone must not be presented as final project or
 Milestone B completion.
-

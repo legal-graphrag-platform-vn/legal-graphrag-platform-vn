@@ -81,7 +81,7 @@ Important baseline constraints:
 - Mapping `RetrievalContext` to backend response DTOs.
 - Typed retrieval error to HTTP response mapping.
 - Thread boundary for synchronous retrieval.
-- Request timeout and cancellation behavior.
+- Request timeout, bounded concurrency, and cancellation behavior.
 - Unit, API, lifecycle, and disposable-Neo4j integration tests.
 - Backend README and environment documentation.
 
@@ -186,6 +186,8 @@ NEO4J_URI
 NEO4J_USER
 NEO4J_PASSWORD
 BACKEND_RETRIEVAL_TIMEOUT_SECONDS
+BACKEND_RETRIEVAL_MAX_CONCURRENCY
+BACKEND_RETRIEVAL_SHUTDOWN_GRACE_SECONDS
 ```
 
 Retrieval settings continue to use the canonical environment names owned by
@@ -214,6 +216,8 @@ Rules:
 - No hard-coded `L59_2020`, `ldn_2020`, port, model, or filesystem path.
 - Credentials must never appear in validation errors or logs.
 - Timeout must be positive and bounded.
+- Maximum concurrency must be a positive bounded integer.
+- The concurrency limit is application-scoped, not recreated per request.
 - Backend must not redefine retrieval limit precedence.
 
 ## 8. API Request Contract
@@ -240,15 +244,31 @@ it explicitly.
 Validation:
 
 ```text
-1 <= final_k <= candidate_k <= 200
+top_k is the backward-compatible API name for runtime final_k
+1 <= top_k <= candidate_k <= 200 when both are supplied
+if candidate_k is omitted, runtime config supplies candidate_k
+if top_k exceeds effective configured candidate_k, return request error
 document_ids are canonical graph IDs
 blank IDs are rejected
-duplicate document IDs are normalized deterministically or rejected
+duplicate document IDs are rejected with HTTP 422
 force_intent uses the shared enum
 request query_date does not bypass temporal parsing/conflict rules
 ```
 
 The backend must not clamp invalid values silently.
+
+Pydantic/body validation and domain request validation use one stable error
+envelope. FastAPI's default validation payload must be mapped to:
+
+```python
+class APIErrorResponse(BaseModel):
+    code: Literal["REQUEST_VALIDATION_ERROR"]
+    message: str
+    details: list[ValidationIssue]
+```
+
+Validation details may expose field locations and safe messages, but never
+credentials or internal exception representations.
 
 ## 9. API Response Contract
 
@@ -276,6 +296,18 @@ class RetrievalResponse(BaseModel):
     metrics: dict[str, object]
 ```
 
+The public source of truth is `RetrievalContext`. The backend mapper is a pure
+projection and may only rename documented fields, serialize enums/dates, map
+trusted source metadata, or omit internal-only fields.
+
+It must not reclassify intent; recompute strategy, temporal source, capability,
+or scores; rebuild graph paths; infer citations from content; query Neo4j to
+fill missing retrieval metadata; or invent defaults that change meaning.
+
+If required response data is absent from `RetrievalContext`, mapping fails with
+a typed output-contract error. Fix the upstream contract rather than deriving
+the value in the backend.
+
 Mapping rules:
 
 - Preserve canonical node IDs.
@@ -290,7 +322,20 @@ Mapping rules:
 
 ## 10. Service Contract
 
-Add `GraphRAGRetrievalService` implementing `RAGService.retrieve`.
+Create one internal application port used by both the query API and Plan 11:
+
+```python
+class RetrievalApplicationPort(Protocol):
+    async def retrieve_context(
+        self,
+        request: RetrievalRequest,
+    ) -> RetrievalContext: ...
+```
+
+Add `GraphRAGRetrievalService` implementing this port. The query-facing
+`RAGService.retrieve` maps the returned context to `RetrievalResponse`; answer
+generation consumes the context directly. No code may reverse-map an API
+response into `RetrievalContext`.
 
 Responsibilities:
 
@@ -298,8 +343,9 @@ Responsibilities:
 1. Validate/map backend DTO into shared RetrievalRequest.
 2. Execute synchronous runtime through an injected async runner.
 3. Apply timeout/cancellation boundary.
-4. Map RetrievalContext to RetrievalResponse.
-5. Propagate typed domain failures without converting them to empty results.
+4. Return the public RetrievalContext unchanged from the application port.
+5. Map RetrievalContext to RetrievalResponse only at the query API boundary.
+6. Propagate typed domain failures without converting them to empty results.
 ```
 
 The service must not:
@@ -316,19 +362,45 @@ The service must not:
 `RetrievalRuntimeHandle.retrieve` is synchronous. It must never run directly on
 the FastAPI event loop.
 
-Canonical boundary:
+Canonical boundary uses one application-scoped bounded executor:
 
 ```python
-context = await run_in_threadpool(runtime.retrieve, retrieval_request)
+executor = ThreadPoolExecutor(max_workers=settings.retrieval_max_concurrency)
+future = loop.run_in_executor(executor, runtime.retrieve, retrieval_request)
+try:
+    context = await asyncio.wait_for(
+        asyncio.shield(future),
+        timeout=settings.retrieval_timeout_seconds,
+    )
+except TimeoutError:
+    future.cancel()  # cancels only if queued; a running thread continues
+    raise RetrievalTimeoutError(...)
 ```
 
-or an injected equivalent suitable for timeout/cancellation tests.
+An injected equivalent is acceptable for deterministic tests.
+
+Timeout semantics must be documented truthfully:
+
+```text
+HTTP timeout stops waiting and returns 504.
+Python cannot safely kill retrieval already running in a worker thread.
+The worker may continue until the sync Neo4j/model call returns.
+No retry is started after timeout.
+Bounded executor size prevents timed-out workers growing without limit.
+Pending work that has not started may be cancelled.
+```
+
+Provider/database-level timeouts should also be configured so abandoned workers
+eventually finish.
 
 Requirements:
 
 - Configure a request timeout.
 - Timeout returns a typed backend error and does not expose stack traces.
-- Cancellation propagates; do not swallow `CancelledError`.
+- Client cancellation stops waiting and does not start follow-up work.
+- Do not swallow `CancelledError`.
+- `BACKEND_RETRIEVAL_MAX_CONCURRENCY` bounds running calls per app instance.
+- Queued requests remain inside the same request timeout budget.
 - Request-local DTOs are never stored as mutable service state.
 - Concurrent requests may share the immutable/runtime resources but not
   mutable request state.
@@ -337,7 +409,7 @@ Requirements:
 ## 12. Lifecycle Ownership
 
 FastAPI lifespan owns the container. The container owns one retrieval runtime
-handle in GraphRAG mode.
+handle and one bounded retrieval executor in GraphRAG mode.
 
 Startup:
 
@@ -354,7 +426,11 @@ Shutdown:
 
 ```text
 Container.close()
+-> stop accepting new retrieval work
+-> cancel queued work that has not started
+-> wait up to shutdown grace for running workers
 -> close RetrievalRuntimeHandle exactly once
+-> shutdown bounded executor
 -> close Neo4j driver through runtime callbacks
 -> report cleanup error without leaking credentials
 ```
@@ -364,6 +440,9 @@ be idempotent.
 
 Do not retain a second `_driver` field if the runtime handle already owns the
 driver. There must be one clear owner.
+
+If shutdown grace expires, report unfinished workers according to documented
+backend policy. Do not claim that running threads were killed.
 
 ## 13. Typed Error Mapping
 
@@ -438,6 +517,11 @@ Rules:
   permits it.
 - Real and mock implementations must pass protocol/contract parity tests.
 - Existing mock chat behavior remains unchanged in this plan.
+- Existing frontend fields remain present: `query`, `retrieved_units`, `intent`,
+  `retrieval_mode`, `graph_paths`, and `metrics`.
+- New audit fields are additive and have deterministic mock fixture values.
+- Mock and GraphRAG modes use the same validation/error envelope.
+- `top_k` remains accepted and maps to runtime `final_k`.
 
 ## 16. Test Plan
 
@@ -446,7 +530,10 @@ Rules:
 - Valid request maps all filters and overrides.
 - Empty/blank query rejected.
 - Invalid limits rejected; no silent clamp.
-- Duplicate/blank document IDs handled by documented rule.
+- Duplicate and blank document IDs are rejected.
+- `top_k > candidate_k` is rejected when both are supplied.
+- `top_k` above effective configured candidate limit is a typed request error.
+- Pydantic 422 failures use the stable API error envelope.
 - Every `RetrievedUnit` field maps correctly.
 - Graph path nodes, relations, relation IDs, and provenance survive mapping.
 - Deep links use canonical IDs.
@@ -462,7 +549,10 @@ Rules:
 - Runtime is called once per request.
 - Thread boundary is used.
 - Timeout produces timeout error.
-- Cancellation propagates.
+- Timeout does not claim to terminate a running worker.
+- Worker concurrency never exceeds the configured maximum.
+- Queued requests share the same timeout budget.
+- Cancellation stops awaiting and schedules no retry.
 - Concurrent calls do not share mutable request state.
 
 ### 16.3 Factory/lifecycle tests
@@ -470,8 +560,9 @@ Rules:
 - Mock startup creates no runtime/model/driver.
 - GraphRAG startup assembles runtime exactly once.
 - Enabled profile verifies only enabled dependencies.
-- Partial startup failure cleans up runtime/driver.
+- Partial startup failure cleans up executor and runtime/driver.
 - Shutdown closes runtime exactly once.
+- Shutdown behavior with one in-flight worker is tested.
 - Repeated close is safe.
 - No resource is created on module import.
 
@@ -558,7 +649,7 @@ Do not run against port 7687.
 | BI-02 | `/api/v1/query` returns real `RetrievalContext` mapping | API test |
 | BI-03 | Response contains no answer generation | Schema test |
 | BI-04 | Sync retrieval runs outside async event loop | Service/API test |
-| BI-05 | Timeout and cancellation behavior are explicit | Failure tests |
+| BI-05 | Timeout does not falsely claim worker termination | Failure tests |
 | BI-06 | Typed retrieval errors map to stable HTTP errors | API tests |
 | BI-07 | No-results differs from unsupported capability | Contract tests |
 | BI-08 | Runtime/driver lifecycle closes exactly once | Lifecycle tests |
@@ -568,12 +659,16 @@ Do not run against port 7687.
 | BI-12 | Cypher is absent from routes/services | Static test |
 | BI-13 | Pilot read-only integration preserves graph digests | Integration evidence |
 | BI-14 | Full tests, Ruff, format, and diff checks pass | Command output |
+| BI-15 | App-scoped executor enforces configured concurrency | Concurrency test |
+| BI-16 | API mapper is a pure RetrievalContext projection | Mapping/static test |
+| BI-17 | Mock frontend fields and stable 422 schema remain compatible | API tests |
 
 ## 21. Stop Conditions
 
 Stop and report instead of weakening the contract when:
 
 - retrieval official source state is unknown or tests are failing;
+- retrieval contract/source commit is not frozen for the integration run;
 - GraphRAG mode can only work by hard-coding pilot IDs;
 - backend needs a second orchestration path;
 - sync retrieval cannot be moved off the event loop;
@@ -581,6 +676,20 @@ Stop and report instead of weakening the contract when:
 - typed failure can only be made green by returning fake/empty data;
 - integration target is not proven disposable/read-only;
 - implementation would require answer generation changes.
+
+Pending official retrieval evaluation does not by itself block pilot backend
+integration. Pilot integration is allowed when:
+
+```text
+retrieval public contract is frozen
+source commit is recorded
+fast tests pass
+required pilot dependency smoke/integration checks pass
+reports keep official evaluation and milestone status pending
+```
+
+It is not allowed to call the integration production-ready or close Milestone B
+before official evaluation is completed.
 
 ## 22. Deliverables
 
@@ -610,4 +719,3 @@ Plan 11 may start implementation only after this plan provides a stable service
 boundary that can return a validated `RetrievalContext` for a request. It does
 not require Gate 7 to be closed for pilot development, but no final milestone
 claim is allowed while Gate 7/M3-B13 remain open.
-
