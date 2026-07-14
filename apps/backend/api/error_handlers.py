@@ -14,6 +14,17 @@ from services.errors import (
     BackendRetrievalClosedError,
     BackendRetrievalTimeoutError,
 )
+from src.generation.errors import (
+    AnswerGenerationError,
+    AnswerProviderDependencyError,
+    AnswerProviderOutputError,
+    AnswerProviderTimeoutError,
+    AnswerRequestError,
+    CitationValidationError,
+    GroundingValidationError,
+    ReasoningPathValidationError,
+    TemporalAnswerValidationError,
+)
 from src.retrieval.errors import (
     IntentAnalysisError,
     RetrievalCapabilityError,
@@ -33,6 +44,7 @@ logger = logging.getLogger(__name__)
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, request_validation_handler)
     app.add_exception_handler(RetrievalError, retrieval_error_handler)
+    app.add_exception_handler(AnswerGenerationError, answer_error_handler)
     app.add_exception_handler(Exception, internal_error_handler)
 
 
@@ -99,6 +111,24 @@ async def internal_error_handler(request: Request, exc: Exception) -> JSONRespon
     )
 
 
+async def answer_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    if not isinstance(exc, AnswerGenerationError):
+        raise TypeError("Expected AnswerGenerationError")
+    status_code, code = _answer_error_contract(exc)
+    logger.warning(
+        "Backend answer request failed: code=%s error_type=%s",
+        code,
+        type(exc).__name__,
+    )
+    return _response(
+        status_code=status_code,
+        code=code,
+        message="Answer generation failed validation or dependency checks",
+        request=request,
+        details={},
+    )
+
+
 def _retrieval_error_contract(error: RetrievalError) -> tuple[int, str]:
     if isinstance(error, BackendRetrievalTimeoutError):
         return 504, "RETRIEVAL_TIMEOUT"
@@ -121,6 +151,36 @@ def _retrieval_error_contract(error: RetrievalError) -> tuple[int, str]:
     if isinstance(error, (RetrievalRequestError, RetrievalRoutingError)):
         return 422, "RETRIEVAL_REQUEST_INVALID"
     return 500, "RETRIEVAL_ERROR"
+
+
+def _answer_error_contract(error: AnswerGenerationError) -> tuple[int, str]:
+    if isinstance(error, AnswerProviderTimeoutError):
+        return 504, "ANSWER_PROVIDER_TIMEOUT"
+    if isinstance(error, AnswerProviderDependencyError):
+        return 503, "ANSWER_PROVIDER_UNAVAILABLE"
+    if isinstance(error, AnswerRequestError):
+        return 422, "ANSWER_REQUEST_INVALID"
+    if isinstance(error, AnswerProviderOutputError):
+        return 502, "ANSWER_PROVIDER_OUTPUT_INVALID"
+    if isinstance(error, CitationValidationError):
+        return 502, "ANSWER_CITATION_INVALID"
+    if isinstance(error, ReasoningPathValidationError):
+        return 502, "ANSWER_PATH_INVALID"
+    if isinstance(error, TemporalAnswerValidationError):
+        return 502, "ANSWER_TEMPORAL_INVALID"
+    if isinstance(error, GroundingValidationError):
+        return 502, "ANSWER_GROUNDING_INVALID"
+    return 500, "ANSWER_GENERATION_ERROR"
+
+
+def stream_error_contract(error: Exception) -> tuple[str, str]:
+    if isinstance(error, AnswerGenerationError):
+        _, code = _answer_error_contract(error)
+        return code, "Không thể tạo câu trả lời có căn cứ."
+    if isinstance(error, RetrievalError):
+        _, code = _retrieval_error_contract(error)
+        return code, "Không thể truy xuất căn cứ pháp lý."
+    return "STREAM_ERROR", "Đã xảy ra lỗi nội bộ."
 
 
 def _response(

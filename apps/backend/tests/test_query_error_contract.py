@@ -7,9 +7,16 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 
 from api.error_handlers import (
+    answer_error_handler,
     internal_error_handler,
     request_validation_handler,
     retrieval_error_handler,
+    stream_error_contract,
+)
+from src.generation.errors import (
+    AnswerProviderOutputError,
+    AnswerProviderTimeoutError,
+    CitationValidationError,
 )
 from api.models import QueryRequest
 from api.routes.query import query
@@ -127,6 +134,40 @@ def test_unexpected_error_does_not_leak_internal_details() -> None:
     assert response.status_code == 500
     assert '"code":"INTERNAL_ERROR"' in body
     assert "secret-password" not in body
+
+
+@pytest.mark.parametrize(
+    ("error", "status", "code"),
+    [
+        (AnswerProviderTimeoutError("slow"), 504, "ANSWER_PROVIDER_TIMEOUT"),
+        (
+            AnswerProviderOutputError("malformed-secret"),
+            502,
+            "ANSWER_PROVIDER_OUTPUT_INVALID",
+        ),
+        (
+            CitationValidationError("hallucinated-id"),
+            502,
+            "ANSWER_CITATION_INVALID",
+        ),
+    ],
+)
+def test_answer_error_mapping_is_typed_and_safe(
+    error: Exception,
+    status: int,
+    code: str,
+) -> None:
+    response = asyncio.run(answer_error_handler(_request(), error))
+    body = response.body.decode()
+    assert response.status_code == status
+    assert f'"code":"{code}"' in body
+    assert str(error) not in body
+
+
+def test_stream_error_contract_uses_stable_code() -> None:
+    code, message = stream_error_contract(CitationValidationError("hallucinated-id"))
+    assert code == "ANSWER_CITATION_INVALID"
+    assert "hallucinated-id" not in message
 
 
 def _request() -> Request:

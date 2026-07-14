@@ -42,14 +42,40 @@ class DocumentLegalStatus(str, Enum):
 
 
 class ChatMessage(BaseModel):
-    role: Literal["user", "assistant", "system"]
-    content: str
+    model_config = ConfigDict(extra="forbid")
+
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4000)
 
 
 class ChatRequest(BaseModel):
-    message: str = Field(min_length=1, max_length=10_000)
+    model_config = ConfigDict(extra="forbid")
+
+    message: str = Field(min_length=1, max_length=4000)
     history: list[ChatMessage] = Field(default_factory=list)
+    document_ids: list[str] = Field(default_factory=list)
+    query_date: date | None = None
     temporal_date: date | None = None
+    force_intent: IntentType | None = None
+    enable_reranker: bool | None = None
+
+    @model_validator(mode="after")
+    def validate_chat_request(self) -> "ChatRequest":
+        self.message = self.message.strip()
+        if not self.message:
+            raise ValueError("Message must not be blank")
+        if self.query_date is not None and self.temporal_date is not None:
+            if self.query_date != self.temporal_date:
+                raise ValueError("query_date conflicts with temporal_date")
+        elif self.temporal_date is not None:
+            self.query_date = self.temporal_date
+        normalized_ids = [value.strip() for value in self.document_ids]
+        if any(not value for value in normalized_ids):
+            raise ValueError("document_ids must not contain blank values")
+        if len(normalized_ids) != len(set(normalized_ids)):
+            raise ValueError("document_ids must be unique")
+        self.document_ids = normalized_ids
+        return self
 
 
 # ---------------------------------------------------------------------------
@@ -60,11 +86,32 @@ class ChatRequest(BaseModel):
 class ChatMetadataData(BaseModel):
     sources: list["RetrievedUnitDTO"] = Field(default_factory=list)
     intent: str
+    strategy: str
     retrieval_mode: str
+    retrieval_contract_version: str
+    answer_contract_version: str
+    cannot_answer: bool
 
 
 class ChatTokenData(BaseModel):
     content: str
+
+
+class ChatCitationData(BaseModel):
+    unit_id: str
+    citation_label: str
+    document_id: str
+    article_id: str | None = None
+    clause_id: str | None = None
+    deep_link: str
+
+
+class ChatDoneData(BaseModel):
+    status: Literal["completed", "cannot_answer", "error"]
+    citation_count: int = 0
+    confidence: float | None = None
+    provider: str | None = None
+    model: str | None = None
 
 
 class ChatErrorData(BaseModel):
@@ -73,7 +120,7 @@ class ChatErrorData(BaseModel):
 
 
 class ChatStreamEvent(BaseModel):
-    event: Literal["metadata", "token", "error", "done"]
+    event: Literal["metadata", "token", "citation", "error", "done"]
     data: dict[str, Any]
 
 

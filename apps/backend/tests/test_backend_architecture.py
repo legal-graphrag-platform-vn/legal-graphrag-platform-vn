@@ -35,6 +35,16 @@ def test_backend_container_is_only_backend_retrieval_composition_path() -> None:
     assert matches == [Path("apps/backend/container.py")]
 
 
+def test_backend_container_is_only_backend_answer_composition_path() -> None:
+    matches: list[Path] = []
+    for path in BACKEND_ROOT.rglob("*.py"):
+        if "tests" in path.parts:
+            continue
+        if "create_answer_generator" in path.read_text(encoding="utf-8"):
+            matches.append(path.relative_to(REPO_ROOT))
+    assert matches == [Path("apps/backend/container.py")]
+
+
 def test_retrieval_and_infrastructure_do_not_import_backend() -> None:
     for package in (
         REPO_ROOT / "src" / "retrieval",
@@ -45,6 +55,15 @@ def test_retrieval_and_infrastructure_do_not_import_backend() -> None:
             assert not any(
                 name.startswith(("apps.backend", "api", "services")) for name in imports
             ), f"{path} imports backend module: {imports}"
+
+
+def test_generation_domain_does_not_import_backend_or_infrastructure() -> None:
+    for path in (REPO_ROOT / "src" / "generation").glob("*.py"):
+        imports = _imports(path)
+        assert not any(
+            name.startswith(("apps.backend", "api", "services", "src.infrastructure"))
+            for name in imports
+        ), f"{path} imports a concrete outer layer: {imports}"
 
 
 def _imports(path: Path) -> set[str]:

@@ -29,7 +29,21 @@ class Settings(BaseSettings):
         le=60,
     )
 
-    # 4.   LLM Providers
+    # 4.   Answer generation is an explicit runtime profile
+    answer_generation_enabled: bool = False
+    answer_provider: Literal["gemini"] = "gemini"
+    answer_model: str = "gemini-2.5-flash"
+    answer_timeout_seconds: float = Field(default=45.0, gt=0, le=300)
+    answer_max_concurrency: int = Field(default=2, ge=1, le=16)
+    answer_max_retries: int = Field(default=2, ge=0, le=5)
+    answer_max_output_tokens: int = Field(default=2048, ge=128, le=8192)
+    answer_temperature: float = Field(default=0.0, ge=0.0, le=1.0)
+    answer_context_max_chars: int = Field(default=24_000, ge=1000, le=200_000)
+    answer_history_max_messages: int = Field(default=6, ge=0, le=20)
+    answer_history_max_chars: int = Field(default=4000, ge=0, le=20_000)
+    answer_stream_chunk_chars: int = Field(default=160, ge=1, le=2000)
+
+    # 5.   LLM Providers
     llm_provider: Literal["gemini", "deepseek", "openai", "ollama"] = "ollama"
     llm_model: str = "llama3"
     ollama_base_url: str = "http://localhost:11434"
@@ -37,7 +51,7 @@ class Settings(BaseSettings):
     deepseek_api_key: str | None = None
     openai_api_key: str | None = None
 
-    # 5.   CORS — không dùng ["*"] trong production
+    # 6.   CORS — không dùng ["*"] trong production
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -60,4 +74,8 @@ class Settings(BaseSettings):
             if missing:
                 raise RuntimeError(
                     f"APP_MODE=graphrag yêu cầu phải set: {', '.join(missing)}"
+                )
+            if self.answer_generation_enabled and not self.gemini_api_key:
+                raise RuntimeError(
+                    "ANSWER_GENERATION_ENABLED=true yêu cầu GEMINI_API_KEY"
                 )

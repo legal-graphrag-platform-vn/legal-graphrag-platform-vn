@@ -50,11 +50,12 @@ explicit = true
 torch = { index = "pytorch-cpu" }
 
 [tool.pytest.ini_options]
-testpaths = ["src/pipeline/tests", "src/retrieval/tests", "apps/backend/tests", "tests"]
+testpaths = ["src/pipeline/tests", "src/retrieval/tests", "src/generation/tests", "apps/backend/tests", "tests"]
 pythonpath = [".", "apps/backend"]
 addopts = "-m 'not integration'"
 markers = [
   "integration: requires a disposable local Neo4j instance and optional model runtime",
   "retrieval_readonly: read-only retrieval checks against the disposable pilot graph",
   "retrieval_fixture: mutating retrieval mechanics isolated by a UUID namespace",
+  "answer_provider_live: opt-in real answer provider smoke test",
 ]

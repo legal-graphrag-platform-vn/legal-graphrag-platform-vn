@@ -11,7 +11,7 @@ Gate 7: OPEN
 M3-B13: OPEN
 Milestone A: NOT PASSED
 Backend retrieval integration: REQUIRED PRECONDITION
-Answer generation implementation: NOT STARTED
+Answer generation implementation: IMPLEMENTED
 End-to-end QA evaluation: NOT STARTED
 Milestone B acceptance: NOT STARTED
 ```
@@ -948,3 +948,36 @@ resume four-document Gate 7 corpus
 
 Implementation completion alone must not be presented as final project or
 Milestone B completion.
+
+## 32. Implementation Result (2026-07-14)
+
+```text
+Answer generation implementation: IMPLEMENTED
+Backend chat integration: IMPLEMENTED
+Hard citation/grounding tests: PASS
+Fast tests: PASS (348 tests; integration excluded by default)
+Read-only Neo4j retrieval regression: PASS (2 tests on disposable port 7688)
+Ruff check: PASS
+Real-provider smoke: NOT RUN
+Pilot answer evaluation: NOT RUN
+Source commit: the commit containing this implementation result
+
+Gate 7 / M3-B13: OPEN
+Milestone A: NOT PASSED
+Milestone B acceptance: NOT STARTED
+```
+
+Implemented contracts:
+
+- one generation path consumes `RetrievalContext` directly;
+- deterministic sufficiency prevents provider calls for insufficient evidence;
+- claim-level citations, trusted path IDs, and temporal assertions are hard-
+  validated before rendering;
+- Gemini structured output uses bounded async concurrency, timeout, and retries;
+- GraphRAG `/chat` emits no token before complete grounding validation;
+- answer generation is opt-in and retrieval-only startup creates no provider;
+- provider and retrieval resources are closed in ownership order.
+
+This implementation result is development evidence only. The live Gemini smoke,
+reviewed pilot QA evaluation, four-document Gate 7 corpus, and milestone evidence
+remain intentionally incomplete.

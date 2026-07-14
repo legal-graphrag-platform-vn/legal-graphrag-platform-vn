@@ -19,6 +19,7 @@ from api.models import (
     RetrievalResponse,
 )
 from src.retrieval.models import RetrievalContext
+from src.generation.models import AnswerGenerationRequest, AnswerResponse
 from src.shared.retrieval_contract import RetrievalRequest
 
 
@@ -50,7 +51,20 @@ class QueryService(Protocol):
     async def retrieve(self, request: QueryRequest) -> RetrievalResponse: ...
 
 
-class RAGService(Protocol):
+class AnswerGeneratorPort(Protocol):
+    async def generate(self, request: AnswerGenerationRequest) -> AnswerResponse: ...
+
+    async def aclose(self) -> None: ...
+
+
+class ChatService(Protocol):
+    async def stream_chat(
+        self,
+        request: ChatRequest,
+    ) -> AsyncIterator[ChatStreamEvent]: ...
+
+
+class RAGService(ChatService, Protocol):
     async def stream_chat(
         self,
         request: ChatRequest,

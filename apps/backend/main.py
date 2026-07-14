@@ -36,7 +36,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # 2.   Startup: build container và lưu vào app.state
-        container = build_container(settings)
+        container = await build_container(settings)
         app.state.container = container
         try:
             yield

@@ -21,6 +21,7 @@ apps/backend/
 ├── services/
 │   ├── interfaces.py          # API and retrieval application ports
 │   ├── graphrag_retrieval_service.py
+│   ├── graphrag_answer_service.py
 │   ├── retrieval_mapping.py
 │   ├── retrieval_runner.py
 │   └── mock_rag_service.py    # Mock implementation (APP_MODE=mock)
@@ -92,6 +93,8 @@ Dùng `encode_sse(event, data)` từ `api/models.py`. Không tự format string.
 Routes call `QueryService`. Only the application-scoped
 `BoundedRetrievalRunner` may move the sync retrieval runtime to worker threads;
 do not create a per-request executor or call the runtime directly from a route.
+Answer providers are async and application-scoped. `/chat` must generate and
+validate the complete structured candidate before emitting any token event.
 
 ### 3.5. Không viết Cypher trong routes
 
@@ -104,10 +107,11 @@ Cypher queries phải nằm trong `src/infrastructure/neo4j/`. Routes chỉ gọ
 | Mode | Mô tả |
 |---|---|
 | `mock` | Không cần Neo4j. Load fixture từ `mock_data/`. Dùng để dev FE. |
-| `graphrag` | Pilot retrieval development; requires Neo4j and enabled retrieval dependencies. |
+| `graphrag` | Pilot retrieval and optional grounded-answer development. |
 
-GraphRAG development does not close Gate 7/M3-B13 or pass Milestone A. Real
-chat/answer generation remains outside Plan 10.
+GraphRAG development does not close Gate 7/M3-B13 or pass Milestone A. Answer
+generation requires explicit `ANSWER_GENERATION_ENABLED=true`; no provider is
+created in retrieval-only mode.
 
 ---
 

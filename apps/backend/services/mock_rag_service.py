@@ -61,7 +61,11 @@ class MockRAGService:
         metadata = ChatMetadataData(
             sources=[],
             intent="factual",
+            strategy="factual_hybrid",
             retrieval_mode="mock",
+            retrieval_contract_version="retrieval-runtime-v1",
+            answer_contract_version="answer-generation-v1",
+            cannot_answer=False,
         )
         yield ChatStreamEvent(event="metadata", data=metadata.model_dump(mode="json"))
 
@@ -78,7 +82,10 @@ class MockRAGService:
             )
 
         # 6.   Done event cuối cùng
-        yield ChatStreamEvent(event="done", data={})
+        yield ChatStreamEvent(
+            event="done",
+            data={"status": "completed", "citation_count": 0},
+        )
 
     async def list_documents(
         self,
