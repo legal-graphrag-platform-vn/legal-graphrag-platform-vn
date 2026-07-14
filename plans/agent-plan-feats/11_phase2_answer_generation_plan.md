@@ -958,7 +958,7 @@ Hard citation/grounding tests: PASS
 Fast tests: PASS (348 tests; integration excluded by default)
 Read-only Neo4j retrieval regression: PASS (2 tests on disposable port 7688)
 Ruff check: PASS
-Real-provider smoke: NOT RUN
+Real-provider smoke: PASS (`gemini-3.5-flash`, `google-genai==2.11.0`)
 Pilot answer evaluation: NOT RUN
 Source commit: the commit containing this implementation result
 

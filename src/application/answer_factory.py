@@ -24,7 +24,7 @@ class AnswerApplicationSettings(BaseSettings):
 
     answer_provider: str = Field(default="gemini", validation_alias="ANSWER_PROVIDER")
     answer_model: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-3.5-flash",
         validation_alias="ANSWER_MODEL",
     )
     gemini_api_key: str | None = Field(

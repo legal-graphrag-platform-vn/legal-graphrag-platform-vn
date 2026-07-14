@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     # 4.   Answer generation is an explicit runtime profile
     answer_generation_enabled: bool = False
     answer_provider: Literal["gemini"] = "gemini"
-    answer_model: str = "gemini-2.5-flash"
+    answer_model: str = "gemini-3.5-flash"
     answer_timeout_seconds: float = Field(default=45.0, gt=0, le=300)
     answer_max_concurrency: int = Field(default=2, ge=1, le=16)
     answer_max_retries: int = Field(default=2, ge=0, le=5)

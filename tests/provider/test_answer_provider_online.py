@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 
 import pytest
@@ -22,7 +23,7 @@ def test_real_gemini_structured_answer_smoke() -> None:
     async def scenario() -> None:
         provider = GeminiAnswerProvider(
             api_key=api_key,
-            model=os.getenv("ANSWER_MODEL", "gemini-2.5-flash"),
+            model=os.getenv("ANSWER_MODEL", "gemini-3.5-flash"),
             config=GenerationConfig(timeout_seconds=60, max_retries=0),
         )
         try:
@@ -40,7 +41,5 @@ def test_real_gemini_structured_answer_smoke() -> None:
             assert candidate.claims or candidate.cannot_answer
         finally:
             await provider.aclose()
-
-    import asyncio
 
     asyncio.run(scenario())

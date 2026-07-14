@@ -98,7 +98,7 @@ class GeminiAnswerProvider:
                 config=self._generate_config_factory(
                     system_instruction=request.system_instruction,
                     response_mime_type="application/json",
-                    response_schema=AnswerCandidate,
+                    response_json_schema=_gemini_response_schema(),
                     temperature=self._config.temperature,
                     max_output_tokens=self._config.max_output_tokens,
                 ),
@@ -120,6 +120,23 @@ class GeminiAnswerProvider:
 
 class _TransientProviderError(RuntimeError):
     pass
+
+
+def _gemini_response_schema() -> dict[str, Any]:
+    """Return the strict domain schema without unsupported Gemini keywords."""
+    return _without_additional_properties(AnswerCandidate.model_json_schema())
+
+
+def _without_additional_properties(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _without_additional_properties(item)
+            for key, item in value.items()
+            if key != "additionalProperties"
+        }
+    if isinstance(value, list):
+        return [_without_additional_properties(item) for item in value]
+    return value
 
 
 def _create_client(api_key: str) -> Any:

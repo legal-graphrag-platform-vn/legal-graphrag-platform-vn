@@ -8,7 +8,7 @@ base_commit = 21506ef1be496a242b400c7312a00e18aa398dd8
 working_tree_state = dirty (implementation worktree, not official evidence)
 answer_generation = implemented
 backend_chat_integration = implemented
-real_provider_smoke = not_run
+real_provider_smoke = pass
 pilot_answer_evaluation = not_run
 Gate 7 / M3-B13 = OPEN
 Milestone A = NOT PASSED
@@ -33,16 +33,17 @@ Milestone B acceptance = NOT STARTED
 
 ```text
 provider = gemini
-default model = gemini-2.5-flash
+default model = gemini-3.5-flash
 structured output = AnswerCandidate
 timeout = includes limiter wait, retries, and provider call
 retry = transient rate-limit/server failures only
 fallback = disabled
 ```
 
-The live provider smoke is explicit opt-in and was not run for this development
-result. Enabling the profile requires the `llm` dependency group and a runtime
-`GEMINI_API_KEY`.
+The opt-in live provider smoke passed with `google-genai==2.11.0` and
+`gemini-3.5-flash`. The earlier `gemini-2.5-flash` default was rejected by the
+provider as unavailable for new users. Enabling the profile requires the `llm`
+dependency group and a runtime `GEMINI_API_KEY`.
 
 ## Verification
 
@@ -57,11 +58,15 @@ tests/integration/test_retrieval_online.py -q -m retrieval_readonly
 
 ruff check changed Python scope
 PASS
+
+RUN_ANSWER_PROVIDER_INTEGRATION=1 \
+UV_CACHE_DIR=/tmp/uv-cache uv run dotenv run -- pytest \
+tests/provider/test_answer_provider_online.py -q -m answer_provider_live
+1 passed
 ```
 
 ## Limitations
 
-- No live Gemini request was made.
 - No reviewed answer-quality dataset or pilot QA evaluation was run.
 - SSE transport validates before streaming and therefore does not optimize
   first-token latency.

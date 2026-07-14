@@ -27,8 +27,10 @@ class FakeModels:
         self.calls = 0
         self.active = 0
         self.peak = 0
+        self.last_kwargs = None
 
     async def generate_content(self, **kwargs):
+        self.last_kwargs = kwargs
         self.calls += 1
         self.active += 1
         self.peak = max(self.peak, self.active)
@@ -67,6 +69,21 @@ def test_gemini_provider_returns_structured_candidate_and_closes() -> None:
         await provider.aclose()
         assert result.claims[0].citation_ids == ["doc_art1"]
         assert client.aio.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_gemini_provider_uses_api_compatible_json_schema() -> None:
+    async def scenario() -> None:
+        client = FakeClient([FakeResponse(answer_candidate().model_dump_json())])
+        provider = _provider(client)
+
+        await provider.generate_structured(_request())
+
+        config = client.aio.models.last_kwargs["config"]
+        schema = config["response_json_schema"]
+        assert "additionalProperties" not in json.dumps(schema)
+        assert config["response_mime_type"] == "application/json"
 
     asyncio.run(scenario())
 
