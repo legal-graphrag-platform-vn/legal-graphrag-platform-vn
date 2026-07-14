@@ -1,0 +1,158 @@
+{
+  "schema_version": "answer-evaluation-dataset-v1",
+  "evaluation_scope": "pilot_development",
+  "name": "L59_2020 grounded answer development pilot",
+  "source_retrieval_dataset": "configs/evaluation/retrieval_pilot_l59_2020.json",
+  "document_ids": [
+    "ldn_2020"
+  ],
+  "review": {
+    "reviewer": null,
+    "status": "pending",
+    "reviewed_at": null
+  },
+  "cases": [
+    {
+      "query_id": "factual_01",
+      "query": "Doanh nghiệp có quyền tự do kinh doanh ngành nghề mà luật không cấm không?",
+      "intent": "factual",
+      "expected_outcome": "answered",
+      "required_citation_groups": [
+        [
+          "ldn_2020_art7_cl1",
+          "ldn_2020_art7"
+        ]
+      ],
+      "gold_key_claims": [
+        "Doanh nghiệp có quyền tự do kinh doanh ngành, nghề mà luật không cấm."
+      ],
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "definition_01",
+      "query": "Cổ đông là gì?",
+      "intent": "definition",
+      "expected_outcome": "answered",
+      "required_citation_groups": [
+        [
+          "ldn_2020_art4_cl3",
+          "ldn_2020_art4"
+        ]
+      ],
+      "gold_key_claims": [
+        "Cổ đông là cá nhân hoặc tổ chức sở hữu ít nhất một cổ phần của công ty cổ phần."
+      ],
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "multi_hop_01",
+      "query": "Điều 38 dẫn chiếu Điều 41 và khoản nào tại Điều 41 xác định tên gây nhầm lẫn?",
+      "intent": "multi_hop",
+      "expected_outcome": "answered",
+      "required_citation_groups": [
+        [
+          "ldn_2020_art38_cl1"
+        ],
+        [
+          "ldn_2020_art41",
+          "ldn_2020_art41_cl2"
+        ]
+      ],
+      "gold_key_claims": [
+        "Khoản 1 Điều 38 dẫn chiếu Điều 41 về tên trùng và tên gây nhầm lẫn.",
+        "Khoản 2 Điều 41 quy định các trường hợp tên gây nhầm lẫn."
+      ],
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "validity_03",
+      "query": "Tại ngày 01 tháng 01 năm 2021 Luật Doanh nghiệp 2020 đang có hiệu lực không?",
+      "intent": "validity",
+      "expected_outcome": "answered",
+      "query_date": "2021-01-01",
+      "required_citation_groups": [
+        [
+          "ldn_2020_art217_cl1",
+          "ldn_2020_art217"
+        ]
+      ],
+      "gold_key_claims": [
+        "Luật Doanh nghiệp 2020 có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021."
+      ],
+      "expected_temporal_valid": true,
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "hierarchy_03",
+      "query": "Khoản 2 quy định các đối tượng không được thành lập doanh nghiệp thuộc Điều nào?",
+      "intent": "hierarchy",
+      "expected_outcome": "answered",
+      "required_citation_groups": [
+        [
+          "ldn_2020_art17_cl2",
+          "ldn_2020_art17"
+        ]
+      ],
+      "gold_key_claims": [
+        "Khoản 2 về các đối tượng không có quyền thành lập và quản lý doanh nghiệp thuộc Điều 17."
+      ],
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "validity_01",
+      "query": "Luật Doanh nghiệp 2020 còn hiệu lực hiện nay không?",
+      "intent": "validity",
+      "expected_outcome": "unsupported_capability",
+      "required_capability": "corpus_complete_current_validity",
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "hierarchy_01",
+      "query": "Văn bản nào hướng dẫn Điều 10 về doanh nghiệp xã hội?",
+      "intent": "hierarchy",
+      "expected_outcome": "unsupported_capability",
+      "required_capability": "guides_relations",
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    },
+    {
+      "query_id": "comparison_01",
+      "query": "So sánh quy định về quyền thành lập doanh nghiệp năm 2020 và năm 2021 khác nhau thế nào?",
+      "intent": "comparison",
+      "expected_outcome": "unsupported_capability",
+      "required_capability": "multiple_versions",
+      "review": {
+        "reviewer": null,
+        "status": "pending",
+        "reviewed_at": null
+      }
+    }
+  ]
+}
