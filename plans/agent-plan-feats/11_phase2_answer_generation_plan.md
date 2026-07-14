@@ -959,7 +959,7 @@ Fast tests: PASS (348 tests; integration excluded by default)
 Read-only Neo4j retrieval regression: PASS (2 tests on disposable port 7688)
 Ruff check: PASS
 Real-provider smoke: PASS (`gemini-3.5-flash`, `google-genai==2.11.0`)
-Pilot answer evaluation: NOT RUN
+Pilot answer evaluation: TECHNICAL PASS (8/8), HUMAN REVIEW PENDING
 Source commit: the commit containing this implementation result
 
 Gate 7 / M3-B13: OPEN
@@ -978,6 +978,5 @@ Implemented contracts:
 - answer generation is opt-in and retrieval-only startup creates no provider;
 - provider and retrieval resources are closed in ownership order.
 
-This implementation result is development evidence only. The live Gemini smoke,
-reviewed pilot QA evaluation, four-document Gate 7 corpus, and milestone evidence
-remain intentionally incomplete.
+This implementation result is development evidence only. Human pilot QA review,
+the four-document Gate 7 corpus, and milestone evidence remain incomplete.

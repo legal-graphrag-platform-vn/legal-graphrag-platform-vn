@@ -1,0 +1,166 @@
+{
+  "contract_version": "answer-evaluation-report-v1",
+  "evaluation_scope": "pilot_development",
+  "metadata": {
+    "source_commit": "b9638f8",
+    "working_tree_state": "clean",
+    "dataset_sha256": "5f1fc6965a73d6ea76e18647d97bc93a32ea4f4fa8ae2eddbb781a01edf197c3",
+    "graph_snapshot_hash": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091",
+    "retrieval_contract_version": "retrieval-runtime-v1",
+    "answer_contract_version": "answer-generation-v1",
+    "prompt_sha256": "055348ab24fd526f0c619fbd080373e5af307c6060684690535f8f781a77c579",
+    "generation_config_sha256": "422cfd56a356f3a0a89122cfb0d9db8d522f4638d1f96432271c06b77f66155e",
+    "provider": "gemini",
+    "model": "gemini-3.5-flash",
+    "dataset_review_status": "pending"
+  },
+  "summary": {
+    "case_count": 8,
+    "hard_pass_count": 8,
+    "hard_fail_count": 0,
+    "human_pending_count": 8,
+    "technical_checks_status": "PASS",
+    "human_legal_review_status": "PENDING",
+    "official_evidence_eligible": false
+  },
+  "cases": [
+    {
+      "query_id": "factual_01",
+      "expected_outcome": "answered",
+      "actual_outcome": "answered",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "answer_text": "Doanh nghiệp có quyền tự do kinh doanh ngành, nghề mà luật không cấm. [Điều 7, Khoản 1, 59/2020/QH14]",
+      "citation_ids": [
+        "ldn_2020_art7_cl1"
+      ],
+      "temporal_notes": [],
+      "gold_key_claims": [
+        "Doanh nghiệp có quyền tự do kinh doanh ngành, nghề mà luật không cấm."
+      ],
+      "human_review_status": "pending",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "latency_ms": 25288
+    },
+    {
+      "query_id": "definition_01",
+      "expected_outcome": "answered",
+      "actual_outcome": "answered",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "answer_text": "Cổ đông là cá nhân, tổ chức sở hữu ít nhất một cổ phần của công ty cổ phần. [Điều 4, Khoản 3, 59/2020/QH14]",
+      "citation_ids": [
+        "ldn_2020_art4_cl3"
+      ],
+      "temporal_notes": [],
+      "gold_key_claims": [
+        "Cổ đông là cá nhân hoặc tổ chức sở hữu ít nhất một cổ phần của công ty cổ phần."
+      ],
+      "human_review_status": "pending",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "latency_ms": 15306
+    },
+    {
+      "query_id": "multi_hop_01",
+      "expected_outcome": "answered",
+      "actual_outcome": "answered",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "answer_text": "Khoản 1 Điều 38 Luật Doanh nghiệp 2020 dẫn chiếu đến Điều 41 về việc đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký. [Điều 38, Khoản 1, 59/2020/QH14]\n\nKhoản 2 Điều 41 Luật Doanh nghiệp 2020 là khoản xác định các trường hợp được coi là tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký. [Điều 41, Khoản 2, 59/2020/QH14]",
+      "citation_ids": [
+        "ldn_2020_art38_cl1",
+        "ldn_2020_art41_cl2"
+      ],
+      "temporal_notes": [],
+      "gold_key_claims": [
+        "Khoản 1 Điều 38 dẫn chiếu Điều 41 về tên trùng và tên gây nhầm lẫn.",
+        "Khoản 2 Điều 41 quy định các trường hợp tên gây nhầm lẫn."
+      ],
+      "human_review_status": "pending",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "latency_ms": 11145
+    },
+    {
+      "query_id": "validity_03",
+      "expected_outcome": "answered",
+      "actual_outcome": "answered",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "answer_text": "Luật Doanh nghiệp 2020 có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021. [Điều 217, Khoản 1, 59/2020/QH14]",
+      "citation_ids": [
+        "ldn_2020_art217_cl1"
+      ],
+      "temporal_notes": [
+        "Theo phạm vi dữ liệu truy xuất, Điều 217, Khoản 1, 59/2020/QH14 có hiệu lực tại ngày 2021-01-01."
+      ],
+      "gold_key_claims": [
+        "Luật Doanh nghiệp 2020 có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021."
+      ],
+      "human_review_status": "pending",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "latency_ms": 16384
+    },
+    {
+      "query_id": "hierarchy_03",
+      "expected_outcome": "answered",
+      "actual_outcome": "answered",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "answer_text": "Khoản 2 quy định về các tổ chức, cá nhân không có quyền thành lập và quản lý doanh nghiệp tại Việt Nam thuộc Điều 17 của Luật Doanh nghiệp 2020. [Điều 17, 59/2020/QH14; Điều 17, Khoản 2, 59/2020/QH14]",
+      "citation_ids": [
+        "ldn_2020_art17",
+        "ldn_2020_art17_cl2"
+      ],
+      "temporal_notes": [],
+      "gold_key_claims": [
+        "Khoản 2 về các đối tượng không có quyền thành lập và quản lý doanh nghiệp thuộc Điều 17."
+      ],
+      "human_review_status": "pending",
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "latency_ms": 17009
+    },
+    {
+      "query_id": "validity_01",
+      "expected_outcome": "unsupported_capability",
+      "actual_outcome": "unsupported_capability",
+      "required_capability": "corpus_complete_current_validity",
+      "reported_capability": "corpus_complete_current_validity",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "human_review_status": "pending",
+      "latency_ms": 990
+    },
+    {
+      "query_id": "hierarchy_01",
+      "expected_outcome": "unsupported_capability",
+      "actual_outcome": "unsupported_capability",
+      "required_capability": "guides_relations",
+      "reported_capability": "guides_relations",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "human_review_status": "pending",
+      "latency_ms": 996
+    },
+    {
+      "query_id": "comparison_01",
+      "expected_outcome": "unsupported_capability",
+      "actual_outcome": "unsupported_capability",
+      "required_capability": "multiple_versions",
+      "reported_capability": "multiple_versions",
+      "hard_status": "pass",
+      "hard_failures": [],
+      "human_review_status": "pending",
+      "latency_ms": 991
+    }
+  ],
+  "status": {
+    "Gate 7 / M3-B13": "OPEN",
+    "Milestone A": "NOT PASSED",
+    "Milestone B acceptance": "NOT STARTED"
+  }
+}

@@ -9,7 +9,7 @@ working_tree_state = dirty (implementation worktree, not official evidence)
 answer_generation = implemented
 backend_chat_integration = implemented
 real_provider_smoke = pass
-pilot_answer_evaluation = not_run
+pilot_answer_evaluation = technical_pass_human_review_pending
 Gate 7 / M3-B13 = OPEN
 Milestone A = NOT PASSED
 Milestone B acceptance = NOT STARTED
@@ -65,9 +65,29 @@ tests/provider/test_answer_provider_online.py -q -m answer_provider_live
 1 passed
 ```
 
+## Pilot Answer Evaluation
+
+```text
+source_commit = b9638f8
+runtime = Neo4j disposable pilot on localhost:7688
+dataset = configs/evaluation/answer_pilot_l59_2020_draft.json
+report = results/answer_generation/answer_pilot_l59_2020_development.json
+case_count = 8
+hard_checks = PASS (8/8)
+answered_cases = 5
+unsupported_capability_cases = 3
+human_legal_review = PENDING (8/8)
+official_evidence_eligible = false
+```
+
+The first development attempt inherited port `7687` from `.env` and was
+discarded. The retained report was regenerated with `NEO4J_URI` explicitly set
+to the disposable pilot port after dotenv loading.
+
 ## Limitations
 
-- No reviewed answer-quality dataset or pilot QA evaluation was run.
+- The answer-quality dataset and generated answers require `lamdx4` legal
+  review before promotion or official evaluation.
 - SSE transport validates before streaming and therefore does not optimize
   first-token latency.
 - Gate 7/four-document corpus and all milestone statuses remain unchanged.
