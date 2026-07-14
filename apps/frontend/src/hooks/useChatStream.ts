@@ -1,218 +1,199 @@
-import { useState } from 'react'
-import { Message, Source } from '../types/chat'
+'use client'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { useEffect, useRef, useState } from 'react'
+import { apiStream } from '@/lib/api/client'
+import { SseParser, SseProtocolError, type ParsedSseEvent } from '@/lib/api/sse'
+import type { Message, Source } from '@/types/chat'
 
-/**
- * Parse SSE named-event stream từ FastAPI.
- * Format mới:
- *   event: metadata
- *   data: {"sources":[...],"intent":"factual","retrieval_mode":"mock"}
- *
- *   event: token
- *   data: {"content":"Vốn "}
- *
- *   event: error
- *   data: {"code":"STREAM_ERROR","message":"..."}
- *
- *   event: done
- *   data: {}
- */
 export function useChatStream(initialMessages: Message[] = []) {
    const [messages, setMessages] = useState<Message[]>(initialMessages)
    const [isStreaming, setIsStreaming] = useState(false)
+   const abortRef = useRef<AbortController | null>(null)
+   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-   const sendMessage = async (
-      text: string,
-      currentMessages: Message[],
-      temporalDate?: string,
-   ) => {
+   useEffect(
+      () => () => {
+         abortRef.current?.abort()
+         if (timerRef.current) clearInterval(timerRef.current)
+      },
+      [],
+   )
+
+   const sendMessage = async (text: string, currentMessages: Message[], queryDate?: string) => {
       if (!text.trim() || isStreaming) return
 
-      // 1. Add user message
       const userMessage: Message = {
          id: crypto.randomUUID(),
          role: 'user',
          content: text,
          timestamp: new Date().toISOString(),
       }
-      const updatedMessages = [...currentMessages, userMessage]
-      setMessages(updatedMessages)
+      const assistantId = crypto.randomUUID()
+      setMessages([
+         ...currentMessages,
+         userMessage,
+         {
+            id: assistantId,
+            role: 'assistant',
+            content: '',
+            sources: [],
+            timestamp: new Date().toISOString(),
+         },
+      ])
       setIsStreaming(true)
 
-      // 2. Placeholder assistant message
-      const assistantId = crypto.randomUUID()
-      const assistantMessage: Message = {
-         id: assistantId,
-         role: 'assistant',
-         content: '',
-         sources: [],
-         timestamp: new Date().toISOString(),
-      }
-      setMessages((prev) => [...prev, assistantMessage])
-
-      // 3. Typewriter buffer
       let rawText = ''
       let displayed = ''
       let streamDone = false
-
-      const typewriterInterval = setInterval(() => {
+      const controller = new AbortController()
+      abortRef.current = controller
+      timerRef.current = setInterval(() => {
          const remaining = rawText.length - displayed.length
          if (remaining > 0) {
-            const charsToAdd = remaining > 40 ? 5 : remaining > 20 ? 3 : remaining > 8 ? 2 : 1
-            displayed += rawText.slice(displayed.length, displayed.length + charsToAdd)
-            setMessages((prev) =>
-               prev.map((msg) =>
-                  msg.id === assistantId ? { ...msg, content: displayed } : msg,
-               ),
-            )
+            const count = remaining > 40 ? 5 : remaining > 20 ? 3 : remaining > 8 ? 2 : 1
+            displayed += rawText.slice(displayed.length, displayed.length + count)
+            updateAssistant(setMessages, assistantId, { content: displayed })
          } else if (streamDone) {
-            clearInterval(typewriterInterval)
+            clearActiveTimer(timerRef)
             setIsStreaming(false)
          }
       }, 20)
 
       try {
-         // 4. POST đến FastAPI /api/v1/chat
          const body: Record<string, unknown> = {
             message: text,
-            history: currentMessages.map((m) => ({ role: m.role, content: m.content })),
+            history: currentMessages.map(({ role, content }) => ({ role, content })),
          }
-         if (temporalDate) body.temporal_date = temporalDate
+         if (queryDate) body.query_date = queryDate
 
-         const response = await fetch(`${API_URL}/api/v1/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-         })
-
-         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`)
-         }
-
+         const response = await apiStream('/api/v1/chat', body, controller.signal)
+         if (!response.ok) throw new Error(`HTTP ${response.status}`)
          const reader = response.body?.getReader()
-         if (!reader) throw new Error('ReadableStream not supported')
+         if (!reader) throw new SseProtocolError('Response does not provide an SSE stream')
 
          const decoder = new TextDecoder()
-         let buffer = ''
-         let currentEvent = ''
-
+         const parser = new SseParser()
+         let doneReceived = false
          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-
-            buffer += decoder.decode(value, { stream: true })
-            const lines = buffer.split('\n')
-            buffer = lines.pop() || ''
-
-            for (const line of lines) {
-               const trimmed = line.trim()
-
-               // 5. Parse named SSE events
-               if (trimmed.startsWith('event: ')) {
-                  currentEvent = trimmed.slice(7).trim()
-                  continue
-               }
-
-               if (!trimmed.startsWith('data: ')) continue
-
-               const dataStr = trimmed.slice(6)
-
-               // Backward compat với Flask [DONE]
-               if (dataStr === '[DONE]') {
-                  streamDone = true
-                  break
-               }
-
-               try {
-                  const payload = JSON.parse(dataStr)
-
-                  if (currentEvent === 'metadata') {
-                     // Map RetrievedUnitDTO → Source (backward compat)
-                     const sources: Source[] = (payload.sources ?? []).map(
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        (s: any) => ({
-                           id: s.id,
-                           title: s.citation_label ?? s.id,
-                           content: s.content_raw ?? '',
-                           citation_label: s.citation_label,
-                           label: s.label,
-                           document_id: s.document_id,
-                           document_number: s.document_number,
-                           article_id: s.article_id,
-                           clause_id: s.clause_id,
-                           effective_from: s.effective_from,
-                           effective_to: s.effective_to,
-                           final_score: s.final_score,
-                        }),
-                     )
-                     setMessages((prev) =>
-                        prev.map((msg) =>
-                           msg.id === assistantId
-                              ? {
-                                   ...msg,
-                                   sources,
-                                   intent: payload.intent,
-                                   retrieval_mode: payload.retrieval_mode,
-                                }
-                              : msg,
-                        ),
-                     )
-                  } else if (currentEvent === 'token') {
-                     // Accumulate — typewriter interval sẽ animate
-                     rawText += payload.content ?? ''
-                  } else if (currentEvent === 'error') {
-                     setMessages((prev) =>
-                        prev.map((msg) =>
-                           msg.id === assistantId
-                              ? {
-                                   ...msg,
-                                   error: payload.message ?? 'Đã xảy ra lỗi',
-                                   content: `❌ ${payload.message ?? 'Đã xảy ra lỗi'}`,
-                                }
-                              : msg,
-                        ),
-                     )
-                  } else if (currentEvent === 'done') {
-                     streamDone = true
-                  } else if (!currentEvent) {
-                     // Backward compat: Flask format không có named event
-                     if (payload.type === 'metadata' && payload.sources) {
-                        const sources: Source[] = payload.sources
-                        setMessages((prev) =>
-                           prev.map((msg) =>
-                              msg.id === assistantId ? { ...msg, sources } : msg,
-                           ),
-                        )
-                     } else if (payload.type === 'content' && payload.content) {
-                        rawText += payload.content
-                     }
-                  }
-               } catch (err) {
-                  console.warn('SSE parse error:', err, trimmed)
-               }
+            const result = await reader.read()
+            if (result.done) break
+            for (const event of parser.push(decoder.decode(result.value, { stream: true }))) {
+               const outcome = applyEvent(event, assistantId, setMessages)
+               rawText += outcome.token
+               if (outcome.done) doneReceived = true
+               if (outcome.error) throw new Error(outcome.error)
             }
          }
-
+         for (const event of parser.finish()) {
+            const outcome = applyEvent(event, assistantId, setMessages)
+            rawText += outcome.token
+            if (outcome.done) doneReceived = true
+            if (outcome.error) throw new Error(outcome.error)
+         }
+         if (!doneReceived) throw new SseProtocolError('SSE stream ended without done event')
          streamDone = true
       } catch (error) {
-         console.error('Chat stream error:', error)
-         clearInterval(typewriterInterval)
+         clearActiveTimer(timerRef)
          setIsStreaming(false)
-         setMessages((prev) =>
-            prev.map((msg) =>
-               msg.id === assistantId
-                  ? {
-                       ...msg,
-                       content: '❌ Có lỗi xảy ra khi kết nối server. Vui lòng thử lại.',
-                    }
-                  : msg,
-            ),
-         )
+         if (controller.signal.aborted) return
+         const message = error instanceof Error ? error.message : 'Không thể kết nối server'
+         updateAssistant(setMessages, assistantId, {
+            content: `Không thể hoàn tất câu trả lời: ${message}`,
+            error: message,
+         })
+      } finally {
+         abortRef.current = null
       }
    }
 
    const clearMessages = () => setMessages([])
-
    return { messages, setMessages, isStreaming, sendMessage, clearMessages }
+}
+
+function applyEvent(
+   event: ParsedSseEvent,
+   assistantId: string,
+   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+): { token: string; done: boolean; error?: string } {
+   if (event.event === 'metadata') {
+      updateAssistant(setMessages, assistantId, {
+         sources: mapSources(event.data.sources),
+         intent: stringValue(event.data.intent),
+         retrieval_mode: stringValue(event.data.retrieval_mode),
+      })
+   } else if (event.event === 'citation') {
+      const unitId = stringValue(event.data.unit_id)
+      const deepLink = stringValue(event.data.deep_link)
+      setMessages((previous) =>
+         previous.map((message) =>
+            message.id === assistantId
+               ? {
+                    ...message,
+                    sources: message.sources?.map((source) =>
+                       source.id === unitId ? { ...source, deep_link: deepLink } : source,
+                    ),
+                 }
+               : message,
+         ),
+      )
+   }
+   return {
+      token: event.event === 'token' ? (stringValue(event.data.content) ?? '') : '',
+      done: event.event === 'done',
+      error: event.event === 'error' ? (stringValue(event.data.message) ?? 'Lỗi SSE') : undefined,
+   }
+}
+
+function mapSources(value: unknown): Source[] {
+   if (!Array.isArray(value)) return []
+   return value.flatMap((item) => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) return []
+      const source = item as Record<string, unknown>
+      const id = stringValue(source.id)
+      if (!id) return []
+      return [
+         {
+            id,
+            title: stringValue(source.citation_label) ?? id,
+            content: stringValue(source.content_raw) ?? '',
+            citation_label: stringValue(source.citation_label),
+            label: labelValue(source.label),
+            document_id: stringValue(source.document_id),
+            document_number: stringValue(source.document_number),
+            article_id: stringValue(source.article_id),
+            clause_id: stringValue(source.clause_id),
+            effective_from: stringValue(source.effective_from),
+            effective_to: stringValue(source.effective_to),
+            final_score: numberValue(source.final_score),
+            deep_link: stringValue(source.deep_link),
+         },
+      ]
+   })
+}
+
+function updateAssistant(
+   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+   assistantId: string,
+   patch: Partial<Message>,
+) {
+   setMessages((previous) =>
+      previous.map((message) => (message.id === assistantId ? { ...message, ...patch } : message)),
+   )
+}
+
+function stringValue(value: unknown): string | undefined {
+   return typeof value === 'string' ? value : undefined
+}
+
+function numberValue(value: unknown): number | undefined {
+   return typeof value === 'number' && Number.isFinite(value) ? value : undefined
+}
+
+function labelValue(value: unknown): Source['label'] {
+   return value === 'Article' || value === 'Clause' || value === 'Point' ? value : undefined
+}
+
+function clearActiveTimer(timerRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>) {
+   if (timerRef.current) clearInterval(timerRef.current)
+   timerRef.current = null
 }

@@ -68,7 +68,7 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
                                  remarkPlugins={[remarkGfm]}
                                  components={{
                                     // Code block custom styling
-                                    code({ node, className, children, ...props }) {
+                                    code({ className, children, ...props }) {
                                        const match = /language-(\w+)/.exec(className || '')
                                        const inline = !match
                                        return inline ? (

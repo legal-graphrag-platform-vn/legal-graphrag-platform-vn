@@ -102,3 +102,50 @@ def test_sse_emits_no_token_before_generation_validation() -> None:
         )
 
     asyncio.run(scenario())
+
+
+def test_greeting_bypasses_retrieval_and_generation() -> None:
+    async def scenario() -> None:
+        retrieval = FakeRetrieval()
+        generator = FakeGenerator()
+        service = GraphRAGAnswerService(
+            retrieval=retrieval,
+            generator=generator,
+            stream_chunk_chars=20,
+        )
+
+        events = [
+            event async for event in service.stream_chat(ChatRequest(message="Hello!"))
+        ]
+
+        assert retrieval.calls == 0
+        assert generator.calls == 0
+        assert events[0].event == "metadata"
+        assert events[0].data["intent"] == "small_talk"
+        assert events[0].data["strategy"] == "direct_response"
+        assert "Luật Doanh nghiệp 2020" in "".join(
+            event.data["content"] for event in events if event.event == "token"
+        )
+        assert events[-1].data["status"] == "completed"
+
+    asyncio.run(scenario())
+
+
+def test_legal_question_with_greeting_still_uses_grounded_pipeline() -> None:
+    async def scenario() -> None:
+        retrieval = FakeRetrieval()
+        generator = FakeGenerator()
+        service = GraphRAGAnswerService(
+            retrieval=retrieval,
+            generator=generator,
+            stream_chunk_chars=20,
+        )
+
+        await service.answer(
+            ChatRequest(message="Xin chào, điều kiện thành lập doanh nghiệp là gì?")
+        )
+
+        assert retrieval.calls == 1
+        assert generator.calls == 1
+
+    asyncio.run(scenario())

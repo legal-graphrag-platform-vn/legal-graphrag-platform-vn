@@ -23,7 +23,7 @@ def test_real_gemini_structured_answer_smoke() -> None:
     async def scenario() -> None:
         provider = GeminiAnswerProvider(
             api_key=api_key,
-            model=os.getenv("ANSWER_MODEL", "gemini-3.5-flash"),
+            model=os.getenv("ANSWER_MODEL", "gemini-3.1-flash-lite"),
             config=GenerationConfig(timeout_seconds=60, max_retries=0),
         )
         try:

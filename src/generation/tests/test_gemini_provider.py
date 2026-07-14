@@ -84,6 +84,7 @@ def test_gemini_provider_uses_api_compatible_json_schema() -> None:
         schema = config["response_json_schema"]
         assert "additionalProperties" not in json.dumps(schema)
         assert config["response_mime_type"] == "application/json"
+        assert config["thinking_config"] == {"thinking_level": "MINIMAL"}
 
     asyncio.run(scenario())
 

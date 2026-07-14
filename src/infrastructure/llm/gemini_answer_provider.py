@@ -101,6 +101,9 @@ class GeminiAnswerProvider:
                     response_json_schema=_gemini_response_schema(),
                     temperature=self._config.temperature,
                     max_output_tokens=self._config.max_output_tokens,
+                    thinking_config={
+                        "thinking_level": self._config.thinking_level.upper()
+                    },
                 ),
             )
         except asyncio.CancelledError:

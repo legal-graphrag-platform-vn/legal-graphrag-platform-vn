@@ -7,20 +7,15 @@ from __future__ import annotations
 from fastapi import Request
 
 from services.errors import BackendFeatureUnavailableError
-from services.interfaces import ChatService, QueryService, RAGService
+from services.interfaces import ChatService, DocumentBrowserService, QueryService
 
 
 async def get_query_service(request: Request) -> QueryService:
     return request.app.state.container.query_service
 
 
-async def get_rag_service(request: Request) -> RAGService:
-    service = request.app.state.container.rag_service
-    if service is None:
-        raise BackendFeatureUnavailableError(
-            "This endpoint is not available in retrieval-only GraphRAG mode"
-        )
-    return service
+async def get_document_service(request: Request) -> DocumentBrowserService:
+    return request.app.state.container.document_service
 
 
 async def get_chat_service(request: Request) -> ChatService:

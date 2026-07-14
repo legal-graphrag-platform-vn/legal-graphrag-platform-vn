@@ -39,6 +39,9 @@ class MockRAGService:
         self._doc_detail = _load("document_detail.json")
         self._doc_graph = _load("document_graph.json")
 
+    async def aclose(self) -> None:
+        return None
+
     async def retrieve(
         self,
         request: QueryRequest,

@@ -13,6 +13,7 @@ from services.interfaces import (
     AnswerGeneratorPort,
     AsyncRetrievalRunner,
     ChatService,
+    DocumentBrowserService,
     QueryService,
     RAGService,
     SyncRetrievalRuntime,
@@ -31,6 +32,7 @@ class Container:
         *,
         query_service: QueryService,
         chat_service: ChatService | None,
+        document_service: DocumentBrowserService,
         rag_service: RAGService | None,
         answer_generator: AnswerGeneratorPort | None = None,
         retrieval_runtime: SyncRetrievalRuntime | None = None,
@@ -38,6 +40,7 @@ class Container:
     ) -> None:
         self.query_service = query_service
         self.chat_service = chat_service
+        self.document_service = document_service
         self.rag_service = rag_service
         self._answer_generator = answer_generator
         self._retrieval_runtime = retrieval_runtime
@@ -53,6 +56,11 @@ class Container:
             try:
                 await self._answer_generator.aclose()
             except Exception as exc:
+                first_error = exc
+        try:
+            await self.document_service.aclose()
+        except Exception as exc:
+            if first_error is None:
                 first_error = exc
         if self._retrieval_runner is not None:
             try:
@@ -76,11 +84,18 @@ async def build_container(
     runtime_factory: Callable[..., SyncRetrievalRuntime] | None = None,
     runner_factory: Callable[..., AsyncRetrievalRunner] = BoundedRetrievalRunner,
     answer_factory: Callable[..., AnswerGeneratorPort] | None = None,
+    browser_factory: Callable[[Settings, AsyncRetrievalRunner], DocumentBrowserService]
+    | None = None,
 ) -> Container:
     """Build mock or explicitly enabled GraphRAG dependencies."""
     if settings.app_mode == "mock":
         mock = MockRAGService()
-        return Container(query_service=mock, chat_service=mock, rag_service=mock)
+        return Container(
+            query_service=mock,
+            chat_service=mock,
+            document_service=mock,
+            rag_service=mock,
+        )
 
     # Pilot GraphRAG integration; no mock fallback.
     from src.application.retrieval_factory import (
@@ -108,6 +123,12 @@ async def build_container(
         _close_runtime_after_startup_failure(runtime)
         raise
     retrieval = GraphRAGRetrievalService(runtime, runner)
+    create_browser = browser_factory or _create_document_browser_service
+    try:
+        document_service = create_browser(settings, runner)
+    except Exception:
+        await _cleanup_retrieval_after_startup_failure(runner, runtime)
+        raise
     answer_generator: AnswerGeneratorPort | None = None
     chat_service: ChatService | None = None
     if settings.answer_generation_enabled:
@@ -127,6 +148,7 @@ async def build_container(
                     max_retries=settings.answer_max_retries,
                     max_output_tokens=settings.answer_max_output_tokens,
                     temperature=settings.answer_temperature,
+                    thinking_level=settings.answer_thinking_level,
                     context_max_chars=settings.answer_context_max_chars,
                     history_max_messages=settings.answer_history_max_messages,
                     history_max_chars=settings.answer_history_max_chars,
@@ -139,7 +161,11 @@ async def build_container(
                 ),
             )
         except Exception:
-            await _cleanup_retrieval_after_startup_failure(runner, runtime)
+            await _cleanup_after_answer_startup_failure(
+                document_service,
+                runner,
+                runtime,
+            )
             raise
         chat_service = GraphRAGAnswerService(
             retrieval=retrieval,
@@ -149,6 +175,7 @@ async def build_container(
     return Container(
         query_service=RetrievalQueryService(retrieval),
         chat_service=chat_service,
+        document_service=document_service,
         rag_service=None,
         answer_generator=answer_generator,
         retrieval_runtime=runtime,
@@ -168,6 +195,39 @@ async def _cleanup_retrieval_after_startup_failure(
             type(exc).__name__,
         )
     _close_runtime_after_startup_failure(runtime)
+
+
+async def _cleanup_after_answer_startup_failure(
+    document_service: DocumentBrowserService,
+    runner: AsyncRetrievalRunner,
+    runtime: SyncRetrievalRuntime,
+) -> None:
+    try:
+        await document_service.aclose()
+    except Exception as exc:
+        logger.error(
+            "Document browser cleanup failed during startup rollback: error_type=%s",
+            type(exc).__name__,
+        )
+    await _cleanup_retrieval_after_startup_failure(runner, runtime)
+
+
+def _create_document_browser_service(
+    settings: Settings,
+    runner: AsyncRetrievalRunner,
+) -> DocumentBrowserService:
+    from neo4j import GraphDatabase
+
+    from services.document_browser_service import Neo4jDocumentBrowserService
+    from src.infrastructure.neo4j.document_browser_repo import (
+        Neo4jDocumentBrowserRepo,
+    )
+
+    driver = GraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=(settings.neo4j_user, settings.neo4j_password),
+    )
+    return Neo4jDocumentBrowserService(Neo4jDocumentBrowserRepo(driver), runner)
 
 
 def _close_runtime_after_startup_failure(runtime: SyncRetrievalRuntime) -> None:

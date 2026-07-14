@@ -55,6 +55,24 @@ class FakeAnswerGenerator:
             self.events.append("answer")
 
 
+class FakeDocumentBrowser:
+    def __init__(self, events: list[str] | None = None) -> None:
+        self.close_count = 0
+        self.events = events
+
+    async def aclose(self) -> None:
+        self.close_count += 1
+        if self.events is not None:
+            self.events.append("browser")
+
+
+def fake_browser_factory(
+    settings: object,
+    runner: object,
+) -> FakeDocumentBrowser:
+    return FakeDocumentBrowser()
+
+
 def test_mock_mode_constructs_no_runtime_or_runner() -> None:
     def forbidden_factory(*args: object, **kwargs: object) -> None:
         raise AssertionError("mock mode must not create retrieval resources")
@@ -64,6 +82,7 @@ def test_mock_mode_constructs_no_runtime_or_runner() -> None:
             Settings(app_mode="mock", _env_file=None),
             runtime_factory=forbidden_factory,
             runner_factory=forbidden_factory,  # type: ignore[arg-type]
+            browser_factory=forbidden_factory,  # type: ignore[arg-type]
         )
     )
 
@@ -91,6 +110,7 @@ def test_graphrag_mode_constructs_runtime_once_with_canonical_settings() -> None
             _graphrag_settings(),
             runtime_factory=runtime_factory,
             runner_factory=runner_factory,  # type: ignore[arg-type]
+            browser_factory=fake_browser_factory,  # type: ignore[arg-type]
         )
     )
 
@@ -115,6 +135,7 @@ def test_partial_runner_startup_failure_closes_runtime() -> None:
                 _graphrag_settings(),
                 runtime_factory=lambda *_: runtime,
                 runner_factory=fail_runner,
+                browser_factory=fake_browser_factory,  # type: ignore[arg-type]
             )
         )
     assert runtime.close_count == 1
@@ -128,13 +149,14 @@ def test_container_closes_runner_before_runtime_exactly_once() -> None:
         container = Container(
             query_service=object(),  # type: ignore[arg-type]
             chat_service=None,
+            document_service=FakeDocumentBrowser(events),
             rag_service=None,
             retrieval_runtime=runtime,
             retrieval_runner=runner,  # type: ignore[arg-type]
         )
         await container.close()
         await container.close()
-        assert events == ["runner", "runtime"]
+        assert events == ["browser", "runner", "runtime"]
         assert runner.close_count == 1
         assert runtime.close_count == 1
 
@@ -148,6 +170,7 @@ def test_runtime_still_closes_when_runner_cleanup_fails() -> None:
         container = Container(
             query_service=object(),  # type: ignore[arg-type]
             chat_service=None,
+            document_service=FakeDocumentBrowser(),
             rag_service=None,
             retrieval_runtime=runtime,
             retrieval_runner=runner,  # type: ignore[arg-type]
@@ -177,11 +200,12 @@ def test_answer_profile_constructs_once_and_closes_before_retrieval() -> None:
             runtime_factory=lambda *_: runtime,
             runner_factory=lambda **_: runner,
             answer_factory=answer_factory,
+            browser_factory=lambda *_: FakeDocumentBrowser(events),
         )
         assert answer_calls == 1
         assert container.chat_service is not None
         await container.close()
-        assert events == ["answer", "runner", "runtime"]
+        assert events == ["answer", "browser", "runner", "runtime"]
 
     asyncio.run(scenario())
 
@@ -200,6 +224,7 @@ def test_answer_startup_failure_closes_retrieval_resources() -> None:
                 runtime_factory=lambda *_: runtime,
                 runner_factory=lambda **_: runner,
                 answer_factory=fail_answer,  # type: ignore[arg-type]
+                browser_factory=lambda *_: FakeDocumentBrowser(),
             )
         assert runner.close_count == 1
         assert runtime.close_count == 1
@@ -223,6 +248,7 @@ def test_answer_startup_failure_still_closes_runtime_when_runner_cleanup_fails()
                 runtime_factory=lambda *_: runtime,
                 runner_factory=lambda **_: runner,
                 answer_factory=fail_answer,  # type: ignore[arg-type]
+                browser_factory=lambda *_: FakeDocumentBrowser(),
             )
         assert runner.close_count == 1
         assert runtime.close_count == 1

@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Source } from '../../types/chat'
 import { BookOpen, ExternalLink, Calendar } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { SourceDetailModal } from './SourceDetailModal'
+import { sourceHref } from '@/lib/source-link'
 
 interface SourceCardProps {
    sources: Source[]
@@ -16,7 +16,9 @@ const LABEL_COLORS: Record<string, string> = {
 }
 
 const LABEL_VN: Record<string, string> = {
-   Article: 'Điều', Clause: 'Khoản', Point: 'Điểm',
+   Article: 'Điều',
+   Clause: 'Khoản',
+   Point: 'Điểm',
 }
 
 export function SourceCard({ sources }: SourceCardProps) {
@@ -26,12 +28,9 @@ export function SourceCard({ sources }: SourceCardProps) {
    if (!sources || sources.length === 0) return null
 
    const handleClick = (source: Source) => {
-      // Nếu có đủ thông tin để deep-link → navigate sang Explorer
-      if (source.document_id) {
-         const params = new URLSearchParams({ document: source.document_id })
-         if (source.article_id) params.set('article', source.article_id)
-         if (source.clause_id) params.set('clause', source.clause_id)
-         router.push(`/explorer?${params.toString()}`)
+      const href = sourceHref(source)
+      if (href) {
+         router.push(href)
       } else {
          // Fallback: mở modal chi tiết
          setActiveSource(source)
@@ -50,7 +49,7 @@ export function SourceCard({ sources }: SourceCardProps) {
                <button
                   key={source.id || index}
                   onClick={() => handleClick(source)}
-                  title={source.document_id ? 'Mở trong Tra cứu văn bản' : 'Xem chi tiết'}
+                  title={sourceHref(source) ? 'Mở trong Tra cứu văn bản' : 'Xem chi tiết'}
                   className="group flex flex-col gap-1 px-3 py-2 text-xs rounded-lg bg-card hover:bg-muted border border-border transition-colors duration-200 text-left max-w-[220px]"
                >
                   {/* Row 1: index + label badge + link icon */}
@@ -59,12 +58,17 @@ export function SourceCard({ sources }: SourceCardProps) {
                         {index + 1}
                      </span>
                      {source.label && (
-                        <span className={`text-[10px] px-1 py-0.5 rounded border ${LABEL_COLORS[source.label] ?? ''}`}>
+                        <span
+                           className={`text-[10px] px-1 py-0.5 rounded border ${LABEL_COLORS[source.label] ?? ''}`}
+                        >
                            {LABEL_VN[source.label] ?? source.label}
                         </span>
                      )}
                      {source.document_id && (
-                        <ExternalLink size={10} className="ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        <ExternalLink
+                           size={10}
+                           className="ml-auto text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        />
                      )}
                   </div>
 
@@ -79,7 +83,8 @@ export function SourceCard({ sources }: SourceCardProps) {
                         <Calendar size={9} />
                         <span>
                            {new Date(source.effective_from).toLocaleDateString('vi-VN')}
-                           {source.effective_to && ` – ${new Date(source.effective_to).toLocaleDateString('vi-VN')}`}
+                           {source.effective_to &&
+                              ` – ${new Date(source.effective_to).toLocaleDateString('vi-VN')}`}
                         </span>
                      </div>
                   )}
@@ -89,7 +94,10 @@ export function SourceCard({ sources }: SourceCardProps) {
                      <div className="flex items-center gap-1">
                         <div
                            className="h-1 rounded-full bg-primary"
-                           style={{ width: `${Math.round(source.final_score * 100)}%`, maxWidth: '60px' }}
+                           style={{
+                              width: `${Math.round(source.final_score * 100)}%`,
+                              maxWidth: '60px',
+                           }}
                         />
                         <span className="text-[10px] text-muted-foreground">
                            {(source.final_score * 100).toFixed(0)}%

@@ -14,6 +14,7 @@ from api.error_handlers import (
     stream_error_contract,
 )
 from src.generation.errors import (
+    AnswerProviderDependencyError,
     AnswerProviderOutputError,
     AnswerProviderTimeoutError,
     CitationValidationError,
@@ -168,6 +169,15 @@ def test_stream_error_contract_uses_stable_code() -> None:
     code, message = stream_error_contract(CitationValidationError("hallucinated-id"))
     assert code == "ANSWER_CITATION_INVALID"
     assert "hallucinated-id" not in message
+
+
+def test_stream_error_contract_reports_provider_unavailability() -> None:
+    code, message = stream_error_contract(
+        AnswerProviderDependencyError("provider-secret")
+    )
+    assert code == "ANSWER_PROVIDER_UNAVAILABLE"
+    assert "đang quá tải" in message
+    assert "provider-secret" not in message
 
 
 def _request() -> Request:

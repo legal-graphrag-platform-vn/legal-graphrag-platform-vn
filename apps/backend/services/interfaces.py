@@ -51,6 +51,29 @@ class QueryService(Protocol):
     async def retrieve(self, request: QueryRequest) -> RetrievalResponse: ...
 
 
+class DocumentBrowserService(Protocol):
+    async def list_documents(
+        self,
+        page: int,
+        page_size: int,
+        filters: dict,
+    ) -> DocumentListResponse: ...
+
+    async def get_document_detail(self, doc_id: str) -> DocumentDetail: ...
+
+    async def get_article(self, article_id: str) -> ArticleResponse: ...
+
+    async def get_document_graph(
+        self,
+        doc_id: str,
+        depth: int,
+        node_limit: int,
+        edge_limit: int,
+    ) -> GraphData: ...
+
+    async def aclose(self) -> None: ...
+
+
 class AnswerGeneratorPort(Protocol):
     async def generate(self, request: AnswerGenerationRequest) -> AnswerResponse: ...
 

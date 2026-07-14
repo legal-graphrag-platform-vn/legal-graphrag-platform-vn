@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Legal GraphRAG Frontend
 
-## Getting Started
+Next.js pilot interface for chat, grounded citations, document exploration, and
+graph visualization. The frontend consumes the FastAPI contracts under
+`/api/v1`; it does not access Neo4j or model providers directly.
 
-First, run the development server:
+## Run
+
+Start the backend first. For the disposable pilot database, ensure the backend
+uses `NEO4J_URI=bolt://localhost:7688` after dotenv loading.
 
 ```bash
+cd apps/frontend
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The client reads:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000`.
 
-## Learn More
+## Verify
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+npm run lint
+npm run format:check
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Current Status
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+Frontend scope: pilot development
+Current legal corpus: L59_2020 pilot
+Gate 7 / M3-B13: OPEN
+Milestone A: NOT PASSED
+Milestone B acceptance: NOT STARTED
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The UI must not present pilot metrics as production accuracy, latency, corpus
+coverage, pricing, quota, or SLA evidence.

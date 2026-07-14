@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 
 from api.models import APIErrorResponse, ValidationIssue
 from services.errors import (
+    BackendDocumentNotFoundError,
     BackendFeatureUnavailableError,
     BackendRetrievalClosedError,
     BackendRetrievalTimeoutError,
@@ -132,6 +133,8 @@ async def answer_error_handler(request: Request, exc: Exception) -> JSONResponse
 def _retrieval_error_contract(error: RetrievalError) -> tuple[int, str]:
     if isinstance(error, BackendRetrievalTimeoutError):
         return 504, "RETRIEVAL_TIMEOUT"
+    if isinstance(error, BackendDocumentNotFoundError):
+        return 404, "DOCUMENT_NOT_FOUND"
     if isinstance(error, BackendFeatureUnavailableError):
         return 501, "FEATURE_NOT_IMPLEMENTED"
     if isinstance(error, BackendRetrievalClosedError):
@@ -176,7 +179,19 @@ def _answer_error_contract(error: AnswerGenerationError) -> tuple[int, str]:
 def stream_error_contract(error: Exception) -> tuple[str, str]:
     if isinstance(error, AnswerGenerationError):
         _, code = _answer_error_contract(error)
-        return code, "Không thể tạo câu trả lời có căn cứ."
+        messages = {
+            "ANSWER_PROVIDER_TIMEOUT": (
+                "Dịch vụ tạo câu trả lời phản hồi quá chậm. Vui lòng thử lại."
+            ),
+            "ANSWER_PROVIDER_UNAVAILABLE": (
+                "Dịch vụ tạo câu trả lời hiện không khả dụng hoặc đang quá tải. "
+                "Vui lòng thử lại sau."
+            ),
+            "ANSWER_PROVIDER_OUTPUT_INVALID": (
+                "Mô hình trả về dữ liệu không hợp lệ. Vui lòng thử lại."
+            ),
+        }
+        return code, messages.get(code, "Không thể tạo câu trả lời có căn cứ.")
     if isinstance(error, RetrievalError):
         _, code = _retrieval_error_contract(error)
         return code, "Không thể truy xuất căn cứ pháp lý."

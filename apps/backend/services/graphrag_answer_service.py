@@ -11,16 +11,23 @@ from api.models import (
     ChatMetadataData,
     ChatRequest,
     ChatStreamEvent,
+    ChatTokenData,
 )
+from services.conversation import greeting_response
 from services.interfaces import AnswerGeneratorPort, RetrievalApplicationPort
 from services.retrieval_mapping import to_retrieval_response
 from src.generation.models import (
+    ANSWER_CONTRACT_VERSION,
     AnswerGenerationRequest,
     AnswerResponse,
     GenerationHistoryMessage,
 )
 from src.retrieval.models import RetrievalContext
-from src.shared.retrieval_contract import RetrievalFilters, RetrievalRequest
+from src.shared.retrieval_contract import (
+    RETRIEVAL_CONTRACT_VERSION,
+    RetrievalFilters,
+    RetrievalRequest,
+)
 
 
 @dataclass(frozen=True)
@@ -74,6 +81,12 @@ class GraphRAGAnswerService:
         self,
         request: ChatRequest,
     ) -> AsyncIterator[ChatStreamEvent]:
+        direct_response = greeting_response(request.message)
+        if direct_response is not None:
+            async for event in self._stream_direct_response(direct_response):
+                yield event
+            return
+
         result = await self.answer(request)
         retrieval = to_retrieval_response(result.retrieval_context)
         answer = result.answer
@@ -115,6 +128,38 @@ class GraphRAGAnswerService:
                 confidence=answer.confidence,
                 provider=answer.provider,
                 model=answer.model,
+            ).model_dump(mode="json"),
+        )
+
+    async def _stream_direct_response(
+        self,
+        response: str,
+    ) -> AsyncIterator[ChatStreamEvent]:
+        yield ChatStreamEvent(
+            event="metadata",
+            data=ChatMetadataData(
+                sources=[],
+                intent="small_talk",
+                strategy="direct_response",
+                retrieval_mode="not_applicable",
+                retrieval_contract_version=RETRIEVAL_CONTRACT_VERSION,
+                answer_contract_version=ANSWER_CONTRACT_VERSION,
+                cannot_answer=False,
+            ).model_dump(mode="json"),
+        )
+        for chunk in _chunks(response, self._stream_chunk_chars):
+            yield ChatStreamEvent(
+                event="token",
+                data=ChatTokenData(content=chunk).model_dump(mode="json"),
+            )
+        yield ChatStreamEvent(
+            event="done",
+            data=ChatDoneData(
+                status="completed",
+                citation_count=0,
+                confidence=1.0,
+                provider=None,
+                model=None,
             ).model_dump(mode="json"),
         )
 

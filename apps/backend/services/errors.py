@@ -13,3 +13,7 @@ class BackendRetrievalClosedError(RetrievalError):
 
 class BackendFeatureUnavailableError(RetrievalError):
     pass
+
+
+class BackendDocumentNotFoundError(RetrievalError):
+    pass

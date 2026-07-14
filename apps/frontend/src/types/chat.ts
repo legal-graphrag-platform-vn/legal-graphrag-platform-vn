@@ -5,8 +5,8 @@
 export interface Source {
    // Backward compat fields
    id: string
-   title: string    // = citation_label
-   content: string  // = content_raw
+   title: string // = citation_label
+   content: string // = content_raw
    // Legacy modal fields (still used by SourceDetailModal)
    url?: string
    page?: string
@@ -21,6 +21,7 @@ export interface Source {
    effective_from?: string
    effective_to?: string
    final_score?: number
+   deep_link?: string
 }
 
 export interface Message {

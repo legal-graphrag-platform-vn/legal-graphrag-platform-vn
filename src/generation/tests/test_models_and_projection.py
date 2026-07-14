@@ -65,6 +65,20 @@ def test_projection_is_byte_stable_and_delimits_injection_text() -> None:
     assert "API_KEY" not in payload["prompt"]
 
 
+def test_non_temporal_prompt_forbids_temporal_assertions() -> None:
+    context = retrieval_context()
+    projector = ContextProjector(GenerationConfig())
+
+    provider_request = projector.provider_request(
+        projector.project(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+    )
+
+    assert "temporal_assertions MUST be an empty array" in provider_request.prompt
+    assert "reasoning_path_ids MUST be an empty array" in provider_request.prompt
+
+
 def test_history_limit_fails_instead_of_silent_truncation() -> None:
     context = retrieval_context()
     projector = ContextProjector(GenerationConfig(history_max_messages=1))

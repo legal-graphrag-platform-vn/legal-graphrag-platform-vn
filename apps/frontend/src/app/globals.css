@@ -1,6 +1,6 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -24,8 +24,8 @@
    --code-header: #f4f4f5;
 
    /* Typography & Layout */
-   --font-sans: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
-   --font-mono: var(--font-geist-mono), SFMono-Regular, monospace;
+   --font-sans: 'Aptos', 'Segoe UI', sans-serif;
+   --font-mono: 'Cascadia Code', 'SFMono-Regular', monospace;
    --background: oklch(1 0 0);
    --foreground: oklch(0.145 0 0);
    --card: oklch(1 0 0);
@@ -62,7 +62,8 @@
 
 /* 2.   Dark Theme support */
 @media (prefers-color-scheme: dark) {
-   :root { /* Nền tối dịu của ChatGPT mới */
+   :root {
+      /* Nền tối dịu của ChatGPT mới */
 
       --card-bg: #2f2f2f;
       --border-color: #383838;
@@ -167,7 +168,6 @@ body {
 }
 
 .dark {
-
    --background: oklch(0.145 0 0);
 
    --foreground: oklch(0.985 0 0);
@@ -232,13 +232,13 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+   * {
+      @apply border-border outline-ring/50;
    }
-  body {
-    @apply bg-background text-foreground;
+   body {
+      @apply bg-background text-foreground;
    }
-  html {
-    @apply font-sans;
+   html {
+      @apply font-sans;
    }
 }

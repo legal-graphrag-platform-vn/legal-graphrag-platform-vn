@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { startTransition, useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MessageItem } from '@/components/chat/MessageItem'
 import { useChatStream } from '@/hooks/useChatStream'
-import { ChatSession, Message } from '@/types/chat'
+import { ChatSession } from '@/types/chat'
 import {
    Plus,
    ArrowUp,
@@ -17,14 +17,13 @@ import {
    CalendarDays,
    X,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 
 export default function ChatPage() {
    const [sessions, setSessions] = useState<ChatSession[]>([])
    const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
    const [inputText, setInputText] = useState('')
    const [sidebarOpen, setSidebarOpen] = useState(true)
-   const [temporalDate, setTemporalDate] = useState<string>('')  // Ngày tra cứu hiệu lực
+   const [temporalDate, setTemporalDate] = useState<string>('') // Ngày tra cứu hiệu lực
    const [showDatePicker, setShowDatePicker] = useState(false)
 
    // Custom hook for SSE Streaming
@@ -39,10 +38,10 @@ export default function ChatPage() {
       if (saved) {
          try {
             const parsed = JSON.parse(saved)
-            setSessions(parsed)
-            if (parsed.length > 0) {
-               setActiveSessionId(parsed[0].id)
-            }
+            startTransition(() => {
+               setSessions(parsed)
+               if (parsed.length > 0) setActiveSessionId(parsed[0].id)
+            })
          } catch (e) {
             console.error('Lỗi load sessions từ localStorage:', e)
          }
@@ -54,8 +53,10 @@ export default function ChatPage() {
             messages: [],
             createdAt: new Date().toISOString(),
          }
-         setSessions([defaultSession])
-         setActiveSessionId(defaultId)
+         startTransition(() => {
+            setSessions([defaultSession])
+            setActiveSessionId(defaultId)
+         })
       }
    }, [])
 
@@ -70,39 +71,35 @@ export default function ChatPage() {
    useEffect(() => {
       if (!activeSessionId) return
 
-      setSessions((prev) =>
-         prev.map((s) => {
-            if (s.id !== activeSessionId) return s
+      startTransition(() => {
+         setSessions((prev) =>
+            prev.map((s) => {
+               if (s.id !== activeSessionId) return s
 
-            let newTitle = s.title
-            if (s.title === 'Cuộc hội thoại mới' && messages.length > 0) {
-               const firstUserMsg = messages.find((m) => m.role === 'user')
-               if (firstUserMsg) {
-                  newTitle = firstUserMsg.content.slice(0, 30)
-                  if (firstUserMsg.content.length > 30) newTitle += '...'
+               let newTitle = s.title
+               if (s.title === 'Cuộc hội thoại mới' && messages.length > 0) {
+                  const firstUserMsg = messages.find((m) => m.role === 'user')
+                  if (firstUserMsg) {
+                     newTitle = firstUserMsg.content.slice(0, 30)
+                     if (firstUserMsg.content.length > 30) newTitle += '...'
+                  }
                }
-            }
 
-            return {
-               ...s,
-               messages: messages,
-               title: newTitle,
-            }
-         }),
-      )
+               return {
+                  ...s,
+                  messages: messages,
+                  title: newTitle,
+               }
+            }),
+         )
+      })
    }, [messages, activeSessionId])
 
-   // 4. Load messages of active session when active session changes
-   useEffect(() => {
-      if (activeSessionId) {
-         const targetSession = sessions.find((s) => s.id === activeSessionId)
-         if (targetSession) {
-            setMessages(targetSession.messages)
-         }
-      } else {
-         clearMessages()
-      }
-   }, [activeSessionId])
+   const handleSelectSession = (sessionId: string) => {
+      const targetSession = sessions.find((session) => session.id === sessionId)
+      setActiveSessionId(sessionId)
+      setMessages(targetSession?.messages ?? [])
+   }
 
    // 5. Scroll to bottom
    const scrollToBottom = () => {
@@ -199,8 +196,13 @@ export default function ChatPage() {
             {temporalDate && (
                <div className="flex items-center gap-2 px-4 pt-2">
                   <CalendarDays size={12} className="text-primary" />
-                  <span className="text-xs text-primary">Tra cứu theo ngày: {new Date(temporalDate).toLocaleDateString('vi-VN')}</span>
-                  <button onClick={() => setTemporalDate('')} className="ml-auto text-muted-foreground hover:text-foreground">
+                  <span className="text-xs text-primary">
+                     Tra cứu theo ngày: {new Date(temporalDate).toLocaleDateString('vi-VN')}
+                  </span>
+                  <button
+                     onClick={() => setTemporalDate('')}
+                     className="ml-auto text-muted-foreground hover:text-foreground"
+                  >
                      <X size={11} />
                   </button>
                </div>
@@ -241,7 +243,9 @@ export default function ChatPage() {
                   </button>
                   {showDatePicker && (
                      <div className="absolute bottom-10 right-0 bg-card border border-border rounded-xl shadow-lg p-3 z-50 w-64">
-                        <p className="text-xs font-medium mb-2 text-foreground">Tra cứu văn bản theo ngày hiệu lực</p>
+                        <p className="text-xs font-medium mb-2 text-foreground">
+                           Tra cứu văn bản theo ngày hiệu lực
+                        </p>
                         <input
                            type="date"
                            value={temporalDate}
@@ -254,7 +258,10 @@ export default function ChatPage() {
                         />
                         {temporalDate && (
                            <button
-                              onClick={() => { setTemporalDate(''); setShowDatePicker(false) }}
+                              onClick={() => {
+                                 setTemporalDate('')
+                                 setShowDatePicker(false)
+                              }}
                               className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground"
                            >
                               Xóa ngày đã chọn
@@ -292,7 +299,7 @@ export default function ChatPage() {
          <Sidebar
             sessions={sessions}
             activeSessionId={activeSessionId}
-            onSelectSession={setActiveSessionId}
+            onSelectSession={handleSelectSession}
             onNewChat={handleNewChat}
             onDeleteSession={handleDeleteSession}
             onDeleteAllSessions={handleDeleteAllSessions}

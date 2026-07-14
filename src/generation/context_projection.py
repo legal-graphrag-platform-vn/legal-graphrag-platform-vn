@@ -91,7 +91,8 @@ class ContextProjector:
     ) -> ProviderAnswerRequest:
         payload = projected.model_dump(mode="json")
         prompt = (
-            "BEGIN_TRUSTED_RETRIEVAL_CONTEXT\n"
+            _output_contract(projected)
+            + "\nBEGIN_TRUSTED_RETRIEVAL_CONTEXT\n"
             + json.dumps(
                 payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
             )
@@ -122,3 +123,31 @@ def _path_id(
         separators=(",", ":"),
     )
     return "path_" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:20]
+
+
+def _output_contract(projected: ProjectedAnswerContext) -> str:
+    path_ids = [path.path_id for path in projected.paths]
+    rules = [
+        "BEGIN_OUTPUT_CONTRACT",
+        "citation_ids MUST contain only IDs from ALLOWED_CITATION_IDS.",
+        "Every supported legal claim MUST contain at least one citation ID.",
+    ]
+    if path_ids:
+        rules.append(
+            "reasoning_path_ids MUST contain only these IDs: "
+            + json.dumps(path_ids, ensure_ascii=False)
+        )
+    else:
+        rules.append("reasoning_path_ids MUST be an empty array.")
+    if projected.resolved_from is None:
+        rules.append(
+            "temporal_assertions MUST be an empty array because this query has no "
+            "resolved temporal point."
+        )
+    else:
+        rules.append(
+            "Each temporal assertion query_date MUST equal "
+            f"{projected.resolved_from.isoformat()}."
+        )
+    rules.append("END_OUTPUT_CONTRACT")
+    return "\n".join(rules)
