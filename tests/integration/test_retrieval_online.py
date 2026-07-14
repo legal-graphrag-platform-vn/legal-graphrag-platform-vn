@@ -2,9 +2,11 @@ import hashlib
 import json
 from datetime import date
 
-from neo4j import GraphDatabase
 import pytest
+from neo4j import GraphDatabase
 
+from main import create_app
+from settings import Settings as BackendSettings
 from src.infrastructure.neo4j.retriever_repo import Neo4jRetrieverRepo
 from src.pipeline.config import settings
 from src.retrieval.config import RetrievalConfig
@@ -19,6 +21,7 @@ from src.retrieval.retriever.hybrid import SeedChannelExecutor
 from src.retrieval.retriever.vector import VectorRetriever
 from src.retrieval.routing.router import IntentRouter
 from src.retrieval.runtime.runtime import RetrievalRuntime
+from tests.asgi_client import SyncASGIClient
 
 
 pytestmark = [pytest.mark.integration, pytest.mark.retrieval_readonly]
@@ -92,6 +95,66 @@ def test_runtime_retrieval_does_not_mutate_pilot() -> None:
 
         assert context.retrieved_units
         assert all(unit.document_id == document_id for unit in context.retrieved_units)
+        assert before == after
+    finally:
+        driver.close()
+
+
+def test_backend_query_api_preserves_read_only_pilot_digests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    driver = GraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=(settings.neo4j_user, settings.neo4j_password),
+    )
+    try:
+        with driver.session() as session:
+            seed = session.run(
+                """
+                MATCH (document:Document)-[:CONTAINS*1..3]->(unit)
+                WHERE unit:Article OR unit:Clause
+                RETURN document.id AS document_id
+                ORDER BY document.id
+                LIMIT 1
+                """
+            ).single()
+        if seed is None:
+            pytest.skip("Disposable database has no pilot document")
+
+        document_id = str(seed["document_id"])
+        before = _pilot_digests(driver, document_id)
+        monkeypatch.setenv("RETRIEVAL_VECTOR_ENABLED", "false")
+        monkeypatch.setenv("RETRIEVAL_FULLTEXT_ENABLED", "true")
+        monkeypatch.setenv("RETRIEVAL_GRAPH_ENABLED", "true")
+        monkeypatch.setenv("RETRIEVAL_RERANKER_ENABLED", "false")
+        app = create_app(
+            BackendSettings(
+                app_mode="graphrag",
+                neo4j_uri=settings.neo4j_uri,
+                neo4j_user=settings.neo4j_user,
+                neo4j_password=settings.neo4j_password,
+                _env_file=None,
+            )
+        )
+        with SyncASGIClient(app) as client:
+            response = client.post(
+                "/api/v1/query",
+                json={
+                    "query": "quyền thành lập doanh nghiệp",
+                    "document_ids": [document_id],
+                    "top_k": 5,
+                    "candidate_k": 10,
+                },
+            )
+        after = _pilot_digests(driver, document_id)
+
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["retrieved_units"]
+        assert all(
+            unit["document_id"] == document_id for unit in payload["retrieved_units"]
+        )
+        assert "answer" not in payload
         assert before == after
     finally:
         driver.close()

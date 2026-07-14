@@ -1,13 +1,23 @@
 """
 FastAPI DI functions — đọc service từ app.state.container.
 """
+
 from __future__ import annotations
 
 from fastapi import Request
 
-from services.interfaces import RAGService
+from services.errors import BackendFeatureUnavailableError
+from services.interfaces import QueryService, RAGService
 
 
-def get_rag_service(request: Request) -> RAGService:
-    # 1.   Lấy RAGService từ container đã được inject vào app.state trong lifespan
-    return request.app.state.container.rag_service
+async def get_query_service(request: Request) -> QueryService:
+    return request.app.state.container.query_service
+
+
+async def get_rag_service(request: Request) -> RAGService:
+    service = request.app.state.container.rag_service
+    if service is None:
+        raise BackendFeatureUnavailableError(
+            "This endpoint is not available in retrieval-only GraphRAG mode"
+        )
+    return service

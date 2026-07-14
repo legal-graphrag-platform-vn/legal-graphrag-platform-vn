@@ -12,7 +12,7 @@ M3-B13: OPEN
 Milestone A: NOT PASSED
 Phase 2 retrieval development: ALLOWED on current pilot data
 Retrieval runtime: IMPLEMENTED, pending official five-profile evidence
-Backend retrieval integration: NOT STARTED
+Backend retrieval integration: IMPLEMENTED
 Answer generation: OUT OF SCOPE for this plan
 Milestone B acceptance: NOT STARTED
 ```
@@ -719,3 +719,25 @@ Plan 11 may start implementation only after this plan provides a stable service
 boundary that can return a validated `RetrievalContext` for a request. It does
 not require Gate 7 to be closed for pilot development, but no final milestone
 claim is allowed while Gate 7/M3-B13 remain open.
+
+## 25. Implementation Result (2026-07-14)
+
+```text
+Backend retrieval integration: IMPLEMENTED
+Fast tests: PASS (313 tests; integration excluded by default)
+Read-only backend/retrieval integration: PASS (2 tests on disposable port 7688)
+Ruff check: PASS
+Ruff format check: PASS
+git diff --check: PASS
+Source commit: the commit containing this implementation result
+Development evidence: results/retrieval/backend_retrieval_integration_development.md
+
+Answer generation: NOT STARTED
+Gate 7 / M3-B13: OPEN
+Milestone A: NOT PASSED
+Milestone B acceptance: NOT STARTED
+```
+
+This result permits Plan 11 pilot implementation against the stable
+`RetrievalApplicationPort.retrieve_context()` boundary. It does not promote the
+backend to production, close corpus gates, or constitute Milestone B evidence.

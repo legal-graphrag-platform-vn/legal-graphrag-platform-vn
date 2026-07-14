@@ -51,6 +51,8 @@ class RetrievedUnit(BaseModel):
     document_number: str | None = None
     document_title: str | None = None
     source_url: str | None = None
+    article_id: str | None = None
+    clause_id: str | None = None
     article_number: str | None = None
     clause_number: str | None = None
     version_family_id: str | None = None

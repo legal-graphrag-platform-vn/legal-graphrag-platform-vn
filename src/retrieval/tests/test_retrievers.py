@@ -16,6 +16,8 @@ def _row(unit_id: str, label: str = "Article") -> dict:
         "id": unit_id,
         "label": label,
         "content_raw": "Nội dung",
+        "article_id": "doc_art5",
+        "clause_id": "doc_art5_cl1" if label == "Clause" else None,
         "article_number": "5",
         "clause_number": "1" if label == "Clause" else None,
         "document_id": "doc",

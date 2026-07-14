@@ -24,6 +24,10 @@ def map_retrieved_unit(
 
     article_number = _optional_text(record.get("article_number"))
     clause_number = _optional_text(record.get("clause_number"))
+    article_id = _required_text(record, "article_id")
+    clause_id = _optional_text(record.get("clause_id"))
+    if label == "Clause" and not clause_id:
+        raise RetrievalRecordError("Clause retrieval row requires clause_id")
     document_number = _optional_text(record.get("document_number"))
     score = float(record.get("score", 0.0)) if score_field else None
     scores = {score_field: score} if score_field else {}
@@ -37,6 +41,8 @@ def map_retrieved_unit(
         document_number=document_number,
         document_title=_optional_text(record.get("document_title")),
         source_url=_optional_text(record.get("source_url")),
+        article_id=article_id,
+        clause_id=clause_id,
         article_number=article_number,
         clause_number=clause_number,
         version_family_id=_optional_text(record.get("version_family_id")),

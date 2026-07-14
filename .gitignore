@@ -36,3 +36,5 @@ tree.txt
 # uv
 .venv/
 
+# Safe, non-secret backend configuration template
+!apps/backend/.env.example

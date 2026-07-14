@@ -11,6 +11,8 @@ def test_clause_mapping_builds_attribution_citation_and_deep_link() -> None:
             "id": "law_art5_cl1",
             "label": "Clause",
             "content_raw": "Nội dung",
+            "article_id": "law_art5",
+            "clause_id": "law_art5_cl1",
             "article_number": "5",
             "clause_number": "1",
             "document_id": "law",
@@ -23,6 +25,8 @@ def test_clause_mapping_builds_attribution_citation_and_deep_link() -> None:
 
     assert unit.citation_label == "Điều 5, Khoản 1, 59/2020/QH14"
     assert unit.deep_link == "/documents/law/units/law_art5_cl1"
+    assert unit.article_id == "law_art5"
+    assert unit.clause_id == "law_art5_cl1"
     assert unit.retrieval_sources == ["vector"]
 
 

@@ -1,4 +1,5 @@
 {
+  "contract_version": "retrieval-runtime-v1",
   "query": "Điều kiện thành lập công ty cổ phần là gì?",
   "retrieved_units": [
     {
@@ -12,7 +13,9 @@
       "clause_id": null,
       "effective_from": "2021-01-01",
       "effective_to": null,
-      "final_score": 0.95
+      "final_score": 0.95,
+      "deep_link": "/documents/ldn_2020/units/ldn_2020_art111",
+      "retrieval_sources": []
     },
     {
       "id": "nd01_2021_art22",
@@ -25,18 +28,37 @@
       "clause_id": null,
       "effective_from": "2021-01-04",
       "effective_to": null,
-      "final_score": 0.88
+      "final_score": 0.88,
+      "deep_link": "/documents/nd01_2021/units/nd01_2021_art22",
+      "retrieval_sources": []
     }
   ],
   "intent": "factual",
+  "strategy": "factual_hybrid",
   "retrieval_mode": "mock",
+  "executed_channels": [],
+  "force_intent_used": false,
+  "temporal_source": "none",
+  "decision_reason_code": "FACTUAL_DEFAULT",
+  "decision_reason": "Deterministic mock retrieval fixture",
+  "capability_status": "supported",
+  "filters": {
+    "document_ids": [],
+    "doc_types": [],
+    "legal_statuses": [],
+    "query_date": null
+  },
+  "reranker_applied": false,
   "graph_paths": [
     {
       "nodes": ["ldn_2020", "ldn_2020_art111", "nd01_2021"],
       "relations": ["CONTAINS", "REFERS_TO"],
+      "relation_ids": [],
+      "is_temporal_valid": true,
       "path_description": "Luật Doanh nghiệp 2020 -> Điều 111 -> Nghị định 01/2021 (tham chiếu)"
     }
   ],
+  "evidence": [],
   "metrics": {
     "vector_hits": 5,
     "bm25_hits": 3,

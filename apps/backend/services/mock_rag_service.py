@@ -2,6 +2,7 @@
 MockRAGService — dùng fixture JSON từ mock_data/.
 Load fixture một lần trong __init__, không đọc file mỗi request.
 """
+
 from __future__ import annotations
 
 import json
@@ -9,7 +10,6 @@ from pathlib import Path
 from typing import AsyncIterator
 
 from api.models import (
-    ArticleDetail,
     ArticleResponse,
     ChatRequest,
     ChatStreamEvent,
@@ -19,6 +19,7 @@ from api.models import (
     DocumentListResponse,
     DocumentSummary,
     GraphData,
+    QueryRequest,
     RetrievalResponse,
 )
 
@@ -40,12 +41,17 @@ class MockRAGService:
 
     async def retrieve(
         self,
-        query: str,
-        top_k: int = 10,
-        temporal_date=None,
+        request: QueryRequest,
     ) -> RetrievalResponse:
-        # 3.   Trả về fixture retrieval — mock không thực sự query theo top_k/temporal
-        return RetrievalResponse(**self._retrieval)
+        # 3.   Giữ schema thật; fixture chỉ mô phỏng nội dung retrieval
+        response = RetrievalResponse(**self._retrieval)
+        limit = request.top_k or len(response.retrieved_units)
+        return response.model_copy(
+            update={
+                "query": request.query,
+                "retrieved_units": response.retrieved_units[:limit],
+            }
+        )
 
     async def stream_chat(
         self,
@@ -86,18 +92,20 @@ class MockRAGService:
         if filters.get("status"):
             all_items = [i for i in all_items if i.get("status") == filters["status"]]
         if filters.get("doc_type"):
-            all_items = [i for i in all_items if i.get("doc_type") == filters["doc_type"]]
+            all_items = [
+                i for i in all_items if i.get("doc_type") == filters["doc_type"]
+            ]
         if filters.get("year"):
             year_str = str(filters["year"])
             all_items = [
-                i for i in all_items
+                i
+                for i in all_items
                 if (i.get("effective_from") or "").startswith(year_str)
             ]
         if filters.get("issuer"):
             issuer_q = filters["issuer"].lower()
             all_items = [
-                i for i in all_items
-                if issuer_q in (i.get("issuer_name") or "").lower()
+                i for i in all_items if issuer_q in (i.get("issuer_name") or "").lower()
             ]
 
         total = len(all_items)

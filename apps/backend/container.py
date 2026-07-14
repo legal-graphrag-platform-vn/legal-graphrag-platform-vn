@@ -1,48 +1,99 @@
-"""
-DI Container — build và giữ application-level dependencies.
-Lưu trong app.state, không dùng global singleton.
-"""
+"""Build and own backend application-level dependencies."""
+
 from __future__ import annotations
 
-from services.interfaces import RAGService
+from collections.abc import Callable
+
+from services.graphrag_retrieval_service import (
+    GraphRAGRetrievalService,
+    RetrievalQueryService,
+)
+from services.interfaces import (
+    AsyncRetrievalRunner,
+    QueryService,
+    RAGService,
+    SyncRetrievalRuntime,
+)
 from services.mock_rag_service import MockRAGService
+from services.retrieval_runner import BoundedRetrievalRunner
 from settings import Settings
 
 
 class Container:
-    def __init__(self, rag_service: RAGService):
-        # 1.   Giữ các dependency
+    def __init__(
+        self,
+        *,
+        query_service: QueryService,
+        rag_service: RAGService | None,
+        retrieval_runtime: SyncRetrievalRuntime | None = None,
+        retrieval_runner: AsyncRetrievalRunner | None = None,
+    ) -> None:
+        self.query_service = query_service
         self.rag_service = rag_service
-        self._driver = None  # Sẽ được gán khi APP_MODE=graphrag (Step 4)
+        self._retrieval_runtime = retrieval_runtime
+        self._retrieval_runner = retrieval_runner
+        self._closed = False
 
     async def close(self) -> None:
-        # 2.   Đóng resources khi shutdown
-        if self._driver is not None:
-            self._driver.close()
+        if self._closed:
+            return
+        self._closed = True
+        first_error: Exception | None = None
+        if self._retrieval_runner is not None:
+            try:
+                await self._retrieval_runner.aclose()
+            except Exception as exc:
+                first_error = exc
+        if self._retrieval_runtime is not None:
+            try:
+                self._retrieval_runtime.close()
+            except Exception as exc:
+                if first_error is None:
+                    first_error = exc
+        if first_error is not None:
+            raise first_error
 
 
-def build_container(settings: Settings) -> Container:
-    """
-    Factory tạo Container theo app_mode.
-    """
+def build_container(
+    settings: Settings,
+    *,
+    runtime_factory: Callable[..., SyncRetrievalRuntime] | None = None,
+    runner_factory: Callable[..., AsyncRetrievalRunner] = BoundedRetrievalRunner,
+) -> Container:
+    """Build mock or retrieval-only GraphRAG dependencies."""
     if settings.app_mode == "mock":
-        # 3.   Mock mode — không cần Neo4j, LLM, hay bất kỳ external service nào
-        return Container(rag_service=MockRAGService())
+        mock = MockRAGService()
+        return Container(query_service=mock, rag_service=mock)
 
-    else:
-        # 4.   🔒 LOCKED — chỉ kích hoạt sau Milestone A pass
-        # Uncomment khi Step 4 ready:
-        # from src.retrieval.retriever.hybrid import HybridRetriever
-        # from src.infrastructure.neo4j.document_repo import DocumentRepository
-        # from services.graphrag_service import GraphRAGService
-        # driver = GraphDatabase.driver(settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password))
-        # retriever = HybridRetriever(...)
-        # repo = DocumentRepository(driver)
-        # container = Container(rag_service=GraphRAGService(retriever, repo))
-        # container._driver = driver
-        # return container
-        raise NotImplementedError(
-            "APP_MODE=graphrag chưa được kích hoạt. "
-            "Cần Milestone A pass trước: vector index ONLINE, graph-quality sạch, "
-            "embedding coverage = 100%."
+    # Retrieval-only pilot integration; no answer generation or mock fallback.
+    from src.application.retrieval_factory import (
+        RetrievalApplicationSettings,
+        create_retrieval_runtime,
+    )
+    from src.retrieval.config import RetrievalConfig
+
+    factory = runtime_factory or create_retrieval_runtime
+    runtime = factory(
+        RetrievalConfig(),
+        RetrievalApplicationSettings(
+            NEO4J_URI=settings.neo4j_uri,
+            NEO4J_USER=settings.neo4j_user,
+            NEO4J_PASSWORD=settings.neo4j_password,
+        ),
+    )
+    try:
+        runner = runner_factory(
+            max_concurrency=settings.backend_retrieval_max_concurrency,
+            timeout_seconds=settings.backend_retrieval_timeout_seconds,
+            shutdown_grace_seconds=(settings.backend_retrieval_shutdown_grace_seconds),
         )
+    except Exception:
+        runtime.close()
+        raise
+    retrieval = GraphRAGRetrievalService(runtime, runner)
+    return Container(
+        query_service=RetrievalQueryService(retrieval),
+        rag_service=None,
+        retrieval_runtime=runtime,
+        retrieval_runner=runner,
+    )

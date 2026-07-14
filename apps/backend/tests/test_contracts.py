@@ -2,13 +2,20 @@
 Contract tests — FastAPI backend mock mode.
 Chạy: cd apps/backend && PYTHONPATH=. pytest tests/ -v
 """
+
 from __future__ import annotations
 
-import pytest
-from fastapi.testclient import TestClient
+import asyncio
+import json
 
+import pytest
+
+from api.models import ChatRequest
+from api.routes.chat import chat
 from main import create_app
+from services.mock_rag_service import MockRAGService
 from settings import Settings
+from tests.asgi_client import SyncASGIClient as TestClient
 
 
 @pytest.fixture(scope="module")
@@ -23,6 +30,7 @@ def client():
 # Settings & Startup
 # ---------------------------------------------------------------------------
 
+
 def test_mock_mode_starts_without_neo4j():
     """Mock mode không cần NEO4J_* config."""
     app = create_app(Settings(app_mode="mock"))
@@ -34,54 +42,63 @@ def test_mock_mode_starts_without_neo4j():
 def test_graphrag_mode_fails_when_credentials_missing():
     """graphrag mode phải raise khi thiếu NEO4J_*."""
     with pytest.raises(RuntimeError, match="NEO4J"):
-        create_app(Settings(app_mode="graphrag"))
+        create_app(Settings(app_mode="graphrag", _env_file=None))
 
 
 # ---------------------------------------------------------------------------
 # Chat SSE Contract
 # ---------------------------------------------------------------------------
 
-def test_chat_sse_contains_named_events(client: TestClient):
+
+def _chat_stream(message: str) -> tuple[object, str]:
+    async def collect() -> tuple[object, str]:
+        response = await chat(
+            ChatRequest(message=message),
+            service=MockRAGService(),
+        )
+        chunks: list[str] = []
+        async for chunk in response.body_iterator:
+            chunks.append(chunk.decode("utf-8") if isinstance(chunk, bytes) else chunk)
+        return response, "".join(chunks)
+
+    return asyncio.run(collect())
+
+
+def test_chat_sse_contains_named_events():
     """Stream phải chứa event: metadata và event: token."""
-    with client.stream("POST", "/api/v1/chat", json={"message": "Điều kiện thành lập công ty?"}
-    ) as resp:
-        assert resp.status_code == 200
-        raw = resp.read().decode("utf-8")
+    _, raw = _chat_stream("Điều kiện thành lập công ty?")
 
     assert "event: metadata" in raw
     assert "event: token" in raw
     assert "event: done" in raw
 
 
-def test_chat_sse_metadata_sent_only_once(client: TestClient):
+def test_chat_sse_metadata_sent_only_once():
     """event: metadata chỉ được gửi 1 lần."""
-    with client.stream("POST", "/api/v1/chat", json={"message": "test"}) as resp:
-        raw = resp.read().decode("utf-8")
+    _, raw = _chat_stream("test")
 
     assert raw.count("event: metadata") == 1
 
 
-def test_chat_sse_headers_correct(client: TestClient):
+def test_chat_sse_headers_correct():
     """Response headers phải đúng cho SSE."""
-    with client.stream("POST", "/api/v1/chat", json={"message": "test"}) as resp:
-        assert resp.headers["content-type"] == "text/event-stream; charset=utf-8"
-        assert resp.headers.get("cache-control") == "no-cache"
+    response, _ = _chat_stream("test")
+
+    assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
+    assert response.headers.get("cache-control") == "no-cache"
 
 
-def test_chat_sse_unicode_tieng_viet(client: TestClient):
+def test_chat_sse_unicode_tieng_viet():
     """Unicode tiếng Việt phải được encode đúng, không bị escape thành \\uXXXX."""
-    with client.stream("POST", "/api/v1/chat", json={"message": "test"}) as resp:
-        raw = resp.read().decode("utf-8")
+    _, raw = _chat_stream("test")
     # Các từ tiếng Việt phải xuất hiện dưới dạng UTF-8 thật, không phải \\uXXXX
     assert "\\u" not in raw or "công" in raw  # ensure_ascii=False hoạt động
     assert "Điều" in raw or "điều" in raw or "nghiệp" in raw
 
 
-def test_chat_no_answer_field_in_metadata(client: TestClient):
+def test_chat_no_answer_field_in_metadata():
     """Metadata event không được chứa answer field."""
-    import json
-    with client.stream("POST", "/api/v1/chat", json={"message": "test"}) as resp:
-        raw = resp.read().decode("utf-8")
+    _, raw = _chat_stream("test")
 
     # Parse metadata event
     for line in raw.split("\n"):
@@ -94,6 +111,7 @@ def test_chat_no_answer_field_in_metadata(client: TestClient):
 # ---------------------------------------------------------------------------
 # Query Contract
 # ---------------------------------------------------------------------------
+
 
 def test_query_response_has_no_answer_field(client: TestClient):
     """RetrievalResponse không được có field `answer`."""
@@ -116,8 +134,8 @@ def test_query_accepts_temporal_date(client: TestClient):
 
 
 def test_query_top_k_max_enforced(client: TestClient):
-    """top_k > 50 phải bị reject."""
-    resp = client.post("/api/v1/query", json={"query": "test", "top_k": 100})
+    """top_k > 200 phải bị reject."""
+    resp = client.post("/api/v1/query", json={"query": "test", "top_k": 201})
     assert resp.status_code == 422
 
 
@@ -130,6 +148,7 @@ def test_query_empty_message_rejected(client: TestClient):
 # ---------------------------------------------------------------------------
 # Document List Contract
 # ---------------------------------------------------------------------------
+
 
 def test_document_list_returns_pagination_meta(client: TestClient):
     """Response phải có pagination metadata."""
@@ -173,6 +192,7 @@ def test_document_list_filter_by_year(client: TestClient):
 # Document Detail Contract
 # ---------------------------------------------------------------------------
 
+
 def test_document_detail_has_chapter_hierarchy(client: TestClient):
     """DocumentDetail phải có chapters với articles."""
     resp = client.get("/api/v1/documents/ldn_2020")
@@ -202,6 +222,7 @@ def test_document_detail_has_relations(client: TestClient):
 # ---------------------------------------------------------------------------
 # Graph Contract
 # ---------------------------------------------------------------------------
+
 
 def test_document_graph_returns_nodes_and_edges(client: TestClient):
     """Graph endpoint phải trả nodes và edges."""
@@ -245,6 +266,7 @@ def test_document_graph_truncated_flag(client: TestClient):
 # Article Contract
 # ---------------------------------------------------------------------------
 
+
 def test_article_endpoint_returns_parent_document(client: TestClient):
     """ArticleResponse phải chứa parent DocumentSummary."""
     resp = client.get("/api/v1/articles/ldn_2020_art111")
@@ -260,9 +282,11 @@ def test_article_endpoint_returns_parent_document(client: TestClient):
 # Contract Parity
 # ---------------------------------------------------------------------------
 
+
 def test_document_legal_status_matches_ontology():
     """DocumentLegalStatus enum phải match src/shared/ontology/contract.py."""
     import sys
+
     sys.path.insert(0, "../..")
     from api.models import DocumentLegalStatus
     from src.shared.ontology.contract import DOCUMENT_LEGAL_STATUSES

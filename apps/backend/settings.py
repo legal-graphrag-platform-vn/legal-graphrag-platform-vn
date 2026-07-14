@@ -2,6 +2,7 @@
 Settings — pydantic-settings cho toàn bộ backend config.
 Không hardcode password default. Validate runtime trước khi serve.
 """
+
 from __future__ import annotations
 
 from typing import Literal
@@ -17,9 +18,18 @@ class Settings(BaseSettings):
     # 2.   Neo4j — chỉ required khi app_mode="graphrag"
     neo4j_uri: str | None = None
     neo4j_user: str | None = None
-    neo4j_password: str | None = None    # Không có default — nếu thiếu phải fail rõ ràng
+    neo4j_password: str | None = None  # Không có default — nếu thiếu phải fail rõ ràng
 
-    # 3.   LLM Providers
+    # 3.   Sync retrieval runs in one bounded application-owned executor
+    backend_retrieval_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
+    backend_retrieval_max_concurrency: int = Field(default=4, ge=1, le=32)
+    backend_retrieval_shutdown_grace_seconds: float = Field(
+        default=5.0,
+        ge=0,
+        le=60,
+    )
+
+    # 4.   LLM Providers
     llm_provider: Literal["gemini", "deepseek", "openai", "ollama"] = "ollama"
     llm_model: str = "llama3"
     ollama_base_url: str = "http://localhost:11434"
@@ -27,7 +37,7 @@ class Settings(BaseSettings):
     deepseek_api_key: str | None = None
     openai_api_key: str | None = None
 
-    # 4.   CORS — không dùng ["*"] trong production
+    # 5.   CORS — không dùng ["*"] trong production
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

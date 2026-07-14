@@ -2,6 +2,7 @@
 API Models — Pydantic schemas cho request, response và SSE events.
 Single source of truth cho toàn bộ API contract.
 """
+
 from __future__ import annotations
 
 import json
@@ -9,13 +10,22 @@ from datetime import date
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from src.shared.retrieval_contract import IntentType
 
 
 # ---------------------------------------------------------------------------
 # Enums — phải sync với src/shared/ontology/contract.py
 # Test parity: tests/test_contract_parity.py
 # ---------------------------------------------------------------------------
+
 
 class DocumentLegalStatus(str, Enum):
     ACTIVE = "ACTIVE"
@@ -29,6 +39,7 @@ class DocumentLegalStatus(str, Enum):
 # ---------------------------------------------------------------------------
 # Chat Contract
 # ---------------------------------------------------------------------------
+
 
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant", "system"]
@@ -44,6 +55,7 @@ class ChatRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # SSE Event Models — không ghép JSON bằng f-string, encode qua đây
 # ---------------------------------------------------------------------------
+
 
 class ChatMetadataData(BaseModel):
     sources: list["RetrievedUnitDTO"] = Field(default_factory=list)
@@ -74,15 +86,13 @@ def encode_sse(event: str, data: BaseModel | dict[str, Any]) -> str:
         payload = data.model_dump(mode="json")
     else:
         payload = data
-    return (
-        f"event: {event}\n"
-        f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
-    )
+    return f"event: {event}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
 
 # ---------------------------------------------------------------------------
 # Retrieval Contract — tách hoàn toàn khỏi answer generation
 # ---------------------------------------------------------------------------
+
 
 class RetrievedUnitDTO(BaseModel):
     id: str
@@ -94,24 +104,95 @@ class RetrievedUnitDTO(BaseModel):
     # /explorer?document={document_id}&article={article_id}&clause={clause_id}
     document_id: str
     document_number: str | None = None
-    article_id: str | None = None    # Có khi label == "Clause" hoặc "Point"
-    clause_id: str | None = None     # Có khi label == "Point"
+    document_title: str | None = None
+    title: str | None = None
+    source_url: str | None = None
+    article_id: str | None = None  # Article ID hoặc parent Article ID
+    clause_id: str | None = None  # Clause ID hoặc parent Clause ID
+    article_number: str | None = None
+    clause_number: str | None = None
+    version_family_id: str | None = None
 
     effective_from: date | None = None
     effective_to: date | None = None
+    legal_status: str | None = None
+    vector_score: float | None = None
+    bm25_score: float | None = None
+    graph_score: float | None = None
+    rerank_score: float | None = None
     final_score: float | None = None
+    deep_link: str
+    retrieval_sources: list[Literal["vector", "fulltext", "graph"]]
 
 
 class GraphPathDTO(BaseModel):
     nodes: list[str]
     relations: list[str]
+    relation_ids: list[str]
     path_description: str
+    is_temporal_valid: bool
+
+
+class EvidenceDTO(BaseModel):
+    unit_id: str
+    evidence_type: Literal["vector", "bm25", "graph", "temporal", "rerank"]
+    matched_text: str | None = None
+    score: float | None = None
+    source_path_id: str | None = None
+    is_sufficient: bool = False
 
 
 class QueryRequest(BaseModel):
-    query: str = Field(min_length=1, max_length=10_000)
-    top_k: int = Field(default=10, ge=1, le=50)
-    temporal_date: date | None = None   # phải truyền đầy đủ xuống service
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, max_length=4000)
+    top_k: int | None = Field(default=None, ge=1, le=200)
+    candidate_k: int | None = Field(default=None, ge=1, le=200)
+    document_ids: list[str] = Field(default_factory=list)
+    query_date: date | None = None
+    force_intent: IntentType | None = None
+    enable_reranker: bool | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_temporal_date_alias(cls, data: object) -> object:
+        if not isinstance(data, dict) or "temporal_date" not in data:
+            return data
+        normalized = dict(data)
+        alias_value = normalized.pop("temporal_date")
+        canonical_value = normalized.get("query_date")
+        if canonical_value is not None and canonical_value != alias_value:
+            raise ValueError("query_date conflicts with temporal_date")
+        normalized["query_date"] = alias_value
+        return normalized
+
+    @field_validator("query")
+    @classmethod
+    def normalize_query(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("Query must not be blank")
+        return normalized
+
+    @field_validator("document_ids")
+    @classmethod
+    def validate_document_ids(cls, values: list[str]) -> list[str]:
+        normalized = [value.strip() for value in values]
+        if any(not value for value in normalized):
+            raise ValueError("document_ids must not contain blank values")
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("document_ids must be unique")
+        return normalized
+
+    @model_validator(mode="after")
+    def validate_limits(self) -> "QueryRequest":
+        if (
+            self.top_k is not None
+            and self.candidate_k is not None
+            and self.top_k > self.candidate_k
+        ):
+            raise ValueError("top_k must not exceed candidate_k")
+        return self
 
 
 class RetrievalResponse(BaseModel):
@@ -119,21 +200,47 @@ class RetrievalResponse(BaseModel):
     Response cho POST /api/v1/query.
     KHÔNG có `answer: str` — answer là trách nhiệm của /chat.
     """
+
+    contract_version: str
     query: str
     retrieved_units: list[RetrievedUnitDTO]
     intent: str
+    strategy: str
     retrieval_mode: str
+    executed_channels: list[str]
+    force_intent_used: bool
+    temporal_source: str
+    decision_reason_code: str
+    decision_reason: str
+    capability_status: Literal["supported", "no_results"]
+    filters: dict[str, Any]
+    reranker_applied: bool
     graph_paths: list[GraphPathDTO]
-    metrics: dict[str, int]
+    evidence: list[EvidenceDTO]
+    metrics: dict[str, Any]
+
+
+class ValidationIssue(BaseModel):
+    location: list[str | int]
+    message: str
+    error_type: str
+
+
+class APIErrorResponse(BaseModel):
+    code: str
+    message: str
+    request_id: str | None = None
+    details: list[ValidationIssue] | dict[str, Any] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
 # Document Browser Contract — đủ hierarchy cho accordion UI
 # ---------------------------------------------------------------------------
 
+
 class PointDetail(BaseModel):
     id: str
-    label: str        # thường là "a)", "b)", v.v.
+    label: str  # thường là "a)", "b)", v.v.
     content_raw: str
 
 
@@ -147,7 +254,7 @@ class ClauseDetail(BaseModel):
 class ArticleDetail(BaseModel):
     id: str
     number: str
-    title: str | None = None     # Optional: không phải điều nào cũng có tiêu đề
+    title: str | None = None  # Optional: không phải điều nào cũng có tiêu đề
     content_raw: str
     clauses: list[ClauseDetail] = Field(default_factory=list)
 
@@ -162,15 +269,15 @@ class ChapterDetail(BaseModel):
 class DocumentRelation(BaseModel):
     doc_id: str
     doc_number: str
-    relation_type: str          # từ RELATION_ENUM: "AMENDS", "REFERS_TO"...
+    relation_type: str  # từ RELATION_ENUM: "AMENDS", "REFERS_TO"...
     affected_units: list[str] = Field(default_factory=list)
 
 
 class DocumentSummary(BaseModel):
     id: str
     number: str
-    title: str | None = None         # Optional — ontology không bảo đảm mọi Document có title
-    doc_type: str                    # "Law", "Decree", "Circular"... từ DOCUMENT_TYPES
+    title: str | None = None  # Optional — ontology không bảo đảm mọi Document có title
+    doc_type: str  # "Law", "Decree", "Circular"... từ DOCUMENT_TYPES
     issuer_name: str | None = None
     issued_date: date | None = None
     effective_from: date | None = None
@@ -187,6 +294,7 @@ class DocumentDetail(DocumentSummary):
 
 class ArticleResponse(BaseModel):
     """Response cho GET /api/v1/articles/{article_id}"""
+
     document: DocumentSummary
     article: ArticleDetail
     related_units: list[DocumentRelation] = Field(default_factory=list)
@@ -194,22 +302,22 @@ class ArticleResponse(BaseModel):
 
 class GraphNode(BaseModel):
     id: str
-    label: str                   # "Document", "Article", "Clause", "LegalConcept"...
-    properties: dict[str, Any]   # number, title, status, v.v.
+    label: str  # "Document", "Article", "Clause", "LegalConcept"...
+    properties: dict[str, Any]  # number, title, status, v.v.
 
 
 class GraphEdge(BaseModel):
     source: str
     target: str
-    relation_type: str           # từ RELATION_ENUM
+    relation_type: str  # từ RELATION_ENUM
 
 
 class GraphData(BaseModel):
     nodes: list[GraphNode]
     edges: list[GraphEdge]
-    truncated: bool = False          # True nếu graph bị cắt do hard limit
-    total_nodes: int | None = None   # Tổng nodes thực tế trước khi cắt
-    total_edges: int | None = None   # Tổng edges thực tế trước khi cắt
+    truncated: bool = False  # True nếu graph bị cắt do hard limit
+    total_nodes: int | None = None  # Tổng nodes thực tế trước khi cắt
+    total_edges: int | None = None  # Tổng edges thực tế trước khi cắt
     # Khi truncated=True, frontend hiển thị: "Đang hiển thị 500/1.247 nodes"
 
 
