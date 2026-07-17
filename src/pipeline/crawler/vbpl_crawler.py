@@ -116,16 +116,16 @@ def _extract_body_lines(full_text: str) -> list[str]:
             break
 
     if first_article_index != -1:
-        toc_index = next(
-            (
-                i
-                for i in range(first_article_index + 1, len(body_lines))
-                if body_lines[i].strip().casefold() == "mục lục"
-            ),
-            None,
-        )
-        if toc_index is not None:
-            body_lines = body_lines[:toc_index]
+        # 3.   Tìm vị trí của "Mục lục" hoặc "Phụ lục" xuất hiện sau Điều đầu tiên
+        cutoff_index = None
+        for i in range(first_article_index + 1, len(body_lines)):
+            line_clean = body_lines[i].strip()
+            line_clean_lower = line_clean.lower()
+            if line_clean_lower == "mục lục" or re.match(r"^phụ\s+lục\b", line_clean_lower):
+                cutoff_index = i
+                break
+        if cutoff_index is not None:
+            body_lines = body_lines[:cutoff_index]
         
     # 3.   Loại bỏ các marker chú thích chỉnh sửa
     annotation_markers = {"Điều khoản được sửa đổi, bổ sung", "Điều khoản được bổ sung"}
