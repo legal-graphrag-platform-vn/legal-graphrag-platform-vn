@@ -5,7 +5,10 @@ from datetime import date
 from src.generation.models import AnswerCandidate, AnswerClaim
 from src.retrieval.models import (
     EvidenceItem,
+    GraphEdge,
+    GraphNodeRef,
     GraphPath,
+    GraphReasoningRequirement,
     IntentType,
     RetrievalContext,
     RetrievedUnit,
@@ -50,17 +53,12 @@ def retrieval_context(
     relations = path_relations or []
     paths = []
     if relations:
-        target = retrieved_unit("doc_art2")
-        units.append(target)
-        paths = [
-            GraphPath(
-                nodes=[units[0].id, target.id],
-                relations=relations,
-                relation_ids=[f"rel-{index}" for index, _ in enumerate(relations)],
-                path_description="Verified legal path",
-                is_temporal_valid=True,
-            )
-        ]
+        path_units = [units[0]]
+        for index in range(1, len(relations) + 1):
+            target = retrieved_unit(f"doc_art{index + 1}")
+            units.append(target)
+            path_units.append(target)
+        paths = [graph_path([unit.id for unit in path_units], relations)]
     query_date = date(2022, 7, 1) if temporal else None
     return RetrievalContext(
         query="Ai có quyền thành lập doanh nghiệp?",
@@ -81,7 +79,7 @@ def retrieval_context(
                 EvidenceItem(
                     unit_id=unit.id,
                     evidence_type="vector",
-                    is_sufficient=True,
+                    is_eligible=True,
                 )
                 for unit in units
             ]
@@ -89,6 +87,40 @@ def retrieval_context(
         metrics={},
         retrieval_mode="no_results" if no_results else "hybrid",
         capability_status="no_results" if no_results else "supported",
+        reasoning_requirement=(
+            GraphReasoningRequirement(minimum_edges=2)
+            if intent is IntentType.MULTI_HOP and len(relations) >= 2
+            else None
+        ),
+    )
+
+
+def graph_path(
+    node_ids: list[str],
+    relation_types: list[str],
+    *,
+    semantic_node_ids: set[str] | None = None,
+) -> GraphPath:
+    semantic_ids = semantic_node_ids or set()
+    return GraphPath(
+        nodes=tuple(
+            GraphNodeRef(
+                node_id=node_id,
+                labels=("LegalConcept",) if node_id in semantic_ids else ("Article",),
+                citable_unit_id=None if node_id in semantic_ids else node_id,
+            )
+            for node_id in node_ids
+        ),
+        edges=tuple(
+            GraphEdge(
+                relation_id=f"rel-{index + 1}",
+                relation_type=relation_type,
+                source_id=node_ids[index],
+                target_id=node_ids[index + 1],
+            )
+            for index, relation_type in enumerate(relation_types)
+        ),
+        path_description="Verified legal path",
     )
 
 

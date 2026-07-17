@@ -203,9 +203,10 @@ Required checks:
 Graph-path shape invariants:
 
 ```text
-len(nodes) == len(relations) + 1
-len(relation_ids) == len(relations)
+len(nodes) == len(edges) + 1
 all node and relation IDs are non-empty
+every edge preserves canonical source_id/target_id
+every edge connects adjacent traversal nodes
 ```
 
 Malformed candidate behavior:
@@ -494,11 +495,13 @@ class LegalEvidenceBlock(BaseModel):
 class ProjectedPathBlock(BaseModel):
     path_id: str
     nodes: tuple[str, ...]
-    relations: tuple[str, ...]
-    relation_ids: tuple[str, ...]
+    edges: tuple[ProjectedGraphEdge, ...]
     description: str
-    is_temporal_valid: bool
 ```
+
+Temporal-invalid paths are rejected at the retrieval boundary and never enter
+projection. Projected edges retain canonical direction and relationship temporal
+metadata.
 
 Contract boundary:
 

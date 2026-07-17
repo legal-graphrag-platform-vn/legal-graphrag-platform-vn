@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from src.generation.errors import EvidenceContractError
 from src.retrieval.models import GraphPath, RetrievalContext, RetrievedUnit
+from src.shared.ontology.contract import RELATION_ENUM
 
 
 _CANONICAL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
@@ -18,7 +19,7 @@ _CANONICAL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
 class EvidenceCandidate:
     unit: RetrievedUnit
     rank: int
-    is_sufficient: bool
+    is_eligible: bool
 
 
 @dataclass(frozen=True)
@@ -38,14 +39,12 @@ class EvidenceValidator:
     """Validate trusted metadata without re-running retrieval filters."""
 
     def validate(self, context: RetrievalContext) -> ValidatedEvidence:
-        sufficient_ids = {
-            item.unit_id for item in context.evidence if item.is_sufficient
-        }
+        eligible_ids = {item.unit_id for item in context.evidence if item.is_eligible}
         candidates = tuple(
             EvidenceCandidate(
                 unit=self._validate_unit(unit, context),
                 rank=rank,
-                is_sufficient=unit.id in sufficient_ids,
+                is_eligible=unit.id in eligible_ids,
             )
             for rank, unit in enumerate(context.retrieved_units)
         )
@@ -101,23 +100,34 @@ class EvidenceValidator:
 
     @staticmethod
     def _validate_path(path: GraphPath) -> GraphPath:
-        if len(path.nodes) != len(path.relations) + 1:
-            raise EvidenceContractError(
-                "Graph path node/relation cardinality is invalid"
-            )
-        if len(path.relation_ids) != len(path.relations):
-            raise EvidenceContractError("Graph path relation identity is incomplete")
-        if not path.relations:
+        if len(path.nodes) != len(path.edges) + 1:
+            raise EvidenceContractError("Graph path node/edge cardinality is invalid")
+        if not path.edges:
             raise EvidenceContractError("Graph path must contain at least one relation")
-        for node_id in path.nodes:
-            _require_canonical_id(node_id, "graph path node ID")
-        for relation_type in path.relations:
-            if not relation_type.strip():
+        node_ids: list[str] = []
+        for node in path.nodes:
+            _require_canonical_id(node.node_id, "graph path node ID")
+            node_ids.append(node.node_id)
+            if node.citable_unit_id is not None:
+                _require_canonical_id(node.citable_unit_id, "citable unit ID")
+        relation_ids: list[str] = []
+        for left, edge, right in zip(
+            path.nodes, path.edges, path.nodes[1:], strict=False
+        ):
+            if edge.relation_type not in RELATION_ENUM:
                 raise EvidenceContractError(
-                    "Graph path relation type must not be blank"
+                    f"Graph path relation type is not canonical: {edge.relation_type}"
                 )
-        for relation_id in path.relation_ids:
-            _require_canonical_id(relation_id, "graph path relation ID")
+            _require_canonical_id(edge.relation_id, "graph path relation ID")
+            _require_canonical_id(edge.source_id, "graph edge source ID")
+            _require_canonical_id(edge.target_id, "graph edge target ID")
+            if {edge.source_id, edge.target_id} != {left.node_id, right.node_id}:
+                raise EvidenceContractError(
+                    f"Graph edge does not connect adjacent nodes: {edge.relation_id}"
+                )
+            relation_ids.append(edge.relation_id)
+        if len(relation_ids) != len(set(relation_ids)):
+            raise EvidenceContractError("Graph path relation IDs must be unique")
         if not path.path_description.strip():
             raise EvidenceContractError("Graph path description must not be blank")
         return path
@@ -126,9 +136,8 @@ class EvidenceValidator:
 def build_path_id(path: GraphPath) -> str:
     canonical = json.dumps(
         {
-            "nodes": path.nodes,
-            "relations": path.relations,
-            "relation_ids": path.relation_ids,
+            "nodes": [node.model_dump(mode="json") for node in path.nodes],
+            "edges": [edge.model_dump(mode="json") for edge in path.edges],
         },
         ensure_ascii=False,
         sort_keys=True,

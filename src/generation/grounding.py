@@ -76,8 +76,7 @@ class GroundingValidator:
                 AnswerReasoningPath(
                     path_id=path.path_id,
                     nodes=path.nodes,
-                    relations=path.relations,
-                    relation_ids=path.relation_ids,
+                    edges=path.edges,
                     description=path.description,
                 )
             )

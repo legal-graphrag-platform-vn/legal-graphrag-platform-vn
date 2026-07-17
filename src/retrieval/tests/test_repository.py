@@ -65,3 +65,26 @@ def test_repository_rejects_unsupported_graph_depth_before_db_session() -> None:
     else:
         raise AssertionError("Unsupported traversal depth should fail")
     assert driver.last_session is None
+
+
+def test_graph_projection_preserves_canonical_edge_endpoints_and_dates() -> None:
+    driver = FakeDriver()
+    repo = Neo4jRetrieverRepo(driver)
+
+    assert (
+        repo.graph_expansion(
+            ["entry"],
+            ("AMENDS",),
+            "incoming",
+            2,
+            filters=RetrievalFilters(query_date=None),
+        )
+        == []
+    )
+
+    query = driver.last_session.query
+    assert "startNode(rel).id" in query
+    assert "endNode(rel).id" in query
+    assert "effective_from: rel.effective_from" in query
+    assert "effective_to: rel.effective_to" in query
+    assert "citable_unit_id" in query

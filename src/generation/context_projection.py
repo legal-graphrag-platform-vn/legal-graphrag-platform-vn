@@ -20,6 +20,7 @@ from src.generation.models import (
     OmittedEvidence,
     ProjectedAnswerContext,
     ProjectedPathBlock,
+    ProjectedGraphEdge,
     ProviderAnswerRequest,
 )
 
@@ -247,11 +248,11 @@ def _to_path(validated_path) -> ProjectedPathBlock:
     path = validated_path.path
     return ProjectedPathBlock(
         path_id=validated_path.path_id,
-        nodes=tuple(path.nodes),
-        relations=tuple(path.relations),
-        relation_ids=tuple(path.relation_ids),
+        nodes=tuple(node.node_id for node in path.nodes),
+        edges=tuple(
+            ProjectedGraphEdge.model_validate(edge.model_dump()) for edge in path.edges
+        ),
         description=path.path_description,
-        is_temporal_valid=path.is_temporal_valid,
     )
 
 

@@ -35,10 +35,13 @@ class ProjectedContextValidator:
             if not selected_ids:
                 return _insufficient("Projected context has no direct evidence")
         elif intent == IntentType.HIERARCHY:
-            if not any("CONTAINS" in path.relations for path in projected.paths):
+            if not any(
+                any(edge.relation_type == "CONTAINS" for edge in path.edges)
+                for path in projected.paths
+            ):
                 return _insufficient("Projected hierarchy path is incomplete")
         elif intent == IntentType.MULTI_HOP:
-            if not projected.paths:
+            if not projected.paths or not plan.required_bundle_sets:
                 return _insufficient("Projected graph path is incomplete")
         elif intent == IntentType.VALIDITY:
             if projected.resolved_from is None:

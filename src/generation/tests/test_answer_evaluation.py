@@ -158,7 +158,7 @@ def _metadata() -> EvaluationMetadata:
         working_tree_state="dirty",
         dataset_sha256="dataset",
         graph_snapshot_hash="graph",
-        retrieval_contract_version="retrieval-runtime-v1",
+        retrieval_contract_version="retrieval-runtime-v2",
         answer_contract_version="answer-generation-v1",
         prompt_sha256="prompt",
         generation_config_sha256="config",

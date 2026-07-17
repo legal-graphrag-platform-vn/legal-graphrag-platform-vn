@@ -172,12 +172,28 @@ class RetrievedUnitDTO(BaseModel):
     retrieval_sources: list[Literal["vector", "fulltext", "graph"]]
 
 
+class GraphNodeDTO(BaseModel):
+    node_id: str
+    labels: tuple[str, ...]
+    effective_from: date | None = None
+    effective_to: date | None = None
+    legal_status: str | None = None
+    citable_unit_id: str | None = None
+
+
+class GraphEdgeDTO(BaseModel):
+    relation_id: str
+    relation_type: str
+    source_id: str
+    target_id: str
+    effective_from: date | None = None
+    effective_to: date | None = None
+
+
 class GraphPathDTO(BaseModel):
-    nodes: list[str]
-    relations: list[str]
-    relation_ids: list[str]
+    nodes: tuple[GraphNodeDTO, ...]
+    edges: tuple[GraphEdgeDTO, ...]
     path_description: str
-    is_temporal_valid: bool
 
 
 class EvidenceDTO(BaseModel):
@@ -186,7 +202,7 @@ class EvidenceDTO(BaseModel):
     matched_text: str | None = None
     score: float | None = None
     source_path_id: str | None = None
-    is_sufficient: bool = False
+    is_eligible: bool = False
 
 
 class QueryRequest(BaseModel):

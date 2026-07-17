@@ -217,7 +217,7 @@ class DevelopmentEvaluationMetadata(BaseModel):
 
     source_commit: str
     working_tree_state: str
-    runtime_contract_version: str = "retrieval-runtime-v1"
+    runtime_contract_version: str = "retrieval-runtime-v2"
     router_config_hash: str
     embedding_contract: str
     reranker_contract: str
@@ -452,10 +452,10 @@ def _graph_path_hit(
     path_hits = [
         any(
             bool(path.nodes)
-            and len(path.relations) >= item.minimum_hops
-            and path.nodes[0] == gold.source_id
-            and path.nodes[-1] == gold.target_id
-            and path.relations == gold.relation_types
+            and len(path.edges) >= item.minimum_hops
+            and path.nodes[0].node_id == gold.source_id
+            and path.nodes[-1].node_id == gold.target_id
+            and [edge.relation_type for edge in path.edges] == gold.relation_types
             for path in context.graph_paths
         )
         for gold in item.gold_paths
@@ -525,11 +525,9 @@ def _hierarchy_hit(
     if not item.gold_hierarchy:
         return None
     observed = {
-        (source, relation, target)
+        (edge.source_id, edge.relation_type, edge.target_id)
         for path in context.graph_paths
-        for source, relation, target in zip(
-            path.nodes, path.relations, path.nodes[1:], strict=False
-        )
+        for edge in path.edges
     }
     return all(
         (gold.parent_id, gold.relation_type, gold.child_id) in observed

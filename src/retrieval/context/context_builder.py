@@ -64,8 +64,8 @@ class ContextBuilder:
         # 3. Tính toán lại Metrics bổ sung nếu cần
         final_metrics = metrics.copy()
         final_metrics["total_evidence_items"] = len(evidence)
-        final_metrics["sufficient_evidence_items"] = sum(
-            1 for e in evidence if e.is_sufficient
+        final_metrics["eligible_evidence_items"] = sum(
+            1 for e in evidence if e.is_eligible
         )
 
         # 4. Trả về Bundle

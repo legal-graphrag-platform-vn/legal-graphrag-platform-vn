@@ -225,12 +225,36 @@ class TextChunk:
     deep_link: str               # /documents/{document_id}/units/{unit_id}
 
 @dataclass
+class GraphNodeRef:
+    node_id: str
+    labels: tuple[str, ...]
+    effective_from: date | None
+    effective_to: date | None
+    legal_status: str | None
+    citable_unit_id: str | None
+
+@dataclass
+class GraphEdge:
+    relation_id: str
+    relation_type: str
+    source_id: str             # canonical Neo4j direction
+    target_id: str
+    effective_from: date | None
+    effective_to: date | None
+
+@dataclass
 class GraphPath:
-    nodes: list[str]           # ["ldn_2020_art46", "ldn_2020_art29"]  # naming convention: legal_ontology.md §4
-    relations: list[str]       # ["REFERS_TO"]  # ADR-17: REFERENCES → REFERS_TO
-    path_description: str      # Human-readable: "Điều 46 viện dẫn Điều 29"
-    is_temporal_valid: bool
+    nodes: tuple[GraphNodeRef, ...]  # traversal order
+    edges: tuple[GraphEdge, ...]     # canonical relationship direction
+    path_description: str
 ```
+
+Only node-and-relationship temporal-valid paths enter `RetrievalContext`.
+Incoming traversal never reverses canonical edge direction. Multi-hop answer
+generation remains fail-closed until retrieval supplies a trusted explicit graph
+requirement and every citable intermediate legal unit is present. Comparison
+requires a shared non-null `version_family_id` or a verified
+`AMENDS`/`REPLACES` path.
 
 Citation labels are generated from returned Document/Article/Clause metadata.
 Deep links use canonical graph IDs, never filesystem `raw_doc_code` values.

@@ -19,7 +19,7 @@ class EvidenceVerifier:
                         evidence_type=_EVIDENCE_TYPE[source],
                         matched_text=unit.content_raw,
                         score=_score_for_source(unit, source),
-                        is_sufficient=bool(unit.content_raw.strip()),
+                        is_eligible=bool(unit.content_raw.strip()),
                     )
                 )
             if unit.rerank_score is not None:
@@ -29,13 +29,14 @@ class EvidenceVerifier:
                         evidence_type="rerank",
                         matched_text=unit.content_raw,
                         score=unit.rerank_score,
-                        is_sufficient=bool(unit.content_raw.strip()),
+                        is_eligible=bool(unit.content_raw.strip()),
                     )
                 )
 
         existing_ids = {item.unit_id for item in evidence}
         for path_index, path in enumerate(graph_paths):
-            for node_id in path.nodes:
+            for node in path.nodes:
+                node_id = node.citable_unit_id or node.node_id
                 if node_id in existing_ids:
                     continue
                 evidence.append(
@@ -44,7 +45,7 @@ class EvidenceVerifier:
                         evidence_type="graph",
                         matched_text=path.path_description,
                         source_path_id=f"path-{path_index}",
-                        is_sufficient=path.is_temporal_valid,
+                        is_eligible=False,
                     )
                 )
                 existing_ids.add(node_id)
