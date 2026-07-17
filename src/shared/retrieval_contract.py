@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-RETRIEVAL_CONTRACT_VERSION = "retrieval-runtime-v1"
+RETRIEVAL_CONTRACT_VERSION = "retrieval-runtime-v2"
 
 
 class IntentType(str, Enum):
@@ -88,7 +88,7 @@ class RetrievalFilters(BaseModel):
 class RetrievalRequest(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    contract_version: Literal["retrieval-runtime-v1"] = RETRIEVAL_CONTRACT_VERSION
+    contract_version: Literal["retrieval-runtime-v2"] = RETRIEVAL_CONTRACT_VERSION
     query: str = Field(min_length=1, max_length=4000)
     filters: RetrievalFilters = Field(default_factory=RetrievalFilters)
     top_k: int | None = Field(default=None, ge=1, le=200)

@@ -17,6 +17,8 @@ from src.retrieval.eval.development import (
     load_development_dataset,
 )
 from src.retrieval.models import (
+    GraphEdge,
+    GraphNodeRef,
     IntentType,
     GraphPath,
     RetrievalContext,
@@ -397,16 +399,34 @@ def test_branching_reference_requires_every_gold_branch() -> None:
     )
     case = next(item for item in dataset.cases if item.query_id == "multi_hop_05")
     first_path = GraphPath(
-        nodes=["ldn_2020_art52_cl1", "ldn_2020_art53_cl6"],
-        relations=["REFERS_TO"],
+        nodes=(
+            GraphNodeRef(node_id="ldn_2020_art52_cl1", labels=("Clause",)),
+            GraphNodeRef(node_id="ldn_2020_art53_cl6", labels=("Clause",)),
+        ),
+        edges=(
+            GraphEdge(
+                relation_id="branch-1",
+                relation_type="REFERS_TO",
+                source_id="ldn_2020_art52_cl1",
+                target_id="ldn_2020_art53_cl6",
+            ),
+        ),
         path_description="first branch",
-        is_temporal_valid=True,
     )
     second_path = GraphPath(
-        nodes=["ldn_2020_art52_cl1", "ldn_2020_art53_cl7"],
-        relations=["REFERS_TO"],
+        nodes=(
+            GraphNodeRef(node_id="ldn_2020_art52_cl1", labels=("Clause",)),
+            GraphNodeRef(node_id="ldn_2020_art53_cl7", labels=("Clause",)),
+        ),
+        edges=(
+            GraphEdge(
+                relation_id="branch-2",
+                relation_type="REFERS_TO",
+                source_id="ldn_2020_art52_cl1",
+                target_id="ldn_2020_art53_cl7",
+            ),
+        ),
         path_description="second branch",
-        is_temporal_valid=True,
     )
     context = SupportedRuntime().retrieve(RetrievalRequest(query=case.query))
 

@@ -135,6 +135,10 @@ class RetrievalRuntime:
             "graph_expansion_count": 1 if decision.graph_enabled else 0,
             "graph_paths_count": len(expansion.paths),
             "graph_units_count": len(expansion.units),
+            "graph_temporal_rejected_path_count": (
+                expansion.diagnostics.temporal_rejected_path_count
+            ),
+            "graph_malformed_path_count": expansion.diagnostics.malformed_path_count,
             "temporal_filtered_count": len(fused) - len(filtered),
             "seed_latency_ms": seed_latency,
             "graph_latency_ms": graph_latency,

@@ -43,7 +43,10 @@ class EvidenceCompactor:
         validated: ValidatedEvidence,
     ) -> CompactionPlan:
         protected_ids = {
-            node_id for path in validated.paths for node_id in path.path.nodes
+            node.citable_unit_id
+            for path in validated.paths
+            for node in path.path.nodes
+            if node.citable_unit_id is not None
         }
         candidates, omissions = self._deduplicate(
             validated.candidates,
@@ -107,18 +110,26 @@ class EvidenceCompactor:
             return tuple(
                 (self._bundle(intent, (candidate,), ()),)
                 for candidate in candidates
-                if candidate.is_sufficient
+                if candidate.is_eligible
             )
         if intent in {IntentType.HIERARCHY, IntentType.MULTI_HOP}:
             required_relation = "CONTAINS" if intent == IntentType.HIERARCHY else None
             alternatives: list[tuple[EvidenceBundle, ...]] = []
             by_id = {candidate.unit.id: candidate for candidate in candidates}
             for path in paths:
-                if required_relation and required_relation not in path.path.relations:
+                relation_types = {edge.relation_type for edge in path.path.edges}
+                if required_relation and required_relation not in relation_types:
                     continue
-                path_candidates = tuple(
-                    by_id[node_id] for node_id in path.path.nodes if node_id in by_id
+                citable_ids = tuple(
+                    dict.fromkeys(
+                        node.citable_unit_id
+                        for node in path.path.nodes
+                        if node.citable_unit_id is not None
+                    )
                 )
+                if any(node_id not in by_id for node_id in citable_ids):
+                    continue
+                path_candidates = tuple(by_id[node_id] for node_id in citable_ids)
                 if len(path_candidates) < 2:
                     continue
                 alternatives.append((self._bundle(intent, path_candidates, (path,)),))
@@ -137,32 +148,58 @@ class EvidenceCompactor:
                     ),
                 )
                 for candidate in candidates
-                if candidate.is_sufficient and _valid_on(candidate, query_date)
+                if candidate.is_eligible and _valid_on(candidate, query_date)
             )
         if intent == IntentType.COMPARISON:
-            by_version: dict[tuple[str | None, str], EvidenceCandidate] = {}
+            by_version: dict[tuple[str, str], EvidenceCandidate] = {}
             for candidate in candidates:
+                if candidate.unit.version_family_id is None:
+                    continue
                 key = (candidate.unit.version_family_id, candidate.unit.document_id)
                 by_version.setdefault(key, candidate)
-            if len(by_version) < 2:
-                return ()
-            bundles = tuple(
-                self._bundle(
-                    intent,
-                    (candidate,),
-                    (),
-                    version_keys=(_version_key(candidate),),
+            grouped_families: dict[str, list[EvidenceCandidate]] = {}
+            for (family_id, _), candidate in by_version.items():
+                grouped_families.setdefault(family_id, []).append(candidate)
+            alternatives: list[tuple[EvidenceBundle, ...]] = []
+            for family_id, family_candidates in sorted(grouped_families.items()):
+                if len(family_candidates) < 2:
+                    continue
+                alternatives.append(
+                    tuple(
+                        self._bundle(
+                            intent,
+                            (candidate,),
+                            (),
+                            version_keys=(f"{family_id}|{candidate.unit.document_id}",),
+                        )
+                        for candidate in sorted(
+                            family_candidates,
+                            key=lambda item: (item.rank, item.unit.id),
+                        )
+                    )
                 )
-                for _, candidate in sorted(
-                    by_version.items(),
-                    key=lambda item: (
-                        item[1].rank,
-                        item[0][0] or "",
-                        item[0][1],
-                    ),
+            by_id = {candidate.unit.id: candidate for candidate in candidates}
+            for path in paths:
+                if not any(
+                    edge.relation_type in {"AMENDS", "REPLACES"}
+                    for edge in path.path.edges
+                ):
+                    continue
+                citable_ids = tuple(
+                    dict.fromkeys(
+                        node.citable_unit_id
+                        for node in path.path.nodes
+                        if node.citable_unit_id is not None
+                    )
                 )
-            )
-            return (bundles,)
+                path_candidates = tuple(
+                    by_id[node_id] for node_id in citable_ids if node_id in by_id
+                )
+                if len(path_candidates) >= 2:
+                    alternatives.append(
+                        (self._bundle(intent, path_candidates, (path,)),)
+                    )
+            return tuple(alternatives)
         return ()
 
     @staticmethod

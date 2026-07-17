@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from src.retrieval.models import (
     EvidenceItem,
+    GraphEdge,
+    GraphNodeRef,
     GraphPath,
     IntentType,
     RetrievalChannel,
@@ -24,11 +26,23 @@ def retrieval_context(*, no_results: bool = False) -> RetrievalContext:
             if no_results
             else [
                 GraphPath(
-                    nodes=["doc", "doc_art1"],
-                    relations=["CONTAINS"],
-                    relation_ids=["rel-1"],
+                    nodes=(
+                        GraphNodeRef(node_id="doc", labels=("Document",)),
+                        GraphNodeRef(
+                            node_id="doc_art1",
+                            labels=("Article",),
+                            citable_unit_id="doc_art1",
+                        ),
+                    ),
+                    edges=(
+                        GraphEdge(
+                            relation_id="rel-1",
+                            relation_type="CONTAINS",
+                            source_id="doc",
+                            target_id="doc_art1",
+                        ),
+                    ),
                     path_description="Document contains Article 1",
-                    is_temporal_valid=True,
                 )
             ]
         ),
@@ -42,7 +56,7 @@ def retrieval_context(*, no_results: bool = False) -> RetrievalContext:
                     matched_text="Quyền thành lập doanh nghiệp",
                     score=0.9,
                     source_path_id="rel-1",
-                    is_sufficient=True,
+                    is_eligible=True,
                 )
             ]
         ),

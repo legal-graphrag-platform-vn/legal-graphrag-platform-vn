@@ -135,15 +135,24 @@ class LegalEvidenceBlock(BaseModel):
     legal_status: str | None
 
 
+class ProjectedGraphEdge(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    relation_id: str
+    relation_type: str
+    source_id: str
+    target_id: str
+    effective_from: date | None
+    effective_to: date | None
+
+
 class ProjectedPathBlock(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     path_id: str
     nodes: tuple[str, ...]
-    relations: tuple[str, ...]
-    relation_ids: tuple[str, ...]
+    edges: tuple[ProjectedGraphEdge, ...]
     description: str
-    is_temporal_valid: bool
 
 
 class EvidenceRegistryEntry(LegalEvidenceBlock):
@@ -231,8 +240,7 @@ class AnswerReasoningPath(BaseModel):
 
     path_id: str
     nodes: tuple[str, ...]
-    relations: tuple[str, ...]
-    relation_ids: tuple[str, ...]
+    edges: tuple[ProjectedGraphEdge, ...]
     description: str
 
 

@@ -105,19 +105,37 @@ class Neo4jRetrieverRepo:
         OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(related)
         WITH path, related,
              CASE WHEN related:Point THEN parent_clause ELSE related END AS unit
+        CALL {{
+          WITH path
+          UNWIND nodes(path) AS path_node
+          OPTIONAL MATCH (path_parent_clause:Clause)-[:CONTAINS]->(path_node)
+          RETURN collect({{
+            node_id: path_node.id,
+            labels: labels(path_node),
+            effective_from: path_node.effective_from,
+            effective_to: path_node.effective_to,
+            legal_status: path_node.legal_status,
+            citable_unit_id: CASE
+              WHEN path_node:Article OR path_node:Clause THEN path_node.id
+              WHEN path_node:Point THEN path_parent_clause.id
+              ELSE null
+            END
+          }}) AS path_node_refs
+        }}
         OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(unit)
         OPTIONAL MATCH (document:Document)-[:CONTAINS*1..3]->(unit)
-        WITH path, unit, parent_article, document
+        WITH path, path_node_refs, unit, parent_article, document
         WHERE NOT (unit:Article OR unit:Clause) OR ({_GRAPH_UNIT_FILTER})
         RETURN
-          [node IN nodes(path) | node.id] AS path_nodes,
-          [rel IN relationships(path) | type(rel)] AS path_relations,
-          [rel IN relationships(path) | coalesce(rel.relation_id, '')] AS path_relation_ids,
-          [node IN nodes(path) | {{
-            labels: labels(node),
-            effective_from: node.effective_from,
-            effective_to: node.effective_to
-          }}] AS path_temporal_nodes,
+          path_node_refs,
+          [rel IN relationships(path) | {{
+            relation_id: rel.relation_id,
+            relation_type: type(rel),
+            source_id: startNode(rel).id,
+            target_id: endNode(rel).id,
+            effective_from: rel.effective_from,
+            effective_to: rel.effective_to
+          }}] AS path_edge_refs,
           CASE WHEN unit:Article OR unit:Clause THEN unit.id ELSE null END AS id,
           CASE WHEN unit:Article THEN 'Article'
                WHEN unit:Clause THEN 'Clause' ELSE null END AS label,
@@ -132,8 +150,11 @@ class Neo4jRetrieverRepo:
           document.title AS document_title,
           null AS source_url,
           unit.effective_from AS effective_from,
-          unit.effective_to AS effective_to
-        ORDER BY length(path) ASC, path_nodes ASC
+          unit.effective_to AS effective_to,
+          unit.legal_status AS legal_status,
+          unit.version_family_id AS version_family_id
+        ORDER BY length(path) ASC,
+                 [node IN path_node_refs | node.node_id] ASC
         LIMIT $limit
         """
         return self._run(

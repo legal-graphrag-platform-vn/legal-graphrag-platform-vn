@@ -76,6 +76,6 @@ def test_cli_stdout_contains_version_and_forced_intent_status(
     exit_code = cli.main(["retrieve", "--query", "quy định"])
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert '"contract_version": "retrieval-runtime-v1"' in captured.out
+    assert '"contract_version": "retrieval-runtime-v2"' in captured.out
     assert '"force_intent_used": false' in captured.out
     assert captured.err == ""

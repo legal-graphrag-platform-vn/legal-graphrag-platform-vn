@@ -16,10 +16,11 @@ from src.generation.service import AnswerGenerator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.generation.tests.factories import (
     answer_candidate,
+    graph_path,
     retrieval_context,
     retrieved_unit,
 )
-from src.retrieval.models import EvidenceItem, GraphPath, IntentType
+from src.retrieval.models import EvidenceItem, GraphReasoningRequirement, IntentType
 
 
 class FakeProvider:
@@ -54,7 +55,7 @@ def test_hierarchical_duplicate_is_omitted_without_losing_provenance() -> None:
         EvidenceItem(
             unit_id=duplicate_clause.id,
             evidence_type="vector",
-            is_sufficient=False,
+            is_eligible=False,
         )
     )
 
@@ -79,12 +80,12 @@ def test_optional_oversized_unit_is_skipped_and_later_unit_is_admitted() -> None
             EvidenceItem(
                 unit_id=oversized.id,
                 evidence_type="vector",
-                is_sufficient=False,
+                is_eligible=False,
             ),
             EvidenceItem(
                 unit_id=trailing.id,
                 evidence_type="vector",
-                is_sufficient=False,
+                is_eligible=False,
             ),
         ]
     )
@@ -114,24 +115,22 @@ def test_multi_hop_bundle_is_admitted_atomically() -> None:
             EvidenceItem(
                 unit_id=second.id,
                 evidence_type="graph",
-                is_sufficient=True,
+                is_eligible=True,
             ),
             EvidenceItem(
                 unit_id=third.id,
                 evidence_type="graph",
-                is_sufficient=True,
+                is_eligible=True,
             ),
         ]
     )
     context.graph_paths = [
-        GraphPath(
-            nodes=["doc_art1", "doc_art2", "doc_art3"],
-            relations=["REFERS_TO", "REFERS_TO"],
-            relation_ids=["rel-1", "rel-2"],
-            path_description="Two-edge verified path",
-            is_temporal_valid=True,
+        graph_path(
+            ["doc_art1", "doc_art2", "doc_art3"],
+            ["REFERS_TO", "REFERS_TO"],
         )
     ]
+    context.reasoning_requirement = GraphReasoningRequirement(minimum_edges=2)
     request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
     projector = ContextProjector(GenerationConfig())
     plan = _compact(context)
@@ -157,7 +156,7 @@ def test_registry_contains_only_projected_legal_evidence() -> None:
         EvidenceItem(
             unit_id=oversized.id,
             evidence_type="vector",
-            is_sufficient=False,
+            is_eligible=False,
         )
     )
     request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
@@ -180,18 +179,17 @@ def test_path_only_semantic_node_is_not_citation_eligible() -> None:
         EvidenceItem(
             unit_id=target.id,
             evidence_type="graph",
-            is_sufficient=True,
+            is_eligible=True,
         )
     )
     context.graph_paths = [
-        GraphPath(
-            nodes=["doc_art1", "legal_concept_x", "doc_art2"],
-            relations=["DEFINES", "REQUIRES"],
-            relation_ids=["rel-1", "rel-2"],
-            path_description="Path through a semantic node",
-            is_temporal_valid=True,
+        graph_path(
+            ["doc_art1", "legal_concept_x", "doc_art2"],
+            ["DEFINES", "REQUIRES"],
+            semantic_node_ids={"legal_concept_x"},
         )
     ]
+    context.reasoning_requirement = GraphReasoningRequirement(minimum_edges=2)
     request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
     projector = ContextProjector(GenerationConfig())
     result = projector.project(request, _compact(context))

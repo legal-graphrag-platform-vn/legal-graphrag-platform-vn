@@ -1,5 +1,5 @@
 {
-  "contract_version": "retrieval-runtime-v1",
+  "contract_version": "retrieval-runtime-v2",
   "query": "Điều kiện thành lập công ty cổ phần là gì?",
   "retrieved_units": [
     {
@@ -51,10 +51,50 @@
   "reranker_applied": false,
   "graph_paths": [
     {
-      "nodes": ["ldn_2020", "ldn_2020_art111", "nd01_2021"],
-      "relations": ["CONTAINS", "REFERS_TO"],
-      "relation_ids": [],
-      "is_temporal_valid": true,
+      "nodes": [
+        {
+          "node_id": "ldn_2020",
+          "labels": ["Document"],
+          "effective_from": "2021-01-01",
+          "effective_to": null,
+          "legal_status": "ACTIVE",
+          "citable_unit_id": null
+        },
+        {
+          "node_id": "ldn_2020_art111",
+          "labels": ["Article"],
+          "effective_from": "2021-01-01",
+          "effective_to": null,
+          "legal_status": "ACTIVE",
+          "citable_unit_id": "ldn_2020_art111"
+        },
+        {
+          "node_id": "nd01_2021",
+          "labels": ["Document"],
+          "effective_from": "2021-01-04",
+          "effective_to": null,
+          "legal_status": "ACTIVE",
+          "citable_unit_id": null
+        }
+      ],
+      "edges": [
+        {
+          "relation_id": "mock-contains-111",
+          "relation_type": "CONTAINS",
+          "source_id": "ldn_2020",
+          "target_id": "ldn_2020_art111",
+          "effective_from": null,
+          "effective_to": null
+        },
+        {
+          "relation_id": "mock-refers-nd01",
+          "relation_type": "REFERS_TO",
+          "source_id": "ldn_2020_art111",
+          "target_id": "nd01_2021",
+          "effective_from": null,
+          "effective_to": null
+        }
+      ],
       "path_description": "Luật Doanh nghiệp 2020 -> Điều 111 -> Nghị định 01/2021 (tham chiếu)"
     }
   ],

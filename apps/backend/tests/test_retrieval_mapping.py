@@ -57,12 +57,12 @@ def test_temporal_date_alias_maps_to_canonical_query_date() -> None:
 def test_response_mapping_is_a_lossless_public_projection() -> None:
     response = to_retrieval_response(retrieval_context())
 
-    assert response.contract_version == "retrieval-runtime-v1"
+    assert response.contract_version == "retrieval-runtime-v2"
     assert response.executed_channels == ["vector", "fulltext"]
     assert response.retrieved_units[0].article_id == "doc_art1"
     assert response.retrieved_units[0].deep_link == ("/documents/doc/units/doc_art1")
     assert response.retrieved_units[0].retrieval_sources == ["vector", "fulltext"]
-    assert response.graph_paths[0].relation_ids == ["rel-1"]
+    assert response.graph_paths[0].edges[0].relation_id == "rel-1"
     assert response.evidence[0].source_path_id == "rel-1"
     assert response.metrics == {"total_pipeline_latency_ms": 12}
     assert "answer" not in response.model_dump()

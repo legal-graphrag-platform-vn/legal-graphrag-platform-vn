@@ -53,7 +53,7 @@ def test_uuid_fixture_graph_path_preserves_relation_identity(
             filters=RetrievalFilters(document_ids=[document_id]),
         )
         assert expansion.paths
-        assert relation_id in expansion.paths[0].relation_ids
+        assert relation_id in {edge.relation_id for edge in expansion.paths[0].edges}
         assert target_id in [unit.id for unit in expansion.units]
     finally:
         session.close()

@@ -71,17 +71,56 @@ class RetrievedUnit(BaseModel):
     )
 
 
+class GraphNodeRef(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    node_id: str
+    labels: tuple[str, ...]
+    effective_from: date | None = None
+    effective_to: date | None = None
+    legal_status: str | None = None
+    citable_unit_id: str | None = None
+
+
+class GraphEdge(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    relation_id: str
+    relation_type: str
+    source_id: str
+    target_id: str
+    effective_from: date | None = None
+    effective_to: date | None = None
+
+
 class GraphPath(BaseModel):
-    nodes: list[str]
-    relations: list[str]
-    relation_ids: list[str] = Field(default_factory=list)
+    model_config = ConfigDict(frozen=True)
+
+    nodes: tuple[GraphNodeRef, ...]
+    edges: tuple[GraphEdge, ...]
     path_description: str
-    is_temporal_valid: bool
+
+
+class GraphExpansionDiagnostics(BaseModel):
+    accepted_path_count: int = 0
+    temporal_rejected_path_count: int = 0
+    malformed_path_count: int = 0
+
+
+class GraphReasoningRequirement(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    minimum_edges: int = Field(ge=2, le=5)
+    required_relation_types: tuple[str, ...] = ()
+    require_all_citable_intermediates: bool = True
 
 
 class GraphExpansion(BaseModel):
     paths: list[GraphPath] = Field(default_factory=list)
     units: list[RetrievedUnit] = Field(default_factory=list)
+    diagnostics: GraphExpansionDiagnostics = Field(
+        default_factory=GraphExpansionDiagnostics
+    )
 
 
 class EvidenceItem(BaseModel):
@@ -90,7 +129,7 @@ class EvidenceItem(BaseModel):
     matched_text: str | None = None
     score: float | None = None
     source_path_id: str | None = None
-    is_sufficient: bool = False
+    is_eligible: bool = False
 
 
 class CapabilitySnapshot(BaseModel):
@@ -113,7 +152,7 @@ class CapabilitySnapshot(BaseModel):
 class RetrievalDecision(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    contract_version: Literal["retrieval-runtime-v1"]
+    contract_version: Literal["retrieval-runtime-v2"]
     intent: IntentType
     strategy: RetrievalStrategyType
     seed_channels: tuple[RetrievalChannel, ...]
@@ -142,7 +181,7 @@ class RoutingResult(BaseModel):
 
 
 class RetrievalContext(BaseModel):
-    contract_version: Literal["retrieval-runtime-v1"] = "retrieval-runtime-v1"
+    contract_version: Literal["retrieval-runtime-v2"] = "retrieval-runtime-v2"
     query: str
     intent: IntentType
     strategy: RetrievalStrategyType = RetrievalStrategyType.FACTUAL_HYBRID
@@ -157,6 +196,7 @@ class RetrievalContext(BaseModel):
     filters_applied: RetrievalFilters = Field(default_factory=RetrievalFilters)
     reranker_applied: bool = False
     capability_status: Literal["supported", "no_results"] = "supported"
+    reasoning_requirement: GraphReasoningRequirement | None = None
     retrieved_units: list[RetrievedUnit]
     graph_paths: list[GraphPath]
     evidence: list[EvidenceItem]

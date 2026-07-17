@@ -66,7 +66,7 @@ class MockRAGService:
             intent="factual",
             strategy="factual_hybrid",
             retrieval_mode="mock",
-            retrieval_contract_version="retrieval-runtime-v1",
+            retrieval_contract_version="retrieval-runtime-v2",
             answer_contract_version="answer-generation-v1",
             cannot_answer=False,
         )

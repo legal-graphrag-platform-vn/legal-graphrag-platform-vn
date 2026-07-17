@@ -15,7 +15,7 @@ class RetrievalConfig(BaseSettings):
         frozen=True,
     )
 
-    contract_version: Literal["retrieval-runtime-v1"] = "retrieval-runtime-v1"
+    contract_version: Literal["retrieval-runtime-v2"] = "retrieval-runtime-v2"
     candidate_k: int = Field(default=20, ge=1, le=200)
     final_k: int = Field(default=10, ge=1, le=200)
     graph_entry_k: int = Field(default=5, ge=1, le=200)

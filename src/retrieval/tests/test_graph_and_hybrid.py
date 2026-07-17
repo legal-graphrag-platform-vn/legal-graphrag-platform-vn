@@ -5,7 +5,13 @@ from src.retrieval.context.context_builder import ContextBuilder
 from src.retrieval.context.temporal_filter import TemporalFilter
 from src.retrieval.evidence.verifier import EvidenceVerifier
 from src.retrieval.fusion.reciprocal_rank_fusion import ReciprocalRankFusion
-from src.retrieval.models import GraphExpansion, GraphPath, RetrievedUnit
+from src.retrieval.models import (
+    GraphEdge,
+    GraphExpansion,
+    GraphNodeRef,
+    GraphPath,
+    RetrievedUnit,
+)
 from src.retrieval.retriever.hybrid import SeedChannelExecutor
 from src.retrieval.routing.router import IntentRouter
 from src.retrieval.runtime.runtime import RetrievalRuntime
@@ -47,11 +53,23 @@ class GraphChannel:
         return GraphExpansion(
             paths=[
                 GraphPath(
-                    nodes=[entry_ids[0], "graph_only"],
-                    relations=["REFERS_TO"],
-                    relation_ids=["relation-1"],
+                    nodes=(
+                        GraphNodeRef(node_id=entry_ids[0], labels=("Article",)),
+                        GraphNodeRef(
+                            node_id="graph_only",
+                            labels=("Article",),
+                            citable_unit_id="graph_only",
+                        ),
+                    ),
+                    edges=(
+                        GraphEdge(
+                            relation_id="relation-1",
+                            relation_type="REFERS_TO",
+                            source_id=entry_ids[0],
+                            target_id="graph_only",
+                        ),
+                    ),
                     path_description="entry -[REFERS_TO]-> graph_only",
-                    is_temporal_valid=True,
                 )
             ],
             units=[_unit("graph_only", "graph", 1.0)],

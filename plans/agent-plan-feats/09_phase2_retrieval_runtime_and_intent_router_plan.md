@@ -5,7 +5,7 @@
 > Parent retrieval plan: `plans/agent-plan-feats/07_phase2_graphrag_retrieval_plan.md`
 > Canonical ontology: `plans/legal_ontology.md` v1.5.1
 > Blocker authority: `plans/agent-plan-feats/06_m3_blocker_register.md`
-> Runtime contract version: `retrieval-runtime-v1`
+> Runtime contract version: `retrieval-runtime-v2`
 
 ## 0. Mandatory Status
 
@@ -199,7 +199,7 @@ before seed RRF, never runs twice, and enters final RRF exactly once.
 All public request, decision, context, CLI, and evaluation outputs expose:
 
 ```text
-contract_version = retrieval-runtime-v1
+contract_version = retrieval-runtime-v2
 ```
 
 `IntentType` has one definition in `src/shared/retrieval_contract.py`. It may be
@@ -209,7 +209,7 @@ re-exported for compatibility, but duplicate enum definitions are forbidden.
 
 ```python
 class RetrievalRequest(BaseModel):
-    contract_version: Literal["retrieval-runtime-v1"]
+    contract_version: Literal["retrieval-runtime-v2"]
     query: str = Field(min_length=1, max_length=4000)
     filters: RetrievalFilters = Field(default_factory=RetrievalFilters)
     top_k: int | None = Field(default=None, ge=1, le=200)
@@ -258,7 +258,7 @@ class RetrievalDecisionReasonCode(str, Enum):
 
 ```python
 class RetrievalDecision(BaseModel):
-    contract_version: Literal["retrieval-runtime-v1"]
+    contract_version: Literal["retrieval-runtime-v2"]
     intent: IntentType
     strategy: RetrievalStrategyType
     seed_channels: tuple[RetrievalChannel, ...]
@@ -498,7 +498,7 @@ Metrics record actual executed channels, not merely configured channels.
 Create retrieval-specific settings without importing `src.pipeline.config`:
 
 ```text
-RETRIEVAL_CONTRACT_VERSION=retrieval-runtime-v1
+RETRIEVAL_CONTRACT_VERSION=retrieval-runtime-v2
 RETRIEVAL_CANDIDATE_K=20
 RETRIEVAL_FINAL_K=10
 RETRIEVAL_GRAPH_ENTRY_K=5
