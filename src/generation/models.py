@@ -11,6 +11,7 @@ from src.retrieval.models import RetrievalContext
 
 
 ANSWER_CONTRACT_VERSION = "answer-generation-v1"
+PROJECTION_CONTRACT_VERSION = "answer-context-v2"
 
 
 class GenerationHistoryMessage(BaseModel):
@@ -92,23 +93,49 @@ class AnswerCandidate(BaseModel):
         return self
 
 
-class ProjectedEvidence(BaseModel):
+class OmittedEvidence(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    unit_id: str
-    label: str
-    citation_label: str
-    document_id: str
+    unit_id: str = Field(min_length=1)
+    reason: Literal[
+        "hierarchical_duplicate",
+        "content_duplicate",
+        "context_budget_exceeded",
+        "superseded_by_more_specific_unit",
+    ]
+    retained_unit_id: str | None = None
+
+
+class ContextBudgetPlan(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    total_chars: int = Field(ge=0)
+    fixed_overhead_chars: int = Field(ge=0)
+    evidence_budget_chars: int = Field(ge=0)
+    safety_reserve_chars: int = Field(ge=0)
+    used_evidence_chars: int = Field(ge=0)
+
+
+class LegalEvidenceBlock(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    unit_id: str = Field(min_length=1)
+    label: Literal["Article", "Clause", "Point"]
+    citation_label: str = Field(min_length=1)
+    document_id: str = Field(min_length=1)
+    document_number: str | None
+    document_title: str | None
+    version_family_id: str | None
     article_id: str | None
     clause_id: str | None
-    deep_link: str
-    content_raw: str
+    deep_link: str = Field(min_length=1)
+    content_raw: str = Field(min_length=1)
     effective_from: date | None
     effective_to: date | None
     legal_status: str | None
 
 
-class ProjectedPath(BaseModel):
+class ProjectedPathBlock(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     path_id: str
@@ -117,6 +144,29 @@ class ProjectedPath(BaseModel):
     relation_ids: tuple[str, ...]
     description: str
     is_temporal_valid: bool
+
+
+class EvidenceRegistryEntry(LegalEvidenceBlock):
+    pass
+
+
+class EvidenceRegistry(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    entries: tuple[EvidenceRegistryEntry, ...]
+    allowed_citation_ids: tuple[str, ...]
+    allowed_path_ids: tuple[str, ...]
+
+    @model_validator(mode="after")
+    def validate_registry(self) -> "EvidenceRegistry":
+        entry_ids = tuple(entry.unit_id for entry in self.entries)
+        if entry_ids != self.allowed_citation_ids:
+            raise ValueError("Registry entries must equal allowed citation IDs")
+        if len(entry_ids) != len(set(entry_ids)):
+            raise ValueError("Registry citation IDs must be unique")
+        if len(self.allowed_path_ids) != len(set(self.allowed_path_ids)):
+            raise ValueError("Registry path IDs must be unique")
+        return self
 
 
 class ProjectedAnswerContext(BaseModel):
@@ -128,10 +178,32 @@ class ProjectedAnswerContext(BaseModel):
     temporal_source: str
     resolved_from: date | None
     resolved_to: date | None
-    evidence: tuple[ProjectedEvidence, ...]
-    paths: tuple[ProjectedPath, ...]
-    allowed_citation_ids: tuple[str, ...]
+    evidence: tuple[LegalEvidenceBlock, ...]
+    paths: tuple[ProjectedPathBlock, ...]
+    admitted_bundle_ids: tuple[str, ...]
+    selected_unit_ids: tuple[str, ...]
+    omitted_evidence: tuple[OmittedEvidence, ...]
+    budget: ContextBudgetPlan
     truncated: bool
+    projection_contract_version: Literal["answer-context-v2"] = (
+        PROJECTION_CONTRACT_VERSION
+    )
+
+    @model_validator(mode="after")
+    def validate_projection(self) -> "ProjectedAnswerContext":
+        evidence_ids = tuple(item.unit_id for item in self.evidence)
+        if evidence_ids != self.selected_unit_ids:
+            raise ValueError("selected_unit_ids must match projected evidence")
+        if len(evidence_ids) != len(set(evidence_ids)):
+            raise ValueError("Projected evidence IDs must be unique")
+        if len(self.admitted_bundle_ids) != len(set(self.admitted_bundle_ids)):
+            raise ValueError("Admitted bundle IDs must be unique")
+        budget_omissions = any(
+            item.reason == "context_budget_exceeded" for item in self.omitted_evidence
+        )
+        if self.truncated != budget_omissions:
+            raise ValueError("truncated must reflect context budget omissions")
+        return self
 
 
 class ProviderAnswerRequest(BaseModel):

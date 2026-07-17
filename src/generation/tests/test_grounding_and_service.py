@@ -7,6 +7,8 @@ import pytest
 
 from src.generation.config import GenerationConfig
 from src.generation.context_projection import ContextProjector
+from src.generation.evidence_compaction import EvidenceCompactor
+from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import (
     CitationValidationError,
     ReasoningPathValidationError,
@@ -18,6 +20,7 @@ from src.generation.models import (
     TemporalAssertion,
 )
 from src.generation.service import AnswerGenerator
+from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.generation.tests.factories import answer_candidate, retrieval_context
 from src.retrieval.models import IntentType
@@ -124,5 +127,8 @@ def _generator(provider: FakeProvider) -> AnswerGenerator:
         provider=provider,
         projector=ContextProjector(config),
         sufficiency=EvidenceSufficiencyPolicy(),
+        evidence_validator=EvidenceValidator(),
+        compactor=EvidenceCompactor(),
+        projected_validator=ProjectedContextValidator(),
         grounding=GroundingValidator(),
     )

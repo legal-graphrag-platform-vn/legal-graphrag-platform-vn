@@ -18,6 +18,8 @@ from src.generation.errors import (
     AnswerProviderOutputError,
     AnswerProviderTimeoutError,
     CitationValidationError,
+    ContextBudgetConfigurationError,
+    EvidenceContractError,
 )
 from api.models import QueryRequest
 from api.routes.query import query
@@ -150,6 +152,16 @@ def test_unexpected_error_does_not_leak_internal_details() -> None:
             CitationValidationError("hallucinated-id"),
             502,
             "ANSWER_CITATION_INVALID",
+        ),
+        (
+            EvidenceContractError("malformed-evidence"),
+            500,
+            "ANSWER_EVIDENCE_CONTRACT_INVALID",
+        ),
+        (
+            ContextBudgetConfigurationError("invalid-budget"),
+            500,
+            "ANSWER_CONTEXT_BUDGET_INVALID",
         ),
     ],
 )

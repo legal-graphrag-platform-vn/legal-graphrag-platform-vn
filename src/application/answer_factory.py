@@ -7,9 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.generation.config import GenerationConfig
 from src.generation.context_projection import ContextProjector
+from src.generation.evidence_compaction import EvidenceCompactor
+from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import AnswerProviderDependencyError
 from src.generation.grounding import GroundingValidator
 from src.generation.service import AnswerGenerator
+from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.infrastructure.llm.gemini_answer_provider import GeminiAnswerProvider
 
@@ -52,5 +55,8 @@ def create_answer_generator(
         provider=provider,
         projector=ContextProjector(runtime_config),
         sufficiency=EvidenceSufficiencyPolicy(),
+        evidence_validator=EvidenceValidator(),
+        compactor=EvidenceCompactor(),
+        projected_validator=ProjectedContextValidator(),
         grounding=GroundingValidator(),
     )

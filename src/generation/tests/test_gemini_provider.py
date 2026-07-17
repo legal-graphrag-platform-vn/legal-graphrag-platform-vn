@@ -4,6 +4,7 @@ import asyncio
 import json
 
 import pytest
+from google.genai.errors import ClientError, ServerError
 
 from src.generation.config import GenerationConfig
 from src.generation.errors import (
@@ -17,8 +18,9 @@ from src.infrastructure.llm.gemini_answer_provider import GeminiAnswerProvider
 
 
 class FakeResponse:
-    def __init__(self, text: str | None) -> None:
+    def __init__(self, text: str | None, *, parsed=None) -> None:
         self.text = text
+        self.parsed = parsed
 
 
 class FakeModels:
@@ -73,6 +75,19 @@ def test_gemini_provider_returns_structured_candidate_and_closes() -> None:
     asyncio.run(scenario())
 
 
+def test_gemini_provider_prefers_sdk_parsed_response() -> None:
+    async def scenario() -> None:
+        candidate = answer_candidate()
+        client = FakeClient([FakeResponse("not-json", parsed=candidate.model_dump())])
+        provider = _provider(client)
+
+        result = await provider.generate_structured(_request())
+
+        assert result == candidate
+
+    asyncio.run(scenario())
+
+
 def test_gemini_provider_uses_api_compatible_json_schema() -> None:
     async def scenario() -> None:
         client = FakeClient([FakeResponse(answer_candidate().model_dump_json())])
@@ -112,6 +127,37 @@ def test_authentication_error_fails_without_retry() -> None:
         with pytest.raises(AnswerProviderDependencyError):
             await provider.generate_structured(_request())
         assert client.aio.models.calls == 1
+
+    asyncio.run(scenario())
+
+
+def test_typed_client_error_fails_without_string_matching_or_retry() -> None:
+    async def scenario() -> None:
+        client = FakeClient([ClientError(401, {"status": "AUTHENTICATION_FAILED"})])
+        provider = _provider(client, max_retries=2)
+
+        with pytest.raises(AnswerProviderDependencyError):
+            await provider.generate_structured(_request())
+
+        assert client.aio.models.calls == 1
+
+    asyncio.run(scenario())
+
+
+def test_typed_server_error_retries_without_string_matching() -> None:
+    async def scenario() -> None:
+        client = FakeClient(
+            [
+                ServerError(503, {"status": "UNAVAILABLE"}),
+                FakeResponse(answer_candidate().model_dump_json()),
+            ]
+        )
+        provider = _provider(client, max_retries=1)
+
+        result = await provider.generate_structured(_request())
+
+        assert result.cannot_answer is False
+        assert client.aio.models.calls == 2
 
     asyncio.run(scenario())
 
