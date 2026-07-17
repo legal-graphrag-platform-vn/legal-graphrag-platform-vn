@@ -33,6 +33,8 @@ uv run python -m pytest src/pipeline/tests/ -v
 
 Luồng hiện tại không parse PDF trực tiếp. `parse` đọc raw text đã crawl ở
 `data/raw/<doc_id>/source.txt` và metadata đi kèm ở `metadata.json`.
+Crawler giữ nguyên toàn bộ chính văn, gồm phần mở đầu, lời dẫn, chữ ký và nơi
+nhận; chỉ loại phần điều hướng của website và mục lục được nối sau toàn văn.
 
 ```bash
 uv run python -m src.pipeline.main crawl --url "https://vbpl.vn/van-ban/chi-tiet/luat-doanh-nghiep-so-59-2020-qh14--142881" \
