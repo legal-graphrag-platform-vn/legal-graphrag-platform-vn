@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from datetime import date
 from pathlib import Path
 
+from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
 from src.pipeline.crawler.models import DocumentMetadata
@@ -85,12 +87,14 @@ def _extract_metadata(body_text: str, doc_id: str, number: str, source_url: str)
 
 
 def _extract_body_lines(full_text: str) -> list[str]:
-    """Cắt phần nav/breadcrumb lặp ở đầu trang, giữ lại nội dung văn bản thật.
+    """Bỏ phần điều hướng và mục lục ở cuối, giữ trọn nội dung văn bản thật.
 
     vbpl.vn render cụm tab "Nội dung | Thuộc tính | Lược đồ | Văn bản gốc | Tải về"
     hai lần (breadcrumb rồi tới heading khối nội dung) -> nội dung văn bản thật nằm
-    SAU lần xuất hiện cuối cùng của dòng "Tải về".
+    SAU lần xuất hiện cuối cùng của dòng "Tải về". Phần mở đầu, lời dẫn, chữ ký
+    và nơi nhận đều thuộc raw text nên không được cắt bỏ.
     """
+    # 1.   Tách văn bản thành các dòng và tìm dòng "Tải về" cuối cùng
     lines = full_text.splitlines()
     last_tai_ve = -1
     for i, line in enumerate(lines):
@@ -98,76 +102,32 @@ def _extract_body_lines(full_text: str) -> list[str]:
             last_tai_ve = i
     if last_tai_ve == -1:
         logger.warning("Không tìm thấy marker 'Tải về' trên trang — dùng toàn bộ text làm nội dung.")
-        return lines
-    
-    body_lines = lines[last_tai_ve + 1 :]
-    
-    # 1.    Tìm vị trí bắt đầu thực sự của Luật (Chương đầu tiên, Phần đầu tiên, hoặc Điều 1).
-    start_index = -1
-    start_pattern = re.compile(
-        r"^(Chương\s+[IVXLCDM\d]+|Phần\s+(\d+|[IVXLCDM]+|thứ\s+\w+)|Điều\s+1\b)",
-        re.IGNORECASE
-    )
+        body_lines = lines
+    else:
+        body_lines = lines[last_tai_ve + 1 :]
+
+    # 2.   vbpl.vn có thể nối một mục lục điều khoản sau toàn văn. Chỉ cắt heading
+    # "Mục lục" xuất hiện sau ít nhất một Điều để không nhầm một heading thuộc
+    # chính văn ở đầu tài liệu và vô tình làm mất nội dung.
+    first_article_index = -1
     for i, line in enumerate(body_lines):
-        if start_pattern.match(line.strip()):
-            start_index = i
+        if re.match(r"^Điều\s+\d+\b", line.strip(), re.IGNORECASE):
+            first_article_index = i
             break
-            
-    if start_index != -1:
-        body_lines = body_lines[start_index:]
+
+    if first_article_index != -1:
+        # 3.   Tìm vị trí của "Mục lục" hoặc "Phụ lục" xuất hiện sau Điều đầu tiên
+        cutoff_index = None
+        for i in range(first_article_index + 1, len(body_lines)):
+            line_clean = body_lines[i].strip()
+            line_clean_lower = line_clean.lower()
+            if line_clean_lower == "mục lục" or re.match(r"^phụ\s+lục\b", line_clean_lower):
+                cutoff_index = i
+                break
+        if cutoff_index is not None:
+            body_lines = body_lines[:cutoff_index]
         
-    # 2.    Tìm vị trí bắt đầu của Điều luật cuối cùng để làm mốc an toàn.
-    search_start_index = 0
-    for i in range(len(body_lines) - 1, -1, -1):
-        if re.match(r"^Điều\s+\d+\.", body_lines[i].strip()):
-            search_start_index = i
-            break
-            
-    # 3.    Nếu không tìm thấy Điều nào, mặc định tìm ở nửa sau văn bản.
-    if search_start_index == 0:
-        search_start_index = len(body_lines) // 2
-        
-    # 4.    Danh sách các marker chữ ký đặc trưng ở cuối văn bản luật.
-    _SIGNATURE_MARKERS = {
-        "CHỦ TỊCH QUỐC HỘI",
-        "THỦ TƯỚNG CHÍNH PHỦ",
-        "KT. THỦ TƯỚNG",
-        "KÝ THAY",
-        "KT. BỘ TRƯỞNG",
-        "QUYỀN CHỦ TỊCH",
-        "(Đã ký)",
-        "(đã ký)",
-        "TM. CHÍNH PHỦ",
-        "TM. QUỐC HỘI",
-        "TM. ỦY BAN THƯỜNG VỤ QUỐC HỘI",
-        "THỦ TƯỚNG",
-        "BỘ TRƯỞNG",
-        "CHỦ TỊCH",
-        "NƠI NHẬN:",
-        "Nơi nhận:",
-        "Nơi nhận",
-    }
-    
-    truncate_index = -1
-    for i in range(search_start_index, len(body_lines)):
-        line_clean = body_lines[i].strip()
-        line_clean_lower = line_clean.lower()
-        is_redundant = (
-            line_clean == "CƠ SỞ DỮ LIỆU QUỐC GIA VỀ PHÁP LUẬT"
-            or line_clean_lower == "mục lục"
-            or line_clean in _SIGNATURE_MARKERS
-            or line_clean_lower.startswith("luật này được quốc hội")
-            or line_clean_lower.startswith("luật này đã được quốc hội")
-            or line_clean_lower.startswith("nghị định này được")
-            or any(line_clean_lower.startswith(m) for m in ["kt.", "tm.", "ký thay", "ký thay.", "nơi nhận", "nơi nhận:"])
-        )
-        if is_redundant:
-            truncate_index = i
-            break
-            
-    if truncate_index != -1:
-        body_lines = body_lines[:truncate_index]
-        
+    # 3.   Loại bỏ các marker chú thích chỉnh sửa
     annotation_markers = {"Điều khoản được sửa đổi, bổ sung", "Điều khoản được bổ sung"}
     return [line for line in body_lines if line.strip() not in annotation_markers]
 
@@ -198,17 +158,204 @@ def fetch_document(url: str, doc_id: str, number: str, timeout_ms: int = 30000) 
     return full_text, metadata
 
 
-def crawl_and_save(url: str, doc_id: str, number: str, raw_dir: Path) -> DocumentMetadata:
-    """Crawl + lưu `data/raw/<doc_id>/source.txt` + `metadata.json`."""
-    full_text, metadata = fetch_document(url, doc_id=doc_id, number=number)
+def _make_tab_url(base_url: str, tab_name: str) -> str:
+    """Tạo URL cho tab tương ứng (thuoc-tinh hoặc luoc-do)."""
+    # 1.   Kiểm tra xem URL đã chứa query parameter hay chưa
+    if "?" in base_url:
+        if "tabs=" in base_url:
+            # 2.   Nếu đã có tham số tabs, thực hiện thay thế bằng regex
+            return re.sub(r"tabs=[^&]+", f"tabs={tab_name}", base_url)
+        return f"{base_url}&tabs={tab_name}"
+    return f"{base_url}?tabs={tab_name}"
 
+
+def parse_properties_html(html: str) -> dict[str, str]:
+    """Phân tích HTML trang Thuộc tính thành cấu trúc key-value JSON."""
+    if not html:
+        return {}
+    
+    # 1.   Khởi tạo BeautifulSoup để parse DOM
+    soup = BeautifulSoup(html, "html.parser")
+    properties = {}
+    
+    # 2.   Tìm tên văn bản (tiêu đề) từ tiêu đề mô tả hoặc thẻ h1 đầu tiên
+    title_el = (
+        soup.find(class_="ant-descriptions-title")
+        or soup.find(class_=lambda c: c and "lawDocumentHeader_title" in c)
+        or soup.find("h1")
+    )
+    if title_el:
+        doc_title = re.sub(r"\s+", " ", title_el.get_text()).strip()
+        if doc_title:
+            properties["Văn bản"] = doc_title
+            
+    # 3.   Tìm các thẻ mô tả thuộc tính của Ant Design
+    items = soup.find_all(class_="ant-descriptions-item")
+    for item in items:
+        label_el = item.find(class_="ant-descriptions-item-label")
+        content_el = item.find(class_="ant-descriptions-item-content")
+        if label_el and content_el:
+            label = re.sub(r"\s+", " ", label_el.get_text()).strip()
+            content = re.sub(r"\s+", " ", content_el.get_text()).strip()
+            if label:
+                properties[label] = content
+                
+    # 4.   Fallback trong trường hợp cấu trúc trang thay đổi thành table truyền thống
+    if len(properties) <= 1:  # Chỉ có mỗi field "Văn bản" hoặc trống
+        table = soup.find("table")
+        if table:
+            for row in table.find_all("tr"):
+                cells = row.find_all(["td", "th"])
+                if len(cells) == 2:
+                    k = re.sub(r"\s+", " ", cells[0].get_text()).strip()
+                    v = re.sub(r"\s+", " ", cells[1].get_text()).strip()
+                    properties[k] = v
+                    
+    return properties
+
+
+def parse_diagram_html(html: str) -> dict[str, list[str]]:
+    """Phân tích HTML trang Lược đồ thành cấu trúc danh sách liên kết, bỏ qua VĂN BẢN ĐANG XEM."""
+    if not html:
+        return {}
+    
+    # 1.   Khởi tạo BeautifulSoup để parse DOM lược đồ
+    soup = BeautifulSoup(html, "html.parser")
+    relations = {}
+    
+    # 2.   Xác định phân vùng hiển thị lược đồ (active tab panel)
+    panel = soup.find(id="rc-tabs-0-panel-luoc-do") or soup.find(class_="ant-tabs-tabpane-active")
+    search_root = panel if panel else soup
+    
+    # 3.   Lặp qua các ant-card (mỗi card biểu diễn một loại quan hệ)
+    cards = search_root.find_all(class_="ant-card")
+    for card in cards:
+        card_text = card.get_text()
+        
+        # 4.   Bỏ qua card chứa "VĂN BẢN ĐANG XEM" theo yêu cầu
+        if "VĂN BẢN ĐANG XEM" in card_text:
+            continue
+            
+        # 5.   Trích xuất tiêu đề của loại quan hệ
+        title_el = card.find("span", class_=lambda c: c and any(x in c for x in ["text-[#2A3034]", "font-bold"]))
+        if not title_el:
+            title_el = card.find("span")
+            
+        if not title_el:
+            continue
+            
+        relation_title = re.sub(r"\s+", " ", title_el.get_text()).strip()
+        if not relation_title or relation_title == "--":
+            continue
+            
+        # 6.   Trích xuất danh sách tiêu đề các văn bản liên kết trong card
+        doc_links = []
+        for li in card.find_all("li"):
+            a_el = li.find("a")
+            if a_el:
+                doc_title = re.sub(r"\s+", " ", a_el.get_text()).strip()
+                if doc_title and doc_title != "--":
+                    doc_links.append(doc_title)
+            else:
+                li_text = re.sub(r"\s+", " ", li.get_text()).strip()
+                if li_text and li_text != "--":
+                    doc_links.append(li_text)
+                    
+        relations[relation_title] = doc_links
+            
+    return relations
+
+
+def fetch_document_all_tabs(
+    url: str,
+    doc_id: str,
+    number: str,
+    timeout_ms: int = 30000,
+) -> tuple[str, DocumentMetadata, dict[str, str], dict[str, list[str]]]:
+    """Crawl đồng thời trang chính, trang thuộc tính, và trang lược đồ của văn bản."""
+    thuoc_tinh_url = _make_tab_url(url, "thuoc-tinh")
+    luoc_do_url = _make_tab_url(url, "luoc-do")
+
+    # 1.   Khởi tạo Playwright trong chế độ headless
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent=_USER_AGENT,
+            viewport={"width": 1366, "height": 900},
+            locale="vi-VN",
+        )
+        
+        # 2.   Tải nội dung trang chính (Toàn văn)
+        page = context.new_page()
+        page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+        page.wait_for_timeout(2000)
+        body_text = page.inner_text("body")
+        page.close()
+        
+        # 3.   Tải nội dung trang Thuộc tính
+        properties_html = ""
+        try:
+            page_prop = context.new_page()
+            page_prop.goto(thuoc_tinh_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page_prop.wait_for_timeout(2000)
+            properties_html = page_prop.content()
+            page_prop.close()
+        except Exception as e:
+            logger.error("Lỗi khi tải tab thuộc tính cho %s: %s", doc_id, e)
+
+        # 4.   Tải nội dung trang Lược đồ
+        diagram_html = ""
+        try:
+            page_diag = context.new_page()
+            page_diag.goto(luoc_do_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page_diag.wait_for_timeout(2000)
+            diagram_html = page_diag.content()
+            page_diag.close()
+        except Exception as e:
+            logger.error("Lỗi khi tải tab lược đồ cho %s: %s", doc_id, e)
+            
+        browser.close()
+
+    # 5.   Trích xuất dữ liệu thô và cấu trúc hóa
+    metadata = _extract_metadata(body_text, doc_id=doc_id, number=number, source_url=url)
+    full_text = "\n".join(_extract_body_lines(body_text))
+    
+    properties = parse_properties_html(properties_html)
+    diagram = parse_diagram_html(diagram_html)
+    
+    return full_text, metadata, properties, diagram
+
+
+def crawl_and_save(url: str, doc_id: str, number: str, raw_dir: Path) -> DocumentMetadata:
+    """Crawl + lưu `data/raw/<doc_id>/source.txt` + `metadata.json` + `properties.json` + `diagram.json`."""
+    # 1.   Thực hiện crawl tất cả các tab cần thiết
+    full_text, metadata, properties, diagram = fetch_document_all_tabs(url, doc_id=doc_id, number=number)
+
+    # 2.   Tạo thư mục lưu trữ dữ liệu thô nếu chưa tồn tại
     out_dir = raw_dir / doc_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    
+    # 3.   Lưu nội dung toàn văn (source.txt)
     (out_dir / "source.txt").write_text(full_text, encoding="utf-8")
+    
+    # 4.   Lưu siêu dữ liệu cơ bản (metadata.json)
     (out_dir / "metadata.json").write_text(
         metadata.model_dump_json(by_alias=True, indent=2, exclude_none=True),
         encoding="utf-8",
     )
+    
+    # 5.   Lưu các thuộc tính chi tiết (properties.json)
+    (out_dir / "properties.json").write_text(
+        json.dumps(properties, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    
+    # 6.   Lưu lược đồ quan hệ liên kết (diagram.json)
+    (out_dir / "diagram.json").write_text(
+        json.dumps(diagram, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    
     logger.info("Đã lưu %s vào %s", doc_id, out_dir)
     return metadata
 

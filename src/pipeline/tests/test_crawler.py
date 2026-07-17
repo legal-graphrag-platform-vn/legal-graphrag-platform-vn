@@ -34,7 +34,52 @@ def test_extract_body_lines_strips_nav_and_tabs() -> None:
     joined = "\n".join(lines)
     assert "Trang chủ" not in joined
     assert "Tải về" not in joined
+    assert "QUỐC HỘI" in joined
+    assert "Căn cứ Hiến pháp nước Cộng hòa xã hội chủ nghĩa Việt Nam;" in joined
     assert "Điều 1. Phạm vi điều chỉnh" in joined
+
+
+def test_extract_body_lines_keeps_full_document_but_removes_trailing_table_of_contents() -> None:
+    body = """Trang chủ
+Tải về
+QUỐC HỘI
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Điều 1. Phạm vi điều chỉnh
+Nội dung điều luật.
+TM. QUỐC HỘI
+CHỦ TỊCH
+Nguyễn Văn A
+MỤC LỤC
+Điều 1. Phạm vi điều chỉnh ........ 1
+Điều 2. Đối tượng áp dụng ........ 2
+"""
+
+    lines = _extract_body_lines(body)
+
+    assert lines == [
+        "QUỐC HỘI",
+        "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM",
+        "Điều 1. Phạm vi điều chỉnh",
+        "Nội dung điều luật.",
+        "TM. QUỐC HỘI",
+        "CHỦ TỊCH",
+        "Nguyễn Văn A",
+    ]
+
+
+def test_extract_body_lines_removes_table_of_contents_without_navigation_marker() -> None:
+    body = """QUỐC HỘI
+Điều 1. Phạm vi điều chỉnh
+Nội dung điều luật.
+Mục lục
+Điều 1. Phạm vi điều chỉnh ........ 1
+"""
+
+    assert _extract_body_lines(body) == [
+        "QUỐC HỘI",
+        "Điều 1. Phạm vi điều chỉnh",
+        "Nội dung điều luật.",
+    ]
 
 
 def test_extract_body_lines_removes_vbpl_amendment_annotations() -> None:
