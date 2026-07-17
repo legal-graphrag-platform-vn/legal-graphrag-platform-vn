@@ -7,6 +7,8 @@ from pydantic import ValidationError
 
 from src.generation.config import GenerationConfig
 from src.generation.context_projection import ContextProjector
+from src.generation.evidence_compaction import EvidenceCompactor
+from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import AnswerRequestError
 from src.generation.models import (
     AnswerCandidate,
@@ -55,8 +57,14 @@ def test_projection_is_byte_stable_and_delimits_injection_text() -> None:
         retrieval_context=context,
     )
 
-    first = projector.provider_request(projector.project(request)).model_dump_json()
-    second = projector.provider_request(projector.project(request)).model_dump_json()
+    first_projected = _project(projector, request)
+    second_projected = _project(projector, request)
+    first = projector.provider_request(
+        first_projected, projector.build_registry(first_projected)
+    ).model_dump_json()
+    second = projector.provider_request(
+        second_projected, projector.build_registry(second_projected)
+    ).model_dump_json()
 
     assert first == second
     payload = json.loads(first)
@@ -69,10 +77,10 @@ def test_non_temporal_prompt_forbids_temporal_assertions() -> None:
     context = retrieval_context()
     projector = ContextProjector(GenerationConfig())
 
+    request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
+    projected = _project(projector, request)
     provider_request = projector.provider_request(
-        projector.project(
-            AnswerGenerationRequest(query=context.query, retrieval_context=context)
-        )
+        projected, projector.build_registry(projected)
     )
 
     assert "temporal_assertions MUST be an empty array" in provider_request.prompt
@@ -92,17 +100,28 @@ def test_history_limit_fails_instead_of_silent_truncation() -> None:
     )
 
     with pytest.raises(AnswerRequestError, match="message limit"):
-        projector.project(request)
+        _project(projector, request)
 
 
 def test_context_limit_retains_rank_order_and_records_truncation() -> None:
     context = retrieval_context(path_relations=["REFERS_TO"])
-    context.retrieved_units[0].content_raw = "a" * 600
-    context.retrieved_units[1].content_raw = "b" * 600
-    projector = ContextProjector(GenerationConfig(context_max_chars=1000))
+    context.retrieved_units[0].content_raw = "a" * 300
+    context.retrieved_units[1].content_raw = "b" * 1800
+    projector = ContextProjector(GenerationConfig(context_max_chars=2500))
     request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
 
-    projected = projector.project(request)
+    projected = _project(projector, request)
 
     assert [item.unit_id for item in projected.evidence] == ["doc_art1"]
     assert projected.truncated is True
+
+
+def _project(
+    projector: ContextProjector,
+    request: AnswerGenerationRequest,
+):
+    validated = EvidenceValidator().validate(request.retrieval_context)
+    plan = EvidenceCompactor().compact(request.retrieval_context, validated)
+    result = projector.project(request, plan)
+    assert result.projected is not None
+    return result.projected

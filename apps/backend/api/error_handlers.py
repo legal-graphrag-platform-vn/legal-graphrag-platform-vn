@@ -22,6 +22,8 @@ from src.generation.errors import (
     AnswerProviderTimeoutError,
     AnswerRequestError,
     CitationValidationError,
+    ContextBudgetConfigurationError,
+    EvidenceContractError,
     GroundingValidationError,
     ReasoningPathValidationError,
     TemporalAnswerValidationError,
@@ -165,6 +167,10 @@ def _answer_error_contract(error: AnswerGenerationError) -> tuple[int, str]:
         return 422, "ANSWER_REQUEST_INVALID"
     if isinstance(error, AnswerProviderOutputError):
         return 502, "ANSWER_PROVIDER_OUTPUT_INVALID"
+    if isinstance(error, EvidenceContractError):
+        return 500, "ANSWER_EVIDENCE_CONTRACT_INVALID"
+    if isinstance(error, ContextBudgetConfigurationError):
+        return 500, "ANSWER_CONTEXT_BUDGET_INVALID"
     if isinstance(error, CitationValidationError):
         return 502, "ANSWER_CITATION_INVALID"
     if isinstance(error, ReasoningPathValidationError):

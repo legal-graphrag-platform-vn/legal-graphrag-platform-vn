@@ -150,6 +150,9 @@ async def build_container(
                     temperature=settings.answer_temperature,
                     thinking_level=settings.answer_thinking_level,
                     context_max_chars=settings.answer_context_max_chars,
+                    context_safety_reserve_chars=(
+                        settings.answer_context_safety_reserve_chars
+                    ),
                     history_max_messages=settings.answer_history_max_messages,
                     history_max_chars=settings.answer_history_max_chars,
                     stream_chunk_chars=settings.answer_stream_chunk_chars,

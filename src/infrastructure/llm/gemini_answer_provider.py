@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any, Callable
 
 from pydantic import ValidationError
@@ -14,6 +15,9 @@ from src.generation.errors import (
     AnswerProviderTimeoutError,
 )
 from src.generation.models import AnswerCandidate, ProviderAnswerRequest
+
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiAnswerProvider:
@@ -110,12 +114,25 @@ class GeminiAnswerProvider:
             raise
         except Exception as exc:
             _raise_provider_error(exc)
-        text = getattr(response, "text", None)
-        if not text:
-            raise AnswerProviderOutputError("Gemini returned an empty answer payload")
         try:
+            parsed = getattr(response, "parsed", None)
+            if parsed is not None:
+                if isinstance(parsed, AnswerCandidate):
+                    return parsed
+                return AnswerCandidate.model_validate(parsed)
+            text = getattr(response, "text", None)
+            if not text:
+                raise AnswerProviderOutputError(
+                    "Gemini returned an empty answer payload"
+                )
             return AnswerCandidate.model_validate_json(text)
         except ValidationError as exc:
+            error_types = sorted({error["type"] for error in exc.errors()})
+            logger.warning(
+                "Gemini structured output validation failed: model=%s error_types=%s",
+                self._model,
+                error_types,
+            )
             raise AnswerProviderOutputError(
                 "Gemini returned an invalid structured answer"
             ) from exc
@@ -163,6 +180,20 @@ def _create_generate_config(**kwargs: Any) -> Any:
 
 
 def _raise_provider_error(exc: Exception) -> None:
+    code = _google_api_error_code(exc)
+    if code is not None:
+        if code in {408, 409, 429} or 500 <= code < 600:
+            raise _TransientProviderError(type(exc).__name__) from exc
+        if 400 <= code < 500:
+            raise AnswerProviderDependencyError(
+                "Gemini answer provider request/authentication/model "
+                "configuration failed"
+            ) from exc
+
+    if _is_transient_network_error(exc):
+        raise _TransientProviderError(type(exc).__name__) from exc
+
+    # Last-resort compatibility fallback for non-SDK wrappers that expose only text.
     message = str(exc).lower()
     if any(
         marker in message
@@ -188,3 +219,25 @@ def _raise_provider_error(exc: Exception) -> None:
     raise AnswerProviderDependencyError(
         f"Gemini answer provider failed: {type(exc).__name__}"
     ) from exc
+
+
+def _google_api_error_code(exc: Exception) -> int | None:
+    try:
+        from google.genai.errors import APIError
+    except ImportError:
+        return None
+    if not isinstance(exc, APIError):
+        return None
+    code = getattr(exc, "code", None)
+    return code if isinstance(code, int) else None
+
+
+def _is_transient_network_error(exc: Exception) -> bool:
+    try:
+        import httpx
+    except ImportError:
+        return isinstance(exc, (ConnectionError, TimeoutError))
+    return isinstance(
+        exc,
+        (ConnectionError, TimeoutError, httpx.NetworkError, httpx.TimeoutException),
+    )

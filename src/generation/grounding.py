@@ -13,6 +13,7 @@ from src.generation.models import (
     AnswerCitation,
     AnswerReasoningPath,
     AnswerResponse,
+    EvidenceRegistry,
     ProjectedAnswerContext,
 )
 
@@ -23,6 +24,7 @@ class GroundingValidator:
         *,
         candidate: AnswerCandidate,
         projected: ProjectedAnswerContext,
+        registry: EvidenceRegistry,
         retrieval_contract_version: str,
         provider: str,
         model: str,
@@ -45,7 +47,7 @@ class GroundingValidator:
                 strategy=projected.strategy,
             )
 
-        evidence_by_id = {item.unit_id: item for item in projected.evidence}
+        evidence_by_id = {item.unit_id: item for item in registry.entries}
         citation_order: list[str] = []
         for claim in candidate.claims:
             if not claim.text.strip():
@@ -58,7 +60,11 @@ class GroundingValidator:
                 if citation_id not in citation_order:
                     citation_order.append(citation_id)
 
-        paths_by_id = {path.path_id: path for path in projected.paths}
+        paths_by_id = {
+            path.path_id: path
+            for path in projected.paths
+            if path.path_id in registry.allowed_path_ids
+        }
         selected_paths: list[AnswerReasoningPath] = []
         for path_id in candidate.reasoning_path_ids:
             path = paths_by_id.get(path_id)

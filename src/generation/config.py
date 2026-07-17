@@ -15,6 +15,7 @@ class GenerationConfig(BaseModel):
     temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     thinking_level: Literal["minimal", "low", "medium", "high"] = "minimal"
     context_max_chars: int = Field(default=24_000, ge=1000, le=200_000)
+    context_safety_reserve_chars: int = Field(default=256, ge=0, le=20_000)
     history_max_messages: int = Field(default=6, ge=0, le=20)
     history_max_chars: int = Field(default=4000, ge=0, le=20_000)
     stream_chunk_chars: int = Field(default=160, ge=1, le=2000)
