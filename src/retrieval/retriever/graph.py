@@ -10,6 +10,7 @@ from src.retrieval.models import (
     GraphEdge,
     GraphExpansion,
     GraphExpansionDiagnostics,
+    GraphCitationEvidence,
     GraphNodeRef,
     GraphPath,
     IntentType,
@@ -64,6 +65,7 @@ class GraphRetriever:
                 if unit.id not in units_by_id:
                     units_by_id[unit.id] = unit
 
+        paths = _deduplicate_topology_paths(paths)
         paths.sort(key=_path_rank_key)
         first_occurrence: dict[str, int] = {}
         for index, path in enumerate(paths, start=1):
@@ -125,6 +127,16 @@ def _map_edge(raw: dict) -> GraphEdge:
         target_id=_required_text(raw.get("target_id"), "edge target ID"),
         effective_from=effective_from,
         effective_to=_native_date(raw.get("effective_to")),
+        citation_evidence=(
+            GraphCitationEvidence(
+                relation_id=_required_text(raw.get("relation_id"), "relation ID"),
+                citation_text=_optional_text(raw.get("citation_text")),
+                citation_type=_optional_text(raw.get("citation_type")),
+                extraction_method=_optional_text(raw.get("extraction_method")),
+            ),
+        )
+        if relation_type == "REFERS_TO"
+        else (),
     )
 
 
@@ -202,6 +214,50 @@ def _path_rank_key(
         tuple(node.node_id for node in path.nodes),
         tuple(edge.relation_id for edge in path.edges),
     )
+
+
+def _deduplicate_topology_paths(paths: list[GraphPath]) -> list[GraphPath]:
+    grouped: dict[tuple, list[GraphPath]] = {}
+    for path in paths:
+        key = (
+            tuple(node.node_id for node in path.nodes),
+            tuple(
+                (edge.relation_type, edge.source_id, edge.target_id)
+                for edge in path.edges
+            ),
+        )
+        grouped.setdefault(key, []).append(path)
+
+    deduplicated: list[GraphPath] = []
+    for group in grouped.values():
+        canonical = min(group, key=_path_rank_key)
+        merged_edges: list[GraphEdge] = []
+        for edge_index, edge in enumerate(canonical.edges):
+            citations = {
+                evidence.relation_id: evidence
+                for path in group
+                for evidence in path.edges[edge_index].citation_evidence
+            }
+            merged_edges.append(
+                edge.model_copy(
+                    update={
+                        "citation_evidence": tuple(
+                            citations[key] for key in sorted(citations)
+                        ),
+                    }
+                )
+            )
+        deduplicated.append(
+            canonical.model_copy(
+                update={
+                    "edges": tuple(merged_edges),
+                    "path_description": _describe_path(
+                        canonical.nodes, tuple(merged_edges)
+                    ),
+                }
+            )
+        )
+    return deduplicated
 
 
 def _required_text(value: object, field_name: str) -> str:

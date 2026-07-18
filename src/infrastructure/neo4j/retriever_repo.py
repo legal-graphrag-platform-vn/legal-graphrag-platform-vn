@@ -134,7 +134,10 @@ class Neo4jRetrieverRepo:
             source_id: startNode(rel).id,
             target_id: endNode(rel).id,
             effective_from: rel.effective_from,
-            effective_to: rel.effective_to
+            effective_to: rel.effective_to,
+            citation_text: rel.citation_text,
+            citation_type: rel.citation_type,
+            extraction_method: rel.extraction_method
           }}] AS path_edge_refs,
           CASE WHEN unit:Article OR unit:Clause THEN unit.id ELSE null END AS id,
           CASE WHEN unit:Article THEN 'Article'

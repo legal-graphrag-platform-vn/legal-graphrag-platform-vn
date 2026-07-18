@@ -1,5 +1,3 @@
-
-
 from __future__ import annotations
 
 import json
@@ -21,7 +19,9 @@ _USER_AGENT = (
 )
 
 _EFFECTIVE_FROM_RE = re.compile(r"Ngày có hiệu lực:\s*\n?\s*(\d{2})/(\d{2})/(\d{4})")
-_ISSUED_DATE_RE = re.compile(r"ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})", re.IGNORECASE)
+_ISSUED_DATE_RE = re.compile(
+    r"ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})", re.IGNORECASE
+)
 _STATUS_KEYWORDS = [
     "Hết hiệu lực một phần",
     "Hết hiệu lực toàn bộ",
@@ -53,7 +53,9 @@ def _parse_vn_date(day: str, month: str, year: str) -> date:
     return date(int(year), int(month), int(day))
 
 
-def _extract_metadata(body_text: str, doc_id: str, number: str, source_url: str) -> DocumentMetadata:
+def _extract_metadata(
+    body_text: str, doc_id: str, number: str, source_url: str
+) -> DocumentMetadata:
     lines = [line.strip() for line in body_text.splitlines() if line.strip()]
     number_prefix = number.split("/")[0]
 
@@ -101,7 +103,9 @@ def _extract_body_lines(full_text: str) -> list[str]:
         if line.strip() == "Tải về":
             last_tai_ve = i
     if last_tai_ve == -1:
-        logger.warning("Không tìm thấy marker 'Tải về' trên trang — dùng toàn bộ text làm nội dung.")
+        logger.warning(
+            "Không tìm thấy marker 'Tải về' trên trang — dùng toàn bộ text làm nội dung."
+        )
         body_lines = lines
     else:
         body_lines = lines[last_tai_ve + 1 :]
@@ -116,23 +120,26 @@ def _extract_body_lines(full_text: str) -> list[str]:
             break
 
     if first_article_index != -1:
-        # 3.   Tìm vị trí của "Mục lục" hoặc "Phụ lục" xuất hiện sau Điều đầu tiên
+        # 3.   Chỉ cắt mục lục trailing. Phụ lục là nội dung pháp lý và được parser
+        # bảo toàn dưới dạng unparsed section cho migration ontology sau này.
         cutoff_index = None
         for i in range(first_article_index + 1, len(body_lines)):
             line_clean = body_lines[i].strip()
             line_clean_lower = line_clean.lower()
-            if line_clean_lower == "mục lục" or re.match(r"^phụ\s+lục\b", line_clean_lower):
+            if line_clean_lower == "mục lục":
                 cutoff_index = i
                 break
         if cutoff_index is not None:
             body_lines = body_lines[:cutoff_index]
-        
+
     # 3.   Loại bỏ các marker chú thích chỉnh sửa
     annotation_markers = {"Điều khoản được sửa đổi, bổ sung", "Điều khoản được bổ sung"}
     return [line for line in body_lines if line.strip() not in annotation_markers]
 
 
-def fetch_document(url: str, doc_id: str, number: str, timeout_ms: int = 30000) -> tuple[str, DocumentMetadata]:
+def fetch_document(
+    url: str, doc_id: str, number: str, timeout_ms: int = 30000
+) -> tuple[str, DocumentMetadata]:
     """Render trang chi tiết vbpl.vn bằng Playwright, trả về (full_text, metadata).
 
     `full_text` là nội dung văn bản pháp luật thuần, sẵn sàng làm input cho
@@ -153,7 +160,9 @@ def fetch_document(url: str, doc_id: str, number: str, timeout_ms: int = 30000) 
         body_text = page.inner_text("body")
         browser.close()
 
-    metadata = _extract_metadata(body_text, doc_id=doc_id, number=number, source_url=url)
+    metadata = _extract_metadata(
+        body_text, doc_id=doc_id, number=number, source_url=url
+    )
     full_text = "\n".join(_extract_body_lines(body_text))
     return full_text, metadata
 
@@ -173,11 +182,11 @@ def parse_properties_html(html: str) -> dict[str, str]:
     """Phân tích HTML trang Thuộc tính thành cấu trúc key-value JSON."""
     if not html:
         return {}
-    
+
     # 1.   Khởi tạo BeautifulSoup để parse DOM
     soup = BeautifulSoup(html, "html.parser")
     properties = {}
-    
+
     # 2.   Tìm tên văn bản (tiêu đề) từ tiêu đề mô tả hoặc thẻ h1 đầu tiên
     title_el = (
         soup.find(class_="ant-descriptions-title")
@@ -188,7 +197,7 @@ def parse_properties_html(html: str) -> dict[str, str]:
         doc_title = re.sub(r"\s+", " ", title_el.get_text()).strip()
         if doc_title:
             properties["Văn bản"] = doc_title
-            
+
     # 3.   Tìm các thẻ mô tả thuộc tính của Ant Design
     items = soup.find_all(class_="ant-descriptions-item")
     for item in items:
@@ -199,7 +208,7 @@ def parse_properties_html(html: str) -> dict[str, str]:
             content = re.sub(r"\s+", " ", content_el.get_text()).strip()
             if label:
                 properties[label] = content
-                
+
     # 4.   Fallback trong trường hợp cấu trúc trang thay đổi thành table truyền thống
     if len(properties) <= 1:  # Chỉ có mỗi field "Văn bản" hoặc trống
         table = soup.find("table")
@@ -210,7 +219,7 @@ def parse_properties_html(html: str) -> dict[str, str]:
                     k = re.sub(r"\s+", " ", cells[0].get_text()).strip()
                     v = re.sub(r"\s+", " ", cells[1].get_text()).strip()
                     properties[k] = v
-                    
+
     return properties
 
 
@@ -218,36 +227,41 @@ def parse_diagram_html(html: str) -> dict[str, list[str]]:
     """Phân tích HTML trang Lược đồ thành cấu trúc danh sách liên kết, bỏ qua VĂN BẢN ĐANG XEM."""
     if not html:
         return {}
-    
+
     # 1.   Khởi tạo BeautifulSoup để parse DOM lược đồ
     soup = BeautifulSoup(html, "html.parser")
     relations = {}
-    
+
     # 2.   Xác định phân vùng hiển thị lược đồ (active tab panel)
-    panel = soup.find(id="rc-tabs-0-panel-luoc-do") or soup.find(class_="ant-tabs-tabpane-active")
+    panel = soup.find(id="rc-tabs-0-panel-luoc-do") or soup.find(
+        class_="ant-tabs-tabpane-active"
+    )
     search_root = panel if panel else soup
-    
+
     # 3.   Lặp qua các ant-card (mỗi card biểu diễn một loại quan hệ)
     cards = search_root.find_all(class_="ant-card")
     for card in cards:
         card_text = card.get_text()
-        
+
         # 4.   Bỏ qua card chứa "VĂN BẢN ĐANG XEM" theo yêu cầu
         if "VĂN BẢN ĐANG XEM" in card_text:
             continue
-            
+
         # 5.   Trích xuất tiêu đề của loại quan hệ
-        title_el = card.find("span", class_=lambda c: c and any(x in c for x in ["text-[#2A3034]", "font-bold"]))
+        title_el = card.find(
+            "span",
+            class_=lambda c: c and any(x in c for x in ["text-[#2A3034]", "font-bold"]),
+        )
         if not title_el:
             title_el = card.find("span")
-            
+
         if not title_el:
             continue
-            
+
         relation_title = re.sub(r"\s+", " ", title_el.get_text()).strip()
         if not relation_title or relation_title == "--":
             continue
-            
+
         # 6.   Trích xuất danh sách tiêu đề các văn bản liên kết trong card
         doc_links = []
         for li in card.find_all("li"):
@@ -260,9 +274,9 @@ def parse_diagram_html(html: str) -> dict[str, list[str]]:
                 li_text = re.sub(r"\s+", " ", li.get_text()).strip()
                 if li_text and li_text != "--":
                     doc_links.append(li_text)
-                    
+
         relations[relation_title] = doc_links
-            
+
     return relations
 
 
@@ -284,19 +298,21 @@ def fetch_document_all_tabs(
             viewport={"width": 1366, "height": 900},
             locale="vi-VN",
         )
-        
+
         # 2.   Tải nội dung trang chính (Toàn văn)
         page = context.new_page()
         page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
         page.wait_for_timeout(2000)
         body_text = page.inner_text("body")
         page.close()
-        
+
         # 3.   Tải nội dung trang Thuộc tính
         properties_html = ""
         try:
             page_prop = context.new_page()
-            page_prop.goto(thuoc_tinh_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page_prop.goto(
+                thuoc_tinh_url, wait_until="domcontentloaded", timeout=timeout_ms
+            )
             page_prop.wait_for_timeout(2000)
             properties_html = page_prop.content()
             page_prop.close()
@@ -307,55 +323,63 @@ def fetch_document_all_tabs(
         diagram_html = ""
         try:
             page_diag = context.new_page()
-            page_diag.goto(luoc_do_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page_diag.goto(
+                luoc_do_url, wait_until="domcontentloaded", timeout=timeout_ms
+            )
             page_diag.wait_for_timeout(2000)
             diagram_html = page_diag.content()
             page_diag.close()
         except Exception as e:
             logger.error("Lỗi khi tải tab lược đồ cho %s: %s", doc_id, e)
-            
+
         browser.close()
 
     # 5.   Trích xuất dữ liệu thô và cấu trúc hóa
-    metadata = _extract_metadata(body_text, doc_id=doc_id, number=number, source_url=url)
+    metadata = _extract_metadata(
+        body_text, doc_id=doc_id, number=number, source_url=url
+    )
     full_text = "\n".join(_extract_body_lines(body_text))
-    
+
     properties = parse_properties_html(properties_html)
     diagram = parse_diagram_html(diagram_html)
-    
+
     return full_text, metadata, properties, diagram
 
 
-def crawl_and_save(url: str, doc_id: str, number: str, raw_dir: Path) -> DocumentMetadata:
+def crawl_and_save(
+    url: str, doc_id: str, number: str, raw_dir: Path
+) -> DocumentMetadata:
     """Crawl + lưu `data/raw/<doc_id>/source.txt` + `metadata.json` + `properties.json` + `diagram.json`."""
     # 1.   Thực hiện crawl tất cả các tab cần thiết
-    full_text, metadata, properties, diagram = fetch_document_all_tabs(url, doc_id=doc_id, number=number)
+    full_text, metadata, properties, diagram = fetch_document_all_tabs(
+        url, doc_id=doc_id, number=number
+    )
 
     # 2.   Tạo thư mục lưu trữ dữ liệu thô nếu chưa tồn tại
     out_dir = raw_dir / doc_id
     out_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # 3.   Lưu nội dung toàn văn (source.txt)
     (out_dir / "source.txt").write_text(full_text, encoding="utf-8")
-    
+
     # 4.   Lưu siêu dữ liệu cơ bản (metadata.json)
     (out_dir / "metadata.json").write_text(
         metadata.model_dump_json(by_alias=True, indent=2, exclude_none=True),
         encoding="utf-8",
     )
-    
+
     # 5.   Lưu các thuộc tính chi tiết (properties.json)
     (out_dir / "properties.json").write_text(
         json.dumps(properties, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    
+
     # 6.   Lưu lược đồ quan hệ liên kết (diagram.json)
     (out_dir / "diagram.json").write_text(
         json.dumps(diagram, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    
+
     logger.info("Đã lưu %s vào %s", doc_id, out_dir)
     return metadata
 
@@ -367,19 +391,23 @@ def crawl_by_search(
     timeout_ms: int = 30000,
 ) -> list[DocumentMetadata]:
     """Crawl hàng loạt tài liệu từ kết quả tìm kiếm trên vbpl.vn."""
-    logger.info("Bắt đầu crawl hàng loạt dựa trên tìm kiếm với từ khóa: '%s', giới hạn: %d", query, limit)
-    
+    logger.info(
+        "Bắt đầu crawl hàng loạt dựa trên tìm kiếm với từ khóa: '%s', giới hạn: %d",
+        query,
+        limit,
+    )
+
     # 1.   Phần phân tích trích xuất doc_id và số hiệu từ tiêu đề
     def infer_doc_id_and_number(title_text: str) -> tuple[str | None, str | None]:
         num_match = re.search(r"(\d+(?:/\d+)?/[A-ZĐa-z0-9\-]+)", title_text)
         if not num_match:
             return None, None
-            
+
         number = num_match.group(1)
         parts = number.split("/")
         num_part = parts[0]
         year_part = parts[1] if len(parts) > 1 else "unknown"
-        
+
         title_lower = title_text.lower()
         if "luật" in title_lower:
             prefix = "L"
@@ -393,7 +421,7 @@ def crawl_by_search(
             prefix = "QD"
         else:
             prefix = "DOC"
-            
+
         doc_id = f"{prefix}{num_part}_{year_part}"
         return doc_id, number
 
@@ -409,12 +437,12 @@ def crawl_by_search(
             locale="vi-VN",
         )
         page = context.new_page()
-        
+
         url = "https://vbpl.vn/van-ban/trung-uong"
         logger.info("Đang điều hướng đến trang tìm kiếm: %s", url)
         page.goto(url, wait_until="networkidle", timeout=timeout_ms)
         page.wait_for_timeout(3000)
-        
+
         # 3.   Điền từ khóa và ẩn các gợi ý tìm kiếm tự động để tránh che khuất click
         page.fill("input#keyword", query)
         page.wait_for_timeout(1000)
@@ -435,54 +463,60 @@ def crawl_by_search(
         page.wait_for_timeout(500)
         page.click("label:has-text('Chính xác cụm từ trên')")
         page.wait_for_timeout(500)
-        
+
         # 4.   Nhấn tìm kiếm và chờ kết quả
         search_btn = page.locator("button:has-text('Tìm kiếm')").nth(-1)
         search_btn.click(force=True)
         logger.info("Chờ tải kết quả tìm kiếm...")
-        page.wait_for_selector("div[class*='DocumentCard_documentTitle__']", timeout=timeout_ms)
+        page.wait_for_selector(
+            "div[class*='DocumentCard_documentTitle__']", timeout=timeout_ms
+        )
         page.wait_for_timeout(2000)
-        
+
         # 5.   Lặp qua các trang để thu thập đủ số lượng URL mong muốn
         while len(links_to_crawl) < limit:
-            title_locators = page.locator("div[class*='DocumentCard_documentTitle__']").all()
+            title_locators = page.locator(
+                "div[class*='DocumentCard_documentTitle__']"
+            ).all()
             if not title_locators:
                 break
-                
+
             for title_el in title_locators:
                 if len(links_to_crawl) >= limit:
                     break
-                    
+
                 title_text = title_el.inner_text().strip()
                 doc_id, number = infer_doc_id_and_number(title_text)
-                
+
                 if not doc_id or not number:
                     continue
-                    
+
                 with context.expect_page() as new_page_info:
                     title_el.click()
                 new_page = new_page_info.value
                 new_page.wait_for_timeout(1000)
                 detail_url = new_page.url
                 new_page.close()
-                
+
                 links_to_crawl.append((detail_url, doc_id, number))
                 logger.info("Đã thu thập URL: %s | ID: %s", detail_url, doc_id)
-                
+
             if len(links_to_crawl) >= limit:
                 break
-                
+
             # 6.   Chuyển sang trang kết quả tiếp theo nếu chưa đạt giới hạn
             next_btn = page.locator("button:has-text('Sau')")
             if next_btn.is_visible() and next_btn.is_enabled():
                 logger.info("Đang chuyển sang trang kết quả tiếp theo...")
                 next_btn.click()
                 page.wait_for_timeout(3000)
-                page.wait_for_selector("div[class*='DocumentCard_documentTitle__']", timeout=timeout_ms)
+                page.wait_for_selector(
+                    "div[class*='DocumentCard_documentTitle__']", timeout=timeout_ms
+                )
             else:
                 logger.info("Đã đến trang kết quả cuối cùng.")
                 break
-                
+
         browser.close()
 
     # 7.   Crawl và lưu nội dung từng tài liệu đã tìm thấy
@@ -492,5 +526,5 @@ def crawl_by_search(
             results_metadata.append(metadata)
         except Exception as e:
             logger.error("Lỗi khi crawl tài liệu %s từ %s: %s", doc_id_val, url_val, e)
-            
+
     return results_metadata

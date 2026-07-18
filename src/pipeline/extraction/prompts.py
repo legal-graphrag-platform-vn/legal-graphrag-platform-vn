@@ -46,4 +46,8 @@ Xác định các quan hệ giữa entities. Chỉ sử dụng các loại quan 
 
 Với mỗi relation, bắt buộc có "evidence" là câu văn nguyên gốc làm cơ sở, và "confidence" thể hiện mức tự tin của bạn (0.0-1.0).
 Không được trả về CONTAINS. Chỉ dùng canonical structural ID có trong structural context; không tự tạo ID Điều/Khoản/Điểm.
+Không trích xuất lại dẫn chiếu cấu trúc tương đối có thể xác định bằng quy tắc, ví dụ
+"khoản này", "Điều này" hoặc "các điểm a và b khoản này". Các dẫn chiếu này được
+structural resolver xử lý trước. Chỉ đề xuất REFERS_TO khi dẫn chiếu cần liên kết
+văn bản bên ngoài hoặc diễn giải ngữ nghĩa/mơ hồ.
 Chỉ trả về quan hệ có evidence rõ ràng trong văn bản, không suy diễn."""

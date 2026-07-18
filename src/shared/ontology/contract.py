@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.5.1"
+ONTOLOGY_VERSION = "1.6.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -49,6 +49,12 @@ CITATION_TYPES: set[str] = {
     "DIRECT",
     "INDIRECT",
     "RANGE",
+}
+
+REFERENCE_EXTRACTION_METHODS: set[str] = {
+    "RULE",
+    "ENTITY_LINKING",
+    "LLM",
 }
 
 GUIDES_WHITELIST: set[tuple[str, str]] = {
@@ -163,15 +169,53 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         "allowed_head": ["Article", "Clause", "Point"],
         "allowed_tail": ["Article", "Clause", "Point", "Document"],
         "no_self_loop": False,
-        "required_properties": ["confidence", "llm_model", "created_at", "citation_text", "citation_type"],
+        "required_properties": [
+            "citation_text",
+            "citation_type",
+            "extraction_method",
+            "created_at",
+            "reference_bundle_id",
+            "reference_target_count",
+        ],
+        "required_properties_by_extraction_method": {
+            "RULE": [
+                "resolver_name",
+                "resolver_version",
+                "source_unit_id",
+                "source_char_start",
+                "source_char_end",
+            ],
+            "ENTITY_LINKING": [
+                "linker_name",
+                "linker_version",
+                "source_unit_id",
+                "source_char_start",
+                "source_char_end",
+            ],
+            "LLM": ["confidence", "llm_model", "checkpoint_id"],
+        },
         "property_types": {
             "confidence": "float",
             "llm_model": "string",
             "created_at": "datetime",
             "citation_text": "string",
             "citation_type": "string",
+            "extraction_method": "string",
+            "reference_bundle_id": "string",
+            "reference_target_count": "integer",
+            "resolver_name": "string",
+            "resolver_version": "string",
+            "linker_name": "string",
+            "linker_version": "string",
+            "source_unit_id": "string",
+            "source_char_start": "integer",
+            "source_char_end": "integer",
+            "checkpoint_id": "string",
         },
-        "property_enums": {"citation_type": CITATION_TYPES},
+        "property_enums": {
+            "citation_type": CITATION_TYPES,
+            "extraction_method": REFERENCE_EXTRACTION_METHODS,
+        },
     },
     "DEFINES": {
         "allowed_head": ["Article", "Clause"],
@@ -205,10 +249,25 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
 
 # Node required fields per type (for application-layer enforcement on Neo4j Community)
 NODE_REQUIRED_FIELDS: dict[str, list[str]] = {
-    "Document": ["id", "doc_type", "number", "normative", "legal_status", "effective_from", "issuer_name"],
+    "Document": [
+        "id",
+        "doc_type",
+        "number",
+        "normative",
+        "legal_status",
+        "effective_from",
+        "issuer_name",
+    ],
     "Issuer": ["id", "name", "branch"],
     "Chapter": ["id", "number", "title"],
-    "Article": ["id", "number", "title", "content_raw", "effective_from", "legal_status"],
+    "Article": [
+        "id",
+        "number",
+        "title",
+        "content_raw",
+        "effective_from",
+        "legal_status",
+    ],
     "Clause": ["id", "number", "content_raw", "effective_from", "legal_status"],
     "Point": ["id", "label", "content_raw"],
     "LegalConcept": ["id", "name"],

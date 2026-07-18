@@ -81,7 +81,10 @@ def test_clause_rejects_duplicate_point_labels() -> None:
         Clause(
             number=4,
             content="Khoản 4",
-            points=[Point(label="c", content="Bản một"), Point(label="c", content="Bản hai")],
+            points=[
+                Point(label="c", content="Bản một"),
+                Point(label="c", content="Bản hai"),
+            ],
         )
 
 
@@ -97,18 +100,68 @@ def test_parser_deduplicates_identical_point_around_vbpl_annotation() -> None:
         "Điều khoản được sửa đổi, bổ sung\nc) Nội dung"
     )
     parsed = parse_text(text, _doc_info())
-    assert [(point.label, point.content) for point in parsed.articles[0].clauses[0].points] == [("c", "Nội dung")]
+    assert [
+        (point.label, point.content) for point in parsed.articles[0].clauses[0].points
+    ] == [("c", "Nội dung")]
 
+
+def test_parser_preserves_appendix_without_attaching_it_to_last_article() -> None:
+    text = (
+        "Điều 1. Nội dung\n1. Khoản chính\n"
+        "PHỤ LỤC I\n1. Không phải khoản\na) Không phải điểm\n"
+    )
+
+    parsed = parse_text(text, _doc_info())
+
+    assert len(parsed.articles) == 1
+    assert parsed.articles[0].clauses[0].content == "Khoản chính"
+    assert len(parsed.unparsed_sections) == 1
+    appendix = parsed.unparsed_sections[0]
+    assert appendix.heading == "PHỤ LỤC I"
+    assert appendix.content_raw == "1. Không phải khoản\na) Không phải điểm"
+    assert text[appendix.source_start_char : appendix.source_end_char].startswith(
+        "PHỤ LỤC I"
+    )
+
+
+def test_parser_does_not_treat_inline_appendix_word_as_heading() -> None:
+    parsed = parse_text(
+        "Điều 1. Nội dung\n1. Kèm theo phụ lục và tài liệu", _doc_info()
+    )
+    assert parsed.unparsed_sections == []
+    assert "phụ lục" in parsed.articles[0].clauses[0].content
+
+
+def test_parser_source_spans_use_canonical_source_coordinates() -> None:
+    text = "Điều 1. Nội dung\r\n1. Khoản\r\na) Điểm"
+    parsed = parse_text(text, _doc_info())
+    canonical = text.replace("\r\n", "\n")
+    point = parsed.articles[0].clauses[0].points[0]
+    assert canonical[point.source_start_char : point.source_end_char] == "a) Điểm"
 
 
 def test_clean_vietnamese_spacing() -> None:
     from src.pipeline.parser.hierarchy_parser import clean_vietnamese_spacing
-    
-    assert clean_vietnamese_spacing("Công ty trách nhi ệm h ữu h ạn") == "Công ty trách nhiệm hữu hạn"
-    assert clean_vietnamese_spacing("hợp cuộc họp được triệu tập t heo quy định") == "hợp cuộc họp được triệu tập theo quy định"
-    assert clean_vietnamese_spacing("Người qu ản lý doanh nghi ệp là người") == "Người quản lý doanh nghiệp là người"
-    assert clean_vietnamese_spacing("điểm a, b, c, d, đ và e") == "điểm a, b, c, d, đ và e"
-    assert clean_vietnamese_spacing("luật t rên p háp luật nước c ộng hòa xã hội") == "luật trên pháp luật nước cộng hòa xã hội"
+
+    assert (
+        clean_vietnamese_spacing("Công ty trách nhi ệm h ữu h ạn")
+        == "Công ty trách nhiệm hữu hạn"
+    )
+    assert (
+        clean_vietnamese_spacing("hợp cuộc họp được triệu tập t heo quy định")
+        == "hợp cuộc họp được triệu tập theo quy định"
+    )
+    assert (
+        clean_vietnamese_spacing("Người qu ản lý doanh nghi ệp là người")
+        == "Người quản lý doanh nghiệp là người"
+    )
+    assert (
+        clean_vietnamese_spacing("điểm a, b, c, d, đ và e") == "điểm a, b, c, d, đ và e"
+    )
+    assert (
+        clean_vietnamese_spacing("luật t rên p háp luật nước c ộng hòa xã hội")
+        == "luật trên pháp luật nước cộng hòa xã hội"
+    )
 
 
 def test_should_skip_line() -> None:

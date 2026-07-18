@@ -7,9 +7,18 @@ from __future__ import annotations
 
 import logging
 import re
+import hashlib
+import unicodedata
 from dataclasses import dataclass, field
 
-from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
+from src.pipeline.parser.models import (
+    Article,
+    Clause,
+    DocumentInfo,
+    ParsedDocument,
+    Point,
+    UnparsedSection,
+)
 from src.pipeline.parser.patterns import (
     looks_like_title,
     match_article,
@@ -26,15 +35,14 @@ def clean_vietnamese_spacing(text: str) -> str:
     # 1. Loại bỏ các dòng tiêu đề/chân trang Công Báo (Gazette headers/footers)
     # Ví dụ: "4 CÔNG BÁO/Số 1175 + 1176/Ngày 30-12-2014" hoặc "CÔNG BÁO/Số 1175 + 1176/Ngày 30-12-2014 5"
     gazette_pattern = re.compile(
-        r"\d*\s*CÔNG BÁO\s*/\s*Số\s+[0-9\s+]+/\s*Ngày\s+[0-9\s\-]+\d*",
-        re.IGNORECASE
+        r"\d*\s*CÔNG BÁO\s*/\s*Số\s+[0-9\s+]+/\s*Ngày\s+[0-9\s\-]+\d*", re.IGNORECASE
     )
     text = gazette_pattern.sub("", text)
 
     # 2. Ghép các cặp phụ âm ghép bị tách (vd: t heo -> theo, t rên -> trên, p háp -> pháp, n ghiệm -> nghiệm)
     digraphs_pattern = re.compile(
-        r"\b(c|g|k|n|p|t)\s+([hrg][aăâeêuơoôưiàáạảãầấậẩẫằắặẳẵèéẹẻẽềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỴỷỹ][\w]*)\b", 
-        re.IGNORECASE
+        r"\b(c|g|k|n|p|t)\s+([hrg][aăâeêuơoôưiàáạảãầấậẩẫằắặẳẵèéẹẻẽềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỴỷỹ][\w]*)\b",
+        re.IGNORECASE,
     )
     old_text = ""
     while old_text != text:
@@ -45,21 +53,23 @@ def clean_vietnamese_spacing(text: str) -> str:
     consonants = r"\b(ch|gh|kh|ngh|ng|nh|ph|qu|th|tr|[bcdđghklmnpqrstvx])"
     vowels = r"([aăâeêuơoôưiàáạảãầấậẩẫằắặẳẵèéẹẻẽềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỴỷỹ][\w]*)\b"
     pattern1 = re.compile(consonants + r"\s+" + vowels, re.IGNORECASE)
-    
+
     old_text = ""
     while old_text != text:
         old_text = text
         text = pattern1.sub(r"\1\2", text)
-        
+
     # 4. Ghép phần đuôi bắt đầu bằng nguyên âm mang dấu thanh (vd: nhi ệm -> nhiệm, nghi ệp -> nghiệp)
-    diacritic_vowels = r"([àáạảãầấậẩẫằắặẳẵèéẹẻẽềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỴỷỹ][\w]*)\b"
+    diacritic_vowels = (
+        r"([àáạảãầấậẩẫằắặẳẵèéẹẻẽềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỴỷỹ][\w]*)\b"
+    )
     pattern2 = re.compile(r"(\w+)\s+" + diacritic_vowels, re.IGNORECASE)
-    
+
     old_text = ""
     while old_text != text:
         old_text = text
         text = pattern2.sub(r"\1\2", text)
-        
+
     # 5. Xử lý khoảng trắng thừa
     text = re.sub(r"\s+", " ", text).strip()
     return text
@@ -72,10 +82,12 @@ def should_skip_line(line: str) -> bool:
     if re.match(r"^\d+$", line):
         return True
     # 2. Các dòng thuộc khối chữ ký số của Cổng TTĐT CP
-    if (line.startswith("Ký bởi:") or 
-        (line.startswith("Email:") and "@" in line) or 
-        line.startswith("Cơ quan:") or 
-        re.match(r"^Thời gian\s*ký:", line, re.IGNORECASE)):
+    if (
+        line.startswith("Ký bởi:")
+        or (line.startswith("Email:") and "@" in line)
+        or line.startswith("Cơ quan:")
+        or re.match(r"^Thời gian\s*ký:", line, re.IGNORECASE)
+    ):
         return True
     # 3. Tiêu đề Công Báo đứng riêng dòng
     if "CÔNG BÁO/Số" in line or "CONG BAO/So" in line:
@@ -90,6 +102,9 @@ class LineRecord:
     text: str
     font_size: float = 0.0
     bold: bool = False
+    source_start_char: int = 0
+    source_end_char: int = 0
+    source_line: int = 1
 
 
 @dataclass
@@ -100,6 +115,8 @@ class _ArticleBuilder:
     chapter_title: str | None
     content_lines: list[str] = field(default_factory=list)
     clauses: list[Clause] = field(default_factory=list)
+    source_start_char: int = 0
+    source_end_char: int = 0
 
     def to_article(self) -> Article:
         # Tái tạo content_raw sạch bằng cách nối các dòng tiếp nối bằng dấu cách,
@@ -109,21 +126,21 @@ class _ArticleBuilder:
             line_str = line.strip()
             if not line_str:
                 continue
-            
+
             from src.pipeline.parser.patterns import match_clause, match_point
-            
+
             is_new_element = (
-                not joined_lines or 
-                (self.title is not None and len(joined_lines) == 1) or 
-                match_clause(line_str) is not None or 
-                match_point(line_str) is not None
+                not joined_lines
+                or (self.title is not None and len(joined_lines) == 1)
+                or match_clause(line_str) is not None
+                or match_point(line_str) is not None
             )
-            
+
             if is_new_element:
                 joined_lines.append(line_str)
             else:
                 joined_lines[-1] = f"{joined_lines[-1]} {line_str}".strip()
-                
+
         content_raw = "\n".join(joined_lines)
         return Article(
             number=self.number,
@@ -132,10 +149,12 @@ class _ArticleBuilder:
             chapter=self.chapter,
             chapter_title=self.chapter_title,
             clauses=self.clauses,
+            source_start_char=self.source_start_char,
+            source_end_char=self.source_end_char,
         )
 
 
-def parse_lines(lines: list[str]) -> list[Article]:
+def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
     """State machine cốt lõi: list các dòng text (đã strip blank thừa) -> list[Article].
 
     Chỉ dùng regex pattern + heuristic "dòng toàn chữ hoa" để bắt tiêu đề chương.
@@ -175,7 +194,12 @@ def parse_lines(lines: list[str]) -> list[Article]:
         nonlocal current_point
         if current_point is not None and current_clause is not None:
             duplicate = next(
-                (point for point in current_clause.points if point.label.strip().lower() == current_point.label.strip().lower()),
+                (
+                    point
+                    for point in current_clause.points
+                    if point.label.strip().lower()
+                    == current_point.label.strip().lower()
+                ),
                 None,
             )
             if duplicate is None:
@@ -193,8 +217,9 @@ def parse_lines(lines: list[str]) -> list[Article]:
     # KHÔNG coi cấu trúc số/chữ cái bên trong nó là Khoản/Điểm thật của văn bản.
     quote_depth = 0
 
-    for raw_line in lines:
-        cleaned_line = clean_vietnamese_spacing(raw_line)
+    for item in lines:
+        record = item if isinstance(item, LineRecord) else LineRecord(text=item)
+        cleaned_line = clean_vietnamese_spacing(record.text)
         line = cleaned_line.strip()
         if not line or should_skip_line(line):
             continue
@@ -207,10 +232,13 @@ def parse_lines(lines: list[str]) -> list[Article]:
             # Chương/Điều/Khoản/Điểm mới trên dòng này.
             if current_article is not None:
                 current_article.content_lines.append(line)
+                current_article.source_end_char = record.source_end_char
                 if current_point is not None:
                     current_point.content = f"{current_point.content} {line}".strip()
+                    current_point.source_end_char = record.source_end_char
                 elif current_clause is not None:
                     current_clause.content = f"{current_clause.content} {line}".strip()
+                    current_clause.source_end_char = record.source_end_char
             continue
 
         chapter_num = match_chapter(line)
@@ -236,6 +264,8 @@ def parse_lines(lines: list[str]) -> list[Article]:
                 title=title or None,
                 chapter=current_chapter,
                 chapter_title=current_chapter_title,
+                source_start_char=record.source_start_char,
+                source_end_char=record.source_end_char,
             )
             if title:
                 current_article.content_lines.append(title)
@@ -250,24 +280,42 @@ def parse_lines(lines: list[str]) -> list[Article]:
         if clause_match is not None:
             flush_clause()
             number, content = clause_match
-            current_clause = Clause(number=number, content=content)
+            current_clause = Clause(
+                number=number,
+                content=content,
+                source_start_char=record.source_start_char,
+                source_end_char=record.source_end_char,
+            )
             current_article.content_lines.append(line)
+            current_article.source_end_char = record.source_end_char
             continue
 
         point_match = match_point(line)
         if point_match is not None and current_clause is not None:
             flush_point()
             label, content = point_match
-            current_point = Point(label=label, content=content)
+            current_point = Point(
+                label=label,
+                content=content,
+                source_start_char=record.source_start_char,
+                source_end_char=record.source_end_char,
+            )
             current_article.content_lines.append(line)
+            current_article.source_end_char = record.source_end_char
+            current_clause.source_end_char = record.source_end_char
             continue
 
         # Dòng tiếp nối nội dung (continuation) của point/clause/article hiện tại
         current_article.content_lines.append(line)
+        current_article.source_end_char = record.source_end_char
         if current_point is not None:
             current_point.content = f"{current_point.content} {line}".strip()
+            current_point.source_end_char = record.source_end_char
+            if current_clause is not None:
+                current_clause.source_end_char = record.source_end_char
         elif current_clause is not None:
             current_clause.content = f"{current_clause.content} {line}".strip()
+            current_clause.source_end_char = record.source_end_char
 
     flush_article()
     return articles
@@ -275,10 +323,99 @@ def parse_lines(lines: list[str]) -> list[Article]:
 
 def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
     """Parse từ văn bản text thuần."""
-    lines = text.splitlines()
-    articles = parse_lines(lines)
+    canonical_text = canonicalize_source_text(text)
+    records = source_line_records(canonical_text)
+    main_records, appendix_groups = partition_appendices(records)
+    articles = parse_lines(main_records)
     _validate_unique_point_labels(articles)
-    return ParsedDocument(document=document, articles=articles)
+    return ParsedDocument(
+        document=document,
+        articles=articles,
+        unparsed_sections=[
+            _appendix_section(group, canonical_text, document.id)
+            for group in appendix_groups
+        ],
+    )
+
+
+def canonicalize_source_text(text: str) -> str:
+    """Canonical source coordinate space: NFC text with LF newlines."""
+    return unicodedata.normalize("NFC", text.replace("\r\n", "\n").replace("\r", "\n"))
+
+
+def source_line_records(canonical_text: str) -> list[LineRecord]:
+    records: list[LineRecord] = []
+    cursor = 0
+    for line_number, raw_line in enumerate(
+        canonical_text.splitlines(keepends=True), start=1
+    ):
+        text = raw_line.rstrip("\n")
+        records.append(
+            LineRecord(
+                text=text,
+                source_start_char=cursor,
+                source_end_char=cursor + len(text),
+                source_line=line_number,
+            )
+        )
+        cursor += len(raw_line)
+    if canonical_text and not records:
+        records.append(
+            LineRecord(text=canonical_text, source_end_char=len(canonical_text))
+        )
+    return records
+
+
+def partition_appendices(
+    records: list[LineRecord],
+) -> tuple[list[LineRecord], list[list[LineRecord]]]:
+    main: list[LineRecord] = []
+    appendices: list[list[LineRecord]] = []
+    current: list[LineRecord] | None = None
+    for record in records:
+        if _is_appendix_heading(record.text):
+            current = [record]
+            appendices.append(current)
+        elif current is None:
+            main.append(record)
+        else:
+            current.append(record)
+    return main, appendices
+
+
+def _is_appendix_heading(text: str) -> bool:
+    stripped = re.sub(r"\s+", " ", text.strip())
+    if not re.match(r"(?i)^phụ lục(?:\s+.*)?$", stripped):
+        return False
+    return stripped.upper() == stripped or bool(
+        re.fullmatch(
+            r"(?i)phụ lục(?:\s+(?:số\s+)?(?:[IVXLCDM]+|\d+[A-Z]?|[A-Z]))?", stripped
+        )
+    )
+
+
+def _appendix_section(
+    records: list[LineRecord], canonical_text: str, document_id: str
+) -> UnparsedSection:
+    heading = records[0].text.strip()
+    start = records[0].source_start_char
+    end = records[-1].source_end_char
+    content_start = (
+        records[1].source_start_char if len(records) > 1 else records[0].source_end_char
+    )
+    content_raw = canonical_text[content_start:end].strip("\n")
+    hash_input = f"{heading}\n{content_raw}".encode("utf-8")
+    return UnparsedSection(
+        section_type="APPENDIX",
+        heading=heading,
+        content_raw=content_raw,
+        source_document_id=document_id,
+        source_start_char=start,
+        source_end_char=end,
+        source_start_line=records[0].source_line,
+        source_end_line=records[-1].source_line,
+        content_hash=hashlib.sha256(hash_input).hexdigest(),
+    )
 
 
 def _validate_unique_point_labels(articles: list[Article]) -> None:

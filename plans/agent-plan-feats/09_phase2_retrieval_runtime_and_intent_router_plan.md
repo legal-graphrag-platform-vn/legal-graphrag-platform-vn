@@ -3,7 +3,7 @@
 > Plan status: IMPLEMENTED FOR PILOT DEVELOPMENT
 > Canonical retrieval contract: `plans/05_graphrag_retrieval.md`
 > Parent retrieval plan: `plans/agent-plan-feats/07_phase2_graphrag_retrieval_plan.md`
-> Canonical ontology: `plans/legal_ontology.md` v1.5.1
+> Canonical ontology: `plans/legal_ontology.md` v1.6.0
 > Blocker authority: `plans/agent-plan-feats/06_m3_blocker_register.md`
 > Runtime contract version: `retrieval-runtime-v2`
 

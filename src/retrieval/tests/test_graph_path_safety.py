@@ -112,3 +112,32 @@ def test_malformed_temporal_value_is_not_treated_as_unbounded() -> None:
             IntentType.FACTUAL,
             filters=RetrievalFilters(),
         )
+
+
+def test_parallel_citations_collapse_to_one_topology_path_and_preserve_evidence() -> (
+    None
+):
+    first = _row(relation_type="REFERS_TO", effective_from=None)
+    first["path_edge_refs"][0].update(
+        relation_id="ref-1",
+        citation_text="theo Điều 17",
+        citation_type="DIRECT",
+        extraction_method="RULE",
+    )
+    second = _row(relation_type="REFERS_TO", effective_from=None)
+    second["path_edge_refs"][0].update(
+        relation_id="ref-2",
+        citation_text="căn cứ Điều 17",
+        citation_type="DIRECT",
+        extraction_method="LLM",
+    )
+
+    expansion = GraphRetriever(Repo([first, second])).expand(
+        ["older"],
+        IntentType.FACTUAL,
+        filters=RetrievalFilters(),
+    )
+
+    assert len(expansion.paths) == 1
+    evidence = expansion.paths[0].edges[0].citation_evidence
+    assert [item.relation_id for item in evidence] == ["ref-1", "ref-2"]

@@ -9,17 +9,20 @@ tái dùng làm input cho LLM Extraction (extraction/llm_extractor.py) để tr�
 from __future__ import annotations
 
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, Field, model_validator
 
 LegalNumber = Annotated[str, BeforeValidator(lambda value: str(value).strip())]
+
 
 class Point(BaseModel):
     """Điểm — đơn vị nhỏ nhất trong cấu trúc văn bản pháp luật VN."""
 
     label: str = Field(description="Nhãn điểm, ví dụ 'a'")
     content: str
+    source_start_char: int = Field(default=0, ge=0)
+    source_end_char: int = Field(default=0, ge=0)
 
 
 class Clause(BaseModel):
@@ -28,6 +31,8 @@ class Clause(BaseModel):
     number: LegalNumber
     content: str
     points: list[Point] = Field(default_factory=list)
+    source_start_char: int = Field(default=0, ge=0)
+    source_end_char: int = Field(default=0, ge=0)
 
     @model_validator(mode="after")
     def point_labels_must_be_unique(self) -> "Clause":
@@ -40,7 +45,9 @@ class Clause(BaseModel):
             seen.add(label)
         if duplicates:
             labels = ", ".join(sorted(duplicates))
-            raise ValueError(f"Duplicate Point label(s) in Clause {self.number}: {labels}")
+            raise ValueError(
+                f"Duplicate Point label(s) in Clause {self.number}: {labels}"
+            )
         return self
 
 
@@ -53,6 +60,22 @@ class Article(BaseModel):
     chapter: str | None = Field(default=None, description="Số chương La Mã, vd 'II'")
     chapter_title: str | None = None
     clauses: list[Clause] = Field(default_factory=list)
+    source_start_char: int = Field(default=0, ge=0)
+    source_end_char: int = Field(default=0, ge=0)
+
+
+class UnparsedSection(BaseModel):
+    """Losslessly preserved source section outside the active graph ontology."""
+
+    section_type: Literal["APPENDIX"]
+    heading: str
+    content_raw: str
+    source_document_id: str
+    source_start_char: int = Field(ge=0)
+    source_end_char: int = Field(ge=0)
+    source_start_line: int = Field(ge=1)
+    source_end_line: int = Field(ge=1)
+    content_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
 class DocumentInfo(BaseModel):
@@ -61,8 +84,13 @@ class DocumentInfo(BaseModel):
     id: str = Field(description="Canonical graph ID theo ontology, vd 'ldn_2020'")
     title: str
     number: str = Field(description="Số hiệu văn bản, vd '59/2020/QH14'")
-    doc_type: str = Field(description="Document type: Law|Decree|Circular|Resolution|Decision")
-    normative: bool = Field(default=True, description="True for normative legal documents in the selected corpus")
+    doc_type: str = Field(
+        description="Document type: Law|Decree|Circular|Resolution|Decision"
+    )
+    normative: bool = Field(
+        default=True,
+        description="True for normative legal documents in the selected corpus",
+    )
     issued_by: str | None = None
     issued_date: date | None = None
     effective_from: date | None = None
@@ -76,3 +104,4 @@ class ParsedDocument(BaseModel):
 
     document: DocumentInfo
     articles: list[Article] = Field(default_factory=list)
+    unparsed_sections: list[UnparsedSection] = Field(default_factory=list)

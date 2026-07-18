@@ -12,7 +12,14 @@ def test_payload_consistency_detects_dangling_relation() -> None:
     report = validate_payload_consistency(
         {
             "nodes": [{"type": "Document", "id": "ldn_2020"}],
-            "relations": [{"head_id": "ldn_2020", "type": "CONTAINS", "tail_id": "missing", "properties": {}}],
+            "relations": [
+                {
+                    "head_id": "ldn_2020",
+                    "type": "CONTAINS",
+                    "tail_id": "missing",
+                    "properties": {},
+                }
+            ],
         }
     )
 
@@ -27,7 +34,14 @@ def test_payload_consistency_requires_relation_id() -> None:
                 {"type": "Document", "id": "ldn_2020"},
                 {"type": "Article", "id": "ldn_2020_art17"},
             ],
-            "relations": [{"head_id": "ldn_2020", "type": "CONTAINS", "tail_id": "ldn_2020_art17", "properties": {}}],
+            "relations": [
+                {
+                    "head_id": "ldn_2020",
+                    "type": "CONTAINS",
+                    "tail_id": "ldn_2020_art17",
+                    "properties": {},
+                }
+            ],
         }
     )
 
@@ -72,15 +86,48 @@ def test_refers_to_identity_uses_normalized_citation_not_mutable_provenance() ->
     }
 
     assert normalize_citation_text(first["citation_text"]) == "Theo Điều 17 Luật này"
-    assert relation_identity_discriminator("REFERS_TO", first) == relation_identity_discriminator(
-        "REFERS_TO", second
-    )
+    assert relation_identity_discriminator(
+        "REFERS_TO", first
+    ) == relation_identity_discriminator("REFERS_TO", second)
 
 
 def test_refers_to_identity_distinguishes_different_citations() -> None:
     first = {"citation_type": "DIRECT", "citation_text": "Điều 17"}
     second = {"citation_type": "DIRECT", "citation_text": "Khoản 1 Điều 17"}
 
-    assert relation_identity_discriminator("REFERS_TO", first) != relation_identity_discriminator(
-        "REFERS_TO", second
+    assert relation_identity_discriminator(
+        "REFERS_TO", first
+    ) != relation_identity_discriminator("REFERS_TO", second)
+
+
+def test_payload_consistency_rejects_incomplete_reference_bundle() -> None:
+    properties = {
+        "citation_type": "RANGE",
+        "citation_text": "các điểm a và b khoản này",
+        "reference_bundle_id": "bundle-ab",
+        "reference_target_count": 2,
+    }
+    discriminator = relation_identity_discriminator("REFERS_TO", properties)
+    properties["relation_id"] = deterministic_relation_id(
+        "doc_art1_cl1_pc", "REFERS_TO", "doc_art1_cl1_pa", discriminator
     )
+
+    report = validate_payload_consistency(
+        {
+            "nodes": [
+                {"type": "Point", "id": "doc_art1_cl1_pc"},
+                {"type": "Point", "id": "doc_art1_cl1_pa"},
+            ],
+            "relations": [
+                {
+                    "head_id": "doc_art1_cl1_pc",
+                    "type": "REFERS_TO",
+                    "tail_id": "doc_art1_cl1_pa",
+                    "properties": properties,
+                }
+            ],
+        }
+    )
+
+    assert report.valid is False
+    assert any("Incomplete reference bundle" in error for error in report.errors)

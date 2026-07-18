@@ -34,6 +34,14 @@ from src.pipeline.extraction.structural_context import (
     EndpointResolution,
     StructuralRegistry,
 )
+from src.pipeline.extraction.structural_references import (
+    LINKER_NAME,
+    LINKER_VERSION,
+    RESOLVER_NAME,
+    RESOLVER_VERSION,
+    ResolvedReference,
+    StructuralReferenceResolver,
+)
 from src.pipeline.pipeline.artifact_store import (
     create_staging_artifact_dir,
     discard_staging_artifacts,
@@ -43,8 +51,12 @@ from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.scoring.confidence_scorer import score
 from src.shared.ontology.validators import validate_relation as validate_ontology
 from src.shared.ontology.contract import ONTOLOGY_VERSION
-from src.pipeline.validation.record_consistency_validator import validate_record_relation
-from src.pipeline.validation.schema_validator import validate_relation as validate_schema
+from src.pipeline.validation.record_consistency_validator import (
+    validate_record_relation,
+)
+from src.pipeline.validation.schema_validator import (
+    validate_relation as validate_schema,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +78,9 @@ def _ontology_label(extraction_label: str) -> str:
 
 def _semantic_id(label: str) -> str:
     normalized = unicodedata.normalize("NFD", label)
-    normalized = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
+    normalized = "".join(
+        char for char in normalized if unicodedata.category(char) != "Mn"
+    )
     normalized = normalized.replace("đ", "d").replace("Đ", "D").lower()
     return re.sub(r"[^a-z0-9]+", "_", normalized).strip("_") or "unknown"
 
@@ -189,21 +203,56 @@ def _relation_properties(
 ) -> dict:
     relation_properties = {}
 
-    if raw_relation.relation in {"AMENDS", "REPEALS", "REPLACES"} and document.effective_from:
+    if (
+        raw_relation.relation in {"AMENDS", "REPEALS", "REPLACES"}
+        and document.effective_from
+    ):
         relation_properties["effective_from"] = str(document.effective_from)
     if raw_relation.relation == "AMENDS":
         relation_properties["source_doc_id"] = document.id
     if raw_relation.relation == "REFERS_TO":
         relation_properties["citation_text"] = raw_relation.evidence
         relation_properties["citation_type"] = "DIRECT"
+        relation_properties["extraction_method"] = "LLM"
+        relation_properties["reference_bundle_id"] = _llm_reference_bundle_id(
+            article.number, raw_relation.head, raw_relation.tail, raw_relation.evidence
+        )
+        relation_properties["reference_target_count"] = 1
+        relation_properties["checkpoint_id"] = (
+            extraction_result.checkpoint_id
+            or _derived_checkpoint_id(article.number, extraction_result)
+        )
     if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES", "REFERS_TO"}:
         relation_properties["confidence"] = raw_relation.confidence
         relation_properties["llm_model"] = _checkpoint_llm_model(extraction_result)
-        relation_properties["created_at"] = _normalize_checkpoint_timestamp(extraction_result.completed_at)
+        relation_properties["created_at"] = _normalize_checkpoint_timestamp(
+            extraction_result.completed_at
+        )
     if raw_relation.relation == "REQUIRES":
         relation_properties["source_article"] = f"{document.id}_art{article.number}"
 
     return relation_properties
+
+
+def _llm_reference_bundle_id(
+    article_number: str, head: str, tail: str, evidence: str
+) -> str:
+    source = "|".join(
+        ["LLM", str(article_number), head, tail, _normalize_citation(evidence)]
+    )
+    return hashlib.sha256(source.encode("utf-8")).hexdigest()
+
+
+def _derived_checkpoint_id(article_number: str, result: ExtractionResult) -> str:
+    required = (result.provider, result.resolved_model, result.completed_at)
+    if any(not value for value in required):
+        raise ValueError("Extraction result is missing checkpoint identity provenance")
+    source = "|".join([str(article_number), *[str(value) for value in required]])
+    return hashlib.sha256(source.encode("utf-8")).hexdigest()
+
+
+def _normalize_citation(value: str) -> str:
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFC", value).strip())
 
 
 def process_article(
@@ -222,8 +271,12 @@ def process_article(
         ParsedDocument(document=document, articles=[article]), raw_doc_code=document.id
     )
     context = registry.context_for_article(article)
-    document_registry = document_registry or DocumentRegistry.from_manifest(settings.curated_manifest_path)
-    result = extraction_result or extract_article(article.number, article_text, context=context)
+    document_registry = document_registry or DocumentRegistry.from_manifest(
+        settings.curated_manifest_path
+    )
+    result = extraction_result or extract_article(
+        article.number, article_text, context=context
+    )
 
     entity_types = _entity_type_lookup(result.entities)
     if entity_index is not None:
@@ -232,7 +285,9 @@ def process_article(
             if entry:
                 existing = entity_index.get(entry["id"])
                 if existing is not None and existing != entry:
-                    raise ValueError(f"Conflicting semantic entity normalization: {entry['id']}")
+                    raise ValueError(
+                        f"Conflicting semantic entity normalization: {entry['id']}"
+                    )
                 entity_index[entry["id"]] = entry
 
     semantic_entries: dict[str, dict] = {}
@@ -240,15 +295,29 @@ def process_article(
         entry = _entity_index_entry(entity)
         if entry:
             semantic_entries[entity.id] = entry
-    known_ids = set(registry.types) | {entry["id"] for entry in semantic_entries.values()}
+    known_ids = set(registry.types) | {
+        entry["id"] for entry in semantic_entries.values()
+    }
 
     for raw_relation in result.relations:
         raw_relation_dict = raw_relation.model_dump()
         head_resolution = _resolve_endpoint(
-            raw_relation.head, entity_types, result.entities, semantic_entries, registry, document_registry, article.number
+            raw_relation.head,
+            entity_types,
+            result.entities,
+            semantic_entries,
+            registry,
+            document_registry,
+            article.number,
         )
         tail_resolution = _resolve_endpoint(
-            raw_relation.tail, entity_types, result.entities, semantic_entries, registry, document_registry, article.number
+            raw_relation.tail,
+            entity_types,
+            result.entities,
+            semantic_entries,
+            registry,
+            document_registry,
+            article.number,
         )
         relation_dict = raw_relation.model_dump()
         if head_resolution.canonical_id:
@@ -258,21 +327,32 @@ def process_article(
         parsed_relation, schema_err = validate_schema(relation_dict)
         schema_valid = parsed_relation is not None
 
-        head_type = head_resolution.canonical_type or _ontology_label(entity_types.get(raw_relation.head, "Entity"))
-        tail_type = tail_resolution.canonical_type or _ontology_label(entity_types.get(raw_relation.tail, "Entity"))
+        head_type = head_resolution.canonical_type or _ontology_label(
+            entity_types.get(raw_relation.head, "Entity")
+        )
+        tail_type = tail_resolution.canonical_type or _ontology_label(
+            entity_types.get(raw_relation.tail, "Entity")
+        )
         head_doc_type = document.doc_type if head_type == "Document" else None
         tail_doc_type = document.doc_type if tail_type == "Document" else None
 
         # 1.   Construct actual relationship properties from document metadata and context
-        relation_properties = _relation_properties(raw_relation, article, document, result)
+        relation_properties = _relation_properties(
+            raw_relation, article, document, result
+        )
 
         # 2.   Enrich the relation dictionary with actual properties
         relation_dict["properties"] = relation_properties
 
         if raw_relation.relation == "CONTAINS":
             ontology_ok, ontology_err = False, "llm_structural_relation_forbidden"
-        elif head_resolution.status == "rejected" or tail_resolution.status == "rejected":
-            ontology_ok, ontology_err = False, head_resolution.reason or tail_resolution.reason
+        elif (
+            head_resolution.status == "rejected" or tail_resolution.status == "rejected"
+        ):
+            ontology_ok, ontology_err = (
+                False,
+                head_resolution.reason or tail_resolution.reason,
+            )
         else:
             ontology_ok, ontology_err = validate_ontology(
                 head_type,
@@ -343,12 +423,23 @@ def _process_article_worker(
     if checkpoint:
         result = _result_from_checkpoint(checkpoint)
     else:
-        extracted = extract_article(article.number, article.content_raw, context=context)
+        extracted = extract_article(
+            article.number, article.content_raw, context=context
+        )
+        checkpoint_id = _checkpoint_fingerprint(
+            context,
+            article.content_raw,
+            provider=settings.llm_provider,
+            configured_model=_configured_llm_model(),
+        )
         result = extracted.model_copy(
             update={
                 "provider": settings.llm_provider,
                 "configured_model": _configured_llm_model(),
-                "completed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                "completed_at": datetime.now(timezone.utc)
+                .isoformat()
+                .replace("+00:00", "Z"),
+                "checkpoint_id": checkpoint_id,
             }
         )
     process_article(
@@ -370,13 +461,14 @@ def run_pipeline(
     raw_doc_code: str,
     provider_calls_allowed: bool = True,
     article_numbers: set[str] | None = None,
+    source_text: str | None = None,
 ) -> None:
     if not raw_doc_code:
         raise ValueError("raw_doc_code is required for pipeline output path")
 
     out_dir = processed_dir / raw_doc_code
     out_dir.mkdir(parents=True, exist_ok=True)
-    
+
     from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
     all_records = []
@@ -384,25 +476,40 @@ def run_pipeline(
     semantic_type_conflicts: set[str] = set()
     registry = StructuralRegistry.from_parsed_document(parsed, raw_doc_code)
     selected_articles = [
-        article for article in parsed.articles if article_numbers is None or article.number in article_numbers
+        article
+        for article in parsed.articles
+        if article_numbers is None or article.number in article_numbers
     ]
     if article_numbers is not None:
         found = {article.number for article in selected_articles}
         missing_selection = sorted(article_numbers - found)
         if missing_selection:
-            raise ValueError(f"Selected Article(s) not found in hierarchy: {missing_selection}")
+            raise ValueError(
+                f"Selected Article(s) not found in hierarchy: {missing_selection}"
+            )
     if not selected_articles:
         raise ValueError("Extraction requires at least one selected Article")
     document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
     checkpoint_path = out_dir / "article_extractions.jsonl"
-    checkpoints = _load_checkpoints(checkpoint_path, registry, parsed)
+    checkpoints = _load_checkpoints(
+        checkpoint_path,
+        registry,
+        parsed,
+        allow_legacy_prompt=not provider_calls_allowed,
+    )
     provider_called = provider_calls_allowed and any(
         article.number not in checkpoints for article in selected_articles
     )
     if not provider_calls_allowed:
-        missing = [article.number for article in selected_articles if article.number not in checkpoints]
+        missing = [
+            article.number
+            for article in selected_articles
+            if article.number not in checkpoints
+        ]
         if missing:
-            raise ValueError(f"Missing valid Article extraction checkpoints: {missing[:10]}")
+            raise ValueError(
+                f"Missing valid Article extraction checkpoints: {missing[:10]}"
+            )
     max_workers = settings.extraction_max_workers
     logger.info("Bắt đầu trích xuất tri thức song song với %d workers...", max_workers)
 
@@ -419,7 +526,12 @@ def run_pipeline(
             return False
         checkpoint = checkpoints.get(article.number)
         future = executor.submit(
-            _process_article_worker, article, parsed.document, registry, document_registry, checkpoint
+            _process_article_worker,
+            article,
+            parsed.document,
+            registry,
+            document_registry,
+            checkpoint,
         )
         future_to_article[future] = article
         return True
@@ -438,23 +550,35 @@ def run_pipeline(
                     for pending in future_to_article:
                         pending.cancel()
                     _write_extraction_blocked(out_dir, exc)
-                    logger.error("Extraction blocked at Điều %s: %s", article.number, exc)
+                    logger.error(
+                        "Extraction blocked at Điều %s: %s", article.number, exc
+                    )
                     if isinstance(exc, ExtractionProviderError):
                         raise
-                    raise RuntimeError(f"Extraction failed at Article {article.number}: {exc}") from exc
+                    raise RuntimeError(
+                        f"Extraction failed at Article {article.number}: {exc}"
+                    ) from exc
 
                 completed += 1
                 results_by_article[article.number] = records
                 for entity_id, entry in article_entity_index.items():
                     existing = entity_index.get(entity_id)
-                    if existing is not None and existing.get("type") != entry.get("type"):
+                    if existing is not None and existing.get("type") != entry.get(
+                        "type"
+                    ):
                         semantic_type_conflicts.add(entity_id)
                     elif entity_id not in semantic_type_conflicts:
                         entity_index[entity_id] = entry
                 existing_models = {
-                    row.get("resolved_model") for row in checkpoints.values() if row.get("resolved_model")
+                    row.get("resolved_model")
+                    for row in checkpoints.values()
+                    if row.get("resolved_model")
                 }
-                if checkpoint_row.get("resolved_model") and existing_models and checkpoint_row["resolved_model"] not in existing_models:
+                if (
+                    checkpoint_row.get("resolved_model")
+                    and existing_models
+                    and checkpoint_row["resolved_model"] not in existing_models
+                ):
                     error = RuntimeError(
                         "Resolved model changed within extraction checkpoints: "
                         f"existing={sorted(existing_models)}, new={checkpoint_row['resolved_model']}"
@@ -463,7 +587,12 @@ def run_pipeline(
                     raise error
                 checkpoints[article.number] = checkpoint_row
                 _write_checkpoints(checkpoint_path, checkpoints)
-                logger.info("Đã trích xuất xong Điều %s (%d/%d)", article.number, completed, total)
+                logger.info(
+                    "Đã trích xuất xong Điều %s (%d/%d)",
+                    article.number,
+                    completed,
+                    total,
+                )
                 submit_next()
     finally:
         executor.shutdown(wait=True, cancel_futures=True)
@@ -473,32 +602,88 @@ def run_pipeline(
         if article.number in results_by_article:
             all_records.extend(results_by_article[article.number])
 
+    source_path = settings.data_raw_dir / raw_doc_code / "source.txt"
+    if source_text is None and source_path.exists():
+        source_text = source_path.read_text(encoding="utf-8")
+    has_source_spans = any(
+        article.source_end_char > article.source_start_char
+        for article in selected_articles
+    )
+    if source_text is None and has_source_spans:
+        raise ValueError(
+            f"Missing canonical source for structural reference resolution: {source_path}"
+        )
+    reference_resolver = StructuralReferenceResolver(
+        registry,
+        source_text or "",
+        document_registry=document_registry,
+    )
+    resolved_references = (
+        [
+            reference
+            for article in selected_articles
+            for reference in reference_resolver.resolve_article(article)
+        ]
+        if source_text
+        else []
+    )
+    reference_checkpoint_path = out_dir / "reference_resolutions.jsonl"
+    reference_checkpoints = _update_reference_checkpoints(
+        reference_checkpoint_path,
+        resolved_references,
+        selected_article_ids={
+            registry.articles[article.number] for article in selected_articles
+        },
+    )
+    rule_records = _rule_reference_records(
+        resolved_references, reference_checkpoints, registry
+    )
+    all_records.extend(rule_records)
+    _mark_llm_relations_superseded_by_rules(all_records)
+
     for entity_id in semantic_type_conflicts:
         entity_index.pop(entity_id, None)
     for record in all_records:
         relation = record.get("relation") or {}
         conflicted = sorted(
-            endpoint for endpoint in (relation.get("head"), relation.get("tail")) if endpoint in semantic_type_conflicts
+            endpoint
+            for endpoint in (relation.get("head"), relation.get("tail"))
+            if endpoint in semantic_type_conflicts
         )
         if conflicted and record.get("schema_valid") and record.get("ontology_valid"):
             record["consistency_valid"] = False
-            record["consistency_error"] = f"Conflicting semantic type for endpoint(s): {conflicted}"
+            record["consistency_error"] = (
+                f"Conflicting semantic type for endpoint(s): {conflicted}"
+            )
             record["review_reason"] = "semantic_type_conflict"
             record["blocking"] = False
 
-    all_records = [_apply_decision_gate(record) for record in all_records]
+    all_records = _apply_atomic_bundle_decisions(
+        [_apply_decision_gate(record) for record in all_records]
+    )
 
     artifact_set_id, staging = create_staging_artifact_dir(out_dir)
     try:
         _write_jsonl(staging / "extract.jsonl", all_records)
         (staging / "prettier_extract.json").write_text(
-            json.dumps(all_records, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+            json.dumps(all_records, ensure_ascii=False, indent=2, default=str),
+            encoding="utf-8",
         )
-        _write_jsonl(staging / "accepted.jsonl", [r for r in all_records if r["decision"] == "accepted"])
-        _write_jsonl(staging / "review.jsonl", [r for r in all_records if r["decision"] == "review"])
-        _write_jsonl(staging / "rejected.jsonl", [r for r in all_records if r["decision"] == "rejected"])
+        _write_jsonl(
+            staging / "accepted.jsonl",
+            [r for r in all_records if r["decision"] == "accepted"],
+        )
+        _write_jsonl(
+            staging / "review.jsonl",
+            [r for r in all_records if r["decision"] == "review"],
+        )
+        _write_jsonl(
+            staging / "rejected.jsonl",
+            [r for r in all_records if r["decision"] == "rejected"],
+        )
         (staging / "entity_index.json").write_text(
-            json.dumps(entity_index, ensure_ascii=False, indent=2, default=str), encoding="utf-8"
+            json.dumps(entity_index, ensure_ascii=False, indent=2, default=str),
+            encoding="utf-8",
         )
         (staging / "extraction_run.json").write_text(
             json.dumps(
@@ -507,19 +692,33 @@ def run_pipeline(
                     "raw_doc_code": raw_doc_code,
                     "graph_id": parsed.document.id,
                     "ontology_version": ONTOLOGY_VERSION,
-                    "adr": "ADR-21",
+                    "adr": "ADR-22",
                     "normalizer_version": NORMALIZER_VERSION,
                     "relation_enricher_version": RELATION_ENRICHER_VERSION,
                     "source": "article_extractions.jsonl checkpoints",
                     "provider_called": provider_called,
-                    "selected_articles": [article.number for article in selected_articles],
+                    "selected_articles": [
+                        article.number for article in selected_articles
+                    ],
                     "document_article_count": len(parsed.articles),
                     "complete_document": len(selected_articles) == len(parsed.articles),
                     "prompt_version": PROMPT_VERSION,
+                    "source_prompt_versions": sorted(
+                        {
+                            str(row.get("prompt_version") or "legacy-unspecified")
+                            for row in checkpoints.values()
+                        }
+                    ),
                     "endpoint_contract_version": ENDPOINT_CONTRACT_VERSION,
+                    "resolver_name": RESOLVER_NAME,
+                    "resolver_version": RESOLVER_VERSION,
                     "semantic_type_conflict_count": len(semantic_type_conflicts),
                     "semantic_type_conflicts": sorted(semantic_type_conflicts),
-                    "completed_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                    "structural_reference_count": len(resolved_references),
+                    "rule_relation_count": len(rule_records),
+                    "completed_at": datetime.now(timezone.utc)
+                    .isoformat()
+                    .replace("+00:00", "Z"),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -590,15 +789,25 @@ def _result_from_checkpoint(row: dict | None) -> ExtractionResult:
             "configured_model": row.get("configured_model"),
             "resolved_model": row.get("resolved_model"),
             "completed_at": _normalize_checkpoint_timestamp(row.get("completed_at")),
+            "checkpoint_id": row.get("fingerprint"),
         }
     )
 
 
-def _load_checkpoints(path: Path, registry: StructuralRegistry, parsed: ParsedDocument) -> dict[str, dict]:
+def _load_checkpoints(
+    path: Path,
+    registry: StructuralRegistry,
+    parsed: ParsedDocument,
+    *,
+    allow_legacy_prompt: bool = False,
+) -> dict[str, dict]:
     if not path.exists():
         return {}
     articles = {article.number: article for article in parsed.articles}
-    contexts = {number: registry.context_for_article(article) for number, article in articles.items()}
+    contexts = {
+        number: registry.context_for_article(article)
+        for number, article in articles.items()
+    }
     valid: dict[str, dict] = {}
     seen_articles: set[str] = set()
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -610,12 +819,31 @@ def _load_checkpoints(path: Path, registry: StructuralRegistry, parsed: ParsedDo
             raise ValueError(f"Duplicate Article checkpoint: {article_number}")
         seen_articles.add(article_number)
         context = contexts.get(article_number)
-        if context and row.get("fingerprint") == _checkpoint_fingerprint(
-            context,
-            articles[article_number].content_raw,
-            provider=row.get("provider"),
-            configured_model=row.get("configured_model"),
-        ):
+        current_content_hash = hashlib.sha256(
+            articles[article_number].content_raw.encode("utf-8")
+        ).hexdigest()
+        current_fingerprint = (
+            _checkpoint_fingerprint(
+                context,
+                articles[article_number].content_raw,
+                provider=row.get("provider"),
+                configured_model=row.get("configured_model"),
+            )
+            if context
+            else None
+        )
+        exact_match = (
+            context is not None and row.get("fingerprint") == current_fingerprint
+        )
+        legacy_match = (
+            allow_legacy_prompt
+            and context is not None
+            and row.get("content_hash") == current_content_hash
+            and row.get("provider")
+            and row.get("resolved_model")
+            and row.get("completed_at")
+        )
+        if exact_match or legacy_match:
             valid[article_number] = row
     return valid
 
@@ -624,7 +852,10 @@ def _write_checkpoints(path: Path, checkpoints: dict[str, dict]) -> None:
     temporary = path.with_suffix(".jsonl.tmp")
     with temporary.open("w", encoding="utf-8") as handle:
         for article_number in sorted(checkpoints):
-            handle.write(json.dumps(checkpoints[article_number], ensure_ascii=False, default=str) + "\n")
+            handle.write(
+                json.dumps(checkpoints[article_number], ensure_ascii=False, default=str)
+                + "\n"
+            )
     temporary.replace(path)
 
 
@@ -644,8 +875,229 @@ def _write_extraction_blocked(out_dir: Path, exc: Exception) -> None:
     )
 
 
+def _reference_fingerprint(reference: ResolvedReference) -> str:
+    payload = reference.model_dump(mode="json")
+    payload["resolver_version"] = RESOLVER_VERSION
+    source = json.dumps(
+        payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
+    return hashlib.sha256(source.encode("utf-8")).hexdigest()
+
+
+def _update_reference_checkpoints(
+    path: Path,
+    references: list[ResolvedReference],
+    *,
+    selected_article_ids: set[str],
+) -> dict[str, dict]:
+    existing: dict[str, dict] = {}
+    if path.exists():
+        for line_number, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            bundle_id = str(row.get("reference_bundle_id", ""))
+            if not bundle_id or bundle_id in existing:
+                raise ValueError(
+                    f"Invalid duplicate reference checkpoint at {path}:{line_number}"
+                )
+            existing[bundle_id] = row
+
+    updated: dict[str, dict] = {
+        bundle_id: row
+        for bundle_id, row in existing.items()
+        if ((row.get("reference") or {}).get("mention") or {})
+        .get("source_context", {})
+        .get("article_id")
+        not in selected_article_ids
+    }
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    for reference in references:
+        bundle_id = reference.mention.reference_bundle_id
+        fingerprint = _reference_fingerprint(reference)
+        prior = existing.get(bundle_id)
+        created_at = (
+            prior.get("created_at")
+            if prior and prior.get("fingerprint") == fingerprint
+            else now
+        )
+        updated[bundle_id] = {
+            "reference_bundle_id": bundle_id,
+            "fingerprint": fingerprint,
+            "resolver_name": RESOLVER_NAME,
+            "resolver_version": RESOLVER_VERSION,
+            "created_at": created_at,
+            "reference": reference.model_dump(mode="json"),
+        }
+
+    temporary = path.with_suffix(".jsonl.tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        for bundle_id in sorted(updated):
+            handle.write(json.dumps(updated[bundle_id], ensure_ascii=False) + "\n")
+    temporary.replace(path)
+    return updated
+
+
+def _rule_reference_records(
+    references: list[ResolvedReference],
+    checkpoints: dict[str, dict],
+    registry: StructuralRegistry,
+) -> list[dict]:
+    records: list[dict] = []
+    known_ids = set(registry.types)
+    for reference in references:
+        if reference.status != "RESOLVED":
+            continue
+        mention = reference.mention
+        source_id = mention.source_context.source_unit_id
+        checkpoint = checkpoints[mention.reference_bundle_id]
+        citation_type = "RANGE" if len(reference.target_unit_ids) > 1 else "DIRECT"
+        for target_id in reference.target_unit_ids:
+            extraction_method = (
+                "ENTITY_LINKING"
+                if reference.resolution_method == "ENTITY_LINKING"
+                else "RULE"
+            )
+            properties = {
+                "citation_text": mention.raw_text,
+                "citation_type": citation_type,
+                "extraction_method": extraction_method,
+                "created_at": checkpoint["created_at"],
+                "reference_bundle_id": mention.reference_bundle_id,
+                "reference_target_count": len(reference.target_unit_ids),
+                "source_unit_id": source_id,
+                "source_char_start": mention.source_char_start,
+                "source_char_end": mention.source_char_end,
+            }
+            if extraction_method == "RULE":
+                properties.update(
+                    resolver_name=RESOLVER_NAME,
+                    resolver_version=RESOLVER_VERSION,
+                )
+            else:
+                properties.update(
+                    linker_name=LINKER_NAME,
+                    linker_version=LINKER_VERSION,
+                )
+            source_type = registry.types.get(source_id)
+            target_type = registry.types.get(target_id) or _structural_type_from_id(
+                target_id
+            )
+            ontology_ok, ontology_error = validate_ontology(
+                source_type or "",
+                "REFERS_TO",
+                target_type or "",
+                head_id=source_id,
+                tail_id=target_id,
+                properties=properties,
+            )
+            consistency = validate_record_relation(
+                relation_type="REFERS_TO",
+                head_id=source_id,
+                tail_id=target_id,
+                properties=properties,
+                known_entity_ids=known_ids,
+                ontology_valid=ontology_ok,
+                head_type=source_type,
+                tail_type=target_type,
+            )
+            relation = {
+                "head": source_id,
+                "relation": "REFERS_TO",
+                "tail": target_id,
+                "evidence": mention.raw_text,
+                "properties": properties,
+            }
+            records.append(
+                {
+                    "document_id": mention.source_context.document_id,
+                    "article_number": registry.article_number_for_id(
+                        mention.source_context.article_id
+                    ),
+                    "raw_relation": relation,
+                    "relation": relation,
+                    "endpoint_resolution": {
+                        "head": {
+                            "status": "resolved",
+                            "method": "rule",
+                            "canonical_id": source_id,
+                        },
+                        "tail": {
+                            "status": "resolved",
+                            "method": "rule",
+                            "canonical_id": target_id,
+                        },
+                    },
+                    "schema_valid": True,
+                    "schema_error": None,
+                    "ontology_valid": ontology_ok,
+                    "ontology_error": ontology_error,
+                    "consistency_valid": consistency.valid,
+                    "consistency_error": consistency.error,
+                    "review_reason": consistency.review_reason,
+                    "blocking": consistency.blocking,
+                    "confidence": None,
+                }
+            )
+    return records
+
+
+def _structural_type_from_id(node_id: str) -> str | None:
+    if re.search(r"_cl[^_]+_p[^_]+$", node_id):
+        return "Point"
+    if re.search(r"_art[^_]+_cl[^_]+$", node_id):
+        return "Clause"
+    if re.search(r"_art[^_]+$", node_id):
+        return "Article"
+    return "Document" if node_id else None
+
+
+def _mark_llm_relations_superseded_by_rules(records: list[dict]) -> None:
+    deterministic_records = [
+        record
+        for record in records
+        if (record.get("relation") or {}).get("properties", {}).get("extraction_method")
+        in {"RULE", "ENTITY_LINKING"}
+    ]
+    for record in records:
+        relation = record.get("relation") or {}
+        properties = relation.get("properties") or {}
+        if (
+            properties.get("extraction_method") != "LLM"
+            or relation.get("relation") != "REFERS_TO"
+        ):
+            continue
+        evidence = _normalize_citation(str(properties.get("citation_text") or ""))
+        for deterministic_record in deterministic_records:
+            deterministic_relation = deterministic_record["relation"]
+            deterministic_properties = deterministic_relation["properties"]
+            deterministic_evidence = _normalize_citation(
+                deterministic_properties["citation_text"]
+            )
+            same_edge = relation.get("head") == deterministic_relation.get(
+                "head"
+            ) and relation.get("tail") == deterministic_relation.get("tail")
+            same_citation = (
+                deterministic_evidence == evidence
+                or deterministic_evidence in evidence
+                or evidence in deterministic_evidence
+            )
+            if same_edge and same_citation:
+                record["superseded_by_deterministic_resolution"] = (
+                    deterministic_properties["reference_bundle_id"]
+                )
+                break
+
+
 def _apply_decision_gate(record: dict) -> dict:
     record = dict(record)
+    if record.get("superseded_by_deterministic_resolution"):
+        record["decision"] = "rejected"
+        record["review_reason"] = "superseded_by_deterministic_resolution"
+        record["blocking"] = False
+        return record
     if not record.get("schema_valid") or not record.get("ontology_valid"):
         record["decision"] = "rejected"
         record["review_reason"] = record.get("review_reason")
@@ -655,6 +1107,15 @@ def _apply_decision_gate(record: dict) -> dict:
     if not record.get("consistency_valid"):
         record["decision"] = "review" if record.get("review_reason") else "rejected"
         record["blocking"] = bool(record.get("blocking", True))
+        return record
+
+    extraction_method = (
+        (record.get("relation") or {}).get("properties", {}).get("extraction_method")
+    )
+    if extraction_method in {"RULE", "ENTITY_LINKING"}:
+        record["decision"] = "accepted"
+        record["review_reason"] = None
+        record["blocking"] = False
         return record
 
     confidence = float(record.get("confidence") or 0.0)
@@ -671,6 +1132,31 @@ def _apply_decision_gate(record: dict) -> dict:
         record["review_reason"] = record.get("review_reason") or "low_confidence"
         record["blocking"] = False
     return record
+
+
+def _apply_atomic_bundle_decisions(records: list[dict]) -> list[dict]:
+    bundles: dict[str, list[dict]] = {}
+    for record in records:
+        properties = (record.get("relation") or {}).get("properties") or {}
+        if properties.get("extraction_method") not in {"RULE", "ENTITY_LINKING"}:
+            continue
+        bundle_id = properties.get("reference_bundle_id")
+        if bundle_id:
+            bundles.setdefault(str(bundle_id), []).append(record)
+
+    for bundle_records in bundles.values():
+        if all(record.get("decision") == "accepted" for record in bundle_records):
+            continue
+        bundle_decision = (
+            "rejected"
+            if any(record.get("decision") == "rejected" for record in bundle_records)
+            else "review"
+        )
+        for record in bundle_records:
+            record["decision"] = bundle_decision
+            record["review_reason"] = "atomic_reference_bundle_validation_failed"
+            record["blocking"] = True
+    return records
 
 
 def _write_jsonl(path: Path, records: list[dict]) -> None:

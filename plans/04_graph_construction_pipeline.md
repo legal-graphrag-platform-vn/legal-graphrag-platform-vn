@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Liên quan đến**: RC2
-> **Depends on**: [legal_ontology.md v1.5.1](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.6.0](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
@@ -144,7 +144,7 @@ stateDiagram-v2
 > **Contract**: LLM chỉ được phép trả về JSON. Các key `entities` và `relations` luôn tồn tại (dù có thể rỗng rỗng). `type` của entity phải nằm trong danh sách Enum (Entity, Concept, Action).
 
 ### 4. Validator & Writer Contract
-> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.5.1. Nếu có lỗi, relation bị drop hoặc raise error.
+> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.6.0. Nếu có lỗi, relation bị drop hoặc raise error.
 > **Writer Guarantee (Neo4j)**: Quá trình MERGE mang tính Idempotent. Việc chạy lại cùng một file JSON 10 lần sẽ không sinh ra duplicate node hay edge nào trong đồ thị.
 
 ### 5. Embedding Contract
@@ -499,7 +499,7 @@ ONTOLOGY_LABEL_MAP = {
 ## Step 4: Ontology Validation
 
 > [!IMPORTANT]
-> Source of truth: `legal_ontology.md` v1.5.1.
+> Source of truth: `legal_ontology.md` v1.6.0.
 > ADR-15: `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j. Numeric precedence/level rules are legacy and must not be used in the current validator.
 > ADR-17: Tất cả relation names dùng active voice.
 

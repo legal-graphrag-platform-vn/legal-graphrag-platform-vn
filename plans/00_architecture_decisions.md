@@ -765,3 +765,33 @@ citation_type + "|" + normalize_citation_text(citation_text)
 - Checkpoint thiếu provider, resolved model hoặc completed timestamp không thể tái sử dụng.
 - Cùng endpoint pair có thể có nhiều `REFERS_TO`, nhưng chỉ khi citation discriminator khác nhau.
 - Gate 4 vẫn bị block cho đến khi artifacts v1.5.1 được regenerate và validate thành công.
+
+---
+
+## ADR-22: Resolver-First Legal References and Method-Aware Provenance
+
+**Ngày**: 2026-07-18
+**Trạng thái**: ACCEPTED
+
+### Decision
+
+Relative structural references are resolved before LLM extraction. The parser owns source hierarchy and source
+coordinates; the resolver owns canonical endpoint identity; the LLM handles only semantic or ambiguous references;
+validators retain final authority over graph persistence.
+
+The graph keeps one semantic relation, `REFERS_TO`. Discovery method is represented by `extraction_method`:
+`RULE`, `ENTITY_LINKING`, or `LLM`. `HYBRID` is not introduced because no canonical flow materializes it.
+Multi-target mentions share a deterministic `reference_bundle_id` and are accepted atomically.
+
+Source coordinates are zero-based, start-inclusive, end-exclusive offsets over Unicode-NFC `source.txt` with LF
+newlines. Rule-resolved relations use resolver checkpoint provenance and never receive fabricated LLM metadata.
+
+Appendix content is preserved as `UnparsedSection` with source provenance but is not persisted to the graph in this
+ontology version.
+
+### Consequences
+
+- Deterministic references no longer depend on LLM output.
+- Existing v1.5.1 decision artifacts are historical and require offline normalization.
+- Parallel citations remain separate graph relationships, while retrieval collapses them for topology/path ranking.
+- Appendix retrieval and reasoning require a separate ontology migration.

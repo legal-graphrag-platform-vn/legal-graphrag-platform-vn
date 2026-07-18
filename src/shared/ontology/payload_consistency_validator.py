@@ -53,7 +53,9 @@ def relation_identity(relation: Mapping) -> str:
     )
 
 
-def deterministic_relation_id(head_id: str, relation_type: str, tail_id: str, discriminator: str | None = None) -> str:
+def deterministic_relation_id(
+    head_id: str, relation_type: str, tail_id: str, discriminator: str | None = None
+) -> str:
     source = "|".join([head_id, relation_type, tail_id, discriminator or ""])
     return hashlib.sha1(source.encode("utf-8")).hexdigest()
 
@@ -65,7 +67,9 @@ def relation_identity_discriminator(relation_type: str, properties: Mapping) -> 
         return str(properties.get("source_article") or "")
     if relation_type == "REFERS_TO":
         citation_type = str(properties.get("citation_type") or "")
-        citation_text = normalize_citation_text(str(properties.get("citation_text") or ""))
+        citation_text = normalize_citation_text(
+            str(properties.get("citation_text") or "")
+        )
         return f"{citation_type}|{citation_text}"
     return ""
 
@@ -83,7 +87,9 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
 
     node_ids = [str(node.get("id", "")) for node in nodes]
     node_counts = Counter(node_ids)
-    duplicate_node_ids = {node_id for node_id, count in node_counts.items() if count > 1}
+    duplicate_node_ids = {
+        node_id for node_id, count in node_counts.items() if count > 1
+    }
     for node_id in sorted(duplicate_node_ids):
         errors.append(f"Duplicate node id: {node_id}")
 
@@ -93,6 +99,7 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
     relation_count_by_type: Counter[str] = Counter()
     degree: Counter[str] = Counter()
     adjacency: dict[str, set[str]] = defaultdict(set)
+    reference_bundles: dict[str, list[Mapping]] = defaultdict(list)
 
     for relation in relations:
         head_id = str(relation.get("head_id", ""))
@@ -111,8 +118,12 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
             errors.append(f"Duplicate relation identity: {identity}")
         seen_relation_identities.add(identity)
 
-        discriminator = relation_identity_discriminator(relation_type, relation.get("properties") or {})
-        expected_relation_id = deterministic_relation_id(head_id, relation_type, tail_id, discriminator)
+        discriminator = relation_identity_discriminator(
+            relation_type, relation.get("properties") or {}
+        )
+        expected_relation_id = deterministic_relation_id(
+            head_id, relation_type, tail_id, discriminator
+        )
         actual_relation_id = (relation.get("properties") or {}).get("relation_id")
         if not actual_relation_id:
             errors.append(f"Missing relation_id for {identity}")
@@ -123,12 +134,39 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
             pair = (node_types.get(head_id), node_types.get(tail_id))
             if pair not in STRUCTURAL_PAIRS:
                 errors.append(f"Invalid CONTAINS chain: {pair[0]} -> {pair[1]}")
+        elif relation_type == "REFERS_TO":
+            bundle_id = str(
+                (relation.get("properties") or {}).get("reference_bundle_id") or ""
+            )
+            if bundle_id:
+                reference_bundles[bundle_id].append(relation)
 
         if head_id in node_types and tail_id in node_types:
             degree[head_id] += 1
             degree[tail_id] += 1
             adjacency[head_id].add(tail_id)
             adjacency[tail_id].add(head_id)
+
+    for bundle_id, bundle_relations in reference_bundles.items():
+        expected_counts = {
+            (relation.get("properties") or {}).get("reference_target_count")
+            for relation in bundle_relations
+        }
+        if len(expected_counts) != 1:
+            errors.append(f"Conflicting reference_target_count for bundle: {bundle_id}")
+            continue
+        expected_count = next(iter(expected_counts))
+        if (
+            not isinstance(expected_count, int)
+            or isinstance(expected_count, bool)
+            or expected_count < 1
+        ):
+            errors.append(f"Invalid reference_target_count for bundle: {bundle_id}")
+        elif len(bundle_relations) != expected_count:
+            errors.append(
+                f"Incomplete reference bundle {bundle_id}: "
+                f"expected {expected_count}, got {len(bundle_relations)}"
+            )
 
     orphan_count = 0
     for node_id, node_type in node_types.items():
@@ -156,7 +194,9 @@ def validate_payload_consistency_or_raise(payload: Mapping) -> PayloadConsistenc
     return report
 
 
-def _connected_component_count(node_ids: Iterable[str], adjacency: Mapping[str, set[str]]) -> int:
+def _connected_component_count(
+    node_ids: Iterable[str], adjacency: Mapping[str, set[str]]
+) -> int:
     unvisited = set(node_ids)
     count = 0
     while unvisited:

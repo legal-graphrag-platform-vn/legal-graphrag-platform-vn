@@ -1,8 +1,8 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.5.1
-> **Frozen date**: 2026-07-12
+> **Version**: 1.6.0
+> **Frozen date**: 2026-07-18
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
 This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
@@ -141,7 +141,7 @@ Only these relation names are current. Relation names use active voice.
 | `REPEALS` | `Document` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
 | `REPLACES` | `Document` | `Document` | `effective_from` | indexed only | yes |
 | `GUIDES` | `Document` | `Document` | none | no | yes, with whitelist |
-| `REFERS_TO` | `Article`, `Clause`, `Point` | `Article`, `Clause`, `Point`, `Document` | `confidence`, `llm_model`, `created_at`, `citation_text`, `citation_type` | no | yes |
+| `REFERS_TO` | `Article`, `Clause`, `Point` | `Article`, `Clause`, `Point`, `Document` | common citation/bundle provenance plus method-specific provenance | no | yes |
 | `DEFINES` | `Article`, `Clause` | `LegalConcept` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REGULATES` | `Article`, `Clause` | `LegalSubject`, `LegalAction` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REQUIRES` | `LegalSubject` | `LegalConcept`; `Obligation` only in runtime/future phase | `confidence`, `llm_model`, `created_at` | no | yes |
@@ -150,7 +150,21 @@ Only these relation names are current. Relation names use active voice.
 
 `REFERS_TO.citation_type` must be one of `DIRECT`, `INDIRECT`, `RANGE`.
 
-Semantic relation provenance is mandatory. The confidence scorer produces `confidence`; the extraction or runtime layer must provide `llm_model` and `created_at` before repository write.
+`REFERS_TO` provenance is method-aware. Common required properties are `citation_text`, `citation_type`,
+`extraction_method`, `created_at`, `reference_bundle_id`, and `reference_target_count`. `extraction_method` is one of `RULE`,
+`ENTITY_LINKING`, or `LLM`; `HYBRID` is intentionally excluded from v1.6.0.
+
+Method-specific requirements:
+
+- `RULE`: `resolver_name`, `resolver_version`, `source_unit_id`, `source_char_start`, `source_char_end`.
+- `ENTITY_LINKING`: `linker_name`, `linker_version`, `source_unit_id`, `source_char_start`, `source_char_end`.
+- `LLM`: `confidence`, `llm_model`, and `checkpoint_id`.
+
+Deterministic and entity-linked bundles bypass confidence scoring only. They still require schema, ontology,
+endpoint, atomic-bundle, and payload consistency validation. A multi-target reference is accepted as a whole or
+not accepted at all.
+
+Other semantic relation provenance is mandatory. The confidence scorer produces `confidence`; the extraction or runtime layer must provide `llm_model` and `created_at` before repository write.
 
 For extracted relations, provenance is immutable evidence from the Article checkpoint:
 
@@ -159,10 +173,16 @@ For extracted relations, provenance is immutable evidence from the Article check
 - `created_at` is the checkpoint `completed_at` normalized to UTC. It records extraction completion time, not legal effective time.
 - Missing checkpoint provenance is a hard validation failure. The normalizer must not invent defaults.
 
+For deterministic references, `created_at` comes from a resolver checkpoint and is reused while the mention
+fingerprint and resolver version remain unchanged. Rule provenance must not be represented by a fake LLM model
+or artificial confidence score.
+
 `REFERS_TO` preserves distinct citations between the same endpoints. Its stable relation identity discriminator is
 `citation_type` plus normalized `citation_text`. Citation normalization uses Unicode NFC, trims leading and trailing
 whitespace, and collapses internal whitespace while preserving Vietnamese text. Mutable provenance (`confidence`,
-`llm_model`, `created_at`) must not participate in relation identity.
+`llm_model`, `created_at`, resolver/linker versions, and extraction method) must not participate in relation
+identity. Retrieval path topology collapses parallel citations by source, relation type, and target while citation
+presentation preserves every distinct relation identity.
 
 ### 3.1 Temporal Relation Direction
 
@@ -325,3 +345,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.4.0 | 2026-07-07 | Rewrote as canonical contract; added validation stack, relation matrix, enforcement boundaries, and legacy alias quarantine | Remove ambiguity between frozen spec, schema bootstrap, and validators |
 | 1.5.0 | 2026-07-10 | Selected BGE-M3/1024 as the primary embedding contract; retained BKAI/768 as an explicit baseline | Model-selection smoke test and ADR-20 |
 | 1.5.1 | 2026-07-12 | Made `REFERS_TO` provenance mandatory and defined citation-based deterministic identity | ADR-21 and Gate 4 evidence review |
+| 1.6.0 | 2026-07-18 | Added resolver-first structural references, atomic bundles, and method-aware `REFERS_TO` provenance | ADR-22 |
