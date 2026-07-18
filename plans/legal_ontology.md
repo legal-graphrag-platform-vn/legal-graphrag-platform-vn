@@ -286,10 +286,10 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 
 `infra/neo4j/init/01_schema_init.cypher` must match this contract:
 
-> **Migration status (2026-07-10)**: ADR-20 and ontology v1.5.0 select
-> BGE-M3/1024. Existing code or databases still configured for BKAI/768 are in a
-> migration state and are not Milestone A compliant. Recreate both vector indexes
-> and re-embed Article/Clause before writing BGE-M3 vectors.
+> **Runtime status (2026-07-17)**: the signed-off pilot schema, indexes, and
+> Article/Clause embeddings use BGE-M3/1024. Any stale or external database still
+> configured for BKAI/768 remains incompatible with this contract and must recreate
+> both vector indexes and re-embed Article/Clause before use.
 
 | Area | Expected state |
 |---|---|

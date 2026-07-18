@@ -1,8 +1,8 @@
 # Detailed Implementation Plan — Neo4j Schema Bootstrap Index Alignment
 
 > Target file: `infra/neo4j/init/01_schema_init.cypher`  
-> Canonical ontology: `plans/legal_ontology.md` v1.5.0
-> Status: v1.4 bootstrap indexes implemented; ADR-20 vector migration to 1024 pending
+> Written against ontology v1.5.0; current authority: `plans/legal_ontology.md` v1.5.1
+> Status: HISTORICAL MIGRATION PLAN; BGE-M3/1024 pilot migration is complete
 
 ---
 

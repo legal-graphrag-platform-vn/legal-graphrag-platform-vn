@@ -1,14 +1,14 @@
 # Detailed Implementation Plan — M3 Runtime Acceptance and Milestone A
 
 > Parent roadmap: `plans/07_implementation_timeline.md` — Phase 1 M3  
-> Current canonical ontology: `plans/legal_ontology.md` v1.5.0  
+> Written against ontology v1.5.0; current authority: `plans/legal_ontology.md` v1.5.1
 > Pipeline contract: `plans/04_graph_construction_pipeline.md`  
 > Dataset contract: `plans/08_dataset_and_scope.md`  
 > Embedding contract: BGE-M3/1024 approved by ADR-20
-> Status: BLOCKED; must pass before Phase 2 retrieval starts
+> Status: HISTORICAL ACCEPTANCE PLAN; pilot signed off, Gate 7/M3-B13 remains open
 > Official blocker register: `06_m3_blocker_register.md`
 
-## Current Status — STOP
+## Historical Status at Plan Creation — STOP
 
 ```text
 Phase 1 M3: BLOCKED

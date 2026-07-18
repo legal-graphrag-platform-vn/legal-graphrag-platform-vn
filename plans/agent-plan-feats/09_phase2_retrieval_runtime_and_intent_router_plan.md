@@ -15,8 +15,8 @@ M3-B13: OPEN
 Milestone A: NOT PASSED
 Phase 2 retrieval development: ALLOWED on current pilot data
 Milestone B acceptance: NOT STARTED
-Answer generation: OUT OF SCOPE
-Backend promotion: OUT OF SCOPE
+Answer generation: IMPLEMENTED UNDER PLAN 11; OUT OF SCOPE OF THIS PLAN
+Backend retrieval integration: IMPLEMENTED UNDER PLAN 10; OUT OF SCOPE OF THIS PLAN
 ```
 
 No implementation, test, pilot metric, or report under this plan may change a
@@ -923,14 +923,18 @@ Stop and do not weaken the contract if:
 Plan status: IMPLEMENTED FOR PILOT DEVELOPMENT
 Retrieval runtime implementation: IMPLEMENTED
 Intent router implementation: IMPLEMENTED
+Runtime contract: retrieval-runtime-v2
+Structured graph-path safety: IMPLEMENTED UNDER PLAN 14
+Multi-hop retrieval: PROTOTYPE
+Multi-hop answer generation: FAIL-CLOSED by default
 Evaluation dataset: APPROVED (30-query pilot development dataset)
-Official pilot development evaluation: NOT STARTED
+Official pilot development evaluation under runtime-v2: NOT STARTED
 3-query smoke: DEVELOPMENT ONLY
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
 Milestone B acceptance: NOT STARTED
-Answer generation: OUT OF SCOPE
-Backend integration: REQUIRES SEPARATE PLAN
+Answer generation: IMPLEMENTED UNDER PLAN 11
+Backend integration: IMPLEMENTED UNDER PLAN 10
 ```
 
 Implementation evidence:
@@ -940,13 +944,18 @@ fast tests: 220 passed, 6 integration tests deselected
 pilot read-only retrieval integration: 1 passed; legal/embedding digests unchanged
 UUID fixture mechanics integration: 1 passed; guarded cleanup
 runtime CLI smoke: passed against disposable Neo4j
-runtime-v1 development evaluation: 3 supported cases, 0 unsupported
+runtime-v1 development evaluation: SUPERSEDED BY runtime-v2 contract migration
+runtime-v2 targeted regression tests: PASS
+runtime-v2 disposable Neo4j integration: NOT RUN
+runtime-v2 official evaluation: NOT STARTED
 Recall@5: 0.6011904762
 MRR: 1.0
 nDCG@5: 0.7846601832
 ```
 
-The balanced 30-query dataset now has human-approved intent, graded gold
+The metrics above are historical runtime-v1 development evidence and must not be
+used as runtime-v2 acceptance evidence. The balanced 30-query dataset has
+human-approved intent, graded gold
 relevance, capability expectations, graph paths, hierarchy relations, and
 temporal evidence. Official evaluation remains `NOT STARTED` until a clean
 source commit and official-candidate artifact verification exist. Full profile

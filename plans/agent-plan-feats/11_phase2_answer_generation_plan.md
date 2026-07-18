@@ -922,11 +922,13 @@ Stop and report instead of weakening validation when:
 ## 30. Completion Status Template
 
 ```text
-Answer generation implementation: IMPLEMENTED / NOT IMPLEMENTED
-Backend chat integration: IMPLEMENTED / NOT IMPLEMENTED
-Hard citation/grounding tests: PASS / FAIL
-Real-provider smoke: PASS / FAIL / NOT RUN
-Pilot answer evaluation: PASS / FAIL / NOT RUN
+Answer generation implementation: IMPLEMENTED
+Backend chat integration: IMPLEMENTED
+Hard citation/grounding tests: PASS
+Retrieval contract: retrieval-runtime-v2
+Multi-hop answer generation: FAIL-CLOSED WITHOUT TRUSTED GRAPH REQUIREMENT
+Runtime-v2 real-provider smoke: NOT RUN
+Runtime-v2 pilot answer evaluation: NOT STARTED
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
 Milestone B acceptance: NOT STARTED
@@ -949,7 +951,7 @@ resume four-document Gate 7 corpus
 Implementation completion alone must not be presented as final project or
 Milestone B completion.
 
-## 32. Implementation Result (2026-07-14)
+## 32. Historical Implementation Result (runtime-v1, 2026-07-14)
 
 ```text
 Answer generation implementation: IMPLEMENTED
@@ -980,3 +982,27 @@ Implemented contracts:
 
 This implementation result is development evidence only. Human pilot QA review,
 the four-document Gate 7 corpus, and milestone evidence remain incomplete.
+
+## 33. Current Alignment (runtime-v2, 2026-07-17)
+
+Plan 14 upgrades retrieval graph paths to canonical directed `GraphEdge` records,
+projects relationship temporal metadata, and removes temporal-invalid paths
+before generation. Answer generation now treats ordinary multi-hop requests as
+fail-closed unless retrieval supplies a trusted `GraphReasoningRequirement`.
+
+```text
+Answer generation implementation: IMPLEMENTED
+Backend chat integration: IMPLEMENTED
+Context compaction: IMPLEMENTED UNDER PLAN 13
+Graph-path safety: IMPLEMENTED UNDER PLAN 14
+Runtime-v2 targeted tests: PASS
+Runtime-v2 real-provider smoke: NOT RUN
+Runtime-v2 answer evaluation: NOT STARTED
+Gate 7 / M3-B13: OPEN
+Milestone A: NOT PASSED
+Milestone B acceptance: NOT STARTED
+```
+
+The runtime-v1 provider smoke and 8/8 technical pilot result above are historical
+development evidence. They require revalidation before being cited for
+`retrieval-runtime-v2`.

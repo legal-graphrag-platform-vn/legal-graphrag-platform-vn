@@ -23,6 +23,9 @@
 
 ```text
 Retrieval implementation: ACTIVE on the L59_2020 pilot
+Retrieval runtime contract: v2 IMPLEMENTED
+Structured graph-path direction/temporal safety: IMPLEMENTED
+Multi-hop answer generation: FAIL-CLOSED by default
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
 Milestone B acceptance: NOT STARTED
@@ -39,6 +42,8 @@ Theo execution contract tại Plan 09:
 - TUYỆT ĐỐI KHÔNG import từ `src/pipeline/`, `apps/` hay `prototypes/` trong retrieval.
 - Provider cho Intent sẽ được thiết kế chuẩn Interface, không hardcode Gemini (ưu tiên default là DeepSeek).
 - Reranker (`bge-reranker-v2-m3`) là dependency optional, test dùng fake implementation.
+- Structured path, temporal relationship, comparison, and fail-closed multi-hop
+  behavior are governed by Plan 14.
 
 ---
 
@@ -84,11 +89,26 @@ class RetrievedUnit(BaseModel):
     final_score: Optional[float] = None
     citation_label: str
 
+class GraphNodeRef(BaseModel):
+    node_id: str
+    labels: tuple[str, ...]
+    effective_from: Optional[date] = None
+    effective_to: Optional[date] = None
+    legal_status: Optional[str] = None
+    citable_unit_id: Optional[str] = None
+
+class GraphEdge(BaseModel):
+    relation_id: str
+    relation_type: str
+    source_id: str
+    target_id: str
+    effective_from: Optional[date] = None
+    effective_to: Optional[date] = None
+
 class GraphPath(BaseModel):
-    nodes: List[str]
-    relations: List[str]
+    nodes: tuple[GraphNodeRef, ...]
+    edges: tuple[GraphEdge, ...]
     path_description: str
-    is_temporal_valid: bool
 
 class EvidenceItem(BaseModel):
     unit_id: str
@@ -96,7 +116,7 @@ class EvidenceItem(BaseModel):
     matched_text: Optional[str] = None
     score: Optional[float] = None
     source_path_id: Optional[str] = None
-    is_sufficient: bool = False
+    is_eligible: bool = False
 
 class RetrievalContext(BaseModel):
     query: str

@@ -13,14 +13,14 @@
 | Layer | Công Nghệ | Lý Do Chọn | Thay Thế |
 |---|---|---|---|
 | **Graph DB + Vector** | Neo4j 5.11+ Community | Graph + Vector Index native, 1 query cho vector + graph + temporal | ArangoDB |
-| **LLM (main)** | Gemini **2.5** Flash | Cost-effective, hỗ trợ Vietnamese tốt | GPT-4o-mini |
+| **LLM (main)** | Configured Gemini provider; current answer default `gemini-3.1-flash-lite` | Structured output, Vietnamese support, configurable checkpoint | Local/provider alternatives require a separate adapter |
 | **LLM (judge)** | Gemini **2.5** Pro | Evaluation quality cần model mạnh hơn | GPT-4o |
 | **LLM SDK** | `google-genai` | SDK mới (thay `google-generativeai` đã deprecated) | — |
 | **Embedding** | `BAAI/bge-m3` via `FlagEmbedding` | Smoke test tốt hơn BKAI trên query pháp luật doanh nghiệp; multilingual dense vector 1024-dim | BKAI Vietnamese bi-encoder 768-dim baseline |
 | **Hierarchy Parser** | Raw text parser | Khớp với `source.txt` từ crawler; retry/fallback selector nếu crawl lỗi | — |
 | **Framework** | **Custom Pipeline** (không dùng LlamaIndex) | LlamaIndex không có direct support cho cấu trúc hà văn bản pháp luật VN | LlamaIndex |
 | **Backend** | FastAPI | Async, OpenAPI docs tự động | Flask |
-| **Frontend** | TBD (React hoặc Gradio — chốt sau Q2a) | Phụ thuộc scope | Next.js |
+| **Frontend** | Next.js 16 + React 19 | Pilot chat, citation, graph explorer, typed backend contracts | — |
 | **Graph UI** | Cytoscape.js / pyvis | Chuyên cho graph | D3.js |
 | **Evaluation** | RAGAS | Industry standard cho RAG evaluation | DeepEval |
 
@@ -31,7 +31,8 @@
 ### Neo4j
 
 ```yaml
-# docker-compose.yml
+# Generic development example. The guarded disposable M3 runtime uses
+# infra/docker-compose.m3.yml with HTTP 7475 and Bolt 7688.
 neo4j:
   image: neo4j:5.x-community
   ports:
@@ -133,12 +134,12 @@ This table is the canonical model-selection map for implementation and thesis de
 | Component | Primary | Candidate / Fallback | Future fine-tune? | Why this fits |
 |---|---|---|---|---|
 | Information Extraction | Gemini Flash Lite latest structured output | Gemini Pro for hard cases; GPT-4o-mini; Qwen3-8B local | Optional LoRA local LLM | Available structured output, Vietnamese legal text handling, and low batch cost |
-| Answer Generation | Gemini 2.5 Flash | Gemini 2.5 Pro for hard cases; Qwen3-8B local | Not priority | Generation is grounded by retrieved graph evidence; fine-tuning is less important than citation discipline |
+| Answer Generation | Configured Gemini adapter; current default `gemini-3.1-flash-lite` | Stronger Gemini checkpoint or local model through a separate adapter | Not priority | Generation is grounded by retrieved graph evidence; fine-tuning is less important than citation discipline |
 | Judge / Evaluation | Gemini 2.5 Pro | GPT-4o; Gemini Flash smoke test | No | Judge should be stronger and more stable than the default generation model |
 | Embedding | `BAAI/bge-m3` via `FlagEmbedding`, 1024-dim | BKAI Vietnamese bi-encoder 768-dim baseline; `Qwen3-Embedding-0.6B` future candidate | Yes, after query-positive pairs exist | BGE-M3 won the project smoke test on Vietnamese enterprise-law queries; BKAI is retained for ablation |
-| Intent Classifier | Gemini 2.5 Flash few-shot | PhoBERT-base-v2; XLM-R; BamiBERT | Yes, PhoBERT fine-tune | Six-class intent task can start with few-shot LLM; fine-tune only after labeled query set exists |
-| Temporal Extractor | Rule-based date regex/parser + Gemini 2.5 Flash fallback | Gemini 2.5 Pro for hard cases; BERT classifier | Not priority | Legal temporal expressions are often deterministic; LLM fallback handles ambiguous wording |
-| Reranker | Not enabled in M3 | `bge-reranker-v2-m3`; `Qwen3-Reranker-0.6B`; `gte-multilingual-reranker-base` | Yes, after retrieval dataset exists | Reranker belongs to Phase 2.5 ablation, not Neo4j Writer M3 |
+| Intent Router | Deterministic six-intent rules + temporal parser | PhoBERT/XLM-R future classifier after labeled data exists | Yes, after reviewed intent labels exist | Current routing must be reproducible and must not require an LLM call |
+| Temporal Extractor | Deterministic date/expression parser | Future reviewed parser/model for unresolved expressions | Not priority | Explicit temporal expressions fail closed when they cannot be resolved; runtime does not silently downgrade |
+| Reranker | Optional `BAAI/bge-reranker-v2-m3` via `FlagReranker`, disabled by default | `Qwen3-Reranker-0.6B`; `gte-multilingual-reranker-base` | Yes, after retrieval dataset exists | Phase 2 adapter is implemented; M3 graph construction does not depend on it |
 | BM25 / Full-text | Neo4j fulltext index | External BM25 only if Neo4j fulltext is insufficient | No | Not a neural model; used as keyword retrieval/fusion or optional ablation |
 
 ### Training Priority
@@ -150,31 +151,20 @@ This table is the canonical model-selection map for implementation and thesis de
 
 ---
 
-### FastAPI Backend Structure
+### Current Application Structure
 
 ```
-backend/
-├── main.py
-├── api/
-│   ├── routes/
-│   │   ├── query.py      # POST /query
-│   │   ├── graph.py      # GET /graph/{node_id}
-│   │   └── admin.py      # POST /ingest
-│   └── models.py
-├── core/
-│   ├── parser/           # Raw text Hierarchy Parser
-│   ├── extraction/       # LLM Extraction
-│   ├── validation/       # Ontology + Schema Validator
-│   ├── retrieval/        # Hybrid Retriever
-│   │   ├── vector.py
-│   │   ├── graph.py
-│   │   └── traversal_policy.py
-│   ├── generation/       # Answer Generator
-│   └── evaluation/       # RAGAS integration
-├── graph/
-│   ├── neo4j_client.py
-│   └── queries.py        # Cypher query templates
-└── config.py
+apps/
+├── backend/              # FastAPI routes, DTO mapping, services, lifecycle
+└── frontend/             # Next.js 16 / React 19 pilot UI
+
+src/
+├── application/          # retrieval/answer composition roots
+├── retrieval/            # routing, channels, fusion, runtime, evaluation
+├── generation/           # projection, sufficiency, prompting, grounding
+├── infrastructure/       # Neo4j, embedding, reranker, Gemini adapters
+├── pipeline/             # crawl, parse, extract, validate, write, reports
+└── shared/               # ontology and public cross-layer contracts
 ```
 
 ---
@@ -231,7 +221,7 @@ pip install pytest pytest-asyncio black ruff
 | Model | Usage | Estimate/Month |
 |---|---|---|
 | Gemini Flash Lite latest | Extraction (20 docs, two-pass entity + relation extraction, rule-based confidence) | Recalculate from measured Milestone A usage |
-| Gemini 2.5 Flash | Query answering (dev/test) | ~$3-10 |
+| Configured Gemini answer model | Query answering (dev/test) | Recalculate from measured pilot usage |
 | Gemini 2.5 Pro | Evaluation (RAGAS judge) | ~$5-15 |
 | **Tổng** | | **~$10-30/month** |
 

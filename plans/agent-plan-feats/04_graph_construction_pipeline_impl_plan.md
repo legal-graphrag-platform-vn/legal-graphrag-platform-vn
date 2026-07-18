@@ -1,8 +1,8 @@
 # Detailed Implementation Plan — Graph Construction Pipeline
 
 > Target spec: `plans/04_graph_construction_pipeline.md`  
-> Canonical ontology: `plans/legal_ontology.md` v1.5.0
-> Status: implemented M3 contract; paths updated after monorepo package flattening
+> Written against ontology v1.5.0; current authority: `plans/legal_ontology.md` v1.5.1
+> Status: HISTORICAL IMPLEMENTATION PLAN; use Plans 06 blocker register and 08 for current M3 acceptance
 
 ---
 

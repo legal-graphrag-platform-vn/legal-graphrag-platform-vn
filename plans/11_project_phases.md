@@ -3,6 +3,11 @@
 > **Mô hình**: Phase Gate — mỗi phase chỉ được bắt đầu khi phase trước đã pass toàn bộ Exit Criteria.  
 > **Triết lý**: Thà chậm mà chắc hơn code nhanh rồi sửa lại từ đầu.
 
+> **Current governance (2026-07-17)**: implementation/prototyping on signed-off
+> pilot data may proceed before the four-document corpus gate closes. Acceptance
+> remains strictly gated: Gate 7 and M3-B13 are OPEN, Milestone A is NOT PASSED,
+> and no later milestone may be reported as passed.
+
 ---
 
 ## Tổng Quan
@@ -14,6 +19,18 @@ Foundation  ───► Graph Build ───► Retrieval   ───► Gener
 
                   RC2               RC3 + RC4         RC4 + XAI        RC5              Demo             Luận văn
 ```
+
+### Current Status Snapshot
+
+| Phase | Implementation status | Acceptance status |
+|---|---|---|
+| Phase 0 — Foundation | Complete for current pilot stack | Complete |
+| Phase 1 — Graph Build | L59_2020 pilot signed off | Milestone A blocked by Gate 7/M3-B13 |
+| Phase 2 — Retrieval | Runtime-v2 implemented on pilot | Milestone B not started; official v2 evaluation pending |
+| Phase 3 — Generation | Answer generation, grounding, and context compaction implemented | Milestone C not passed; runtime-v2 QA rerun pending |
+| Phase 4 — Evaluation | Development dataset/tooling exists | Official evaluation not started |
+| Phase 5 — UI & Deployment | Pilot FastAPI/Next.js UI implemented | Deployment acceptance not passed |
+| Phase 6 — Report & Defense | Planning only | Not started |
 
 
 ---
@@ -101,12 +118,12 @@ Xây dựng Unified Hybrid Retrieval Pipeline: semantic search → intent-based 
 
 | Task | Mô Tả | Người Phụ Trách |
 |---|---|---|
-| P2-1 | Intent Classifier: 6 classes với few-shot LLM | AI/ML |
+| P2-1 | Deterministic Intent Router: 6 classes, explicit temporal precedence | AI/ML |
 | P2-2 | Traversal Policy table: intent → relations → depth | AI/ML + Backend |
-| P2-3 | Neo4jRetriever: unified Cypher (vector + traversal + temporal) | Backend |
-| P2-4 | Temporal filter logic: time-travel query theo `effective_from/to` | Backend |
-| P2-5 | RetrieverInterface: abstract class + mock cho testing | Backend |
-| P2-6 | Context assembler: merge retrieved nodes thành coherent context | Backend |
+| P2-3 | Retrieval runtime: vector/full-text seed channels, RRF, one graph expansion, final RRF | Backend |
+| P2-4 | Temporal validation: node and directed relationship intervals | Backend |
+| P2-5 | Retrieval ports + application composition root + test fakes | Backend |
+| P2-6 | RetrievalContext builder với citation, source attribution và structured graph paths | Backend |
 | P2-7 | 20 test queries cho intent classification (annotated) | Data |
 | P2-8 | 10 temporal test queries (annotated với expected version) | Data |
 
@@ -268,13 +285,15 @@ Sau mỗi phase, điền vào bảng này:
 
 | Phase | Bắt Đầu | Kết Thúc | # Criteria Pass | # Criteria Fail | Ghi Chú |
 |---|---|---|---|---|---|
-| Phase 0 | ? | ? | ? / 6 | ? | |
-| Phase 1 | ? | ? | ? / 8 | ? | |
-| Phase 2 | ? | ? | ? / 7 | ? | |
-| Phase 3 | ? | ? | ? / 5 | ? | |
-| Phase 4 | ? | ? | ? / 7 | ? | |
-| Phase 5 | ? | ? | ? / 5 | ? | |
-| Phase 6 | ? | ? | ? / 5 | ? | |
+| Phase 0 | Completed | Completed | Current foundation accepted | 0 known | Pilot foundation |
+| Phase 1 | Completed on pilot | Open on corpus | Pilot criteria passed | Gate 7 open | M3-B13 blocks Milestone A |
+| Phase 2 | Implemented on pilot | — | Not signed off | Official v2 evaluation pending | Milestone B not started |
+| Phase 3 | Implemented on pilot | — | Not signed off | Runtime-v2 QA pending | Milestone C not passed |
+| Phase 4 | In development | — | Not signed off | Official evaluation pending | Development evidence only |
+| Phase 5 | Pilot implemented | — | Not signed off | Deployment acceptance pending | FastAPI + Next.js pilot |
+| Phase 6 | Not started | — | 0 / 5 | 5 | Report/defense work pending |
 
-> **Quy tắc**: Nếu fail bất kỳ criterion nào trong một phase → **không được chuyển sang phase tiếp theo**.  
-> Fix xong, verify lại, rồi mới tiếp tục.
+> **Quy tắc acceptance**: Nếu fail bất kỳ criterion nào trong một phase thì
+> milestone của phase đó không được pass. Pilot implementation ở phase sau có thể
+> tiếp tục để phục vụ nghiên cứu, nhưng phải giữ nhãn development và không được
+> dùng để đóng milestone trước.
