@@ -1,18 +1,20 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt .
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app:/app/apps/backend \
+    PATH=/app/.venv/bin:$PATH
 
-# Install dependencies and a production server (gunicorn)
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+COPY --from=ghcr.io/astral-sh/uv:0.8.22 /uv /uvx /bin/
 
-# Copy application code
-COPY . .
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --group embedding --group llm --no-install-project
 
-# Mở port 5000 cho Flask
-EXPOSE 5000
+COPY src ./src
+COPY apps/backend ./apps/backend
 
-# Chạy ứng dụng qua gunicorn thay vì dev server
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--app-dir", "apps/backend", "--host", "0.0.0.0", "--port", "8000"]
