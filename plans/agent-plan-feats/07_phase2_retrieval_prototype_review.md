@@ -2,10 +2,9 @@
 
 > Reviewed: 2026-07-12
 > Parent plan: `07_phase2_graphrag_retrieval_plan.md`
-> Canonical ontology: `plans/legal_ontology.md` v1.5.0
+> Written against ontology v1.5.0; current authority: `plans/legal_ontology.md` v1.5.1
 > Canonical retrieval contract: `plans/05_graphrag_retrieval.md`
-> Status: ACTIVE FIX REGISTER; implementation is allowed on the signed-off
-> `L59_2020` pilot while Gate 7 and M3-B13 remain open.
+> Status: HISTORICAL PROTOTYPE REVIEW; current runtime contract is Plans 09 and 14.
 
 ## Status
 

@@ -703,10 +703,10 @@ before official evaluation is completed.
 ## 23. Completion Status Template
 
 ```text
-Backend retrieval integration: IMPLEMENTED / NOT IMPLEMENTED
-Fast tests: PASS / FAIL
-Read-only integration tests: PASS / FAIL / NOT RUN
-Answer generation: NOT STARTED
+Backend retrieval integration: IMPLEMENTED
+Fast tests: PASS
+Runtime-v2 read-only integration tests: NOT RUN
+Answer generation: IMPLEMENTED UNDER PLAN 11
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
 Milestone B acceptance: NOT STARTED
@@ -720,7 +720,7 @@ boundary that can return a validated `RetrievalContext` for a request. It does
 not require Gate 7 to be closed for pilot development, but no final milestone
 claim is allowed while Gate 7/M3-B13 remain open.
 
-## 25. Implementation Result (2026-07-14)
+## 25. Historical Implementation Result (runtime-v1, 2026-07-14)
 
 ```text
 Backend retrieval integration: IMPLEMENTED
@@ -732,7 +732,7 @@ git diff --check: PASS
 Source commit: the commit containing this implementation result
 Development evidence: results/retrieval/backend_retrieval_integration_development.md
 
-Answer generation: NOT STARTED
+Answer generation: IMPLEMENTED LATER UNDER PLAN 11
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
 Milestone B acceptance: NOT STARTED
@@ -741,3 +741,21 @@ Milestone B acceptance: NOT STARTED
 This result permits Plan 11 pilot implementation against the stable
 `RetrievalApplicationPort.retrieve_context()` boundary. It does not promote the
 backend to production, close corpus gates, or constitute Milestone B evidence.
+
+## 26. Current Alignment (runtime-v2, 2026-07-17)
+
+```text
+Backend retrieval integration: IMPLEMENTED
+Answer generation: IMPLEMENTED UNDER PLAN 11
+Retrieval contract: retrieval-runtime-v2
+Graph-path direction and temporal safety: IMPLEMENTED UNDER PLAN 14
+Runtime-v2 read-only Neo4j regression: NOT RUN
+Official runtime-v2 evaluation: NOT STARTED
+Gate 7 / M3-B13: OPEN
+Milestone A: NOT PASSED
+Milestone B acceptance: NOT STARTED
+```
+
+The runtime-v1 test counts above remain historical evidence. They must not be
+used as runtime-v2 acceptance without rerunning the read-only integration and
+evaluation workflows against the current contract.

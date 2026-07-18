@@ -59,9 +59,11 @@ User Query (Vietnamese NL)
 
 ## 1. NLU Processing
 
-### Intent Classifier
+### Intent Router
 
-> Model choice: Gemini 2.5 Flash few-shot is the primary implementation path. PhoBERT-base-v2, XLM-R, and BamiBERT are ablation/fine-tune candidates only after an intent-labeled dataset exists. See `10_tech_stack.md` → Model Candidate Matrix.
+The current runtime uses a deterministic six-intent router with stable decision
+reason codes. It does not call an LLM. A learned classifier remains a future
+ablation/fine-tune candidate after a reviewed intent dataset exists.
 
 **6 Intent Classes:**
 
@@ -76,52 +78,24 @@ INTENT_CLASSES = [
 ]
 ```
 
-**Few-shot Prompt:**
-
-```
-Phân loại intent của câu hỏi pháp lý sau:
-
-Classes:
-- factual: Hỏi về quy định, điều kiện cụ thể
-- validity: Hỏi về tình trạng hiệu lực của văn bản/điều luật
-- hierarchy: Hỏi về văn bản hướng dẫn/thực thi
-- comparison: So sánh quy định giữa các thời điểm
-- definition: Hỏi định nghĩa khái niệm pháp lý
-- multi_hop: Câu hỏi cần nhiều bước suy luận
-
-Ví dụ:
-Q: "Điều kiện thành lập công ty TNHH là gì?" → factual
-Q: "NĐ 78/2015 còn hiệu lực không?" → validity
-Q: "Nghị định nào hướng dẫn Luật DN 2020?" → hierarchy
-Q: "Quy định vốn điều lệ năm 2019 khác bây giờ như thế nào?" → comparison
-Q: "Vốn điều lệ là gì?" → definition
-Q: "Thủ tục mà nghị định hướng dẫn điều X quy định ra sao?" → multi_hop
-
-Câu hỏi: "{query}"
-Intent:
-```
+Router output includes `intent`, `decision_reason_code`, `decision_reason`,
+`force_intent_used`, `temporal_source`, selected channels, and required
+capability. `force_intent` overrides classification only; it never bypasses
+request, temporal, filter, or capability validation.
 
 ### Temporal Extractor
 
-> Model choice: rule-based date parser is primary; Gemini 2.5 Flash structured output is fallback for ambiguous temporal wording. See `10_tech_stack.md` → Model Candidate Matrix.
+The primary and current implementation is a deterministic date/expression
+parser with an injected `Clock`. Explicit temporal wording that cannot be
+resolved raises `TemporalRoutingError`; the runtime does not silently downgrade
+the request or invoke an untracked model fallback.
 
-```python
-TEMPORAL_EXTRACTION_PROMPT = """
-Trích xuất thông tin thời gian từ câu hỏi sau (nếu có):
+Temporal precedence is:
 
-Câu hỏi: "{query}"
-
-Trả về JSON:
-{{
-  "has_temporal": boolean,
-  "expression": string | null,   // "năm 2022", "trước 2020", "hiện tại"
-  "resolved_from": "YYYY-MM-DD" | null,
-  "resolved_to": "YYYY-MM-DD" | null,
-  "granularity": "year" | "month" | "day" | "current" | null
-}}
-
-Ngày hiện tại: {today}
-"""
+```text
+explicit request query_date
+> parsed date expression in query
+> injected current date only for explicit current-validity wording
 ```
 
 ---
@@ -163,9 +137,13 @@ TRAVERSAL_POLICIES = {
         "follow_temporal": False
     },
     "multi_hop": {
-        "relations": ["ALL"],  # Tất cả relations
+        "relations": [
+            "ISSUED_BY", "CONTAINS", "GUIDES", "REFERS_TO",
+            "AMENDS", "REPEALS", "REPLACES", "DEFINES",
+            "REGULATES", "REQUIRES"
+        ],
         "max_depth": 3,
-        "follow_temporal": True
+        "direction": "both"
     }
 }
 ```
@@ -200,31 +178,21 @@ Temporal relation direction is active voice: newer legal units point to older af
 ## 3. Context Builder Output Format
 
 ```python
-@dataclass
 class RetrievalContext:
-    # Text chunks
-    chunks: list[TextChunk]
-    
-    # Graph paths (for XAI)
+    contract_version: Literal["retrieval-runtime-v2"]
+    query: str
+    intent: IntentType
+    strategy: RetrievalStrategyType
+    temporal: TemporalQuery
+    filters_applied: RetrievalFilters
+    retrieved_units: list[RetrievedUnit]
     graph_paths: list[GraphPath]
-    
-    # Metadata
-    temporal_context: dict
-    intent: str
+    evidence: list[EvidenceItem]
+    reasoning_requirement: GraphReasoningRequirement | None
+    executed_channels: list[RetrievalChannel]
+    retrieval_mode: str
+    metrics: dict[str, Any]
 
-@dataclass
-class TextChunk:
-    id: str                    # e.g., "ldn_2020_art46_cl1"
-    content: str               # Full text of clause
-    source: str                # "Luật Doanh nghiệp 2020"
-    article_number: int        # 46
-    effective_from: date
-    effective_to: date | None
-    relevance_score: float
-    source_url: str | None       # optional when persisted by the corpus
-    deep_link: str               # /documents/{document_id}/units/{unit_id}
-
-@dataclass
 class GraphNodeRef:
     node_id: str
     labels: tuple[str, ...]
@@ -233,7 +201,6 @@ class GraphNodeRef:
     legal_status: str | None
     citable_unit_id: str | None
 
-@dataclass
 class GraphEdge:
     relation_id: str
     relation_type: str
@@ -242,7 +209,6 @@ class GraphEdge:
     effective_from: date | None
     effective_to: date | None
 
-@dataclass
 class GraphPath:
     nodes: tuple[GraphNodeRef, ...]  # traversal order
     edges: tuple[GraphEdge, ...]     # canonical relationship direction
@@ -264,42 +230,14 @@ nodes are not added to the vector index.
 
 ---
 
-## 4. Answer Generation Prompt
+## 4. Answer Generation Boundary
 
-```python
-SYSTEM_PROMPT = """
-Bạn là chuyên gia tư vấn pháp luật doanh nghiệp Việt Nam.
-Trả lời câu hỏi chỉ dựa trên các điều luật được cung cấp.
-KHÔNG được suy đoán hoặc bổ sung thông tin ngoài context.
-
-Nếu câu hỏi liên quan đến thời điểm cụ thể, chỉ sử dụng các điều luật 
-có hiệu lực tại thời điểm đó.
-
-Định dạng trả lời (JSON):
-{
-  "answer": "Câu trả lời đầy đủ...",
-  "citations": ["ldn_2020_art46_cl1", "ldn_2020_art29"],  // naming: legal_ontology.md §4
-  "reasoning_path": [
-    {"from": "ldn_2020_art46", "relation": "REFERS_TO", "to": "ldn_2020_art29",  // ADR-17
-     "explanation": "Điều 46 viện dẫn quy định vốn tại Điều 29"}
-  ],
-  "temporal_note": "Câu trả lời áp dụng cho giai đoạn 2021-2024",
-  "confidence": 0.92,
-  "cannot_answer": false
-}
-"""
-
-USER_PROMPT = """
-Câu hỏi: {query}
-Thời điểm hỏi: {temporal_context}
-
-Các điều luật liên quan:
-{text_chunks}
-
-Đường suy luận trong đồ thị tri thức:
-{graph_paths}
-"""
-```
+Answer generation is governed by Plans 11 and 13. It consumes only a validated
+and projected `RetrievalContext`, emits structured claims with citation IDs, and
+must pass grounding validation before any response is returned or streamed.
+The provider cannot cite omitted evidence or invent graph paths. Multi-hop
+generation fails closed unless context carries a trusted explicit
+`GraphReasoningRequirement`.
 
 ---
 

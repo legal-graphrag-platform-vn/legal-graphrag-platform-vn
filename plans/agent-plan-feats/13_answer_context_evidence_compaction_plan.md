@@ -346,11 +346,11 @@ source legal unit
 + complete verified graph path
 ```
 
-Generation must not infer a hop requirement from query text. It enforces the
-graph requirement already represented by retrieval context. Until retrieval
-context carries an explicit `minimum_hops`/branching requirement, this migration
-must preserve the current verified path contract and must not claim that every
-`MULTI_HOP` case has at least two edges.
+Generation must not infer a hop requirement from query text. Retrieval context
+now supports a trusted `GraphReasoningRequirement` with explicit hop/branching
+requirements. The ordinary router and public `force_intent` path do not create
+that trusted requirement, so multi-hop answer generation remains fail-closed by
+default rather than claiming unverified multi-edge reasoning.
 
 The compactor still enforces atomic path projection: if a selected path is
 `A -> B -> C`, all available legal-unit nodes `A`, `B`, `C` and the complete path
@@ -875,12 +875,14 @@ measured change after this deterministic contract is stable.
 ## 24. Completion Status
 
 ```text
-Plan status: IMPLEMENTED, READY FOR CODE REVIEW
+Plan status: IMPLEMENTED, ALIGNED WITH RETRIEVAL-RUNTIME-V2
 Implementation: COMPLETE
 Context contract version: answer-context-v2
 Deterministic verification: PASS
 Provider/model contract: unchanged
 Retrieval ranking contract: unchanged
+Graph-path safety contract: Plan 14
+Multi-hop answer generation: fail-closed without trusted graph requirement
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
 Milestone B acceptance: NOT STARTED

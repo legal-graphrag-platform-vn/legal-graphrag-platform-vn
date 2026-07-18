@@ -1,6 +1,6 @@
 # Implementation Timeline — Legal GraphRAG
 
-> **Cập nhật**: 2026-07-10
+> **Cập nhật**: 2026-07-17
 > **Đánh giá**: Research ⭐⭐⭐⭐⭐ | Engineering ⭐⭐⭐⭐☆ | Hoàn thành ⭐⭐⭐⭐☆  
 > **Triết lý**: Ưu tiên giá trị nghiên cứu → Experiment → Portal.
 > **Depends on**: [legal_ontology.md v1.5.1](./legal_ontology.md)
@@ -26,18 +26,20 @@
 ```
 Phase 0 — Foundation          ✅ DONE
 Phase 1 — Pipeline M1+M2      ✅ DONE  (Crawler → Parser → NER → Relation → Validator → Scorer → JSONL)
-Phase 1 — Pipeline M3         ❌ CHƯA  (Neo4j Writer, Embedding)
-Milestone A — Graph Build     ❌ CHƯA
-Phase 2 — Hybrid Retrieval    ❌ CHƯA
+Phase 1 — Pipeline M3 pilot   ✅ SIGNED OFF (L59_2020)
+Gate 7 — Corpus 4 văn bản     ⏳ OPEN (M3-B13)
+Milestone A — Graph Build     ❌ NOT PASSED (chờ Gate 7)
+Phase 2 — Hybrid Retrieval    🟡 IMPLEMENTED ON PILOT (runtime-v2)
 Milestone B — Retrieval       ❌ CHƯA
-Phase 3 — LLM + Citation      ❌ CHƯA
+Phase 3 — LLM + Citation      🟡 IMPLEMENTED ON PILOT; QA acceptance chưa chạy lại
 Milestone C — QA              ❌ CHƯA
-Phase 4 — Evaluation          ❌ CHƯA
+Phase 4 — Evaluation          🟡 DEVELOPMENT DATASET/TOOLING; official evaluation chưa chạy
 Milestone D — Evaluation      ❌ CHƯA
-Phase 5 — Portal              ❌ CHƯA
+Phase 5 — Portal              🟡 PILOT UI/API đã có; deployment acceptance chưa đạt
 ```
 
-**Tiến độ tổng thể**: ~28%
+> Phase 2/3 development trên pilot được phép trong khi Gate 7 còn mở. Trạng thái
+> implementation không đồng nghĩa với Milestone A, B hoặc C đã pass.
 
 ---
 
@@ -46,8 +48,8 @@ Phase 5 — Portal              ❌ CHƯA
 | Module | Mức độ cần | Ghi chú |
 |---|---|---|
 | Crawler + Parser + Extraction | ⭐⭐⭐⭐⭐ | Core RC2 — **Đã xong** |
-| Ontology + Graph Builder | ⭐⭐⭐⭐⭐ | Core RC2 — **M3 cần làm ngay** |
-| Graph Quality Evaluation | ⭐⭐⭐⭐⭐ | Bắt buộc trước khi sang retrieval |
+| Ontology + Graph Builder | ⭐⭐⭐⭐⭐ | Core RC2 — **pilot signed off; corpus còn mở** |
+| Graph Quality Evaluation | ⭐⭐⭐⭐⭐ | Pilot đã có; phải chạy lại ở corpus level |
 | Hybrid Retrieval (Ablation) | ⭐⭐⭐⭐⭐ | Core RC3 |
 | LLM + Citation + Reasoning | ⭐⭐⭐⭐⭐ | Core RC4 |
 | Evaluation (5 levels + Human) | ⭐⭐⭐⭐⭐ | Core RC5 — quan trọng hơn Portal |
@@ -68,7 +70,7 @@ Phase 5 — Portal              ❌ CHƯA
 
 ---
 
-## Phase 1 — M3: Neo4j Writer + Embedding ❌ → Milestone A
+## Phase 1 — M3: Neo4j Writer + Embedding 🟡 Pilot Complete, Corpus Open
 
 **Mục tiêu**: Đưa JSONL vào Neo4j, sinh embedding, hoàn thiện Knowledge Graph.
 
@@ -78,33 +80,28 @@ Phase 5 — Portal              ❌ CHƯA
   - Map JSONL → Cypher `MERGE` (document, article, clause, point nodes)
   - Tạo relationships từ validated relations
   - Gắn `effective_from`, `effective_to`, `legal_status`, `doc_type` đúng schema
-- [ ] Chạy writer với LDN2020 JSONL output
-- [ ] Verify: `MATCH (a:Article) RETURN count(a)` → đúng 218
+- [x] Chạy writer idempotently với `L59_2020`
+- [x] Verify pilot có đúng 218 Article và projection hash khớp payload
 
 ### Tuần 2: Embedding Generator + Vector Index
 
-- [ ] Migrate primary embedding contract theo ADR-20: `BAAI/bge-m3` via `FlagEmbedding`, 1024-dim
+- [x] Migrate primary embedding contract theo ADR-20: `BAAI/bge-m3` via `FlagEmbedding`, 1024-dim
 - [ ] Giữ `bkai-foundation-models/vietnamese-bi-encoder`, 768-dim làm baseline/ablation; không dùng chung vector index với BGE-M3
 - [x] Implement `src/pipeline/embedding/embedding_generator.py` and `src/infrastructure/neo4j/embedding_writer.py` — batch processing, dimension validation
-- [ ] Đồng bộ `EMBEDDING_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_DIM` với ontology và Neo4j schema
-- [ ] Drop/recreate vector indexes 1024-dim và re-embed toàn bộ Article/Clause nếu DB đã dùng schema 768 cũ
-- [ ] Load vào Neo4j vector index (`article_embedding`, `clause_embedding`)
-- [ ] Verify: `CALL db.index.vector.queryNodes(...)` trả về kết quả
+- [x] Đồng bộ `EMBEDDING_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_DIM` với ontology và Neo4j schema
+- [x] Drop/recreate vector indexes 1024-dim và re-embed pilot Article/Clause
+- [x] Load vào Neo4j vector index (`article_embedding`, `clause_embedding`)
+- [x] Verify pilot vector smoke trên Article/Clause
 
 ### Tuần 3: Graph Quality Evaluation ← *Thêm mới — không bỏ qua*
 
 > [!IMPORTANT]
 > Không nhảy ngay sang retrieval. Phải đo chất lượng graph trước.
 
-- [ ] Đo **Entity count** theo từng label (Document, Article, Clause, Point, LegalConcept, LegalSubject, LegalAction)
-- [ ] Đo **Relation count** theo từng type (CONTAINS, AMENDS, ...)
-- [ ] Đo **Ontology violation rate** — số relations bị reject / tổng relations extracted
-- [ ] Đo **Coverage** — % Điều có ít nhất 1 relation ngoài CONTAINS
-- [ ] Đo **Duplicate rate** — node trùng ID
-- [ ] Đo **Orphan nodes** — node không có edge nào
-- [ ] Đo **Graph density** và **Average degree**
-- [ ] Đo **Connected components** — graph có connected không hay bị tách rời
-- [ ] Viết báo cáo Graph Quality (đưa vào luận văn Chương 4)
+- [x] Đo pilot counts, relation breakdown, ontology violations và embedding coverage từ Neo4j
+- [x] Đo duplicate IDs, relation identities, orphan metrics và connected components trên pilot
+- [x] Viết pilot graph-quality/evidence report
+- [ ] Chạy lại các metric ở phạm vi corpus 4 văn bản và reconcile external references
 
 ### 🏁 Milestone A — Graph Build Success
 
@@ -118,7 +115,7 @@ Phase 5 — Portal              ❌ CHƯA
 
 ---
 
-## Phase 2 — Hybrid Retrieval ❌ → Milestone B
+## Phase 2 — Hybrid Retrieval 🟡 Implemented on Pilot → Milestone B Pending
 
 **Mục tiêu**: RC3 — Temporal Ontology-based Hybrid Graph Retrieval.
 
@@ -143,13 +140,17 @@ Evidence Verifier
 
 ### Triển khai
 
-- [ ] **2.1** Intent Classifier: phân loại 6 lớp `factual / validity / hierarchy / comparison / definition / multi_hop`
-- [ ] **2.1** Vector Retriever: `queryNodes` trên `article_embedding` / `clause_embedding`
-- [ ] **2.2** Graph Expansion: từ vector results, traverse `CONTAINS`, `AMENDS`, `REFERS_TO` để lấy context liên quan
-- [ ] **2.3** Temporal Filter: Cypher filter theo `effective_from` / `effective_to` tại thời điểm T trong query
-- [ ] **2.4** BM25 Fulltext fusion (Neo4j fulltext index đã có trong schema)
-- [ ] **2.5** Cross Encoder Reranker (default candidate: `bge-reranker-v2-m3`; ablation candidate: `Qwen3-Reranker-0.6B`)
-- [ ] Evidence Verifier: check retrieved context chứa evidence thực
+- [x] **2.1** Intent Router: phân loại 6 lớp `factual / validity / hierarchy / comparison / definition / multi_hop`
+- [x] **2.1** Vector Retriever: `queryNodes` trên `article_embedding` / `clause_embedding`
+- [x] **2.2** Graph Expansion: structured `GraphNodeRef`/`GraphEdge`, giữ canonical direction
+- [x] **2.3** Temporal Filter: kiểm tra node và relationship validity trước `RetrievalContext`
+- [x] **2.4** BM25 full-text + deterministic two-stage RRF fusion
+- [x] **2.5** Optional `bge-reranker-v2-m3` adapter, disabled unless enabled by profile
+- [x] Backend retrieval API và answer-generation pipeline trên pilot
+- [ ] Chạy lại official retrieval/answer evaluation theo `retrieval-runtime-v2`
+- [ ] Chạy read-only disposable-Neo4j integration regression cho runtime-v2
+- [ ] Hoàn tất corpus 4 văn bản trước khi công nhận Milestone B
+- [x] Evidence Verifier: structured evidence/path contracts and fail-closed validation
 - [ ] **Benchmark từng bước** với **50 câu hỏi dev split** → Recall@5, MRR, nDCG  
   *(50 = dev split của 100 QA total; test split 50 còn lại dùng trong Phase 4 final eval)*
 
@@ -164,15 +165,18 @@ Evidence Verifier
 
 ---
 
-## Phase 3 — LLM + Citation + Reasoning Path ❌ → Milestone C
+## Phase 3 — LLM + Citation + Reasoning Path 🟡 Implemented on Pilot → Milestone C Pending
 
 **Mục tiêu**: RC4 — Explainable Legal QA, không hallucinate, citation cụ thể.
 
-- [ ] Answer Generator với retrieved context làm grounding
-- [ ] **Strict Citation**: mỗi câu trả lời phải có `[Điều X, Khoản Y, Luật Z]`
-- [ ] **Reasoning Path**: serialize graph traversal → human-readable explanation
-- [ ] Anti-hallucination check: câu trả lời phải nằm trong retrieved context
-- [ ] End-to-end test: query → retrieval → answer + citation + reasoning path
+- [x] Answer Generator chỉ nhận validated/projected `RetrievalContext`
+- [x] Claim-level citations bị giới hạn bởi evidence registry
+- [x] Structured reasoning paths giữ edge direction và temporal metadata
+- [x] Grounding validator reject citation/path ngoài allowlist
+- [x] Context compaction, mandatory bundles và post-projection sufficiency
+- [x] Backend `/chat` integration với structured provider output
+- [ ] Chạy lại real-provider smoke và reviewed QA evaluation theo runtime-v2
+- [ ] Chứng minh Milestone C metrics trên corpus/evaluation được duyệt
 
 ### 🏁 Milestone C — QA Success
 
@@ -284,7 +288,7 @@ Evidence Verifier
 
 ---
 
-## Phase 5 — Portal ❌
+## Phase 5 — Portal 🟡 Pilot Implemented, Acceptance Pending
 
 **Mục tiêu**: Demo được 5 tính năng core.
 
@@ -304,16 +308,16 @@ Portal
 
 ### Triển khai
 
-- [ ] Backend API (FastAPI): `/search`, `/chat`, `/graph`, `/timeline`, `/document`
-- [ ] Frontend (React/Vite):
-  - [ ] Chat interface với citation panel + reasoning path
-  - [ ] Graph Explorer (D3.js hoặc Cytoscape.js)
-  - [ ] Timeline view
-  - [ ] Search page
-  - [ ] Document Reader với highlight + related nodes
+- [x] Backend FastAPI: `/query`, `/chat`, document/detail/graph/article endpoints
+- [x] Frontend Next.js/React pilot:
+  - [x] Chat interface với citation/source details
+  - [x] Graph Explorer trên document subgraph
+  - [x] Document list/detail và article deep links
+  - [ ] Timeline view cho corpus có quan hệ sửa đổi
+  - [ ] Dedicated search page ngoài chat/query flow
 - [ ] Graph Visualization Metrics (hiển thị trong Explorer):
   - Node count, Edge count, Graph density, Average path length
-- [ ] Integrate frontend ↔ backend ↔ Neo4j
+- [x] Integrate pilot frontend ↔ FastAPI backend ↔ Neo4j
 - [ ] End-to-end demo scenarios (chuẩn bị cho bảo vệ)
 
 ---
