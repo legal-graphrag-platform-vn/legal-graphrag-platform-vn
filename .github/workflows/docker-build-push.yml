@@ -19,7 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [backend, frontend]
+        include:
+          - component: backend
+            context: .
+            dockerfile: apps/backend/Dockerfile
+          - component: frontend
+            context: apps/frontend
+            dockerfile: apps/frontend/Dockerfile
     
     permissions:
       contents: read
@@ -51,10 +57,10 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: ./apps/${{ matrix.component }}
-          file: ./apps/${{ matrix.component }}/Dockerfile 
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
