@@ -1,19 +1,19 @@
 # M3 / Milestone A Blocker Register
 
-> Last verified: 2026-07-12
+> Last verified: 2026-07-18
 > Parent plan: `06_m3_runtime_acceptance_and_milestone_a_plan.md`
 > Status authority for M3 blockers: this file
 
 ## Current State
 
 ```text
-Phase 1 M3: pilot signed off; BLOCKED on corpus completion
+Phase 1 M3: v1.5.1 pilot signed off historically; v1.6.0 migration BLOCKED
 Milestone A: NOT PASSED
 Phase 2 implementation: ACTIVE on signed-off pilot data
 Phase 2 acceptance: BLOCKED by M3-B13
-Canonical Neo4j pilot graph: VERIFIED on disposable M3 runtime
-Graph-quality report: CURRENT
-Neo4j pilot evidence: SIGNED OFF from source commit 3ab2baa
+Canonical Neo4j pilot graph: STALE under ontology v1.6.0
+Graph-quality report: STALE
+Neo4j pilot evidence: HISTORICAL v1.5.1 evidence from source commit 3ab2baa
 ```
 
 Retrieval development and pilot-only evaluation may proceed on `L59_2020`.
@@ -25,6 +25,7 @@ results until every `MILESTONE BLOCKER` below is closed.
 | ID | Problem | Status | Dependency | Close condition |
 |---|---|---|---|---|
 | M3-B13 | Four-document minimum corpus is incomplete | MILESTONE BLOCKER | Pilot sign-off | All four required documents complete the pipeline end to end with per-document reports |
+| M3-B14 | Resolver-first ontology v1.6.0 artifacts and pilot graph are not rebuilt | MILESTONE BLOCKER | ADR-22 implementation | Reparse source spans, normalize v1.6.0 artifacts, validate payload, rebuild disposable pilot, and regenerate evidence |
 
 ## Closed Milestone Blockers
 
@@ -67,7 +68,7 @@ unresolved endpoint references = 718
 payload failure = Accepted relation references missing entity: khoan_1_1
 ```
 
-### Current canonical extraction and payload (ontology v1.5.1)
+### Historical canonical extraction and payload (ontology v1.5.1)
 
 ```text
 source = 218 Article checkpoints; provider_called = false

@@ -13,6 +13,16 @@ SEMANTIC_PROPS = {
     "created_at": "2026-07-09T00:00:00+00:00",
 }
 
+REFERS_TO_PROPS = {
+    **SEMANTIC_PROPS,
+    "citation_text": "theo Điều 17",
+    "citation_type": "DIRECT",
+    "extraction_method": "LLM",
+    "reference_bundle_id": "bundle-17",
+    "reference_target_count": 1,
+    "checkpoint_id": "checkpoint-17",
+}
+
 
 def test_all_relations_have_constraints() -> None:
     """Mọi relation trong enum phải có đúng 1 key trong CONSTRAINTS."""
@@ -32,11 +42,7 @@ def test_refers_to_not_rejected() -> None:
         "Article",
         "REFERS_TO",
         "Article",
-        properties={
-            **SEMANTIC_PROPS,
-            "citation_text": "theo Điều 17",
-            "citation_type": "DIRECT",
-        },
+        properties=REFERS_TO_PROPS,
     )
     assert ok, f"REFERS_TO bị reject: {err}"
 
@@ -49,26 +55,42 @@ def test_contains_structural_chain_allows_chapter() -> None:
 
 
 def test_requires_not_rejected() -> None:
-    ok, err = validate_relation("LegalSubject", "REQUIRES", "LegalConcept", properties=SEMANTIC_PROPS)
+    ok, err = validate_relation(
+        "LegalSubject", "REQUIRES", "LegalConcept", properties=SEMANTIC_PROPS
+    )
     assert ok, f"REQUIRES bị reject: {err}"
 
 
 def test_requires_entity_to_entity_rejected() -> None:
-    ok, err = validate_relation("LegalSubject", "REQUIRES", "LegalSubject", properties=SEMANTIC_PROPS)
+    ok, err = validate_relation(
+        "LegalSubject", "REQUIRES", "LegalSubject", properties=SEMANTIC_PROPS
+    )
     assert not ok
-    assert "tail type" in (err or "") or "Invalid tail type" in (err or "") or "Invalid pair" in (err or "")
+    assert (
+        "tail type" in (err or "")
+        or "Invalid tail type" in (err or "")
+        or "Invalid pair" in (err or "")
+    )
 
 
 def test_semantic_relation_missing_provenance_rejected() -> None:
-    ok, err = validate_relation("LegalSubject", "REQUIRES", "LegalConcept", properties={})
+    ok, err = validate_relation(
+        "LegalSubject", "REQUIRES", "LegalConcept", properties={}
+    )
     assert not ok
     assert "llm_model" in (err or "")
 
 
 def test_extraction_labels_rejected_at_ontology_boundary() -> None:
-    ok, err = validate_relation("Entity", "REQUIRES", "Concept", properties=SEMANTIC_PROPS)
+    ok, err = validate_relation(
+        "Entity", "REQUIRES", "Concept", properties=SEMANTIC_PROPS
+    )
     assert not ok
-    assert "head type" in (err or "") or "Invalid head type" in (err or "") or "Invalid pair" in (err or "")
+    assert (
+        "head type" in (err or "")
+        or "Invalid head type" in (err or "")
+        or "Invalid pair" in (err or "")
+    )
 
 
 def test_refers_to_invalid_citation_type_rejected() -> None:
@@ -76,7 +98,7 @@ def test_refers_to_invalid_citation_type_rejected() -> None:
         "Article",
         "REFERS_TO",
         "Article",
-        properties={**SEMANTIC_PROPS, "citation_text": "theo Điều 17", "citation_type": "FOO"},
+        properties={**REFERS_TO_PROPS, "citation_type": "FOO"},
     )
     assert not ok
     assert "citation_type" in (err or "")

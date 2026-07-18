@@ -48,7 +48,10 @@ def validate_relation(
 
     allowed_tail = constraint.get("allowed_tail")
     if allowed_tail and tail_type not in allowed_tail:
-        return False, f"Invalid tail type for {relation}: {tail_type} not in {allowed_tail}"
+        return (
+            False,
+            f"Invalid tail type for {relation}: {tail_type} not in {allowed_tail}",
+        )
 
     if constraint.get("no_self_loop") and head_id is not None and tail_id is not None:
         if head_id == tail_id:
@@ -57,27 +60,65 @@ def validate_relation(
     required_props = constraint.get("required_properties", [])
     if required_props:
         props = properties or {}
-        missing = [p for p in required_props if p not in props or props[p] is None or props[p] == ""]
+        missing = [
+            p
+            for p in required_props
+            if p not in props or props[p] is None or props[p] == ""
+        ]
         if missing:
             return False, f"Missing required properties for {relation}: {missing}"
+
+    method_property_map = constraint.get("required_properties_by_extraction_method", {})
+    if method_property_map:
+        props = properties or {}
+        extraction_method = props.get("extraction_method")
+        method_properties = method_property_map.get(extraction_method, [])
+        missing = [
+            p
+            for p in method_properties
+            if p not in props or props[p] is None or props[p] == ""
+        ]
+        if missing:
+            return False, (
+                f"Missing required properties for {relation} "
+                f"with extraction_method={extraction_method}: {missing}"
+            )
 
     for key, expected in constraint.get("property_types", {}).items():
         value = (properties or {}).get(key)
         if value is None:
             continue
-        if expected == "float" and (isinstance(value, bool) or not isinstance(value, (int, float))):
+        if expected == "float" and (
+            isinstance(value, bool) or not isinstance(value, (int, float))
+        ):
             return False, f"Invalid property type for {relation}.{key}: expected float"
         if expected == "string" and not isinstance(value, str):
             return False, f"Invalid property type for {relation}.{key}: expected string"
+        if expected == "integer" and (
+            isinstance(value, bool) or not isinstance(value, int)
+        ):
+            return (
+                False,
+                f"Invalid property type for {relation}.{key}: expected integer",
+            )
         if expected == "datetime":
             if not isinstance(value, str):
-                return False, f"Invalid property type for {relation}.{key}: expected datetime"
+                return (
+                    False,
+                    f"Invalid property type for {relation}.{key}: expected datetime",
+                )
             try:
                 parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
             except ValueError:
-                return False, f"Invalid property type for {relation}.{key}: expected datetime"
+                return (
+                    False,
+                    f"Invalid property type for {relation}.{key}: expected datetime",
+                )
             if parsed.tzinfo is None:
-                return False, f"Invalid property type for {relation}.{key}: timezone required"
+                return (
+                    False,
+                    f"Invalid property type for {relation}.{key}: timezone required",
+                )
 
     if relation == "REFERS_TO":
         citation_type = (properties or {}).get("citation_type")

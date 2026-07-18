@@ -91,6 +91,16 @@ class GraphEdge(BaseModel):
     target_id: str
     effective_from: date | None = None
     effective_to: date | None = None
+    citation_evidence: tuple["GraphCitationEvidence", ...] = ()
+
+
+class GraphCitationEvidence(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    relation_id: str
+    citation_text: str | None = None
+    citation_type: str | None = None
+    extraction_method: str | None = None
 
 
 class GraphPath(BaseModel):

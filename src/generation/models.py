@@ -135,6 +135,15 @@ class LegalEvidenceBlock(BaseModel):
     legal_status: str | None
 
 
+class ProjectedCitationEvidence(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    relation_id: str
+    citation_text: str | None = None
+    citation_type: str | None = None
+    extraction_method: str | None = None
+
+
 class ProjectedGraphEdge(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -144,6 +153,7 @@ class ProjectedGraphEdge(BaseModel):
     target_id: str
     effective_from: date | None
     effective_to: date | None
+    citation_evidence: tuple[ProjectedCitationEvidence, ...] = ()
 
 
 class ProjectedPathBlock(BaseModel):

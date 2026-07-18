@@ -3,7 +3,7 @@
 > Plan status: IMPLEMENTED, TARGETED VERIFICATION PASSED
 > Implementation commit: `e4faa40`
 > Retrieval contract: `retrieval-runtime-v2`
-> Canonical ontology: `plans/legal_ontology.md` v1.5.1
+> Canonical ontology: `plans/legal_ontology.md` v1.6.0
 
 ## 0. Current Status
 

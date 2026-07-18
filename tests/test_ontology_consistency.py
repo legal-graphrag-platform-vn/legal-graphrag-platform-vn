@@ -131,20 +131,32 @@ class OntologyConsistencyTests(unittest.TestCase):
                     "created_at": "2026-07-12T00:00:00Z",
                     "citation_text": "Điều 4",
                     "citation_type": "DIRECT",
+                    "extraction_method": "LLM",
+                    "reference_bundle_id": "bundle-4",
+                    "reference_target_count": 1,
+                    "checkpoint_id": "checkpoint-4",
                 },
             ),
         ]
 
         for head_type, relation_type, tail_type, properties in cases:
-            ok, error = validate_relation(head_type, relation_type, tail_type, properties=properties)
+            ok, error = validate_relation(
+                head_type, relation_type, tail_type, properties=properties
+            )
             self.assertTrue(ok, error)
 
     def test_semantic_relations_require_provenance(self) -> None:
-        ok, error = validate_relation("Article", "DEFINES", "LegalConcept", properties={"confidence": 0.9})
+        ok, error = validate_relation(
+            "Article", "DEFINES", "LegalConcept", properties={"confidence": 0.9}
+        )
         self.assertFalse(ok)
         self.assertIn("llm_model", error or "")
 
-        provenance = {"confidence": 0.9, "llm_model": "test-model", "created_at": "2026-07-07T00:00:00Z"}
+        provenance = {
+            "confidence": 0.9,
+            "llm_model": "test-model",
+            "created_at": "2026-07-07T00:00:00Z",
+        }
         cases = [
             ("Article", "DEFINES", "LegalConcept"),
             ("Clause", "REGULATES", "LegalSubject"),
@@ -154,22 +166,34 @@ class OntologyConsistencyTests(unittest.TestCase):
         ]
 
         for head_type, relation_type, tail_type in cases:
-            ok, error = validate_relation(head_type, relation_type, tail_type, properties=provenance)
+            ok, error = validate_relation(
+                head_type, relation_type, tail_type, properties=provenance
+            )
             self.assertTrue(ok, error)
 
-        ok, error = validate_relation("LegalSubject", "REQUIRES", "Obligation", properties=provenance)
+        ok, error = validate_relation(
+            "LegalSubject", "REQUIRES", "Obligation", properties=provenance
+        )
         self.assertFalse(ok)
         self.assertIn("tail type Obligation", error or "")
 
-    def test_write_time_relation_validation_accepts_database_datetime_object(self) -> None:
+    def test_write_time_relation_validation_accepts_database_datetime_object(
+        self,
+    ) -> None:
         properties = {
             "confidence": 0.9,
             "llm_model": "gemini:model",
             "created_at": datetime(2026, 7, 12, tzinfo=timezone.utc),
             "citation_text": "Điều 17",
             "citation_type": "DIRECT",
+            "extraction_method": "LLM",
+            "reference_bundle_id": "bundle-17",
+            "reference_target_count": 1,
+            "checkpoint_id": "checkpoint-17",
         }
-        ok, error = validate_relation("Article", "REFERS_TO", "Article", properties=properties)
+        ok, error = validate_relation(
+            "Article", "REFERS_TO", "Article", properties=properties
+        )
         self.assertTrue(ok, error)
 
     def test_runtime_only_nodes_are_not_phase1_persistent(self) -> None:
@@ -177,7 +201,11 @@ class OntologyConsistencyTests(unittest.TestCase):
             self.validator.validate_graph_payload(
                 {
                     "nodes": [
-                        {"type": "Obligation", "id": "obligation_1", "name": "Must register"},
+                        {
+                            "type": "Obligation",
+                            "id": "obligation_1",
+                            "name": "Must register",
+                        },
                     ],
                     "relations": [],
                 }
