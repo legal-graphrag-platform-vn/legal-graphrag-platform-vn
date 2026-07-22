@@ -2,7 +2,8 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Proposed — cần team review trước khi bắt đầu code
+> **Trạng thái:** Proposed — Task 0 đã chạy và fail; ADR-23 amendment đang chờ
+> review, ontology v1.6.0 artifact rebuild còn mở
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -22,8 +23,8 @@ Sau khi hoàn tất plan này, một query multi-hop tuyến tính 2–3 bước
       -> deterministic routing
       -> LLM tạo UnlinkedSemanticPlan
       -> validate plan theo allowlist
-      -> EntityLinker bind anchor vào canonical node
-      -> Neo4j chạy exact ordered pattern
+      -> EntityLinker bind độc lập anchor và target vào canonical nodes
+      -> Neo4j chạy exact ordered pattern giữa hai endpoint
       -> tạo PlanExecutionResult
       -> sufficiency kiểm satisfied-path membership
       -> compaction chỉ giữ evidence thuộc satisfied path
@@ -114,7 +115,7 @@ cho non-multi-hop; multi-hop không có plan vẫn fail-closed như hiện nay.
 
 - LLM chỉ sinh relation, direction và next_label trong enum đóng.
 - Neo4j repository dùng template cố định cho depth 2 và 3.
-- IDs, filters và constraint values truyền bằng parameters.
+- Bound anchor ID, bound target ID, filters và constraint values truyền bằng parameters.
 - Python re-validates từng returned path theo plan.
 - Không nối user text, node ID hoặc relation do LLM sinh trực tiếp vào Cypher.
 
@@ -139,11 +140,27 @@ V1 không nhận:
 - soft relation constraint;
 - nhiều anchor;
 - temporal hint do planner tự sinh;
-- target attributes hoặc legal conditions;
+- target predicates, arbitrary property expressions hoặc legal conditions;
 - semantic relaxation khi không tìm thấy path.
 
 Case multi_hop_05 trong dataset là branching one-hop và phải được báo
 OUT_OF_SCOPE_PLAN_SHAPE, không được ép thành linear plan.
+
+### ED-7 — Bind target độc lập trước exact execution (ADR-23)
+
+Task 0 cho thấy `relation + direction + next_label` trả dư target ở
+`multi_hop_01`, `multi_hop_03`, và `multi_hop_04`. V1 bổ sung một
+`TargetMention` bắt buộc:
+
+- planner chỉ sinh text của target; target label derive từ bước cuối;
+- linker resolve anchor và target độc lập, không dùng path existence làm feature;
+- `BoundSemanticPlan` chỉ tồn tại khi cả hai endpoint resolve duy nhất;
+- executor bắt buộc path bắt đầu tại bound anchor và kết thúc tại bound target;
+- nhiều topology giữa cùng endpoint trả `AMBIGUOUS_PATH`, không tự chọn shortest;
+- candidate list là diagnostic của linker, không phải trusted execution input.
+
+QG-0 dùng manually bound gold endpoints để cô lập executor. Semantic target
+binding được calibration riêng trước QG-1 end-to-end.
 
 ---
 
@@ -157,14 +174,14 @@ OUT_OF_SCOPE_PLAN_SHAPE, không được ép thành linear plan.
       +----------------------+
       |                      |
       v                      v
-    S2 Path identity       S3 Structural linker
+    S2 Path identity       S3 Structural endpoint linker
       |                      |
       +----------+-----------+
                  v
              S4 Exact executor
                  |
                  v
-             QG-0 Gold-plan gate
+             QG-0 Gold bound-endpoint gate
                  |
         pass ----+---- fail -> dừng, sửa data/design
                  |
@@ -178,13 +195,13 @@ OUT_OF_SCOPE_PLAN_SHAPE, không được ép thành linear plan.
              S7 LLM planner provider
                  |
                  v
-             S8 Async application wiring
+             S8 Semantic endpoint linker
                  |
                  v
-             S9 QG-1 evaluation + observability
+             S9 Async application wiring
                  |
                  v
-             S10 Documentation + full verification
+             S10 QG-1 + docs/full verification
 
 Task 8 không được bắt đầu trước khi QG-0 pass. Nếu exact executor không chạy đúng
 với plan viết tay hoàn hảo, thêm LLM chỉ làm failure khó chẩn đoán hơn.
@@ -241,6 +258,30 @@ tục và current plan shape đủ biểu diễn gold cases.
 
 **Estimated scope:** S — report và command/probe; chưa sửa production code.
 
+### Task 0 execution result — 2026-07-22
+
+Artifacts:
+
+- `results/retrieval/query_graph_preflight.json`
+- `results/retrieval/query_graph_preflight.md`
+
+Result: **failed**.
+
+- Gold paths tồn tại cho `multi_hop_01–04`.
+- Shape cũ exact only cho `multi_hop_02`.
+- `multi_hop_01`, `multi_hop_03`, `multi_hop_04` trả ba target Clause và được
+  phân loại `PLAN_UNDERCONSTRAINED`.
+- Cả bảy scoped `REFERS_TO` edges thiếu provenance bắt buộc của ontology v1.6.0.
+
+Response:
+
+1. ADR-23 bổ sung independent target binding.
+2. Gold-bound read-only probe xác nhận amended plan contract có exact denotation
+   ở 4/4 linear cases; đây chưa phải target-linker evaluation.
+3. Rerun Task 0 sau artifact rebuild để xác nhận citable-evidence completeness.
+4. Task 1 chỉ được mở khi rerun xác nhận exact denotation và
+   citable-evidence completeness.
+
 ---
 
 ## Task 1 — Đóng planning DTO và validation contract
@@ -249,10 +290,14 @@ tục và current plan shape đủ biểu diễn gold cases.
 
 **Công việc:**
 
-- Tạo UnlinkedSemanticPlan, AnchorMention, PathStepConstraint,
-  BoundSemanticPlan, PlanExecutionResult và PlanReasonCode.
+- Tạo UnlinkedSemanticPlan, AnchorMention, TargetMention,
+  PathStepConstraint, BoundEndpoint, BoundSemanticPlan, PlanExecutionResult và
+  PlanReasonCode.
 - Enforce depth 2–3, positional label roles, relation allowlist, exact direction,
-  non-empty normalized mention và no runtime-only labels.
+  non-empty normalized anchor/target mention và no runtime-only labels.
+- Target label derive từ final `next_label`; không expose field lặp có thể lệch.
+- BoundSemanticPlan chỉ nhận đúng một bound anchor và một bound target; label
+  của bound target phải bằng final `next_label`.
 - Enforce consistency invariant của PlanExecutionResult:
 
       satisfied
@@ -270,8 +315,10 @@ tục và current plan shape đủ biểu diễn gold cases.
 **Acceptance criteria:**
 
 - [ ] Invalid relation, legacy alias, wrong direction, wrong positional label,
-      depth 1/4 và blank anchor đều bị reject bằng ValueError rõ nghĩa.
+      depth 1/4, blank anchor và blank target đều bị reject bằng ValueError rõ nghĩa.
 - [ ] DTO không có field cho node ID ở UnlinkedSemanticPlan.
+- [ ] Bound target label khác final next_label bị reject.
+- [ ] Candidate list không thể được truyền như trusted BoundSemanticPlan.
 - [ ] Bound plan không tự được coi là trusted execution result.
 - [ ] JSON schema provider chỉ expose query-plannable labels/relations.
 
@@ -288,7 +335,7 @@ tục và current plan shape đủ biểu diễn gold cases.
 - [ ] uv run pytest -q src/retrieval/tests/test_query_plan_models.py
 - [ ] uv run pytest -q src/retrieval/tests/test_query_plan_patterns.py
 
-**Dependencies:** Task 0 pass.
+**Dependencies:** ADR-23 accepted và Task 0 rerun pass trên artifacts ontology v1.6.0.
 
 **Estimated scope:** M — 5 files.
 
@@ -332,24 +379,27 @@ generation, ổn định trước thay đổi mutable provenance.
 
 ---
 
-## Task 3 — Implement deterministic structural EntityLinker
+## Task 3 — Implement deterministic structural endpoint linker
 
-**Mục tiêu:** bind các mention như “Khoản 3 Điều 145” vào canonical legal unit
-mà không dùng LLM-generated ID.
+**Mục tiêu:** bind structural anchor hoặc target như “Khoản 3 Điều 145” vào
+canonical legal unit mà không dùng LLM-generated ID.
 
 **Công việc:**
 
-- Định nghĩa StructuralAnchorResolverPort ở retrieval boundary.
+- Định nghĩa StructuralEndpointResolverPort ở retrieval boundary.
 - Parse Document/Article/Clause/Point reference theo controlled grammar.
 - Neo4j lookup theo document scope và canonical hierarchy.
 - Trả candidate có typed resolution status; không trả top-1 nếu lookup không duy nhất.
 - Stable ordering theo canonical node ID.
+- Dùng cùng resolver contract cho vai trò anchor/target nhưng giữ reason code
+  `UNBOUND_ANCHOR`/`AMBIGUOUS_ANCHOR` tách khỏi
+  `UNBOUND_TARGET`/`AMBIGUOUS_TARGET`.
 
 **Acceptance criteria:**
 
 - [ ] Unique structural reference bind đúng canonical ID.
-- [ ] Thiếu document scope hoặc nhiều match trả AMBIGUOUS_ANCHOR.
-- [ ] Không có match trả UNBOUND_ANCHOR.
+- [ ] Thiếu document scope hoặc nhiều match trả typed ambiguous code đúng endpoint role.
+- [ ] Không có match trả typed unbound code đúng endpoint role.
 - [ ] Không suy ID bằng string prefix và không import extraction registry.
 - [ ] Lookup query parameterized và không ghi graph.
 
@@ -358,12 +408,12 @@ mà không dùng LLM-generated ID.
 - src/retrieval/planning/linker.py
 - src/retrieval/ports.py
 - src/infrastructure/neo4j/retriever_repo.py
-- src/retrieval/tests/test_structural_anchor_linker.py
+- src/retrieval/tests/test_structural_endpoint_linker.py
 - src/retrieval/tests/test_repository.py
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_structural_anchor_linker.py
+- [ ] uv run pytest -q src/retrieval/tests/test_structural_endpoint_linker.py
 - [ ] uv run pytest -q src/retrieval/tests/test_repository.py
 
 **Dependencies:** Task 1.
@@ -377,7 +427,7 @@ mà không dùng LLM-generated ID.
 - [ ] Task 0 preflight pass.
 - [ ] DTO/schema tests pass.
 - [ ] Path identity is topology-only.
-- [ ] Structural anchors resolve deterministically.
+- [ ] Structural anchors/targets resolve deterministically.
 - [ ] Không có ontology hoặc write-path change.
 
 Không bắt đầu exact executor nếu Checkpoint A chưa đạt.
@@ -393,6 +443,8 @@ khớp toàn bộ ordered constraints.
 
 - Thêm PlannedPathExecutionPort.
 - Tạo static query template riêng cho depth 2 và depth 3.
+- Parameterize cả bound anchor ID và bound target ID; target mention text không
+  được đưa vào Cypher.
 - Enforce relation type, traversal direction và next_label theo từng vị trí.
 - Reuse temporal validation hiện tại cho node và edge.
 - Reject cycle, malformed edge, duplicate topology và path vượt budget.
@@ -403,6 +455,7 @@ khớp toàn bộ ordered constraints.
 **Acceptance criteria:**
 
 - [ ] Executor không dùng generic any-order relation membership.
+- [ ] Mọi returned path bắt đầu tại bound anchor và kết thúc tại bound target.
 - [ ] Incoming traversal không đảo canonical source_id/target_id.
 - [ ] Không có Cypher do LLM sinh.
 - [ ] Same input/snapshot trả cùng ordered result.
@@ -432,19 +485,22 @@ khớp toàn bộ ordered constraints.
 
 ## Task 5 — QG-0: chạy manual gold plans
 
-**Mục tiêu:** chứng minh linker + executor đúng khi plan đầu vào hoàn hảo, trước
-khi thêm LLM planner.
+**Mục tiêu:** chứng minh executor đúng khi plan và hai bound endpoint đầu vào
+hoàn hảo, trước khi thêm LLM planner hoặc semantic target linker.
 
 **Công việc:**
 
-- Viết manual UnlinkedSemanticPlan fixture cho multi_hop_01–04.
-- Chạy bind + execute trên pinned graph snapshot.
+- Viết manual BoundSemanticPlan fixture cho multi_hop_01–04, gồm gold anchor ID
+  và gold target ID.
+- Kiểm structural anchor resolver riêng, sau đó chạy exact executor bằng bound
+  fixture; không dùng semantic target ranking trong gate này.
 - So sánh source ID, ordered relation types và target ID với gold_paths.
 - Ghi false-positive paths, failure reason và latency.
 
 **Gate QG-0:**
 
-- [ ] 100% executable linear gold cases bind đúng anchor.
+- [ ] 100% executable linear gold cases có manual bound endpoints đúng contract.
+- [ ] Structural anchor resolver bind đúng anchor ở 100% linear cases.
 - [ ] 100% returned denotation khớp gold path; không chỉ “gold nằm trong top-k”.
 - [ ] Không có legacy relation alias.
 - [ ] Không path nào pass khi direction bị đảo.
@@ -456,7 +512,7 @@ Nếu QG-0 fail, dừng. Phân loại lỗi vào một trong ba nhóm:
 
 1. graph/data thiếu hoặc sai;
 2. plan contract không đủ biểu đạt;
-3. executor/linker implementation sai.
+3. executor/structural-linker implementation sai.
 
 Không bắt đầu Task 6 trở đi cho tới khi QG-0 pass.
 
@@ -579,12 +635,13 @@ Nếu Checkpoint B chưa pass thì không tích hợp provider.
 ## Task 8 — Implement async LLM query planner provider
 
 **Mục tiêu:** chuyển query multi-hop thành UnlinkedSemanticPlan đúng strict schema,
-không sinh ID hoặc Cypher.
+gồm anchor mention, target mention và ordered steps; không sinh ID hoặc Cypher.
 
 **Công việc:**
 
 - Định nghĩa QueryPlannerPort async.
-- Tạo prompt chỉ expose allowlisted labels, relations và directions.
+- Tạo prompt chỉ expose allowlisted labels, relations và directions; target chỉ
+  có normalized mention text, label derive từ final step.
 - Gemini adapter dùng structured output, timeout, bounded concurrency và retry
   policy giống answer provider nhưng config riêng.
 - Validate response bằng DTO contract; malformed/empty payload fail typed.
@@ -593,6 +650,7 @@ không sinh ID hoặc Cypher.
 **Acceptance criteria:**
 
 - [ ] Provider output không thể chứa node_id hoặc Cypher.
+- [ ] Missing/blank target mention là typed invalid-plan failure.
 - [ ] Timeout, cancellation, closed provider, malformed JSON và unsupported enum
       có typed failure.
 - [ ] Same valid payload tạo cùng plan fingerprint.
@@ -618,38 +676,41 @@ không sinh ID hoặc Cypher.
 
 ---
 
-## Task 9 — Thêm semantic anchor linking và calibration
+## Task 9 — Thêm semantic endpoint linking và calibration
 
-**Mục tiêu:** hỗ trợ anchor dạng khái niệm khi structural parser không áp dụng,
-nhưng vẫn fail-closed khi kết quả mơ hồ.
+**Mục tiêu:** hỗ trợ semantic anchor/target khi structural parser không áp dụng,
+đặc biệt target mô tả bằng nội dung như “trình tự chào bán phần vốn góp”, nhưng
+vẫn fail-closed khi kết quả mơ hồ.
 
 **Công việc:**
 
 - Reuse vector + full-text retrieval ports, không tạo index/model contract mới.
 - Fuse candidate deterministically.
-- Chốt top-score threshold, margin và candidate budget bằng calibration set.
+- Chốt top-score threshold, margin và candidate budget riêng cho anchor và target
+  bằng calibration set.
 - Không dùng “có path” làm ground truth cho anchor correctness.
+- Không dùng “có path tới bound anchor/target” làm ranking feature hoặc tie-break.
 - Structural resolver luôn được ưu tiên khi mention là structural reference.
 
 **Acceptance criteria:**
 
 - [ ] Candidate ordering deterministic khi score bằng nhau.
-- [ ] Dưới threshold trả UNBOUND_ANCHOR.
-- [ ] Không đủ margin trả AMBIGUOUS_ANCHOR.
+- [ ] Dưới threshold trả typed `UNBOUND_ANCHOR` hoặc `UNBOUND_TARGET` theo role.
+- [ ] Không đủ margin trả typed `AMBIGUOUS_ANCHOR` hoặc `AMBIGUOUS_TARGET`.
 - [ ] Threshold được lưu trong config và có calibration evidence; không dùng magic number.
-- [ ] Binding accuracy được báo riêng khỏi path execution accuracy.
+- [ ] Anchor accuracy, target accuracy và path execution accuracy được báo riêng.
 
 **Files likely touched:**
 
 - src/retrieval/planning/linker.py
 - src/retrieval/config.py
-- src/retrieval/tests/test_semantic_anchor_linker.py
+- src/retrieval/tests/test_semantic_endpoint_linker.py
 - configs/evaluation/query_graph_linker_calibration.json
 - results/retrieval/query_graph_linker_calibration.md
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_semantic_anchor_linker.py
+- [ ] uv run pytest -q src/retrieval/tests/test_semantic_endpoint_linker.py
 - [ ] Re-run calibration tạo cùng threshold trên cùng artifact.
 
 **Dependencies:** Tasks 3 và 8.
@@ -774,6 +835,7 @@ và end-to-end retrieval; không gom thành một con số dễ che lỗi.
 - plan schema-valid rate;
 - exact relation/direction/label sequence match;
 - anchor binding accuracy;
+- target binding accuracy;
 - exact path denotation accuracy;
 - extra-path rate;
 - NO_PATH và AMBIGUOUS_PATH rate;
@@ -866,6 +928,7 @@ suite mặc định.
 
 - Structural anchor duy nhất, linear depth 2.
 - Structural anchor duy nhất, linear depth 3.
+- Semantic target duy nhất sau calibrated threshold/margin.
 - Incoming và outgoing step đúng canonical direction.
 - Direct-citable target Article/Clause/Point.
 - Semantic target có citable Article/Clause trên chính path.
@@ -884,6 +947,7 @@ suite mặc định.
 ### Invalid inputs
 
 - Blank anchor.
+- Blank target mention.
 - Depth 1 hoặc 4.
 - Legacy alias REFERENCES/AMENDED_BY.
 - Runtime-only label.
@@ -898,6 +962,7 @@ suite mặc định.
 - Planner provider/auth/model unavailable.
 - Neo4j unavailable.
 - Anchor unresolved hoặc ambiguous.
+- Target unresolved hoặc ambiguous.
 - No exact path.
 - More than one exact denotation khi contract yêu cầu unique.
 - Temporal rejection.
@@ -935,6 +1000,8 @@ Closed enum cần cover tối thiểu:
 | PLANNER_TIMEOUT | Planner quá thời gian |
 | UNBOUND_ANCHOR | Không resolve được anchor |
 | AMBIGUOUS_ANCHOR | Anchor có nhiều candidate không đủ margin |
+| UNBOUND_TARGET | Không resolve được target |
+| AMBIGUOUS_TARGET | Target có nhiều candidate không đủ margin |
 | NO_PATH | Anchor đúng nhưng không có exact path |
 | AMBIGUOUS_PATH | Plan trả nhiều denotation không thể chọn deterministic |
 | PATH_BUDGET_EXCEEDED | Kết quả bị truncate trước khi chứng minh đủ |
@@ -990,7 +1057,7 @@ không ghi graph và không thay schema.
 |---|---|---|
 | Graph thiếu relation | Cao | Task 0 preflight; dừng read-path work |
 | Plan relation+label trả dư target | Cao | Exact-denotation check; amend design trước Task 1 |
-| EntityLinker neo sai | Cao | Structural-first, calibrated margin, đo riêng |
+| EntityLinker bind sai anchor/target | Cao | Independent binding, structural-first, calibrated margin, đo riêng |
 | LLM sinh valid nhưng sai ý query | Cao | Gold comparison, wrong-but-valid metric |
 | Generic path mở gate | Cao | Fingerprint membership trước compatibility checks |
 | Async planner làm rối sync runtime | Cao | prepare/execute split; application coordinator |
@@ -1008,6 +1075,7 @@ Feature chỉ được coi là hoàn tất khi:
 - [ ] Task 0 và QG-0 pass trên pinned graph snapshot.
 - [ ] Tất cả DTO invariants có unit tests.
 - [ ] Entity linking và exact path execution có contract/integration evidence.
+- [ ] Anchor binding và target binding có metric/evidence tách biệt.
 - [ ] Generation chỉ admit satisfied path.
 - [ ] Answer provider call count sau plan failure bằng 0.
 - [ ] Non-multi-hop regression suite pass.

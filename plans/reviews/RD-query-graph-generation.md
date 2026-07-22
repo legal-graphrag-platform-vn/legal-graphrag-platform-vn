@@ -17,6 +17,11 @@
 - **Phạm vi:** chỉ làm ở lúc truy vấn (read path); **không** sửa cách xây graph (extraction).
 - **Điều kiện:** graph phải thật sự chứa dữ liệu nhiều bước — nếu không, phải sửa khâu tạo graph trước (Phần 6).
 
+> **Amendment 2026-07-22 (ADR-23):** Task 0 preflight chứng minh
+> relation/direction/label chưa đủ phân biệt gold target ở 3/4 linear cases.
+> V1 vì vậy bổ sung `TargetMention` và target binding độc lập; xem báo cáo
+> `results/retrieval/query_graph_preflight.md`.
+
 ---
 
 ## Thay đổi này khác hệ thống hiện tại ở đâu?
@@ -105,8 +110,8 @@ Nếu bắt AI tự đoán "đi node A→B→C" thì nó **bịa**, vì nó khô
 
 | Thành phần | Nhận vào | Trả ra | Không được làm |
 |---|---|---|---|
-| **1. Planner (LLM)** | Câu hỏi tiếng Việt | Pattern quan hệ có thứ tự | Không sinh node ID, không sinh Cypher |
-| **2. EntityLinker** | Cụm neo trong plan | Candidate node ID có thật | Không tự chọn khi kết quả mơ hồ |
+| **1. Planner (LLM)** | Câu hỏi tiếng Việt | Anchor mention, target mention và pattern quan hệ có thứ tự | Không sinh node ID, không sinh Cypher |
+| **2. EntityLinker** | Cụm neo và cụm đích trong plan | Canonical endpoint đã resolve duy nhất | Không dùng “có path” để chọn candidate |
 | **3. Exact-path Executor** | Plan đã bind | Các path thật thỏa đúng pattern | Không nới constraint để cố tìm kết quả |
 | **4. Sufficiency/Gate** | Path đã xác minh + evidence | Cho phép trả lời hoặc fail reason | Không chấp nhận generic path ngoài plan |
 
@@ -131,6 +136,9 @@ AI đọc câu hỏi và trả về một cấu trúc (KHÔNG phải đáp án, 
     "text": "Khoản 3 Điều 145",
     "expected_label": "Clause"
   },
+  "target": {
+    "text": "điều kiện của lần họp thứ nhất"
+  },
   "steps": [
     {
       "relation": "REFERS_TO",
@@ -144,28 +152,33 @@ AI đọc câu hỏi và trả về một cấu trúc (KHÔNG phải đáp án, 
     }
   ]
 }
-// Đích là Clause ở cuối chuỗi hai lần dẫn chiếu.
+// Label đích là Clause, derive từ next_label của bước cuối.
 ```
 
 Đọc như tiếng Việt: *“Bắt đầu từ Khoản 3 Điều 145; đi theo dẫn chiếu tới một
 Khoản; sau đó tiếp tục theo dẫn chiếu tới một Khoản khác.”*
 
-### Chặng 2 — Bộ dò tên tìm điều luật thật
+### Chặng 2 — Bộ dò tên bind hai endpoint thật
 
-Bộ dò tên nhận cụm cấu trúc **“Khoản 3 Điều 145”**, cộng với document scope của
-query/corpus, rồi resolve sang node thật:
+Bộ dò tên resolve anchor **“Khoản 3 Điều 145”** bằng hierarchy lookup và target
+**“điều kiện của lần họp thứ nhất”** bằng retrieval đã calibration trong cùng
+document/label/temporal scope:
 
 ```jsonc
-candidates = [
-  {
-    "node_id": "ldn_2020_art145_cl3",
-    "resolution": "unique_structural_match"
-  }
-]
+bound_anchor = {
+  "node_id": "ldn_2020_art145_cl3",
+  "resolution": "unique_structural_match"
+}
+bound_target = {
+  "node_id": "ldn_2020_art145_cl1",
+  "resolution": "unique_semantic_match"
+}
 ```
 
-Nếu document scope không xác định hoặc có nhiều node cùng khớp, EntityLinker trả
-`AMBIGUOUS_ANCHOR` thay vì đoán.
+Nếu một endpoint không resolve được hoặc có nhiều candidate không đủ margin,
+EntityLinker trả `UNBOUND_*`/`AMBIGUOUS_*` thay vì tạo `BoundSemanticPlan`.
+Anchor và target được chấm độc lập; việc một candidate tình cờ có path nối tới
+endpoint còn lại không được dùng để nâng score hoặc phá hòa.
 
 Chi tiết Bộ dò tên ở [Phần 3.6](#36--bộ-dò-tên-entitylinker--chi-tiết).
 
@@ -174,7 +187,9 @@ Chi tiết Bộ dò tên ở [Phần 3.6](#36--bộ-dò-tên-entitylinker--chi-t
 Giờ có ID thật, máy dò theo đúng đơn hàng:
 
     Plan yêu cầu:
+      anchor = ldn_2020_art145_cl3
       Clause -> REFERS_TO -> Clause -> REFERS_TO -> Clause
+      target = ldn_2020_art145_cl1
 
     Neo4j trả về:
       ldn_2020_art145_cl3
@@ -202,26 +217,31 @@ Hệ thống **từ chối trung thực + báo rõ lý do** (mã lý do), không
 
 Đây là chỗ dễ hiểu lầm nhất, nên tách riêng.
 
-**Nó nhận gì?** Một anchor mention cùng scope cần thiết để resolve, ví dụ
-`“Khoản 3 Điều 145”` trong Luật Doanh nghiệp 2020; không phải toàn bộ plan.
+**Nó nhận gì?** Từng endpoint mention cùng scope cần thiết để resolve. Anchor và
+target được resolve bằng hai lời gọi logic độc lập, không truyền toàn bộ bound
+plan cho scorer.
 
 **Nó có phải AI không?** Phần lớn **KHÔNG** — nó là *tra cứu / tìm kiếm*, không phải AI sinh chữ. Hai cơ chế:
 
-1. **Tham chiếu cấu trúc** (thuần logic): nếu cụm chữ là `“Điều 12”`,
+1. **Tham chiếu cấu trúc** (thuần logic): nếu anchor hoặc target là `“Điều 12”`,
    `“Khoản 2 Điều 5”` thì parse số và tra canonical hierarchy. Chỉ resolve khi
    document scope và hierarchy cho đúng một kết quả.
-2. **Khái niệm mơ hồ** (tìm kiếm): nếu là `“vốn điều lệ”` thì dùng semantic
-   search + full-text search, trả về nhiều candidate có score.
+2. **Mô tả ngữ nghĩa** (tìm kiếm): nếu target là `“trình tự chào bán phần vốn
+   góp”` thì dùng semantic search + full-text search, giới hạn theo target label,
+   corpus và temporal scope, rồi trả candidate có score.
 
 **Vì sao tách khỏi AI?** An toàn: nếu để AI tự nói ID, nó **có thể bịa** một "Điều 99" không tồn tại. Nên **AI chỉ được nói chữ, chỉ Bộ dò tên (tìm trên graph thật) mới được tạo ID** — không thể trả về điều luật không có thật.
 
 **Nó không chọn bừa:** structural reference phải resolve duy nhất; semantic
-mention phải vượt ngưỡng và margin đã calibration. Nếu không đạt, trả
-`UNBOUND_ANCHOR` hoặc `AMBIGUOUS_ANCHOR`. Việc thử nhiều candidate phải có
-budget cố định và không được biến “có path” thành bằng chứng rằng candidate đó
-đúng ý query.
+mention phải vượt ngưỡng và margin đã calibration. Nếu không đạt, trả reason
+code riêng cho anchor hoặc target. Candidate list chỉ là diagnostic của linker;
+`BoundSemanticPlan` chỉ được tạo với đúng một anchor và một target. Việc thử
+nhiều candidate phải có budget cố định và không được biến “có path” thành bằng
+chứng rằng candidate đó đúng ý query.
 
-> **Đây là rủi ro lớn nhất của cả giải pháp:** nếu Bộ dò tên neo sai điều luật ngay từ đầu, mọi bước sau đều sai. Vì vậy phải **đo độ chính xác của nó riêng, sớm** (Phần 6).
+> **Đây là rủi ro lớn nhất của cả giải pháp:** nếu Bộ dò tên bind sai anchor hoặc
+> target, mọi bước sau vẫn có thể đúng cấu trúc nhưng sai ý query. Vì vậy phải đo
+> anchor accuracy và target accuracy riêng, sớm (Phần 6).
 
 ---
 
@@ -294,6 +314,7 @@ Toàn bộ giải pháp giả định graph **thật sự chứa** các chuỗi 
 
 ```
 Cổng QG-0:  Đưa "đơn hàng vàng" (viết tay) cho máy dò đường.
+            Anchor và target ID đều được bind thủ công từ gold.
             → Nếu máy dò chạy đúng khi đơn hoàn hảo (100% ca gold) → kiến trúc ổn, đi tiếp.
             → Nếu không đạt → DỪNG, khỏi tốn công xây AI planner.
 
@@ -301,7 +322,21 @@ Cổng QG-1:  Mới để AI planner tự viết đơn hàng, so với bản là
             → Đánh giá trên tập tài liệu tách riêng (leave-one-document-out).
 ```
 
-Chiến lược này **cô lập rủi ro**: nếu hỏng ở QG-0 thì biết ngay là do máy dò/dữ liệu, chưa dính tới AI.
+Chiến lược này **cô lập rủi ro**: QG-0 không đo target linker. Nếu hỏng ở QG-0
+thì biết ngay là do executor/data/plan contract, chưa dính tới AI hoặc semantic
+binding. Anchor/target binding được đo riêng trước QG-1 end-to-end.
+
+### 6.2.1. Kết quả Task 0 ngày 2026-07-22
+
+- Bốn gold path đều tồn tại.
+- `multi_hop_02` có exact denotation với shape cũ.
+- `multi_hop_01`, `multi_hop_03`, `multi_hop_04` mỗi case trả ba Clause vì
+  `REFERS_TO -> CONTAINS -> Clause` không phân biệt được Clause đích.
+- Quyết định: áp dụng ADR-23, thêm target mention/binding; không để answer LLM
+  chọn target.
+- Artifact graph còn stale so với ontology v1.6.0 nên Task 0 vẫn chưa pass.
+
+Chi tiết: `results/retrieval/query_graph_preflight.md`.
 
 ### 6.3. Đọc log biết hỏng ở đâu
 
@@ -310,6 +345,8 @@ Chiến lược này **cô lập rủi ro**: nếu hỏng ở QG-0 thì biết n
 | `INVALID_PLAN` | AI ra đơn sai (quan hệ lạ, sai chiều, sai số bước) | Planner | prompt/schema |
 | `UNBOUND_ANCHOR` | Không tìm ra điều luật cho cụm chữ | Bộ dò tên | index/tìm kiếm |
 | `AMBIGUOUS_ANCHOR` | Nhiều ứng viên ngang điểm | Bộ dò tên | ngưỡng / hỏi lại |
+| `UNBOUND_TARGET` | Không resolve được đơn vị đích | Bộ dò tên | index/scope/calibration |
+| `AMBIGUOUS_TARGET` | Target có nhiều candidate không đủ margin | Bộ dò tên | calibration hoặc thu hẹp scope |
 | `NO_PATH` | Neo đúng nhưng graph không có đường | **Dữ liệu** | thường là graph thiếu cạnh (§6.1) |
 | `TEMPORAL_REJECTED` | Có đường nhưng hết hiệu lực | Máy dò | đúng thiết kế |
 | `EVIDENCE_UNLIFTABLE` | Tới đích nhưng không trích dẫn được | Lift evidence | đích là node ngữ nghĩa thiếu Điều/Khoản kề |
@@ -329,6 +366,7 @@ Phần này dành cho người code. Người đọc để hiểu ý tưởng c�
 class UnlinkedSemanticPlan(BaseModel):
     model_config = ConfigDict(frozen=True)
     anchor: AnchorMention
+    target: TargetMention
     steps: tuple[PathStepConstraint, ...]        # exact-linear, 2..3 bước
 
     @model_validator(mode="after")
@@ -350,29 +388,46 @@ class AnchorMention(BaseModel):
     text: str
     expected_label: AnchorLabel | None = None    # AI gợi ý; Bộ dò tên mới quyết
 
+class TargetMention(BaseModel):
+    text: str                                    # không node_id
+    # expected label derive từ steps[-1].next_label, không lặp field
+
 class PathStepConstraint(BaseModel):
     relation: QueryPlannableRelation
     direction: Literal["outgoing", "incoming"]   # exact
     next_label: TraversalLabel | TargetLabel
 
-# Bộ dò tên sinh — node_id chỉ xuất hiện ở đây
+# Bộ dò tên sinh — node_id chỉ xuất hiện sau boundary này.
+class BoundEndpoint(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    mention_text: str
+    node_id: str
+    label: str
+    resolution_method: Literal["STRUCTURAL", "FULLTEXT", "VECTOR_RRF"]
+    score: float | None = None
+
 class BoundSemanticPlan(BaseModel):
     model_config = ConfigDict(frozen=True)
     unlinked: UnlinkedSemanticPlan
-    bound_anchor: BoundAnchor                     # mention → candidates(node_id, score)
+    bound_anchor: BoundEndpoint                   # unique, không candidate list
+    bound_target: BoundEndpoint                   # unique, label == target_label
 
 # Máy dò đường sinh — kết quả có kiểm chứng
 class PlanExecutionResult(BaseModel):
     model_config = ConfigDict(frozen=True)
     plan_fingerprint: str
     satisfied_path_fingerprints: tuple[str, ...]  # cổng membership cho sufficiency
-    bound_anchor_ids: tuple[str, ...]
-    target_ids: tuple[str, ...]
+    bound_anchor_id: str
+    bound_target_id: str
     execution_status: Literal["satisfied", "failed"]
     reason_code: PlanReasonCode                   # enum đóng (bảng §6.3)
     message: str | None = None
     derived_reasoning_requirement: GraphReasoningRequirement | None   # artifact tương thích
 ```
+
+V1 invariant bổ sung: kết quả `satisfied` có đúng một topology fingerprint sau
+khi collapse parallel citation provenance. Nhiều topology nối cùng hai endpoint
+vẫn là `AMBIGUOUS_PATH`, không chọn shortest path ngầm.
 
 ### 7.2. Nhãn được phép — tách theo VAI TRÒ, chỉ dùng nhãn "chạy được"
 
@@ -417,7 +472,10 @@ Node ngữ nghĩa (LegalConcept…) **không tự trích dẫn được** (chỉ
 ### 7.6. Ranh giới khác
 
 - **Thời gian:** dùng lại `TemporalQuery` sẵn có làm nguồn duy nhất; planner **không** tạo nguồn thời gian song song.
-- **Bộ dò tên:** định nghĩa `StructuralAnchorResolverPort` thuộc retrieval; **không** import registry của extraction (giữ đúng chiều phụ thuộc).
+- **Bộ dò tên:** định nghĩa `StructuralEndpointResolverPort` và
+  `SemanticEndpointResolverPort` thuộc retrieval; **không** import registry của
+  extraction. Semantic binding dùng corpus/label/temporal filters nhưng không
+  nhận path-existence feature.
 - **Sync/async:** planner là lời gọi LLM async, retrieval đang đồng bộ → phải có adapter timeout/hủy rõ ràng, không gọi async tùy tiện trong luồng đồng bộ.
 
 ---
@@ -427,12 +485,16 @@ Node ngữ nghĩa (LegalConcept…) **không tự trích dẫn được** (chỉ
 Giải pháp lấp đúng chỗ khiến câu hỏi multi-hop bị từ chối:
 
 1. Planner chuyển câu hỏi thành một pattern quan hệ có thứ tự.
-2. EntityLinker gắn anchor vào canonical node có thật.
-3. Executor chỉ chạy đúng pattern đó trên Neo4j.
+2. EntityLinker bind độc lập anchor và target vào canonical node có thật.
+3. Executor chỉ chạy đúng pattern giữa hai endpoint đã bind trên Neo4j.
 4. Sufficiency chỉ mở generation gate cho path đã thực sự thỏa plan.
 5. Bất kỳ bước nào thất bại đều trả reason code và không sinh câu trả lời.
 
 Nói gọn: **LLM mô tả cần tìm đường gì; code tìm và kiểm đường thật; answer
 generation chỉ được dùng evidence nằm trên đường đã kiểm.**
 
-Điều kiện tiên quyết: **graph phải có dữ liệu multi-hop** (kiểm ở §6.1). Rủi ro lớn nhất là **Bộ dò tên**, không phải AI planner. Chiến lược đúng: **kiểm dữ liệu → chứng minh máy dò đường (QG-0) → mới xây AI planner (QG-1)**, và giữ tuyên bố đúng phạm vi *multi-hop tuyến tính, đảm bảo mức 1*.
+Điều kiện tiên quyết: **graph phải có dữ liệu multi-hop** (kiểm ở §6.1). Rủi ro
+lớn nhất là **binding endpoint**, không phải AI planner. Chiến lược đúng:
+**kiểm dữ liệu/expressivity → bind gold endpoints và chứng minh executor (QG-0)
+→ calibrate endpoint linker → mới chạy QG-1**, và giữ tuyên bố đúng phạm vi
+*multi-hop tuyến tính, đảm bảo mức 1*.
