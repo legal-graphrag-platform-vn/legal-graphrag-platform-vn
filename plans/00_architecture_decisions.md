@@ -795,3 +795,82 @@ ontology version.
 - Existing v1.5.1 decision artifacts are historical and require offline normalization.
 - Parallel citations remain separate graph relationships, while retrieval collapses them for topology/path ranking.
 - Appendix retrieval and reasoning require a separate ontology migration.
+
+---
+
+## ADR-23: Bind target độc lập cho query plan multi-hop chính xác
+
+**Ngày**: 2026-07-22
+**Trạng thái**: PROPOSED
+
+### Bối cảnh
+
+Preflight query-graph ở Task 0 chứng minh rằng cấu trúc plan ban đầu
+`anchor + các bước relation/direction/label có thứ tự` không thể xác định duy
+nhất target cho ba query đã được review. Với `multi_hop_01`, `multi_hop_03` và
+`multi_hop_04`, cấu trúc
+`Clause -> REFERS_TO -> Article -> CONTAINS -> Clause` trả về mọi Clause trong
+Article được viện dẫn. Gold path có tồn tại, nhưng chỉ các constraint về
+relation và label thì chưa thể biểu diễn Clause nào trả lời query.
+
+Nếu cho phép answer model chọn target sau execution, một plan mơ hồ có thể bị
+coi là đã thỏa mãn, đồng thời vi phạm boundary về exact-path membership.
+
+### Quyết định
+
+Một query plan exact-linear V1 phải chứa cả:
+
+1. `AnchorMention`, xác định điểm bắt đầu traversal; và
+2. `TargetMention` bắt buộc, mô tả legal unit hoặc semantic endpoint mà query
+   cần đi tới.
+
+Planner chỉ sinh mention text và label thuộc allowlist; không bao giờ sinh
+canonical ID hoặc Cypher. Binding thuộc retrieval sẽ resolve anchor và target
+độc lập. Structural mention dùng controlled hierarchy lookup; semantic mention
+dùng full-text/vector retrieval đã calibration và bị giới hạn bởi corpus,
+target label cùng temporal filter.
+
+Chỉ tạo `BoundSemanticPlan` khi cả hai endpoint đều resolve duy nhất. Exact
+executor sau đó truyền bound anchor ID và bound target ID dưới dạng parameter
+vào static template depth 2 hoặc 3, rồi revalidate mọi topology trả về. Nếu có
+nhiều exact topology thì trả `AMBIGUOUS_PATH`; nếu không có kết quả thì trả
+`NO_PATH`.
+
+Không bao giờ được dùng việc path có tồn tại làm evidence rằng một anchor hoặc
+target candidate đúng về semantic. Binding accuracy và path execution accuracy
+phải được đo riêng.
+
+### Các phương án đã cân nhắc
+
+**Chỉ dùng các bước relation/direction/label**
+
+- Loại vì Task 0 trả ba target Clause ở ba trong bốn linear case đã review.
+
+**Để answer generation chọn trong mọi Clause có thể đi tới**
+
+- Loại vì generation sẽ quyết định retrieval có đủ hay không, qua đó bypass cơ
+  chế exact-path membership theo nguyên tắc fail-closed.
+
+**Thêm target predicate tùy ý hoặc Cypher do LLM sinh**
+
+- Loại khỏi V1 vì làm rộng executable surface, làm yếu query parameterization và
+  khiến validation khó hơn đáng kể.
+
+**Thu hẹp V1 chỉ còn `multi_hop_02`**
+
+- Không chọn làm hướng chính vì phương án này né tránh thay vì giải quyết khoảng
+  trống về target denotation đã được review. Đây vẫn là fallback nếu target
+  binding không đạt các calibration threshold đã preregister.
+
+### Hệ quả
+
+- `UnlinkedSemanticPlan` bổ sung `TargetMention` bắt buộc nhưng vẫn không chứa
+  graph ID.
+- `BoundSemanticPlan` mang đúng một anchor và một target đã resolve duy nhất;
+  candidate list chỉ là diagnostic của linker, không phải trusted plan.
+- Runtime reason code bổ sung `UNBOUND_TARGET` và `AMBIGUOUS_TARGET`.
+- QG-0 dùng gold endpoint được bind thủ công để cô lập correctness của executor.
+- QG-1 báo cáo anchor binding, target binding và exact-path denotation thành các
+  metric riêng.
+- V1 vẫn không bao gồm branching, join, target predicate, legal entailment và
+  automatic constraint relaxation.
