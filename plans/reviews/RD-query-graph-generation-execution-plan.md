@@ -2,8 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0 rerun đã pass; Task 1 được phép triển khai
-> review, ontology v1.6.0 artifact rebuild còn mở
+> **Trạng thái:** Accepted — Task 0–3 đã pass; Task 4 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -55,7 +54,7 @@ unit cần trích dẫn còn tồn tại sau evidence projection.
 | Evidence compaction | Đã có | src/generation/evidence_compaction.py |
 | Answer grounding | Đã có | src/generation/grounding.py |
 | Query-specific planner | Chưa có | — |
-| Anchor binding | Chưa có retrieval-owned component | — |
+| Structural anchor/target binding | Đã có, deterministic và retrieval-owned | src/retrieval/planning/linker.py |
 | Exact ordered executor | Chưa có | — |
 | Satisfied-path membership | Chưa có | — |
 
@@ -335,13 +334,13 @@ triển khai.
 
 **Acceptance criteria:**
 
-- [ ] Invalid relation, legacy alias, wrong direction, wrong positional label,
+- [x] Invalid relation, legacy alias, wrong direction, wrong positional label,
       depth 1/4, blank anchor và blank target đều bị reject bằng ValueError rõ nghĩa.
-- [ ] DTO không có field cho node ID ở UnlinkedSemanticPlan.
-- [ ] Bound target label khác final next_label bị reject.
-- [ ] Candidate list không thể được truyền như trusted BoundSemanticPlan.
-- [ ] Bound plan không tự được coi là trusted execution result.
-- [ ] JSON schema provider chỉ expose query-plannable labels/relations.
+- [x] DTO không có field cho node ID ở UnlinkedSemanticPlan.
+- [x] Bound target label khác final next_label bị reject.
+- [x] Candidate list không thể được truyền như trusted BoundSemanticPlan.
+- [x] Bound plan không tự được coi là trusted execution result.
+- [x] JSON schema provider chỉ expose query-plannable labels/relations.
 
 **Files likely touched:**
 
@@ -353,12 +352,26 @@ triển khai.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_query_plan_models.py
-- [ ] uv run pytest -q src/retrieval/tests/test_query_plan_patterns.py
+- [x] uv run pytest -q src/retrieval/tests/test_query_plan_models.py
+- [x] uv run pytest -q src/retrieval/tests/test_query_plan_patterns.py
 
 **Dependencies:** ADR-23 accepted và Task 0 rerun pass trên artifacts ontology v1.6.0.
 
 **Estimated scope:** M — 5 files.
+
+### Task 1 implementation result — 2026-07-23
+
+Result: **passed**.
+
+- Thêm immutable planning DTO, closed reason/status/resolution enums và strict
+  `extra="forbid"` boundary.
+- `UnlinkedSemanticPlan` chỉ chứa mentions và ordered steps; target label derive
+  từ final `next_label`, không có canonical node ID hoặc temporal source riêng.
+- `validate_directed_step` dùng shared ontology `CONSTRAINTS` và canonical edge
+  direction, không gọi write-time provenance validator.
+- Bound plan chỉ nhận một anchor và một target; execution result enforce
+  satisfied/failed invariant và unique topology fingerprint của V1.
+- Targeted tests: 36 passed. Full retrieval tests: 124 passed.
 
 ---
 
@@ -378,9 +391,9 @@ generation, ổn định trước thay đổi mutable provenance.
 
 **Acceptance criteria:**
 
-- [ ] Retrieval và generation dùng cùng helper.
-- [ ] Không có implementation path identity thứ hai.
-- [ ] Stable ordering không phụ thuộc set/dict iteration.
+- [x] Retrieval và generation dùng cùng helper.
+- [x] Không có implementation path identity thứ hai.
+- [x] Stable ordering không phụ thuộc set/dict iteration.
 
 **Files likely touched:**
 
@@ -391,12 +404,26 @@ generation, ổn định trước thay đổi mutable provenance.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_path_identity.py
-- [ ] uv run pytest -q src/generation/tests/test_evidence_compaction.py
+- [x] uv run pytest -q src/retrieval/tests/test_path_identity.py
+- [x] uv run pytest -q src/generation/tests/test_evidence_compaction.py
 
 **Dependencies:** Task 1.
 
 **Estimated scope:** M — 4 files.
+
+### Task 2 implementation result — 2026-07-23
+
+Result: **passed**.
+
+- Thêm một canonical `build_topology_path_fingerprint` dựa trên node IDs theo
+  traversal order và canonical relation type/source/target.
+- Loại `relation_id`, citation presentation, temporal metadata và mutable
+  provenance khỏi path identity.
+- Generation validation và retrieval topology dedup cùng import helper này;
+  implementation `build_path_id` cũ đã được xóa.
+- Parallel `REFERS_TO` citations collapse về cùng fingerprint nhưng retrieval
+  vẫn giữ toàn bộ citation evidence theo stable relation-ID ordering.
+- Targeted path/compaction tests: 16 passed; graph-path safety tests: 7 passed.
 
 ---
 
@@ -418,11 +445,11 @@ canonical legal unit mà không dùng LLM-generated ID.
 
 **Acceptance criteria:**
 
-- [ ] Unique structural reference bind đúng canonical ID.
-- [ ] Thiếu document scope hoặc nhiều match trả typed ambiguous code đúng endpoint role.
-- [ ] Không có match trả typed unbound code đúng endpoint role.
-- [ ] Không suy ID bằng string prefix và không import extraction registry.
-- [ ] Lookup query parameterized và không ghi graph.
+- [x] Unique structural reference bind đúng canonical ID.
+- [x] Thiếu document scope hoặc nhiều match trả typed ambiguous code đúng endpoint role.
+- [x] Không có match trả typed unbound code đúng endpoint role.
+- [x] Không suy ID bằng string prefix và không import extraction registry.
+- [x] Lookup query parameterized và không ghi graph.
 
 **Files likely touched:**
 
@@ -434,8 +461,17 @@ canonical legal unit mà không dùng LLM-generated ID.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_structural_endpoint_linker.py
-- [ ] uv run pytest -q src/retrieval/tests/test_repository.py
+- [x] uv run pytest -q src/retrieval/tests/test_structural_endpoint_linker.py
+- [x] uv run pytest -q src/retrieval/tests/test_repository.py
+
+**Kết quả thực thi (2026-07-23):**
+
+- Unit/repository contract: 19 tests pass.
+- Retrieval regression suite: 147 tests pass.
+- Full suite: 465 tests pass, 8 tests deselected.
+- Neo4j M3 live read-only verification bind duy nhất `59/2020/QH14`, `Điều 145`
+  và `Khoản 3 Điều 145` lần lượt về `ldn_2020`, `ldn_2020_art145` và
+  `ldn_2020_art145_cl3`.
 
 **Dependencies:** Task 1.
 
@@ -446,10 +482,10 @@ canonical legal unit mà không dùng LLM-generated ID.
 ## Checkpoint A — Foundation
 
 - [x] Task 0 preflight pass.
-- [ ] DTO/schema tests pass.
-- [ ] Path identity is topology-only.
-- [ ] Structural anchors/targets resolve deterministically.
-- [ ] Không có ontology hoặc write-path change.
+- [x] DTO/schema tests pass.
+- [x] Path identity is topology-only.
+- [x] Structural anchors/targets resolve deterministically.
+- [x] Không có ontology hoặc write-path change.
 
 Không bắt đầu exact executor nếu Checkpoint A chưa đạt.
 

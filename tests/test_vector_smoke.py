@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import json
 
-from src.infrastructure.neo4j.vector_smoke import SMOKE_QUERIES, run_vector_smoke, write_vector_smoke_evidence
+from src.infrastructure.neo4j.vector_smoke import (
+    SMOKE_QUERIES,
+    run_vector_smoke,
+    write_vector_smoke_evidence,
+)
 
 
 class FakeSession:
@@ -25,8 +29,8 @@ def test_vector_smoke_runs_every_query_on_both_indexes(tmp_path) -> None:
     assert all(len(run["results"]) == 1 for run in report["runs"])
 
     results_path, judgements_path = write_vector_smoke_evidence(report, tmp_path)
-    assert len(json.loads(results_path.read_text())) == 3
-    judgements = json.loads(judgements_path.read_text())
+    assert len(json.loads(results_path.read_text(encoding="utf-8"))) == 3
+    judgements = json.loads(judgements_path.read_text(encoding="utf-8"))
     assert len(judgements) == 6
     assert all(item["judgement"] is None for item in judgements)
 
@@ -38,4 +42,7 @@ def test_vector_smoke_does_not_overwrite_manual_judgements(tmp_path) -> None:
 
     write_vector_smoke_evidence(report, tmp_path)
 
-    assert json.loads(judgements_path.read_text())[0]["judgement"] == "relevant"
+    assert (
+        json.loads(judgements_path.read_text(encoding="utf-8"))[0]["judgement"]
+        == "relevant"
+    )
