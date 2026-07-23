@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 from types import SimpleNamespace
 
 import pytest
@@ -52,19 +53,29 @@ class FakePlanningRuntime:
     """Runtime that exposes prepare/execute for the planning orchestration path."""
 
     def __init__(self, intent: IntentType) -> None:
-        self._prepared = SimpleNamespace(
-            routing=SimpleNamespace(decision=SimpleNamespace(intent=intent))
-        )
+        self._intent = intent
         self.prepare_calls = 0
+        self.prepared_requests: list[object] = []
         self.executed_plans: list[object] = []
+        self.executions: list[tuple[str, object]] = []
+        self.prepare_thread_ids: list[int] = []
+        self.execute_thread_ids: list[int] = []
 
     def prepare(self, request: RetrievalRequest):
         self.prepare_calls += 1
-        return self._prepared
+        self.prepare_thread_ids.append(threading.get_ident())
+        prepared = SimpleNamespace(
+            request=request,
+            routing=SimpleNamespace(decision=SimpleNamespace(intent=self._intent)),
+        )
+        self.prepared_requests.append(prepared)
+        return prepared
 
     def execute(self, prepared, *, plan=None):
-        assert prepared is self._prepared
+        assert prepared in self.prepared_requests
+        self.execute_thread_ids.append(threading.get_ident())
         self.executed_plans.append(plan)
+        self.executions.append((prepared.request.query, plan))
         return retrieval_context()
 
     def retrieve(self, request: RetrievalRequest):
@@ -82,9 +93,11 @@ class FakePlanner:
         self._plan = plan
         self._error = error
         self.calls = 0
+        self.thread_ids: list[int] = []
 
     async def plan(self, query: str):
         self.calls += 1
+        self.thread_ids.append(threading.get_ident())
         if self._error is not None:
             raise self._error
         return self._plan
@@ -141,12 +154,15 @@ def test_multi_hop_plans_once_then_executes_with_plan() -> None:
             runtime, runner, planner=planner, planning_enabled=True
         )
         try:
-            await service.retrieve_context(RetrievalRequest(query="multi hop"))
+            context = await service.retrieve_context(
+                RetrievalRequest(query="multi hop")
+            )
         finally:
             await runner.aclose()
         assert planner.calls == 1
         assert runtime.prepare_calls == 1
         assert runtime.executed_plans == [plan]
+        assert context.metrics["planner_provider_calls"] == 1
 
     asyncio.run(scenario())
 
@@ -160,11 +176,37 @@ def test_non_multi_hop_skips_planner_and_executes_without_plan() -> None:
             runtime, runner, planner=planner, planning_enabled=True
         )
         try:
-            await service.retrieve_context(RetrievalRequest(query="factual"))
+            context = await service.retrieve_context(RetrievalRequest(query="factual"))
         finally:
             await runner.aclose()
         assert planner.calls == 0
         assert runtime.executed_plans == [None]
+        assert context.metrics["planner_provider_calls"] == 0
+
+    asyncio.run(scenario())
+
+
+def test_planner_stays_on_event_loop_while_runtime_work_uses_runner_thread() -> None:
+    async def scenario() -> None:
+        event_loop_thread_id = threading.get_ident()
+        runtime = FakePlanningRuntime(IntentType.MULTI_HOP)
+        planner = FakePlanner(plan=_unlinked_plan())
+        runner = _runner()
+        service = GraphRAGRetrievalService(
+            runtime, runner, planner=planner, planning_enabled=True
+        )
+        try:
+            await service.retrieve_context(RetrievalRequest(query="multi hop"))
+        finally:
+            await runner.aclose()
+
+        assert planner.thread_ids == [event_loop_thread_id]
+        assert runtime.prepare_thread_ids
+        assert runtime.execute_thread_ids
+        assert all(
+            thread_id != event_loop_thread_id
+            for thread_id in runtime.prepare_thread_ids + runtime.execute_thread_ids
+        )
 
     asyncio.run(scenario())
 
@@ -227,9 +269,10 @@ def test_concurrent_requests_keep_independent_plan_state() -> None:
             )
         finally:
             await runner.aclose()
-        # every request executed with exactly its own plan, none shared or dropped
-        assert set(runtime.executed_plans) == set(plans.values())
-        assert len(runtime.executed_plans) == len(plans)
+        # Every prepared request is paired with its own plan. Merely comparing the
+        # plan set would miss a cross-request swap between two concurrent calls.
+        assert dict(runtime.executions) == plans
+        assert len(runtime.executions) == len(plans)
 
     asyncio.run(scenario())
 

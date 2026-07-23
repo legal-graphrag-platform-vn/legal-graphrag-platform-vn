@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–11, QG-0 và Checkpoint B đã pass; Checkpoint C là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–11, QG-0, Checkpoint B và Checkpoint C đã pass; Task 12 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -1010,12 +1010,29 @@ danh sách để giữ boundary typed).
 
 ## Checkpoint C — Provider và backend integration
 
-- [ ] Planner timeout, cancellation và malformed output đều fail typed.
-- [ ] Neo4j execution không chạy trên FastAPI event loop.
-- [ ] Plan failure tạo zero answer-provider calls.
-- [ ] Startup rollback và shutdown đóng đủ planner, runner và runtime.
-- [ ] Mock mode cùng các non-multi-hop endpoints không regression.
-- [ ] Provider-online tests vẫn là explicit opt-in.
+- [x] Planner timeout, cancellation và malformed output đều fail typed.
+- [x] Neo4j execution không chạy trên FastAPI event loop.
+- [x] Plan failure tạo zero answer-provider calls.
+- [x] Startup rollback và shutdown đóng đủ planner, runner và runtime.
+- [x] Mock mode cùng các non-multi-hop endpoints không regression.
+- [x] Provider-online tests vẫn là explicit opt-in.
+
+**Kết quả kiểm chứng (2026-07-24):**
+
+- Regression test xác nhận planner async chạy trên FastAPI event-loop thread,
+  còn `prepare` và `execute` của retrieval runtime chạy trong bounded runner
+  thread; không có Neo4j work trên event loop.
+- `planner_provider_calls` được ghi trên mọi retrieval context: `1` khi backend
+  gọi planner cho MULTI_HOP và `0` khi planner bị bỏ qua. Metric này đếm planner
+  invocation tại backend boundary; retry provider nội bộ vẫn thuộc cùng invocation.
+- Concurrent requests kiểm trực tiếp mapping `prepared request query -> plan`, vì
+  vậy việc tráo plan giữa hai request không thể pass chỉ nhờ cùng tập plan.
+- Lifecycle regression bao phủ browser startup failure sau khi planner đã được
+  tạo và planner close failure; planner, document service, runner và runtime còn
+  lại vẫn được cleanup đầy đủ.
+- Checkpoint suite: 68 tests pass; architecture/dependency suite: 9 tests pass.
+  Hai provider-online tests được default marker filter deselect (`2 deselected`)
+  và chỉ chạy khi explicit opt-in.
 
 Không chạy QG-1 nếu Checkpoint C chưa đạt.
 
