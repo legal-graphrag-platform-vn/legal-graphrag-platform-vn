@@ -1,14 +1,14 @@
 {
   "contract_version": "retrieval-evaluation-artifact-verification-v1",
-  "generated_at": "2026-07-13T15:09:08.970405Z",
+  "generated_at": "2026-07-23T13:02:43.802597Z",
   "verifier_contract_version": "retrieval-evaluation-artifact-verification-v1",
-  "source_commit": "52412fd244f06dc8b0f13000f46386d43794191a",
-  "verifier_source_commit": "52412fd244f06dc8b0f13000f46386d43794191a",
-  "working_tree_state": "clean",
+  "source_commit": "48feb5510d25669fccbdb6995642ef296931f72d",
+  "verifier_source_commit": "48feb5510d25669fccbdb6995642ef296931f72d",
+  "working_tree_state": "dirty",
   "technical_checks_status": "PASS",
-  "evidence_tier": "official_candidate",
-  "official_evidence_eligible": true,
-  "verification_command_hash": "61c28775256ecd758e849f0a8121b4751b742cc6d19d36d7b751298a89426c99",
+  "evidence_tier": "development",
+  "official_evidence_eligible": false,
+  "verification_command_hash": "cac4b1ed8cc1c1b5ad9ba9b8517a2d2fd649668e55728254fccc85d663c66aeb",
   "runtime_config_hash": "f41db2873d038575e317ab62f1231f71da03d2d92faf330fba30cdf41d756430",
   "capability_query_version": "neo4j-retrieval-capability-v1",
   "capability_query_hash": "f3594f5f77036db122c564fdd35b31c57fc92b318c6bdd3e504e6144ec780fc8",
@@ -28,11 +28,11 @@
     "ldn_2020"
   ],
   "input_hashes": {
-    "dataset_sha256": "979ca695a074ae1eec44bff5af204530ecfad47c5d6ab3260c205206aa75b77f",
-    "accepted_relations_sha256": "e353b866bc08a5599e03e92dfc45c7a91360bb81a34785562ee24d8a2b8b3432",
-    "hierarchy_sha256": "8ef26f54e98055286b91a127bf0bec437666b891fd2d2daf6d3fa6ffc62675c5",
-    "graph_snapshot_sha256": "a0e04cee9461102c4663bcb920c08aed3b30f577a1a1f1eb95564c0a9bcd3288",
-    "graph_projection_sha256": "67d0318fbb32b3c0f7ad9b4842515b2c5cd074f4021cebba32338103795f0091"
+    "dataset_sha256": "52b37c628826dfdc6f289596b28a0407b5652424615267ab510a971ed0447e41",
+    "accepted_relations_sha256": "899723c4309dbccf891275419b73af650cab428db6bf20c78c28b4425d29c5a6",
+    "hierarchy_sha256": "570d40dffd186c4b138e8732f969667dbda56f696d0953df9a3016d45607cd27",
+    "graph_snapshot_sha256": "da83cbda49eaa8543390f4eb3f49de8085cbb96bbcb3ed42ff5a1cb9d6304dd8",
+    "graph_projection_sha256": "294cf005d4d5926d5d09c9388236ff23d92cd6b845eeaef89a4d263f6280e291"
   },
   "accepted_refers_to_records": [
     {
@@ -40,15 +40,21 @@
       "relation_type": "REFERS_TO",
       "target_id": "ldn_2020_art145_cl1",
       "source_relation_id": null,
-      "relation_id": "1ff70eabe43ca2f602f12009932c0d8896327ba1",
+      "relation_id": "2075fce0eeb9ffd5950e9e93bda96da3b57e0612",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+      "identity_discriminator": "DIRECT|khoản 1 Điều này",
       "properties": {
-        "citation_text": "Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+        "citation_text": "khoản 1 Điều này",
         "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:25.413766Z"
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "985d2479e6a8eadd63d516907e51ea7d5e96caa1f7d2af8f45181941e706c55f",
+        "reference_target_count": 1,
+        "source_unit_id": "ldn_2020_art145_cl2",
+        "source_char_start": 203736,
+        "source_char_end": 203752,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     },
@@ -57,15 +63,21 @@
       "relation_type": "REFERS_TO",
       "target_id": "ldn_2020_art145_cl2",
       "source_relation_id": null,
-      "relation_id": "b12574461cbfe6c5cc5fa808ac2678a41fde91a2",
+      "relation_id": "a923241e370d9e905e74e1b743dc2e19ee29bc01",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+      "identity_discriminator": "DIRECT|khoản 2 Điều này",
       "properties": {
-        "citation_text": "Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+        "citation_text": "khoản 2 Điều này",
         "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:25.413766Z"
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "ee3ea129d1a9304f1b7006bf42fc583e780ee4e4a4ae2635aad9787a1be37a61",
+        "reference_target_count": 1,
+        "source_unit_id": "ldn_2020_art145_cl3",
+        "source_char_start": 204159,
+        "source_char_end": 204175,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     },
@@ -74,15 +86,21 @@
       "relation_type": "REFERS_TO",
       "target_id": "ldn_2020_art41",
       "source_relation_id": null,
-      "relation_id": "aba8af2a5f330a167047f6ea81210138488983aa",
+      "relation_id": "5ff22095694da50e34335eecc889bf0520e277f7",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+      "identity_discriminator": "DIRECT|Điều 41",
       "properties": {
-        "citation_text": "Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+        "citation_text": "Điều 41",
         "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:24.185249Z"
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "ab542985d30782182437eae64040ab5a8382c462cb741e8857834dab2e554866",
+        "reference_target_count": 1,
+        "source_unit_id": "ldn_2020_art38_cl1",
+        "source_char_start": 52270,
+        "source_char_end": 52277,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     },
@@ -91,15 +109,21 @@
       "relation_type": "REFERS_TO",
       "target_id": "ldn_2020_art53_cl6",
       "source_relation_id": null,
-      "relation_id": "2d329a8970427479e48d81b9ddf2c5bc2b3c4e9e",
+      "relation_id": "70838dfc3cae364a34369435c12b1b2affaf0b76",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+      "identity_discriminator": "RANGE|khoản 6 và khoản 7 Điều 53",
       "properties": {
-        "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
-        "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:24.339279Z"
+        "citation_text": "khoản 6 và khoản 7 Điều 53",
+        "citation_type": "RANGE",
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "9fb342042a7190d2fd42a5ab218f3cdd653f984b0186cbb19459ecf67224a8b1",
+        "reference_target_count": 2,
+        "source_unit_id": "ldn_2020_art52_cl1",
+        "source_char_start": 68979,
+        "source_char_end": 69005,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     },
@@ -108,32 +132,44 @@
       "relation_type": "REFERS_TO",
       "target_id": "ldn_2020_art53_cl7",
       "source_relation_id": null,
-      "relation_id": "b87c493c85b789ff9e7f423efcc5d7309a1cf7bc",
+      "relation_id": "3a16b6c2d077699569019dffc8253bb2405ff09d",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+      "identity_discriminator": "RANGE|khoản 6 và khoản 7 Điều 53",
       "properties": {
-        "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
-        "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:24.339279Z"
+        "citation_text": "khoản 6 và khoản 7 Điều 53",
+        "citation_type": "RANGE",
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "9fb342042a7190d2fd42a5ab218f3cdd653f984b0186cbb19459ecf67224a8b1",
+        "reference_target_count": 2,
+        "source_unit_id": "ldn_2020_art52_cl1",
+        "source_char_start": 68979,
+        "source_char_end": 69005,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     },
     {
       "source_id": "ldn_2020_art57_cl1",
       "relation_type": "REFERS_TO",
-      "target_id": "ldn_2020_art49",
+      "target_id": "ldn_2020_art49_cl2",
       "source_relation_id": null,
-      "relation_id": "8b9caf8edb8c3a749a9a81b9af64744d5c2b6a3a",
+      "relation_id": "4401487a8dd4ecc545b0e42c45ffc47149fb36da",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
+      "identity_discriminator": "RANGE|khoản 2 và khoản 3 Điều 49",
       "properties": {
-        "citation_text": "Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
-        "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:24.432635Z"
+        "citation_text": "khoản 2 và khoản 3 Điều 49",
+        "citation_type": "RANGE",
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "b2f5d1c6d6b0e5abdb4ea74de0a27313f5d172166cc07dd96d0ac50c3cbfcd1e",
+        "reference_target_count": 2,
+        "source_unit_id": "ldn_2020_art57_cl1",
+        "source_char_start": 77655,
+        "source_char_end": 77681,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     },
@@ -142,15 +178,21 @@
       "relation_type": "REFERS_TO",
       "target_id": "ldn_2020_art52",
       "source_relation_id": null,
-      "relation_id": "95cb38a870d4a67024b94151257cd1f3ccc9a34e",
+      "relation_id": "50e93a35ae3625248e313e13b2ef001af2055fff",
       "relation_id_source": "derived_canonical_contract",
-      "identity_discriminator": "DIRECT|Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+      "identity_discriminator": "DIRECT|Điều 52",
       "properties": {
-        "citation_text": "Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+        "citation_text": "Điều 52",
         "citation_type": "DIRECT",
-        "confidence": 1.0,
-        "llm_model": "gemini:gemini-3.1-flash-lite",
-        "created_at": "2026-07-12T06:52:24.551403Z"
+        "extraction_method": "RULE",
+        "created_at": "2026-07-23T10:48:03.382115Z",
+        "reference_bundle_id": "56c8e54858d1d644c8f124dc9530242fce36f2d8dec9a91df05895248f6bf644",
+        "reference_target_count": 1,
+        "source_unit_id": "ldn_2020_art68_cl2",
+        "source_char_start": 95350,
+        "source_char_end": 95357,
+        "resolver_name": "vn-structural-reference-resolver",
+        "resolver_version": "2.0.1"
       },
       "source_artifact": "accepted.jsonl"
     }
@@ -180,15 +222,21 @@
             "relation_type": "REFERS_TO",
             "target_id": "ldn_2020_art41",
             "source_relation_id": null,
-            "relation_id": "aba8af2a5f330a167047f6ea81210138488983aa",
+            "relation_id": "5ff22095694da50e34335eecc889bf0520e277f7",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+            "identity_discriminator": "DIRECT|Điều 41",
             "properties": {
-              "citation_text": "Đặt tên trùng hoặc tên gây nhầm lẫn với tên của doanh nghiệp đã đăng ký được quy định tại Điều 41 của Luật này.",
+              "citation_text": "Điều 41",
               "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:24.185249Z"
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "ab542985d30782182437eae64040ab5a8382c462cb741e8857834dab2e554866",
+              "reference_target_count": 1,
+              "source_unit_id": "ldn_2020_art38_cl1",
+              "source_char_start": 52270,
+              "source_char_end": 52277,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
           },
@@ -227,15 +275,21 @@
             "relation_type": "REFERS_TO",
             "target_id": "ldn_2020_art145_cl2",
             "source_relation_id": null,
-            "relation_id": "b12574461cbfe6c5cc5fa808ac2678a41fde91a2",
+            "relation_id": "a923241e370d9e905e74e1b743dc2e19ee29bc01",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+            "identity_discriminator": "DIRECT|khoản 2 Điều này",
             "properties": {
-              "citation_text": "Trường hợp cuộc họp lần thứ hai không đủ điều kiện tiến hành theo quy định tại khoản 2 Điều này",
+              "citation_text": "khoản 2 Điều này",
               "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:25.413766Z"
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "ee3ea129d1a9304f1b7006bf42fc583e780ee4e4a4ae2635aad9787a1be37a61",
+              "reference_target_count": 1,
+              "source_unit_id": "ldn_2020_art145_cl3",
+              "source_char_start": 204159,
+              "source_char_end": 204175,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
           },
@@ -244,15 +298,21 @@
             "relation_type": "REFERS_TO",
             "target_id": "ldn_2020_art145_cl1",
             "source_relation_id": null,
-            "relation_id": "1ff70eabe43ca2f602f12009932c0d8896327ba1",
+            "relation_id": "2075fce0eeb9ffd5950e9e93bda96da3b57e0612",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+            "identity_discriminator": "DIRECT|khoản 1 Điều này",
             "properties": {
-              "citation_text": "Trường hợp cuộc họp lần thứ nhất không đủ điều kiện tiến hành theo quy định tại khoản 1 Điều này",
+              "citation_text": "khoản 1 Điều này",
               "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:25.413766Z"
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "985d2479e6a8eadd63d516907e51ea7d5e96caa1f7d2af8f45181941e706c55f",
+              "reference_target_count": 1,
+              "source_unit_id": "ldn_2020_art145_cl2",
+              "source_char_start": 203736,
+              "source_char_end": 203752,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
           }
@@ -261,12 +321,11 @@
     },
     {
       "query_id": "multi_hop_03",
-      "graph_case_type": "multi_edge_traversal",
+      "graph_case_type": "direct_reference",
       "expected": {
         "source_id": "ldn_2020_art57_cl1",
         "relation_types": [
-          "REFERS_TO",
-          "CONTAINS"
+          "REFERS_TO"
         ],
         "target_id": "ldn_2020_art49_cl2"
       },
@@ -274,34 +333,31 @@
       "resolved_path": {
         "nodes": [
           "ldn_2020_art57_cl1",
-          "ldn_2020_art49",
           "ldn_2020_art49_cl2"
         ],
         "edges": [
           {
             "source_id": "ldn_2020_art57_cl1",
             "relation_type": "REFERS_TO",
-            "target_id": "ldn_2020_art49",
+            "target_id": "ldn_2020_art49_cl2",
             "source_relation_id": null,
-            "relation_id": "8b9caf8edb8c3a749a9a81b9af64744d5c2b6a3a",
+            "relation_id": "4401487a8dd4ecc545b0e42c45ffc47149fb36da",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
+            "identity_discriminator": "RANGE|khoản 2 và khoản 3 Điều 49",
             "properties": {
-              "citation_text": "Hội đồng thành viên được triệu tập họp theo yêu cầu của Chủ tịch Hội đồng thành viên hoặc theo yêu cầu của thành viên hoặc nhóm thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này.",
-              "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:24.432635Z"
+              "citation_text": "khoản 2 và khoản 3 Điều 49",
+              "citation_type": "RANGE",
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "b2f5d1c6d6b0e5abdb4ea74de0a27313f5d172166cc07dd96d0ac50c3cbfcd1e",
+              "reference_target_count": 2,
+              "source_unit_id": "ldn_2020_art57_cl1",
+              "source_char_start": 77655,
+              "source_char_end": 77681,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
-          },
-          {
-            "source_id": "ldn_2020_art49",
-            "relation_type": "CONTAINS",
-            "target_id": "ldn_2020_art49_cl2",
-            "relation_id": null,
-            "properties": {},
-            "source_artifact": "hierarchy.json"
           }
         ]
       }
@@ -330,15 +386,21 @@
             "relation_type": "REFERS_TO",
             "target_id": "ldn_2020_art52",
             "source_relation_id": null,
-            "relation_id": "95cb38a870d4a67024b94151257cd1f3ccc9a34e",
+            "relation_id": "50e93a35ae3625248e313e13b2ef001af2055fff",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+            "identity_discriminator": "DIRECT|Điều 52",
             "properties": {
-              "citation_text": "Thành viên có thể chuyển nhượng quyền góp vốn của mình cho người khác theo quy định tại Điều 52 của Luật này.",
+              "citation_text": "Điều 52",
               "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:24.551403Z"
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "56c8e54858d1d644c8f124dc9530242fce36f2d8dec9a91df05895248f6bf644",
+              "reference_target_count": 1,
+              "source_unit_id": "ldn_2020_art68_cl2",
+              "source_char_start": 95350,
+              "source_char_end": 95357,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
           },
@@ -375,15 +437,21 @@
             "relation_type": "REFERS_TO",
             "target_id": "ldn_2020_art53_cl6",
             "source_relation_id": null,
-            "relation_id": "2d329a8970427479e48d81b9ddf2c5bc2b3c4e9e",
+            "relation_id": "70838dfc3cae364a34369435c12b1b2affaf0b76",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+            "identity_discriminator": "RANGE|khoản 6 và khoản 7 Điều 53",
             "properties": {
-              "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
-              "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:24.339279Z"
+              "citation_text": "khoản 6 và khoản 7 Điều 53",
+              "citation_type": "RANGE",
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "9fb342042a7190d2fd42a5ab218f3cdd653f984b0186cbb19459ecf67224a8b1",
+              "reference_target_count": 2,
+              "source_unit_id": "ldn_2020_art52_cl1",
+              "source_char_start": 68979,
+              "source_char_end": 69005,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
           }
@@ -412,15 +480,21 @@
             "relation_type": "REFERS_TO",
             "target_id": "ldn_2020_art53_cl7",
             "source_relation_id": null,
-            "relation_id": "b87c493c85b789ff9e7f423efcc5d7309a1cf7bc",
+            "relation_id": "3a16b6c2d077699569019dffc8253bb2405ff09d",
             "relation_id_source": "derived_canonical_contract",
-            "identity_discriminator": "DIRECT|khoản 6 và khoản 7 Điều 53 của Luật này",
+            "identity_discriminator": "RANGE|khoản 6 và khoản 7 Điều 53",
             "properties": {
-              "citation_text": "khoản 6 và khoản 7 Điều 53 của Luật này",
-              "citation_type": "DIRECT",
-              "confidence": 1.0,
-              "llm_model": "gemini:gemini-3.1-flash-lite",
-              "created_at": "2026-07-12T06:52:24.339279Z"
+              "citation_text": "khoản 6 và khoản 7 Điều 53",
+              "citation_type": "RANGE",
+              "extraction_method": "RULE",
+              "created_at": "2026-07-23T10:48:03.382115Z",
+              "reference_bundle_id": "9fb342042a7190d2fd42a5ab218f3cdd653f984b0186cbb19459ecf67224a8b1",
+              "reference_target_count": 2,
+              "source_unit_id": "ldn_2020_art52_cl1",
+              "source_char_start": 68979,
+              "source_char_end": 69005,
+              "resolver_name": "vn-structural-reference-resolver",
+              "resolver_version": "2.0.1"
             },
             "source_artifact": "accepted.jsonl"
           }

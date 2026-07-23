@@ -16,10 +16,10 @@
     "pass": true
   },
   "semantic_edge_accounting": {
-    "semantic_relation_total": 775,
-    "topology_edge_count": 746,
+    "semantic_relation_total": 1094,
+    "topology_edge_count": 963,
     "excluded_edge_count_by_type": {
-      "REFERS_TO": 29
+      "REFERS_TO": 131
     },
     "reconciles": true
   },

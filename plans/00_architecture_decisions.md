@@ -801,7 +801,7 @@ ontology version.
 ## ADR-23: Bind target độc lập cho query plan multi-hop chính xác
 
 **Ngày**: 2026-07-22
-**Trạng thái**: PROPOSED
+**Trạng thái**: ACCEPTED
 
 ### Bối cảnh
 
@@ -869,6 +869,14 @@ phải được đo riêng.
 - `BoundSemanticPlan` mang đúng một anchor và một target đã resolve duy nhất;
   candidate list chỉ là diagnostic của linker, không phải trusted plan.
 - Runtime reason code bổ sung `UNBOUND_TARGET` và `AMBIGUOUS_TARGET`.
+
+### Xác nhận
+
+Quyết định được chấp nhận ngày 2026-07-23 sau khi resolver v2.0.1 và graph
+ontology v1.6.0 được rebuild. Task 0 rerun xác nhận ba exact-linear case còn
+thuộc V1 đều có đúng một topology khi bind độc lập anchor và target. Case
+`multi_hop_03` nay là direct `Clause -> REFERS_TO -> Clause`, nên được giữ trong
+evaluation dataset nhưng không còn được dùng làm bằng chứng cho plan 2 bước.
 - QG-0 dùng gold endpoint được bind thủ công để cô lập correctness của executor.
 - QG-1 báo cáo anchor binding, target binding và exact-path denotation thành các
   metric riêng.

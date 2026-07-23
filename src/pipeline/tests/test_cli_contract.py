@@ -40,6 +40,7 @@ def test_module_cli_entrypoint_runs_from_repo_root() -> None:
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
 
     assert result.returncode == 0, result.stderr
@@ -53,6 +54,7 @@ def test_parse_cli_uses_raw_doc_code_option() -> None:
         check=False,
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
 
     assert result.returncode == 0, result.stderr

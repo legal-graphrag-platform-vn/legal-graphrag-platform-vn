@@ -20,7 +20,7 @@ from src.pipeline.parser.models import Article, Clause, Point
 
 
 RESOLVER_NAME = "vn-structural-reference-resolver"
-RESOLVER_VERSION = "2.0.0"
+RESOLVER_VERSION = "2.0.1"
 LINKER_NAME = "curated-document-registry"
 LINKER_VERSION = "1.0.0"
 
@@ -73,7 +73,10 @@ _EXPLICIT_POINT = re.compile(
     r"\s+điều\s+(?P<article>\d+[a-z]?)\b"
 )
 _EXPLICIT_CLAUSE = re.compile(
-    r"(?i)\bkhoản\s+(?P<clause>\d+[a-z]?)\s+điều\s+(?P<article>\d+[a-z]?)\b"
+    r"(?i)\b(?:các\s+)?khoản\s+"
+    r"(?P<clauses>\d+[a-z]?(?:\s*,\s*(?:khoản\s+)?\d+[a-z]?)*"
+    r"(?:\s+và\s+(?:khoản\s+)?\d+[a-z]?)?)"
+    r"\s+điều\s+(?P<article>\d+[a-z]?)\b"
 )
 _CLAUSE_CURRENT_ARTICLE = re.compile(
     r"(?i)\bkhoản\s+(?P<clause>\d+[a-z]?)\s+điều\s+này\b"
@@ -107,7 +110,7 @@ class StructuralReferenceResolver:
         patterns = (
             (_POINTS_CURRENT_CLAUSE, self._resolve_points_current_clause),
             (_EXPLICIT_POINT, self._resolve_explicit_point),
-            (_EXPLICIT_CLAUSE, self._resolve_explicit_clause),
+            (_EXPLICIT_CLAUSE, self._resolve_explicit_clauses),
             (_CLAUSE_CURRENT_ARTICLE, self._resolve_clause_current_article),
             (_CURRENT_CLAUSE, self._resolve_current_clause),
             (_CURRENT_ARTICLE, self._resolve_current_article),
@@ -128,7 +131,11 @@ class StructuralReferenceResolver:
                 occupied.append(local_span)
                 external_number = (
                     _external_document_number(_citation_segment(text, match.start()))
-                    if pattern in {_EXPLICIT_POINT, _EXPLICIT_CLAUSE, _EXPLICIT_ARTICLE}
+                    if pattern in {
+                        _EXPLICIT_POINT,
+                        _EXPLICIT_CLAUSE,
+                        _EXPLICIT_ARTICLE,
+                    }
                     else None
                 )
                 mention = self._mention(
@@ -182,16 +189,20 @@ class StructuralReferenceResolver:
             )
         graph_id, _ = identity
         article_number = match.groupdict().get("article")
-        clause_number = match.groupdict().get("clause")
+        clause_numbers = _clause_numbers(match)
         point_label = match.groupdict().get("label")
-        target = f"{graph_id}_art{article_number.lower()}"
-        if clause_number:
-            target += f"_cl{clause_number.lower()}"
+        base_target = f"{graph_id}_art{article_number.lower()}"
+        targets = tuple(
+            f"{base_target}_cl{clause_number}"
+            for clause_number in clause_numbers
+        ) or (base_target,)
         if point_label:
-            target += f"_p{normalize_point_label(point_label)}"
+            targets = (
+                f"{targets[0]}_p{normalize_point_label(point_label)}",
+            )
         return ResolvedReference(
             mention=mention,
-            target_unit_ids=(target,),
+            target_unit_ids=targets,
             status="RESOLVED",
             resolution_method="ENTITY_LINKING",
             reason_code="curated_external_document_resolution",
@@ -227,13 +238,17 @@ class StructuralReferenceResolver:
         )
         return _resolved_or_missing(mention, target, "explicit_point_target_missing")
 
-    def _resolve_explicit_clause(
+    def _resolve_explicit_clauses(
         self, mention: ReferenceMention, match: re.Match[str]
     ) -> ResolvedReference:
-        target = self.registry.clauses.get(
-            (match.group("article").lower(), match.group("clause").lower())
+        article_number = match.group("article").lower()
+        targets = tuple(
+            self.registry.clauses.get((article_number, clause_number)) or ""
+            for clause_number in _clause_numbers(match)
         )
-        return _resolved_or_missing(mention, target, "explicit_clause_target_missing")
+        if not targets or any(not target for target in targets):
+            return _unresolved(mention, "explicit_clause_target_missing")
+        return _resolved_or_self(mention, targets)
 
     def _resolve_clause_current_article(
         self, mention: ReferenceMention, match: re.Match[str]
@@ -424,3 +439,14 @@ def _citation_segment(text: str, match_start: int) -> str:
 def _external_document_number(text: str) -> str | None:
     match = re.search(r"(?i)\b(?:số\s+)?(\d+/\d{4}/[A-ZĐ0-9-]+)\b", text)
     return match.group(1).upper() if match else None
+
+
+def _clause_numbers(match: re.Match[str]) -> tuple[str, ...]:
+    groups = match.groupdict()
+    if groups.get("clauses"):
+        return tuple(
+            number.lower()
+            for number in re.findall(r"(?i)\b(\d+[a-z]?)\b", groups["clauses"])
+        )
+    clause = groups.get("clause")
+    return (clause.lower(),) if clause else ()

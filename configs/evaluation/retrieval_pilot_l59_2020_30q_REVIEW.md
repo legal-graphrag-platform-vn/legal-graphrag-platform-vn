@@ -4,7 +4,7 @@
 
 ```text
 Dataset: APPROVED
-Human sign-off: COMPLETE by lamdx4 at 2026-07-13T22:00:00+07:00
+Human sign-off: UPDATED by lamdx4 at 2026-07-23T20:00:00+07:00
 Official evaluation: NOT STARTED
 Gate 7 / M3-B13: OPEN
 Milestone A: NOT PASSED
@@ -18,10 +18,11 @@ Artifact verification:
 
 The artifact verifier reads the active accepted extraction export and canonical
 hierarchy, then queries the scoped capability snapshot from the disposable
-Neo4j runtime. The current verification status is `PASS` with input hashes
-recorded in the report. The five graph cases require seven distinct accepted
-`REFERS_TO` edges because `multi_hop_02` contains two sequential references and
-`multi_hop_05` contains two branches.
+Neo4j runtime. `multi_hop_03` was updated after resolver v2.0.1 replaced the
+stale `Clause -> Article -> Clause` representation with an atomic direct
+`Clause -> Clause` reference. The five graph cases still require seven distinct
+accepted `REFERS_TO` edges because `multi_hop_02` contains two sequential
+references and `multi_hop_05` contains two branches.
 
 The approved dataset uses only the local canonical hierarchy under
 `data/processed/L59_2020/hierarchy.json`. It does not use web search or fixture
@@ -44,15 +45,17 @@ For every case, verify:
 5. The wording is natural Vietnamese and does not reveal the expected ID.
 
 The legal gold and capability expectations were confirmed during human review.
-The dataset-level review and all case-level reviews now use:
+The dataset-level review and the revised `multi_hop_03` case use:
 
 ```json
 {
   "reviewer": "lamdx4",
   "status": "approved",
-  "reviewed_at": "2026-07-13T22:00:00+07:00"
+  "reviewed_at": "2026-07-23T20:00:00+07:00"
 }
 ```
+
+The unchanged cases retain their original approval timestamp.
 
 Any dataset edit after `source_commit` requires a new source commit and a full
 evaluation rerun.
@@ -73,7 +76,7 @@ evaluation rerun.
 | `definition_05` | definition | supported | `lexical_definition` | `art12_cl1`, `art12` |
 | `multi_hop_01` | multi_hop | supported | `semantic_multi_hop_graph` | `art38_cl1` -> `REFERS_TO` -> `art41` -> `CONTAINS` -> `art41_cl2` |
 | `multi_hop_02` | multi_hop | supported | `semantic_multi_hop_graph` | `art145_cl3` -> `REFERS_TO` -> `art145_cl2` -> `REFERS_TO` -> `art145_cl1` |
-| `multi_hop_03` | multi_hop | supported | `semantic_multi_hop_graph` | `art57_cl1` -> `REFERS_TO` -> `art49` -> `CONTAINS` -> `art49_cl2` |
+| `multi_hop_03` | multi_hop | supported | `semantic_multi_hop_graph` | atomic direct reference: `art57_cl1` -> `REFERS_TO` -> `art49_cl2` |
 | `multi_hop_04` | multi_hop | supported | `semantic_multi_hop_graph` | `art68_cl2` -> `REFERS_TO` -> `art52` -> `CONTAINS` -> `art52_cl1` |
 | `multi_hop_05` | multi_hop | supported | `semantic_multi_hop_graph` | branching one-hop: `art52_cl1` -> `REFERS_TO` -> `art53_cl6/cl7` |
 | `validity_01`, `02`, `04` | validity | unsupported | `corpus_complete_current_validity` | none; do not fabricate |
@@ -98,10 +101,11 @@ all unsupported cases expect an unavailable capability
 all gold unit IDs resolve in the L59_2020 hierarchy
 all natural-language queries route to their declared intent
 all declared capabilities match canonical pilot artifacts
-four multi-hop cases require at least two graph edges and resolve through
+three multi-hop cases require at least two graph edges and resolve through
 accepted REFERS_TO and canonical structural CONTAINS relations
-the fifth graph case is explicitly typed as a branching one-hop reference and
-requires both gold branches
+multi_hop_03 is explicitly typed as one direct atomic REFERS_TO path
+multi_hop_05 is explicitly typed as a branching one-hop reference and requires
+both gold branches
 supported validity cases contain machine-readable query date, subject, scope,
 expected decision, temporal evidence source, and required temporal metadata
 supported hierarchy cases contain machine-readable CONTAINS parent/child gold
