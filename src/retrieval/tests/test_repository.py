@@ -1,3 +1,5 @@
+import pytest
+
 from src.infrastructure.neo4j.retriever_repo import Neo4jRetrieverRepo
 from src.retrieval.models import RetrievalFilters
 
@@ -127,3 +129,91 @@ def test_structural_endpoint_lookup_is_read_only_parameterized_and_stably_ordere
         keyword in upper_query
         for keyword in (" CREATE ", " MERGE ", " SET ", " DELETE ")
     )
+
+
+def test_exact_path_lookup_uses_static_depth_template_and_parameterized_constraints() -> (
+    None
+):
+    driver = FakeDriver()
+    repo = Neo4jRetrieverRepo(driver)
+    steps = [
+        {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Clause"},
+        {"relation": "REFERS_TO", "direction": "incoming", "next_label": "Clause"},
+    ]
+
+    assert (
+        repo.lookup_exact_paths(
+            anchor_id="anchor'}) MATCH (secret) //",
+            target_id="target",
+            steps=steps,
+            filters=RetrievalFilters(document_ids=["doc"]),
+            limit=21,
+        )
+        == []
+    )
+
+    session = driver.last_session
+    assert session.parameters["anchor_id"] == "anchor'}) MATCH (secret) //"
+    assert session.parameters["target_id"] == "target"
+    assert session.parameters["relation_1"] == "REFERS_TO"
+    assert session.parameters["direction_2"] == "incoming"
+    assert session.parameters["next_label_2"] == "Clause"
+    assert session.parameters["limit"] == 21
+    assert "target mention" not in session.query.lower()
+    assert "MATCH path = (node_0)-[edge_1]-(node_1)-[edge_2]-(node_2)" in session.query
+    assert "startNode(edge_1)" in session.query
+    assert "endNode(edge_1)" in session.query
+    assert "ORDER BY" in session.query
+    assert "LIMIT $limit" in session.query
+    assert "secret" not in session.query
+    upper_query = session.query.upper()
+    assert not any(
+        keyword in upper_query
+        for keyword in (" CREATE ", " MERGE ", " SET ", " DELETE ")
+    )
+
+
+def test_exact_path_lookup_rejects_unsupported_depth_without_opening_session() -> None:
+    driver = FakeDriver()
+    repo = Neo4jRetrieverRepo(driver)
+
+    with pytest.raises(ValueError, match="depth"):
+        repo.lookup_exact_paths(
+            anchor_id="anchor",
+            target_id="target",
+            steps=[
+                {
+                    "relation": "REFERS_TO",
+                    "direction": "outgoing",
+                    "next_label": "Clause",
+                }
+            ],
+            filters=RetrievalFilters(),
+            limit=21,
+        )
+
+    assert driver.last_session is None
+
+
+def test_exact_path_lookup_has_a_distinct_static_depth_three_template() -> None:
+    driver = FakeDriver()
+    repo = Neo4jRetrieverRepo(driver)
+
+    repo.lookup_exact_paths(
+        anchor_id="anchor",
+        target_id="target",
+        steps=[
+            {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Clause"},
+            {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Clause"},
+            {
+                "relation": "DEFINES",
+                "direction": "outgoing",
+                "next_label": "LegalConcept",
+            },
+        ],
+        filters=RetrievalFilters(),
+        limit=21,
+    )
+
+    assert "-[edge_3]-(node_3)" in driver.last_session.query
+    assert driver.last_session.parameters["relation_3"] == "DEFINES"

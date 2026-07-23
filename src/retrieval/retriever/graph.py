@@ -54,8 +54,8 @@ class GraphRetriever:
         units_by_id: dict[str, RetrievedUnit] = {}
         temporal_rejected = 0
         for row in rows:
-            path = _map_path(row)
-            if not _is_path_temporally_valid(path, active_filters.query_date):
+            path = map_graph_path(row)
+            if not is_graph_path_temporally_valid(path, active_filters.query_date):
                 temporal_rejected += 1
                 continue
             paths.append(path)
@@ -66,8 +66,8 @@ class GraphRetriever:
                 if unit.id not in units_by_id:
                     units_by_id[unit.id] = unit
 
-        paths = _deduplicate_topology_paths(paths)
-        paths.sort(key=_path_rank_key)
+        paths = deduplicate_topology_paths(paths)
+        paths.sort(key=graph_path_rank_key)
         first_occurrence: dict[str, int] = {}
         for index, path in enumerate(paths, start=1):
             for node in path.nodes:
@@ -90,7 +90,7 @@ class GraphRetriever:
         )
 
 
-def _map_path(row: dict) -> GraphPath:
+def map_graph_path(row: dict) -> GraphPath:
     try:
         nodes = tuple(
             GraphNodeRef(
@@ -157,7 +157,7 @@ def _validate_path_shape(
             )
 
 
-def _is_path_temporally_valid(path: GraphPath, query_date: date | None) -> bool:
+def is_graph_path_temporally_valid(path: GraphPath, query_date: date | None) -> bool:
     if query_date is None:
         return True
     for node in path.nodes:
@@ -202,7 +202,7 @@ def _describe_path(
     return " ".join(parts)
 
 
-def _path_rank_key(
+def graph_path_rank_key(
     path: GraphPath,
 ) -> tuple[int, str, str, tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
     source_id = path.nodes[0].node_id if path.nodes else ""
@@ -217,7 +217,7 @@ def _path_rank_key(
     )
 
 
-def _deduplicate_topology_paths(paths: list[GraphPath]) -> list[GraphPath]:
+def deduplicate_topology_paths(paths: list[GraphPath]) -> list[GraphPath]:
     grouped: dict[str, list[GraphPath]] = {}
     for path in paths:
         fingerprint = build_topology_path_fingerprint(path)
@@ -225,7 +225,7 @@ def _deduplicate_topology_paths(paths: list[GraphPath]) -> list[GraphPath]:
 
     deduplicated: list[GraphPath] = []
     for group in grouped.values():
-        canonical = min(group, key=_path_rank_key)
+        canonical = min(group, key=graph_path_rank_key)
         merged_edges: list[GraphEdge] = []
         for edge_index, edge in enumerate(canonical.edges):
             citations = {

@@ -1,5 +1,9 @@
 """Exact query-specific graph planning contracts."""
 
+from src.retrieval.planning.executor import (
+    PlannedPathExecution,
+    PlannedPathExecutor,
+)
 from src.retrieval.planning.models import (
     AnchorMention,
     BoundEndpoint,
@@ -44,6 +48,8 @@ __all__ = [
     "PlanExecutionResult",
     "PlanExecutionStatus",
     "PlanReasonCode",
+    "PlannedPathExecution",
+    "PlannedPathExecutor",
     "QUERY_ANCHOR_LABELS",
     "QUERY_PLANNABLE_RELATIONS",
     "QUERY_TARGET_LABELS",
