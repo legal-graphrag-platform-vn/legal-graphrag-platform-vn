@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Mapping, Protocol, Sequence
+from typing import TYPE_CHECKING, Any, Mapping, Protocol, Sequence
 
 from src.retrieval.models import GraphExpansion, IntentType, RetrievedUnit
 from src.shared.retrieval_contract import RetrievalFilters
+
+if TYPE_CHECKING:
+    from src.retrieval.planning.linker import (
+        EndpointRole,
+        StructuralEndpointResolution,
+    )
 
 
 class VectorSearchPort(Protocol):
@@ -42,6 +48,31 @@ class GraphExpansionPort(Protocol):
         filters: RetrievalFilters,
         limit: int = 50,
     ) -> list[dict[str, Any]]: ...
+
+
+class StructuralEndpointLookupPort(Protocol):
+    def lookup_structural_endpoints(
+        self,
+        *,
+        label: str,
+        document_number: str | None,
+        article_number: str | None,
+        clause_number: str | None,
+        point_label: str | None,
+        filters: RetrievalFilters,
+        limit: int = 20,
+    ) -> list[Mapping[str, Any]]: ...
+
+
+class StructuralEndpointResolverPort(Protocol):
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: "EndpointRole | str",
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> "StructuralEndpointResolution": ...
 
 
 class EmbeddingPort(Protocol):

@@ -17,6 +17,7 @@ from src.retrieval.models import (
     RetrievalFilters,
     RetrievedUnit,
 )
+from src.retrieval.path_identity import build_topology_path_fingerprint
 from src.retrieval.ports import GraphExpansionPort
 from src.retrieval.retriever.policies import policy_for
 from src.shared.ontology.contract import RELATION_ENUM
@@ -217,16 +218,10 @@ def _path_rank_key(
 
 
 def _deduplicate_topology_paths(paths: list[GraphPath]) -> list[GraphPath]:
-    grouped: dict[tuple, list[GraphPath]] = {}
+    grouped: dict[str, list[GraphPath]] = {}
     for path in paths:
-        key = (
-            tuple(node.node_id for node in path.nodes),
-            tuple(
-                (edge.relation_type, edge.source_id, edge.target_id)
-                for edge in path.edges
-            ),
-        )
-        grouped.setdefault(key, []).append(path)
+        fingerprint = build_topology_path_fingerprint(path)
+        grouped.setdefault(fingerprint, []).append(path)
 
     deduplicated: list[GraphPath] = []
     for group in grouped.values():

@@ -147,6 +147,37 @@ def test_multi_hop_bundle_is_admitted_atomically() -> None:
     assert len(result.projected.admitted_bundle_ids) == 1
 
 
+def test_parallel_citations_share_one_topology_path_identity() -> None:
+    context = retrieval_context(intent=IntentType.MULTI_HOP)
+    second = retrieved_unit("doc_art2")
+    third = retrieved_unit("doc_art3")
+    context.retrieved_units.extend([second, third])
+    context.evidence.extend(
+        [
+            EvidenceItem(unit_id=second.id, evidence_type="graph", is_eligible=True),
+            EvidenceItem(unit_id=third.id, evidence_type="graph", is_eligible=True),
+        ]
+    )
+    first_path = graph_path(
+        ["doc_art1", "doc_art2", "doc_art3"],
+        ["REFERS_TO", "REFERS_TO"],
+    )
+    parallel_path = first_path.model_copy(
+        update={
+            "edges": tuple(
+                edge.model_copy(update={"relation_id": f"parallel-{index}"})
+                for index, edge in enumerate(first_path.edges, start=1)
+            )
+        }
+    )
+    context.graph_paths = [first_path, parallel_path]
+
+    validated = EvidenceValidator().validate(context)
+
+    assert len(validated.paths) == 2
+    assert validated.paths[0].path_id == validated.paths[1].path_id
+
+
 def test_registry_contains_only_projected_legal_evidence() -> None:
     context = retrieval_context()
     oversized = retrieved_unit("doc_art2")

@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 import re
 from dataclasses import dataclass
 
 from src.generation.errors import EvidenceContractError
 from src.retrieval.models import GraphPath, RetrievalContext, RetrievedUnit
+from src.retrieval.path_identity import build_topology_path_fingerprint
 from src.shared.ontology.contract import RELATION_ENUM
 
 
@@ -51,7 +50,7 @@ class EvidenceValidator:
         paths = tuple(
             ValidatedPath(
                 path=self._validate_path(path),
-                path_id=build_path_id(path),
+                path_id=build_topology_path_fingerprint(path),
                 rank=rank,
             )
             for rank, path in enumerate(context.graph_paths)
@@ -131,19 +130,6 @@ class EvidenceValidator:
         if not path.path_description.strip():
             raise EvidenceContractError("Graph path description must not be blank")
         return path
-
-
-def build_path_id(path: GraphPath) -> str:
-    canonical = json.dumps(
-        {
-            "nodes": [node.model_dump(mode="json") for node in path.nodes],
-            "edges": [edge.model_dump(mode="json") for edge in path.edges],
-        },
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    )
-    return "path_" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:20]
 
 
 def _require_canonical_id(value: str, field_name: str) -> None:

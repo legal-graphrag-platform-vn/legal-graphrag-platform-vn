@@ -168,6 +168,70 @@ class Neo4jRetrieverRepo:
             **_filter_parameters(filters),
         )
 
+    def lookup_structural_endpoints(
+        self,
+        *,
+        label: str,
+        document_number: str | None,
+        article_number: str | None,
+        clause_number: str | None,
+        point_label: str | None,
+        filters: RetrievalFilters,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        if label not in {"Document", "Article", "Clause", "Point"}:
+            raise ValueError(f"Unsupported structural endpoint label: {label}")
+        if not 1 <= limit <= 100:
+            raise ValueError(
+                "Structural endpoint lookup limit must be between 1 and 100"
+            )
+        query = """
+        MATCH (document:Document)
+        WHERE document.id IN $document_ids
+          AND ($doc_types = [] OR document.doc_type IN $doc_types)
+        MATCH (document)-[:CONTAINS*0..4]->(node)
+        WHERE $label IN labels(node)
+        OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(node)
+        OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(node)
+        OPTIONAL MATCH (point_article:Article)-[:CONTAINS]->(parent_clause)
+        WITH document, node, parent_clause,
+             CASE WHEN node:Article THEN node.number
+                  WHEN node:Clause THEN parent_article.number
+                  WHEN node:Point THEN point_article.number
+                  ELSE null END AS resolved_article_number,
+             CASE WHEN node:Clause THEN node.number
+                  WHEN node:Point THEN parent_clause.number
+                  ELSE null END AS resolved_clause_number,
+             CASE WHEN node:Point THEN node.label ELSE null END AS resolved_point_label,
+             CASE WHEN node:Point THEN parent_clause ELSE node END AS temporal_node
+        WHERE ($document_number IS NULL OR document.number = $document_number)
+          AND ($article_number IS NULL OR resolved_article_number = $article_number)
+          AND ($clause_number IS NULL OR resolved_clause_number = $clause_number)
+          AND ($point_label IS NULL OR resolved_point_label = $point_label)
+          AND ($legal_statuses = [] OR temporal_node.legal_status IN $legal_statuses)
+          AND ($query_date IS NULL OR (
+            temporal_node.effective_from IS NOT NULL
+            AND temporal_node.effective_from <= $query_date
+            AND (temporal_node.effective_to IS NULL
+                 OR temporal_node.effective_to > $query_date)
+          ))
+        RETURN DISTINCT node.id AS node_id,
+                        $label AS label,
+                        document.id AS document_id
+        ORDER BY node_id
+        LIMIT $limit
+        """
+        return self._run(
+            query,
+            label=label,
+            document_number=document_number,
+            article_number=article_number,
+            clause_number=clause_number,
+            point_label=point_label,
+            limit=limit,
+            **_filter_parameters(filters),
+        )
+
     def inspect_dependencies(self) -> dict[str, object]:
         query = """
         SHOW INDEXES
