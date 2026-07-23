@@ -11,7 +11,9 @@ from src.shared.retrieval_contract import RetrievalFilters
 if TYPE_CHECKING:
     from src.retrieval.planning.executor import PlannedPathExecution
     from src.retrieval.planning.linker import (
+        EndpointResolution,
         EndpointRole,
+        SemanticEndpointResolution,
         StructuralEndpointResolution,
     )
     from src.retrieval.planning.models import BoundSemanticPlan
@@ -75,6 +77,28 @@ class StructuralEndpointResolverPort(Protocol):
         expected_label: str | None,
         filters: RetrievalFilters,
     ) -> "StructuralEndpointResolution": ...
+
+
+class SemanticEndpointResolverPort(Protocol):
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: "EndpointRole | str",
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> "SemanticEndpointResolution": ...
+
+
+class EndpointResolverPort(Protocol):
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: "EndpointRole | str",
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> "EndpointResolution": ...
 
 
 class PlannedPathLookupPort(Protocol):

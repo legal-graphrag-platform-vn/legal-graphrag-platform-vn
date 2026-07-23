@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–8, QG-0 và Checkpoint B đã pass; Task 9 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–9, QG-0 và Checkpoint B đã pass; Task 10 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -824,11 +824,11 @@ vẫn fail-closed khi kết quả mơ hồ.
 
 **Acceptance criteria:**
 
-- [ ] Candidate ordering deterministic khi score bằng nhau.
-- [ ] Dưới threshold trả typed `UNBOUND_ANCHOR` hoặc `UNBOUND_TARGET` theo role.
-- [ ] Không đủ margin trả typed `AMBIGUOUS_ANCHOR` hoặc `AMBIGUOUS_TARGET`.
-- [ ] Threshold được lưu trong config và có calibration evidence; không dùng magic number.
-- [ ] Anchor accuracy, target accuracy và path execution accuracy được báo riêng.
+- [x] Candidate ordering deterministic khi score bằng nhau.
+- [x] Dưới threshold trả typed `UNBOUND_ANCHOR` hoặc `UNBOUND_TARGET` theo role.
+- [x] Không đủ margin trả typed `AMBIGUOUS_ANCHOR` hoặc `AMBIGUOUS_TARGET`.
+- [x] Threshold được lưu trong config và có calibration evidence; không dùng magic number.
+- [x] Anchor accuracy, target accuracy và path execution accuracy được báo riêng.
 
 **Files likely touched:**
 
@@ -840,8 +840,24 @@ vẫn fail-closed khi kết quả mơ hồ.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_semantic_endpoint_linker.py
-- [ ] Re-run calibration tạo cùng threshold trên cùng artifact.
+- [x] uv run pytest -q src/retrieval/tests/test_semantic_endpoint_linker.py
+- [x] Re-run calibration tạo cùng threshold trên cùng artifact.
+
+**Kết quả thực thi (2026-07-23):**
+
+- `EndpointLinker` ưu tiên structural parser tuyệt đối; chỉ semantic mention mới
+  đi qua vector + full-text channels.
+- Semantic candidates dùng deterministic hierarchy-aware RRF; Article hit có
+  thể hỗ trợ Clause candidate cùng article family nhưng không dùng path existence
+  hoặc target reachability.
+- Config calibrated: anchor/target minimum score `0.063`, minimum margin `0.001`,
+  candidate budget `10`, RRF k `60`.
+- Calibration phát triển giữ false resolution bằng 0: anchor accuracy `1/3`,
+  target accuracy `2/3`; QG-0 path execution accuracy được báo riêng là `3/3`.
+- Live BGE-M3 + Neo4j check resolve đúng mô tả chuyển nhượng/chào bán phần vốn
+  góp sang `ldn_2020_art52_cl1` với score `0.063101`.
+- Semantic linker suite: 6 tests pass; full suite: 512 tests pass, 10
+  integration/provider tests deselected.
 
 **Dependencies:** Tasks 3 và 8.
 
