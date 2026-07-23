@@ -10,10 +10,15 @@ from typing import Any, Literal, Mapping, Self, TypeAlias
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from src.retrieval.errors import RetrievalOutputError
-from src.retrieval.models import RetrievalFilters
+from src.retrieval.config import EndpointLinkerConfig
+from src.retrieval.models import RetrievalFilters, RetrievedUnit
 from src.retrieval.planning.models import BoundEndpoint, PlanReasonCode
 from src.retrieval.planning.patterns import QUERY_TRAVERSAL_LABELS
-from src.retrieval.ports import StructuralEndpointLookupPort
+from src.retrieval.ports import (
+    FullTextChannelPort,
+    StructuralEndpointLookupPort,
+    VectorChannelPort,
+)
 
 
 _NUMBER = r"[0-9]+[A-Za-z]?"
@@ -115,6 +120,38 @@ class StructuralEndpointResolution(_ImmutableContract):
         elif self.bound_endpoint is not None or self.reason_code is None:
             raise ValueError("Unresolved endpoint requires a reason and no binding")
         return self
+
+
+class SemanticEndpointCandidate(_ImmutableContract):
+    node_id: str
+    label: Literal["Article", "Clause", "Point"]
+    document_id: str
+    score: float
+    retrieval_sources: tuple[Literal["vector", "fulltext"], ...]
+
+
+class SemanticEndpointResolution(_ImmutableContract):
+    role: EndpointRole
+    status: EndpointResolutionStatus
+    mention_text: str
+    candidates: tuple[SemanticEndpointCandidate, ...] = ()
+    bound_endpoint: BoundEndpoint | None = None
+    reason_code: PlanReasonCode | None = None
+    message: str
+
+    @model_validator(mode="after")
+    def validate_resolution_state(self) -> Self:
+        if self.status is EndpointResolutionStatus.RESOLVED:
+            if not self.candidates or self.bound_endpoint is None or self.reason_code:
+                raise ValueError("Resolved semantic endpoint requires a binding")
+        elif self.bound_endpoint is not None or self.reason_code is None:
+            raise ValueError("Unresolved semantic endpoint requires a reason")
+        return self
+
+
+EndpointResolution: TypeAlias = (
+    StructuralEndpointResolution | SemanticEndpointResolution
+)
 
 
 class StructuralEndpointResolver:
@@ -278,6 +315,256 @@ class StructuralEndpointResolver:
             reason_code=reason,
             message=message,
         )
+
+
+class SemanticEndpointResolver:
+    def __init__(
+        self,
+        *,
+        vector: VectorChannelPort,
+        fulltext: FullTextChannelPort,
+        config: EndpointLinkerConfig,
+    ) -> None:
+        self._vector = vector
+        self._fulltext = fulltext
+        self._config = config
+
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: EndpointRole | str,
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> SemanticEndpointResolution:
+        normalized_role = EndpointRole(role)
+        normalized_mention = _normalize_mention(mention_text)
+        if expected_label not in {"Article", "Clause", "Point"}:
+            return self._unbound(
+                normalized_role,
+                normalized_mention,
+                (),
+                "Expected label is not supported by legal-unit retrieval channels",
+            )
+        candidate_k = self._candidate_k(normalized_role)
+        channels = {
+            "vector": self._vector.retrieve(
+                normalized_mention,
+                filters=filters,
+                top_k=candidate_k,
+            ),
+            "fulltext": self._fulltext.retrieve(
+                normalized_mention,
+                filters=filters,
+                top_k=candidate_k,
+            ),
+        }
+        self._validate_channel_scope(channels, filters)
+        candidates = _fuse_semantic_candidates(
+            channels,
+            expected_label=expected_label,
+            rrf_k=self._config.rrf_k,
+            top_n=candidate_k,
+        )
+        if not candidates or candidates[0].score < self._min_score(normalized_role):
+            return self._unbound(
+                normalized_role,
+                normalized_mention,
+                candidates,
+                "Semantic candidates are below the calibrated score threshold",
+            )
+        if len(candidates) > 1 and candidates[0].score - candidates[
+            1
+        ].score < self._min_margin(normalized_role):
+            return self._ambiguous(
+                normalized_role,
+                normalized_mention,
+                candidates,
+                "Semantic candidates do not meet the calibrated score margin",
+            )
+        top = candidates[0]
+        method = "VECTOR_RRF" if "vector" in top.retrieval_sources else "FULLTEXT"
+        return SemanticEndpointResolution(
+            role=normalized_role,
+            status=EndpointResolutionStatus.RESOLVED,
+            mention_text=normalized_mention,
+            candidates=candidates,
+            bound_endpoint=BoundEndpoint(
+                mention_text=normalized_mention,
+                node_id=top.node_id,
+                label=top.label,
+                resolution_method=method,
+                score=top.score,
+            ),
+            message="Semantic endpoint resolved above calibrated thresholds",
+        )
+
+    @staticmethod
+    def _validate_channel_scope(
+        channels: Mapping[str, list[RetrievedUnit]],
+        filters: RetrievalFilters,
+    ) -> None:
+        for units in channels.values():
+            for unit in units:
+                if (
+                    filters.document_ids
+                    and unit.document_id not in filters.document_ids
+                ):
+                    raise RetrievalOutputError(
+                        "Semantic endpoint candidate is outside document scope"
+                    )
+
+    def _candidate_k(self, role: EndpointRole) -> int:
+        return (
+            self._config.anchor_candidate_k
+            if role is EndpointRole.ANCHOR
+            else self._config.target_candidate_k
+        )
+
+    def _min_score(self, role: EndpointRole) -> float:
+        return (
+            self._config.anchor_min_score
+            if role is EndpointRole.ANCHOR
+            else self._config.target_min_score
+        )
+
+    def _min_margin(self, role: EndpointRole) -> float:
+        return (
+            self._config.anchor_min_margin
+            if role is EndpointRole.ANCHOR
+            else self._config.target_min_margin
+        )
+
+    @staticmethod
+    def _unbound(
+        role: EndpointRole,
+        mention_text: str,
+        candidates: tuple[SemanticEndpointCandidate, ...],
+        message: str,
+    ) -> SemanticEndpointResolution:
+        return SemanticEndpointResolution(
+            role=role,
+            status=EndpointResolutionStatus.UNBOUND,
+            mention_text=mention_text,
+            candidates=candidates,
+            reason_code=(
+                PlanReasonCode.UNBOUND_ANCHOR
+                if role is EndpointRole.ANCHOR
+                else PlanReasonCode.UNBOUND_TARGET
+            ),
+            message=message,
+        )
+
+    @staticmethod
+    def _ambiguous(
+        role: EndpointRole,
+        mention_text: str,
+        candidates: tuple[SemanticEndpointCandidate, ...],
+        message: str,
+    ) -> SemanticEndpointResolution:
+        return SemanticEndpointResolution(
+            role=role,
+            status=EndpointResolutionStatus.AMBIGUOUS,
+            mention_text=mention_text,
+            candidates=candidates,
+            reason_code=(
+                PlanReasonCode.AMBIGUOUS_ANCHOR
+                if role is EndpointRole.ANCHOR
+                else PlanReasonCode.AMBIGUOUS_TARGET
+            ),
+            message=message,
+        )
+
+
+class EndpointLinker:
+    def __init__(
+        self,
+        *,
+        structural: StructuralEndpointResolver,
+        semantic: SemanticEndpointResolver,
+    ) -> None:
+        self._structural = structural
+        self._semantic = semantic
+
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: EndpointRole | str,
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> EndpointResolution:
+        if parse_structural_reference(mention_text) is not None:
+            return self._structural.resolve(
+                mention_text=mention_text,
+                role=role,
+                expected_label=expected_label,
+                filters=filters,
+            )
+        return self._semantic.resolve(
+            mention_text=mention_text,
+            role=role,
+            expected_label=expected_label,
+            filters=filters,
+        )
+
+
+def _fuse_semantic_candidates(
+    channels: Mapping[str, list[RetrievedUnit]],
+    *,
+    expected_label: str,
+    rrf_k: int,
+    top_n: int,
+) -> tuple[SemanticEndpointCandidate, ...]:
+    direct_units: dict[str, RetrievedUnit] = {}
+    for units in channels.values():
+        for unit in units:
+            if unit.label == expected_label:
+                direct_units.setdefault(unit.id, unit)
+
+    scores = {unit_id: 0.0 for unit_id in direct_units}
+    sources: dict[str, set[str]] = {unit_id: set() for unit_id in direct_units}
+    for source, units in sorted(channels.items()):
+        for rank, unit in enumerate(units, start=1):
+            recipients = _semantic_score_recipients(
+                unit,
+                expected_label=expected_label,
+                direct_units=direct_units,
+            )
+            for unit_id in recipients:
+                scores[unit_id] += 1.0 / (rrf_k + rank)
+                sources[unit_id].add(source)
+
+    ordered_ids = sorted(scores, key=lambda unit_id: (-scores[unit_id], unit_id))
+    return tuple(
+        SemanticEndpointCandidate(
+            node_id=unit_id,
+            label=direct_units[unit_id].label,
+            document_id=direct_units[unit_id].document_id,
+            score=scores[unit_id],
+            retrieval_sources=tuple(sorted(sources[unit_id])),
+        )
+        for unit_id in ordered_ids[:top_n]
+    )
+
+
+def _semantic_score_recipients(
+    unit: RetrievedUnit,
+    *,
+    expected_label: str,
+    direct_units: Mapping[str, RetrievedUnit],
+) -> tuple[str, ...]:
+    if unit.id in direct_units:
+        return (unit.id,)
+    if expected_label == "Clause" and unit.label == "Article":
+        return tuple(
+            candidate.id
+            for candidate in direct_units.values()
+            if candidate.article_id == unit.id
+        )
+    if expected_label == "Article" and unit.label == "Clause":
+        return (unit.article_id,) if unit.article_id in direct_units else ()
+    return ()
 
 
 def parse_structural_reference(mention_text: str) -> StructuralReference | None:
