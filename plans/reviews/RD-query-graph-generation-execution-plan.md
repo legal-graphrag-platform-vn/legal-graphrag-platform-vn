@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–3 đã pass; Task 4 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–5 và QG-0 đã pass; Task 6 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -55,7 +55,7 @@ unit cần trích dẫn còn tồn tại sau evidence projection.
 | Answer grounding | Đã có | src/generation/grounding.py |
 | Query-specific planner | Chưa có | — |
 | Structural anchor/target binding | Đã có, deterministic và retrieval-owned | src/retrieval/planning/linker.py |
-| Exact ordered executor | Chưa có | — |
+| Exact ordered executor | Đã có, deterministic và dùng static depth 2/3 templates | src/retrieval/planning/executor.py |
 | Satisfied-path membership | Chưa có | — |
 
 Lỗ hổng cần lấp không phải chỉ là gán thêm reasoning_requirement. Cần có trọn
@@ -511,14 +511,14 @@ khớp toàn bộ ordered constraints.
 
 **Acceptance criteria:**
 
-- [ ] Executor không dùng generic any-order relation membership.
-- [ ] Mọi returned path bắt đầu tại bound anchor và kết thúc tại bound target.
-- [ ] Incoming traversal không đảo canonical source_id/target_id.
-- [ ] Không có Cypher do LLM sinh.
-- [ ] Same input/snapshot trả cùng ordered result.
-- [ ] Empty result, temporal rejection, ambiguous result và truncation có reason
+- [x] Executor không dùng generic any-order relation membership.
+- [x] Mọi returned path bắt đầu tại bound anchor và kết thúc tại bound target.
+- [x] Incoming traversal không đảo canonical source_id/target_id.
+- [x] Không có Cypher do LLM sinh.
+- [x] Same input/snapshot trả cùng ordered result.
+- [x] Empty result, temporal rejection, ambiguous result và truncation có reason
       code khác nhau.
-- [ ] Executor không tìm evidence ngoài satisfied path để cứu plan.
+- [x] Executor không tìm evidence ngoài satisfied path để cứu plan.
 
 **Files likely touched:**
 
@@ -530,9 +530,19 @@ khớp toàn bộ ordered constraints.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_exact_path_executor.py
-- [ ] uv run pytest -q src/retrieval/tests/test_repository.py
-- [ ] Integration query xác nhận canonical edge direction trên Neo4j fixture.
+- [x] uv run pytest -q src/retrieval/tests/test_exact_path_executor.py
+- [x] uv run pytest -q src/retrieval/tests/test_repository.py
+- [x] Integration query xác nhận canonical edge direction trên Neo4j fixture.
+
+**Kết quả thực thi (2026-07-23):**
+
+- Exact executor contract: 15 tests pass; repository contract: 7 tests pass.
+- Retrieval regression suite: 165 tests pass.
+- Full suite: 483 tests pass, 8 tests deselected.
+- Neo4j M3 xác nhận duy nhất path `cl3 -[:REFERS_TO]-> cl2
+  -[:REFERS_TO]-> cl1` và traversal incoming/outgoing `cl3 -> Article 145 -> cl1`.
+  Hai cạnh `CONTAINS` của case incoming vẫn giữ canonical direction
+  `Article 145 -> Clause`.
 
 **Dependencies:** Tasks 1–3.
 
@@ -558,12 +568,12 @@ hoàn hảo, trước khi thêm LLM planner hoặc semantic target linker.
 
 **Gate QG-0:**
 
-- [ ] 100% executable linear gold cases có manual bound endpoints đúng contract.
-- [ ] Structural anchor resolver bind đúng anchor ở 100% linear cases.
-- [ ] 100% returned denotation khớp gold path; không chỉ “gold nằm trong top-k”.
-- [ ] Không có legacy relation alias.
-- [ ] Không path nào pass khi direction bị đảo.
-- [ ] Case thiếu edge trả NO_PATH và không gọi bất kỳ answer provider nào.
+- [x] 100% executable linear gold cases có manual bound endpoints đúng contract.
+- [x] Structural anchor resolver bind đúng anchor ở 100% linear cases.
+- [x] 100% returned denotation khớp gold path; không chỉ “gold nằm trong top-k”.
+- [x] Không có legacy relation alias.
+- [x] Không path nào pass khi direction bị đảo.
+- [x] Case thiếu edge trả NO_PATH và không gọi bất kỳ answer provider nào.
 
 **Stop condition:**
 
@@ -584,7 +594,19 @@ Không bắt đầu Task 6 trở đi cho tới khi QG-0 pass.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_query_graph_gold_plans.py
+- [x] uv run pytest -q src/retrieval/tests/test_query_graph_gold_plans.py
+
+**Kết quả thực thi (2026-07-23):**
+
+- Ba manual gold fixtures `multi_hop_01`, `multi_hop_02`, `multi_hop_04` đều
+  resolve đúng structural anchor và trả đúng một exact denotation.
+- Anchor accuracy: 3/3; exact denotation: 3/3; false-positive paths: 0.
+- Direction đảo và target thiếu đều trả `NO_PATH`; answer-provider calls: 0.
+- Unit/artifact contract: 3 tests pass; Neo4j M3 integration: 1 test pass.
+- Retrieval regression suite: 168 tests pass, 1 integration test deselected.
+- Full suite: 486 tests pass, 9 integration tests deselected.
+- Evidence: `results/retrieval/query_graph_qg0.json` và
+  `results/retrieval/query_graph_qg0.md`.
 
 **Dependencies:** Task 4.
 
@@ -1131,7 +1153,7 @@ không ghi graph và không thay schema.
 
 Feature chỉ được coi là hoàn tất khi:
 
-- [ ] Task 0 và QG-0 pass trên pinned graph snapshot.
+- [x] Task 0 và QG-0 pass trên pinned graph snapshot.
 - [ ] Tất cả DTO invariants có unit tests.
 - [ ] Entity linking và exact path execution có contract/integration evidence.
 - [ ] Anchor binding và target binding có metric/evidence tách biệt.

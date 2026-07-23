@@ -1,0 +1,73 @@
+{
+  "schema_version": "query-graph-qg0-v1",
+  "captured_at": "2026-07-23T14:23:36.205960+00:00",
+  "status": "passed",
+  "gate": "QG-0 manual gold plans",
+  "config_sha256": "7c14744c582288f981f3cb16b0552b60f5297b1e3de5a07774d024c783496ba1",
+  "evaluation_scope": "pilot_development",
+  "document_ids": ["ldn_2020"],
+  "graph_identity": {
+    "uri_without_credentials": "bolt://127.0.0.1:7688",
+    "database_name": "neo4j",
+    "component": "Neo4j Kernel",
+    "version": "5.26.28",
+    "edition": "community",
+    "ontology_version": "1.6.0",
+    "preflight_projection_sha256": "294cf005d4d5926d5d09c9388236ff23d92cd6b845eeaef89a4d263f6280e291"
+  },
+  "cases": [
+    {
+      "query_id": "multi_hop_01",
+      "anchor_status": "resolved",
+      "anchor_id": "ldn_2020_art38_cl1",
+      "execution_status": "satisfied",
+      "reason_code": "SATISFIED",
+      "expected_node_ids": ["ldn_2020_art38_cl1", "ldn_2020_art41", "ldn_2020_art41_cl2"],
+      "returned_node_ids": ["ldn_2020_art38_cl1", "ldn_2020_art41", "ldn_2020_art41_cl2"],
+      "expected_relation_types": ["REFERS_TO", "CONTAINS"],
+      "returned_relation_types": ["REFERS_TO", "CONTAINS"],
+      "exact_denotation": true,
+      "false_positive_path_count": 0,
+      "latency_ms": 13.858
+    },
+    {
+      "query_id": "multi_hop_02",
+      "anchor_status": "resolved",
+      "anchor_id": "ldn_2020_art145_cl3",
+      "execution_status": "satisfied",
+      "reason_code": "SATISFIED",
+      "expected_node_ids": ["ldn_2020_art145_cl3", "ldn_2020_art145_cl2", "ldn_2020_art145_cl1"],
+      "returned_node_ids": ["ldn_2020_art145_cl3", "ldn_2020_art145_cl2", "ldn_2020_art145_cl1"],
+      "expected_relation_types": ["REFERS_TO", "REFERS_TO"],
+      "returned_relation_types": ["REFERS_TO", "REFERS_TO"],
+      "exact_denotation": true,
+      "false_positive_path_count": 0,
+      "latency_ms": 21.072
+    },
+    {
+      "query_id": "multi_hop_04",
+      "anchor_status": "resolved",
+      "anchor_id": "ldn_2020_art68_cl2",
+      "execution_status": "satisfied",
+      "reason_code": "SATISFIED",
+      "expected_node_ids": ["ldn_2020_art68_cl2", "ldn_2020_art52", "ldn_2020_art52_cl1"],
+      "returned_node_ids": ["ldn_2020_art68_cl2", "ldn_2020_art52", "ldn_2020_art52_cl1"],
+      "expected_relation_types": ["REFERS_TO", "CONTAINS"],
+      "returned_relation_types": ["REFERS_TO", "CONTAINS"],
+      "exact_denotation": true,
+      "false_positive_path_count": 0,
+      "latency_ms": 13.929
+    }
+  ],
+  "negative_checks": {
+    "reversed_direction_reason": "NO_PATH",
+    "missing_edge_reason": "NO_PATH",
+    "answer_provider_call_count": 0
+  },
+  "summary": {
+    "linear_case_count": 3,
+    "anchor_resolved_count": 3,
+    "exact_denotation_count": 3,
+    "false_positive_path_count": 0
+  }
+}

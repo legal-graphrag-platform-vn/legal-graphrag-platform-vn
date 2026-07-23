@@ -1,0 +1,59 @@
+{
+  "schema_version": "query-graph-gold-plans-v1",
+  "evaluation_scope": "pilot_development",
+  "document_ids": ["ldn_2020"],
+  "excluded_cases": {
+    "multi_hop_03": "direct atomic one-hop reference, outside exact-linear V1",
+    "multi_hop_05": "branching one-hop case, outside exact-linear V1"
+  },
+  "cases": [
+    {
+      "query_id": "multi_hop_01",
+      "query": "Điều 38 dẫn chiếu Điều 41 và khoản nào tại Điều 41 xác định tên gây nhầm lẫn?",
+      "anchor_mention": "Khoản 1 Điều 38",
+      "anchor_label": "Clause",
+      "anchor_id": "ldn_2020_art38_cl1",
+      "target_mention": "Khoản 2 Điều 41",
+      "target_label": "Clause",
+      "target_id": "ldn_2020_art41_cl2",
+      "steps": [
+        {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Article"},
+        {"relation": "CONTAINS", "direction": "outgoing", "next_label": "Clause"}
+      ],
+      "expected_node_ids": ["ldn_2020_art38_cl1", "ldn_2020_art41", "ldn_2020_art41_cl2"],
+      "expected_relation_types": ["REFERS_TO", "CONTAINS"]
+    },
+    {
+      "query_id": "multi_hop_02",
+      "query": "Từ quy định về cuộc họp lần thứ ba tại Khoản 3 Điều 145, hãy lần theo các dẫn chiếu để xác định điều kiện của lần họp thứ hai và lần họp thứ nhất.",
+      "anchor_mention": "Khoản 3 Điều 145",
+      "anchor_label": "Clause",
+      "anchor_id": "ldn_2020_art145_cl3",
+      "target_mention": "Khoản 1 Điều 145",
+      "target_label": "Clause",
+      "target_id": "ldn_2020_art145_cl1",
+      "steps": [
+        {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Clause"},
+        {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Clause"}
+      ],
+      "expected_node_ids": ["ldn_2020_art145_cl3", "ldn_2020_art145_cl2", "ldn_2020_art145_cl1"],
+      "expected_relation_types": ["REFERS_TO", "REFERS_TO"]
+    },
+    {
+      "query_id": "multi_hop_04",
+      "query": "Khoản 2 Điều 68 dẫn chiếu điều nào về chuyển nhượng phần vốn góp, và khoản nào của điều đó quy định trình tự chào bán phần vốn góp?",
+      "anchor_mention": "Khoản 2 Điều 68",
+      "anchor_label": "Clause",
+      "anchor_id": "ldn_2020_art68_cl2",
+      "target_mention": "Khoản 1 Điều 52",
+      "target_label": "Clause",
+      "target_id": "ldn_2020_art52_cl1",
+      "steps": [
+        {"relation": "REFERS_TO", "direction": "outgoing", "next_label": "Article"},
+        {"relation": "CONTAINS", "direction": "outgoing", "next_label": "Clause"}
+      ],
+      "expected_node_ids": ["ldn_2020_art68_cl2", "ldn_2020_art52", "ldn_2020_art52_cl1"],
+      "expected_relation_types": ["REFERS_TO", "CONTAINS"]
+    }
+  ]
+}

@@ -9,10 +9,12 @@ from src.retrieval.models import GraphExpansion, IntentType, RetrievedUnit
 from src.shared.retrieval_contract import RetrievalFilters
 
 if TYPE_CHECKING:
+    from src.retrieval.planning.executor import PlannedPathExecution
     from src.retrieval.planning.linker import (
         EndpointRole,
         StructuralEndpointResolution,
     )
+    from src.retrieval.planning.models import BoundSemanticPlan
 
 
 class VectorSearchPort(Protocol):
@@ -73,6 +75,27 @@ class StructuralEndpointResolverPort(Protocol):
         expected_label: str | None,
         filters: RetrievalFilters,
     ) -> "StructuralEndpointResolution": ...
+
+
+class PlannedPathLookupPort(Protocol):
+    def lookup_exact_paths(
+        self,
+        *,
+        anchor_id: str,
+        target_id: str,
+        steps: Sequence[Mapping[str, str]],
+        filters: RetrievalFilters,
+        limit: int,
+    ) -> list[Mapping[str, Any]]: ...
+
+
+class PlannedPathExecutionPort(Protocol):
+    def execute(
+        self,
+        plan: "BoundSemanticPlan",
+        *,
+        filters: RetrievalFilters,
+    ) -> "PlannedPathExecution": ...
 
 
 class EmbeddingPort(Protocol):
