@@ -13,7 +13,11 @@ from src.retrieval.errors import (
     RetrievalOutputError,
     RetrievalRequestError,
 )
-from src.retrieval.execution_contract import PlanExecutionResult, PlanExecutionStatus
+from src.retrieval.execution_contract import (
+    PlanExecutionResult,
+    PlanExecutionStatus,
+    PlanReasonCode,
+)
 from src.retrieval.fusion.reciprocal_rank_fusion import ReciprocalRankFusion
 from src.retrieval.models import (
     CapabilitySnapshot,
@@ -103,6 +107,7 @@ class RetrievalRuntime:
         prepared: PreparedRetrievalRequest,
         *,
         bound_plan: BoundSemanticPlan | None = None,
+        binding_reason_code: PlanReasonCode | None = None,
     ) -> RetrievalContext:
         started = time.perf_counter()
         active_request = prepared.request
@@ -214,6 +219,8 @@ class RetrievalRuntime:
             "planned_execution_reason_code": (
                 planned_execution.reason_code.value
                 if planned_execution is not None
+                else binding_reason_code.value
+                if binding_reason_code is not None
                 else "NOT_PROVIDED"
             ),
             "reranker_latency_ms": _elapsed_ms(reranker_started),

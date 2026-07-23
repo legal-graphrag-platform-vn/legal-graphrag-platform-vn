@@ -1,5 +1,10 @@
 """Exact query-specific graph planning contracts."""
 
+from src.retrieval.planning.binder import (
+    BindingOutcome,
+    PlanBinder,
+    PlanBindingFailure,
+)
 from src.retrieval.planning.executor import (
     PlannedPathExecution,
     PlannedPathExecutor,
@@ -44,8 +49,11 @@ from src.retrieval.planning.patterns import (
 
 __all__ = [
     "AnchorMention",
+    "BindingOutcome",
     "BoundEndpoint",
     "BoundSemanticPlan",
+    "PlanBinder",
+    "PlanBindingFailure",
     "EndpointResolutionMethod",
     "EndpointResolutionStatus",
     "EndpointRole",
