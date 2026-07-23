@@ -22,7 +22,7 @@ UPPERCASE_TITLE_RE = re.compile(
 ARTICLE_RE = re.compile(r"^Điều\s+(\d+[a-z]?)(?:\.|\s*$)\s*(.*)$", re.IGNORECASE)
 
 # Pattern nhận diện dòng bắt đầu một Khoản luật (ví dụ: "1. ", "2. ").
-CLAUSE_RE = re.compile(r"^(\d+[a-z]?)\.\s*(.*)$", re.IGNORECASE)
+CLAUSE_RE = re.compile(r"^(\d+[a-z]?)\.(?:\s+|$)(.*)$", re.IGNORECASE)
 
 # Pattern nhận diện dòng bắt đầu một Điểm luật (ví dụ: "a) ", "b) ").
 POINT_RE = re.compile(r"^([a-zđ])\)\s*(.*)$")

@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from src.pipeline.pipeline.artifact_store import (
     ACTIVE_ARTIFACT_NAMES,
+    active_artifact_dir,
     create_staging_artifact_dir,
     publish_staged_artifacts,
 )
@@ -151,7 +152,7 @@ def test_complete_artifact_set_switches_active_pointer(tmp_path) -> None:
 
     published = publish_staged_artifacts(tmp_path, artifact_set_id, staging)
 
-    assert (tmp_path / "current_extraction").resolve() == published.resolve()
+    assert active_artifact_dir(tmp_path) == published.resolve()
     assert (
         json.loads((tmp_path / "entity_index.json").read_text(encoding="utf-8")) == {}
     )

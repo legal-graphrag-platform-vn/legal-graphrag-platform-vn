@@ -63,6 +63,22 @@ def test_parser_supports_suffixed_article_and_clause_numbers() -> None:
     assert parsed.articles[0].clauses[0].number == "1b"
 
 
+def test_parser_does_not_treat_phone_numbers_as_clauses() -> None:
+    parsed = parse_text(
+        (
+            "Điều 218. Quy định chuyển tiếp\n"
+            "1. Khoản thứ nhất\n"
+            "2. Khoản thứ hai\n"
+            "Điện thoại:\n"
+            "024.6273.9468 | Fax:\n"
+            "024.6273.9359"
+        ),
+        _doc_info(),
+    )
+
+    assert [clause.number for clause in parsed.articles[0].clauses] == ["1", "2"]
+
+
 def test_clause_content_not_empty() -> None:
     text = FIXTURE.read_text(encoding="utf-8")
     parsed = parse_text(text, _doc_info())

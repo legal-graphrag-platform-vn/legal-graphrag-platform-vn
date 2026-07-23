@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from typing import Any
+from typing import Any, TypeVar
+
+from pydantic import BaseModel, ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
 from src.pipeline.config import settings
@@ -24,13 +26,14 @@ from src.pipeline.extraction.structural_context import ArticleExtractionContext
 logger = logging.getLogger(__name__)
 _request_lock = threading.Lock()
 _last_request_at = 0.0
+StructuredResponseT = TypeVar("StructuredResponseT", bound=BaseModel)
 
 _retry_llm_call = retry(
     retry=retry_if_exception_type(RetryableExtractionProviderError),
     stop=stop_after_attempt(8),
     wait=wait_random_exponential(multiplier=2, min=10, max=180),
     before_sleep=lambda retry_state: logger.warning(
-        "Gemini request bị rate-limit; retry lần %d sau %.1f giây",
+        "Gemini request gặp lỗi retryable; retry lần %d sau %.1f giây",
         retry_state.attempt_number + 1,
         retry_state.next_action.sleep,
     ),
@@ -67,7 +70,7 @@ class GeminiProvider(BaseProvider):
             self.resolved_model = response.model_version or settings.gemini_model
         except Exception as exc:
             _raise_classified_provider_error(exc, settings.gemini_model)
-        result = EntityExtractionResult.model_validate_json(response.text)
+        result = _validate_structured_response(EntityExtractionResult, response.text)
         return result.entities
 
     @_retry_llm_call
@@ -96,8 +99,20 @@ class GeminiProvider(BaseProvider):
             self.resolved_model = response.model_version or settings.gemini_model
         except Exception as exc:
             _raise_classified_provider_error(exc, settings.gemini_model)
-        result = RelationExtractionResult.model_validate_json(response.text)
+        result = _validate_structured_response(RelationExtractionResult, response.text)
         return result.relations
+
+
+def _validate_structured_response(
+    schema: type[StructuredResponseT], response_text: str
+) -> StructuredResponseT:
+    try:
+        return schema.model_validate_json(response_text)
+    except ValidationError as exc:
+        raise RetryableExtractionProviderError(
+            "Retryable Gemini provider error: reason=invalid_structured_output, "
+            f"model={settings.gemini_model!r}"
+        ) from exc
 
 
 def _raise_classified_provider_error(exc: Exception, model: str) -> None:

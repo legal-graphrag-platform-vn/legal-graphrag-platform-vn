@@ -7,9 +7,11 @@ Dùng trực tiếp làm `response_schema` cho Gemini structured output (`google
 
 from __future__ import annotations
 
+import re
+import unicodedata
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from src.pipeline.parser.models import LegalNumber
 
 EntityType = Literal[
@@ -34,6 +36,18 @@ class ExtractedEntity(BaseModel):
     id: str = Field(pattern=r"^[a-z0-9_]+$", description="unique, snake_case")
     type: EntityType
     label: str = Field(min_length=1)
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def canonicalize_id(cls, value: object) -> object:
+        if not isinstance(value, str):
+            return value
+        decomposed = unicodedata.normalize("NFD", value)
+        without_marks = "".join(
+            char for char in decomposed if unicodedata.category(char) != "Mn"
+        )
+        ascii_text = without_marks.replace("đ", "d").replace("Đ", "D").lower()
+        return re.sub(r"[^a-z0-9]+", "_", ascii_text).strip("_")
 
 
 class EntityExtractionResult(BaseModel):
