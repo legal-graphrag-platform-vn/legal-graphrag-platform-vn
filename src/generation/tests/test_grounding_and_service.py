@@ -24,6 +24,11 @@ from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.generation.tests.factories import answer_candidate, retrieval_context
 from src.retrieval.models import IntentType
+from src.retrieval.execution_contract import (
+    PlanExecutionResult,
+    PlanExecutionStatus,
+    PlanReasonCode,
+)
 
 
 class FakeProvider:
@@ -53,6 +58,33 @@ def test_insufficient_evidence_does_not_call_provider() -> None:
         assert response.cannot_answer is True
         assert provider.calls == 0
         assert response.provider is None
+
+    asyncio.run(scenario())
+
+
+def test_failed_plan_does_not_call_answer_provider_and_metrics_are_separate() -> None:
+    async def scenario() -> None:
+        provider = FakeProvider()
+        context = retrieval_context(intent=IntentType.MULTI_HOP)
+        context.plan_execution = PlanExecutionResult(
+            plan_fingerprint="plan-failed",
+            satisfied_path_fingerprints=(),
+            bound_anchor_id="doc_art1",
+            bound_target_id="doc_art3",
+            execution_status=PlanExecutionStatus.FAILED,
+            reason_code=PlanReasonCode.NO_PATH,
+        )
+
+        response = await _generator(provider).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+
+        assert response.cannot_answer is True
+        assert response.insufficiency_reason == "NO_PATH"
+        assert provider.calls == 0
+        assert context.metrics["planner_provider_calls"] == 0
+        assert context.metrics["answer_provider_calls_after_plan_failure"] == 0
+        assert "planner_provider_calls" != ("answer_provider_calls_after_plan_failure")
 
     asyncio.run(scenario())
 

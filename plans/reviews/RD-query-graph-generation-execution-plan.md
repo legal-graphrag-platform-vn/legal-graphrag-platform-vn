@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–5 và QG-0 đã pass; Task 6 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–8, QG-0 và Checkpoint B đã pass; Task 9 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -50,13 +50,13 @@ unit cần trích dẫn còn tồn tại sau evidence projection.
 | GraphPath và requirement cũ | Đã có | src/retrieval/models.py |
 | Temporal path validation | Đã có | src/retrieval/retriever/graph.py |
 | Evidence/path validation | Đã có | src/generation/evidence_validation.py |
-| Multi-hop sufficiency | Đã có nhưng chỉ kiểm minimum edge và unordered relation membership | src/generation/sufficiency.py |
+| Multi-hop sufficiency | Đã kiểm satisfied topology fingerprint trước compatibility | src/generation/sufficiency.py |
 | Evidence compaction | Đã có | src/generation/evidence_compaction.py |
 | Answer grounding | Đã có | src/generation/grounding.py |
 | Query-specific planner | Chưa có | — |
 | Structural anchor/target binding | Đã có, deterministic và retrieval-owned | src/retrieval/planning/linker.py |
 | Exact ordered executor | Đã có, deterministic và dùng static depth 2/3 templates | src/retrieval/planning/executor.py |
-| Satisfied-path membership | Chưa có | — |
+| Satisfied-path membership | Đã có xuyên suốt sufficiency, compaction và projection | src/retrieval/path_identity.py; src/generation/ |
 
 Lỗ hổng cần lấp không phải chỉ là gán thêm reasoning_requirement. Cần có trọn
 chuỗi Planner → Linker → Exact Executor → Membership Gate.
@@ -631,11 +631,11 @@ chỉ được derive từ execution result đã satisfied.
 
 **Acceptance criteria:**
 
-- [ ] Non-multi-hop behavior và retrieval-runtime-v2 contract không regression.
-- [ ] Multi-hop thiếu plan tiếp tục trả MULTI_HOP_REQUIREMENT_UNRESOLVED.
-- [ ] Failed plan không tạo reasoning_requirement.
-- [ ] Satisfied result có fingerprint tồn tại trong context.graph_paths.
-- [ ] Một request chỉ thực hiện một planned execution.
+- [x] Non-multi-hop behavior và retrieval-runtime-v2 contract không regression.
+- [x] Multi-hop thiếu plan tiếp tục trả MULTI_HOP_REQUIREMENT_UNRESOLVED.
+- [x] Failed plan không tạo reasoning_requirement.
+- [x] Satisfied result có fingerprint tồn tại trong context.graph_paths.
+- [x] Một request chỉ thực hiện một planned execution.
 
 **Files likely touched:**
 
@@ -647,8 +647,20 @@ chỉ được derive từ execution result đã satisfied.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_runtime_contract.py
-- [ ] uv run pytest -q src/retrieval/tests/test_graph_and_hybrid.py
+- [x] uv run pytest -q src/retrieval/tests/test_runtime_contract.py
+- [x] uv run pytest -q src/retrieval/tests/test_graph_and_hybrid.py
+
+**Kết quả thực thi (2026-07-23):**
+
+- `RetrievalRuntime.prepare()` giữ routing/validation thuần; `execute()` sở hữu
+  capability inspection, retrieval và tối đa một planned execution.
+- `retrieve()` giữ nguyên convenience contract `retrieval-runtime-v2`.
+- Failed/missing plan không tạo `reasoning_requirement`; satisfied result chỉ
+  được nhận khi fingerprint tồn tại trong merged `context.graph_paths`.
+- Generic graph paths vẫn phục vụ ranking/XAI nhưng không được thêm vào
+  `satisfied_path_fingerprints`.
+- Retrieval regression suite: 173 tests pass, 1 integration test deselected.
+- Full suite: 491 tests pass, 9 integration tests deselected.
 
 **Dependencies:** QG-0 pass.
 
@@ -671,11 +683,11 @@ và đi vào projected context.
 
 **Acceptance criteria:**
 
-- [ ] Generic path cùng relation types nhưng khác anchor/target/order không mở gate.
-- [ ] Path bị đổi direction không mở gate.
-- [ ] Compaction không thay satisfied path bằng path ngắn hơn.
-- [ ] Mất một citable intermediate làm projected validation fail.
-- [ ] planner_provider_calls và answer_provider_calls_after_plan_failure là metric
+- [x] Generic path cùng relation types nhưng khác anchor/target/order không mở gate.
+- [x] Path bị đổi direction không mở gate.
+- [x] Compaction không thay satisfied path bằng path ngắn hơn.
+- [x] Mất một citable intermediate làm projected validation fail.
+- [x] planner_provider_calls và answer_provider_calls_after_plan_failure là metric
       tách biệt; metric thứ hai luôn bằng 0.
 
 **Files likely touched:**
@@ -688,9 +700,23 @@ và đi vào projected context.
 
 **Verification:**
 
-- [ ] uv run pytest -q src/generation/tests/test_sufficiency.py
-- [ ] uv run pytest -q src/generation/tests/test_evidence_compaction.py
-- [ ] uv run pytest -q src/generation/tests/test_grounding_and_service.py
+- [x] uv run pytest -q src/generation/tests/test_sufficiency.py
+- [x] uv run pytest -q src/generation/tests/test_evidence_compaction.py
+- [x] uv run pytest -q src/generation/tests/test_grounding_and_service.py
+
+**Kết quả thực thi (2026-07-23):**
+
+- Sufficiency chỉ xét path có topology fingerprint nằm trong
+  `PlanExecutionResult.satisfied_path_fingerprints`; path sai endpoint, order hoặc
+  direction đều fail-closed.
+- Multi-hop compaction chỉ giữ path và legal evidence thuộc satisfied path; các
+  generic/shorter/unrelated path không đi vào projected context.
+- Projected validation xác nhận bundle/path membership và fail khi mất citable
+  intermediate.
+- Plan failure trả typed reason trước provider call; hai provider metrics được
+  tách riêng và `answer_provider_calls_after_plan_failure` giữ bằng 0.
+- Generation suite: 49 tests pass. Full suite: 498 tests pass, 9 integration
+  tests deselected.
 
 **Dependencies:** Tasks 2 và 6.
 
@@ -702,12 +728,21 @@ và đi vào projected context.
 
 Tại checkpoint này chưa có LLM planner. Dùng manual gold plan:
 
-- [ ] Query multi_hop_02 chạy từ bind đến RetrievalContext.
-- [ ] Sufficiency pass đúng satisfied path.
-- [ ] Context projection giữ đủ ba legal units.
-- [ ] Answer provider chỉ nhận evidence trên satisfied path.
-- [ ] Wrong-order/unrelated path bị reject.
-- [ ] Toàn bộ fast retrieval + generation tests pass.
+- [x] Query multi_hop_02 chạy từ bind đến RetrievalContext.
+- [x] Sufficiency pass đúng satisfied path.
+- [x] Context projection giữ đủ ba legal units.
+- [x] Answer provider chỉ nhận evidence trên satisfied path.
+- [x] Wrong-order/unrelated path bị reject.
+- [x] Toàn bộ fast retrieval + generation tests pass.
+
+**Kết quả Checkpoint B (2026-07-23):**
+
+- QG-0 live read-only trên Neo4j: 1 test pass; ba manual gold cases tiếp tục đạt
+  exact denotation và negative cases fail-closed.
+- `multi_hop_02` đi qua runtime với đúng authoritative path
+  `ldn_2020_art145_cl3 -> ldn_2020_art145_cl2 -> ldn_2020_art145_cl1`.
+- Projected context thực tế chỉ chứa đúng ba legal units trên path này, dù generic
+  expansion đồng thời trả nhiều path liên quan và đảo thứ tự.
 
 Nếu Checkpoint B chưa pass thì không tích hợp provider.
 
@@ -730,26 +765,40 @@ gồm anchor mention, target mention và ordered steps; không sinh ID hoặc Cy
 
 **Acceptance criteria:**
 
-- [ ] Provider output không thể chứa node_id hoặc Cypher.
-- [ ] Missing/blank target mention là typed invalid-plan failure.
-- [ ] Timeout, cancellation, closed provider, malformed JSON và unsupported enum
+- [x] Provider output không thể chứa node_id hoặc Cypher.
+- [x] Missing/blank target mention là typed invalid-plan failure.
+- [x] Timeout, cancellation, closed provider, malformed JSON và unsupported enum
       có typed failure.
-- [ ] Same valid payload tạo cùng plan fingerprint.
-- [ ] Unit tests không gọi provider thật.
-- [ ] Online provider test có marker riêng.
+- [x] Same valid payload tạo cùng plan fingerprint.
+- [x] Unit tests không gọi provider thật.
+- [x] Online provider test có marker riêng.
 
 **Files likely touched:**
 
 - src/retrieval/planning/ports.py
 - src/retrieval/planning/prompts.py
-- src/infrastructure/llm/gemini_query_planner.py
+- src/application/gemini_query_planner.py
 - src/retrieval/tests/test_query_planner_contract.py
 - tests/provider/test_query_planner_online.py
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_query_planner_contract.py
-- [ ] Online marker chỉ chạy khi có explicit opt-in.
+- [x] uv run pytest -q src/retrieval/tests/test_query_planner_contract.py
+- [x] Online marker chỉ chạy khi có explicit opt-in.
+
+**Kết quả thực thi (2026-07-23):**
+
+- `QueryPlannerPort` là async contract trả `UnlinkedSemanticPlan`; prompt chỉ
+  expose allowlisted label/relation/direction và cấm ID/Cypher.
+- Gemini adapter có config timeout/concurrency/retry riêng, strict structured
+  validation, idempotent close và không log prompt/raw payload/API key.
+- Invalid/empty/malformed payload trả typed invalid-plan; timeout/closed provider
+  trả typed failure; cancellation được propagate nguyên trạng.
+- Fingerprint của validated unlinked plan là deterministic.
+- Adapter đặt tại application layer thay vì infrastructure để giữ dependency
+  invariant hai chiều hiện có của repo.
+- Contract suite: 8 tests pass; online smoke bị deselect mặc định. Full suite:
+  506 tests pass, 10 integration/provider tests deselected.
 
 **Dependencies:** Checkpoint B pass.
 

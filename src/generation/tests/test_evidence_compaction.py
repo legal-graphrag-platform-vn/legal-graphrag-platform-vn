@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 
 import pytest
 
@@ -16,6 +17,7 @@ from src.generation.service import AnswerGenerator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.generation.tests.factories import (
     answer_candidate,
+    bind_satisfied_path,
     graph_path,
     retrieval_context,
     retrieved_unit,
@@ -131,6 +133,7 @@ def test_multi_hop_bundle_is_admitted_atomically() -> None:
         )
     ]
     context.reasoning_requirement = GraphReasoningRequirement(minimum_edges=2)
+    bind_satisfied_path(context)
     request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
     projector = ContextProjector(GenerationConfig())
     plan = _compact(context)
@@ -221,6 +224,7 @@ def test_path_only_semantic_node_is_not_citation_eligible() -> None:
         )
     ]
     context.reasoning_requirement = GraphReasoningRequirement(minimum_edges=2)
+    bind_satisfied_path(context)
     request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
     projector = ContextProjector(GenerationConfig())
     result = projector.project(request, _compact(context))
@@ -231,6 +235,107 @@ def test_path_only_semantic_node_is_not_citation_eligible() -> None:
     assert "legal_concept_x" in result.projected.paths[0].nodes
     assert "legal_concept_x" not in registry.allowed_citation_ids
     assert registry.allowed_citation_ids == ("doc_art1", "doc_art2")
+
+
+def test_multi_hop_compaction_keeps_only_satisfied_path() -> None:
+    context = retrieval_context(
+        intent=IntentType.MULTI_HOP,
+        path_relations=["REFERS_TO", "REQUIRES"],
+    )
+    satisfied_path = context.graph_paths[0]
+    shorter_path = graph_path(
+        ["doc_art1", "doc_art3"],
+        ["REQUIRES"],
+    )
+    context.graph_paths = [shorter_path, satisfied_path]
+
+    plan = _compact(context)
+
+    assert len(plan.paths) == 1
+    assert plan.paths[0].path.nodes == satisfied_path.nodes
+    assert plan.required_bundle_sets[0][0].unit_ids == (
+        "doc_art1",
+        "doc_art2",
+        "doc_art3",
+    )
+
+
+def test_multi_hop_projection_excludes_evidence_outside_satisfied_path() -> None:
+    context = retrieval_context(
+        intent=IntentType.MULTI_HOP,
+        path_relations=["REFERS_TO", "REQUIRES"],
+    )
+    unrelated = retrieved_unit("doc_art99")
+    context.retrieved_units.append(unrelated)
+    context.evidence.append(
+        EvidenceItem(
+            unit_id=unrelated.id,
+            evidence_type="vector",
+            is_eligible=True,
+        )
+    )
+    request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
+
+    result = ContextProjector(GenerationConfig()).project(request, _compact(context))
+
+    assert result.projected is not None
+    assert result.projected.selected_unit_ids == (
+        "doc_art1",
+        "doc_art2",
+        "doc_art3",
+    )
+
+
+def test_projected_validation_rejects_missing_citable_intermediate() -> None:
+    context = retrieval_context(
+        intent=IntentType.MULTI_HOP,
+        path_relations=["REFERS_TO", "REQUIRES"],
+    )
+    request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
+    plan = _compact(context)
+    result = ContextProjector(GenerationConfig()).project(request, plan)
+    assert result.projected is not None
+    projected = result.projected
+    incomplete = projected.model_copy(
+        update={
+            "evidence": tuple(
+                item for item in projected.evidence if item.unit_id != "doc_art2"
+            ),
+            "selected_unit_ids": tuple(
+                unit_id
+                for unit_id in projected.selected_unit_ids
+                if unit_id != "doc_art2"
+            ),
+        }
+    )
+
+    validation = ProjectedContextValidator().evaluate(incomplete, plan)
+
+    assert validation.sufficient is False
+    assert validation.reason_code == "PROJECTED_EVIDENCE_INSUFFICIENT"
+
+
+def test_projected_validation_requires_satisfied_path_membership() -> None:
+    context = retrieval_context(
+        intent=IntentType.MULTI_HOP,
+        path_relations=["REFERS_TO", "REQUIRES"],
+    )
+    request = AnswerGenerationRequest(query=context.query, retrieval_context=context)
+    plan = _compact(context)
+    result = ContextProjector(GenerationConfig()).project(request, plan)
+    assert result.projected is not None
+    corrupted_plan = replace(
+        plan,
+        authoritative_path_ids=("path_not_satisfied",),
+    )
+
+    validation = ProjectedContextValidator().evaluate(
+        result.projected,
+        corrupted_plan,
+    )
+
+    assert validation.sufficient is False
+    assert validation.reason_code == "PROJECTED_EVIDENCE_INSUFFICIENT"
 
 
 def test_mandatory_bundle_budget_failure_does_not_call_provider() -> None:

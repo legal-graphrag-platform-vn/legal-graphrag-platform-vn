@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from src.retrieval.execution_contract import PlanExecutionStatus
 from src.retrieval.models import IntentType, RetrievalContext
+from src.retrieval.path_identity import build_topology_path_fingerprint
 
 
 @dataclass(frozen=True)
@@ -32,14 +34,29 @@ class EvidenceSufficiencyPolicy:
                 )
             return self._evidence_required(context)
         if context.intent == IntentType.MULTI_HOP:
-            requirement = context.reasoning_requirement
+            execution = context.plan_execution
+            if execution is None:
+                return _insufficient(
+                    "MULTI_HOP_REQUIREMENT_UNRESOLVED",
+                    "Chưa xác định được yêu cầu đường dẫn nhiều bước đáng tin cậy.",
+                )
+            if execution.execution_status is not PlanExecutionStatus.SATISFIED:
+                return _insufficient(
+                    execution.reason_code.value,
+                    execution.message
+                    or "Query plan không tìm được đường dẫn graph đáng tin cậy.",
+                )
+            requirement = execution.derived_reasoning_requirement
             if requirement is None:
                 return _insufficient(
                     "MULTI_HOP_REQUIREMENT_UNRESOLVED",
                     "Chưa xác định được yêu cầu đường dẫn nhiều bước đáng tin cậy.",
                 )
+            satisfied_fingerprints = set(execution.satisfied_path_fingerprints)
             unit_ids = {unit.id for unit in context.retrieved_units}
             for path in context.graph_paths:
+                if build_topology_path_fingerprint(path) not in satisfied_fingerprints:
+                    continue
                 relation_types = tuple(edge.relation_type for edge in path.edges)
                 if len(path.edges) < requirement.minimum_edges:
                     continue

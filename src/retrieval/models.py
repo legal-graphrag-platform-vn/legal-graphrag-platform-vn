@@ -7,6 +7,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.retrieval.execution_contract import (
+    GraphReasoningRequirement,
+    PlanExecutionResult,
+)
 from src.shared.retrieval_contract import (
     IntentType,
     RetrievalChannel,
@@ -117,14 +121,6 @@ class GraphExpansionDiagnostics(BaseModel):
     malformed_path_count: int = 0
 
 
-class GraphReasoningRequirement(BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-    minimum_edges: int = Field(ge=2, le=5)
-    required_relation_types: tuple[str, ...] = ()
-    require_all_citable_intermediates: bool = True
-
-
 class GraphExpansion(BaseModel):
     paths: list[GraphPath] = Field(default_factory=list)
     units: list[RetrievedUnit] = Field(default_factory=list)
@@ -190,6 +186,14 @@ class RoutingResult(BaseModel):
     filters: RetrievalFilters
 
 
+class PreparedRetrievalRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    request: RetrievalRequest
+    routing: RoutingResult
+    prepare_latency_ms: int = Field(ge=0)
+
+
 class RetrievalContext(BaseModel):
     contract_version: Literal["retrieval-runtime-v2"] = "retrieval-runtime-v2"
     query: str
@@ -207,6 +211,7 @@ class RetrievalContext(BaseModel):
     reranker_applied: bool = False
     capability_status: Literal["supported", "no_results"] = "supported"
     reasoning_requirement: GraphReasoningRequirement | None = None
+    plan_execution: PlanExecutionResult | None = None
     retrieved_units: list[RetrievedUnit]
     graph_paths: list[GraphPath]
     evidence: list[EvidenceItem]

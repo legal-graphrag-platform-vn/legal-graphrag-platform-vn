@@ -20,6 +20,7 @@ from src.retrieval.context.temporal_filter import TemporalFilter
 from src.retrieval.errors import RetrievalDependencyError
 from src.retrieval.evidence.verifier import EvidenceVerifier
 from src.retrieval.fusion.reciprocal_rank_fusion import ReciprocalRankFusion
+from src.retrieval.planning.executor import PlannedPathExecutor
 from src.retrieval.reranking.bge_reranker import BGEReranker
 from src.retrieval.retriever.fulltext import FULLTEXT_INDEX, FullTextRetriever
 from src.retrieval.retriever.graph import GraphRetriever
@@ -171,6 +172,7 @@ def create_retrieval_runtime(
             temporal_filter=TemporalFilter(),
             context_builder=ContextBuilder(EvidenceVerifier()),
             reranker=reranker,
+            planned_executor=PlannedPathExecutor(repo),
         )
         return RetrievalRuntimeHandle(runtime, close_callbacks=callbacks)
     except Exception:
