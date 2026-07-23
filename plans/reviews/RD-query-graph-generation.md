@@ -338,6 +338,18 @@ binding. Anchor/target binding được đo riêng trước QG-1 end-to-end.
 
 Chi tiết: `results/retrieval/query_graph_preflight.md`.
 
+### 6.2.2. Kết quả rerun ngày 2026-07-23
+
+- ADR-23 đã được chấp nhận.
+- Graph được rebuild theo ontology v1.6.0; 377/377 `REFERS_TO` đủ common và
+  method-specific provenance.
+- `multi_hop_01`, `multi_hop_02`, `multi_hop_04` có đúng một topology khi bind
+  gold anchor và target.
+- Resolver v2.0.1 biến `multi_hop_03` thành direct atomic
+  `Clause -> REFERS_TO -> Clause`; case này vẫn là evaluation case nhưng nằm
+  ngoài exact-linear plan 2–3 bước của V1.
+- Task 0 pass và Task 1 được phép bắt đầu. QG-0 vẫn chờ exact executor.
+
 ### 6.3. Đọc log biết hỏng ở đâu
 
 | Mã lý do | Nghĩa | Hỏng ở chặng | Sửa ở đâu |

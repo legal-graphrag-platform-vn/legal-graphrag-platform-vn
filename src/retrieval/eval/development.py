@@ -135,9 +135,9 @@ class DevelopmentEvaluationCase(BaseModel):
     gold_relevance: list[GoldRelevance] = Field(default_factory=list)
     requires_graph_path: bool = False
     minimum_hops: int = Field(default=0, ge=0)
-    graph_case_type: Literal["multi_edge_traversal", "branching_reference"] | None = (
-        None
-    )
+    graph_case_type: Literal[
+        "multi_edge_traversal", "direct_reference", "branching_reference"
+    ] | None = None
     gold_paths: list[GoldGraphPath] = Field(default_factory=list)
     gold_temporal: GoldTemporal | None = None
     gold_hierarchy: list[GoldHierarchy] = Field(default_factory=list)
@@ -167,6 +167,14 @@ class DevelopmentEvaluationCase(BaseModel):
             raise ValueError("graph_case_type is reserved for multi_hop cases")
         if self.graph_case_type == "multi_edge_traversal" and self.minimum_hops < 2:
             raise ValueError("Multi-edge traversal cases require minimum_hops >= 2")
+        if self.graph_case_type == "direct_reference" and (
+            self.minimum_hops != 1
+            or len(self.gold_paths) != 1
+            or self.gold_paths[0].relation_types != ["REFERS_TO"]
+        ):
+            raise ValueError(
+                "Direct reference cases require exactly one one-hop REFERS_TO path"
+            )
         if self.graph_case_type == "branching_reference" and (
             self.minimum_hops != 1 or len(self.gold_paths) < 2
         ):

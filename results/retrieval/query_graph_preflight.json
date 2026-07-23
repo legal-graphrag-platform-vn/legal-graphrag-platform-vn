@@ -1,70 +1,64 @@
 {
   "schema_version": "query-graph-preflight-v1",
-  "captured_at": "2026-07-22T09:46:05.9990324Z",
-  "status": "failed",
+  "captured_at": "2026-07-23T13:00:29.3463526Z",
+  "status": "passed",
   "gate": "Task 0 / plan-expressivity preflight",
-  "stop_condition_triggered": true,
-  "stop_reasons": [
-    "PLAN_UNDERCONSTRAINED",
-    "ONTOLOGY_V1_6_REFERS_TO_PROVENANCE_INCOMPLETE"
-  ],
+  "stop_condition_triggered": false,
+  "stop_reasons": [],
   "database": {
     "uri_without_credentials": "bolt://localhost:7688",
     "database_name": "neo4j",
     "component": "Neo4j Kernel",
     "version": "5.26.28",
     "edition": "community",
-    "scope_document_ids": [
-      "ldn_2020"
-    ],
+    "scope_document_ids": ["ldn_2020"],
     "ontology_version": "1.6.0",
-    "git_commit": "53794883d8c87be1c202dd054ce772b0f235a537",
-    "read_only_projection_sha256": "e4b685e22e51aac3d5891937b944ed86637e03e9746ea0c4dcb8e0dd0eab541a",
-    "projection_line_count": 3172,
-    "projection_hash_method": "SHA-256 of deterministic cypher-shell plain output containing scoped node IDs/labels, relation topology/IDs, counts, and REFERS_TO provenance diagnostics",
-    "projection_rerun_match": true
+    "git_commit": "48feb5510d25669fccbdb6995642ef296931f72d",
+    "read_only_projection_sha256": "294cf005d4d5926d5d09c9388236ff23d92cd6b845eeaef89a4d263f6280e291",
+    "projection_rerun_match": true,
+    "payload_projection_match": true
   },
   "dataset": {
     "path": "configs/evaluation/retrieval_pilot_l59_2020.json",
-    "sha256": "d264a3cd67a36979ec4a554527170cd8e0e74b928e6d6821b23a13949b9a1f2a",
+    "sha256": "52b37c628826dfdc6f289596b28a0407b5652424615267ab510a971ed0447e41",
     "evaluation_scope": "pilot_development",
-    "document_ids": [
-      "ldn_2020"
-    ]
+    "document_ids": ["ldn_2020"],
+    "artifact_verification_path": "results/retrieval/L59_2020_30q_artifact_verification.json",
+    "artifact_verification_status": "PASS"
   },
   "graph_scope": {
-    "node_count": 1126,
-    "relation_count": 1132,
+    "node_count": 2224,
+    "relation_count": 3042,
     "node_count_by_label": {
       "Article": 218,
       "Chapter": 10,
       "Clause": 897,
-      "Document": 1
+      "Document": 1,
+      "Issuer": 1,
+      "LegalAction": 88,
+      "LegalConcept": 86,
+      "LegalSubject": 101,
+      "Point": 822
     },
     "relation_count_by_type": {
-      "CONTAINS": 1125,
-      "REFERS_TO": 7
+      "CONTAINS": 1947,
+      "DEFINES": 63,
+      "ISSUED_BY": 1,
+      "REFERS_TO": 377,
+      "REGULATES": 586,
+      "REQUIRES": 68
     },
     "refers_to_provenance": {
-      "total": 7,
-      "missing_extraction_method": 7,
-      "missing_reference_bundle_id": 7,
-      "missing_reference_target_count": 7,
-      "ontology_v1_6_complete": false
-    }
+      "total": 377,
+      "missing_common": 0,
+      "missing_rule": 0,
+      "missing_llm": 0,
+      "ontology_v1_6_complete": true
+    },
+    "legal_units_checked": 11,
+    "legal_units_with_content": 11,
+    "legal_units_with_temporal_metadata": 11
   },
-  "multi_hop_density": [
-    {"depth": 2, "relation_sequence": ["CONTAINS", "CONTAINS"], "path_count": 1937},
-    {"depth": 2, "relation_sequence": ["CONTAINS", "REFERS_TO"], "path_count": 7},
-    {"depth": 2, "relation_sequence": ["REFERS_TO", "CONTAINS"], "path_count": 13},
-    {"depth": 2, "relation_sequence": ["REFERS_TO", "REFERS_TO"], "path_count": 1},
-    {"depth": 3, "relation_sequence": ["CONTAINS", "CONTAINS", "CONTAINS"], "path_count": 1719},
-    {"depth": 3, "relation_sequence": ["CONTAINS", "CONTAINS", "REFERS_TO"], "path_count": 7},
-    {"depth": 3, "relation_sequence": ["CONTAINS", "REFERS_TO", "CONTAINS"], "path_count": 13},
-    {"depth": 3, "relation_sequence": ["CONTAINS", "REFERS_TO", "REFERS_TO"], "path_count": 1},
-    {"depth": 3, "relation_sequence": ["REFERS_TO", "CONTAINS", "CONTAINS"], "path_count": 22},
-    {"depth": 3, "relation_sequence": ["REFERS_TO", "CONTAINS", "REFERS_TO"], "path_count": 2}
-  ],
   "cases": [
     {
       "query_id": "multi_hop_01",
@@ -72,17 +66,11 @@
       "source_id": "ldn_2020_art38_cl1",
       "relation_sequence": ["REFERS_TO", "CONTAINS"],
       "expected_target_id": "ldn_2020_art41_cl2",
-      "actual_target_ids": [
-        "ldn_2020_art41_cl1",
-        "ldn_2020_art41_cl2",
-        "ldn_2020_art41_cl3"
-      ],
-      "topology_count": 3,
+      "topology_count": 1,
       "path_exists": true,
-      "exact_denotation": false,
-      "legal_units_complete": true,
-      "citable_evidence_complete": false,
-      "reason_code": "PLAN_UNDERCONSTRAINED"
+      "exact_denotation": true,
+      "citable_evidence_complete": true,
+      "reason_code": "PASS"
     },
     {
       "query_id": "multi_hop_02",
@@ -90,33 +78,23 @@
       "source_id": "ldn_2020_art145_cl3",
       "relation_sequence": ["REFERS_TO", "REFERS_TO"],
       "expected_target_id": "ldn_2020_art145_cl1",
-      "actual_target_ids": [
-        "ldn_2020_art145_cl1"
-      ],
       "topology_count": 1,
       "path_exists": true,
       "exact_denotation": true,
-      "legal_units_complete": true,
-      "citable_evidence_complete": false,
-      "reason_code": "ONTOLOGY_V1_6_REFERS_TO_PROVENANCE_INCOMPLETE"
+      "citable_evidence_complete": true,
+      "reason_code": "PASS"
     },
     {
       "query_id": "multi_hop_03",
-      "shape": "exact-linear-depth-2",
+      "shape": "direct-reference-one-hop",
       "source_id": "ldn_2020_art57_cl1",
-      "relation_sequence": ["REFERS_TO", "CONTAINS"],
+      "relation_sequence": ["REFERS_TO"],
       "expected_target_id": "ldn_2020_art49_cl2",
-      "actual_target_ids": [
-        "ldn_2020_art49_cl1",
-        "ldn_2020_art49_cl2",
-        "ldn_2020_art49_cl3"
-      ],
-      "topology_count": 3,
+      "topology_count": 1,
       "path_exists": true,
-      "exact_denotation": false,
-      "legal_units_complete": true,
-      "citable_evidence_complete": false,
-      "reason_code": "PLAN_UNDERCONSTRAINED"
+      "exact_denotation": true,
+      "citable_evidence_complete": true,
+      "reason_code": "OUT_OF_SCOPE_PLAN_SHAPE"
     },
     {
       "query_id": "multi_hop_04",
@@ -124,64 +102,25 @@
       "source_id": "ldn_2020_art68_cl2",
       "relation_sequence": ["REFERS_TO", "CONTAINS"],
       "expected_target_id": "ldn_2020_art52_cl1",
-      "actual_target_ids": [
-        "ldn_2020_art52_cl1",
-        "ldn_2020_art52_cl2",
-        "ldn_2020_art52_cl3"
-      ],
-      "topology_count": 3,
+      "topology_count": 1,
       "path_exists": true,
-      "exact_denotation": false,
-      "legal_units_complete": true,
-      "citable_evidence_complete": false,
-      "reason_code": "PLAN_UNDERCONSTRAINED"
+      "exact_denotation": true,
+      "citable_evidence_complete": true,
+      "reason_code": "PASS"
     },
     {
       "query_id": "multi_hop_05",
       "shape": "branching-one-hop",
-      "path_exists": null,
+      "path_exists": true,
       "exact_denotation": null,
-      "citable_evidence_complete": null,
+      "citable_evidence_complete": true,
       "reason_code": "OUT_OF_SCOPE_PLAN_SHAPE"
     }
   ],
-  "adr_23_gold_bound_target_probe": {
-    "status": "passed",
-    "purpose": "Validate amended plan expressivity with manually bound gold anchor and target IDs; this does not evaluate target-linker accuracy.",
-    "cases_passed": 4,
-    "cases_total": 4,
-    "results": [
-      {
-        "query_id": "multi_hop_01",
-        "topology_count": 1,
-        "node_ids": ["ldn_2020_art38_cl1", "ldn_2020_art41", "ldn_2020_art41_cl2"]
-      },
-      {
-        "query_id": "multi_hop_02",
-        "topology_count": 1,
-        "node_ids": ["ldn_2020_art145_cl3", "ldn_2020_art145_cl2", "ldn_2020_art145_cl1"]
-      },
-      {
-        "query_id": "multi_hop_03",
-        "topology_count": 1,
-        "node_ids": ["ldn_2020_art57_cl1", "ldn_2020_art49", "ldn_2020_art49_cl2"]
-      },
-      {
-        "query_id": "multi_hop_04",
-        "topology_count": 1,
-        "node_ids": ["ldn_2020_art68_cl2", "ldn_2020_art52", "ldn_2020_art52_cl1"]
-      }
-    ]
-  },
-  "official_payload_snapshot": {
-    "status": "failed",
-    "command": "uv run python -m src.pipeline.main graph-snapshot --raw-doc-code L59_2020 --output query_graph_preflight_base.json",
-    "reason": "Validated payload is stale against ontology v1.6.0: REFERS_TO records lack extraction_method, reference_bundle_id, and reference_target_count.",
-    "output_created": false
-  },
   "decision": {
-    "task_0_passed": false,
-    "task_1_authorized": false,
-    "required_next_action": "Review/accept ADR-23, then rebuild/migrate ontology v1.6.0 REFERS_TO artifacts before rerunning Task 0 and claiming citable evidence completeness."
+    "task_0_passed": true,
+    "task_1_authorized": true,
+    "qg_0_status": "NOT_STARTED",
+    "required_next_action": "Implement Task 1 planning DTO and validation contract; keep QG-0 closed until the exact executor exists."
   }
 }

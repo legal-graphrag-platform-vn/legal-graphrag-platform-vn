@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Proposed — Task 0 đã chạy và fail; ADR-23 amendment đang chờ
+> **Trạng thái:** Accepted — Task 0 rerun đã pass; Task 1 được phép triển khai
 > review, ontology v1.6.0 artifact rebuild còn mở
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
@@ -220,7 +220,8 @@ tục và current plan shape đủ biểu diễn gold cases.
 1. Ghi lại database identity, graph snapshot hash, ontology version và document
    scope.
 2. Đếm path 2–3 bước theo ordered relation sequence trong allowlist.
-3. Kiểm bốn reviewed linear cases multi_hop_01 đến multi_hop_04.
+3. Kiểm ba reviewed linear cases `multi_hop_01`, `multi_hop_02`,
+   `multi_hop_04`; ghi rõ `multi_hop_03` là direct reference sau resolver v2.0.1.
 4. Với mỗi gold case, đo:
    - gold path có tồn tại hay không;
    - relation+direction+label plan trả đúng một path hay trả dư path;
@@ -230,8 +231,10 @@ tục và current plan shape đủ biểu diễn gold cases.
 **Acceptance criteria:**
 
 - [ ] Report có snapshot identity và corpus scope, không dùng database không rõ nguồn.
-- [ ] Mỗi case multi_hop_01–04 có kết quả path_exists, exact_denotation và
-      citable_evidence_complete.
+- [x] Mỗi linear case `multi_hop_01`, `multi_hop_02`, `multi_hop_04` có kết quả
+      path_exists, exact_denotation và citable_evidence_complete.
+- [x] Case `multi_hop_03` được kiểm bằng direct atomic `REFERS_TO` và ghi rõ
+      out of V1 exact-linear 2–3 bước.
 - [ ] Case multi_hop_05 được ghi rõ out of V1 scope.
 - [ ] Nếu pattern trả dư path, issue được ghi là PLAN_UNDERCONSTRAINED; không
       tự thêm heuristic để che lỗi.
@@ -258,7 +261,7 @@ tục và current plan shape đủ biểu diễn gold cases.
 
 **Estimated scope:** S — report và command/probe; chưa sửa production code.
 
-### Task 0 execution result — 2026-07-22
+### Task 0 initial execution result — 2026-07-22
 
 Artifacts:
 
@@ -281,6 +284,24 @@ Response:
 3. Rerun Task 0 sau artifact rebuild để xác nhận citable-evidence completeness.
 4. Task 1 chỉ được mở khi rerun xác nhận exact denotation và
    citable-evidence completeness.
+
+### Task 0 rerun result — 2026-07-23
+
+Result: **passed**.
+
+- Resolver v2.0.1 biểu diễn `multi_hop_03` bằng direct atomic
+  `Clause -> REFERS_TO -> Clause`; reviewed dataset đã được cập nhật tương ứng.
+- Ba exact-linear case còn thuộc V1 (`multi_hop_01`, `multi_hop_02`,
+  `multi_hop_04`) đều trả đúng một gold-bound topology.
+- Direct case `multi_hop_03` cũng trả đúng một topology; branching
+  `multi_hop_05` tiếp tục out of V1 plan shape.
+- 11/11 legal units trên scoped paths có content và temporal metadata.
+- 377/377 `REFERS_TO` có common và method-specific provenance hợp lệ.
+- Hai graph snapshot liên tiếp cùng projection SHA-256
+  `294cf005d4d5926d5d09c9388236ff23d92cd6b845eeaef89a4d263f6280e291`.
+
+Task 1 được phép bắt đầu; QG-0 vẫn là gate riêng sau khi exact executor được
+triển khai.
 
 ---
 
@@ -424,7 +445,7 @@ canonical legal unit mà không dùng LLM-generated ID.
 
 ## Checkpoint A — Foundation
 
-- [ ] Task 0 preflight pass.
+- [x] Task 0 preflight pass.
 - [ ] DTO/schema tests pass.
 - [ ] Path identity is topology-only.
 - [ ] Structural anchors/targets resolve deterministically.
@@ -490,8 +511,10 @@ hoàn hảo, trước khi thêm LLM planner hoặc semantic target linker.
 
 **Công việc:**
 
-- Viết manual BoundSemanticPlan fixture cho multi_hop_01–04, gồm gold anchor ID
-  và gold target ID.
+- Viết manual BoundSemanticPlan fixture cho các executable linear case
+  `multi_hop_01`, `multi_hop_02`, `multi_hop_04`, gồm gold anchor ID và gold
+  target ID. `multi_hop_03` là direct reference nên không đưa vào QG-0 của
+  exact-linear executor V1.
 - Kiểm structural anchor resolver riêng, sau đó chạy exact executor bằng bound
   fixture; không dùng semantic target ranking trong gate này.
 - So sánh source ID, ordered relation types và target ID với gold_paths.

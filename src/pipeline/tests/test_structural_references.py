@@ -63,6 +63,32 @@ c) Theo các điểm a và b khoản này.
     assert reference.target_unit_ids == ()
 
 
+def test_resolves_coordinated_explicit_clauses_as_one_atomic_bundle() -> None:
+    text = (
+        "Điều 49. Quyền của thành viên\n"
+        "1. Quyền thứ nhất.\n"
+        "2. Quyền thứ hai.\n"
+        "3. Quyền thứ ba.\n"
+        "Điều 57. Triệu tập họp\n"
+        "1. Thành viên quy định tại khoản 2 và khoản 3 Điều 49 của Luật này."
+    )
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[1]
+    )
+
+    assert len(references) == 1
+    reference = references[0]
+    assert reference.status == "RESOLVED"
+    assert reference.target_unit_ids == (
+        "ldn_2020_art49_cl2",
+        "ldn_2020_art49_cl3",
+    )
+    assert reference.mention.raw_text == "khoản 2 và khoản 3 Điều 49"
+
+
 def test_current_clause_self_reference_creates_no_edge() -> None:
     text = "Điều 1. Trách nhiệm\n1. Thực hiện theo khoản này."
     parsed = parse_text(text, _document())
