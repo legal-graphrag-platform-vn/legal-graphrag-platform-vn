@@ -70,9 +70,15 @@ class FakeQueryPlanner:
     provider_name = "fake"
     model_name = "fake-model"
 
-    def __init__(self, events: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        events: list[str] | None = None,
+        *,
+        close_error: Exception | None = None,
+    ) -> None:
         self.close_count = 0
         self.events = events
+        self.close_error = close_error
 
     async def plan(self, query: str):
         raise AssertionError("not used in lifecycle test")
@@ -81,6 +87,8 @@ class FakeQueryPlanner:
         self.close_count += 1
         if self.events is not None:
             self.events.append("planner")
+        if self.close_error is not None:
+            raise self.close_error
 
 
 def fake_browser_factory(
@@ -320,6 +328,61 @@ def test_planner_startup_failure_closes_retrieval_resources() -> None:
                 planner_factory=fail_planner,  # type: ignore[arg-type]
                 browser_factory=lambda *_: FakeDocumentBrowser(),
             )
+        assert runner.close_count == 1
+        assert runtime.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_browser_startup_failure_closes_planner_runner_and_runtime() -> None:
+    async def scenario() -> None:
+        runtime = FakeRuntime()
+        runner = FakeRunner()
+        planner = FakeQueryPlanner()
+
+        def fail_browser(*args: object) -> None:
+            raise RuntimeError("browser startup failed")
+
+        with pytest.raises(RuntimeError, match="browser startup failed"):
+            await build_container(
+                _graphrag_settings(query_planning_enabled=True),
+                runtime_factory=lambda *_, **__: runtime,
+                runner_factory=lambda **_: runner,
+                planner_factory=lambda _: planner,
+                browser_factory=fail_browser,  # type: ignore[arg-type]
+            )
+
+        assert planner.close_count == 1
+        assert runner.close_count == 1
+        assert runtime.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_planner_close_failure_does_not_skip_remaining_cleanup() -> None:
+    async def scenario() -> None:
+        events: list[str] = []
+        runtime = FakeRuntime(events)
+        runner = FakeRunner(events=events)
+        planner = FakeQueryPlanner(
+            events,
+            close_error=RuntimeError("planner cleanup failed"),
+        )
+        container = Container(
+            query_service=object(),  # type: ignore[arg-type]
+            chat_service=None,
+            document_service=FakeDocumentBrowser(events),
+            rag_service=None,
+            query_planner=planner,
+            retrieval_runtime=runtime,
+            retrieval_runner=runner,  # type: ignore[arg-type]
+        )
+
+        with pytest.raises(RuntimeError, match="planner cleanup failed"):
+            await container.close()
+
+        assert events == ["planner", "browser", "runner", "runtime"]
+        assert planner.close_count == 1
         assert runner.close_count == 1
         assert runtime.close_count == 1
 

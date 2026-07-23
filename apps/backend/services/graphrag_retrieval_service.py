@@ -51,15 +51,21 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         request: RetrievalRequest,
     ) -> RetrievalContext:
         if self._planner is None or not self._planning_enabled:
-            return await self._runner.run(partial(self._runtime.retrieve, request))
+            context = await self._runner.run(partial(self._runtime.retrieve, request))
+            context.metrics["planner_provider_calls"] = 0
+            return context
 
         prepared = await self._runner.run(partial(self._runtime.prepare, request))
         plan: UnlinkedSemanticPlan | None = None
+        planner_provider_calls = 0
         if prepared.routing.decision.intent is IntentType.MULTI_HOP:
             plan = await self._plan(request.query)
-        return await self._runner.run(
+            planner_provider_calls = 1
+        context = await self._runner.run(
             partial(self._runtime.execute, prepared, plan=plan)
         )
+        context.metrics["planner_provider_calls"] = planner_provider_calls
+        return context
 
     async def _plan(self, query: str) -> UnlinkedSemanticPlan:
         """Plan on the event loop; surface planner infra failures as typed errors.
