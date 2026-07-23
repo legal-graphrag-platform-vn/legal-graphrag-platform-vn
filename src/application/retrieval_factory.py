@@ -14,13 +14,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.infrastructure.embedding.embedding_generator import EmbeddingGenerator
 from src.infrastructure.neo4j.retriever_repo import Neo4jRetrieverRepo
-from src.retrieval.config import RetrievalConfig
+from src.retrieval.config import EndpointLinkerConfig, RetrievalConfig
 from src.retrieval.context.context_builder import ContextBuilder
 from src.retrieval.context.temporal_filter import TemporalFilter
 from src.retrieval.errors import RetrievalDependencyError
 from src.retrieval.evidence.verifier import EvidenceVerifier
 from src.retrieval.fusion.reciprocal_rank_fusion import ReciprocalRankFusion
+from src.retrieval.planning.binder import PlanBinder
 from src.retrieval.planning.executor import PlannedPathExecutor
+from src.retrieval.planning.linker import (
+    EndpointLinker,
+    SemanticEndpointResolver,
+    StructuralEndpointResolver,
+)
 from src.retrieval.reranking.bge_reranker import BGEReranker
 from src.retrieval.retriever.fulltext import FULLTEXT_INDEX, FullTextRetriever
 from src.retrieval.retriever.graph import GraphRetriever
@@ -121,6 +127,7 @@ def create_retrieval_runtime(
     config: RetrievalConfig | None = None,
     application_settings: RetrievalApplicationSettings | None = None,
     *,
+    planning_enabled: bool = False,
     driver_factory: DriverFactory | None = None,
     embedding_factory: Callable[..., Any] = EmbeddingGenerator,
     reranker_factory: Callable[..., Any] = BGEReranker,
@@ -174,7 +181,12 @@ def create_retrieval_runtime(
             reranker=reranker,
             planned_executor=PlannedPathExecutor(repo),
         )
-        return RetrievalRuntimeHandle(runtime, close_callbacks=callbacks)
+        binder = (
+            _build_plan_binder(repo, vector, fulltext) if planning_enabled else None
+        )
+        return RetrievalRuntimeHandle(
+            runtime, binder=binder, close_callbacks=callbacks
+        )
     except Exception:
         for callback in reversed(callbacks):
             try:
@@ -185,6 +197,26 @@ def create_retrieval_runtime(
                     type(cleanup_error).__name__,
                 )
         raise
+
+
+def _build_plan_binder(
+    repo: Neo4jRetrieverRepo,
+    vector: Any,
+    fulltext: Any,
+) -> PlanBinder:
+    if vector is None or fulltext is None:
+        raise RetrievalDependencyError(
+            "Query planning requires both vector and full-text channels enabled"
+        )
+    linker = EndpointLinker(
+        structural=StructuralEndpointResolver(repo),
+        semantic=SemanticEndpointResolver(
+            vector=vector,
+            fulltext=fulltext,
+            config=EndpointLinkerConfig(),
+        ),
+    )
+    return PlanBinder(linker)
 
 
 def _verify_enabled_dependencies(

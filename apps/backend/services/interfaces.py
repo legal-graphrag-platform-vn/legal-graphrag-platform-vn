@@ -18,7 +18,9 @@ from api.models import (
     QueryRequest,
     RetrievalResponse,
 )
-from src.retrieval.models import RetrievalContext
+from src.retrieval.models import PreparedRetrievalRequest, RetrievalContext
+from src.retrieval.planning.models import UnlinkedSemanticPlan
+from src.retrieval.planning.ports import QueryPlannerPort as QueryPlannerPort
 from src.generation.models import AnswerGenerationRequest, AnswerResponse
 from src.shared.retrieval_contract import RetrievalRequest
 
@@ -37,6 +39,15 @@ class SyncRetrievalRuntime(Protocol):
     """Minimal runtime surface consumed by the backend adapter."""
 
     def retrieve(self, request: RetrievalRequest) -> RetrievalContext: ...
+
+    def prepare(self, request: RetrievalRequest) -> PreparedRetrievalRequest: ...
+
+    def execute(
+        self,
+        prepared: PreparedRetrievalRequest,
+        *,
+        plan: UnlinkedSemanticPlan | None = None,
+    ) -> RetrievalContext: ...
 
     def close(self) -> None: ...
 

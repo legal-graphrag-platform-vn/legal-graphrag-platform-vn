@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–9, QG-0 và Checkpoint B đã pass; Task 10 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–10, QG-0 và Checkpoint B đã pass; Task 11 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -882,11 +882,11 @@ runner, không block event loop và không leak provider.
 
 **Acceptance criteria:**
 
-- [ ] Planner async chạy trên event loop; Neo4j execution chạy trong retrieval worker.
-- [ ] Không asyncio.run, per-request executor hoặc blocking retrieval trên event loop.
-- [ ] Timeout/cancellation không retry request hoặc gọi answer provider.
-- [ ] Shutdown idempotent và partial startup failure cleanup đủ resource.
-- [ ] Mock mode không cần planner/Neo4j/provider.
+- [x] Planner async chạy trên event loop; Neo4j execution chạy trong retrieval worker.
+- [x] Không asyncio.run, per-request executor hoặc blocking retrieval trên event loop.
+- [x] Timeout/cancellation không retry request hoặc gọi answer provider.
+- [x] Shutdown idempotent và partial startup failure cleanup đủ resource.
+- [x] Mock mode không cần planner/Neo4j/provider.
 
 **Files likely touched:**
 
@@ -900,13 +900,42 @@ Lifecycle tests bổ sung ở task kế tiếp nếu vượt giới hạn 5 file
 
 **Verification:**
 
-- [ ] uv run pytest -q apps/backend/tests/test_graphrag_retrieval_service.py
-- [ ] uv run pytest -q apps/backend/tests/test_backend_lifecycle.py
-- [ ] uv run pytest -q apps/backend/tests/test_retrieval_runner.py
+- [x] uv run pytest -q apps/backend/tests/test_graphrag_retrieval_service.py
+- [x] uv run pytest -q apps/backend/tests/test_backend_lifecycle.py
+- [x] uv run pytest -q apps/backend/tests/test_retrieval_runner.py
+
+**Kết quả thực thi (2026-07-23):**
+
+- Theo quyết định phạm vi, Task 10 gộp luôn bước binding vào retrieval runtime để
+  `UnlinkedSemanticPlan` chảy xuyên suốt: thêm `PlanBinder`
+  (`src/retrieval/planning/binder.py`) resolve anchor + target độc lập qua
+  `EndpointLinker`, fail-closed trả `PlanBindingFailure` mang reason code thay vì
+  bind sai.
+- `RetrievalRuntimeHandle` expose `prepare()` và `execute(prepared, plan=...)`:
+  plan hợp lệ → bind → `runtime.execute(bound_plan=...)`; binding thất bại →
+  generic retrieval + ghi `planned_execution_reason_code`. `retrieve()` giữ
+  nguyên cho caller cũ.
+- Factory dựng `EndpointLinker` (structural + semantic) + `PlanBinder` chỉ khi
+  `planning_enabled`; retrieval-only profile giữ `binder=None`, không đổi hành vi.
+- `GraphRAGRetrievalService` điều phối: `runner.run(prepare)` → nếu MULTI_HOP và
+  planning bật thì `await planner.plan()` trên event loop → `runner.run(execute)`.
+  Planner timeout/invalid/unavailable → fail-closed về generic retrieval; cancellation
+  propagate nguyên trạng; không retry request, không chạm answer provider.
+- Container dựng planner khi `QUERY_PLANNING_ENABLED`, inject vào retrieval service,
+  đóng planner idempotent theo thứ tự ownership (answer → planner → document → runner
+  → runtime), và rollback đủ resource khi startup fail ở từng chặng. Mock mode không
+  dựng planner/Neo4j/provider.
+- Không dùng `asyncio.run` hay per-request executor; toàn bộ Neo4j work chạy trong
+  `BoundedRetrievalRunner`.
+- Tests mới: `test_plan_binder.py` (4), planner path trong
+  `test_graphrag_retrieval_service.py` (+5), planner lifecycle trong
+  `test_backend_lifecycle.py` (+2). Full suite: 523 passed, 10 integration/provider
+  deselected; ruff sạch trên toàn bộ file đổi.
 
 **Dependencies:** Tasks 6, 8 và 9.
 
-**Estimated scope:** M — 5 files.
+**Estimated scope:** M — mở rộng ngoài 5 file backend để gộp binding orchestration
+(retrieval runtime handle + factory + `PlanBinder`).
 
 ---
 

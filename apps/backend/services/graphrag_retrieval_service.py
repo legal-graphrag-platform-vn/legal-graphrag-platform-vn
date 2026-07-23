@@ -2,17 +2,25 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from functools import partial
 
 from api.models import QueryRequest, RetrievalResponse
 from services.interfaces import (
     AsyncRetrievalRunner,
+    QueryPlannerPort,
     RetrievalApplicationPort,
     SyncRetrievalRuntime,
 )
 from services.retrieval_mapping import to_retrieval_request, to_retrieval_response
-from src.retrieval.models import RetrievalContext
+from src.retrieval.models import IntentType, RetrievalContext
+from src.retrieval.planning.errors import (
+    QueryPlannerDependencyError,
+    QueryPlannerInvalidPlanError,
+    QueryPlannerTimeoutError,
+)
+from src.retrieval.planning.models import UnlinkedSemanticPlan
 from src.shared.retrieval_contract import RetrievalRequest
 
 
@@ -24,15 +32,49 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         self,
         runtime: SyncRetrievalRuntime,
         runner: AsyncRetrievalRunner,
+        *,
+        planner: QueryPlannerPort | None = None,
+        planning_enabled: bool = False,
     ) -> None:
         self._runtime = runtime
         self._runner = runner
+        self._planner = planner
+        self._planning_enabled = planning_enabled
 
     async def retrieve_context(
         self,
         request: RetrievalRequest,
     ) -> RetrievalContext:
-        return await self._runner.run(partial(self._runtime.retrieve, request))
+        if self._planner is None or not self._planning_enabled:
+            return await self._runner.run(partial(self._runtime.retrieve, request))
+
+        prepared = await self._runner.run(partial(self._runtime.prepare, request))
+        plan: UnlinkedSemanticPlan | None = None
+        if prepared.routing.decision.intent is IntentType.MULTI_HOP:
+            plan = await self._plan(request.query)
+        return await self._runner.run(
+            partial(self._runtime.execute, prepared, plan=plan)
+        )
+
+    async def _plan(self, query: str) -> UnlinkedSemanticPlan | None:
+        """Plan on the event loop; fail closed to generic retrieval on planner errors."""
+        assert self._planner is not None
+        try:
+            return await self._planner.plan(query)
+        except asyncio.CancelledError:
+            raise
+        except (
+            QueryPlannerTimeoutError,
+            QueryPlannerInvalidPlanError,
+            QueryPlannerDependencyError,
+        ) as exc:
+            logger.warning(
+                "Query planning failed; falling back to generic retrieval: "
+                "provider=%s reason=%s",
+                self._planner.provider_name,
+                type(exc).__name__,
+            )
+            return None
 
 
 class RetrievalQueryService:

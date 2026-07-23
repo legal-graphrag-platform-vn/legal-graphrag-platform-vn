@@ -5,7 +5,13 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from types import TracebackType
 
-from src.retrieval.models import RetrievalContext, RetrievalRequest
+from src.retrieval.models import (
+    PreparedRetrievalRequest,
+    RetrievalContext,
+    RetrievalRequest,
+)
+from src.retrieval.planning.binder import PlanBinder, PlanBindingFailure
+from src.retrieval.planning.models import BoundSemanticPlan, UnlinkedSemanticPlan
 from src.retrieval.runtime.runtime import RetrievalRuntime
 
 
@@ -14,9 +20,11 @@ class RetrievalRuntimeHandle:
         self,
         runtime: RetrievalRuntime,
         *,
+        binder: PlanBinder | None = None,
         close_callbacks: Sequence[Callable[[], None]] = (),
     ) -> None:
         self._runtime = runtime
+        self._binder = binder
         self._close_callbacks = list(close_callbacks)
         self._closed = False
 
@@ -35,6 +43,28 @@ class RetrievalRuntimeHandle:
         self, request: RetrievalRequest | str, **kwargs: object
     ) -> RetrievalContext:
         return self._runtime.retrieve(request, **kwargs)
+
+    def prepare(
+        self, request: RetrievalRequest | str, **kwargs: object
+    ) -> PreparedRetrievalRequest:
+        return self._runtime.prepare(request, **kwargs)
+
+    def execute(
+        self,
+        prepared: PreparedRetrievalRequest,
+        *,
+        plan: UnlinkedSemanticPlan | None = None,
+    ) -> RetrievalContext:
+        """Bind an unlinked plan then execute; fail closed on any binding gap."""
+        if plan is None or self._binder is None:
+            return self._runtime.execute(prepared)
+        outcome = self._binder.bind(plan, prepared.routing.filters)
+        if isinstance(outcome, PlanBindingFailure):
+            return self._runtime.execute(
+                prepared, binding_reason_code=outcome.reason_code
+            )
+        assert isinstance(outcome, BoundSemanticPlan)
+        return self._runtime.execute(prepared, bound_plan=outcome)
 
     def close(self) -> None:
         if self._closed:
