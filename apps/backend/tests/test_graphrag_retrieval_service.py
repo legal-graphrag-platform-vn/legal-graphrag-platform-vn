@@ -10,10 +10,19 @@ from services.graphrag_retrieval_service import (
     GraphRAGRetrievalService,
     RetrievalQueryService,
 )
+from services.errors import (
+    BackendPlanningOutputError,
+    BackendPlanningTimeoutError,
+    BackendPlanningUnavailableError,
+)
 from services.retrieval_runner import BoundedRetrievalRunner
 from src.retrieval.errors import RetrievalCapabilityError
 from src.retrieval.models import IntentType
-from src.retrieval.planning.errors import QueryPlannerTimeoutError
+from src.retrieval.planning.errors import (
+    QueryPlannerDependencyError,
+    QueryPlannerInvalidPlanError,
+    QueryPlannerTimeoutError,
+)
 from src.retrieval.planning.models import (
     AnchorMention,
     PathStepConstraint,
@@ -84,10 +93,27 @@ class FakePlanner:
         return None
 
 
-def _unlinked_plan() -> UnlinkedSemanticPlan:
+class _PerQueryPlanner:
+    provider_name = "fake"
+    model_name = "fake-model"
+
+    def __init__(self, plans: dict[str, UnlinkedSemanticPlan]) -> None:
+        self._plans = plans
+
+    async def plan(self, query: str) -> UnlinkedSemanticPlan:
+        await asyncio.sleep(0)  # yield so requests genuinely interleave
+        return self._plans[query]
+
+    async def aclose(self) -> None:
+        return None
+
+
+def _unlinked_plan(
+    target: str = "điều kiện của lần họp thứ nhất",
+) -> UnlinkedSemanticPlan:
     return UnlinkedSemanticPlan(
         anchor=AnchorMention(text="Khoản 3 Điều 145", expected_label="Clause"),
-        target=TargetMention(text="điều kiện của lần họp thứ nhất"),
+        target=TargetMention(text=target),
         steps=(
             PathStepConstraint(
                 relation="REFERS_TO", direction="outgoing", next_label="Clause"
@@ -143,23 +169,67 @@ def test_non_multi_hop_skips_planner_and_executes_without_plan() -> None:
     asyncio.run(scenario())
 
 
-def test_planner_timeout_falls_back_to_generic_execution() -> None:
+@pytest.mark.parametrize(
+    ("planner_error", "backend_error"),
+    [
+        (QueryPlannerTimeoutError("slow-secret"), BackendPlanningTimeoutError),
+        (
+            QueryPlannerDependencyError("provider-secret"),
+            BackendPlanningUnavailableError,
+        ),
+        (QueryPlannerInvalidPlanError("payload-secret"), BackendPlanningOutputError),
+    ],
+)
+def test_planner_infra_failure_raises_typed_backend_error_without_execution(
+    planner_error: Exception,
+    backend_error: type[Exception],
+) -> None:
     async def scenario() -> None:
         runtime = FakePlanningRuntime(IntentType.MULTI_HOP)
-        planner = FakePlanner(error=QueryPlannerTimeoutError("slow"))
+        planner = FakePlanner(error=planner_error)
         runner = _runner()
         service = GraphRAGRetrievalService(
             runtime, runner, planner=planner, planning_enabled=True
         )
         try:
-            context = await service.retrieve_context(
-                RetrievalRequest(query="multi hop")
-            )
+            with pytest.raises(backend_error) as captured:
+                await service.retrieve_context(RetrievalRequest(query="multi hop"))
         finally:
             await runner.aclose()
         assert planner.calls == 1
-        assert runtime.executed_plans == [None]
-        assert context.capability_status == "supported"
+        assert runtime.executed_plans == []  # no Neo4j work after a planner failure
+        # the raw provider message must not leak through the typed boundary error
+        assert str(planner_error) not in str(captured.value)
+
+    asyncio.run(scenario())
+
+
+def test_concurrent_requests_keep_independent_plan_state() -> None:
+    async def scenario() -> None:
+        runtime = FakePlanningRuntime(IntentType.MULTI_HOP)
+        plans = {
+            query: _unlinked_plan(target=f"đích số {query}")
+            for query in ("a", "b", "c", "d")
+        }
+        planner = _PerQueryPlanner(plans)
+        runner = BoundedRetrievalRunner(
+            max_concurrency=4, timeout_seconds=1, shutdown_grace_seconds=1
+        )
+        service = GraphRAGRetrievalService(
+            runtime, runner, planner=planner, planning_enabled=True
+        )
+        try:
+            await asyncio.gather(
+                *(
+                    service.retrieve_context(RetrievalRequest(query=query))
+                    for query in plans
+                )
+            )
+        finally:
+            await runner.aclose()
+        # every request executed with exactly its own plan, none shared or dropped
+        assert set(runtime.executed_plans) == set(plans.values())
+        assert len(runtime.executed_plans) == len(plans)
 
     asyncio.run(scenario())
 

@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–10, QG-0 và Checkpoint B đã pass; Task 11 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–11, QG-0 và Checkpoint B đã pass; Checkpoint C là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -919,8 +919,9 @@ Lifecycle tests bổ sung ở task kế tiếp nếu vượt giới hạn 5 file
   `planning_enabled`; retrieval-only profile giữ `binder=None`, không đổi hành vi.
 - `GraphRAGRetrievalService` điều phối: `runner.run(prepare)` → nếu MULTI_HOP và
   planning bật thì `await planner.plan()` trên event loop → `runner.run(execute)`.
-  Planner timeout/invalid/unavailable → fail-closed về generic retrieval; cancellation
-  propagate nguyên trạng; không retry request, không chạm answer provider.
+  Plan bind fail → generic retrieval + gate đóng (cannot-answer); planner infra fail
+  (timeout/unavailable/invalid output) được Task 11 map thành typed backend error;
+  cancellation propagate nguyên trạng; không retry request, không chạm answer provider.
 - Container dựng planner khi `QUERY_PLANNING_ENABLED`, inject vào retrieval service,
   đóng planner idempotent theo thứ tự ownership (answer → planner → document → runner
   → runtime), và rollback đủ resource khi startup fail ở từng chặng. Mock mode không
@@ -954,11 +955,11 @@ silent empty result.
 
 **Acceptance criteria:**
 
-- [ ] Unsupported capability khác no-results và khác plan-failed.
-- [ ] Chat SSE không phát token trước khi full answer candidate được validate.
-- [ ] Plan failure tạo zero answer-provider calls.
-- [ ] Concurrent requests không dùng chung mutable plan/request state.
-- [ ] Existing factual, definition, hierarchy, validity và comparison API tests pass.
+- [x] Unsupported capability khác no-results và khác plan-failed.
+- [x] Chat SSE không phát token trước khi full answer candidate được validate.
+- [x] Plan failure tạo zero answer-provider calls.
+- [x] Concurrent requests không dùng chung mutable plan/request state.
+- [x] Existing factual, definition, hierarchy, validity và comparison API tests pass.
 
 **Files likely touched:**
 
@@ -970,13 +971,40 @@ silent empty result.
 
 **Verification:**
 
-- [ ] uv run pytest -q apps/backend/tests/test_backend_lifecycle.py
-- [ ] uv run pytest -q apps/backend/tests/test_query_error_contract.py
-- [ ] uv run pytest -q apps/backend/tests/test_graphrag_answer_service.py
+- [x] uv run pytest -q apps/backend/tests/test_backend_lifecycle.py
+- [x] uv run pytest -q apps/backend/tests/test_query_error_contract.py
+- [x] uv run pytest -q apps/backend/tests/test_graphrag_answer_service.py
+
+**Kết quả thực thi (2026-07-23):**
+
+- Phân biệt rõ hai loại thất bại của multi-hop tại backend boundary:
+  - **Planner infra failure** (`QueryPlannerTimeoutError` /
+    `QueryPlannerDependencyError` / `QueryPlannerInvalidPlanError`) →
+    `GraphRAGRetrievalService._plan` dịch sang typed backend error
+    (`BackendPlanning{Timeout,Unavailable,Output}Error`), map ở
+    `error_handlers` thành `QUERY_PLANNING_TIMEOUT` 504 /
+    `QUERY_PLANNING_UNAVAILABLE` 503 / `QUERY_PLANNING_OUTPUT_INVALID` 502.
+    Đây là điều chỉnh so với hành vi tạm của Task 10 (trước đó nuốt lỗi rồi
+    fallback generic).
+  - **Plan bind failure** (unbound/ambiguous/no-path) → generic retrieval,
+    generation gate `EvidenceSufficiencyPolicy` trả cannot-answer cho MULTI_HOP
+    (`plan_execution` None hoặc chưa SATISFIED); không factual fallback.
+- Message của typed error là generic tiếng Việt, không kèm `str` gốc của
+  provider → không lộ payload/secret; `retrieval_error_handler` tiếp tục không lộ
+  stack trace. `cannot_answer` short-circuit trước `provider.generate_structured`
+  nên plan failure tạo zero answer-provider call (đã có coverage ở
+  `src/generation/tests/test_grounding_and_service.py`).
+- Ba outcome độc lập: unsupported capability (`RetrievalCapabilityError` 409) ≠
+  no-results (`capability_status`) ≠ plan-failed (cannot-answer qua gate).
+- Tests: `test_query_error_contract.py` +3 mapping planner; service test thêm
+  typed-error + no-leak (parametrized 3) và concurrent-requests giữ plan state
+  độc lập; đổi test fallback cũ của Task 10 sang assert typed error. Full suite:
+  529 passed, 10 integration/provider deselected; ruff sạch.
 
 **Dependencies:** Task 10.
 
-**Estimated scope:** M — 5 files.
+**Estimated scope:** M — 5 files (service `_plan` dịch lỗi là chỉnh nhỏ ngoài
+danh sách để giữ boundary typed).
 
 ---
 

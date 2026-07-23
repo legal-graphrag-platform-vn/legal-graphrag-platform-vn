@@ -23,7 +23,12 @@ from src.generation.errors import (
 )
 from api.models import QueryRequest
 from api.routes.query import query
-from services.errors import BackendRetrievalTimeoutError
+from services.errors import (
+    BackendPlanningOutputError,
+    BackendPlanningTimeoutError,
+    BackendPlanningUnavailableError,
+    BackendRetrievalTimeoutError,
+)
 from src.retrieval.errors import (
     IntentAnalysisError,
     RetrievalCapabilityError,
@@ -92,6 +97,21 @@ def test_query_route_delegates_once_and_returns_no_results() -> None:
             IntentAnalysisError("invalid intent"),
             422,
             "INTENT_ANALYSIS_INVALID",
+        ),
+        (
+            BackendPlanningTimeoutError("planning slow"),
+            504,
+            "QUERY_PLANNING_TIMEOUT",
+        ),
+        (
+            BackendPlanningUnavailableError("planner down"),
+            503,
+            "QUERY_PLANNING_UNAVAILABLE",
+        ),
+        (
+            BackendPlanningOutputError("bad plan"),
+            502,
+            "QUERY_PLANNING_OUTPUT_INVALID",
         ),
     ],
 )

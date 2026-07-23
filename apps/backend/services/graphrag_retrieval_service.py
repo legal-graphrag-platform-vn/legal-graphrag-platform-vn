@@ -7,6 +7,11 @@ import logging
 from functools import partial
 
 from api.models import QueryRequest, RetrievalResponse
+from services.errors import (
+    BackendPlanningOutputError,
+    BackendPlanningTimeoutError,
+    BackendPlanningUnavailableError,
+)
 from services.interfaces import (
     AsyncRetrievalRunner,
     QueryPlannerPort,
@@ -56,25 +61,31 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
             partial(self._runtime.execute, prepared, plan=plan)
         )
 
-    async def _plan(self, query: str) -> UnlinkedSemanticPlan | None:
-        """Plan on the event loop; fail closed to generic retrieval on planner errors."""
+    async def _plan(self, query: str) -> UnlinkedSemanticPlan:
+        """Plan on the event loop; surface planner infra failures as typed errors.
+
+        A produced-but-unbindable plan is handled downstream (fail-closed generic
+        retrieval + cannot-answer at the generation gate). Provider infra failures
+        instead become typed backend errors so the API distinguishes them from a
+        legitimate no-results or plan-failed outcome, and never leak provider payload.
+        """
         assert self._planner is not None
         try:
             return await self._planner.plan(query)
         except asyncio.CancelledError:
             raise
-        except (
-            QueryPlannerTimeoutError,
-            QueryPlannerInvalidPlanError,
-            QueryPlannerDependencyError,
-        ) as exc:
-            logger.warning(
-                "Query planning failed; falling back to generic retrieval: "
-                "provider=%s reason=%s",
-                self._planner.provider_name,
-                type(exc).__name__,
-            )
-            return None
+        except QueryPlannerTimeoutError as exc:
+            raise BackendPlanningTimeoutError(
+                "Lập kế hoạch truy vấn vượt quá thời gian cho phép."
+            ) from exc
+        except QueryPlannerDependencyError as exc:
+            raise BackendPlanningUnavailableError(
+                "Dịch vụ lập kế hoạch truy vấn hiện không khả dụng."
+            ) from exc
+        except QueryPlannerInvalidPlanError as exc:
+            raise BackendPlanningOutputError(
+                "Bộ lập kế hoạch truy vấn trả về kế hoạch không hợp lệ."
+            ) from exc
 
 
 class RetrievalQueryService:
