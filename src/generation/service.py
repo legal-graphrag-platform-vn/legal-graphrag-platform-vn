@@ -33,6 +33,10 @@ class AnswerGenerator:
         self._grounding = grounding
 
     async def generate(self, request: AnswerGenerationRequest) -> AnswerResponse:
+        request.retrieval_context.metrics.setdefault("planner_provider_calls", 0)
+        request.retrieval_context.metrics.setdefault(
+            "answer_provider_calls_after_plan_failure", 0
+        )
         result = self._sufficiency.evaluate(request.retrieval_context)
         if not result.sufficient:
             return self._cannot_answer(request, result.reason_code, result.reason)

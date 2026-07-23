@@ -14,6 +14,12 @@ from src.retrieval.models import (
     RetrievedUnit,
     TemporalQuery,
 )
+from src.retrieval.execution_contract import (
+    PlanExecutionResult,
+    PlanExecutionStatus,
+    PlanReasonCode,
+)
+from src.retrieval.path_identity import build_topology_path_fingerprint
 from src.shared.retrieval_contract import RetrievalStrategyType, TemporalSource
 
 
@@ -60,7 +66,7 @@ def retrieval_context(
             path_units.append(target)
         paths = [graph_path([unit.id for unit in path_units], relations)]
     query_date = date(2022, 7, 1) if temporal else None
-    return RetrievalContext(
+    context = RetrievalContext(
         query="Ai có quyền thành lập doanh nghiệp?",
         intent=intent,
         strategy=_strategy(intent),
@@ -92,6 +98,29 @@ def retrieval_context(
             if intent is IntentType.MULTI_HOP and len(relations) >= 2
             else None
         ),
+    )
+    if intent is IntentType.MULTI_HOP and len(relations) >= 2:
+        bind_satisfied_path(context)
+    return context
+
+
+def bind_satisfied_path(
+    context: RetrievalContext,
+    *,
+    path_index: int = 0,
+    requirement: GraphReasoningRequirement | None = None,
+) -> None:
+    path = context.graph_paths[path_index]
+    trusted_requirement = requirement or GraphReasoningRequirement(minimum_edges=2)
+    context.reasoning_requirement = trusted_requirement
+    context.plan_execution = PlanExecutionResult(
+        plan_fingerprint="plan-test",
+        satisfied_path_fingerprints=(build_topology_path_fingerprint(path),),
+        bound_anchor_id=path.nodes[0].node_id,
+        bound_target_id=path.nodes[-1].node_id,
+        execution_status=PlanExecutionStatus.SATISFIED,
+        reason_code=PlanReasonCode.SATISFIED,
+        derived_reasoning_requirement=trusted_requirement,
     )
 
 

@@ -43,6 +43,18 @@ class ProjectedContextValidator:
         elif intent == IntentType.MULTI_HOP:
             if not projected.paths or not plan.required_bundle_sets:
                 return _insufficient("Projected graph path is incomplete")
+            authoritative_path_ids = set(plan.authoritative_path_ids)
+            if (
+                not authoritative_path_ids
+                or not selected_path_ids.issubset(authoritative_path_ids)
+                or any(
+                    not set(bundle.path_ids).issubset(authoritative_path_ids)
+                    for bundle in admitted.values()
+                )
+            ):
+                return _insufficient(
+                    "Projected graph path is outside the satisfied plan"
+                )
         elif intent == IntentType.VALIDITY:
             if projected.resolved_from is None:
                 return _insufficient("Projected context has no temporal point")
