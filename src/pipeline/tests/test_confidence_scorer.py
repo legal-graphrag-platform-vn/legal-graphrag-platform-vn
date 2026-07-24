@@ -55,3 +55,48 @@ def test_score_reject_when_schema_and_ontology_invalid() -> None:
         known_entity_ids=set(),
     )
     assert breakdown.total < 0.3
+
+
+def test_schema_score_calculation_with_deepdiff() -> None:
+    from src.pipeline.validation.schema_validator import score_relation_schema
+
+    # Perfect schema match
+    perfect = {
+        "head": "ldn_2020_art1",
+        "relation": "REGULATES",
+        "tail": "thanh_lap",
+        "evidence": "Luật này quy định...",
+        "confidence": 0.95,
+    }
+    assert score_relation_schema(perfect) == 1.0
+
+    # Missing evidence field (minus 0.3)
+    missing_evidence = {
+        "head": "ldn_2020_art1",
+        "relation": "REGULATES",
+        "tail": "thanh_lap",
+        "confidence": 0.95,
+    }
+    assert abs(score_relation_schema(missing_evidence) - 0.7) < 1e-9
+
+    # Extra field (minus 0.05) and type change on confidence (minus 0.2)
+    extra_and_type_change = {
+        "head": "ldn_2020_art1",
+        "relation": "REGULATES",
+        "tail": "thanh_lap",
+        "evidence": "evidence text",
+        "confidence": "high",  # string instead of float -> type change
+        "extra_field": "some data",  # extra field
+    }
+    # Expected penalty: type_change (0.2) + extra_key (0.05) = 0.25 -> Score: 0.75
+    assert abs(score_relation_schema(extra_and_type_change) - 0.75) < 1e-9
+
+    # Invalid relation literal (minus 0.2)
+    invalid_relation = {
+        "head": "ldn_2020_art1",
+        "relation": "INVALID_RELATION",
+        "tail": "thanh_lap",
+        "evidence": "Luật này quy định...",
+        "confidence": 0.95,
+    }
+    assert abs(score_relation_schema(invalid_relation) - 0.8) < 1e-9

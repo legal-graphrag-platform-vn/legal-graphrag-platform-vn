@@ -15,6 +15,7 @@ dependencies = [
   "tenacity>=8.3",
   "fastapi>=0.139.0",
   "uvicorn[standard]>=0.51.0",
+  "deepdiff>=9.1.0",
 ]
 
 [dependency-groups]

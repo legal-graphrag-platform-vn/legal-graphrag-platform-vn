@@ -56,6 +56,7 @@ from src.pipeline.validation.record_consistency_validator import (
 )
 from src.pipeline.validation.schema_validator import (
     validate_relation as validate_schema,
+    score_relation_schema,
 )
 
 logger = logging.getLogger(__name__)
@@ -325,7 +326,12 @@ def process_article(
         if tail_resolution.canonical_id:
             relation_dict["tail"] = tail_resolution.canonical_id
         parsed_relation, schema_err = validate_schema(relation_dict)
-        schema_valid = parsed_relation is not None
+        if parsed_relation is not None:
+            schema_score = 1.0
+            schema_valid = True
+        else:
+            schema_score = score_relation_schema(relation_dict)
+            schema_valid = schema_score >= 0.7
 
         head_type = head_resolution.canonical_type or _ontology_label(
             entity_types.get(raw_relation.head, "Entity")
@@ -377,7 +383,7 @@ def process_article(
         )
 
         breakdown = score(
-            schema_valid=schema_valid,
+            schema_valid=schema_score,
             ontology_valid=ontology_ok,
             evidence=raw_relation.evidence,
             article_text=article_text,
@@ -395,6 +401,7 @@ def process_article(
                 "head": _resolution_dict(head_resolution),
                 "tail": _resolution_dict(tail_resolution),
             },
+            "schema_score": schema_score,
             "schema_valid": schema_valid,
             "schema_error": schema_err,
             "ontology_valid": ontology_ok,

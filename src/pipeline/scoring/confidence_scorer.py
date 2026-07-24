@@ -73,7 +73,7 @@ def score_entities_resolvable(entity_ids: list[str], known_entity_ids: set[str])
 
 def score(
     *,
-    schema_valid: bool,
+    schema_valid: bool | float,
     ontology_valid: bool,
     evidence: str,
     article_text: str,
@@ -88,7 +88,7 @@ def score(
     cho từng relation type, nên ontology hợp lệ tức là chiều quan hệ đúng.
     """
     return ConfidenceBreakdown(
-        schema_valid=1.0 if schema_valid else 0.0,
+        schema_valid=float(schema_valid),
         ontology_valid=1.0 if ontology_valid else 0.0,
         evidence_present=score_evidence_presence(evidence, article_text),
         entities_resolvable=score_entities_resolvable([head_id, tail_id], known_entity_ids),
