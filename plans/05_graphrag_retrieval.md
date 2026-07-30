@@ -148,6 +148,49 @@ TRAVERSAL_POLICIES = {
 }
 ```
 
+### Query-specific planned retrieval — development-only
+
+`QUERY_PLANNING_ENABLED=false` is the default. When disabled, the runtime still
+runs generic retrieval but MULTI_HOP has no trusted `GraphReasoningRequirement`;
+therefore it must not be described as supported planned multi-hop, and generation
+must fail-closed. When enabled in development, only the `MULTI_HOP` intent calls
+the planner; other intents keep their existing retrieval path and have
+`planner_provider_calls=0`.
+
+Application orchestration tách rõ async/sync boundary:
+
+```text
+bounded worker: runtime.prepare(request)
+       -> event loop: await planner.plan(query)       # MULTI_HOP only
+       -> bounded worker: runtime handle bind + runtime.execute(...)
+       -> exact executor: static depth-2/depth-3 query, read-only
+       -> generation gate: admit only SATISFIED fingerprinted path
+```
+
+The planner only produces an `UnlinkedSemanticPlan`; it does not produce node
+IDs or Cypher. The runtime handle resolves anchor/target independently and does
+not use path existence for ranking. If binding or exact execution fails, generic
+evidence must not replace the trusted planned path and the answer provider call
+count must be 0. Planner timeout/unavailable/invalid output is returned as a
+typed backend error, not a silent fallback.
+
+As of 2026-07-30, QG-1 still has `threshold_status=failed` on three reviewed
+cases of `ldn_2020`; therefore this profile is development/evaluation only, not
+default-on, and carries no corpus-level or generalization claim.
+
+| Contract | Default | Range / semantics |
+|---|---:|---|
+| Plan depth | required | `2..3`, exact-linear only; no default |
+| Exact path budget | 20 | `1..100`; exceeding the budget returns `PATH_BUDGET_EXCEEDED` |
+| Endpoint RRF k | 60 | `>=1` |
+| Anchor/target candidate k | 10 / 10 | `1..100` per role |
+| Anchor/target minimum score | `0.063` / `0.063` | `(0,1]`, calibrated separately from retrieval ranking |
+| Anchor/target minimum margin | `0.001` / `0.001` | `[0,1]`; a missing margin returns typed ambiguous |
+
+Query planning requires both vector and full-text seed channels. Endpoint
+thresholds are not currently environment overrides; they are pinned in
+`EndpointLinkerConfig` and only change after independent calibration evidence.
+
 ### Cypher Query Template
 
 ```cypher
