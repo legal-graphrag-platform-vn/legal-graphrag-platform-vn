@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–11, QG-0, Checkpoint B và Checkpoint C đã pass; Task 12 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–12, QG-0, Checkpoint B và Checkpoint C đã hoàn tất; QG-1 chưa đạt preregistered thresholds, Task 13 là bước kế tiếp
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -757,7 +757,9 @@ gồm anchor mention, target mention và ordered steps; không sinh ID hoặc Cy
 
 - Định nghĩa QueryPlannerPort async.
 - Tạo prompt chỉ expose allowlisted labels, relations và directions; target chỉ
-  có normalized mention text, label derive từ final step.
+  có normalized mention text, label derive từ final step. Semantic target phải
+  là cụm tìm kiếm tự đủ nghĩa, giữ chủ thể, hành vi, điều kiện và số liệu phân
+  biệt từ câu hỏi; không dùng target chung chung đứng một mình.
 - Gemini adapter dùng structured output, timeout, bounded concurrency và retry
   policy giống answer provider nhưng config riêng.
 - Validate response bằng DTO contract; malformed/empty payload fail typed.
@@ -1043,6 +1045,10 @@ Không chạy QG-1 nếu Checkpoint C chưa đạt.
 **Mục tiêu:** đo riêng planner correctness, linker correctness, executor correctness
 và end-to-end retrieval; không gom thành một con số dễ che lỗi.
 
+**Trạng thái:** implementation và evaluation artifact đã hoàn thành, nhưng QG-1
+đang có `threshold_status=failed`. Task 12 còn follow-up cải thiện chất lượng;
+planned retrieval chưa đủ điều kiện default-on.
+
 **Profiles bắt buộc:**
 
 1. generic retrieval hiện tại;
@@ -1066,11 +1072,11 @@ và end-to-end retrieval; không gom thành một con số dễ che lỗi.
 
 **Acceptance criteria:**
 
-- [ ] Thresholds được preregister trước khi chạy test fold.
-- [ ] Gold executor được báo là upper bound, không phải baseline cạnh tranh.
-- [ ] Wrong-but-valid plan được tính là sai dù executor chạy thành công.
-- [ ] Kết quả ghi dataset hash, graph snapshot hash, model và prompt fingerprint.
-- [ ] Development evidence không được gắn nhãn official khi M3-B13/artifact rebuild
+- [x] Thresholds được preregister trước khi chạy test fold.
+- [x] Gold executor được báo là upper bound, không phải baseline cạnh tranh.
+- [x] Wrong-but-valid plan được tính là sai dù executor chạy thành công.
+- [x] Kết quả ghi dataset hash, graph snapshot hash, model và prompt fingerprint.
+- [x] Development evidence không được gắn nhãn official khi M3-B13/artifact rebuild
       còn mở.
 
 **Corpus gate:**
@@ -1089,8 +1095,55 @@ rebuild. Trước đó chỉ được báo development case study, không claim 
 
 **Verification:**
 
-- [ ] uv run pytest -q src/retrieval/tests/test_query_planning_evaluation.py
-- [ ] Re-run cùng snapshot/model/prompt cho artifact metadata giống nhau.
+- [x] uv run pytest -q src/retrieval/tests/test_query_planning_evaluation.py
+- [x] Re-run cùng snapshot/model/prompt cho artifact metadata giống nhau.
+
+**Kết quả kiểm chứng (2026-07-30):**
+
+- Baseline QG-1 được chạy hai lần trên graph snapshot
+  `294cf005d4d5926d5d09c9388236ff23d92cd6b845eeaef89a4d263f6280e291`
+  với `gemini:gemini-3.1-flash-lite`; dataset, thresholds, graph, model và prompt
+  fingerprints giống nhau giữa hai lần chạy. LLM planner đạt schema-valid `3/3`
+  và exact plan sequence `3/3`, nhưng anchor
+  binding chỉ đạt `2/3`, target binding `0/3`, exact path denotation `0/3` và
+  graph-path hit `0/3`. Failure pattern ổn định giữa hai lần chạy:
+  `UNBOUND_TARGET`, `AMBIGUOUS_TARGET`, `UNBOUND_TARGET`.
+- Diagnostic bổ sung target mention, resolution status, top-k candidate
+  ID/score/source, gold rank và top-2 margin; không lưu raw provider payload và
+  không dùng execution/path data để xếp hạng. Baseline cho thấy cả ba gold target
+  đều ngoài top-10 do planner mention thiếu ngữ cảnh.
+- Development prompt iteration yêu cầu semantic target tự đủ nghĩa, prompt
+  fingerprint `415ed9c2e85ee42a5fed462cd3c3bbed3f1d8d02c8843fee8ee741f6981affa4`.
+  `multi_hop_01` cải thiện từ target `khoản`/gold ngoài top-10 lên gold rank 1,
+  nhưng vẫn fail-closed vì margin `0.000770 < 0.001`; `multi_hop_04` vẫn ngoài
+  top-k và `multi_hop_02` có provider output invalid trong lần chạy này. Đây là
+  development iteration trên cùng reviewed cases, không phải test-fold claim mới.
+- Gold manual upper bound đạt anchor/target binding, exact path denotation và
+  graph-path hit `3/3`, xác nhận graph và exact executor vẫn thỏa các gold path.
+- Preregistered threshold status là `failed`; planned retrieval vì vậy chưa đủ
+  điều kiện default-on. Artifact chỉ mang nhãn `development_case_study`,
+  `official=false`, không claim generalization vì cả ba case đều thuộc
+  `ldn_2020`.
+- Unit evaluation suite: 8 tests pass; planner/evaluation/linker targeted suite:
+  22 tests pass; full default suite: 540 tests pass,
+  10 integration/provider tests deselected theo marker. Artifact canonical:
+  `results/retrieval/query_graph_qg1.{json,md}`.
+
+**Cải thiện còn mở của Task 12:**
+
+- [ ] Mở rộng calibration/evaluation corpus lên tối thiểu 4 văn bản và tách
+      calibration fold khỏi QG-1 test fold; không tune threshold trên ba case
+      `ldn_2020` hiện tại.
+- [ ] Thu thập nhiều target mention thực tế từ planner, đo target top-k recall,
+      gold rank, score và margin trước khi thay đổi linker threshold.
+- [ ] Amend design cho câu hỏi mà target không thể xác định độc lập từ semantic
+      text, điển hình `multi_hop_02`; không dùng path existence hoặc target
+      reachability làm ranking feature/tie-break.
+- [ ] Chỉ đánh giá endpoint reranker trong Phase 2.5 sau khi có calibration set,
+      hard negatives và preregistered false-resolution gate; không bật từ ba case
+      development hiện tại.
+- [ ] Chạy lại QG-1 trên independent test fold và đạt preregistered thresholds,
+      gồm zero answer-provider calls sau plan failure, trước khi default-on.
 
 **Dependencies:** Tasks 10–11.
 

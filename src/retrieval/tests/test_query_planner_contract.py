@@ -89,7 +89,11 @@ def test_valid_structured_plan_is_strict_and_fingerprint_is_stable() -> None:
         ) == build_unlinked_plan_fingerprint(second)
         request = client.aio.models.last_kwargs
         assert "node_id" not in request["contents"]
-        assert "Cypher" in request["config"]["system_instruction"]
+        system_instruction = request["config"]["system_instruction"]
+        assert "Cypher" in system_instruction
+        assert "cụm tìm kiếm tự đủ nghĩa" in system_instruction
+        assert "chủ thể, hành vi, điều kiện và số liệu" in system_instruction
+        assert "không dùng target chung chung" in system_instruction.casefold()
         assert "additionalProperties" not in json.dumps(
             request["config"]["response_json_schema"]
         )

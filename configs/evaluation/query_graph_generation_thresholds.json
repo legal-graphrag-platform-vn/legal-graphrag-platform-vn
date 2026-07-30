@@ -1,0 +1,23 @@
+{
+  "schema_version": "query-graph-qg1-thresholds-v1",
+  "evaluation_scope": "pilot_development",
+  "claim_label": "development_case_study",
+  "preregistered_at": "2026-07-30T00:00:00+07:00",
+  "minimum_case_count": 3,
+  "required_profiles": [
+    "generic_retrieval",
+    "rule_based_planner",
+    "gold_manual_upper_bound",
+    "llm_planner"
+  ],
+  "llm_acceptance": {
+    "plan_schema_valid_rate": 0.8,
+    "exact_plan_sequence_match_rate": 0.66,
+    "anchor_binding_accuracy": 0.66,
+    "target_binding_accuracy": 0.66,
+    "exact_path_denotation_accuracy": 0.66,
+    "graph_path_hit_rate": 0.66,
+    "maximum_extra_path_rate": 0.0,
+    "answer_provider_calls_after_plan_failure": 0
+  }
+}

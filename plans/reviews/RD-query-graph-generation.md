@@ -401,13 +401,15 @@ class AnchorMention(BaseModel):
     expected_label: AnchorLabel | None = None    # AI gợi ý; Bộ dò tên mới quyết
 
 class TargetMention(BaseModel):
-    text: str                                    # không node_id
+    text: str                                    # không node_id; semantic text tự đủ nghĩa
     # expected label derive từ steps[-1].next_label, không lặp field
 
 class PathStepConstraint(BaseModel):
     relation: QueryPlannableRelation
     direction: Literal["outgoing", "incoming"]   # exact
     next_label: TraversalLabel | TargetLabel
+
+# Semantic target text phải giữ chi tiết phân biệt từ query; linker vẫn độc lập.
 
 # Bộ dò tên sinh — node_id chỉ xuất hiện sau boundary này.
 class BoundEndpoint(BaseModel):
@@ -436,6 +438,13 @@ class PlanExecutionResult(BaseModel):
     message: str | None = None
     derived_reasoning_requirement: GraphReasoningRequirement | None   # artifact tương thích
 ```
+
+Khi target không phải tham chiếu cấu trúc `Điều/Khoản/Điểm`, planner phải sinh
+một cụm tìm kiếm tự đủ nghĩa, giữ các chi tiết phân biệt có trong câu hỏi như
+chủ thể, hành vi, điều kiện và số liệu. Target chung chung như `khoản`, `điều`,
+`quy định` hoặc `điều kiện` đứng một mình là không đủ cho semantic linking.
+Linker vẫn resolve độc lập và không dùng path existence hoặc target reachability
+làm ranking feature.
 
 V1 invariant bổ sung: kết quả `satisfied` có đúng một topology fingerprint sau
 khi collapse parallel citation provenance. Nhiều topology nối cùng hai endpoint
