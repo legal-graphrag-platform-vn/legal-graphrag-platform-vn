@@ -120,6 +120,27 @@ thành công, Executor và generation gate chạy deterministic, fail-closed tr�
 graph hiện có. Điều này không có nghĩa graph luôn đầy đủ hoặc plan luôn đúng ý
 pháp lý; hai rủi ro đó được đo riêng ở Phần 5–6.
 
+### 2.3. Orchestration sync/async hiện hành
+
+Backend không chạy Neo4j hoặc embedding trên FastAPI event loop. Khi
+`QUERY_PLANNING_ENABLED=true`, application coordinator thực hiện đúng thứ tự:
+
+1. gọi `runtime.prepare(request)` trên bounded worker để route và chuẩn hóa
+   request;
+2. chỉ với intent `MULTI_HOP`, `await planner.plan(query)` trên event loop;
+3. gọi `RetrievalRuntimeHandle.execute(prepared, plan=plan)` trên bounded worker;
+4. runtime handle bind anchor/target đồng bộ, rồi exact executor và generic
+   retrieval cùng chạy trong sync runtime;
+5. chỉ `SATISFIED` path đã qua fingerprint membership mới tạo trusted reasoning
+   requirement cho generation.
+
+Khi feature flag tắt, coordinator gọi `runtime.retrieve(request)` một lần trên
+bounded worker và `planner_provider_calls=0`. Đây không phải planned multi-hop
+support: MULTI_HOP không có trusted reasoning requirement và generation phải
+fail-closed. Planner provider timeout/unavailable/invalid output được map thành
+typed backend error; binding hoặc exact-execution failure không được gọi answer
+provider.
+
 ---
 
 ## Phần 3 — Luồng chạy đầy đủ (kèm ví dụ)
@@ -354,12 +375,18 @@ Chi tiết: `results/retrieval/query_graph_preflight.md`.
 
 | Mã lý do | Nghĩa | Hỏng ở chặng | Sửa ở đâu |
 |---|---|---|---|
+| `SATISFIED` | Có đúng một topology path thỏa plan và evidence contract | Không hỏng | cho phép generation gate kiểm tiếp |
 | `INVALID_PLAN` | AI ra đơn sai (quan hệ lạ, sai chiều, sai số bước) | Planner | prompt/schema |
+| `OUT_OF_SCOPE_PLAN_SHAPE` | One-hop, branching hoặc shape ngoài V1 | Planner/contract | thu hẹp query hoặc amend design |
+| `PLANNER_UNAVAILABLE` | Provider, auth, model hoặc dependency không khả dụng | Planner provider | config/dependency/provider |
+| `PLANNER_TIMEOUT` | Planner vượt timeout | Planner provider | timeout/latency/provider |
 | `UNBOUND_ANCHOR` | Không tìm ra điều luật cho cụm chữ | Bộ dò tên | index/tìm kiếm |
 | `AMBIGUOUS_ANCHOR` | Nhiều ứng viên ngang điểm | Bộ dò tên | ngưỡng / hỏi lại |
 | `UNBOUND_TARGET` | Không resolve được đơn vị đích | Bộ dò tên | index/scope/calibration |
 | `AMBIGUOUS_TARGET` | Target có nhiều candidate không đủ margin | Bộ dò tên | calibration hoặc thu hẹp scope |
 | `NO_PATH` | Neo đúng nhưng graph không có đường | **Dữ liệu** | thường là graph thiếu cạnh (§6.1) |
+| `AMBIGUOUS_PATH` | Có nhiều topology exact, không thể chọn deterministic | Máy dò | sửa plan/data hoặc thu hẹp scope |
+| `PATH_BUDGET_EXCEEDED` | Số path vượt budget trước khi chứng minh unique | Máy dò | thu hẹp plan hoặc review budget |
 | `TEMPORAL_REJECTED` | Có đường nhưng hết hiệu lực | Máy dò | đúng thiết kế |
 | `EVIDENCE_UNLIFTABLE` | Tới đích nhưng không trích dẫn được | Lift evidence | đích là node ngữ nghĩa thiếu Điều/Khoản kề |
 

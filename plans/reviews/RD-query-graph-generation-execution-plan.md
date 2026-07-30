@@ -2,7 +2,7 @@
 
 > **Ngày lập:** 2026-07-20
 >
-> **Trạng thái:** Accepted — Task 0–12, QG-0, Checkpoint B và Checkpoint C đã hoàn tất; QG-1 chưa đạt preregistered thresholds, Task 13 là bước kế tiếp
+> **Trạng thái:** Accepted — Task 0–13, QG-0, Checkpoint B và Checkpoint C đã hoàn tất; QG-1 chưa đạt preregistered thresholds và các follow-up cải thiện của Task 12 còn mở, planned retrieval chưa default-on
 >
 > **Technical design:** [RD-query-graph-generation.md](./RD-query-graph-generation.md)
 >
@@ -1166,11 +1166,11 @@ cùng một contract.
 
 **Acceptance criteria:**
 
-- [ ] Technical design phản ánh orchestration prepare/async plan/sync execute.
-- [ ] Reason code table khớp closed enum trong code.
-- [ ] Config docs có default, range và enable/disable semantics.
-- [ ] Không mô tả multi-hop là supported nếu planner profile đang disabled.
-- [ ] Không thay đổi ontology v1.6.0 hoặc extraction contract.
+- [x] Technical design phản ánh orchestration prepare/async plan/sync execute.
+- [x] Reason code table khớp closed enum trong code.
+- [x] Config docs có default, range và enable/disable semantics.
+- [x] Không mô tả multi-hop là supported nếu planner profile đang disabled.
+- [x] Không thay đổi ontology v1.6.0 hoặc extraction contract.
 
 **Verification commands:**
 
@@ -1188,6 +1188,26 @@ Nếu có Neo4j integration environment:
 
 Provider-online tests chỉ chạy bằng marker/explicit opt-in; không nằm trong fast
 suite mặc định.
+
+**Kết quả kiểm chứng (2026-07-30):**
+
+- `plans/05_graphrag_retrieval.md`, technical design, backend README và
+  `.env.example` cùng mô tả feature flag mặc định tắt, orchestration
+  prepare/async plan/sync bind+execute, fail-closed generation và giới hạn QG-1.
+- Automated contract audit: reason-code table khớp closed enum `14/14`; backend
+  README và `.env.example` bao phủ query-planner settings `8/8`, gồm default,
+  range và enable semantics.
+- Test suites: retrieval `199 passed, 1 deselected`; generation `49 passed`;
+  backend `98 passed`; full default suite `540 passed, 10 deselected`.
+- Ruff check và Ruff format check pass trên toàn bộ Python files của query-planning
+  change; `git diff --check` pass.
+- Không chạy `tests/integration/test_retrieval_online.py`: integration guard bắt
+  buộc disposable Neo4j tại Bolt `7688`, trong khi environment hiện chỉ có pilot
+  container tại `7687`. Không nới safety guard hoặc chạy integration suite lên
+  pilot graph. Provider-online tests tiếp tục explicit opt-in và không được chạy.
+- Self-review không còn Critical/Required finding. QG-1 `threshold_status=failed`
+  và các follow-up Task 12 vẫn là blocker cho default-on, không phải blocker để
+  đồng bộ docs/verification của Task 13.
 
 **Dependencies:** Task 12.
 
@@ -1346,17 +1366,17 @@ không ghi graph và không thay schema.
 Feature chỉ được coi là hoàn tất khi:
 
 - [x] Task 0 và QG-0 pass trên pinned graph snapshot.
-- [ ] Tất cả DTO invariants có unit tests.
-- [ ] Entity linking và exact path execution có contract/integration evidence.
-- [ ] Anchor binding và target binding có metric/evidence tách biệt.
-- [ ] Generation chỉ admit satisfied path.
-- [ ] Answer provider call count sau plan failure bằng 0.
-- [ ] Non-multi-hop regression suite pass.
-- [ ] Backend timeout, cancellation, concurrency và lifecycle tests pass.
-- [ ] QG-1 report có dataset/model/prompt/snapshot fingerprints.
-- [ ] Docs/config/runtime cùng một contract.
-- [ ] Full pytest, Ruff và git diff checks pass.
-- [ ] Remaining corpus/artifact limitation được ghi rõ, không claim quá evidence.
+- [x] Tất cả DTO invariants có unit tests.
+- [x] Entity linking và exact path execution có contract/integration evidence.
+- [x] Anchor binding và target binding có metric/evidence tách biệt.
+- [x] Generation chỉ admit satisfied path.
+- [x] Answer provider call count sau plan failure bằng 0.
+- [x] Non-multi-hop regression suite pass.
+- [x] Backend timeout, cancellation, concurrency và lifecycle tests pass.
+- [x] QG-1 report có dataset/model/prompt/snapshot fingerprints.
+- [x] Docs/config/runtime cùng một contract.
+- [x] Full pytest, Ruff và git diff checks pass.
+- [x] Remaining corpus/artifact limitation được ghi rõ, không claim quá evidence.
 
 ---
 
