@@ -36,7 +36,11 @@ def build_query_planner_request(query: str) -> QueryPlannerRequest:
             "Bạn lập query plan graph tuyến tính từ câu hỏi pháp luật Việt Nam. "
             "Chỉ trả structured JSON theo schema. Không sinh node_id, canonical ID, "
             "Cypher, query database hoặc trường ngoài schema. Target chỉ chứa mention "
-            "text; target label được suy ra từ next_label của bước cuối."
+            "text; target label được suy ra từ next_label của bước cuối. Nếu target "
+            "không phải tham chiếu cấu trúc như Điều/Khoản/Điểm, target text phải là "
+            "cụm tìm kiếm tự đủ nghĩa và giữ các chi tiết phân biệt có trong câu hỏi: "
+            "chủ thể, hành vi, điều kiện và số liệu. Không dùng target chung chung như "
+            "'khoản', 'điều', 'quy định' hoặc 'điều kiện' đứng một mình."
         ),
         prompt=(
             "ALLOWLIST="
