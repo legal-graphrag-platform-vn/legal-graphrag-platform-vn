@@ -453,5 +453,83 @@ def crawl(
         raise typer.Exit(code=2)
 
 
+@app.command("enrich-vbpl")
+def enrich_vbpl(
+    raw_dir: Annotated[
+        Path, typer.Option(help="Path to raw documents output directory")
+    ] = DEFAULT_OUTPUT,
+    skip_existing: Annotated[
+        bool, typer.Option(help="Skip documents that already have properties.json and diagram.json")
+    ] = True,
+    max_documents: Annotated[
+        int | None, typer.Option(help="Limit max documents to enrich")
+    ] = None,
+    delay: Annotated[
+        float, typer.Option(min=0.0, help="Delay in seconds between document requests per worker")
+    ] = 0.0,
+    concurrency: Annotated[
+        int, typer.Option(min=1, max=16, help="Number of parallel worker threads")
+    ] = 4,
+    batch_size: Annotated[
+        int, typer.Option(min=1, help="Number of documents per batch across workers")
+    ] = 50,
+    batch_delay: Annotated[
+        float, typer.Option(min=0.0, help="Delay in seconds between batches")
+    ] = 10.0,
+) -> None:
+    """Enrich LuatVietnam raw document folders with properties.json and diagram.json from VBPL by querying document number in multithreading & batch mode."""
+    from .vbpl_enricher import enrich_documents
+
+    stats = enrich_documents(
+        raw_dir,
+        skip_existing=skip_existing,
+        max_documents=max_documents,
+        delay_seconds=delay,
+        concurrency=concurrency,
+        batch_size=batch_size,
+        batch_delay_seconds=batch_delay,
+    )
+    typer.echo(json.dumps(stats, ensure_ascii=False, indent=2))
+
+
+@app.command("resolve-diagram-items")
+def resolve_diagram_items_cli(
+    raw_dir: Annotated[
+        Path, typer.Option(help="Path to raw documents output directory")
+    ] = DEFAULT_OUTPUT,
+    skip_existing: Annotated[
+        bool, typer.Option(help="Skip document folders that have already been resolved")
+    ] = True,
+    max_documents: Annotated[
+        int | None, typer.Option(help="Limit max diagram files to resolve")
+    ] = None,
+    delay: Annotated[
+        float, typer.Option(min=0.0, help="Delay in seconds between title resolution requests")
+    ] = 0.0,
+    concurrency: Annotated[
+        int, typer.Option(min=1, max=16, help="Number of parallel worker threads")
+    ] = 4,
+    batch_size: Annotated[
+        int, typer.Option(min=1, help="Number of diagram files per batch across workers")
+    ] = 50,
+    batch_delay: Annotated[
+        float, typer.Option(min=0.0, help="Delay in seconds between batches")
+    ] = 10.0,
+) -> None:
+    """Resolve missing URL and number for items in diagram.json by querying Title on VBPL with Checkpoint & Cache."""
+    from .diagram_item_resolver import resolve_diagram_items
+
+    stats = resolve_diagram_items(
+        raw_dir,
+        skip_existing=skip_existing,
+        max_documents=max_documents,
+        delay_seconds=delay,
+        concurrency=concurrency,
+        batch_size=batch_size,
+        batch_delay_seconds=batch_delay,
+    )
+    typer.echo(json.dumps(stats, ensure_ascii=True, indent=2))
+
+
 if __name__ == "__main__":
     app()

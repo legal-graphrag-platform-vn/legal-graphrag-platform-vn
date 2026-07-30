@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None  # type: ignore
+
+try:
+    import msvcrt
+except ImportError:
+    msvcrt = None  # type: ignore
+
 import json
 import os
 import random
@@ -29,13 +38,22 @@ class RunLock:
     def __enter__(self) -> RunLock:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         handle = self.path.open("a+", encoding="utf-8")
-        try:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            handle.close()
-            raise SafetyPolicyError(
-                f"Another LuatVietnam crawler is already running: {self.path}"
-            ) from exc
+        if fcntl is not None:
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                handle.close()
+                raise SafetyPolicyError(
+                    f"Another LuatVietnam crawler is already running: {self.path}"
+                ) from exc
+        elif msvcrt is not None:
+            try:
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            except OSError as exc:
+                handle.close()
+                raise SafetyPolicyError(
+                    f"Another LuatVietnam crawler is already running: {self.path}"
+                ) from exc
         self._handle = handle
         return self
 
@@ -46,7 +64,17 @@ class RunLock:
         traceback: TracebackType | None,
     ) -> None:
         if self._handle is not None:
-            fcntl.flock(self._handle.fileno(), fcntl.LOCK_UN)
+            if fcntl is not None:
+                try:
+                    fcntl.flock(self._handle.fileno(), fcntl.LOCK_UN)
+                except OSError:
+                    pass
+            elif msvcrt is not None:
+                try:
+                    self._handle.seek(0)
+                    msvcrt.locking(self._handle.fileno(), msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
             self._handle.close()
             self._handle = None
 

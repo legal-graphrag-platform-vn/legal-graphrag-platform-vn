@@ -4,6 +4,10 @@ This folder is deliberately isolated from `src/pipeline` and `data/raw`. It is
 for evaluating `luatvietnam.vn` as a new source before any curated-ingestion
 decision is made.
 
+Optional `properties.json` and `diagram.json` sidecars are described in
+[`docs/supplemental_crawl_artifacts.md`](docs/supplemental_crawl_artifacts.md).
+They are experiment-local crawl artifacts, not pipeline or graph contracts.
+
 ## Install and test
 
 From the repository root:
