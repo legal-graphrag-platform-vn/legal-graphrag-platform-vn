@@ -31,13 +31,23 @@ class FakeDocumentRepo:
             "document": _document(),
             "nodes": [
                 _node("doc_ch1", "Chapter", "1"),
+                _node(
+                    "doc_ch1_sec1",
+                    "Section",
+                    "1",
+                    title="Quy định chung",
+                ),
                 _node("doc_art1", "Article", "1", title="Phạm vi"),
                 _node("doc_art1_cl1", "Clause", "1", content_raw="Nội dung"),
                 _node("doc_art1_cl1_pa", "Point", point_label="a"),
             ],
             "structural_edges": [
                 {"source": "doc", "target": "doc_ch1"},
+                # Transitional legacy edge must not duplicate an Article that is
+                # already nested under a verified Section.
                 {"source": "doc_ch1", "target": "doc_art1"},
+                {"source": "doc_ch1", "target": "doc_ch1_sec1"},
+                {"source": "doc_ch1_sec1", "target": "doc_art1"},
                 {"source": "doc_art1", "target": "doc_art1_cl1"},
                 {"source": "doc_art1_cl1", "target": "doc_art1_cl1_pa"},
             ],
@@ -59,9 +69,7 @@ class FakeDocumentRepo:
         }
 
     def graph_edges(self, node_ids: list[str]):
-        return [
-            {"source": "doc", "target": "doc_art1", "relation_type": "CONTAINS"}
-        ]
+        return [{"source": "doc", "target": "doc_art1", "relation_type": "CONTAINS"}]
 
     def close(self) -> None:
         self.closed = True
@@ -75,8 +83,12 @@ def test_document_browser_builds_canonical_hierarchy() -> None:
 
         assert listing.pagination.total == 1
         assert detail.id == "doc"
-        assert detail.chapters[0].articles[0].id == "doc_art1"
-        clause = detail.chapters[0].articles[0].clauses[0]
+        assert detail.chapters[0].articles == []
+        section = detail.chapters[0].sections[0]
+        assert section.id == "doc_ch1_sec1"
+        assert section.title == "Quy định chung"
+        assert section.articles[0].id == "doc_art1"
+        clause = section.articles[0].clauses[0]
         assert clause.id == "doc_art1_cl1"
         assert clause.points[0].label == "a"
 

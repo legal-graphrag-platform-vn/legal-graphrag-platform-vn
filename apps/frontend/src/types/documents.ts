@@ -27,14 +27,22 @@ export interface ArticleDetail {
   number: string
   title?: string
   content_raw: string
-  clauses: ClauseDetail[]
+   clauses: ClauseDetail[]
+}
+
+export interface SectionDetail {
+   id: string
+   number: string
+   title: string
+   articles: ArticleDetail[]
 }
 
 export interface ChapterDetail {
   id: string
   number: string
   title?: string
-  articles: ArticleDetail[]
+   articles: ArticleDetail[]
+   sections: SectionDetail[]
 }
 
 export interface DocumentRelation {

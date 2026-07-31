@@ -4,8 +4,21 @@ from datetime import date
 
 import json
 
-from src.pipeline.extraction.structural_context import DocumentRegistry, StructuralRegistry
-from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
+import pytest
+from pydantic import ValidationError
+
+from src.pipeline.extraction.structural_context import (
+    DocumentRegistry,
+    StructuralRegistry,
+)
+from src.pipeline.parser.models import (
+    Article,
+    Clause,
+    DocumentInfo,
+    ParsedDocument,
+    Point,
+    Section,
+)
 
 
 def _parsed() -> ParsedDocument:
@@ -26,11 +39,18 @@ def _parsed() -> ParsedDocument:
                     Clause(
                         number=1,
                         content="Khoản 1",
-                        points=[Point(label="d", content="d"), Point(label="đ", content="đ")],
+                        points=[
+                            Point(label="d", content="d"),
+                            Point(label="đ", content="đ"),
+                        ],
                     )
                 ],
             ),
-            Article(number=53, content_raw="Điều 53", clauses=[Clause(number=2, content="Khoản 2")]),
+            Article(
+                number=53,
+                content_raw="Điều 53",
+                clauses=[Clause(number=2, content="Khoản 2")],
+            ),
         ],
     )
 
@@ -53,7 +73,10 @@ def test_registry_resolves_legal_labels_not_ambiguous_raw_aliases() -> None:
         "khoan_1_1", current_article=5, entity_type="Clause", entity_label="Khoản 1"
     )
     cross_article = registry.resolve(
-        "bad_alias", current_article=5, entity_type="Clause", entity_label="Khoản 2 Điều 53"
+        "bad_alias",
+        current_article=5,
+        entity_type="Clause",
+        entity_label="Khoản 2 Điều 53",
     )
     ambiguous = registry.resolve("khoan_x_2", current_article=5)
 
@@ -68,6 +91,39 @@ def test_registry_resolves_current_document_reference() -> None:
         "luat_nay", current_article=5, entity_type="Document", entity_label="Luật này"
     )
     assert result.canonical_id == "ldn_2020"
+
+
+def test_registry_indexes_section_under_exact_chapter_parent() -> None:
+    parsed = _parsed()
+    parsed.sections = [
+        Section(number="1", title="Công ty trách nhiệm hữu hạn", chapter="III")
+    ]
+    parsed.articles[0].chapter = "III"
+    parsed.articles[0].section = "1"
+
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    assert registry.chapters["III"] == "ldn_2020_ch3"
+    assert registry.sections[("III", "1")] == "ldn_2020_ch3_sec1"
+    assert registry.section_for_article_id("ldn_2020_art5") == "ldn_2020_ch3_sec1"
+    resolved = registry.resolve(
+        "muc_1_chuong_3",
+        current_article="5",
+        entity_type="Section",
+        entity_label="Mục 1 Chương III",
+    )
+    assert resolved.canonical_id == "ldn_2020_ch3_sec1"
+
+
+def test_registry_hard_fails_duplicate_local_section() -> None:
+    parsed = _parsed()
+    parsed.sections = [
+        Section(number="1", title="Tên một", chapter="III"),
+        Section(number="1", title="Tên hai", chapter="III"),
+    ]
+
+    with pytest.raises(ValidationError, match="Duplicate Section"):
+        ParsedDocument.model_validate(parsed.model_dump())
 
 
 def test_document_registry_resolves_explicit_curated_number(tmp_path) -> None:
@@ -89,5 +145,8 @@ def test_document_registry_resolves_explicit_curated_number(tmp_path) -> None:
         encoding="utf-8",
     )
     registry = DocumentRegistry.from_manifest(manifest)
-    assert registry.resolve("nghi_dinh_01", "Nghị định 01/2021/NĐ-CP") == ("nd_01_2021", "Decree")
+    assert registry.resolve("nghi_dinh_01", "Nghị định 01/2021/NĐ-CP") == (
+        "nd_01_2021",
+        "Decree",
+    )
     assert registry.resolve("nghi_dinh", "Nghị định") is None

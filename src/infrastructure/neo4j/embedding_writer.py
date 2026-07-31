@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Protocol
 
 from src.pipeline.config import settings
+from src.shared.ontology.hierarchy import MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH
 
 
 class SessionProtocol(Protocol):
@@ -61,7 +62,7 @@ class Neo4jEmbeddingWriter:
         rows = list(
             self.session.run(
                 (
-                    "MATCH (d:Document {id: $graph_id})-[:CONTAINS*1..4]->(n) "
+                    f"MATCH (d:Document {{id: $graph_id}})-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(n) "
                     "WHERE n:Article OR n:Clause "
                     "RETURN n.id AS id, size(n.embedding) AS vector_size, "
                     "n.embedding_model AS model, n.embedding_provider AS provider, "

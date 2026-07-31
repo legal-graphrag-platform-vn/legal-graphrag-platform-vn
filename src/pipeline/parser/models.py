@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, BeforeValidator, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, field_validator, model_validator
 
 LegalNumber = Annotated[str, BeforeValidator(lambda value: str(value).strip())]
 
@@ -59,9 +59,30 @@ class Article(BaseModel):
     content_raw: str
     chapter: str | None = Field(default=None, description="Số chương La Mã, vd 'II'")
     chapter_title: str | None = None
+    section: str | None = Field(
+        default=None, description="Số Mục trong Chapter, vd '1'"
+    )
     clauses: list[Clause] = Field(default_factory=list)
     source_start_char: int = Field(default=0, ge=0)
     source_end_char: int = Field(default=0, ge=0)
+
+
+class Section(BaseModel):
+    """Mục — structural grouping nằm trực tiếp dưới Chapter."""
+
+    number: LegalNumber
+    title: str
+    chapter: str
+    source_start_char: int = Field(default=0, ge=0)
+    source_end_char: int = Field(default=0, ge=0)
+
+    @field_validator("title", "chapter")
+    @classmethod
+    def required_text_must_not_be_blank(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("must not be blank")
+        return normalized
 
 
 class UnparsedSection(BaseModel):
@@ -104,4 +125,40 @@ class ParsedDocument(BaseModel):
 
     document: DocumentInfo
     articles: list[Article] = Field(default_factory=list)
+    sections: list[Section] = Field(default_factory=list)
     unparsed_sections: list[UnparsedSection] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def section_hierarchy_must_be_consistent(self) -> "ParsedDocument":
+        section_index: dict[tuple[str, str], Section] = {}
+        for section in self.sections:
+            key = (section.chapter.strip().upper(), section.number.strip().lower())
+            if key in section_index:
+                raise ValueError(
+                    f"Duplicate Section number: Chapter {section.chapter} Section {section.number}"
+                )
+            section_index[key] = section
+
+        referenced_sections: set[tuple[str, str]] = set()
+        for article in self.articles:
+            if article.section is None:
+                continue
+            if article.chapter is None:
+                raise ValueError(
+                    f"Article {article.number} references Section {article.section} without Chapter"
+                )
+            key = (article.chapter.strip().upper(), article.section.strip().lower())
+            if key not in section_index:
+                raise ValueError(
+                    f"Article {article.number} references missing Section "
+                    f"{article.section} in Chapter {article.chapter}"
+                )
+            referenced_sections.add(key)
+
+        orphan_sections = sorted(set(section_index) - referenced_sections)
+        if orphan_sections:
+            chapter, section = orphan_sections[0]
+            raise ValueError(
+                f"Section {section} in Chapter {chapter} does not contain any Article"
+            )
+        return self

@@ -322,11 +322,19 @@ class ArticleDetail(BaseModel):
     clauses: list[ClauseDetail] = Field(default_factory=list)
 
 
+class SectionDetail(BaseModel):
+    id: str
+    number: str
+    title: str
+    articles: list[ArticleDetail] = Field(default_factory=list)
+
+
 class ChapterDetail(BaseModel):
     id: str
     number: str
     title: str | None = None
     articles: list[ArticleDetail] = Field(default_factory=list)
+    sections: list[SectionDetail] = Field(default_factory=list)
 
 
 class DocumentRelation(BaseModel):

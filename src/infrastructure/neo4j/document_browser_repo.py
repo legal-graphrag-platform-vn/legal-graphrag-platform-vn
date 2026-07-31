@@ -7,6 +7,11 @@ from typing import Any
 
 from neo4j import Driver
 
+from src.shared.ontology.hierarchy import (
+    MAX_DOCUMENT_HIERARCHY_DEPTH,
+    MAX_DOCUMENT_TO_ARTICLE_DEPTH,
+)
+
 
 _GRAPH_RELATIONS = [
     "ISSUED_BY",
@@ -86,17 +91,17 @@ class Neo4jDocumentBrowserRepo:
         nodes = self._run(
             f"""
             MATCH (document:Document {{id: $document_id}})
-            MATCH (document)-[:CONTAINS*1..4]->(node)
+            MATCH (document)-[:CONTAINS*1..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(node)
             RETURN {_BROWSER_NODE_PROJECTION}
             ORDER BY node.id
             """,
             document_id=document_id,
         )
         structural_edges = self._run(
-            """
-            MATCH (document:Document {id: $document_id})
-            MATCH (document)-[:CONTAINS*0..4]->(source)-[:CONTAINS]->(target)
-            WHERE (document)-[:CONTAINS*1..4]->(target)
+            f"""
+            MATCH (document:Document {{id: $document_id}})
+            MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(source)-[:CONTAINS]->(target)
+            WHERE (document)-[:CONTAINS*1..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(target)
             RETURN source.id AS source, target.id AS target
             ORDER BY source, target
             """,
@@ -112,7 +117,7 @@ class Neo4jDocumentBrowserRepo:
     def get_article(self, article_id: str) -> dict[str, Any] | None:
         rows = self._run(
             f"""
-            MATCH (document:Document)-[:CONTAINS*1..3]->(article:Article {{id: $article_id}})
+            MATCH (document:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_ARTICLE_DEPTH}]->(article:Article {{id: $article_id}})
             RETURN {_DOCUMENT_PROJECTION},
                    article.id AS article_id,
                    article.number AS article_number,
@@ -147,7 +152,7 @@ class Neo4jDocumentBrowserRepo:
         nodes = self._run(
             f"""
             MATCH (document:Document {{id: $document_id}})
-            MATCH (document)-[:CONTAINS*0..4]->(base)
+            MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(base)
             {path_clause}
             WHERE all(relation IN relationships(path)
                       WHERE type(relation) IN $relations)
@@ -179,10 +184,10 @@ class Neo4jDocumentBrowserRepo:
 
     def _document_relations(self, document_id: str) -> list[dict[str, Any]]:
         return self._run(
-            """
-            MATCH (document:Document {id: $document_id})
-            MATCH (document)-[:CONTAINS*0..4]->(source)-[relation]->(target)
-            MATCH (other:Document)-[:CONTAINS*0..4]->(target)
+            f"""
+            MATCH (document:Document {{id: $document_id}})
+            MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(source)-[relation]->(target)
+            MATCH (other:Document)-[:CONTAINS*0..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(target)
             WHERE other.id <> document.id
               AND type(relation) IN $relations
             RETURN other.id AS doc_id,
@@ -219,6 +224,7 @@ node.id AS id,
 CASE
   WHEN node:Document THEN 'Document'
   WHEN node:Chapter THEN 'Chapter'
+  WHEN node:Section THEN 'Section'
   WHEN node:Article THEN 'Article'
   WHEN node:Clause THEN 'Clause'
   WHEN node:Point THEN 'Point'

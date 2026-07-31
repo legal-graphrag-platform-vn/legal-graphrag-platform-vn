@@ -4,7 +4,7 @@ from datetime import date
 
 import pytest
 
-from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point
+from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point, Section
 from src.pipeline.persistence.payload_builder import PayloadBuildError, build_graph_payload
 
 
@@ -101,6 +101,41 @@ def test_point_d_and_dd_do_not_collide() -> None:
     point_ids = {node["id"] for node in payload["nodes"] if node["type"] == "Point"}
 
     assert point_ids == {"ldn_2020_art17_cl1_pd", "ldn_2020_art17_cl1_pdd"}
+
+
+def test_build_graph_payload_nests_section_between_chapter_and_article() -> None:
+    parsed = _parsed()
+    parsed.sections = [Section(number="1", title="Thành lập", chapter="II")]
+    parsed.articles[0].section = "1"
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+
+    section = next(node for node in payload["nodes"] if node["type"] == "Section")
+    assert section == {
+        "type": "Section",
+        "id": "ldn_2020_ch2_sec1",
+        "number": "1",
+        "title": "Thành lập",
+    }
+    contains = {
+        (relation["head_id"], relation["tail_id"])
+        for relation in payload["relations"]
+        if relation["type"] == "CONTAINS"
+    }
+    assert ("ldn_2020_ch2", "ldn_2020_ch2_sec1") in contains
+    assert ("ldn_2020_ch2_sec1", "ldn_2020_art17") in contains
+    assert ("ldn_2020_ch2", "ldn_2020_art17") not in contains
+
+
+def test_old_payload_without_sections_keeps_direct_chapter_article_edge() -> None:
+    payload = build_graph_payload(_parsed(), [], {}, raw_doc_code="L59_2020")
+    contains = {
+        (relation["head_id"], relation["tail_id"])
+        for relation in payload["relations"]
+        if relation["type"] == "CONTAINS"
+    }
+
+    assert ("ldn_2020_ch2", "ldn_2020_art17") in contains
 
 
 def test_build_graph_payload_rejects_raw_structural_alias() -> None:

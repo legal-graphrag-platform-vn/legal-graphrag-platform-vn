@@ -7,6 +7,7 @@ from src.pipeline.parser.models import DocumentInfo
 from src.pipeline.pipeline.orchestrator import (
     _apply_atomic_bundle_decisions,
     _rule_reference_records,
+    _structural_type_from_id,
     _update_reference_checkpoints,
 )
 
@@ -97,7 +98,8 @@ def test_reference_checkpoint_reuses_created_at_for_unchanged_fingerprint(
     )
 
     bundle_id = references[0].mention.reference_bundle_id
-    assert first[bundle_id]["created_at"] == second[bundle_id]["created_at"]
+    assert first[bundle_id].detected_at == second[bundle_id].detected_at
+    assert first[bundle_id].mention_fingerprint == second[bundle_id].mention_fingerprint
     assert (
         len([line for line in path.read_text(encoding="utf-8").splitlines() if line])
         == 1
@@ -105,3 +107,40 @@ def test_reference_checkpoint_reuses_created_at_for_unchanged_fingerprint(
     assert (
         json.loads(path.read_text(encoding="utf-8"))["reference_bundle_id"] == bundle_id
     )
+
+
+def test_external_section_checkpoint_preserves_structured_candidate(tmp_path) -> None:
+    text = (
+        "Điều 1. Chuyển tiếp\n1. Áp dụng Mục 1 Chương III Nghị định số 57/2026/NĐ-CP."
+    )
+    document = DocumentInfo(
+        id="ldn_2020", title="Luật", number="59/2020/QH14", doc_type="Law"
+    )
+    parsed = parse_text(text, document)
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[0]
+    )
+
+    _update_reference_checkpoints(
+        tmp_path / "references.jsonl",
+        references,
+        selected_article_ids={"ldn_2020_art1"},
+    )
+
+    row = json.loads((tmp_path / "references.jsonl").read_text(encoding="utf-8"))
+    assert row["resolution"]["status"] == "UNRESOLVED"
+    assert row["reference"]["target_candidate"] == {
+        "target_type": "Section",
+        "document_number": "57/2026/NĐ-CP",
+        "chapter_number": "III",
+        "section_number": "1",
+        "article_number": None,
+        "clause_number": None,
+        "point_label": None,
+    }
+
+
+def test_structural_type_inference_checks_section_before_chapter() -> None:
+    assert _structural_type_from_id("ldn_2020_ch3_sec1") == "Section"
+    assert _structural_type_from_id("ldn_2020_ch3") == "Chapter"

@@ -13,6 +13,7 @@ from src.shared.ontology.payload_consistency_validator import (
     deterministic_relation_id,
     relation_identity_discriminator,
 )
+from src.shared.ontology.hierarchy import chapter_id, section_id
 
 
 SEMANTIC_LABEL_MAP = {
@@ -101,27 +102,59 @@ def build_graph_payload(
     _add_relation(relations, document_node["id"], "ISSUED_BY", issuer_node["id"], {})
 
     structural_ids: dict[str, str] = {document_node["id"]: document_node["id"]}
-    chapter_ids: dict[str, str] = {}
+    sections_by_key = {
+        (section.chapter.strip().upper(), section.number.strip().lower()): section
+        for section in parsed.sections
+    }
     content_status = CONTENT_STATUS_FALLBACK.get(parsed.document.legal_status, "ACTIVE")
     effective_from = str(parsed.document.effective_from)
 
     for article in parsed.articles:
         parent_id = document_node["id"]
         if article.chapter:
-            chapter_id = f"{document_node['id']}_ch{_normalize_chapter_number(article.chapter)}"
-            chapter_ids[article.chapter] = chapter_id
-            if chapter_id not in nodes:
+            chapter_node_id = chapter_id(document_node["id"], article.chapter)
+            structural_ids[chapter_node_id] = chapter_node_id
+            if chapter_node_id not in nodes:
                 _add_node(
                     nodes,
                     {
                         "type": "Chapter",
-                        "id": chapter_id,
+                        "id": chapter_node_id,
                         "number": str(article.chapter),
                         "title": article.chapter_title or f"Chương {article.chapter}",
                     },
                 )
-                _add_relation(relations, document_node["id"], "CONTAINS", chapter_id, {})
-            parent_id = chapter_id
+                _add_relation(relations, document_node["id"], "CONTAINS", chapter_node_id, {})
+            parent_id = chapter_node_id
+            if article.section:
+                section_key = (
+                    article.chapter.strip().upper(),
+                    article.section.strip().lower(),
+                )
+                section = sections_by_key.get(section_key)
+                if section is None:
+                    raise PayloadBuildError(
+                        f"Article {article.number} references missing Section "
+                        f"{article.section} in Chapter {article.chapter}"
+                    )
+                section_node_id = section_id(
+                    document_node["id"], article.chapter, article.section
+                )
+                structural_ids[section_node_id] = section_node_id
+                if section_node_id not in nodes:
+                    _add_node(
+                        nodes,
+                        {
+                            "type": "Section",
+                            "id": section_node_id,
+                            "number": str(section.number),
+                            "title": section.title,
+                        },
+                    )
+                    _add_relation(
+                        relations, chapter_node_id, "CONTAINS", section_node_id, {}
+                    )
+                parent_id = section_node_id
 
         article_id = f"{document_node['id']}_art{article.number}"
         structural_ids[article_id] = article_id
@@ -325,23 +358,6 @@ def _semantic_id(label: Any) -> str:
     text = str(label or "")
     normalized = _strip_accents(text).lower().strip()
     return KNOWN_SEMANTIC_IDS.get(text.lower().strip()) or KNOWN_SEMANTIC_IDS.get(normalized) or _slug(text)
-
-
-def _normalize_chapter_number(value: str) -> str:
-    text = value.strip().upper()
-    roman = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100}
-    if re.fullmatch(r"[IVXLC]+", text):
-        total = 0
-        prev = 0
-        for char in reversed(text):
-            current = roman[char]
-            if current < prev:
-                total -= current
-            else:
-                total += current
-                prev = current
-        return str(total)
-    return _slug(value)
 
 
 def _normalize_point_label(value: str) -> str:

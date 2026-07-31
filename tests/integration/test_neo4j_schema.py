@@ -17,5 +17,6 @@ def test_neo4j_constraints_and_indexes() -> None:
         session.close()
 
     assert "doc_id_unique" in report.constraints
+    assert "sec_id_unique" in report.constraints
     assert "article_embedding" in report.user_indexes
     assert "clause_embedding" in report.user_indexes

@@ -17,14 +17,17 @@ from src.pipeline.parser.models import (
     DocumentInfo,
     ParsedDocument,
     Point,
+    Section,
     UnparsedSection,
 )
 from src.pipeline.parser.patterns import (
+    MAX_STRUCTURAL_TITLE_LENGTH,
     looks_like_title,
     match_article,
     match_chapter,
     match_clause,
     match_point,
+    match_section,
 )
 
 logger = logging.getLogger(__name__)
@@ -113,6 +116,7 @@ class _ArticleBuilder:
     title: str | None
     chapter: str | None
     chapter_title: str | None
+    section: str | None
     content_lines: list[str] = field(default_factory=list)
     clauses: list[Clause] = field(default_factory=list)
     source_start_char: int = 0
@@ -148,13 +152,25 @@ class _ArticleBuilder:
             content_raw=content_raw,
             chapter=self.chapter,
             chapter_title=self.chapter_title,
+            section=self.section,
             clauses=self.clauses,
             source_start_char=self.source_start_char,
             source_end_char=self.source_end_char,
         )
 
 
+@dataclass(frozen=True, slots=True)
+class _ParsedHierarchy:
+    articles: list[Article]
+    sections: list[Section]
+
+
 def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
+    """Compatibility wrapper returning only parsed Articles."""
+    return _parse_hierarchy(lines).articles
+
+
+def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
     """State machine cốt lõi: list các dòng text (đã strip blank thừa) -> list[Article].
 
     Chỉ dùng regex pattern + heuristic "dòng toàn chữ hoa" để bắt tiêu đề chương.
@@ -167,8 +183,11 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
     không tách biệt sẽ bị nhận nhầm thành Khoản/Điểm cấp cao mới (xem REPORT.md mục A7).
     """
     articles: list[Article] = []
+    sections: list[Section] = []
     current_chapter: str | None = None
     current_chapter_title: str | None = None
+    current_section: Section | None = None
+    current_section_article_count = 0
     current_article: _ArticleBuilder | None = None
     current_clause: Clause | None = None
     current_point: Point | None = None
@@ -212,6 +231,7 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
         current_point = None
 
     pending_chapter_title = False
+    pending_section: tuple[str, LineRecord] | None = None
     # Đếm độ sâu dấu ngoặc kép “ ” đang mở — > 0 nghĩa là dòng hiện tại nằm trong
     # khối trích dẫn nguyên văn (vd nội dung mới của khoản/điểm bị sửa đổi), nên
     # KHÔNG coi cấu trúc số/chữ cái bên trong nó là Khoản/Điểm thật của văn bản.
@@ -241,10 +261,31 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
                     current_clause.source_end_char = record.source_end_char
             continue
 
+        if pending_section is not None:
+            section_number, heading_record = pending_section
+            if _looks_like_section_title(record, line):
+                current_section = Section(
+                    number=section_number,
+                    title=line,
+                    chapter=current_chapter or "",
+                    source_start_char=heading_record.source_start_char,
+                    source_end_char=record.source_end_char,
+                )
+                sections.append(current_section)
+                current_section_article_count = 0
+                pending_section = None
+                continue
+            raise ValueError(
+                f"Section {section_number} in Chapter {current_chapter} is missing a valid title"
+            )
+
         chapter_num = match_chapter(line)
         if chapter_num is not None:
+            _require_section_has_article(current_section, current_section_article_count)
             current_chapter = chapter_num
             current_chapter_title = None
+            current_section = None
+            current_section_article_count = 0
             pending_chapter_title = True
             continue
 
@@ -255,6 +296,42 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
                 continue
             # Không phải tiêu đề chương (vd đi thẳng vào Điều) -> rơi qua xử lý bình thường
 
+        section_match = match_section(line)
+        if section_match is not None:
+            if current_chapter is None:
+                raise ValueError(
+                    f"Section {section_match[0]} appears before any Chapter"
+                )
+            _require_section_has_article(current_section, current_section_article_count)
+            section_number, inline_title = section_match
+            if any(
+                section.chapter.strip().upper() == current_chapter.strip().upper()
+                and section.number.strip().lower() == section_number
+                for section in sections
+            ):
+                raise ValueError(
+                    f"Duplicate Section number: Chapter {current_chapter} Section {section_number}"
+                )
+            current_section = None
+            current_section_article_count = 0
+            if inline_title is None:
+                pending_section = (section_number, record)
+                continue
+            if len(inline_title) > MAX_STRUCTURAL_TITLE_LENGTH:
+                raise ValueError(
+                    f"Section {section_number} title exceeds "
+                    f"{MAX_STRUCTURAL_TITLE_LENGTH} characters"
+                )
+            current_section = Section(
+                number=section_number,
+                title=inline_title,
+                chapter=current_chapter,
+                source_start_char=record.source_start_char,
+                source_end_char=record.source_end_char,
+            )
+            sections.append(current_section)
+            continue
+
         article_match = match_article(line)
         if article_match is not None:
             flush_article()
@@ -264,9 +341,12 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
                 title=title or None,
                 chapter=current_chapter,
                 chapter_title=current_chapter_title,
+                section=current_section.number if current_section else None,
                 source_start_char=record.source_start_char,
                 source_end_char=record.source_end_char,
             )
+            if current_section is not None:
+                current_section_article_count += 1
             if title:
                 current_article.content_lines.append(title)
             continue
@@ -318,7 +398,12 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
             current_clause.source_end_char = record.source_end_char
 
     flush_article()
-    return articles
+    if pending_section is not None:
+        raise ValueError(
+            f"Section {pending_section[0]} in Chapter {current_chapter} is missing a valid title"
+        )
+    _require_section_has_article(current_section, current_section_article_count)
+    return _ParsedHierarchy(articles=articles, sections=sections)
 
 
 def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
@@ -326,16 +411,42 @@ def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
     canonical_text = canonicalize_source_text(text)
     records = source_line_records(canonical_text)
     main_records, appendix_groups = partition_appendices(records)
-    articles = parse_lines(main_records)
+    hierarchy = _parse_hierarchy(main_records)
+    articles = hierarchy.articles
     _validate_unique_point_labels(articles)
     return ParsedDocument(
         document=document,
         articles=articles,
+        sections=hierarchy.sections,
         unparsed_sections=[
             _appendix_section(group, canonical_text, document.id)
             for group in appendix_groups
         ],
     )
+
+
+def _looks_like_section_title(record: LineRecord, line: str) -> bool:
+    if len(line) > MAX_STRUCTURAL_TITLE_LENGTH:
+        return False
+    if any(
+        matcher(line) is not None
+        for matcher in (
+            match_chapter,
+            match_section,
+            match_article,
+            match_clause,
+            match_point,
+        )
+    ):
+        return False
+    return record.bold or looks_like_title(line)
+
+
+def _require_section_has_article(section: Section | None, article_count: int) -> None:
+    if section is not None and article_count == 0:
+        raise ValueError(
+            f"Section {section.number} in Chapter {section.chapter} does not contain any Article"
+        )
 
 
 def canonicalize_source_text(text: str) -> str:

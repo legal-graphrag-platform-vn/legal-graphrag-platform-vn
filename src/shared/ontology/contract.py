@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.6.0"
+ONTOLOGY_VERSION = "1.7.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -90,6 +90,7 @@ PHASE1_PERSISTED_LABELS: set[str] = {
     "Document",
     "Issuer",
     "Chapter",
+    "Section",
     "Article",
     "Clause",
     "Point",
@@ -126,7 +127,9 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         "valid_pairs": [
             ("Document", "Chapter"),
             ("Document", "Article"),
+            ("Chapter", "Section"),
             ("Chapter", "Article"),
+            ("Section", "Article"),
             ("Article", "Clause"),
             ("Clause", "Point"),
         ],
@@ -167,7 +170,14 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "REFERS_TO": {
         "allowed_head": ["Article", "Clause", "Point"],
-        "allowed_tail": ["Article", "Clause", "Point", "Document"],
+        "allowed_tail": [
+            "Article",
+            "Clause",
+            "Point",
+            "Document",
+            "Chapter",
+            "Section",
+        ],
         "no_self_loop": False,
         "required_properties": [
             "citation_text",
@@ -260,6 +270,7 @@ NODE_REQUIRED_FIELDS: dict[str, list[str]] = {
     ],
     "Issuer": ["id", "name", "branch"],
     "Chapter": ["id", "number", "title"],
+    "Section": ["id", "number", "title"],
     "Article": [
         "id",
         "number",

@@ -42,6 +42,67 @@ def test_chapter_attached_to_article() -> None:
     assert art17.chapter_title == "THÀNH LẬP DOANH NGHIỆP"
 
 
+def test_parser_builds_section_hierarchy_for_supported_heading_variants() -> None:
+    text = """Chương III
+CÔNG TY
+Mục 1. Quy định chung
+Điều 46. Điều thứ nhất
+MỤC 2
+QUẢN TRỊ CÔNG TY
+Điều 47. Điều thứ hai
+Mục 3a: Chuyển tiếp
+Điều 48. Điều thứ ba
+"""
+
+    parsed = parse_text(text, _doc_info())
+
+    assert [
+        (section.chapter, section.number, section.title) for section in parsed.sections
+    ] == [
+        ("III", "1", "Quy định chung"),
+        ("III", "2", "QUẢN TRỊ CÔNG TY"),
+        ("III", "3a", "Chuyển tiếp"),
+    ]
+    assert [article.section for article in parsed.articles] == ["1", "2", "3a"]
+
+
+def test_parser_rejects_section_without_chapter_or_title_or_article() -> None:
+    with pytest.raises(ValueError, match="appears before any Chapter"):
+        parse_text("Mục 1. Quy định chung\nĐiều 1. Test", _doc_info())
+
+    with pytest.raises(ValueError, match="missing a valid title"):
+        parse_text("Chương I\nTÊN CHƯƠNG\nMục 1\nĐiều 1. Test", _doc_info())
+
+    with pytest.raises(ValueError, match="does not contain any Article"):
+        parse_text(
+            "Chương I\nTÊN CHƯƠNG\nMục 1. Quy định chung\nMục 2. Quy định khác\nĐiều 1. Test",
+            _doc_info(),
+        )
+
+
+def test_parser_does_not_treat_inline_section_citation_as_heading() -> None:
+    parsed = parse_text(
+        "Điều 1. Test\n1. Áp dụng theo Mục 1 Chương III của Luật này.",
+        _doc_info(),
+    )
+
+    assert parsed.sections == []
+    assert "Mục 1 Chương III" in parsed.articles[0].clauses[0].content
+
+
+def test_parser_accepts_bounded_uppercase_legal_title_with_punctuation() -> None:
+    title = (
+        "QUY ĐỊNH VỀ DOANH NGHIỆP NẮM GIỮ TRÊN 50% VỐN ĐIỀU LỆ; "
+        "QUẢN LÝ, GIÁM SÁT VÀ KIỂM TRA"
+    )
+    parsed = parse_text(
+        f"Chương III\nTÊN CHƯƠNG\nMục 1\n{title}\nĐiều 1. Test",
+        _doc_info(),
+    )
+
+    assert parsed.sections[0].title == title
+
+
 def test_clauses_and_points_under_article_17() -> None:
     text = FIXTURE.read_text(encoding="utf-8")
     parsed = parse_text(text, _doc_info())
