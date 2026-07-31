@@ -393,7 +393,7 @@ def enrich_documents(
     batch_tracker = BatchTracker(batch_size=batch_size, batch_delay_seconds=batch_delay_seconds)
     threads: list[threading.Thread] = []
 
-    print(f"🚀 Bắt đầu tiến trình cào đa luồng ({concurrency} workers, {batch_size} văn bản/batch, nghỉ batch {batch_delay_seconds}s)...")
+    print(f"Bat dau tien trinh cao da luong ({concurrency} workers, {batch_size} van ban/batch, nghi batch {batch_delay_seconds}s)...")
 
     # // 4.   Khởi tạo các worker threads
     for i in range(1, concurrency + 1):
