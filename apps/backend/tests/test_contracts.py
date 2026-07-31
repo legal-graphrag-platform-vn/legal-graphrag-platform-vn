@@ -201,6 +201,7 @@ def test_document_detail_has_chapter_hierarchy(client: TestClient):
     assert "chapters" in data
     assert len(data["chapters"]) > 0
     assert "articles" in data["chapters"][0]
+    assert "sections" in data["chapters"][0]
 
 
 def test_document_detail_has_ungrouped_articles_field(client: TestClient):

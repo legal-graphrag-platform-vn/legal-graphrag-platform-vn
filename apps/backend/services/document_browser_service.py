@@ -21,6 +21,7 @@ from api.models import (
     GraphNode,
     PageMeta,
     PointDetail,
+    SectionDetail,
 )
 from services.errors import BackendDocumentNotFoundError
 from services.interfaces import AsyncRetrievalRunner
@@ -161,6 +162,28 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
         for node_id, node in nodes.items()
         if node["label"] == "Article"
     }
+    sections = {
+        node_id: SectionDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=str(node.get("title") or ""),
+            articles=_sorted_items(
+                [
+                    articles[item]
+                    for item in children.get(node_id, [])
+                    if item in articles
+                ]
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Section"
+    }
+    section_article_ids = {
+        article_id
+        for section_id in sections
+        for article_id in children.get(section_id, [])
+        if article_id in articles
+    }
     chapters = [
         ChapterDetail(
             id=node_id,
@@ -170,8 +193,16 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
                 [
                     articles[item]
                     for item in children.get(node_id, [])
-                    if item in articles
+                    if item in articles and item not in section_article_ids
                 ]
+            ),
+            sections=sorted(
+                [
+                    sections[item]
+                    for item in children.get(node_id, [])
+                    if item in sections
+                ],
+                key=lambda item: _number_key(item.number),
             ),
         )
         for node_id, node in nodes.items()
@@ -286,12 +317,13 @@ def _graph_node_key(node: dict[str, Any]) -> tuple[int, tuple[int, str], str]:
     rank = {
         "Document": 0,
         "Chapter": 1,
-        "Article": 2,
-        "Clause": 3,
-        "Point": 4,
-        "Issuer": 5,
-        "LegalConcept": 6,
-        "LegalSubject": 7,
-        "LegalAction": 8,
+        "Section": 2,
+        "Article": 3,
+        "Clause": 4,
+        "Point": 5,
+        "Issuer": 6,
+        "LegalConcept": 7,
+        "LegalSubject": 8,
+        "LegalAction": 9,
     }.get(str(node["label"]), 99)
     return rank, _number_key(str(node.get("number") or "")), str(node["id"])

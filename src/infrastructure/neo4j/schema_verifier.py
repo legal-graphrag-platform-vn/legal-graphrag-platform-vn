@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 
 EXPECTED_CONSTRAINTS = {
-    "doc_id_unique", "ch_id_unique", "art_id_unique", "cls_id_unique", "pnt_id_unique",
+    "doc_id_unique", "ch_id_unique", "sec_id_unique", "art_id_unique", "cls_id_unique", "pnt_id_unique",
     "iss_id_unique", "lc_id_unique", "ls_id_unique", "la_id_unique",
 }
 EXPECTED_USER_INDEXES = {

@@ -1,8 +1,8 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.6.0
-> **Frozen date**: 2026-07-18
+> **Version**: 1.7.0
+> **Frozen date**: 2026-07-31
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
 This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
@@ -32,7 +32,7 @@ legal_ontology.md
 
 ```text
 STRUCTURAL LAYER
-Document, Issuer, Chapter, Article, Clause, Point
+Document, Issuer, Chapter, Section, Article, Clause, Point
 Relations: ISSUED_BY, CONTAINS, AMENDS, REPEALS, REPLACES, GUIDES, REFERS_TO
 
 SEMANTIC LAYER
@@ -85,6 +85,7 @@ Required means mandatory before `Neo4jRepository.merge(...)`. Neo4j Community Ed
 | `Document` | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `effective_to`, `jurisdiction`, `source_url`, `document_uri`, `gazette_number` | `doc_type`: `Constitution`, `Law`, `Ordinance`, `Resolution`, `Decree`, `Decision`, `Circular`, `JointCircular`; `legal_status`: `ACTIVE`, `NOT_YET_EFFECTIVE`, `PARTIALLY_EFFECTIVE`, `REPLACED`, `REPEALED`, `EXPIRED` |
 | `Issuer` | `id`, `name`, `branch` | none | `branch`: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER` |
 | `Chapter` | `id`, `number`, `title` | none | none |
+| `Section` | `id`, `number`, `title` | none | none |
 | `Article` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `title`, `effective_to`, `embedding` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
 | `Clause` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `effective_to`, `embedding` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
 | `Point` | `id`, `label`, `content_raw` | none | none |
@@ -97,7 +98,9 @@ Rules:
 | `Issuer.id` | Slug of normalized issuer name; this is the `MERGE` key, not `name` |
 | Temporal denormalization | `Article` and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
 | Point temporal scope | Phase 1 does not store temporal fields on `Point`; point-level amendments are normalized to the nearest `Clause` |
-| Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[1024]` under the current BGE-M3 contract; `Point` has no embedding |
+| Section corpus contract | `Section` is created only from a parsed heading under a `Chapter`; `title` is mandatory and is never replaced by a display fallback |
+| Grouping-node scope | `Chapter` and `Section` do not carry temporal fields or embeddings |
+| Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[1024]` under the current BGE-M3 contract; `Chapter`, `Section`, and `Point` have no embedding |
 
 ### 2.2 Semantic Nodes
 
@@ -120,12 +123,13 @@ Extraction mapping:
 | `Action` | `LegalAction` |
 | `Document` | `Document` |
 | `Article` | `Article` |
+| `Section` | `Section` |
 | `Clause` | `Clause` |
 | `Point` | `Point` |
 
 Extraction types are input schema labels, not Neo4j labels. The writer or repository mapping layer must normalize them before persistence.
 
-Phase 1 persistence is limited to `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, and `LegalAction`. Runtime reasoning labels (`Obligation`, `Right`, `Condition`, `Exception`) are valid ontology labels, but they must not be persisted by the Phase 1 extraction pipeline.
+Phase 1 persistence is limited to `Document`, `Issuer`, `Chapter`, `Section`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, and `LegalAction`. Runtime reasoning labels (`Obligation`, `Right`, `Condition`, `Exception`) are valid ontology labels, but they must not be persisted by the Phase 1 extraction pipeline.
 
 ---
 
@@ -136,23 +140,41 @@ Only these relation names are current. Relation names use active voice.
 | Relation | From | To | Required properties | Enforced by Neo4j CE | Enforced by Python |
 |---|---|---|---|---|---|
 | `ISSUED_BY` | `Document` | `Issuer` | none | no | yes |
-| `CONTAINS` | `Document`, `Chapter`, `Article`, `Clause` | `Chapter`, `Article`, `Clause`, `Point` by allowed pair | none | no | yes |
+| `CONTAINS` | `Document`, `Chapter`, `Section`, `Article`, `Clause` | `Chapter`, `Section`, `Article`, `Clause`, `Point` by allowed pair | none | no | yes |
 | `AMENDS` | `Document`, `Article`, `Clause` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
 | `REPEALS` | `Document` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
 | `REPLACES` | `Document` | `Document` | `effective_from` | indexed only | yes |
 | `GUIDES` | `Document` | `Document` | none | no | yes, with whitelist |
-| `REFERS_TO` | `Article`, `Clause`, `Point` | `Article`, `Clause`, `Point`, `Document` | common citation/bundle provenance plus method-specific provenance | no | yes |
+| `REFERS_TO` | `Article`, `Clause`, `Point` | `Document`, `Chapter`, `Section`, `Article`, `Clause`, `Point` | common citation/bundle provenance plus method-specific provenance | no | yes |
 | `DEFINES` | `Article`, `Clause` | `LegalConcept` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REGULATES` | `Article`, `Clause` | `LegalSubject`, `LegalAction` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REQUIRES` | `LegalSubject` | `LegalConcept`; `Obligation` only in runtime/future phase | `confidence`, `llm_model`, `created_at` | no | yes |
 | `HAS_CONDITION` | `LegalAction`, `Obligation`, `Right` | `Condition` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `HAS_EXCEPTION` | `Article`, `Clause`, `LegalAction` | `Exception` | `confidence`, `llm_model`, `created_at` | no | yes |
 
+The exact Phase 1 `CONTAINS` pairs are:
+
+```text
+Document -> Chapter
+Document -> Article
+Chapter  -> Section
+Chapter  -> Article
+Section  -> Article
+Article  -> Clause
+Clause   -> Point
+```
+
+`Document -> Article` and `Chapter -> Article` remain valid for documents or
+chapters without `Mục`. `Document -> Section` is invalid. When a source Article
+is inside a parsed Section, its canonical parent is that Section; a legacy
+direct `Chapter -> Article` edge may be removed only after the exact
+`Chapter -> Section -> Article` chain exists.
+
 `REFERS_TO.citation_type` must be one of `DIRECT`, `INDIRECT`, `RANGE`.
 
 `REFERS_TO` provenance is method-aware. Common required properties are `citation_text`, `citation_type`,
 `extraction_method`, `created_at`, `reference_bundle_id`, and `reference_target_count`. `extraction_method` is one of `RULE`,
-`ENTITY_LINKING`, or `LLM`; `HYBRID` is intentionally excluded from v1.6.0.
+`ENTITY_LINKING`, or `LLM`; `HYBRID` is intentionally excluded from v1.7.0.
 
 Method-specific requirements:
 
@@ -253,6 +275,7 @@ Any current pipeline, test, prompt, or repository code that emits a legacy alias
 |---|---|---|
 | `Document.id` | snake-case slug | `ldn_2020` |
 | `Chapter.id` | `{doc_id}_ch{N}` | `ldn_2020_ch2` |
+| `Section.id` | `{doc_id}_ch{N}_sec{M}` | `ldn_2020_ch3_sec1` |
 | `Article.id` | `{doc_id}_art{N}` | `ldn_2020_art17` |
 | `Clause.id` | `{doc_id}_art{N}_cl{K}` | `ldn_2020_art17_cl1` |
 | `Point.id` | `{doc_id}_art{N}_cl{K}_p{letter}` | `ldn_2020_art17_cl1_pa` |
@@ -313,7 +336,7 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 
 | Area | Expected state |
 |---|---|
-| Structural uniqueness | `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point` by `id` |
+| Structural uniqueness | `Document`, `Issuer`, `Chapter`, `Section`, `Article`, `Clause`, `Point` by `id` |
 | Phase 1 semantic uniqueness | `LegalConcept`, `LegalSubject`, `LegalAction` by `id` |
 | Runtime reasoning labels | No bootstrap requirement until persisted by a runtime reasoning component |
 | Relation indexes | `AMENDS.effective_from`, `REPEALS.effective_from`, `REPLACES.effective_from` |
@@ -346,3 +369,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.5.0 | 2026-07-10 | Selected BGE-M3/1024 as the primary embedding contract; retained BKAI/768 as an explicit baseline | Model-selection smoke test and ADR-20 |
 | 1.5.1 | 2026-07-12 | Made `REFERS_TO` provenance mandatory and defined citation-based deterministic identity | ADR-21 and Gate 4 evidence review |
 | 1.6.0 | 2026-07-18 | Added resolver-first structural references, atomic bundles, and method-aware `REFERS_TO` provenance | ADR-22 |
+| 1.7.0 | 2026-07-31 | Added corpus-verified `Section` hierarchy, Chapter/Section reference targets, and guarded hierarchy migration | ADR-23 |

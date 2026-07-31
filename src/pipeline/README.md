@@ -1,6 +1,6 @@
 # Legal GraphRAG VN — Graph Construction Pipeline (Milestone 1 + 2)
 
-Crawler (vbpl.vn) → Hierarchy Parser (Chương/Điều/Khoản/Điểm) → LLM Extraction
+Crawler (vbpl.vn) → Hierarchy Parser (Chương/Mục/Điều/Khoản/Điểm) → LLM Extraction
 (Gemini, two-pass) → Schema/Ontology Validation → Confidence Scoring → Decision
 Gate. Xem [`REPORT.md`](REPORT.md) cho thiết kế chi tiết, lý do kỹ thuật, và
 data flow đầy đủ.
@@ -28,6 +28,56 @@ uv run python -m src.pipeline.main graph-quality --raw-doc-code L59_2020
 
 uv run python -m pytest src/pipeline/tests/ -v
 ```
+
+`Mục` is persisted as `Section` under its `Chapter` when the canonical source
+contains a verified heading and legal title. Existing processed artifacts do
+not migrate automatically: re-run `parse`, normalization, payload validation,
+and `write` for curated ready documents. The write command verifies each new
+`Chapter -> Section -> Article` chain before removing its exact legacy direct
+`Chapter -> Article` edge.
+
+## Dẫn chiếu cấu trúc liên văn bản
+
+Sau khi toàn bộ văn bản nguồn và đích đã chạy `validate-payload` rồi `write`, tạo
+registry bất biến từ đúng các payload đã qua root validation:
+
+```bash
+uv run python -m src.pipeline.main build-reference-registry \
+  --build-id registry-v17-20260731-001 \
+  --raw-doc-code L59_2020 \
+  --raw-doc-code L68_2014 \
+  --raw-doc-code TT01_2021
+```
+
+Có thể thay danh sách lặp bằng `--manifest configs/corpus/curated_v1.json`, nhưng
+không dùng đồng thời hai kiểu chọn. Build thất bại toàn bộ nếu một document thiếu
+source hoặc payload chưa hợp lệ. Output gồm `build_id`, `snapshot_hash` và
+`provenance_hash`; registry không được xây từ manifest/crawl metadata đơn thuần.
+
+Resolve trước ở dry-run (không mở Neo4j, không gọi LLM):
+
+```bash
+uv run python -m src.pipeline.main reconcile-external-references \
+  --build-id registry-v17-20260731-001 \
+  --raw-doc-code TT01_2021
+
+uv run python -m src.pipeline.main reference-status \
+  --raw-doc-code TT01_2021
+```
+
+Khi checkpoint đã đúng, materialize các bundle đã xác minh:
+
+```bash
+uv run python -m src.pipeline.main reconcile-external-references \
+  --build-id registry-v17-20260731-001 \
+  --raw-doc-code TT01_2021 \
+  --apply
+```
+
+Writer chỉ `MATCH` source/target đã tồn tại và chỉ `MERGE` cạnh `REFERS_TO`.
+Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger được
+append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
+ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
 ## Parse từ raw text
 

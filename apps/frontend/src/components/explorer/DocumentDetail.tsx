@@ -197,6 +197,21 @@ export function DocumentDetailPanel({
                                  highlightClauseId={highlightClauseId}
                               />
                            ))}
+                           {ch.sections.map((section) => (
+                              <div key={section.id} className="mb-5">
+                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                                    Mục {section.number} — {section.title}
+                                 </p>
+                                 {section.articles.map((art) => (
+                                    <ArticleItem
+                                       key={art.id}
+                                       article={art}
+                                       highlightArticleId={highlightArticleId}
+                                       highlightClauseId={highlightClauseId}
+                                    />
+                                 ))}
+                              </div>
+                           ))}
                         </div>
                      ))}
                      {doc.ungrouped_articles.map((art) => (

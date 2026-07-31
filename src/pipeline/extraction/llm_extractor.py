@@ -60,7 +60,7 @@ def normalize_entities_for_relations(entities: list[ExtractedEntity]) -> list[Ex
     """Canonicalize semantic IDs before pass 2 and omit parser-owned local structure."""
     normalized: dict[str, ExtractedEntity] = {}
     for entity in entities:
-        if entity.type in {"Article", "Chapter", "Clause", "Point"}:
+        if entity.type in {"Article", "Chapter", "Section", "Clause", "Point"}:
             continue
         canonical_id = _semantic_id(entity.label) if entity.type in {"Concept", "Entity", "Action"} else entity.id
         candidate = ExtractedEntity(id=canonical_id, type=entity.type, label=entity.label)

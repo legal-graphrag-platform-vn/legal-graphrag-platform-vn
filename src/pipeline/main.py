@@ -15,6 +15,7 @@ import logging
 import shutil
 import sys
 from collections import Counter
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
@@ -28,6 +29,12 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 from src.pipeline.config import settings
 from src.pipeline.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
 from src.pipeline.extraction.providers.base import ExtractionProviderError
+from src.pipeline.extraction.corpus_structural_registry import (
+    RegistryError,
+    build_corpus_registry,
+    load_registry_build,
+    publish_registry_build,
+)
 from src.infrastructure.embedding.embedding_generator import (
     EmbeddingGenerator,
     embedding_content_hash,
@@ -35,13 +42,40 @@ from src.infrastructure.embedding.embedding_generator import (
 )
 from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 from src.infrastructure.neo4j.graph_snapshot import generate_snapshot, write_snapshot
-from src.infrastructure.neo4j.m3_runtime import M3RuntimeGuardError, validate_disposable_uri
-from src.infrastructure.neo4j.schema_verifier import SchemaVerificationError, verify_canonical_schema
-from src.infrastructure.neo4j.vector_smoke import SMOKE_QUERIES, run_vector_smoke, write_vector_smoke_evidence
+from src.infrastructure.neo4j.hierarchy_reconciler import SectionHierarchyReconciler
+from src.infrastructure.neo4j.m3_runtime import (
+    M3RuntimeGuardError,
+    validate_disposable_uri,
+)
+from src.infrastructure.neo4j.schema_verifier import (
+    SchemaVerificationError,
+    verify_canonical_schema,
+)
+from src.infrastructure.neo4j.vector_smoke import (
+    SMOKE_QUERIES,
+    run_vector_smoke,
+    write_vector_smoke_evidence,
+)
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
-from src.infrastructure.neo4j.writer import GraphIngestionService, Neo4jWriter, create_neo4j_session, validate_graph_payload
-from src.pipeline.persistence.payload_builder import PayloadBuildError, build_payload_from_paths
+from src.infrastructure.neo4j.writer import (
+    GraphIngestionService,
+    Neo4jWriter,
+    create_neo4j_session,
+    validate_graph_payload,
+)
+from src.pipeline.persistence.payload_builder import (
+    PayloadBuildError,
+    build_payload_from_paths,
+)
+from src.pipeline.persistence.validated_payload_loader import (
+    ValidatedPayloadLoadError,
+    load_validated_payload,
+)
+from src.pipeline.pipeline.external_reference_reconciliation import (
+    reconcile_external_references as reconcile_external_reference_service,
+    reference_status as load_reference_status,
+)
 from src.pipeline.pipeline.orchestrator import run_pipeline
 from src.pipeline.reports.graph_quality import (
     GraphQualityReporter,
@@ -61,10 +95,14 @@ from src.pipeline.validation.extraction_readiness import (
     ExtractionReadinessError,
     validate_extraction_readiness,
 )
-from src.shared.ontology.payload_consistency_validator import validate_payload_consistency
+from src.shared.ontology.payload_consistency_validator import (
+    validate_payload_consistency,
+)
 from src.shared.ontology.validators import GraphValidationError
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 app = typer.Typer(help="Legal GraphRAG — Graph Construction Pipeline (Milestone 1+2)")
@@ -115,7 +153,9 @@ def _parse_folder_worker(raw_doc_code: str) -> bool:
         source_path = raw_dir / "source.txt"
 
         if not source_path.exists() or not metadata_path.exists():
-            typer.echo(f"Thư mục {raw_doc_code} thiếu source.txt hoặc metadata.json", err=True)
+            typer.echo(
+                f"Thư mục {raw_doc_code} thiếu source.txt hoặc metadata.json", err=True
+            )
             return False
 
         doc_info = _document_info_from_metadata(_ready_metadata(raw_doc_code))
@@ -144,23 +184,32 @@ def _parse_folder_worker(raw_doc_code: str) -> bool:
 @app.command()
 def crawl(
     url: Annotated[str, typer.Option(help="URL trang chi tiết vbpl.vn")],
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
     number: Annotated[str, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'")],
 ) -> None:
     """Crawl văn bản từ vbpl.vn -> data/raw/<raw_doc_code>/{source.txt,metadata.json}."""
-    metadata = crawl_and_save(url, doc_id=raw_doc_code, number=number, raw_dir=settings.data_raw_dir)
+    metadata = crawl_and_save(
+        url, doc_id=raw_doc_code, number=number, raw_dir=settings.data_raw_dir
+    )
     typer.echo(f"Đã crawl {raw_doc_code}: {metadata.title} ({metadata.status})")
 
 
 # Lệnh CLI để cào hàng loạt văn bản pháp luật dựa trên từ khóa tìm kiếm trên vbpl.vn.
 @app.command()
 def crawl_search(
-    query: Annotated[str, typer.Option(help="Từ khóa tìm kiếm trên vbpl.vn (vd: 'Luật Doanh nghiệp số')")],
+    query: Annotated[
+        str,
+        typer.Option(help="Từ khóa tìm kiếm trên vbpl.vn (vd: 'Luật Doanh nghiệp số')"),
+    ],
     limit: Annotated[int, typer.Option(help="Số lượng văn bản tối đa muốn crawl")] = 10,
 ) -> None:
     """Crawl hàng loạt văn bản từ vbpl.vn dựa trên từ khóa tìm kiếm."""
     results = crawl_by_search(query, raw_dir=settings.data_raw_dir, limit=limit)
-    typer.echo(f"Đã crawl thành công {len(results)} văn bản dựa trên tìm kiếm từ khóa '{query}'.")
+    typer.echo(
+        f"Đã crawl thành công {len(results)} văn bản dựa trên tìm kiếm từ khóa '{query}'."
+    )
 
 
 # Lệnh CLI để phân tách cấu trúc văn bản pháp luật (Chương/Điều/Khoản/Điểm) từ file thô hoặc Text.
@@ -168,7 +217,9 @@ def crawl_search(
 def parse(
     raw_doc_code: Annotated[
         str | None,
-        typer.Option(help="Filesystem document code, vd 'L59_2020'. Nếu không truyền, parse curated folders trong data/raw/"),
+        typer.Option(
+            help="Filesystem document code, vd 'L59_2020'. Nếu không truyền, parse curated folders trong data/raw/"
+        ),
     ] = None,
     txt: Annotated[
         Path | None,
@@ -215,7 +266,9 @@ def parse(
         (out_dir / "hierarchy.json").write_text(
             parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
         )
-        typer.echo(f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}")
+        typer.echo(
+            f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}"
+        )
         return
 
     # 2. Nếu không dùng --txt và truyền --raw-doc-code cụ thể để parse một thư mục
@@ -225,7 +278,10 @@ def parse(
         source_path = raw_dir / "source.txt"
 
         if not source_path.exists() or not metadata_path.exists():
-            typer.echo(f"Thiếu {source_path} hoặc {metadata_path} — chạy `crawl` trước (hoặc dùng --txt).", err=True)
+            typer.echo(
+                f"Thiếu {source_path} hoặc {metadata_path} — chạy `crawl` trước (hoặc dùng --txt).",
+                err=True,
+            )
             raise typer.Exit(code=1)
 
         try:
@@ -245,7 +301,9 @@ def parse(
         (out_dir / "hierarchy.json").write_text(
             parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
         )
-        typer.echo(f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}")
+        typer.echo(
+            f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}"
+        )
         return
 
     # 3. Nếu không truyền --txt/--raw-doc-code, parse các thư mục curated trong data/raw/
@@ -254,17 +312,30 @@ def parse(
         raise typer.Exit(code=1)
 
     curated_codes = set(load_curated_manifest(settings.curated_manifest_path))
-    subdirs = [p for p in settings.data_raw_dir.iterdir() if p.is_dir() and p.name in curated_codes]
-    valid_folders = [p.name for p in subdirs if (p / "source.txt").exists() and (p / "metadata.json").exists()]
+    subdirs = [
+        p
+        for p in settings.data_raw_dir.iterdir()
+        if p.is_dir() and p.name in curated_codes
+    ]
+    valid_folders = [
+        p.name
+        for p in subdirs
+        if (p / "source.txt").exists() and (p / "metadata.json").exists()
+    ]
 
     if not valid_folders:
-        typer.echo("Không tìm thấy thư mục hợp lệ nào chứa cả source.txt và metadata.json trong data/raw/.", err=True)
+        typer.echo(
+            "Không tìm thấy thư mục hợp lệ nào chứa cả source.txt và metadata.json trong data/raw/.",
+            err=True,
+        )
         raise typer.Exit(code=1)
 
-    typer.echo(f"Tìm thấy {len(valid_folders)} thư mục hợp lệ trong data/raw/. Bắt đầu parse song song...")
-    
+    typer.echo(
+        f"Tìm thấy {len(valid_folders)} thư mục hợp lệ trong data/raw/. Bắt đầu parse song song..."
+    )
+
     from concurrent.futures import ThreadPoolExecutor, as_completed
-    
+
     parsed_count = 0
     max_workers = min(10, len(valid_folders))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -272,7 +343,7 @@ def parse(
             executor.submit(_parse_folder_worker, folder_name): folder_name
             for folder_name in valid_folders
         }
-        
+
         for future in as_completed(future_to_folder):
             folder_name = future_to_folder[future]
             try:
@@ -282,16 +353,22 @@ def parse(
             except Exception as e:
                 typer.echo(f"Lỗi không xác định khi xử lý {folder_name}: {e}", err=True)
 
-    typer.echo(f"Hoàn thành parse hàng loạt: Đã parse {parsed_count}/{len(valid_folders)} thư mục.")
+    typer.echo(
+        f"Hoàn thành parse hàng loạt: Đã parse {parsed_count}/{len(valid_folders)} thư mục."
+    )
 
 
 # Lệnh CLI để trích xuất thực thể, quan hệ từ cấu trúc đã phân tách sử dụng mô hình LLM.
 @app.command()
 def extract(
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
     articles: Annotated[
         str | None,
-        typer.Option(help="Comma-separated Article numbers for smoke extraction; omitted means full document."),
+        typer.Option(
+            help="Comma-separated Article numbers for smoke extraction; omitted means full document."
+        ),
     ] = None,
 ) -> None:
     """Chạy LLM Extraction + Validation + Scoring trên hierarchy.json đã parse."""
@@ -306,8 +383,14 @@ def extract(
         typer.echo(f"Thiếu {hierarchy_path} — chạy `parse` trước.", err=True)
         raise typer.Exit(code=1)
 
-    parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
-    selected = {value.strip().lower() for value in articles.split(",") if value.strip()} if articles else None
+    parsed = ParsedDocument.model_validate_json(
+        hierarchy_path.read_text(encoding="utf-8")
+    )
+    selected = (
+        {value.strip().lower() for value in articles.split(",") if value.strip()}
+        if articles
+        else None
+    )
     try:
         run_pipeline(
             parsed,
@@ -326,10 +409,14 @@ def extract(
 
 @app.command("normalize-extraction")
 def normalize_extraction(
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
     articles: Annotated[
         str | None,
-        typer.Option(help="Comma-separated checkpoint Article numbers; omitted means full document."),
+        typer.Option(
+            help="Comma-separated checkpoint Article numbers; omitted means full document."
+        ),
     ] = None,
 ) -> None:
     """Regenerate decision artifacts from valid per-Article checkpoints without LLM calls."""
@@ -337,8 +424,14 @@ def normalize_extraction(
     if not hierarchy_path.exists():
         typer.echo(f"Thiếu {hierarchy_path} — chạy `parse` trước.", err=True)
         raise typer.Exit(code=1)
-    parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
-    selected = {value.strip().lower() for value in articles.split(",") if value.strip()} if articles else None
+    parsed = ParsedDocument.model_validate_json(
+        hierarchy_path.read_text(encoding="utf-8")
+    )
+    selected = (
+        {value.strip().lower() for value in articles.split(",") if value.strip()}
+        if articles
+        else None
+    )
     try:
         run_pipeline(
             parsed,
@@ -355,7 +448,9 @@ def normalize_extraction(
 
 @app.command("archive-extraction")
 def archive_extraction(
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
 ) -> None:
     """Archive current decision artifacts that must not enter the writer."""
     processed_dir = _processed_dir(raw_doc_code)
@@ -369,19 +464,36 @@ def archive_extraction(
         "entity_index.json",
         "prettier_extract.json",
     )
-    existing = [processed_dir / name for name in names if (processed_dir / name).exists()]
+    existing = [
+        processed_dir / name for name in names if (processed_dir / name).exists()
+    ]
     if not existing:
-        typer.echo(f"Không có extraction artifacts để archive tại {processed_dir}", err=True)
+        typer.echo(
+            f"Không có extraction artifacts để archive tại {processed_dir}", err=True
+        )
         raise typer.Exit(code=1)
     archive_dir.mkdir(parents=True, exist_ok=False)
     for source in existing:
         shutil.move(str(source), archive_dir / source.name)
+
     def _line_count(name: str) -> int:
         path = archive_dir / name
-        return sum(1 for line in path.read_text(encoding="utf-8").splitlines() if line.strip()) if path.exists() else 0
+        return (
+            sum(
+                1
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            )
+            if path.exists()
+            else 0
+        )
 
     entity_path = archive_dir / "entity_index.json"
-    entity_total = len(json.loads(entity_path.read_text(encoding="utf-8"))) if entity_path.exists() else 0
+    entity_total = (
+        len(json.loads(entity_path.read_text(encoding="utf-8")))
+        if entity_path.exists()
+        else 0
+    )
     manifest = {
         "status": "invalid_for_write",
         "reason": "accepted records contain unresolved noncanonical structural endpoints",
@@ -407,7 +519,9 @@ def archive_extraction(
 
 @app.command("validate-data")
 def validate_data(
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
 ) -> None:
     """Validate curated metadata and canonical graph identity before parsing."""
     readiness = validate_document_readiness(
@@ -438,7 +552,9 @@ def validate_data(
 
 @app.command("validate-payload")
 def validate_payload(
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
 ) -> None:
     """Build and validate a graph payload without opening a Neo4j connection."""
     processed_dir = _processed_dir(raw_doc_code)
@@ -454,11 +570,15 @@ def validate_payload(
         raise typer.Exit(code=1) from exc
 
     node_counts = Counter(node.get("type") for node in payload.get("nodes", []))
-    relation_counts = Counter(relation.get("type") for relation in payload.get("relations", []))
-    
+    relation_counts = Counter(
+        relation.get("type") for relation in payload.get("relations", [])
+    )
+
     consistency = validate_payload_consistency(payload)
-    dangling_endpoint_count = sum(1 for err in consistency.errors if "dangling" in err.lower())
-    
+    dangling_endpoint_count = sum(
+        1 for err in consistency.errors if "dangling" in err.lower()
+    )
+
     ontology_violation_count = 0
     ontology_errors = []
     try:
@@ -491,13 +611,161 @@ def validate_payload(
         raise typer.Exit(code=1)
 
 
+@app.command("build-reference-registry")
+def build_reference_registry(
+    build_id: Annotated[str, typer.Option(help="Immutable registry build receipt ID")],
+    raw_doc_code: Annotated[
+        list[str] | None,
+        typer.Option(help="Repeat for each explicitly selected processed document"),
+    ] = None,
+    manifest: Annotated[
+        Path | None,
+        typer.Option(
+            help="Explicit corpus manifest; mutually exclusive with --raw-doc-code"
+        ),
+    ] = None,
+) -> None:
+    """Build an immutable accepted-structure registry without Neo4j or LLM calls."""
+    if bool(raw_doc_code) == bool(manifest):
+        typer.echo(
+            "Provide either repeated --raw-doc-code or --manifest, but not both.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    try:
+        selected = (
+            list(dict.fromkeys(raw_doc_code or []))
+            if manifest is None
+            else list(load_curated_manifest(manifest))
+        )
+    except Exception as exc:
+        typer.echo(f"Registry selection error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    payloads = {}
+    sources = {}
+    try:
+        for code in selected:
+            logger.info("Registry build: validating %s", code)
+            loaded = load_validated_payload(_processed_dir(code))
+            source_path = _raw_dir(code) / "source.txt"
+            if not source_path.is_file():
+                raise ValidatedPayloadLoadError(
+                    f"Missing canonical source: {source_path}"
+                )
+            payloads[code] = loaded.validated_payload
+            sources[code] = source_path.read_text(encoding="utf-8")
+        build = build_corpus_registry(payloads, sources, build_id=build_id)
+        publish_registry_build(build, settings.data_registry_dir)
+    except (ValidatedPayloadLoadError, RegistryError, OSError, ValueError) as exc:
+        typer.echo(f"Registry build blocked: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(
+        json.dumps(
+            {
+                "build_id": build.receipt.build_id,
+                "snapshot_hash": build.receipt.snapshot_hash,
+                "provenance_hash": build.receipt.provenance_hash,
+                "document_count": build.registry.manifest.document_count,
+                "structural_unit_count": build.registry.manifest.structural_unit_count,
+                "contains_relation_count": build.registry.manifest.contains_relation_count,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@app.command("reconcile-external-references")
+def reconcile_external_reference_command(
+    build_id: Annotated[str, typer.Option(help="Verified registry build receipt ID")],
+    raw_doc_code: Annotated[
+        list[str], typer.Option(help="Repeat for each source document to reconcile")
+    ],
+    apply: Annotated[
+        bool, typer.Option(help="Write verified REFERS_TO edges to Neo4j")
+    ] = False,
+) -> None:
+    """Resolve external citations; graph writes require explicit --apply."""
+    try:
+        build = load_registry_build(settings.data_registry_dir, build_id)
+    except (RegistryError, OSError, ValueError) as exc:
+        typer.echo(f"Registry load blocked: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    session = create_neo4j_session() if apply else None
+    reports = []
+    try:
+        for code in dict.fromkeys(raw_doc_code):
+            processed_dir = _processed_dir(code)
+            hierarchy_path = processed_dir / "hierarchy.json"
+            source_path = _raw_dir(code) / "source.txt"
+            if not hierarchy_path.is_file() or not source_path.is_file():
+                raise ValueError(
+                    f"Missing hierarchy/source for {code}; run parse and normalization first"
+                )
+            parsed = ParsedDocument.model_validate_json(
+                hierarchy_path.read_text(encoding="utf-8")
+            )
+            logger.info(
+                "External reference reconciliation: %s (%s)",
+                code,
+                "apply" if apply else "dry-run",
+            )
+            report = reconcile_external_reference_service(
+                raw_doc_code=code,
+                processed_dir=processed_dir,
+                parsed=parsed,
+                source_text=source_path.read_text(encoding="utf-8"),
+                build=build,
+                apply=apply,
+                session=session,
+            )
+            reports.append(report)
+    except Exception as exc:
+        typer.echo(f"External reconciliation blocked: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    finally:
+        if session is not None:
+            session.close()
+    payload = [asdict(report) for report in reports]
+    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+    if apply and any(report.failed_count or report.blocked_count for report in reports):
+        raise typer.Exit(code=1)
+
+
+@app.command("reference-status")
+def reference_status_command(
+    raw_doc_code: Annotated[str, typer.Option(help="Processed source document code")],
+) -> None:
+    """Print stable JSON resolution/materialization checkpoint metrics."""
+    try:
+        report = load_reference_status(_processed_dir(raw_doc_code))
+    except Exception as exc:
+        typer.echo(f"Reference status blocked: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(
+        json.dumps(
+            {"raw_doc_code": raw_doc_code, **report},
+            ensure_ascii=False,
+            indent=2,
+            default=str,
+        )
+    )
+
+
 @app.command("write")
-def write_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")]) -> None:
+def write_graph(
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
+    ],
+) -> None:
     """Build accepted graph payload and write it to Neo4j through the guarded writer."""
     payload = _validated_payload_for_raw_doc_code(raw_doc_code)
     session = create_neo4j_session()
     try:
-        service = GraphIngestionService(writer=Neo4jWriter(session=session))
+        service = GraphIngestionService(
+            writer=Neo4jWriter(session=session),
+            hierarchy_reconciler=SectionHierarchyReconciler(session=session),
+        )
         validated_payload = service.ingest(payload)
     finally:
         close = getattr(session, "close", None)
@@ -507,18 +775,30 @@ def write_graph(raw_doc_code: Annotated[str, typer.Option(help="Folder name unde
         f"Wrote graph for {raw_doc_code}: "
         f"{len(validated_payload.nodes)} nodes, {len(validated_payload.relations)} relations"
     )
+    hierarchy_report = service.last_hierarchy_report
+    if hierarchy_report is not None:
+        typer.echo(
+            "Section hierarchy reconciliation: "
+            f"{hierarchy_report.mapping_count} mapped Article(s), "
+            f"{hierarchy_report.deleted_legacy_edge_count} legacy edge(s) removed"
+        )
 
 
 @app.command("embed")
 def embed_graph(
-    raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
+    ],
     batch_size: Annotated[int, typer.Option(min=1, help="Embedding batch size")] = 32,
 ) -> None:
     """Generate and write configured-dimension Article/Clause embeddings."""
     payload = _validated_payload_for_raw_doc_code(raw_doc_code)
     texts_by_node_id = embedding_texts_by_node_id(payload)
     graph_id = _graph_id(payload)
-    content_hashes = {node_id: embedding_content_hash(text) for node_id, text in texts_by_node_id.items()}
+    content_hashes = {
+        node_id: embedding_content_hash(text)
+        for node_id, text in texts_by_node_id.items()
+    }
 
     session = create_neo4j_session()
     try:
@@ -534,25 +814,37 @@ def embed_graph(
         generator = EmbeddingGenerator()
         for start in range(0, len(stale_ids), batch_size):
             batch_ids = stale_ids[start : start + batch_size]
-            vectors = generator.encode([texts_by_node_id[node_id] for node_id in batch_ids])
+            vectors = generator.encode(
+                [texts_by_node_id[node_id] for node_id in batch_ids]
+            )
             writer.write_embeddings(
                 dict(zip(batch_ids, vectors, strict=True)),
                 graph_id=graph_id,
-                content_hashes={node_id: content_hashes[node_id] for node_id in batch_ids},
+                content_hashes={
+                    node_id: content_hashes[node_id] for node_id in batch_ids
+                },
                 model=settings.embedding_model,
                 provider=settings.embedding_provider,
                 normalized=True,
             )
-            typer.echo(f"Embedded {min(start + len(batch_ids), len(stale_ids))}/{len(stale_ids)} stale targets")
+            typer.echo(
+                f"Embedded {min(start + len(batch_ids), len(stale_ids))}/{len(stale_ids)} stale targets"
+            )
     finally:
         close = getattr(session, "close", None)
         if callable(close):
             close()
-    typer.echo(f"Embedding complete for {raw_doc_code}: updated={len(stale_ids)}, skipped={len(texts_by_node_id) - len(stale_ids)}")
+    typer.echo(
+        f"Embedding complete for {raw_doc_code}: updated={len(stale_ids)}, skipped={len(texts_by_node_id) - len(stale_ids)}"
+    )
 
 
 @app.command("graph-quality")
-def graph_quality(raw_doc_code: Annotated[str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")]) -> None:
+def graph_quality(
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
+    ],
+) -> None:
     """Generate graph quality metrics from the canonical graph payload."""
     processed_dir = _processed_dir(raw_doc_code)
     try:
@@ -564,16 +856,23 @@ def graph_quality(raw_doc_code: Annotated[str, typer.Option(help="Folder name un
     if not hierarchy_path.exists():
         typer.echo(f"Thiếu {hierarchy_path} — chạy `parse` trước.", err=True)
         raise typer.Exit(code=1)
-    parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
+    parsed = ParsedDocument.model_validate_json(
+        hierarchy_path.read_text(encoding="utf-8")
+    )
 
     session = create_neo4j_session()
     try:
-        report = GraphQualityReporter(session=session).generate_for_document(graph_id=parsed.document.id)
+        report = GraphQualityReporter(session=session).generate_for_document(
+            graph_id=parsed.document.id
+        )
     finally:
         close = getattr(session, "close", None)
         if callable(close):
             close()
-    report["extraction_decisions"] = decision_stats_from_paths(_processed_dir(raw_doc_code))
+    report["extraction_decisions"] = decision_stats_from_paths(
+        _processed_dir(raw_doc_code)
+    )
+    report["external_references"] = load_reference_status(_processed_dir(raw_doc_code))
     out_dir = settings.data_reports_dir / raw_doc_code
     write_graph_quality_report(report, out_dir)
     typer.echo(f"Wrote graph quality report -> {out_dir}")
@@ -595,13 +894,26 @@ def verify_m3_schema() -> None:
         raise typer.Exit(code=1) from exc
     finally:
         session.close()
-    typer.echo(json.dumps({"uri": safe_uri, "constraints": report.constraints, "indexes": report.user_indexes}, indent=2))
+    typer.echo(
+        json.dumps(
+            {
+                "uri": safe_uri,
+                "constraints": report.constraints,
+                "indexes": report.user_indexes,
+            },
+            indent=2,
+        )
+    )
 
 
 @app.command("graph-snapshot")
 def graph_snapshot(
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
-    output: Annotated[str | None, typer.Option(help="Evidence file name under snapshots/")] = None,
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
+    output: Annotated[
+        str | None, typer.Option(help="Evidence file name under snapshots/")
+    ] = None,
 ) -> None:
     """Capture a read-only payload-to-graph digest snapshot from disposable Neo4j."""
     try:
@@ -616,9 +928,15 @@ def graph_snapshot(
         snapshot = generate_snapshot(session, payload, graph_id=graph_id, uri=safe_uri)
     finally:
         session.close()
-    output_name = output or datetime.now(timezone.utc).strftime("snapshot_%Y%m%dT%H%M%SZ.json")
+    output_name = output or datetime.now(timezone.utc).strftime(
+        "snapshot_%Y%m%dT%H%M%SZ.json"
+    )
     try:
-        path = write_snapshot(snapshot, settings.data_reports_dir / raw_doc_code / "snapshots", output_name)
+        path = write_snapshot(
+            snapshot,
+            settings.data_reports_dir / raw_doc_code / "snapshots",
+            output_name,
+        )
     except ValueError as exc:
         typer.echo(f"Snapshot output error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -626,7 +944,9 @@ def graph_snapshot(
 
 
 @app.command("vector-smoke")
-def vector_smoke(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code")]) -> None:
+def vector_smoke(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code")],
+) -> None:
     """Run the fixed top-5 Milestone A queries against both vector indexes."""
     try:
         validate_disposable_uri(settings.neo4j_uri)
@@ -648,14 +968,18 @@ def vector_smoke(raw_doc_code: Annotated[str, typer.Option(help="Filesystem docu
 
 
 @app.command("milestone-a-report")
-def milestone_a_report(raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code")]) -> None:
+def milestone_a_report(
+    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code")],
+) -> None:
     """Validate pilot evidence without promoting the four-document corpus gate."""
     try:
         report = generate_milestone_a_report(raw_doc_code, settings.data_reports_dir)
     except MilestoneAReportError as exc:
         typer.echo(f"Milestone A evidence error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
-    json_path, md_path = write_milestone_a_report(report, settings.data_reports_dir / raw_doc_code)
+    json_path, md_path = write_milestone_a_report(
+        report, settings.data_reports_dir / raw_doc_code
+    )
     typer.echo(json.dumps(report, ensure_ascii=False, indent=2))
     typer.echo(f"Report JSON -> {json_path}")
     typer.echo(f"Report Markdown -> {md_path}")
@@ -666,27 +990,10 @@ def milestone_a_report(raw_doc_code: Annotated[str, typer.Option(help="Filesyste
 def _validated_payload_for_raw_doc_code(raw_doc_code: str) -> dict:
     processed_dir = _processed_dir(raw_doc_code)
     try:
-        validate_extraction_readiness(processed_dir)
-    except ExtractionReadinessError as exc:
-        typer.echo(f"Extraction readiness error: {exc}", err=True)
+        return load_validated_payload(processed_dir).raw_payload
+    except ValidatedPayloadLoadError as exc:
+        typer.echo(f"Validated payload load error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
-    try:
-        payload = build_payload_from_paths(processed_dir)
-    except PayloadBuildError as exc:
-        typer.echo(f"Payload build error: {exc}", err=True)
-        raise typer.Exit(code=1) from exc
-    consistency = validate_payload_consistency(payload)
-    if not consistency.valid:
-        for error in consistency.errors:
-            typer.echo(f"Payload consistency error: {error}", err=True)
-        raise typer.Exit(code=1)
-    try:
-        validate_graph_payload(payload)
-    except GraphValidationError as exc:
-        for error in exc.errors:
-            typer.echo(f"Ontology validation error: {error}", err=True)
-        raise typer.Exit(code=1) from exc
-    return payload
 
 
 def _graph_id(payload: dict) -> str:
@@ -700,7 +1007,9 @@ def _graph_id(payload: dict) -> str:
 @app.command()
 def ingest(
     url: Annotated[str, typer.Option(help="URL trang chi tiết vbpl.vn")],
-    raw_doc_code: Annotated[str, typer.Option(help="Filesystem document code, vd 'L59_2020'")],
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
+    ],
     number: Annotated[str, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'")],
 ) -> None:
     """Full pipeline: crawl -> parse -> extract."""

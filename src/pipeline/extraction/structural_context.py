@@ -9,10 +9,11 @@ from typing import Literal
 from pathlib import Path
 
 from src.pipeline.parser.models import Article, ParsedDocument
+from src.shared.ontology.hierarchy import chapter_id, section_id
 
 
-PROMPT_VERSION = "structural-reference-v2"
-ENDPOINT_CONTRACT_VERSION = "canonical-endpoints-v2"
+PROMPT_VERSION = "structural-reference-v3"
+ENDPOINT_CONTRACT_VERSION = "canonical-endpoints-v3"
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,15 +49,54 @@ class StructuralRegistry:
         self.graph_id = parsed.document.id
         self.raw_doc_code = raw_doc_code
         self.types: dict[str, str] = {self.graph_id: "Document"}
+        self.chapters: dict[str, str] = {}
+        self.sections: dict[tuple[str, str], str] = {}
         self.articles: dict[str, str] = {}
         self.clauses: dict[tuple[str, str], str] = {}
         self.points: dict[tuple[str, str, str], str] = {}
+        self.article_chapters: dict[str, str] = {}
+        self.article_sections: dict[str, str] = {}
+
+        for section in parsed.sections:
+            chapter_number = _normalize_chapter_key(section.chapter)
+            section_number = section.number.strip().lower()
+            self._register_chapter(chapter_number)
+            key = (chapter_number, section_number)
+            if key in self.sections:
+                raise ValueError(
+                    f"Duplicate Section number: Chapter {section.chapter} Section {section.number}"
+                )
+            section_node_id = section_id(self.graph_id, chapter_number, section_number)
+            self.sections[key] = section_node_id
+            self.types[section_node_id] = "Section"
+
         for article in parsed.articles:
             article_id = f"{self.graph_id}_art{article.number}"
             if article.number in self.articles:
                 raise ValueError(f"Duplicate Article number: {article.number}")
             self.articles[article.number] = article_id
             self.types[article_id] = "Article"
+            if article.chapter:
+                chapter_number = _normalize_chapter_key(article.chapter)
+                self.article_chapters[article_id] = self._register_chapter(
+                    chapter_number
+                )
+                if article.section:
+                    section_key = (
+                        chapter_number,
+                        article.section.strip().lower(),
+                    )
+                    section_node_id = self.sections.get(section_key)
+                    if section_node_id is None:
+                        raise ValueError(
+                            f"Article {article.number} references missing Section "
+                            f"{article.section} in Chapter {article.chapter}"
+                        )
+                    self.article_sections[article_id] = section_node_id
+            elif article.section:
+                raise ValueError(
+                    f"Article {article.number} references Section {article.section} without Chapter"
+                )
             for clause in article.clauses:
                 key = (article.number, clause.number)
                 if key in self.clauses:
@@ -79,6 +119,15 @@ class StructuralRegistry:
                         )
                     self.points[point_key] = point_id
                     self.types[point_id] = "Point"
+
+    def _register_chapter(self, chapter_number: str) -> str:
+        existing = self.chapters.get(chapter_number)
+        canonical_id = chapter_id(self.graph_id, chapter_number)
+        if existing is not None and existing != canonical_id:
+            raise ValueError(f"Conflicting Chapter identity: {chapter_number}")
+        self.chapters[chapter_number] = canonical_id
+        self.types[canonical_id] = "Chapter"
+        return canonical_id
 
     @classmethod
     def from_parsed_document(
@@ -105,6 +154,12 @@ class StructuralRegistry:
             ),
             None,
         )
+
+    def chapter_for_article_id(self, article_id: str) -> str | None:
+        return self.article_chapters.get(article_id)
+
+    def section_for_article_id(self, article_id: str) -> str | None:
+        return self.article_sections.get(article_id)
 
     def context_for_article(self, article: Article) -> ArticleExtractionContext:
         return ArticleExtractionContext(
@@ -148,6 +203,28 @@ class StructuralRegistry:
             return EndpointResolution(
                 raw, self.graph_id, "Document", "resolved", "current_document_reference"
             )
+
+        if entity_type == "Chapter" or normalized_label.startswith("chương"):
+            if "chương này" in normalized_label:
+                node_id = self.chapter_for_article_id(
+                    self.articles.get(current_article, current_article)
+                )
+            else:
+                chapter_number = _chapter_number(label)
+                node_id = self.chapters.get(chapter_number or "")
+            if node_id:
+                return EndpointResolution(
+                    raw, node_id, "Chapter", "resolved", "structural_label"
+                )
+
+        if entity_type == "Section" or normalized_label.startswith("mục"):
+            section_number = _first_number_after("mục", label)
+            chapter_number = _chapter_number(label)
+            node_id = self.sections.get((chapter_number or "", section_number or ""))
+            if node_id:
+                return EndpointResolution(
+                    raw, node_id, "Section", "resolved", "structural_label"
+                )
 
         article_number = _article_number(label)
         if entity_type == "Article" or normalized_label.startswith("điều"):
@@ -241,6 +318,15 @@ def normalize_point_label(label: str) -> str:
 def _article_number(label: str) -> str | None:
     match = re.search(r"(?i)điều\s+(\d+[a-z]?)", label)
     return match.group(1).lower() if match else None
+
+
+def _chapter_number(label: str) -> str | None:
+    match = re.search(r"(?i)chương\s+([IVXLCDM]+)", label)
+    return _normalize_chapter_key(match.group(1)) if match else None
+
+
+def _normalize_chapter_key(value: str) -> str:
+    return value.strip().upper()
 
 
 def _first_number_after(token: str, label: str) -> str | None:

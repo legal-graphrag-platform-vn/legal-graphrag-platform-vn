@@ -8,7 +8,9 @@ from typing import Any, Mapping, Protocol
 
 from src.pipeline.config import settings
 from src.shared.ontology import validators as root_validator
-from src.shared.ontology.payload_consistency_validator import validate_payload_consistency_or_raise
+from src.shared.ontology.payload_consistency_validator import (
+    validate_payload_consistency_or_raise,
+)
 
 
 class WriteAttemptError(TypeError):
@@ -18,7 +20,13 @@ class WriteAttemptError(TypeError):
 class SessionProtocol(Protocol):
     def run(self, cypher: str, **parameters: Any) -> Any: ...
 
+    def execute_write(self, callback: Any, *args: Any, **kwargs: Any) -> Any: ...
+
     def close(self) -> None: ...
+
+
+class HierarchyReconcilerProtocol(Protocol):
+    def reconcile(self, payload: Any) -> Any: ...
 
 
 def validate_graph_payload(payload: Mapping[str, Any]):
@@ -38,15 +46,22 @@ class Neo4jWriter:
     session: SessionProtocol
 
     def write(self, payload: Any) -> None:
-        if not isinstance(payload, _validated_graph_payload_type()) or payload.validation_token is not _validation_token():
-            raise WriteAttemptError("Neo4jWriter.write expects a root ValidatedGraphPayload")
+        if (
+            not isinstance(payload, _validated_graph_payload_type())
+            or payload.validation_token is not _validation_token()
+        ):
+            raise WriteAttemptError(
+                "Neo4jWriter.write expects a root ValidatedGraphPayload"
+            )
         for node in payload.nodes:
             self._merge_node(node)
         for relation in payload.relations:
             self._merge_relation(relation)
 
     def _merge_node(self, node: Any) -> None:
-        properties, temporal_cypher, temporal_parameters = _neo4j_properties("n", node.properties)
+        properties, temporal_cypher, temporal_parameters = _neo4j_properties(
+            "n", node.properties
+        )
         cypher = f"MERGE (n:{node.node_type} {{id: $id}}) SET n += $properties {temporal_cypher}"
         self.session.run(
             cypher,
@@ -58,8 +73,12 @@ class Neo4jWriter:
     def _merge_relation(self, relation: Any) -> None:
         relation_id = relation.properties.get("relation_id")
         if not relation_id:
-            raise WriteAttemptError(f"Validated relation missing relation_id: {relation.relation_type}")
-        properties, temporal_cypher, temporal_parameters = _neo4j_properties("r", relation.properties)
+            raise WriteAttemptError(
+                f"Validated relation missing relation_id: {relation.relation_type}"
+            )
+        properties, temporal_cypher, temporal_parameters = _neo4j_properties(
+            "r", relation.properties
+        )
         cypher = (
             "MATCH (head {id: $head_id}) "
             "MATCH (tail {id: $tail_id}) "
@@ -79,6 +98,8 @@ class Neo4jWriter:
 @dataclass(slots=True)
 class GraphIngestionService:
     writer: Neo4jWriter
+    hierarchy_reconciler: HierarchyReconcilerProtocol | None = None
+    last_hierarchy_report: Any = None
 
     def ingest(self, payload: Mapping[str, Any] | Any):
         if isinstance(payload, _validated_graph_payload_type()):
@@ -87,6 +108,8 @@ class GraphIngestionService:
             validate_payload_consistency_or_raise(payload)
             validated = validate_graph_payload(payload)
         self.writer.write(validated)
+        if self.hierarchy_reconciler is not None:
+            self.last_hierarchy_report = self.hierarchy_reconciler.reconcile(validated)
         return validated
 
 
@@ -97,6 +120,9 @@ class ManagedNeo4jSession:
 
     def run(self, cypher: str, **parameters: Any) -> Any:
         return self.session.run(cypher, **parameters)
+
+    def execute_write(self, callback: Any, *args: Any, **kwargs: Any) -> Any:
+        return self.session.execute_write(callback, *args, **kwargs)
 
     def close(self) -> None:
         try:
@@ -111,9 +137,13 @@ def create_neo4j_session() -> SessionProtocol:
     try:
         from neo4j import GraphDatabase
     except ImportError as exc:
-        raise RuntimeError("Install neo4j Python driver to use write/embed commands") from exc
+        raise RuntimeError(
+            "Install neo4j Python driver to use write/embed commands"
+        ) from exc
 
-    driver = GraphDatabase.driver(settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password))
+    driver = GraphDatabase.driver(
+        settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password)
+    )
     return ManagedNeo4jSession(driver=driver, session=driver.session())
 
 
@@ -121,7 +151,9 @@ DATE_PROPERTIES = {"effective_from", "effective_to", "issued_date"}
 DATETIME_PROPERTIES = {"created_at", "updated_at"}
 
 
-def _neo4j_properties(alias: str, raw_properties: Mapping[str, Any]) -> tuple[dict[str, Any], str, dict[str, str]]:
+def _neo4j_properties(
+    alias: str, raw_properties: Mapping[str, Any]
+) -> tuple[dict[str, Any], str, dict[str, str]]:
     properties = dict(raw_properties)
     assignments: list[str] = []
     parameters: dict[str, str] = {}

@@ -10,6 +10,7 @@ from typing import Any, Protocol
 
 from src.shared.ontology.payload_consistency_validator import validate_payload_consistency
 from src.shared.ontology.validators import validate_relation
+from src.shared.ontology.hierarchy import MAX_DOCUMENT_HIERARCHY_DEPTH
 
 
 class SessionProtocol(Protocol):
@@ -43,6 +44,8 @@ class GraphQualityReporter:
         return {
             "document_count": label_counts.get("Document", 0),
             "issuer_count": label_counts.get("Issuer", 0),
+            "chapter_count": label_counts.get("Chapter", 0),
+            "section_count": label_counts.get("Section", 0),
             "article_count": article_stats["total"],
             "clause_count": clause_stats["total"],
             "legal_concept_count": label_counts.get("LegalConcept", 0),
@@ -78,7 +81,7 @@ class GraphQualityReporter:
             self.session.run(
                 (
                     "MATCH (d:Document {id: $graph_id}) "
-                    "OPTIONAL MATCH (d)-[:CONTAINS*0..4]->(s) "
+                    f"OPTIONAL MATCH (d)-[:CONTAINS*0..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(s) "
                     "WITH collect(DISTINCT d) + collect(DISTINCT s) AS structural_nodes "
                     "WITH [n IN structural_nodes WHERE n IS NOT NULL AND n.id IS NOT NULL] AS structural_nodes "
                     "WITH structural_nodes, [n IN structural_nodes | n.id] AS structural_ids "
@@ -482,6 +485,7 @@ def _canonical_label(labels: list[str]) -> str:
         "Document",
         "Issuer",
         "Chapter",
+        "Section",
         "Article",
         "Clause",
         "Point",

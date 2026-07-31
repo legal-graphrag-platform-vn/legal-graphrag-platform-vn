@@ -75,6 +75,20 @@ class OntologyConsistencyTests(unittest.TestCase):
             )
         self.assertIn("content_raw", str(exc.exception))
 
+    def test_section_requires_legal_title(self) -> None:
+        for section in (
+            {"type": "Section", "id": "ldn_2020_ch3_sec1", "number": "1"},
+            {
+                "type": "Section",
+                "id": "ldn_2020_ch3_sec1",
+                "number": "1",
+                "title": "   ",
+            },
+        ):
+            with self.assertRaises(GraphValidationError) as exc:
+                self.validator.validate_section(section)
+            self.assertIn("title", str(exc.exception))
+
     def test_article_requires_legal_status(self) -> None:
         with self.assertRaises(GraphValidationError) as exc:
             self.validator.validate_article(
@@ -118,6 +132,8 @@ class OntologyConsistencyTests(unittest.TestCase):
         cases = [
             ("Document", "ISSUED_BY", "Issuer", {}),
             ("Document", "CONTAINS", "Chapter", {}),
+            ("Chapter", "CONTAINS", "Section", {}),
+            ("Section", "CONTAINS", "Article", {}),
             ("Chapter", "CONTAINS", "Article", {}),
             ("Document", "REPEALS", "Article", {"effective_from": "2021-01-01"}),
             ("Document", "REPLACES", "Document", {"effective_from": "2021-01-01"}),

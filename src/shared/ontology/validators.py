@@ -104,6 +104,33 @@ class ValidatedGraphPayload:
         return {node.id: node for node in self.nodes}
 
 
+@dataclass(frozen=True, slots=True)
+class ValidatedExternalReference:
+    """A relation plus registry-proven endpoint ownership evidence."""
+
+    relation: ValidatedRelation
+    source_id: str
+    source_type: str
+    source_document_id: str
+    source_ancestor_ids: tuple[str, ...]
+    target_id: str
+    target_type: str
+    target_document_id: str
+    target_ancestor_ids: tuple[str, ...]
+    reference_bundle_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class ValidatedRelationBatch:
+    """Root-gated relation-only write boundary for external references."""
+
+    references: tuple[ValidatedExternalReference, ...]
+    registry_build_id: str
+    registry_snapshot_hash: str
+    registry_provenance_hash: str
+    validation_token: object
+
+
 class OntologyValidator:
     """Validate graph payloads against the frozen ontology."""
 
@@ -138,6 +165,15 @@ class OntologyValidator:
         return self._validate_node(
             chapter,
             node_type="Chapter",
+            required_fields=("id", "number", "title"),
+        )
+
+    def validate_section(self, section: Mapping[str, Any]) -> ValidatedNode:
+        if isinstance(section.get("title"), str) and not str(section["title"]).strip():
+            raise GraphValidationError(["Section requires field: title"])
+        return self._validate_node(
+            section,
+            node_type="Section",
             required_fields=("id", "number", "title"),
         )
 
@@ -301,6 +337,8 @@ class OntologyValidator:
                     node = self.validate_issuer(raw_node)
                 elif node_type == "Chapter":
                     node = self.validate_chapter(raw_node)
+                elif node_type == "Section":
+                    node = self.validate_section(raw_node)
                 elif node_type == "Article":
                     node = self.validate_article(raw_node)
                 elif node_type == "Clause":
@@ -439,6 +477,77 @@ def validate_relation(
 
 def validate_graph_payload(payload: Mapping[str, Any]) -> ValidatedGraphPayload:
     return OntologyValidator().validate_graph_payload(payload)
+
+
+def validate_external_relation_batch(
+    references: Sequence[ValidatedExternalReference],
+    *,
+    registry_build_id: str,
+    registry_snapshot_hash: str,
+    registry_provenance_hash: str,
+) -> ValidatedRelationBatch:
+    """Validate relation shape before issuing the unforgeable batch token."""
+
+    errors: list[str] = []
+    seen_relation_ids: set[str] = set()
+    seen_bundle_targets: set[tuple[str, str]] = set()
+    validator = OntologyValidator()
+    for reference in references:
+        relation = reference.relation
+        if relation.head_id != reference.source_id:
+            errors.append("External reference source wrapper does not match relation")
+        if relation.tail_id != reference.target_id:
+            errors.append("External reference target wrapper does not match relation")
+        if relation.head_type != reference.source_type:
+            errors.append("External reference source type does not match relation")
+        if relation.tail_type != reference.target_type:
+            errors.append("External reference target type does not match relation")
+        if reference.source_document_id == reference.target_document_id:
+            errors.append(
+                "External reference endpoints must belong to different Documents"
+            )
+        relation_id = str(relation.properties.get("relation_id") or "")
+        if not relation_id:
+            errors.append("External REFERS_TO relation requires relation_id")
+        elif relation_id in seen_relation_ids:
+            errors.append(f"Duplicate external relation_id: {relation_id}")
+        seen_relation_ids.add(relation_id)
+        identity = (reference.reference_bundle_id, reference.target_id)
+        if identity in seen_bundle_targets:
+            errors.append(
+                "Duplicate external bundle target: "
+                f"{reference.reference_bundle_id}/{reference.target_id}"
+            )
+        seen_bundle_targets.add(identity)
+        ok, error = validator.validate_relation(
+            relation.head_type,
+            relation.relation_type,
+            relation.tail_type,
+            properties=relation.properties,
+            head_id=relation.head_id,
+            tail_id=relation.tail_id,
+        )
+        if not ok:
+            errors.append(error or "Invalid external relation")
+        if relation.relation_type != "REFERS_TO":
+            errors.append("External relation batch only accepts REFERS_TO")
+        if (
+            relation.properties.get("reference_bundle_id")
+            != reference.reference_bundle_id
+        ):
+            errors.append("External reference bundle wrapper does not match relation")
+
+    if not references:
+        errors.append("External relation batch must not be empty")
+    if errors:
+        raise GraphValidationError(errors)
+    return ValidatedRelationBatch(
+        references=tuple(references),
+        registry_build_id=registry_build_id,
+        registry_snapshot_hash=registry_snapshot_hash,
+        registry_provenance_hash=registry_provenance_hash,
+        validation_token=_VALIDATION_TOKEN,
+    )
 
 
 def _serialize_value(value: Any) -> Any:

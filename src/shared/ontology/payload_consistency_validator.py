@@ -12,7 +12,9 @@ from typing import Iterable, Mapping
 
 STRUCTURAL_PAIRS = {
     ("Document", "Chapter"),
+    ("Chapter", "Section"),
     ("Chapter", "Article"),
+    ("Section", "Article"),
     ("Document", "Article"),
     ("Article", "Clause"),
     ("Clause", "Point"),

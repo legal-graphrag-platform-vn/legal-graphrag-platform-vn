@@ -47,6 +47,12 @@ from src.pipeline.pipeline.artifact_store import (
     discard_staging_artifacts,
     publish_staged_artifacts,
 )
+from src.pipeline.pipeline.reference_checkpoint_store import (
+    ReferenceCheckpointStore,
+    ReferenceCheckpointV2,
+    checkpoint_from_reference,
+    committed_target_history,
+)
 from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.scoring.confidence_scorer import score
 from src.shared.ontology.validators import validate_relation as validate_ontology
@@ -616,7 +622,6 @@ def run_pipeline(
     reference_resolver = StructuralReferenceResolver(
         registry,
         source_text or "",
-        document_registry=document_registry,
     )
     resolved_references = (
         [
@@ -875,80 +880,67 @@ def _write_extraction_blocked(out_dir: Path, exc: Exception) -> None:
     )
 
 
-def _reference_fingerprint(reference: ResolvedReference) -> str:
-    payload = reference.model_dump(mode="json")
-    payload["resolver_version"] = RESOLVER_VERSION
-    source = json.dumps(
-        payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    )
-    return hashlib.sha256(source.encode("utf-8")).hexdigest()
-
-
 def _update_reference_checkpoints(
     path: Path,
     references: list[ResolvedReference],
     *,
     selected_article_ids: set[str],
-) -> dict[str, dict]:
-    existing: dict[str, dict] = {}
-    if path.exists():
-        for line_number, line in enumerate(
-            path.read_text(encoding="utf-8").splitlines(), start=1
-        ):
-            if not line.strip():
-                continue
-            row = json.loads(line)
-            bundle_id = str(row.get("reference_bundle_id", ""))
-            if not bundle_id or bundle_id in existing:
-                raise ValueError(
-                    f"Invalid duplicate reference checkpoint at {path}:{line_number}"
-                )
-            existing[bundle_id] = row
-
-    updated: dict[str, dict] = {
-        bundle_id: row
-        for bundle_id, row in existing.items()
-        if ((row.get("reference") or {}).get("mention") or {})
-        .get("source_context", {})
-        .get("article_id")
-        not in selected_article_ids
-    }
-    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    for reference in references:
-        bundle_id = reference.mention.reference_bundle_id
-        fingerprint = _reference_fingerprint(reference)
-        prior = existing.get(bundle_id)
-        created_at = (
-            prior.get("created_at")
-            if prior and prior.get("fingerprint") == fingerprint
-            else now
-        )
-        updated[bundle_id] = {
-            "reference_bundle_id": bundle_id,
-            "fingerprint": fingerprint,
-            "resolver_name": RESOLVER_NAME,
-            "resolver_version": RESOLVER_VERSION,
-            "created_at": created_at,
-            "reference": reference.model_dump(mode="json"),
+) -> dict[str, ReferenceCheckpointV2]:
+    store = ReferenceCheckpointStore(path.parent)
+    store.checkpoint_path = path
+    with store.locked():
+        existing = store.read_checkpoints()
+        attempts = store.read_attempts()
+        expected_hash = store.checkpoint_hash()
+        updated: dict[str, ReferenceCheckpointV2] = {
+            bundle_id: checkpoint
+            for bundle_id, checkpoint in existing.items()
+            if checkpoint.reference.mention.source_context.article_id
+            not in selected_article_ids
+            or checkpoint.materialization.status in {"WRITTEN", "BLOCKED"}
         }
-
-    temporary = path.with_suffix(".jsonl.tmp")
-    with temporary.open("w", encoding="utf-8") as handle:
-        for bundle_id in sorted(updated):
-            handle.write(json.dumps(updated[bundle_id], ensure_ascii=False) + "\n")
-    temporary.replace(path)
+        now = datetime.now(timezone.utc)
+        for reference in references:
+            bundle_id = reference.mention.reference_bundle_id
+            prior = existing.get(bundle_id)
+            if (
+                prior is not None
+                and prior.resolution.build_id is not None
+                and reference.reference_scope == "EXTERNAL"
+                and reference.status == "UNRESOLVED"
+                and reference.reason_code == "target_document_not_in_snapshot"
+            ):
+                # Normal extraction has no corpus snapshot. Do not downgrade a
+                # later reconciliation result merely because this stage cannot
+                # reproduce its existence evidence.
+                updated[bundle_id] = prior
+                continue
+            prior_written = bool(committed_target_history(attempts, bundle_id))
+            updated[bundle_id] = checkpoint_from_reference(
+                reference,
+                resolver_name=RESOLVER_NAME,
+                resolver_version=RESOLVER_VERSION,
+                detected_at=now,
+                prior=prior,
+                prior_written=prior_written,
+            )
+        store.compare_and_swap(updated, expected_hash=expected_hash)
     return updated
 
 
 def _rule_reference_records(
     references: list[ResolvedReference],
-    checkpoints: dict[str, dict],
+    checkpoints: dict[str, ReferenceCheckpointV2],
     registry: StructuralRegistry,
 ) -> list[dict]:
     records: list[dict] = []
     known_ids = set(registry.types)
     for reference in references:
-        if reference.status != "RESOLVED":
+        if (
+            reference.status != "RESOLVED"
+            or reference.reference_scope != "LOCAL"
+            or reference.is_self_reference
+        ):
             continue
         mention = reference.mention
         source_id = mention.source_context.source_unit_id
@@ -964,7 +956,9 @@ def _rule_reference_records(
                 "citation_text": mention.raw_text,
                 "citation_type": citation_type,
                 "extraction_method": extraction_method,
-                "created_at": checkpoint["created_at"],
+                "created_at": checkpoint.detected_at.astimezone(timezone.utc)
+                .isoformat()
+                .replace("+00:00", "Z"),
                 "reference_bundle_id": mention.reference_bundle_id,
                 "reference_target_count": len(reference.target_unit_ids),
                 "source_unit_id": source_id,
@@ -1051,6 +1045,10 @@ def _structural_type_from_id(node_id: str) -> str | None:
         return "Clause"
     if re.search(r"_art[^_]+$", node_id):
         return "Article"
+    if re.search(r"_ch[^_]+_sec[^_]+$", node_id):
+        return "Section"
+    if re.search(r"_ch[^_]+$", node_id):
+        return "Chapter"
     return "Document" if node_id else None
 
 

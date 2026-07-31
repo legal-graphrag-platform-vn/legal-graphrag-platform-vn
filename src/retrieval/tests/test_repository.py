@@ -45,7 +45,7 @@ def test_repository_parameterizes_filters_and_closes_session() -> None:
     assert session.closed is True
     assert session.parameters["document_ids"] == ["doc"]
     assert session.parameters["legal_statuses"] == ["ACTIVE"]
-    assert "CONTAINS*1..3" in session.query
+    assert "CONTAINS*1..4" in session.query
 
 
 def test_repository_rejects_unsupported_graph_depth_before_db_session() -> None:
