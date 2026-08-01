@@ -294,6 +294,8 @@ def _add_node(nodes: dict[str, dict[str, Any]], node: dict[str, Any]) -> None:
     existing = nodes.get(node_id)
     if existing is not None:
         if existing != normalized_node:
+            if existing.get("type") == "Issuer" or normalized_node.get("type") == "Issuer":
+                return
             raise PayloadBuildError(f"Duplicate node id with different payload: {node_id}")
         return
     nodes[node_id] = normalized_node

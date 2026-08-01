@@ -5,10 +5,10 @@
   "official": false,
   "threshold_status": "failed",
   "metadata": {
-    "graph_snapshot_sha256": "294cf005d4d5926d5d09c9388236ff23d92cd6b845eeaef89a4d263f6280e291",
+    "graph_snapshot_sha256": "multi_doc_test_corpus_v1",
     "planner_provider": "gemini",
     "planner_model": "gemini-3.1-flash-lite",
-    "prompt_fingerprint": "415ed9c2e85ee42a5fed462cd3c3bbed3f1d8d02c8843fee8ee741f6981affa4",
+    "prompt_fingerprint": "95484bd8c81163c86e14cbf12e4ef53ef02875390b1ae7d942785b31bb1bcfea",
     "dataset_sha256": "7c14744c582288f981f3cb16b0552b60f5297b1e3de5a07774d024c783496ba1",
     "thresholds_sha256": "577ee524e3966ee02fbfa08523f4582f47fd9f165cda12391810b85cbd13f1b5"
   },
@@ -34,8 +34,8 @@
       },
       "total_retrieval_latency": {
         "sample_size": 3,
-        "p50_ms": 1456.235,
-        "p95_ms": 9074.695
+        "p50_ms": 2032.08,
+        "p95_ms": 11722.996
       },
       "cases": [
         {
@@ -98,13 +98,13 @@
       "answer_provider_calls_after_plan_failure": 0,
       "planner_latency": {
         "sample_size": 3,
-        "p50_ms": 0.081,
-        "p95_ms": 0.091
+        "p50_ms": 0.116,
+        "p95_ms": 0.151
       },
       "total_retrieval_latency": {
         "sample_size": 3,
-        "p50_ms": 273.676,
-        "p95_ms": 322.25
+        "p50_ms": 286.221,
+        "p95_ms": 292.702
       },
       "cases": [
         {
@@ -127,7 +127,7 @@
                 "rank": 1,
                 "node_id": "ldn_2020_art41_cl2",
                 "label": "Clause",
-                "score": 0.06379650063051703,
+                "score": 0.06403688524590165,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -137,7 +137,7 @@
                 "rank": 2,
                 "node_id": "ldn_2020_art38_cl1",
                 "label": "Clause",
-                "score": 0.06328259554066006,
+                "score": 0.06351569577376029,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -145,9 +145,9 @@
               },
               {
                 "rank": 3,
-                "node_id": "ldn_2020_art41_cl3",
+                "node_id": "ldn_2020_art41_cl1",
                 "label": "Clause",
-                "score": 0.04765107388058208,
+                "score": 0.047891458495966696,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -155,9 +155,9 @@
               },
               {
                 "rank": 4,
-                "node_id": "ldn_2020_art41_cl1",
+                "node_id": "ldn_2020_art38_cl3",
                 "label": "Clause",
-                "score": 0.04740305800756621,
+                "score": 0.04640914640914641,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -165,9 +165,9 @@
               },
               {
                 "rank": 5,
-                "node_id": "ldn_2020_art38_cl3",
+                "node_id": "ldn_2020_art38_cl2",
                 "label": "Clause",
-                "score": 0.045730413377472204,
+                "score": 0.045750384880819665,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -177,7 +177,7 @@
                 "rank": 6,
                 "node_id": "ldn_2020_art37_cl5",
                 "label": "Clause",
-                "score": 0.045235361653272105,
+                "score": 0.0454615036704589,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -187,15 +187,24 @@
                 "rank": 7,
                 "node_id": "ldn_2020_art16_cl4",
                 "label": "Clause",
-                "score": 0.02877846790890269,
+                "score": 0.014705882352941176,
+                "retrieval_sources": [
+                  "vector"
+                ]
+              },
+              {
+                "rank": 8,
+                "node_id": "ldn_2020_art16_cl5",
+                "label": "Clause",
+                "score": 0.014285714285714285,
                 "retrieval_sources": [
                   "vector"
                 ]
               }
             ],
             "gold_rank": 1,
-            "top_score": 0.06379650063051703,
-            "top_two_margin": 0.000513905089856978
+            "top_score": 0.06403688524590165,
+            "top_two_margin": 0.000521189472141359
           }
         },
         {
@@ -245,9 +254,9 @@
             "candidates": [
               {
                 "rank": 1,
-                "node_id": "ldn_2020_art123_cl1",
+                "node_id": "ldn_2020_art52_cl1",
                 "label": "Clause",
-                "score": 0.04596351361057244,
+                "score": 0.04655217278168098,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -255,9 +264,9 @@
               },
               {
                 "rank": 2,
-                "node_id": "ldn_2020_art112_cl3",
+                "node_id": "ldn_2020_art123_cl1",
                 "label": "Clause",
-                "score": 0.031544957774465976,
+                "score": 0.046459914611005695,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -265,9 +274,9 @@
               },
               {
                 "rank": 3,
-                "node_id": "ldn_2020_art124_cl4",
+                "node_id": "ldn_2020_art112_cl3",
                 "label": "Clause",
-                "score": 0.030330882352941176,
+                "score": 0.03131881575727918,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -275,9 +284,9 @@
               },
               {
                 "rank": 4,
-                "node_id": "ldn_2020_art112_cl2",
+                "node_id": "ldn_2020_art124_cl4",
                 "label": "Clause",
-                "score": 0.03007688828584351,
+                "score": 0.030536130536130537,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -285,9 +294,9 @@
               },
               {
                 "rank": 5,
-                "node_id": "ldn_2020_art125_cl3",
+                "node_id": "ldn_2020_art112_cl2",
                 "label": "Clause",
-                "score": 0.029910714285714284,
+                "score": 0.029850746268656716,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -313,7 +322,7 @@
               },
               {
                 "rank": 8,
-                "node_id": "ldn_2020_art203_cl2",
+                "node_id": "ldn_2020_art68_cl2",
                 "label": "Clause",
                 "score": 0.014492753623188406,
                 "retrieval_sources": [
@@ -321,9 +330,9 @@
                 ]
               }
             ],
-            "gold_rank": null,
-            "top_score": 0.04596351361057244,
-            "top_two_margin": 0.014418555836106461
+            "gold_rank": 1,
+            "top_score": 0.04655217278168098,
+            "top_two_margin": 9.225817067528425e-05
           }
         }
       ]
@@ -349,8 +358,8 @@
       },
       "total_retrieval_latency": {
         "sample_size": 3,
-        "p50_ms": 8.854,
-        "p95_ms": 9.131
+        "p50_ms": 8.983,
+        "p95_ms": 10.759
       },
       "cases": [
         {
@@ -413,13 +422,13 @@
       "answer_provider_calls_after_plan_failure": 0,
       "planner_latency": {
         "sample_size": 3,
-        "p50_ms": 1222.919,
-        "p95_ms": 1603.648
+        "p50_ms": 1224.37,
+        "p95_ms": 3268.68
       },
       "total_retrieval_latency": {
         "sample_size": 3,
-        "p50_ms": 1445.529,
-        "p95_ms": 1876.605
+        "p50_ms": 1328.65,
+        "p95_ms": 3524.08
       },
       "cases": [
         {
@@ -435,14 +444,14 @@
           "reason_code": "AMBIGUOUS_TARGET",
           "answer_provider_calls_after_plan_failure": 0,
           "target_diagnostic": {
-            "mention_text": "khoản xác định tên gây nhầm lẫn tại Điều 41",
+            "mention_text": "khoản quy định tên gây nhầm lẫn tại Điều 41",
             "resolution_status": "ambiguous",
             "candidates": [
               {
                 "rank": 1,
                 "node_id": "ldn_2020_art41_cl2",
                 "label": "Clause",
-                "score": 0.06379650063051703,
+                "score": 0.06403688524590165,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -452,7 +461,7 @@
                 "rank": 2,
                 "node_id": "ldn_2020_art38_cl1",
                 "label": "Clause",
-                "score": 0.06302657915561141,
+                "score": 0.06351569577376029,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -460,9 +469,9 @@
               },
               {
                 "rank": 3,
-                "node_id": "ldn_2020_art41_cl3",
+                "node_id": "ldn_2020_art41_cl1",
                 "label": "Clause",
-                "score": 0.047907090265630725,
+                "score": 0.047891458495966696,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -470,9 +479,9 @@
               },
               {
                 "rank": 4,
-                "node_id": "ldn_2020_art41_cl1",
+                "node_id": "ldn_2020_art38_cl3",
                 "label": "Clause",
-                "score": 0.04740305800756621,
+                "score": 0.04618300439195962,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -480,9 +489,9 @@
               },
               {
                 "rank": 5,
-                "node_id": "ldn_2020_art38_cl3",
+                "node_id": "ldn_2020_art38_cl2",
                 "label": "Clause",
-                "score": 0.045730413377472204,
+                "score": 0.04596351361057244,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -492,7 +501,7 @@
                 "rank": 6,
                 "node_id": "ldn_2020_art37_cl5",
                 "label": "Clause",
-                "score": 0.045235361653272105,
+                "score": 0.04568764568764569,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -500,7 +509,7 @@
               },
               {
                 "rank": 7,
-                "node_id": "ldn_2020_art16_cl4",
+                "node_id": "ldn_2020_art16_cl5",
                 "label": "Clause",
                 "score": 0.014492753623188406,
                 "retrieval_sources": [
@@ -509,7 +518,7 @@
               },
               {
                 "rank": 8,
-                "node_id": "ldn_2020_art16_cl5",
+                "node_id": "ldn_2020_art71_cl3",
                 "label": "Clause",
                 "score": 0.014285714285714285,
                 "retrieval_sources": [
@@ -518,8 +527,8 @@
               }
             ],
             "gold_rank": 1,
-            "top_score": 0.06379650063051703,
-            "top_two_margin": 0.0007699214749056216
+            "top_score": 0.06403688524590165,
+            "top_two_margin": 0.000521189472141359
           }
         },
         {
@@ -549,14 +558,14 @@
           "reason_code": "UNBOUND_TARGET",
           "answer_provider_calls_after_plan_failure": 0,
           "target_diagnostic": {
-            "mention_text": "trình tự chào bán phần vốn góp",
+            "mention_text": "khoản quy định trình tự chào bán phần vốn góp tại Điều 52",
             "resolution_status": "unbound",
             "candidates": [
               {
                 "rank": 1,
-                "node_id": "ldn_2020_art123_cl1",
+                "node_id": "ldn_2020_art52_cl1",
                 "label": "Clause",
-                "score": 0.047072599531615925,
+                "score": 0.048171500630517027,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -564,9 +573,9 @@
               },
               {
                 "rank": 2,
-                "node_id": "ldn_2020_art124_cl1",
+                "node_id": "ldn_2020_art52_cl2",
                 "label": "Clause",
-                "score": 0.045979778526721235,
+                "score": 0.047907090265630725,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -574,9 +583,9 @@
               },
               {
                 "rank": 3,
-                "node_id": "ldn_2020_art124_cl4",
+                "node_id": "ldn_2020_art52_cl3",
                 "label": "Clause",
-                "score": 0.045760287745334055,
+                "score": 0.04648394036050739,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -586,7 +595,7 @@
                 "rank": 4,
                 "node_id": "ldn_2020_art112_cl3",
                 "label": "Clause",
-                "score": 0.031024531024531024,
+                "score": 0.029857397504456328,
                 "retrieval_sources": [
                   "fulltext",
                   "vector"
@@ -594,17 +603,46 @@
               },
               {
                 "rank": 5,
-                "node_id": "ldn_2020_art126_cl2",
+                "node_id": "ldn_2020_art112_cl2",
                 "label": "Clause",
-                "score": 0.029877369007803793,
+                "score": 0.029631255487269532,
+                "retrieval_sources": [
+                  "fulltext",
+                  "vector"
+                ]
+              },
+              {
+                "rank": 6,
+                "node_id": "ldn_2020_art51_cl3",
+                "label": "Clause",
+                "score": 0.02877846790890269,
+                "retrieval_sources": [
+                  "fulltext",
+                  "vector"
+                ]
+              },
+              {
+                "rank": 7,
+                "node_id": "ldn_2020_art53_cl4",
+                "label": "Clause",
+                "score": 0.015873015873015872,
+                "retrieval_sources": [
+                  "vector"
+                ]
+              },
+              {
+                "rank": 8,
+                "node_id": "ldn_2020_art23_cl5",
+                "label": "Clause",
+                "score": 0.015625,
                 "retrieval_sources": [
                   "vector"
                 ]
               }
             ],
-            "gold_rank": null,
-            "top_score": 0.047072599531615925,
-            "top_two_margin": 0.0010928210048946896
+            "gold_rank": 1,
+            "top_score": 0.048171500630517027,
+            "top_two_margin": 0.0002644103648863014
           }
         }
       ]
