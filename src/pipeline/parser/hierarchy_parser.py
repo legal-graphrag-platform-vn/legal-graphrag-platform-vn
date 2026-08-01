@@ -63,7 +63,8 @@ def clean_vietnamese_spacing(text: str) -> str:
     diacritic_vowels = (
         r"([àáạảãầấậẩẫằắặẳẵèéẹẻẽềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỴỷỹ][\w]*)\b"
     )
-    pattern2 = re.compile(r"(\w+)\s+" + diacritic_vowels, re.IGNORECASE)
+    consonant_prefixes = r"\b(ch|gh|kh|ngh|ng|nh|ph|qu|th|tr|nhi|nghi|[bcdđghklmnpqrstvx]{1,2})\s+"
+    pattern2 = re.compile(consonant_prefixes + diacritic_vowels, re.IGNORECASE)
 
     old_text = ""
     while old_text != text:
@@ -154,6 +155,36 @@ class _ArticleBuilder:
         )
 
 
+def _ascii(value: str) -> str:
+    decomposed = unicodedata.normalize("NFD", value)
+    return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").replace("đ", "d").replace("Đ", "D")
+
+
+CITATION_PREV_RE = re.compile(
+    r"(?:quy\s+dinh\s+tai|sua\s+doi[,\s]+bo\s+sung|thong\s+nhat\s+voi|theo|tai|theo\s+quy\s+dinh|khoan\s+\d+|diem\s+[a-z]|vao|hoac|va|bai\s+bo|,)\s*$",
+    re.IGNORECASE,
+)
+CITATION_NEXT_RE = re.compile(
+    r"^(?:va|hoac|,|nhu\s+sau|cua|nghi\s+dinh|luat|phu\s+luc|\.)",
+    re.IGNORECASE,
+)
+CLOSING_ARTICLE_TITLE_RE = re.compile(r"(?:thi\s+hanh|chuyen\s+tiep)", re.IGNORECASE)
+APPENDIX_ASCII_RE = re.compile(r"^\s*(?:danh\s*muc|phu\s*luc|mau\s*so|bieu\s*mau)\b", re.IGNORECASE)
+
+
+def is_citation_context(prev_line: str, line: str, next_line: str) -> bool:
+    m = re.match(r"^Điều\s+\d+[a-z]?$", line.strip(), re.IGNORECASE)
+    if not m:
+        return False
+    prev_asc = _ascii(prev_line).strip().lower() if prev_line else ""
+    next_asc = _ascii(next_line).strip().lower() if next_line else ""
+    if prev_asc and CITATION_PREV_RE.search(prev_asc):
+        return True
+    if next_asc and CITATION_NEXT_RE.search(next_asc):
+        return True
+    return False
+
+
 def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
     """State machine cốt lõi: list các dòng text (đã strip blank thừa) -> list[Article].
 
@@ -172,12 +203,16 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
     current_article: _ArticleBuilder | None = None
     current_clause: Clause | None = None
     current_point: Point | None = None
+    seen_closing_article = False
+    in_appendix = False
 
     def flush_article() -> None:
         nonlocal current_article, current_clause, current_point
         if current_article is not None:
             flush_clause()
-            articles.append(current_article.to_article())
+            art = current_article.to_article()
+            if art.title or art.clauses:
+                articles.append(art)
         current_article = None
         current_clause = None
         current_point = None
@@ -216,12 +251,58 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
     # khối trích dẫn nguyên văn (vd nội dung mới của khoản/điểm bị sửa đổi), nên
     # KHÔNG coi cấu trúc số/chữ cái bên trong nó là Khoản/Điểm thật của văn bản.
     quote_depth = 0
+    raw_text_lines = [item.text if isinstance(item, LineRecord) else str(item) for item in lines]
 
-    for item in lines:
+    for idx, item in enumerate(lines):
         record = item if isinstance(item, LineRecord) else LineRecord(text=item)
         cleaned_line = clean_vietnamese_spacing(record.text)
         line = cleaned_line.strip()
         if not line or should_skip_line(line):
+            continue
+
+        asc_line = _ascii(line).strip().lower()
+        if seen_closing_article and APPENDIX_ASCII_RE.search(asc_line):
+            in_appendix = True
+
+        prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
+        next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
+
+        chapter_num = match_chapter(line)
+        if chapter_num is not None and not in_appendix:
+            quote_depth = 0
+            if current_article is not None and current_article.chapter is None:
+                current_article = None
+                current_clause = None
+                current_point = None
+            current_chapter = chapter_num
+            current_chapter_title = None
+            pending_chapter_title = True
+            continue
+
+        if pending_chapter_title:
+            pending_chapter_title = False
+            if looks_like_title(line):
+                current_chapter_title = line
+                continue
+            # Không phải tiêu đề chương (vd đi thẳng vào Điều) -> rơi qua xử lý bình thường
+
+        article_match = match_article(line)
+        if article_match is not None and not in_appendix and not is_citation_context(prev_line, line, next_line):
+            quote_depth = 0
+            flush_article()
+            number, title = article_match
+            if title and CLOSING_ARTICLE_TITLE_RE.search(_ascii(title)):
+                seen_closing_article = True
+            current_article = _ArticleBuilder(
+                number=number,
+                title=title or None,
+                chapter=current_chapter,
+                chapter_title=current_chapter_title,
+                source_start_char=record.source_start_char,
+                source_end_char=record.source_end_char,
+            )
+            if title:
+                current_article.content_lines.append(title)
             continue
 
         in_quote = quote_depth > 0
@@ -239,36 +320,6 @@ def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
                 elif current_clause is not None:
                     current_clause.content = f"{current_clause.content} {line}".strip()
                     current_clause.source_end_char = record.source_end_char
-            continue
-
-        chapter_num = match_chapter(line)
-        if chapter_num is not None:
-            current_chapter = chapter_num
-            current_chapter_title = None
-            pending_chapter_title = True
-            continue
-
-        if pending_chapter_title:
-            pending_chapter_title = False
-            if looks_like_title(line):
-                current_chapter_title = line
-                continue
-            # Không phải tiêu đề chương (vd đi thẳng vào Điều) -> rơi qua xử lý bình thường
-
-        article_match = match_article(line)
-        if article_match is not None:
-            flush_article()
-            number, title = article_match
-            current_article = _ArticleBuilder(
-                number=number,
-                title=title or None,
-                chapter=current_chapter,
-                chapter_title=current_chapter_title,
-                source_start_char=record.source_start_char,
-                source_end_char=record.source_end_char,
-            )
-            if title:
-                current_article.content_lines.append(title)
             continue
 
         if current_article is None:

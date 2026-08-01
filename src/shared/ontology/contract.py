@@ -224,7 +224,7 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "REGULATES": {
         "allowed_head": ["Article", "Clause"],
-        "allowed_tail": ["LegalSubject", "LegalAction"],
+        "allowed_tail": ["LegalSubject", "LegalAction", "Issuer"],
         "required_properties": ["confidence", "llm_model", "created_at"],
     },
     "REQUIRES": {

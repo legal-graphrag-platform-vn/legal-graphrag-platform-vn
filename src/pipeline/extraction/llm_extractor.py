@@ -65,9 +65,13 @@ def normalize_entities_for_relations(entities: list[ExtractedEntity]) -> list[Ex
         canonical_id = _semantic_id(entity.label) if entity.type in {"Concept", "Entity", "Action"} else entity.id
         candidate = ExtractedEntity(id=canonical_id, type=entity.type, label=entity.label)
         existing = normalized.get(canonical_id)
-        if existing is not None and existing != candidate:
-            raise ValueError(f"Conflicting entity normalization for {canonical_id}")
-        normalized[canonical_id] = candidate
+        if existing is None:
+            normalized[canonical_id] = candidate
+        else:
+            # Deterministically resolve duplicate canonical_id from LLM output variations
+            preferred_type = candidate.type if candidate.type == "Entity" and existing.type != "Entity" else existing.type
+            preferred_label = candidate.label if len(candidate.label) > len(existing.label) else existing.label
+            normalized[canonical_id] = ExtractedEntity(id=canonical_id, type=preferred_type, label=preferred_label)
     return list(normalized.values())
 
 
