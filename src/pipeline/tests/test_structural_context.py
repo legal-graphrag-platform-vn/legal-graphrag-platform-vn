@@ -16,8 +16,10 @@ from src.pipeline.parser.models import (
     Clause,
     DocumentInfo,
     ParsedDocument,
+    Part,
     Point,
     Section,
+    Subsection,
 )
 
 
@@ -124,6 +126,52 @@ def test_registry_hard_fails_duplicate_local_section() -> None:
 
     with pytest.raises(ValidationError, match="Duplicate Section"):
         ParsedDocument.model_validate(parsed.model_dump())
+
+
+def test_registry_indexes_part_and_subsection_ancestors() -> None:
+    parsed = _parsed()
+    parsed.parts = [Part(number="I", title="Quy định chung")]
+    parsed.sections = [Section(number="1", title="Phạm vi", chapter="I", part="I")]
+    parsed.subsections = [
+        Subsection(
+            number="1a",
+            title="Nguyên tắc",
+            chapter="I",
+            section="1",
+            part="I",
+        )
+    ]
+    parsed.articles[0].part = "I"
+    parsed.articles[0].chapter = "I"
+    parsed.articles[0].section = "1"
+    parsed.articles[0].subsection = "1a"
+
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    assert registry.parts["1"] == "ldn_2020_part1"
+    assert registry.subsections[("I", "1", "1a")] == ("ldn_2020_ch1_sec1_subsec1a")
+    assert registry.part_for_article_id("ldn_2020_art5") == "ldn_2020_part1"
+    assert registry.subsection_for_article_id("ldn_2020_art5") == (
+        "ldn_2020_ch1_sec1_subsec1a"
+    )
+    assert (
+        registry.resolve(
+            "part_current",
+            current_article="5",
+            entity_type="Part",
+            entity_label="Phần này",
+        ).canonical_id
+        == "ldn_2020_part1"
+    )
+    assert (
+        registry.resolve(
+            "subsection",
+            current_article="5",
+            entity_type="Subsection",
+            entity_label="Tiểu mục 1a Mục 1 Chương I",
+        ).canonical_id
+        == "ldn_2020_ch1_sec1_subsec1a"
+    )
 
 
 def test_document_registry_resolves_explicit_curated_number(tmp_path) -> None:

@@ -1045,10 +1045,14 @@ def _structural_type_from_id(node_id: str) -> str | None:
         return "Clause"
     if re.search(r"_art[^_]+$", node_id):
         return "Article"
+    if re.search(r"_ch[^_]+_sec[^_]+_subsec[^_]+$", node_id):
+        return "Subsection"
     if re.search(r"_ch[^_]+_sec[^_]+$", node_id):
         return "Section"
     if re.search(r"_ch[^_]+$", node_id):
         return "Chapter"
+    if re.search(r"_part[^_]+$", node_id):
+        return "Part"
     return "Document" if node_id else None
 
 

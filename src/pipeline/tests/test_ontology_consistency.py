@@ -4,6 +4,7 @@ Chạy: pytest tests/test_ontology_consistency.py
 Tốc độ: <1ms, không cần DB hay LLM.
 """
 
+from src.shared.ontology.contract import NODE_REQUIRED_FIELDS
 from src.shared.ontology.validators import CONSTRAINTS, RELATION_ENUM, validate_relation
 
 
@@ -36,6 +37,12 @@ def test_no_orphan_constraints() -> None:
     assert orphans == set(), f"Constraints thừa (không có trong enum): {orphans}"
 
 
+def test_grouping_titles_are_required_but_article_title_is_optional() -> None:
+    for label in ("Part", "Chapter", "Section", "Subsection"):
+        assert "title" in NODE_REQUIRED_FIELDS[label]
+    assert "title" not in NODE_REQUIRED_FIELDS["Article"]
+
+
 def test_refers_to_not_rejected() -> None:
     """REFERS_TO là relation phổ biến nhất — phải pass validator."""
     ok, err = validate_relation(
@@ -65,6 +72,23 @@ def test_contains_structural_chain_allows_section_and_refers_to_it() -> None:
             "REFERS_TO",
             target,
             properties=REFERS_TO_PROPS,
+        )
+        assert ok, f"Clause REFERS_TO {target} bị reject: {err}"
+
+
+def test_contains_and_refers_to_support_part_and_subsection() -> None:
+    for head, tail in (
+        ("Document", "Part"),
+        ("Part", "Chapter"),
+        ("Section", "Subsection"),
+        ("Subsection", "Article"),
+    ):
+        ok, err = validate_relation(head, "CONTAINS", tail)
+        assert ok, f"{head}->{tail} bị reject: {err}"
+
+    for target in ("Part", "Subsection"):
+        ok, err = validate_relation(
+            "Clause", "REFERS_TO", target, properties=REFERS_TO_PROPS
         )
         assert ok, f"Clause REFERS_TO {target} bị reject: {err}"
 

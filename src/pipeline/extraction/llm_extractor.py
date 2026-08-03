@@ -11,21 +11,30 @@ import logging
 import re
 import unicodedata
 
-from src.pipeline.extraction.models import ExtractedEntity, ExtractedRelation, ExtractionResult
+from src.pipeline.extraction.models import (
+    ExtractedEntity,
+    ExtractedRelation,
+    ExtractionResult,
+)
 from src.pipeline.extraction.providers import get_provider
 from src.pipeline.extraction.structural_context import ArticleExtractionContext
 
 logger = logging.getLogger(__name__)
 
 
-def extract_entities(article_text: str, *, context: ArticleExtractionContext) -> list[ExtractedEntity]:
+def extract_entities(
+    article_text: str, *, context: ArticleExtractionContext
+) -> list[ExtractedEntity]:
     """Pass 1 — trích entities (Document/Concept/Entity) được nhắc tới trong 1 Điều."""
     provider = get_provider()
     return provider.extract_entities(article_text, context=context)
 
 
 def extract_relations(
-    article_text: str, entities: list[ExtractedEntity], *, context: ArticleExtractionContext
+    article_text: str,
+    entities: list[ExtractedEntity],
+    *,
+    context: ArticleExtractionContext,
 ) -> list[ExtractedRelation]:
     """Pass 2 — trích relations giữa các entities đã tìm thấy ở Pass 1."""
     provider = get_provider()
@@ -44,7 +53,11 @@ def extract_article(
     )
     raw_entities = provider.extract_entities(article_text, context=context)
     entities = normalize_entities_for_relations(raw_entities)
-    logger.info("Điều %s: tìm thấy %d entities, đang extract relations", article_number, len(entities))
+    logger.info(
+        "Điều %s: tìm thấy %d entities, đang extract relations",
+        article_number,
+        len(entities),
+    )
     relations = provider.extract_relations(article_text, entities, context=context)
     logger.info("Điều %s: tìm thấy %d relations", article_number, len(relations))
     return ExtractionResult(
@@ -56,14 +69,30 @@ def extract_article(
     )
 
 
-def normalize_entities_for_relations(entities: list[ExtractedEntity]) -> list[ExtractedEntity]:
+def normalize_entities_for_relations(
+    entities: list[ExtractedEntity],
+) -> list[ExtractedEntity]:
     """Canonicalize semantic IDs before pass 2 and omit parser-owned local structure."""
     normalized: dict[str, ExtractedEntity] = {}
     for entity in entities:
-        if entity.type in {"Article", "Chapter", "Section", "Clause", "Point"}:
+        if entity.type in {
+            "Part",
+            "Chapter",
+            "Section",
+            "Subsection",
+            "Article",
+            "Clause",
+            "Point",
+        }:
             continue
-        canonical_id = _semantic_id(entity.label) if entity.type in {"Concept", "Entity", "Action"} else entity.id
-        candidate = ExtractedEntity(id=canonical_id, type=entity.type, label=entity.label)
+        canonical_id = (
+            _semantic_id(entity.label)
+            if entity.type in {"Concept", "Entity", "Action"}
+            else entity.id
+        )
+        candidate = ExtractedEntity(
+            id=canonical_id, type=entity.type, label=entity.label
+        )
         existing = normalized.get(canonical_id)
         if existing is not None and existing != candidate:
             raise ValueError(f"Conflicting entity normalization for {canonical_id}")
@@ -73,6 +102,8 @@ def normalize_entities_for_relations(entities: list[ExtractedEntity]) -> list[Ex
 
 def _semantic_id(label: str) -> str:
     decomposed = unicodedata.normalize("NFD", label)
-    without_marks = "".join(char for char in decomposed if unicodedata.category(char) != "Mn")
+    without_marks = "".join(
+        char for char in decomposed if unicodedata.category(char) != "Mn"
+    )
     ascii_text = without_marks.replace("đ", "d").replace("Đ", "D").lower()
     return re.sub(r"[^a-z0-9]+", "_", ascii_text).strip("_") or "unknown"

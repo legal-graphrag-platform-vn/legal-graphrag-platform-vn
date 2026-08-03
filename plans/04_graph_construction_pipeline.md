@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Liên quan đến**: RC2
-> **Depends on**: [legal_ontology.md v1.7.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.8.0](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
@@ -144,7 +144,7 @@ stateDiagram-v2
 > **Contract**: LLM chỉ được phép trả về JSON. Các key `entities` và `relations` luôn tồn tại (dù có thể rỗng rỗng). `type` của entity phải nằm trong danh sách Enum (Entity, Concept, Action).
 
 ### 4. Validator & Writer Contract
-> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.7.0. Nếu có lỗi, relation bị drop hoặc raise error.
+> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.8.0. Nếu có lỗi, relation bị drop hoặc raise error.
 > **Writer Guarantee (Neo4j)**: Quá trình MERGE mang tính Idempotent. Việc chạy lại cùng một file JSON 10 lần sẽ không sinh ra duplicate node hay edge nào trong đồ thị.
 
 ### 5. Embedding Contract
@@ -267,17 +267,20 @@ PATTERNS = {
 
     "section": r"^Mục\s+(\d+[a-z]?)(?:(?:\.|:)\s*(.*))?$",
     # "Mục 1", "MỤC 1.", "Mục 1: Quy định chung", "Mục 1a"
+
+    "part": r"^Phần\s+(thứ\s+\w+|[IVXLCDM]+|\d+[a-z]?)(?:(?:\.|:)\s*(.*))?$",
+    "subsection": r"^Tiểu\s+mục\s+(\d+[a-z]?)(?:(?:\.|:)\s*(.*))?$",
     
     "chapter_title": r"^([A-ZĐÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸ ]+)$"
     # Dòng toàn chữ hoa = tiêu đề chương
 }
 ```
 
-`Section.title` is mandatory. An inline title is preferred; otherwise the next
+`Part.title`, `Section.title`, and `Subsection.title` are mandatory. An inline title is preferred; otherwise the next
 non-empty line must have bold or uppercase structural evidence, must not be
 another structural boundary, and must be at most 240 canonical characters.
-`Section` outside an active `Chapter`, duplicate `(Chapter, Section)`, missing
-title, or Section without an Article is a parser/data-quality failure. Full-line
+Invalid parent context, duplicate canonical key, missing title, or grouping node
+without an Article descendant is a parser/data-quality failure. Full-line
 matching prevents citation text such as `theo Mục 1 Chương III` from becoming a
 heading.
 
@@ -409,7 +412,7 @@ ENTITY_SCHEMA = {
     "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
         "type": {"enum": [
-            "Document", "Chapter", "Section", "Article", "Clause", "Point",
+            "Document", "Part", "Chapter", "Section", "Subsection", "Article", "Clause", "Point",
             "Concept", "Entity",
             "Action"   # v1.1.0: hành vi pháp lý (thành lập, góp vốn, giải thể...)
         ]},
@@ -493,7 +496,7 @@ Pydantic extraction labels are not Neo4j ontology labels. They exist only at the
 | `Entity` | `LegalSubject` |
 | `Concept` | `LegalConcept` |
 | `Action` | `LegalAction` |
-| `Document`, `Chapter`, `Section`, `Article`, `Clause`, `Point` | unchanged |
+| `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | unchanged |
 
 ```python
 ONTOLOGY_LABEL_MAP = {
@@ -510,7 +513,7 @@ ONTOLOGY_LABEL_MAP = {
 ## Step 4: Ontology Validation
 
 > [!IMPORTANT]
-> Source of truth: `legal_ontology.md` v1.7.0.
+> Source of truth: `legal_ontology.md` v1.8.0.
 > ADR-15: `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j. Numeric precedence/level rules are legacy and must not be used in the current validator.
 > ADR-17: Tất cả relation names dùng active voice.
 
@@ -534,8 +537,12 @@ RELATION_ENUM = {
 CONSTRAINTS = {
     "CONTAINS": {
         "valid_pairs": [
+            ("Document", "Part"),
             ("Document", "Chapter"),
+            ("Part",     "Chapter"),
             ("Chapter",  "Section"),
+            ("Section",  "Subsection"),
+            ("Subsection", "Article"),
             ("Section",  "Article"),
             ("Chapter",  "Article"),
             ("Document", "Article"),

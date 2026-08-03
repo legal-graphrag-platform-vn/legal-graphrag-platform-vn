@@ -11,13 +11,32 @@ from typing import Iterable, Mapping
 
 
 STRUCTURAL_PAIRS = {
+    ("Document", "Part"),
     ("Document", "Chapter"),
+    ("Part", "Chapter"),
     ("Chapter", "Section"),
     ("Chapter", "Article"),
+    ("Section", "Subsection"),
     ("Section", "Article"),
+    ("Subsection", "Article"),
     ("Document", "Article"),
     ("Article", "Clause"),
     ("Clause", "Point"),
+}
+STRUCTURAL_LABELS = {
+    "Document",
+    "Part",
+    "Chapter",
+    "Section",
+    "Subsection",
+    "Article",
+    "Clause",
+    "Point",
+}
+GROUPING_CHILD_MODES = {
+    "Document": {"Part", "Chapter", "Article"},
+    "Chapter": {"Section", "Article"},
+    "Section": {"Subsection", "Article"},
 }
 TEMPORAL_RELATIONS = {"AMENDS", "REPEALS", "REPLACES"}
 
@@ -102,6 +121,8 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
     degree: Counter[str] = Counter()
     adjacency: dict[str, set[str]] = defaultdict(set)
     reference_bundles: dict[str, list[Mapping]] = defaultdict(list)
+    structural_parents: dict[str, list[str]] = defaultdict(list)
+    structural_child_types: dict[str, set[str]] = defaultdict(set)
 
     for relation in relations:
         head_id = str(relation.get("head_id", ""))
@@ -136,6 +157,13 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
             pair = (node_types.get(head_id), node_types.get(tail_id))
             if pair not in STRUCTURAL_PAIRS:
                 errors.append(f"Invalid CONTAINS chain: {pair[0]} -> {pair[1]}")
+            elif head_id in node_types and tail_id in node_types:
+                structural_parents[tail_id].append(head_id)
+                if (
+                    pair[0] in GROUPING_CHILD_MODES
+                    and pair[1] in GROUPING_CHILD_MODES[pair[0]]
+                ):
+                    structural_child_types[head_id].add(pair[1])
         elif relation_type == "REFERS_TO":
             bundle_id = str(
                 (relation.get("properties") or {}).get("reference_bundle_id") or ""
@@ -148,6 +176,13 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
             degree[tail_id] += 1
             adjacency[head_id].add(tail_id)
             adjacency[tail_id].add(head_id)
+
+    _validate_structural_hierarchy(
+        node_types,
+        structural_parents,
+        structural_child_types,
+        errors,
+    )
 
     for bundle_id, bundle_relations in reference_bundles.items():
         expected_counts = {
@@ -187,6 +222,46 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
         connected_component_count=component_count,
         relation_count_by_type=dict(relation_count_by_type),
     )
+
+
+def _validate_structural_hierarchy(
+    node_types: Mapping[str, str],
+    structural_parents: Mapping[str, list[str]],
+    structural_child_types: Mapping[str, set[str]],
+    errors: list[str],
+) -> None:
+    for node_id, node_type in node_types.items():
+        if node_type not in STRUCTURAL_LABELS or node_type == "Document":
+            continue
+        parents = structural_parents.get(node_id, [])
+        if len(parents) != 1:
+            errors.append(
+                f"Structural node {node_id} must have exactly one CONTAINS parent; "
+                f"got {len(parents)}"
+            )
+
+    for parent_id, child_types in structural_child_types.items():
+        parent_type = node_types[parent_id]
+        if len(child_types) > 1:
+            errors.append(
+                f"{parent_type} {parent_id} mixes structural child modes: "
+                f"{', '.join(sorted(child_types))}"
+            )
+
+    for node_id, node_type in node_types.items():
+        if node_type not in STRUCTURAL_LABELS or node_type == "Document":
+            continue
+        visited: set[str] = set()
+        current = node_id
+        while node_types.get(current) != "Document":
+            if current in visited:
+                errors.append(f"Structural CONTAINS cycle reaches {node_id}")
+                break
+            visited.add(current)
+            parents = structural_parents.get(current, [])
+            if len(parents) != 1:
+                break
+            current = parents[0]
 
 
 def validate_payload_consistency_or_raise(payload: Mapping) -> PayloadConsistencyReport:

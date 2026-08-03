@@ -9,11 +9,18 @@ from typing import Literal
 from pathlib import Path
 
 from src.pipeline.parser.models import Article, ParsedDocument
-from src.shared.ontology.hierarchy import chapter_id, section_id
+from src.shared.ontology.hierarchy import (
+    chapter_id,
+    normalize_part_number,
+    normalize_subsection_number,
+    part_id,
+    section_id,
+    subsection_id,
+)
 
 
-PROMPT_VERSION = "structural-reference-v3"
-ENDPOINT_CONTRACT_VERSION = "canonical-endpoints-v3"
+PROMPT_VERSION = "structural-reference-v4"
+ENDPOINT_CONTRACT_VERSION = "canonical-endpoints-v4"
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,13 +56,25 @@ class StructuralRegistry:
         self.graph_id = parsed.document.id
         self.raw_doc_code = raw_doc_code
         self.types: dict[str, str] = {self.graph_id: "Document"}
+        self.parts: dict[str, str] = {}
         self.chapters: dict[str, str] = {}
         self.sections: dict[tuple[str, str], str] = {}
+        self.subsections: dict[tuple[str, str, str], str] = {}
         self.articles: dict[str, str] = {}
         self.clauses: dict[tuple[str, str], str] = {}
         self.points: dict[tuple[str, str, str], str] = {}
+        self.article_parts: dict[str, str] = {}
         self.article_chapters: dict[str, str] = {}
         self.article_sections: dict[str, str] = {}
+        self.article_subsections: dict[str, str] = {}
+
+        for part in parsed.parts:
+            part_number = normalize_part_number(part.number)
+            if part_number in self.parts:
+                raise ValueError(f"Duplicate Part number: {part.number}")
+            part_node_id = part_id(self.graph_id, part.number)
+            self.parts[part_number] = part_node_id
+            self.types[part_node_id] = "Part"
 
         for section in parsed.sections:
             chapter_number = _normalize_chapter_key(section.chapter)
@@ -70,12 +89,45 @@ class StructuralRegistry:
             self.sections[key] = section_node_id
             self.types[section_node_id] = "Section"
 
+        for subsection in parsed.subsections:
+            chapter_number = _normalize_chapter_key(subsection.chapter)
+            section_number = subsection.section.strip().lower()
+            subsection_number = normalize_subsection_number(subsection.number)
+            key = (chapter_number, section_number, subsection_number)
+            if key in self.subsections:
+                raise ValueError(
+                    "Duplicate Subsection number: "
+                    f"Chapter {subsection.chapter} Section {subsection.section} "
+                    f"Subsection {subsection.number}"
+                )
+            if (chapter_number, section_number) not in self.sections:
+                raise ValueError(
+                    f"Subsection {subsection.number} references missing Section "
+                    f"{subsection.section} in Chapter {subsection.chapter}"
+                )
+            subsection_node_id = subsection_id(
+                self.graph_id,
+                chapter_number,
+                section_number,
+                subsection_number,
+            )
+            self.subsections[key] = subsection_node_id
+            self.types[subsection_node_id] = "Subsection"
+
         for article in parsed.articles:
             article_id = f"{self.graph_id}_art{article.number}"
             if article.number in self.articles:
                 raise ValueError(f"Duplicate Article number: {article.number}")
             self.articles[article.number] = article_id
             self.types[article_id] = "Article"
+            if article.part:
+                part_number = normalize_part_number(article.part)
+                part_node_id = self.parts.get(part_number)
+                if part_node_id is None:
+                    raise ValueError(
+                        f"Article {article.number} references missing Part {article.part}"
+                    )
+                self.article_parts[article_id] = part_node_id
             if article.chapter:
                 chapter_number = _normalize_chapter_key(article.chapter)
                 self.article_chapters[article_id] = self._register_chapter(
@@ -93,9 +145,26 @@ class StructuralRegistry:
                             f"{article.section} in Chapter {article.chapter}"
                         )
                     self.article_sections[article_id] = section_node_id
+                    if article.subsection:
+                        subsection_key = (
+                            chapter_number,
+                            article.section.strip().lower(),
+                            normalize_subsection_number(article.subsection),
+                        )
+                        subsection_node_id = self.subsections.get(subsection_key)
+                        if subsection_node_id is None:
+                            raise ValueError(
+                                f"Article {article.number} references missing Subsection "
+                                f"{article.subsection} in Section {article.section}"
+                            )
+                        self.article_subsections[article_id] = subsection_node_id
             elif article.section:
                 raise ValueError(
                     f"Article {article.number} references Section {article.section} without Chapter"
+                )
+            elif article.subsection:
+                raise ValueError(
+                    f"Article {article.number} references Subsection without Section"
                 )
             for clause in article.clauses:
                 key = (article.number, clause.number)
@@ -158,8 +227,14 @@ class StructuralRegistry:
     def chapter_for_article_id(self, article_id: str) -> str | None:
         return self.article_chapters.get(article_id)
 
+    def part_for_article_id(self, article_id: str) -> str | None:
+        return self.article_parts.get(article_id)
+
     def section_for_article_id(self, article_id: str) -> str | None:
         return self.article_sections.get(article_id)
+
+    def subsection_for_article_id(self, article_id: str) -> str | None:
+        return self.article_subsections.get(article_id)
 
     def context_for_article(self, article: Article) -> ArticleExtractionContext:
         return ArticleExtractionContext(
@@ -204,6 +279,19 @@ class StructuralRegistry:
                 raw, self.graph_id, "Document", "resolved", "current_document_reference"
             )
 
+        if entity_type == "Part" or normalized_label.startswith("phần"):
+            if "phần này" in normalized_label:
+                node_id = self.part_for_article_id(
+                    self.articles.get(current_article, current_article)
+                )
+            else:
+                part_number = _part_number(label)
+                node_id = self.parts.get(part_number or "")
+            if node_id:
+                return EndpointResolution(
+                    raw, node_id, "Part", "resolved", "structural_label"
+                )
+
         if entity_type == "Chapter" or normalized_label.startswith("chương"):
             if "chương này" in normalized_label:
                 node_id = self.chapter_for_article_id(
@@ -224,6 +312,21 @@ class StructuralRegistry:
             if node_id:
                 return EndpointResolution(
                     raw, node_id, "Section", "resolved", "structural_label"
+                )
+
+        if entity_type == "Subsection" or normalized_label.startswith("tiểu mục"):
+            subsection_number, section_number = _subsection_and_section_numbers(label)
+            chapter_number = _chapter_number(label)
+            node_id = self.subsections.get(
+                (
+                    chapter_number or "",
+                    section_number or "",
+                    subsection_number or "",
+                )
+            )
+            if node_id:
+                return EndpointResolution(
+                    raw, node_id, "Subsection", "resolved", "structural_label"
                 )
 
         article_number = _article_number(label)
@@ -323,6 +426,24 @@ def _article_number(label: str) -> str | None:
 def _chapter_number(label: str) -> str | None:
     match = re.search(r"(?i)chương\s+([IVXLCDM]+)", label)
     return _normalize_chapter_key(match.group(1)) if match else None
+
+
+def _part_number(label: str) -> str | None:
+    match = re.search(r"(?i)phần\s+(thứ\s+[a-zà-ỹ]+|[IVXLCDM]+|\d+[a-z]?)", label)
+    return normalize_part_number(match.group(1)) if match else None
+
+
+def _subsection_and_section_numbers(label: str) -> tuple[str | None, str | None]:
+    match = re.search(
+        r"(?i)tiểu\s+mục\s+(\d+[a-z]?)\s+(?:của\s+)?mục\s+(\d+[a-z]?)",
+        label,
+    )
+    if not match:
+        return None, None
+    return (
+        normalize_subsection_number(match.group(1)),
+        match.group(2).lower(),
+    )
 
 
 def _normalize_chapter_key(value: str) -> str:

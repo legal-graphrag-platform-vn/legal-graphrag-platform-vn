@@ -322,11 +322,19 @@ class ArticleDetail(BaseModel):
     clauses: list[ClauseDetail] = Field(default_factory=list)
 
 
+class SubsectionDetail(BaseModel):
+    id: str
+    number: str
+    title: str
+    articles: list[ArticleDetail] = Field(default_factory=list)
+
+
 class SectionDetail(BaseModel):
     id: str
     number: str
     title: str
     articles: list[ArticleDetail] = Field(default_factory=list)
+    subsections: list[SubsectionDetail] = Field(default_factory=list)
 
 
 class ChapterDetail(BaseModel):
@@ -335,6 +343,13 @@ class ChapterDetail(BaseModel):
     title: str | None = None
     articles: list[ArticleDetail] = Field(default_factory=list)
     sections: list[SectionDetail] = Field(default_factory=list)
+
+
+class PartDetail(BaseModel):
+    id: str
+    number: str
+    title: str
+    chapters: list[ChapterDetail] = Field(default_factory=list)
 
 
 class DocumentRelation(BaseModel):
@@ -356,6 +371,7 @@ class DocumentSummary(BaseModel):
 
 
 class DocumentDetail(DocumentSummary):
+    parts: list[PartDetail] = Field(default_factory=list)
     chapters: list[ChapterDetail] = Field(default_factory=list)
     # 2. ungrouped_articles: Document có thể chứa Article trực tiếp (không qua Chapter).
     # Ví dụ: Nghị định ngắn thường không có Chương, chỉ có Điều.

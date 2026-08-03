@@ -21,29 +21,46 @@ from src.pipeline.parser.hierarchy_parser import canonicalize_source_text
 from src.shared.ontology.contract import ONTOLOGY_VERSION
 from src.shared.ontology.hierarchy import (
     normalize_chapter_number,
+    normalize_part_number,
     normalize_section_number,
+    normalize_subsection_number,
 )
 from src.shared.ontology.validators import ValidatedGraphPayload, ValidatedNode
 
 
-REGISTRY_CONTRACT_VERSION = "corpus-structural-registry-v1"
-REGISTRY_BUILD_CONTRACT_VERSION = "corpus-structural-registry-build-v1"
+REGISTRY_CONTRACT_VERSION = "corpus-structural-registry-v2"
+LEGACY_REGISTRY_CONTRACT_VERSION = "corpus-structural-registry-v1"
+REGISTRY_BUILD_CONTRACT_VERSION = "corpus-structural-registry-build-v2"
+LEGACY_REGISTRY_BUILD_CONTRACT_VERSION = "corpus-structural-registry-build-v1"
 REGISTRY_CANONICALIZATION_VERSION = "registry-canonical-json-v1"
-PARSER_CONTRACT_VERSION = "hierarchy-parser-v1.7"
-HIERARCHY_CONTRACT_VERSION = "document-hierarchy-v1.7"
-VALIDATOR_VERSION = "ontology-validator-v1.7"
+PARSER_CONTRACT_VERSION = "hierarchy-parser-v1.8"
+HIERARCHY_CONTRACT_VERSION = "document-hierarchy-v1.8"
+VALIDATOR_VERSION = "ontology-validator-v1.8"
 
 STRUCTURAL_TYPES = frozenset(
-    {"Document", "Chapter", "Section", "Article", "Clause", "Point"}
+    {
+        "Document",
+        "Part",
+        "Chapter",
+        "Section",
+        "Subsection",
+        "Article",
+        "Clause",
+        "Point",
+    }
 )
 UNIT_TYPES = frozenset(STRUCTURAL_TYPES - {"Document"})
 ALLOWED_CONTAINS_PAIRS = frozenset(
     {
+        ("Document", "Part"),
         ("Document", "Chapter"),
         ("Document", "Article"),
+        ("Part", "Chapter"),
         ("Chapter", "Section"),
         ("Chapter", "Article"),
+        ("Section", "Subsection"),
         ("Section", "Article"),
+        ("Subsection", "Article"),
         ("Article", "Clause"),
         ("Clause", "Point"),
     }
@@ -61,9 +78,9 @@ class _FrozenModel(BaseModel):
 
 
 class RegistryContentManifest(_FrozenModel):
-    contract_version: Literal["corpus-structural-registry-v1"] = (
-        REGISTRY_CONTRACT_VERSION
-    )
+    contract_version: Literal[
+        "corpus-structural-registry-v1", "corpus-structural-registry-v2"
+    ] = REGISTRY_CONTRACT_VERSION
     snapshot_hash: str
     ontology_version: str
     canonicalization_version: str
@@ -80,9 +97,10 @@ class RegistrySourceArtifact(_FrozenModel):
 
 
 class RegistryBuildReceipt(_FrozenModel):
-    contract_version: Literal["corpus-structural-registry-build-v1"] = (
-        REGISTRY_BUILD_CONTRACT_VERSION
-    )
+    contract_version: Literal[
+        "corpus-structural-registry-build-v1",
+        "corpus-structural-registry-build-v2",
+    ] = REGISTRY_BUILD_CONTRACT_VERSION
     build_id: str
     snapshot_hash: str
     provenance_hash: str
@@ -102,12 +120,16 @@ class RegistryDocument(_FrozenModel):
 
 class RegistryUnit(_FrozenModel):
     unit_id: str = Field(min_length=1)
-    unit_type: Literal["Chapter", "Section", "Article", "Clause", "Point"]
+    unit_type: Literal[
+        "Part", "Chapter", "Section", "Subsection", "Article", "Clause", "Point"
+    ]
     document_id: str = Field(min_length=1)
     parent_id: str = Field(min_length=1)
     ancestor_ids: tuple[str, ...]
+    part_number: str | None = None
     chapter_number: str | None = None
     section_number: str | None = None
+    subsection_number: str | None = None
     article_number: str | None = None
     clause_number: str | None = None
     point_label: str | None = None
@@ -173,8 +195,10 @@ class CorpusStructuralRegistry:
         *,
         document_id: str,
         unit_type: str,
+        part_number: str | None = None,
         chapter_number: str | None = None,
         section_number: str | None = None,
+        subsection_number: str | None = None,
         article_number: str | None = None,
         clause_number: str | None = None,
         point_label: str | None = None,
@@ -182,8 +206,10 @@ class CorpusStructuralRegistry:
         key = structural_lookup_key(
             document_id=document_id,
             unit_type=unit_type,
+            part_number=part_number,
             chapter_number=chapter_number,
             section_number=section_number,
+            subsection_number=subsection_number,
             article_number=article_number,
             clause_number=clause_number,
             point_label=point_label,
@@ -191,11 +217,20 @@ class CorpusStructuralRegistry:
         return self._units_by_key.get(key, ())
 
     def _validate_content(self) -> None:
-        if self.manifest.contract_version != REGISTRY_CONTRACT_VERSION:
+        if self.manifest.contract_version not in {
+            LEGACY_REGISTRY_CONTRACT_VERSION,
+            REGISTRY_CONTRACT_VERSION,
+        }:
             raise RegistryError(
                 f"Unsupported registry contract: {self.manifest.contract_version}"
             )
-        expected_hash = registry_snapshot_hash(self.documents, self.units)
+        expected_hash = registry_snapshot_hash(
+            self.documents,
+            self.units,
+            contract_version=self.manifest.contract_version,
+            ontology_version=self.manifest.ontology_version,
+            canonicalization_version=self.manifest.canonicalization_version,
+        )
         if self.manifest.snapshot_hash != expected_hash:
             raise RegistryError(
                 "Registry snapshot hash mismatch: "
@@ -209,6 +244,16 @@ class CorpusStructuralRegistry:
             raise RegistryError(
                 "Every registry unit must have exactly one canonical parent"
             )
+        if self.manifest.contract_version == LEGACY_REGISTRY_CONTRACT_VERSION:
+            unsupported = sorted(
+                unit.unit_type
+                for unit in self.units
+                if unit.unit_type in {"Part", "Subsection"}
+            )
+            if unsupported:
+                raise RegistryError(
+                    "Registry v1 cannot contain Part or Subsection units"
+                )
 
         endpoint_ids = [item.document_id for item in self.documents] + [
             item.unit_id for item in self.units
@@ -292,18 +337,23 @@ def build_corpus_registry(
 
 
 def registry_snapshot_hash(
-    documents: Sequence[RegistryDocument], units: Sequence[RegistryUnit]
+    documents: Sequence[RegistryDocument],
+    units: Sequence[RegistryUnit],
+    *,
+    contract_version: str = REGISTRY_CONTRACT_VERSION,
+    ontology_version: str = ONTOLOGY_VERSION,
+    canonicalization_version: str = REGISTRY_CANONICALIZATION_VERSION,
 ) -> str:
     payload = {
-        "contract_version": REGISTRY_CONTRACT_VERSION,
-        "ontology_version": ONTOLOGY_VERSION,
-        "canonicalization_version": REGISTRY_CANONICALIZATION_VERSION,
+        "contract_version": contract_version,
+        "ontology_version": ontology_version,
+        "canonicalization_version": canonicalization_version,
         "documents": [
             item.model_dump(mode="json")
             for item in sorted(documents, key=lambda value: value.document_id)
         ],
         "units": [
-            item.model_dump(mode="json")
+            _unit_snapshot_payload(item, contract_version)
             for item in sorted(units, key=lambda value: value.unit_id)
         ],
     }
@@ -311,13 +361,18 @@ def registry_snapshot_hash(
 
 
 def registry_provenance_hash(
-    snapshot_hash: str, artifacts: Sequence[RegistrySourceArtifact]
+    snapshot_hash: str,
+    artifacts: Sequence[RegistrySourceArtifact],
+    *,
+    parser_contract_version: str = PARSER_CONTRACT_VERSION,
+    hierarchy_contract_version: str = HIERARCHY_CONTRACT_VERSION,
+    validator_version: str = VALIDATOR_VERSION,
 ) -> str:
     _hash_hex(snapshot_hash)
     payload = {
-        "parser_contract_version": PARSER_CONTRACT_VERSION,
-        "hierarchy_contract_version": HIERARCHY_CONTRACT_VERSION,
-        "validator_version": VALIDATOR_VERSION,
+        "parser_contract_version": parser_contract_version,
+        "hierarchy_contract_version": hierarchy_contract_version,
+        "validator_version": validator_version,
         "snapshot_hash": snapshot_hash,
         "sources": [
             {
@@ -428,7 +483,11 @@ def load_registry_build(root: Path, build_id: str | None = None) -> RegistryBuil
     if receipt.build_id != build_dir.name:
         raise RegistryError("Registry build receipt ID does not match directory")
     expected_provenance = registry_provenance_hash(
-        receipt.snapshot_hash, receipt.source_artifacts
+        receipt.snapshot_hash,
+        receipt.source_artifacts,
+        parser_contract_version=receipt.parser_contract_version,
+        hierarchy_contract_version=receipt.hierarchy_contract_version,
+        validator_version=receipt.validator_version,
     )
     if receipt.provenance_hash != expected_provenance:
         raise RegistryError("Registry provenance hash mismatch")
@@ -466,8 +525,10 @@ def structural_key(unit: RegistryUnit) -> tuple[str, ...]:
     return structural_lookup_key(
         document_id=unit.document_id,
         unit_type=unit.unit_type,
+        part_number=unit.part_number,
         chapter_number=unit.chapter_number,
         section_number=unit.section_number,
+        subsection_number=unit.subsection_number,
         article_number=unit.article_number,
         clause_number=unit.clause_number,
         point_label=unit.point_label,
@@ -478,12 +539,18 @@ def structural_lookup_key(
     *,
     document_id: str,
     unit_type: str,
+    part_number: str | None = None,
     chapter_number: str | None = None,
     section_number: str | None = None,
+    subsection_number: str | None = None,
     article_number: str | None = None,
     clause_number: str | None = None,
     point_label: str | None = None,
 ) -> tuple[str, ...]:
+    if unit_type == "Part":
+        if part_number is None:
+            raise RegistryError("Part lookup requires part_number")
+        return (document_id, unit_type, normalize_part_number(part_number))
     if unit_type == "Chapter":
         if chapter_number is None:
             raise RegistryError("Chapter lookup requires chapter_number")
@@ -496,6 +563,22 @@ def structural_lookup_key(
             unit_type,
             normalize_chapter_number(chapter_number),
             normalize_section_number(section_number),
+        )
+    if unit_type == "Subsection":
+        if (
+            chapter_number is None
+            or section_number is None
+            or subsection_number is None
+        ):
+            raise RegistryError(
+                "Subsection lookup requires chapter, section, and subsection"
+            )
+        return (
+            document_id,
+            unit_type,
+            normalize_chapter_number(chapter_number),
+            normalize_section_number(section_number),
+            normalize_subsection_number(subsection_number),
         )
     if unit_type == "Article":
         if article_number is None:
@@ -639,8 +722,10 @@ def _registry_unit(
         document_id=document_id,
         parent_id=parent_id,
         ancestor_ids=ancestor_ids,
+        part_number=number_for("Part"),
         chapter_number=number_for("Chapter"),
         section_number=number_for("Section"),
+        subsection_number=number_for("Subsection"),
         article_number=number_for("Article"),
         clause_number=number_for("Clause"),
         point_label=number_for("Point", "label"),
@@ -659,6 +744,16 @@ def _projection_digest(
             ],
         }
     )
+
+
+def _unit_snapshot_payload(
+    unit: RegistryUnit, contract_version: str
+) -> dict[str, object]:
+    payload = unit.model_dump(mode="json")
+    if contract_version == LEGACY_REGISTRY_CONTRACT_VERSION:
+        payload.pop("part_number", None)
+        payload.pop("subsection_number", None)
+    return payload
 
 
 def _load_content(content_dir: Path) -> CorpusStructuralRegistry:

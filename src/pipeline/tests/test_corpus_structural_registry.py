@@ -126,6 +126,55 @@ def _build(*, build_id: str = "registry-build-1", source: str = "Nội dung"):
     )
 
 
+def _part_subsection_payload():
+    document_id = "nd34_2016"
+    nodes = [
+        {
+            "type": "Document",
+            "id": document_id,
+            "number": "34/2016/NĐ-CP",
+            "doc_type": "Decree",
+            "normative": True,
+            "legal_status": "ACTIVE",
+            "effective_from": "2016-07-01",
+            "issuer_name": "Chính phủ",
+        },
+        {"type": "Part", "id": f"{document_id}_part2", "number": "II", "title": "Hai"},
+        {"type": "Chapter", "id": f"{document_id}_ch5", "number": "V", "title": "Năm"},
+        {
+            "type": "Section",
+            "id": f"{document_id}_ch5_sec3",
+            "number": "3",
+            "title": "Ba",
+        },
+        {
+            "type": "Subsection",
+            "id": f"{document_id}_ch5_sec3_subsec1",
+            "number": "1",
+            "title": "Một",
+        },
+        {
+            "type": "Article",
+            "id": f"{document_id}_art77",
+            "number": "77",
+            "content_raw": "Điều 77",
+            "effective_from": "2016-07-01",
+            "legal_status": "ACTIVE",
+        },
+    ]
+    ids = [node["id"] for node in nodes]
+    relations = [
+        {
+            "head_id": head,
+            "type": "CONTAINS",
+            "tail_id": tail,
+            "properties": {},
+        }
+        for head, tail in zip(ids, ids[1:])
+    ]
+    return validate_graph_payload({"nodes": nodes, "relations": relations})
+
+
 def test_registry_separates_document_endpoints_from_descendant_units() -> None:
     build = _build()
 
@@ -244,3 +293,31 @@ def test_registry_document_number_lookup_is_exact() -> None:
 
     assert registry.document_candidates(" 59/2020/QH14 ")[0].document_id == "ldn_2020"
     assert registry.document_candidates("Nghị định 59/2020/QH14") == ()
+
+
+def test_registry_v2_indexes_part_subsection_and_complete_ancestry() -> None:
+    build = build_corpus_registry(
+        {"ND34": _part_subsection_payload()},
+        {"ND34": "canonical source"},
+        build_id="registry-v2-test",
+    )
+
+    assert build.registry.manifest.contract_version == ("corpus-structural-registry-v2")
+    part = build.registry.unit_candidates(
+        document_id="nd34_2016", unit_type="Part", part_number="thứ hai"
+    )
+    subsection = build.registry.unit_candidates(
+        document_id="nd34_2016",
+        unit_type="Subsection",
+        chapter_number="V",
+        section_number="3",
+        subsection_number="1",
+    )
+
+    assert [item.unit_id for item in part] == ["nd34_2016_part2"]
+    assert subsection[0].ancestor_ids == (
+        "nd34_2016",
+        "nd34_2016_part2",
+        "nd34_2016_ch5",
+        "nd34_2016_ch5_sec3",
+    )

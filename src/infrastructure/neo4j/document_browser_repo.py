@@ -223,8 +223,10 @@ _BROWSER_NODE_PROJECTION = """
 node.id AS id,
 CASE
   WHEN node:Document THEN 'Document'
+  WHEN node:Part THEN 'Part'
   WHEN node:Chapter THEN 'Chapter'
   WHEN node:Section THEN 'Section'
+  WHEN node:Subsection THEN 'Subsection'
   WHEN node:Article THEN 'Article'
   WHEN node:Clause THEN 'Clause'
   WHEN node:Point THEN 'Point'

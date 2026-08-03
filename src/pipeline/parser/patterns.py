@@ -1,4 +1,4 @@
-"""Regex patterns nhận dạng ranh giới Phần/Chương/Điều/Khoản/Điểm.
+"""Regex patterns nhận dạng ranh giới Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm.
 
 Nguồn: plans/04_graph_construction_pipeline.md mục "Pattern Nhận Dạng".
 Giữ patterns tách riêng khỏi hierarchy_parser.py để dễ điều chỉnh khi gặp
@@ -34,10 +34,26 @@ POINT_RE = re.compile(r"^([a-zđ])\)\s*(.*)$")
 # Pattern nhận diện dòng tiêu đề Chương dạng số La Mã (ví dụ: "Chương II").
 CHAPTER_RE = re.compile(r"^Chương\s+([IVXLCDM]+)\s*$", re.IGNORECASE)
 
+_PART_NUMBER = (
+    r"(?:[IVXLCDM]+|\d+[a-z]?|"
+    r"(?:thứ\s+)?(?:nhất|một|hai|ba|tư|năm|sáu|bảy|tám|chín|mười))"
+)
+
+# Full-line only so inline citations such as "theo Phần II của Luật này" are not headings.
+PART_RE = re.compile(
+    rf"^Phần\s+({_PART_NUMBER})(?:(?:\.|:)\s*(.*))?$",
+    re.IGNORECASE,
+)
+
 # Pattern nhận diện heading Mục toàn dòng. Citation như "Mục 1 Chương III"
 # không full-match và vì vậy không thể trở thành structural heading.
 SECTION_RE = re.compile(
     r"^Mục\s+(\d+[a-z]?)(?:(?:\.|:)\s*(.*))?$",
+    re.IGNORECASE,
+)
+
+SUBSECTION_RE = re.compile(
+    r"^Tiểu\s+Mục\s+(\d+[a-z]?)(?:(?:\.|:)\s*(.*))?$",
     re.IGNORECASE,
 )
 
@@ -75,8 +91,24 @@ def match_chapter(line: str) -> str | None:
     return m.group(1)
 
 
+def match_part(line: str) -> tuple[str, str | None] | None:
+    m = PART_RE.fullmatch(line.strip())
+    if not m:
+        return None
+    title = (m.group(2) or "").strip()
+    return m.group(1).lower(), title or None
+
+
 def match_section(line: str) -> tuple[str, str | None] | None:
     m = SECTION_RE.fullmatch(line.strip())
+    if not m:
+        return None
+    title = (m.group(2) or "").strip()
+    return m.group(1).lower(), title or None
+
+
+def match_subsection(line: str) -> tuple[str, str | None] | None:
+    m = SUBSECTION_RE.fullmatch(line.strip())
     if not m:
         return None
     title = (m.group(2) or "").strip()

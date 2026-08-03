@@ -13,7 +13,7 @@ from src.shared.ontology.validators import (
 )
 
 
-def _batch():
+def _batch(*, target_type: str = "Article", target_id: str = "target_art35"):
     properties = {
         "relation_id": "rel-1",
         "citation_text": "Điều 35 Luật số 68/2014/QH13",
@@ -31,9 +31,9 @@ def _batch():
     relation = ValidatedRelation(
         head_id="source_art1",
         relation_type="REFERS_TO",
-        tail_id="target_art35",
+        tail_id=target_id,
         head_type="Article",
-        tail_type="Article",
+        tail_type=target_type,
         properties=properties,
     )
     wrapped = ValidatedExternalReference(
@@ -42,8 +42,8 @@ def _batch():
         source_type="Article",
         source_document_id="source_doc",
         source_ancestor_ids=("source_doc",),
-        target_id="target_art35",
-        target_type="Article",
+        target_id=target_id,
+        target_type=target_type,
         target_document_id="target_doc",
         target_ancestor_ids=("target_doc",),
         reference_bundle_id="bundle-1",
@@ -133,3 +133,23 @@ def test_external_writer_blocks_conflicting_old_target_before_merge() -> None:
 def test_external_writer_rejects_raw_input() -> None:
     with pytest.raises(TypeError, match="ValidatedRelationBatch"):
         Neo4jExternalReferenceWriter(_Session()).write({"references": []})
+
+
+@pytest.mark.parametrize(
+    ("target_type", "target_id"),
+    [("Part", "target_part2"), ("Subsection", "target_ch5_sec3_subsec1")],
+)
+def test_external_writer_accepts_verified_new_structural_targets(
+    target_type: str, target_id: str
+) -> None:
+    session = _Session()
+
+    result = Neo4jExternalReferenceWriter(session).write(
+        _batch(target_type=target_type, target_id=target_id)
+    )[0]
+
+    assert result.final_target_ids == (target_id,)
+    assert any(
+        f"MATCH (target:{target_type}" in query for query, _ in session.tx.queries
+    )
+    assert any("CONTAINS*1..7" in query for query, _ in session.tx.queries)
