@@ -70,6 +70,63 @@ def _validated_section_payload():
     )
 
 
+def _validated_part_subsection_payload():
+    relations = [
+        ("doc_ch3_sec1_subsec1", "Subsection", "doc_art46", "Article"),
+        ("doc", "Document", "doc_part1", "Part"),
+        ("doc_part1", "Part", "doc_ch3", "Chapter"),
+        ("doc_ch3", "Chapter", "doc_ch3_sec1", "Section"),
+        ("doc_ch3_sec1", "Section", "doc_ch3_sec1_subsec1", "Subsection"),
+    ]
+    nodes = [
+        {
+            "type": "Document",
+            "id": "doc",
+            "doc_type": "Law",
+            "number": "59/2020/QH14",
+            "normative": True,
+            "legal_status": "ACTIVE",
+            "effective_from": "2021-01-01",
+            "issuer_name": "Quốc hội",
+        },
+        {"type": "Part", "id": "doc_part1", "number": "I", "title": "Một"},
+        {"type": "Chapter", "id": "doc_ch3", "number": "III", "title": "Ba"},
+        {"type": "Section", "id": "doc_ch3_sec1", "number": "1", "title": "Một"},
+        {
+            "type": "Subsection",
+            "id": "doc_ch3_sec1_subsec1",
+            "number": "1",
+            "title": "Một",
+        },
+        {
+            "type": "Article",
+            "id": "doc_art46",
+            "number": "46",
+            "content_raw": "Nội dung",
+            "effective_from": "2021-01-01",
+            "legal_status": "ACTIVE",
+        },
+    ]
+    return validate_graph_payload(
+        {
+            "nodes": nodes,
+            "relations": [
+                {
+                    "head_id": head,
+                    "head_type": head_type,
+                    "type": "CONTAINS",
+                    "tail_id": tail,
+                    "tail_type": tail_type,
+                    "properties": {
+                        "relation_id": deterministic_relation_id(head, "CONTAINS", tail)
+                    },
+                }
+                for head, head_type, tail, tail_type in relations
+            ],
+        }
+    )
+
+
 def test_reconciler_deletes_only_exact_legacy_edge_after_chain_verification() -> None:
     session = Mock()
     session.run.return_value = [
@@ -117,3 +174,25 @@ def test_reconciler_rerun_is_idempotent() -> None:
 
     assert first.deleted_legacy_edge_count == 1
     assert second.deleted_legacy_edge_count == 0
+
+
+def test_reconciler_handles_part_and_subsection_order_independently() -> None:
+    session = Mock()
+    session.run.return_value = [
+        {"all_chains_exist": True, "deleted_legacy_edge_count": 1}
+    ]
+
+    report = SectionHierarchyReconciler(session).reconcile(
+        _validated_part_subsection_payload()
+    )
+
+    assert report.mapping_count == 3
+    assert report.part_mapping_count == 1
+    assert report.subsection_mapping_count == 1
+    assert report.deleted_legacy_edge_count == 3
+    calls = session.run.call_args_list
+    assert len(calls) == 3
+    assert "Document->Part->Chapter" not in calls[1].args[0]
+    assert calls[1].kwargs["mappings"] == [
+        {"document_id": "doc", "part_id": "doc_part1", "chapter_id": "doc_ch3"}
+    ]

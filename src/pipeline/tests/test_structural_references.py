@@ -75,12 +75,72 @@ def _registry_build():
             }
         )
 
+    grouping_payload = validate_graph_payload(
+        {
+            "nodes": [
+                {
+                    "type": "Document",
+                    "id": "nd34_2016",
+                    "number": "34/2016/NĐ-CP",
+                    "doc_type": "Decree",
+                    "normative": True,
+                    "legal_status": "ACTIVE",
+                    "effective_from": "2016-07-01",
+                    "issuer_name": "Chính phủ",
+                },
+                {
+                    "type": "Part",
+                    "id": "nd34_2016_part2",
+                    "number": "II",
+                    "title": "Phần hai",
+                },
+                {
+                    "type": "Chapter",
+                    "id": "nd34_2016_ch5",
+                    "number": "V",
+                    "title": "Chương năm",
+                },
+                {
+                    "type": "Section",
+                    "id": "nd34_2016_ch5_sec3",
+                    "number": "3",
+                    "title": "Mục ba",
+                },
+                {
+                    "type": "Subsection",
+                    "id": "nd34_2016_ch5_sec3_subsec1",
+                    "number": "1",
+                    "title": "Tiểu mục một",
+                },
+                {
+                    "type": "Article",
+                    "id": "nd34_2016_art77",
+                    "number": "77",
+                    "content_raw": "Điều 77",
+                    "effective_from": "2016-07-01",
+                    "legal_status": "ACTIVE",
+                },
+            ],
+            "relations": [
+                {"head_id": head, "type": "CONTAINS", "tail_id": tail, "properties": {}}
+                for head, tail in (
+                    ("nd34_2016", "nd34_2016_part2"),
+                    ("nd34_2016_part2", "nd34_2016_ch5"),
+                    ("nd34_2016_ch5", "nd34_2016_ch5_sec3"),
+                    ("nd34_2016_ch5_sec3", "nd34_2016_ch5_sec3_subsec1"),
+                    ("nd34_2016_ch5_sec3_subsec1", "nd34_2016_art77"),
+                )
+            ],
+        }
+    )
+
     return build_corpus_registry(
         {
             "L59": payload("ldn_2020", "59/2020/QH14", "1", "1", "a"),
             "L68": payload("ldn_2014", "68/2014/QH13", "35", "1", "m"),
+            "ND34": grouping_payload,
         },
-        {"L59": "source", "L68": "target"},
+        {"L59": "source", "L68": "target", "ND34": "grouping target"},
         build_id="test-registry",
     )
 
@@ -261,8 +321,10 @@ Mục 1. Nội dung
     assert section.target_candidate.model_dump() == {
         "target_type": "Section",
         "document_number": "57/2026/NĐ-CP",
+        "part_number": None,
         "chapter_number": "III",
         "section_number": "1",
+        "subsection_number": None,
         "article_number": None,
         "clause_number": None,
         "point_label": None,
@@ -270,8 +332,10 @@ Mục 1. Nội dung
     assert chapter.target_candidate.model_dump() == {
         "target_type": "Chapter",
         "document_number": "57/2026/NĐ-CP",
+        "part_number": None,
         "chapter_number": "V",
         "section_number": None,
+        "subsection_number": None,
         "article_number": None,
         "clause_number": None,
         "point_label": None,
@@ -295,3 +359,71 @@ Mục 1. Mục thật
     assert reference.status == "UNRESOLVED"
     assert reference.reason_code == "explicit_section_target_missing"
     assert reference.target_unit_ids == ()
+
+
+def test_part_and_subsection_references_resolve_against_exact_ancestors() -> None:
+    text = """Phần I. QUY ĐỊNH CHUNG
+Chương I
+PHẠM VI
+Mục 1. NGUYÊN TẮC
+Tiểu mục 1. YÊU CẦU
+Điều 1. Nội dung
+1. Áp dụng Phần này, Phần I của Luật này và Tiểu mục 1 Mục 1 Chương I.
+"""
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[0]
+    )
+
+    assert [item.target_unit_ids for item in references] == [
+        ("ldn_2020_part1",),
+        ("ldn_2020_part1",),
+        ("ldn_2020_ch1_sec1_subsec1",),
+    ]
+    assert all(item.status == "RESOLVED" for item in references)
+
+
+def test_external_part_and_subsection_do_not_fall_back_to_local_document() -> None:
+    text = """Điều 1. Nội dung
+1. Áp dụng Phần II Nghị định 78/2025/NĐ-CP và Tiểu mục 1 Mục 3 Chương VI Nghị định 34/2016/NĐ-CP.
+"""
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[0]
+    )
+
+    assert len(references) == 2
+    assert [item.target_candidate.target_type for item in references] == [
+        "Part",
+        "Subsection",
+    ]
+    assert all(item.status == "UNRESOLVED" for item in references)
+    assert all(item.reference_scope == "EXTERNAL" for item in references)
+    assert references[1].target_candidate.subsection_number == "1"
+
+
+def test_external_part_and_subsection_resolve_from_registry_v2() -> None:
+    text = """Điều 1. Nội dung
+1. Áp dụng Phần II Nghị định 34/2016/NĐ-CP và Tiểu mục 1 Mục 3 Chương V Nghị định 34/2016/NĐ-CP.
+"""
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+    build = _registry_build()
+
+    references = StructuralReferenceResolver(
+        registry,
+        text,
+        corpus_registry=build.registry,
+        registry_receipt=build.receipt,
+    ).resolve_article(parsed.articles[0])
+
+    assert [item.target_unit_ids for item in references] == [
+        ("nd34_2016_part2",),
+        ("nd34_2016_ch5_sec3_subsec1",),
+    ]
+    assert all(item.status == "RESOLVED" for item in references)
+    assert all(item.reference_scope == "EXTERNAL" for item in references)

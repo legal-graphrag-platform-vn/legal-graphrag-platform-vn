@@ -5,6 +5,11 @@ from pydantic import ValidationError
 
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import Clause, DocumentInfo, Point
+from src.shared.ontology.hierarchy import (
+    normalize_part_number,
+    part_id,
+    subsection_id,
+)
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_law.txt"
 
@@ -101,6 +106,94 @@ def test_parser_accepts_bounded_uppercase_legal_title_with_punctuation() -> None
     )
 
     assert parsed.sections[0].title == title
+
+
+@pytest.mark.parametrize(
+    ("text", "expected_context"),
+    [
+        (
+            "Phần I\nQUY ĐỊNH CHUNG\nChương I\nCHƯƠNG MỘT\nMục 1. Mục một\n"
+            "Tiểu mục 1. Tiểu mục một\nĐiều 1. Nội dung",
+            ("i", "I", "1", "1"),
+        ),
+        (
+            "Phần I. Phần một\nChương I\nCHƯƠNG MỘT\nMục 1. Mục một\nĐiều 1. Nội dung",
+            ("i", "I", "1", None),
+        ),
+        (
+            "Phần thứ nhất. Phần một\nChương I\nCHƯƠNG MỘT\nĐiều 1. Nội dung",
+            ("thứ nhất", "I", None, None),
+        ),
+        (
+            "Chương I\nCHƯƠNG MỘT\nMục 1. Mục một\n"
+            "Tiểu Mục 1\nTIỂU MỤC MỘT\nĐiều 1. Nội dung",
+            (None, "I", "1", "1"),
+        ),
+        (
+            "Chương I\nCHƯƠNG MỘT\nMục 1. Mục một\nĐiều 1. Nội dung",
+            (None, "I", "1", None),
+        ),
+        (
+            "Chương I\nCHƯƠNG MỘT\nĐiều 1. Nội dung",
+            (None, "I", None, None),
+        ),
+        ("Điều 1. Nội dung", (None, None, None, None)),
+    ],
+)
+def test_parser_supports_all_seven_canonical_article_paths(
+    text: str, expected_context: tuple[str | None, str | None, str | None, str | None]
+) -> None:
+    parsed = parse_text(text, _doc_info())
+
+    article = parsed.articles[0]
+    assert (article.part, article.chapter, article.section, article.subsection) == (
+        expected_context
+    )
+
+
+def test_parser_preserves_part_and_subsection_metadata() -> None:
+    parsed = parse_text(
+        "Phần II: Quy định chuyên ngành\nChương IV\nCHƯƠNG BỐN\n"
+        "Mục 3. Quy trình\nTiểu mục 1a: Trình tự\nĐiều 10. Thực hiện",
+        _doc_info(),
+    )
+
+    assert [(part.number, part.title) for part in parsed.parts] == [
+        ("ii", "Quy định chuyên ngành")
+    ]
+    assert [
+        (sub.part, sub.chapter, sub.section, sub.number, sub.title)
+        for sub in parsed.subsections
+    ] == [("ii", "IV", "3", "1a", "Trình tự")]
+
+
+def test_parser_rejects_invalid_part_subsection_and_mixed_child_modes() -> None:
+    with pytest.raises(ValueError, match="Subsection 1 appears before any Section"):
+        parse_text("Tiểu mục 1. Tên\nĐiều 1. Nội dung", _doc_info())
+
+    with pytest.raises(ValueError, match="Part i is missing a valid title"):
+        parse_text("Phần I\nChương I\nTÊN CHƯƠNG\nĐiều 1. Nội dung", _doc_info())
+
+    with pytest.raises(ValueError, match="mixes Article and Section child modes"):
+        parse_text(
+            "Chương I\nTÊN CHƯƠNG\nĐiều 1. Trực tiếp\nMục 1. Có mục\nĐiều 2. Trong mục",
+            _doc_info(),
+        )
+
+    with pytest.raises(ValueError, match="mixes Article and Subsection child modes"):
+        parse_text(
+            "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
+            "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục",
+            _doc_info(),
+        )
+
+
+def test_part_and_subsection_ids_are_deterministic_and_normalized() -> None:
+    assert normalize_part_number("I") == "1"
+    assert normalize_part_number("1") == "1"
+    assert normalize_part_number("Thứ nhất") == "1"
+    assert part_id("demo", "Thứ nhất") == "demo_part1"
+    assert subsection_id("demo", "III", "1", "2a") == "demo_ch3_sec1_subsec2a"
 
 
 def test_clauses_and_points_under_article_17() -> None:

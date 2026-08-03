@@ -4,8 +4,22 @@ from datetime import date
 
 import pytest
 
-from src.pipeline.parser.models import Article, Clause, DocumentInfo, ParsedDocument, Point, Section
-from src.pipeline.persistence.payload_builder import PayloadBuildError, build_graph_payload
+from src.pipeline.parser.hierarchy_parser import parse_text
+from src.pipeline.parser.models import (
+    Article,
+    Clause,
+    DocumentInfo,
+    ParsedDocument,
+    Point,
+    Section,
+)
+from src.pipeline.persistence.payload_builder import (
+    PayloadBuildError,
+    build_graph_payload,
+)
+from src.shared.ontology.payload_consistency_validator import (
+    validate_payload_consistency_or_raise,
+)
 
 
 def _parsed() -> ParsedDocument:
@@ -27,7 +41,13 @@ def _parsed() -> ParsedDocument:
                 chapter="II",
                 chapter_title="Thành lập doanh nghiệp",
                 content_raw="Điều 17 content",
-                clauses=[Clause(number=1, content="Khoản 1", points=[Point(label="a", content="Điểm a")])],
+                clauses=[
+                    Clause(
+                        number=1,
+                        content="Khoản 1",
+                        points=[Point(label="a", content="Điểm a")],
+                    )
+                ],
             )
         ],
     )
@@ -72,7 +92,9 @@ def test_build_graph_payload_uses_canonical_ids_and_relation_id() -> None:
     assert "von_dieu_le" in node_ids
     assert "quoc_hoi" in node_ids
     assert "issuer_quoc_hoi" not in node_ids
-    defines = next(relation for relation in payload["relations"] if relation["type"] == "DEFINES")
+    defines = next(
+        relation for relation in payload["relations"] if relation["type"] == "DEFINES"
+    )
     assert defines["head_id"] == "ldn_2020_art17"
     assert defines["tail_id"] == "von_dieu_le"
     assert defines["id"]
@@ -84,7 +106,16 @@ def test_build_graph_payload_fails_for_missing_entity_index_entry() -> None:
     with pytest.raises(PayloadBuildError, match="missing entity"):
         build_graph_payload(
             _parsed(),
-            [{"decision": "accepted", "relation": {"head": "ldn_2020_art17", "relation": "DEFINES", "tail": "missing"}}],
+            [
+                {
+                    "decision": "accepted",
+                    "relation": {
+                        "head": "ldn_2020_art17",
+                        "relation": "DEFINES",
+                        "tail": "missing",
+                    },
+                }
+            ],
             {},
             raw_doc_code="LDN2020",
         )
@@ -138,12 +169,76 @@ def test_old_payload_without_sections_keeps_direct_chapter_article_edge() -> Non
     assert ("ldn_2020_ch2", "ldn_2020_art17") in contains
 
 
+def test_build_graph_payload_persists_part_and_subsection_chain() -> None:
+    parsed = parse_text(
+        "Phần I. Phần một\nChương II\nCHƯƠNG HAI\nMục 1. Mục một\n"
+        "Tiểu mục 2. Tiểu mục hai\nĐiều 17. Quyền thành lập\n1. Khoản một",
+        _parsed().document,
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+    validate_payload_consistency_or_raise(payload)
+    nodes = {node["id"]: node for node in payload["nodes"]}
+    assert nodes["ldn_2020_part1"]["type"] == "Part"
+    assert nodes["ldn_2020_ch2_sec1_subsec2"]["type"] == "Subsection"
+    contains = {
+        (relation["head_id"], relation["tail_id"])
+        for relation in payload["relations"]
+        if relation["type"] == "CONTAINS"
+    }
+    assert {
+        ("ldn_2020", "ldn_2020_part1"),
+        ("ldn_2020_part1", "ldn_2020_ch2"),
+        ("ldn_2020_ch2", "ldn_2020_ch2_sec1"),
+        ("ldn_2020_ch2_sec1", "ldn_2020_ch2_sec1_subsec2"),
+        ("ldn_2020_ch2_sec1_subsec2", "ldn_2020_art17"),
+    } <= contains
+
+
+def test_build_graph_payload_keeps_part_chapter_article_path_without_fake_section() -> (
+    None
+):
+    parsed = parse_text(
+        "Phần I. Phần một\nChương II\nCHƯƠNG HAI\nĐiều 17. Quyền thành lập",
+        _parsed().document,
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+    validate_payload_consistency_or_raise(payload)
+    assert not any(
+        node["type"] in {"Section", "Subsection"} for node in payload["nodes"]
+    )
+    contains = {
+        (relation["head_id"], relation["tail_id"])
+        for relation in payload["relations"]
+        if relation["type"] == "CONTAINS"
+    }
+    assert ("ldn_2020", "ldn_2020_part1") in contains
+    assert ("ldn_2020_part1", "ldn_2020_ch2") in contains
+    assert ("ldn_2020_ch2", "ldn_2020_art17") in contains
+
+
 def test_build_graph_payload_rejects_raw_structural_alias() -> None:
     with pytest.raises(PayloadBuildError, match="missing entity"):
         build_graph_payload(
             _parsed(),
-            [{"decision": "accepted", "relation": {"head": "dieu_17", "relation": "DEFINES", "tail": "von_dieu_le"}}],
-            {"von_dieu_le": {"id": "von_dieu_le", "type": "LegalConcept", "name": "Vốn điều lệ"}},
+            [
+                {
+                    "decision": "accepted",
+                    "relation": {
+                        "head": "dieu_17",
+                        "relation": "DEFINES",
+                        "tail": "von_dieu_le",
+                    },
+                }
+            ],
+            {
+                "von_dieu_le": {
+                    "id": "von_dieu_le",
+                    "type": "LegalConcept",
+                    "name": "Vốn điều lệ",
+                }
+            },
             raw_doc_code="L59_2020",
         )
 
@@ -151,7 +246,11 @@ def test_build_graph_payload_rejects_raw_structural_alias() -> None:
 def test_requires_relations_preserve_distinct_source_articles() -> None:
     entity_index = {
         "cong_ty": {"id": "cong_ty", "type": "LegalSubject", "name": "Công ty"},
-        "so_dang_ky": {"id": "so_dang_ky", "type": "LegalConcept", "name": "Sổ đăng ký"},
+        "so_dang_ky": {
+            "id": "so_dang_ky",
+            "type": "LegalConcept",
+            "name": "Sổ đăng ký",
+        },
     }
     records = [
         {
@@ -165,7 +264,11 @@ def test_requires_relations_preserve_distinct_source_articles() -> None:
         }
         for source_article in ("ldn_2020_art122", "ldn_2020_art124")
     ]
-    payload = build_graph_payload(_parsed(), records, entity_index, raw_doc_code="L59_2020")
-    requires = [relation for relation in payload["relations"] if relation["type"] == "REQUIRES"]
+    payload = build_graph_payload(
+        _parsed(), records, entity_index, raw_doc_code="L59_2020"
+    )
+    requires = [
+        relation for relation in payload["relations"] if relation["type"] == "REQUIRES"
+    ]
     assert len(requires) == 2
     assert len({relation["id"] for relation in requires}) == 2

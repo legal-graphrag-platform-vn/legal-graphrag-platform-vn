@@ -75,6 +75,33 @@ class FakeDocumentRepo:
         self.closed = True
 
 
+class FullHierarchyRepo(FakeDocumentRepo):
+    def get_document(self, document_id: str):
+        return {
+            "document": _document(),
+            "nodes": [
+                _node("doc_part1", "Part", "I", title="Phần một"),
+                _node("doc_ch1", "Chapter", "I", title="Chương một"),
+                _node("doc_ch1_sec1", "Section", "1", title="Mục một"),
+                _node(
+                    "doc_ch1_sec1_subsec1",
+                    "Subsection",
+                    "1",
+                    title="Tiểu mục một",
+                ),
+                _node("doc_art1", "Article", "1", title="Điều một"),
+            ],
+            "structural_edges": [
+                {"source": "doc", "target": "doc_part1"},
+                {"source": "doc_part1", "target": "doc_ch1"},
+                {"source": "doc_ch1", "target": "doc_ch1_sec1"},
+                {"source": "doc_ch1_sec1", "target": "doc_ch1_sec1_subsec1"},
+                {"source": "doc_ch1_sec1_subsec1", "target": "doc_art1"},
+            ],
+            "relations": [],
+        }
+
+
 def test_document_browser_builds_canonical_hierarchy() -> None:
     async def scenario() -> None:
         service = Neo4jDocumentBrowserService(FakeDocumentRepo(), InlineRunner())
@@ -117,6 +144,22 @@ def test_document_browser_not_found_is_typed_and_repo_closes() -> None:
             await service.get_document_detail("missing")
         await service.aclose()
         assert repo.closed is True
+
+    asyncio.run(scenario())
+
+
+def test_document_browser_preserves_part_and_subsection_levels() -> None:
+    async def scenario() -> None:
+        service = Neo4jDocumentBrowserService(FullHierarchyRepo(), InlineRunner())
+
+        detail = await service.get_document_detail("doc")
+
+        assert detail.chapters == []
+        part = detail.parts[0]
+        assert part.id == "doc_part1"
+        subsection = part.chapters[0].sections[0].subsections[0]
+        assert subsection.id == "doc_ch1_sec1_subsec1"
+        assert subsection.articles[0].id == "doc_art1"
 
     asyncio.run(scenario())
 

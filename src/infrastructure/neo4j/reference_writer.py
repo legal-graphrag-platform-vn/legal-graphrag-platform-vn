@@ -10,11 +10,21 @@ from src.shared.ontology.validators import (
     ValidatedExternalReference,
     ValidatedRelationBatch,
 )
+from src.shared.ontology.hierarchy import MAX_DOCUMENT_HIERARCHY_DEPTH
 
 
 SOURCE_LABELS = frozenset({"Article", "Clause", "Point"})
 TARGET_LABELS = frozenset(
-    {"Document", "Chapter", "Section", "Article", "Clause", "Point"}
+    {
+        "Document",
+        "Part",
+        "Chapter",
+        "Section",
+        "Subsection",
+        "Article",
+        "Clause",
+        "Point",
+    }
 )
 
 
@@ -224,7 +234,8 @@ def _verify_endpoint(
     else:
         query = (
             f"OPTIONAL MATCH (endpoint:{endpoint_type} {{id: $endpoint_id}}) "
-            "OPTIONAL MATCH path=(owner:Document)-[:CONTAINS*1..5]->(endpoint) "
+            "OPTIONAL MATCH path=(owner:Document)"
+            f"-[:CONTAINS*1..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(endpoint) "
             "RETURN count(DISTINCT endpoint) AS endpoint_count, "
             "collect(DISTINCT owner.id) AS owner_ids, "
             "count(path) AS ownership_path_count"

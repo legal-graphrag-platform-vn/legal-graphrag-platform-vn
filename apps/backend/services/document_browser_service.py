@@ -20,8 +20,10 @@ from api.models import (
     GraphEdge,
     GraphNode,
     PageMeta,
+    PartDetail,
     PointDetail,
     SectionDetail,
+    SubsectionDetail,
 )
 from services.errors import BackendDocumentNotFoundError
 from services.interfaces import AsyncRetrievalRunner
@@ -144,13 +146,18 @@ class Neo4jDocumentBrowserService:
 def _document_detail(result: dict[str, Any]) -> DocumentDetail:
     document = result["document"]
     nodes = {str(node["id"]): node for node in result["nodes"]}
-    children: dict[str, list[str]] = {}
     parent: dict[str, str] = {}
     for edge in result["structural_edges"]:
         source = str(edge["source"])
         target = str(edge["target"])
+        existing = parent.get(target)
+        if existing is None or _parent_rank(
+            nodes, source, document["id"]
+        ) > _parent_rank(nodes, existing, document["id"]):
+            parent[target] = source
+    children: dict[str, list[str]] = {}
+    for target, source in parent.items():
         children.setdefault(source, []).append(target)
-        parent[target] = source
 
     clauses = {
         node_id: _clause(node, children, nodes)
@@ -161,6 +168,22 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
         node_id: _article(node, children, clauses)
         for node_id, node in nodes.items()
         if node["label"] == "Article"
+    }
+    subsections = {
+        node_id: SubsectionDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=str(node.get("title") or ""),
+            articles=_sorted_items(
+                [
+                    articles[item]
+                    for item in children.get(node_id, [])
+                    if item in articles
+                ]
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Subsection"
     }
     sections = {
         node_id: SectionDetail(
@@ -174,18 +197,20 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
                     if item in articles
                 ]
             ),
+            subsections=sorted(
+                [
+                    subsections[item]
+                    for item in children.get(node_id, [])
+                    if item in subsections
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
         )
         for node_id, node in nodes.items()
         if node["label"] == "Section"
     }
-    section_article_ids = {
-        article_id
-        for section_id in sections
-        for article_id in children.get(section_id, [])
-        if article_id in articles
-    }
-    chapters = [
-        ChapterDetail(
+    chapters = {
+        node_id: ChapterDetail(
             id=node_id,
             number=str(node.get("number") or ""),
             title=node.get("title"),
@@ -193,7 +218,7 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
                 [
                     articles[item]
                     for item in children.get(node_id, [])
-                    if item in articles and item not in section_article_ids
+                    if item in articles
                 ]
             ),
             sections=sorted(
@@ -207,6 +232,47 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
         )
         for node_id, node in nodes.items()
         if node["label"] == "Chapter"
+    }
+    parts = [
+        PartDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=str(node.get("title") or ""),
+            chapters=sorted(
+                [
+                    chapters[item]
+                    for item in children.get(node_id, [])
+                    if item in chapters
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Part" and parent.get(node_id) == document["id"]
+    ]
+    root_chapters = [
+        ChapterDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=node.get("title"),
+            articles=_sorted_items(
+                [
+                    articles[item]
+                    for item in children.get(node_id, [])
+                    if item in articles
+                ]
+            ),
+            sections=sorted(
+                [
+                    sections[item]
+                    for item in children.get(node_id, [])
+                    if item in sections
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Chapter" and parent.get(node_id) == document["id"]
     ]
     ungrouped = [
         article
@@ -215,10 +281,26 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
     ]
     return DocumentDetail(
         **_document_fields(document),
-        chapters=sorted(chapters, key=lambda item: _number_key(item.number)),
+        parts=sorted(parts, key=lambda item: _number_key(item.number)),
+        chapters=sorted(root_chapters, key=lambda item: _number_key(item.number)),
         ungrouped_articles=_sorted_items(ungrouped),
         relations=[DocumentRelation(**relation) for relation in result["relations"]],
     )
+
+
+def _parent_rank(
+    nodes: dict[str, dict[str, Any]], parent_id: str, document_id: str
+) -> int:
+    if parent_id == document_id:
+        return 0
+    return {
+        "Part": 1,
+        "Chapter": 2,
+        "Section": 3,
+        "Subsection": 4,
+        "Article": 5,
+        "Clause": 6,
+    }.get(str(nodes.get(parent_id, {}).get("label") or ""), -1)
 
 
 def _article_clauses(children: list[dict[str, Any]]) -> list[ClauseDetail]:

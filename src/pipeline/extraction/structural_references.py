@@ -22,12 +22,16 @@ from src.pipeline.extraction.structural_context import (
 )
 from src.pipeline.parser.hierarchy_parser import canonicalize_source_text
 from src.pipeline.parser.models import Article, Clause, Point
+from src.shared.ontology.hierarchy import (
+    normalize_part_number,
+    normalize_subsection_number,
+)
 
 
 RESOLVER_NAME = "vn-structural-reference-resolver"
 RESOLVER_VERSION = "4.0.0"
 LINKER_NAME = "corpus-structural-registry"
-LINKER_VERSION = "1.0.0"
+LINKER_VERSION = "2.0.0"
 
 ReferenceKind = Literal["STRUCTURAL", "EXPLICIT", "SEMANTIC"]
 ResolutionStatus = Literal["RESOLVED", "AMBIGUOUS", "UNRESOLVED"]
@@ -81,10 +85,21 @@ class ResolvedReference(BaseModel):
 
 
 class StructuralTargetCandidate(BaseModel):
-    target_type: Literal["Document", "Chapter", "Section", "Article", "Clause", "Point"]
+    target_type: Literal[
+        "Document",
+        "Part",
+        "Chapter",
+        "Section",
+        "Subsection",
+        "Article",
+        "Clause",
+        "Point",
+    ]
     document_number: str | None = None
+    part_number: str | None = None
     chapter_number: str | None = None
     section_number: str | None = None
+    subsection_number: str | None = None
     article_number: str | None = None
     clause_number: str | None = None
     point_label: str | None = None
@@ -93,14 +108,18 @@ class StructuralTargetCandidate(BaseModel):
     def validate_required_parents(self) -> "StructuralTargetCandidate":
         if self.target_type == "Document":
             children = (
+                self.part_number,
                 self.chapter_number,
                 self.section_number,
+                self.subsection_number,
                 self.article_number,
                 self.clause_number,
                 self.point_label,
             )
             if any(value is not None for value in children):
                 raise ValueError("Document target cannot carry structural child fields")
+        elif self.target_type == "Part" and self.part_number is None:
+            raise ValueError("Part target requires part_number")
         elif self.target_type == "Chapter" and self.chapter_number is None:
             raise ValueError("Chapter target requires chapter_number")
         elif self.target_type == "Section" and (
@@ -108,6 +127,14 @@ class StructuralTargetCandidate(BaseModel):
         ):
             raise ValueError(
                 "Section target requires chapter_number and section_number"
+            )
+        elif self.target_type == "Subsection" and (
+            self.chapter_number is None
+            or self.section_number is None
+            or self.subsection_number is None
+        ):
+            raise ValueError(
+                "Subsection target requires chapter, section, and subsection"
             )
         elif self.target_type == "Article" and self.article_number is None:
             raise ValueError("Article target requires article_number")
@@ -153,6 +180,7 @@ _POINTS_CURRENT_CLAUSE = re.compile(
 _DOCUMENT_KIND = (
     r"(?:Luật|Nghị\s+định|Thông\s+tư|Quyết\s+định|Nghị\s+quyết|Pháp\s+lệnh|Hiến\s+pháp)"
 )
+_PART_NUMBER = r"(?:thứ\s+[a-zà-ỹ]+|[IVXLCDM]+|\d+[a-z]?)"
 _EXTERNAL_POINT = re.compile(
     rf"(?i)\bđiểm\s+(?P<label>[a-zđ])\s+khoản\s+(?P<clause>\d+[a-z]?)"
     rf"\s+điều\s+(?P<article>\d+[a-z]?)\s+(?:của\s+)?{_DOCUMENT_KIND}\s+"
@@ -166,6 +194,16 @@ _EXTERNAL_CLAUSE = re.compile(
 _EXTERNAL_SECTION = re.compile(
     rf"(?i)\bmục\s+(?P<section>\d+[a-z]?)\s+(?:của\s+)?"
     rf"chương\s+(?P<chapter>[IVXLCDM]+)\s+(?:của\s+)?{_DOCUMENT_KIND}\s+"
+    r"(?:số\s+)?(?P<document>\d+/\d{4}/[A-ZĐ0-9-]+)\b"
+)
+_EXTERNAL_SUBSECTION = re.compile(
+    rf"(?i)\btiểu\s+mục\s+(?P<subsection>\d+[a-z]?)\s+(?:của\s+)?"
+    rf"mục\s+(?P<section>\d+[a-z]?)\s+(?:của\s+)?"
+    rf"chương\s+(?P<chapter>[IVXLCDM]+)\s+(?:của\s+)?{_DOCUMENT_KIND}\s+"
+    r"(?:số\s+)?(?P<document>\d+/\d{4}/[A-ZĐ0-9-]+)\b"
+)
+_EXTERNAL_PART = re.compile(
+    rf"(?i)\bphần\s+(?P<part>{_PART_NUMBER})\s+(?:của\s+)?{_DOCUMENT_KIND}\s+"
     r"(?:số\s+)?(?P<document>\d+/\d{4}/[A-ZĐ0-9-]+)\b"
 )
 _EXTERNAL_CHAPTER = re.compile(
@@ -183,6 +221,16 @@ _EXTERNAL_DOCUMENT = re.compile(
 _LOCAL_SECTION = re.compile(
     r"(?i)\bmục\s+(?P<section>\d+[a-z]?)\s+(?:của\s+)?"
     r"chương\s+(?P<chapter>[IVXLCDM]+)\b"
+)
+_LOCAL_SUBSECTION = re.compile(
+    r"(?i)\btiểu\s+mục\s+(?P<subsection>\d+[a-z]?)\s+(?:của\s+)?"
+    r"mục\s+(?P<section>\d+[a-z]?)\s+(?:của\s+)?"
+    r"chương\s+(?P<chapter>[IVXLCDM]+)\b"
+)
+_CURRENT_PART = re.compile(r"(?i)\bphần\s+này\b")
+_EXPLICIT_LOCAL_PART = re.compile(
+    rf"(?i)\bphần\s+(?P<part>{_PART_NUMBER})\b"
+    r"(?:\s+của\s+(?:luật|văn\s+bản)\s+này\b)?"
 )
 _CURRENT_CHAPTER = re.compile(r"(?i)\bchương\s+này\b")
 _EXPLICIT_LOCAL_CHAPTER = re.compile(
@@ -240,11 +288,16 @@ class StructuralReferenceResolver:
         patterns = (
             (_EXTERNAL_POINT, self._resolve_external_match),
             (_EXTERNAL_CLAUSE, self._resolve_external_match),
+            (_EXTERNAL_SUBSECTION, self._resolve_external_match),
             (_EXTERNAL_SECTION, self._resolve_external_match),
             (_EXTERNAL_CHAPTER, self._resolve_external_match),
+            (_EXTERNAL_PART, self._resolve_external_match),
             (_EXTERNAL_ARTICLE, self._resolve_external_match),
             (_EXTERNAL_DOCUMENT, self._resolve_external_match),
+            (_LOCAL_SUBSECTION, self._resolve_local_subsection),
             (_LOCAL_SECTION, self._resolve_local_section),
+            (_CURRENT_PART, self._resolve_current_part),
+            (_EXPLICIT_LOCAL_PART, self._resolve_explicit_local_part),
             (_CURRENT_CHAPTER, self._resolve_current_chapter),
             (_EXPLICIT_LOCAL_CHAPTER, self._resolve_explicit_local_chapter),
             (_POINTS_CURRENT_CLAUSE, self._resolve_points_current_clause),
@@ -271,8 +324,10 @@ class StructuralReferenceResolver:
                 is_external = pattern in {
                     _EXTERNAL_POINT,
                     _EXTERNAL_CLAUSE,
+                    _EXTERNAL_SUBSECTION,
                     _EXTERNAL_SECTION,
                     _EXTERNAL_CHAPTER,
+                    _EXTERNAL_PART,
                     _EXTERNAL_ARTICLE,
                     _EXTERNAL_DOCUMENT,
                 }
@@ -303,6 +358,42 @@ class StructuralReferenceResolver:
             mention,
             target,
             "explicit_section_target_missing",
+            candidate=candidate,
+        )
+
+    def _resolve_local_subsection(
+        self, mention: ReferenceMention, match: re.Match[str]
+    ) -> ResolvedReference:
+        candidate = _target_candidate(match)
+        target = self.registry.subsections.get(
+            (
+                match.group("chapter").strip().upper(),
+                match.group("section").strip().lower(),
+                normalize_subsection_number(match.group("subsection")),
+            )
+        )
+        return _resolved_or_missing(
+            mention,
+            target,
+            "explicit_subsection_target_missing",
+            candidate=candidate,
+        )
+
+    def _resolve_current_part(
+        self, mention: ReferenceMention, _: re.Match[str]
+    ) -> ResolvedReference:
+        target = self.registry.part_for_article_id(mention.source_context.article_id)
+        return _resolved_or_missing(mention, target, "current_part_context_missing")
+
+    def _resolve_explicit_local_part(
+        self, mention: ReferenceMention, match: re.Match[str]
+    ) -> ResolvedReference:
+        candidate = _target_candidate(match)
+        target = self.registry.parts.get(normalize_part_number(match.group("part")))
+        return _resolved_or_missing(
+            mention,
+            target,
+            "explicit_part_target_missing",
             candidate=candidate,
         )
 
@@ -401,8 +492,10 @@ class StructuralReferenceResolver:
             target_candidates = self.corpus_registry.unit_candidates(
                 document_id=target_document.document_id,
                 unit_type=candidate.target_type,
+                part_number=candidate.part_number,
                 chapter_number=candidate.chapter_number,
                 section_number=candidate.section_number,
+                subsection_number=candidate.subsection_number,
                 article_number=candidate.article_number,
                 clause_number=candidate.clause_number,
                 point_label=candidate.point_label,
@@ -705,8 +798,10 @@ def _subtract_intervals(
 def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
     groups = match.groupdict()
     document = groups.get("document")
+    part = groups.get("part")
     chapter = groups.get("chapter")
     section = groups.get("section")
+    subsection = groups.get("subsection")
     article = groups.get("article")
     clause = groups.get("clause")
     point = groups.get("label")
@@ -716,17 +811,25 @@ def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
         target_type = "Clause"
     elif article:
         target_type = "Article"
+    elif subsection:
+        target_type = "Subsection"
     elif section:
         target_type = "Section"
     elif chapter:
         target_type = "Chapter"
+    elif part:
+        target_type = "Part"
     else:
         target_type = "Document"
     return StructuralTargetCandidate(
         target_type=target_type,
         document_number=document.upper() if document else None,
+        part_number=normalize_part_number(part) if part else None,
         chapter_number=chapter.upper() if chapter else None,
         section_number=section.lower() if section else None,
+        subsection_number=(
+            normalize_subsection_number(subsection) if subsection else None
+        ),
         article_number=article.lower() if article else None,
         clause_number=clause.lower() if clause else None,
         point_label=point.lower() if point else None,

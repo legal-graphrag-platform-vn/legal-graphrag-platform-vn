@@ -922,7 +922,7 @@ Document representation is disjoint:
 ```text
 RegistryEndpoint = RegistryDocument | RegistryUnit
 RegistryDocument = document identity and canonical Document endpoint
-RegistryUnit     = Chapter | Section | Article | Clause | Point only
+RegistryUnit     = Part | Chapter | Section | Subsection | Article | Clause | Point only
 ```
 
 `documents.jsonl` stores `RegistryDocument`; `units.jsonl` stores descendants.
@@ -1005,7 +1005,7 @@ Before materializing `REFERS_TO`, one Neo4j transaction must:
 - `MATCH` exact source and target IDs with allowlisted labels;
 - require source type `Article|Clause|Point`;
 - require target type
-  `Document|Chapter|Section|Article|Clause|Point`;
+  `Document|Part|Chapter|Section|Subsection|Article|Clause|Point`;
 - verify source and target ownership against registry-proven Document IDs;
 - require source and target Documents to differ;
 - verify every member of the atomic bundle before any relation merge;
@@ -1016,9 +1016,9 @@ Document ownership is verified through canonical hierarchy rather than a
 denormalized `document_id` property:
 
 ```text
-(sourceDocument)-[:CONTAINS*1..5]->(source)
+(sourceDocument)-[:CONTAINS*1..7]->(source)
 target type Document: targetDocument = target
-other target types:   (targetDocument)-[:CONTAINS*1..5]->(target)
+other target types:   (targetDocument)-[:CONTAINS*1..7]->(target)
 ```
 
 The query must measure ownership-path count and distinct Document owners before
@@ -1119,3 +1119,96 @@ bump.
 - This ADR defines the external materialization contract. Compound-list grammar
   expansion remains a separate implementation scope, while any resulting
   multi-target bundle must continue to materialize atomically.
+
+---
+
+## ADR-25: Canonical `Part` and `Subsection` Hierarchy
+
+**Status:** Accepted
+
+**Date:** 2026-08-01
+
+**Ontology version:** 1.8.0
+
+### Context
+
+The v1.7 hierarchy represented `Document`, `Chapter`, `Section`, `Article`,
+`Clause`, and `Point`, but could not preserve the legal headings `Phần` and
+`Tiểu mục`. Flattening those headings loses exact ownership, prevents verified
+references to those units, and makes the document browser disagree with source
+structure.
+
+Article 62 of Decree 34/2016/ND-CP is historical evidence for six explicitly
+listed layouts. Article 63 of Decree 78/2025/ND-CP is the current composition
+rule and permits a Chapter to omit a Section. Together they require seven
+canonical parent chains to Article, including
+`Document -> Part -> Chapter -> Article`.
+
+### Decision
+
+Add persisted structural labels:
+
+```text
+Part        required: id, number, title
+Subsection  required: id, number, title
+```
+
+The exact structural `CONTAINS` pairs are:
+
+```text
+Document   -> Part | Chapter | Article
+Part       -> Chapter
+Chapter    -> Section | Article
+Section    -> Subsection | Article
+Subsection -> Article
+Article    -> Clause
+Clause     -> Point
+```
+
+Every descendant has exactly one direct canonical parent. Each concrete
+Document, Chapter, and Section uses one child mode and does not mix the
+alternatives shown above. `Document -> Article` remains valid.
+
+Canonical IDs are deterministic. Adding Part ownership does not rename an
+existing Chapter or Article:
+
+```text
+Part        {document_id}_part{normalized_part}
+Subsection  {document_id}_ch{chapter}_sec{section}_subsec{subsection}
+```
+
+`REFERS_TO` retains its existing direction and relation type. Its target
+allowlist expands to `Part` and `Subsection`; these targets are materialized
+only when the immutable corpus registry and Neo4j endpoint checks both verify
+them. Registry content uses `corpus-structural-registry-v2`; v1 snapshots remain
+read-only legacy snapshots.
+
+Ownership queries use shared semantic bounds: Article depth 5, retrieval-unit
+depth 6, and deepest citable/hierarchy depth 7. Depth alone is not structural
+evidence; validators enforce exact parent-label pairs.
+
+Migration reparses canonical source and writes the accepted hierarchy first.
+Only after the replacement chain exists may reconciliation remove legacy
+shortcuts:
+
+```text
+Document -> Chapter  after Document -> Part -> Chapter
+Section  -> Article  after Section -> Subsection -> Article
+```
+
+`Chapter -> Article` is preserved for the valid
+`Document -> Part -> Chapter -> Article` and `Document -> Chapter -> Article`
+paths.
+
+### Consequences
+
+- Parser, payload, validator, schema, registry, reference resolver/writer,
+  retrieval ownership, API, and UI share one v1.8 hierarchy contract.
+- `Part`, `Chapter`, `Section`, and `Subsection` remain non-embedded,
+  non-temporal grouping nodes.
+- A recognized Part or Subsection without an accepted legal title is a parser
+  failure; display fallback text is never persisted as the title.
+- Citation text cannot create a structural node. Missing or ambiguous targets
+  remain unresolved checkpoints.
+- Existing documents without Part/Subsection continue to use their canonical
+  direct paths without fake grouping nodes.

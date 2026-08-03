@@ -8,7 +8,13 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
-import type { DocumentDetail, ArticleDetail } from '@/types/documents'
+import type {
+   ArticleDetail,
+   ChapterDetail,
+   DocumentDetail,
+   SectionDetail,
+   SubsectionDetail,
+} from '@/types/documents'
 import { useDocumentGraph } from '@/hooks/useDocumentGraph'
 
 // GraphViewer: client-only + lazy (chỉ import khi tab Đồ thị được click)
@@ -105,6 +111,66 @@ function ArticleItem({
    )
 }
 
+type HierarchyHighlights = {
+   highlightArticleId?: string
+   highlightClauseId?: string
+}
+
+function SubsectionBlock({
+   subsection,
+   ...highlights
+}: { subsection: SubsectionDetail } & HierarchyHighlights) {
+   return (
+      <div className="mb-4 ml-3">
+         <p className="text-[10px] font-medium text-muted-foreground mb-2">
+            Tiểu mục {subsection.number} — {subsection.title}
+         </p>
+         {subsection.articles.map((article) => (
+            <ArticleItem key={article.id} article={article} {...highlights} />
+         ))}
+      </div>
+   )
+}
+
+function SectionBlock({
+   section,
+   ...highlights
+}: { section: SectionDetail } & HierarchyHighlights) {
+   return (
+      <div className="mb-5">
+         <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+            Mục {section.number} — {section.title}
+         </p>
+         {section.articles.map((article) => (
+            <ArticleItem key={article.id} article={article} {...highlights} />
+         ))}
+         {section.subsections.map((subsection) => (
+            <SubsectionBlock key={subsection.id} subsection={subsection} {...highlights} />
+         ))}
+      </div>
+   )
+}
+
+function ChapterBlock({
+   chapter,
+   ...highlights
+}: { chapter: ChapterDetail } & HierarchyHighlights) {
+   return (
+      <div className="mb-6">
+         <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
+            Chương {chapter.number}
+            {chapter.title ? ` — ${chapter.title}` : ''}
+         </p>
+         {chapter.articles.map((article) => (
+            <ArticleItem key={article.id} article={article} {...highlights} />
+         ))}
+         {chapter.sections.map((section) => (
+            <SectionBlock key={section.id} section={section} {...highlights} />
+         ))}
+      </div>
+   )
+}
+
 interface DocumentDetailPanelProps {
    doc: DocumentDetail
    highlightArticleId?: string
@@ -183,36 +249,28 @@ export function DocumentDetailPanel({
             <TabsContent value="content" className="flex-1 overflow-hidden m-0">
                <ScrollArea className="h-full">
                   <div className="p-4">
-                     {doc.chapters.map((ch) => (
-                        <div key={ch.id} className="mb-6">
-                           <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                              Chương {ch.number}
-                              {ch.title ? ` — ${ch.title}` : ''}
+                     {doc.parts.map((part) => (
+                        <div key={part.id} className="mb-7">
+                           <p className="text-xs font-bold uppercase tracking-widest text-foreground mb-4">
+                              Phần {part.number} — {part.title}
                            </p>
-                           {ch.articles.map((art) => (
-                              <ArticleItem
-                                 key={art.id}
-                                 article={art}
+                           {part.chapters.map((chapter) => (
+                              <ChapterBlock
+                                 key={chapter.id}
+                                 chapter={chapter}
                                  highlightArticleId={highlightArticleId}
                                  highlightClauseId={highlightClauseId}
                               />
                            ))}
-                           {ch.sections.map((section) => (
-                              <div key={section.id} className="mb-5">
-                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                                    Mục {section.number} — {section.title}
-                                 </p>
-                                 {section.articles.map((art) => (
-                                    <ArticleItem
-                                       key={art.id}
-                                       article={art}
-                                       highlightArticleId={highlightArticleId}
-                                       highlightClauseId={highlightClauseId}
-                                    />
-                                 ))}
-                              </div>
-                           ))}
                         </div>
+                     ))}
+                     {doc.chapters.map((ch) => (
+                        <ChapterBlock
+                           key={ch.id}
+                           chapter={ch}
+                           highlightArticleId={highlightArticleId}
+                           highlightClauseId={highlightClauseId}
+                        />
                      ))}
                      {doc.ungrouped_articles.map((art) => (
                         <ArticleItem

@@ -133,8 +133,10 @@ def test_external_section_checkpoint_preserves_structured_candidate(tmp_path) ->
     assert row["reference"]["target_candidate"] == {
         "target_type": "Section",
         "document_number": "57/2026/NĐ-CP",
+        "part_number": None,
         "chapter_number": "III",
         "section_number": "1",
+        "subsection_number": None,
         "article_number": None,
         "clause_number": None,
         "point_label": None,
@@ -142,5 +144,7 @@ def test_external_section_checkpoint_preserves_structured_candidate(tmp_path) ->
 
 
 def test_structural_type_inference_checks_section_before_chapter() -> None:
+    assert _structural_type_from_id("ldn_2020_ch3_sec1_subsec1") == "Subsection"
     assert _structural_type_from_id("ldn_2020_ch3_sec1") == "Section"
     assert _structural_type_from_id("ldn_2020_ch3") == "Chapter"
+    assert _structural_type_from_id("ldn_2020_part1") == "Part"

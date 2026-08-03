@@ -168,12 +168,33 @@ class OntologyValidator:
             required_fields=("id", "number", "title"),
         )
 
+    def validate_part(self, part: Mapping[str, Any]) -> ValidatedNode:
+        if isinstance(part.get("title"), str) and not str(part["title"]).strip():
+            raise GraphValidationError(["Part requires field: title"])
+        return self._validate_node(
+            part,
+            node_type="Part",
+            required_fields=("id", "number", "title"),
+        )
+
     def validate_section(self, section: Mapping[str, Any]) -> ValidatedNode:
         if isinstance(section.get("title"), str) and not str(section["title"]).strip():
             raise GraphValidationError(["Section requires field: title"])
         return self._validate_node(
             section,
             node_type="Section",
+            required_fields=("id", "number", "title"),
+        )
+
+    def validate_subsection(self, subsection: Mapping[str, Any]) -> ValidatedNode:
+        if (
+            isinstance(subsection.get("title"), str)
+            and not str(subsection["title"]).strip()
+        ):
+            raise GraphValidationError(["Subsection requires field: title"])
+        return self._validate_node(
+            subsection,
+            node_type="Subsection",
             required_fields=("id", "number", "title"),
         )
 
@@ -335,10 +356,14 @@ class OntologyValidator:
                     node = self.validate_document(raw_node)
                 elif node_type == "Issuer":
                     node = self.validate_issuer(raw_node)
+                elif node_type == "Part":
+                    node = self.validate_part(raw_node)
                 elif node_type == "Chapter":
                     node = self.validate_chapter(raw_node)
                 elif node_type == "Section":
                     node = self.validate_section(raw_node)
+                elif node_type == "Subsection":
+                    node = self.validate_subsection(raw_node)
                 elif node_type == "Article":
                     node = self.validate_article(raw_node)
                 elif node_type == "Clause":

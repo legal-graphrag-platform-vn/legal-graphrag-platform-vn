@@ -212,6 +212,16 @@ def test_document_detail_has_ungrouped_articles_field(client: TestClient):
     assert "ungrouped_articles" in data
 
 
+def test_document_detail_exposes_part_and_subsection_collections(client: TestClient):
+    response = client.get("/api/v1/documents/ldn_2020")
+    assert response.status_code == 200
+    data = response.json()
+    assert "parts" in data
+    schemas = client.get("/openapi.json").json()["components"]["schemas"]
+    assert "parts" in schemas["DocumentDetail"]["properties"]
+    assert "subsections" in schemas["SectionDetail"]["properties"]
+
+
 def test_document_detail_has_relations(client: TestClient):
     """DocumentDetail phải có relations."""
     resp = client.get("/api/v1/documents/ldn_2020")

@@ -6,9 +6,25 @@ import re
 import unicodedata
 
 
-MAX_DOCUMENT_TO_ARTICLE_DEPTH = 3
-MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH = 4
-MAX_DOCUMENT_HIERARCHY_DEPTH = 5
+MAX_DOCUMENT_TO_ARTICLE_DEPTH = 5
+MAX_DOCUMENT_TO_RETRIEVAL_UNIT_DEPTH = 6
+MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH = 7
+MAX_DOCUMENT_HIERARCHY_DEPTH = 7
+
+
+_VIETNAMESE_ORDINALS = {
+    "nhat": "1",
+    "mot": "1",
+    "hai": "2",
+    "ba": "3",
+    "tu": "4",
+    "nam": "5",
+    "sau": "6",
+    "bay": "7",
+    "tam": "8",
+    "chin": "9",
+    "muoi": "10",
+}
 
 
 def normalize_chapter_number(value: str) -> str:
@@ -32,6 +48,23 @@ def normalize_section_number(value: str) -> str:
     return _slug(value.strip().lower())
 
 
+def normalize_part_number(value: str) -> str:
+    text = value.strip()
+    without_prefix = re.sub(r"(?i)^thứ\s+", "", text).strip()
+    slug = _slug(without_prefix)
+    if slug in _VIETNAMESE_ORDINALS:
+        return _VIETNAMESE_ORDINALS[slug]
+    return normalize_chapter_number(without_prefix)
+
+
+def normalize_subsection_number(value: str) -> str:
+    return _slug(value.strip().lower())
+
+
+def part_id(document_id: str, part_number: str) -> str:
+    return f"{document_id}_part{normalize_part_number(part_number)}"
+
+
 def chapter_id(document_id: str, chapter_number: str) -> str:
     return f"{document_id}_ch{normalize_chapter_number(chapter_number)}"
 
@@ -40,6 +73,18 @@ def section_id(document_id: str, chapter_number: str, section_number: str) -> st
     return (
         f"{chapter_id(document_id, chapter_number)}"
         f"_sec{normalize_section_number(section_number)}"
+    )
+
+
+def subsection_id(
+    document_id: str,
+    chapter_number: str,
+    section_number: str,
+    subsection_number: str,
+) -> str:
+    return (
+        f"{section_id(document_id, chapter_number, section_number)}"
+        f"_subsec{normalize_subsection_number(subsection_number)}"
     )
 
 

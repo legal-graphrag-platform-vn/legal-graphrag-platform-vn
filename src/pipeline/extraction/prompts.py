@@ -25,7 +25,7 @@ Trích xuất tất cả entities được đề cập:
 
 QUY TẮC ĐẶT ID (BẮT BUỘC):
 - Đối với Concept/Entity/Document khác: Đặt tên tiếng Việt không dấu, viết thường, cách nhau bằng gạch dưới (Ví dụ: "cong_ty_co_phan", "co_quan_dang_ky_kinh_doanh").
-- KHÔNG trích xuất Chương/Mục/Điều/Khoản/Điểm hiện tại thành entity. Chúng thuộc structural parser/resolver.
+- KHÔNG trích xuất Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại thành entity. Chúng thuộc structural parser/resolver.
 
 Chỉ trích xuất entity thực sự được nhắc tới trong văn bản, không suy diễn thêm."""
 
@@ -40,12 +40,12 @@ Xác định các quan hệ giữa entities. Chỉ sử dụng các loại quan 
 - DEFINES: Đi từ Article/Clause -> Concept.
 - REGULATES: Đi từ Article/Clause -> Entity hoặc Action.
 - REQUIRES: Đi từ Entity -> Concept.
-- REFERS_TO: Đi từ Article/Clause/Point -> Document/Chapter/Section/Article/Clause/Point khác.
+- REFERS_TO: Đi từ Article/Clause/Point -> Document/Part/Chapter/Section/Subsection/Article/Clause/Point khác.
 - AMENDS / REPLACES / REPEALS: Quan hệ chủ động từ văn bản hoặc đơn vị mới sang văn bản hoặc đơn vị bị tác động.
 - GUIDES: Đi từ văn bản cấp cao hơn sang văn bản cấp thấp hơn trong whitelist ontology.
 
 Với mỗi relation, bắt buộc có "evidence" là câu văn nguyên gốc làm cơ sở, và "confidence" thể hiện mức tự tin của bạn (0.0-1.0).
-Không được trả về CONTAINS. Chỉ dùng canonical structural ID có trong structural context; không tự tạo ID Chương/Mục/Điều/Khoản/Điểm.
+Không được trả về CONTAINS. Chỉ dùng canonical structural ID có trong structural context; không tự tạo ID Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm.
 Không trích xuất lại dẫn chiếu cấu trúc tương đối có thể xác định bằng quy tắc, ví dụ
 "khoản này", "Điều này" hoặc "các điểm a và b khoản này". Các dẫn chiếu này được
 structural resolver xử lý trước. Chỉ đề xuất REFERS_TO khi dẫn chiếu cần liên kết

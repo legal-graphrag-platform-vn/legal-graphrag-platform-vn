@@ -143,24 +143,34 @@ def test_parallel_citations_collapse_to_one_topology_path_and_preserve_evidence(
     assert [item.relation_id for item in evidence] == ["ref-1", "ref-2"]
 
 
-def test_verified_refers_to_path_can_end_at_non_temporal_section() -> None:
+@pytest.mark.parametrize(
+    ("target_label", "target_id", "citation_text"),
+    [
+        ("Section", "doc_ch3_sec1", "Mục 1 Chương III"),
+        ("Part", "target_part2", "Phần II"),
+        ("Subsection", "target_ch5_sec3_subsec1", "Tiểu mục 1 Mục 3 Chương V"),
+    ],
+)
+def test_verified_refers_to_path_can_end_at_non_temporal_grouping_node(
+    target_label: str, target_id: str, citation_text: str
+) -> None:
     row = _row(
         source_id="doc_art89_cl2",
-        target_id="doc_ch3_sec1",
-        traversal_nodes=("doc_art89_cl2", "doc_ch3_sec1"),
+        target_id=target_id,
+        traversal_nodes=("doc_art89_cl2", target_id),
         relation_type="REFERS_TO",
         effective_from=None,
     )
     row["path_node_refs"][0]["labels"] = ["Clause"]
     row["path_node_refs"][1].update(
-        labels=["Section"],
+        labels=[target_label],
         effective_from=None,
         legal_status=None,
         citable_unit_id=None,
     )
     row["path_edge_refs"][0].update(
         relation_id="ref-section",
-        citation_text="Mục 1 Chương III",
+        citation_text=citation_text,
         citation_type="DIRECT",
         extraction_method="RULE",
     )
@@ -172,5 +182,5 @@ def test_verified_refers_to_path_can_end_at_non_temporal_section() -> None:
     )
 
     assert len(expansion.paths) == 1
-    assert expansion.paths[0].nodes[1].labels == ("Section",)
-    assert expansion.paths[0].edges[0].target_id == "doc_ch3_sec1"
+    assert expansion.paths[0].nodes[1].labels == (target_label,)
+    assert expansion.paths[0].edges[0].target_id == target_id

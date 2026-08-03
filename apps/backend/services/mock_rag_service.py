@@ -147,19 +147,23 @@ class MockRAGService:
             status=detail.status,
         )
 
-        # 10.   Tìm article theo article_id trong chapters
-        for chapter in detail.chapters:
-            for article in chapter.articles:
-                if article.id == article_id:
-                    return ArticleResponse(document=summary, article=article)
-
-        # 11.   Tìm trong ungrouped_articles
-        for article in detail.ungrouped_articles:
+        # 10. Tìm Article ở mọi canonical hierarchy path.
+        all_articles = list(detail.ungrouped_articles)
+        chapters = list(detail.chapters)
+        for part in detail.parts:
+            chapters.extend(part.chapters)
+        for chapter in chapters:
+            all_articles.extend(chapter.articles)
+            for section in chapter.sections:
+                all_articles.extend(section.articles)
+                for subsection in section.subsections:
+                    all_articles.extend(subsection.articles)
+        for article in all_articles:
             if article.id == article_id:
                 return ArticleResponse(document=summary, article=article)
 
-        # 12.   Fallback: trả article đầu tiên nếu không tìm thấy
-        first_article = detail.chapters[0].articles[0] if detail.chapters else None
+        # 11. Fallback: trả Article đầu tiên nếu fixture có dữ liệu.
+        first_article = all_articles[0] if all_articles else None
         if first_article:
             return ArticleResponse(document=summary, article=first_article)
 

@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.3
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.7.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.8.0](./legal_ontology.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
@@ -70,8 +70,8 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
 │       LAYER 1: LEGAL KNOWLEDGE GRAPH          │
 │                                               │
 │  ├── Structural Knowledge                     │
-│  │      Document, Chapter, Section,            │
-│  │      Article, Clause, Point                 │
+│  │      Document, Part, Chapter, Section,      │
+│  │      Subsection, Article, Clause, Point     │
 │  │      Citation, Hierarchy                   │
 │  ├── Semantic Knowledge                       │
 │  │      Legal Concepts, Legal Entities        │
