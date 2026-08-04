@@ -11,10 +11,10 @@ from typing import AsyncIterator
 
 from api.models import (
     ArticleResponse,
-    ChatRequest,
     ChatStreamEvent,
     ChatMetadataData,
     ChatTokenData,
+    ConversationChatRequest,
     DocumentDetail,
     DocumentListResponse,
     DocumentSummary,
@@ -22,6 +22,7 @@ from api.models import (
     QueryRequest,
     RetrievalResponse,
 )
+from persistence.domain import Owner
 
 MOCK_DATA_DIR = Path(__file__).resolve().parent.parent / "mock_data"
 
@@ -58,7 +59,8 @@ class MockRAGService:
 
     async def stream_chat(
         self,
-        request: ChatRequest,
+        request: ConversationChatRequest,
+        owner: Owner,
     ) -> AsyncIterator[ChatStreamEvent]:
         # 4.   Yield metadata event đầu tiên (1 lần duy nhất)
         metadata = ChatMetadataData(

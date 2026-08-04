@@ -19,14 +19,23 @@ export function useChatStream(initialMessages: Message[] = []) {
       [],
    )
 
-   const sendMessage = async (text: string, currentMessages: Message[], queryDate?: string) => {
+   const sendMessage = async (
+      text: string,
+      conversationId: string,
+      currentMessages: Message[],
+      queryDate?: string,
+   ) => {
       if (!text.trim() || isStreaming) return
 
+      // client_turn_id ổn định trong suốt lần gửi này (kể cả transport retry),
+      // để server idempotent hoá turn và không gọi provider lần hai (Plan 19 §5).
+      const clientTurnId = crypto.randomUUID()
       const userMessage: Message = {
          id: crypto.randomUUID(),
          role: 'user',
          content: text,
          timestamp: new Date().toISOString(),
+         client_turn_id: clientTurnId,
       }
       const assistantId = crypto.randomUUID()
       setMessages([
@@ -60,9 +69,11 @@ export function useChatStream(initialMessages: Message[] = []) {
       }, 20)
 
       try {
+         // Không gửi local history — server sở hữu context (Plan 19 §5).
          const body: Record<string, unknown> = {
+            conversation_id: conversationId,
+            client_turn_id: clientTurnId,
             message: text,
-            history: currentMessages.map(({ role, content }) => ({ role, content })),
          }
          if (queryDate) body.query_date = queryDate
 
@@ -120,6 +131,16 @@ function applyEvent(
          sources: mapSources(event.data.sources),
          intent: stringValue(event.data.intent),
          retrieval_mode: stringValue(event.data.retrieval_mode),
+         resolution_status: stringValue(event.data.resolution_status),
+      })
+   } else if (event.event === 'clarification') {
+      // Turn cần làm rõ: không có source cards; câu hỏi tới qua token stream.
+      updateAssistant(setMessages, assistantId, { kind: 'clarification', sources: [] })
+   } else if (event.event === 'done' && stringValue(event.data.status) === 'processing') {
+      // Turn trùng đang được xử lý ở nơi khác — báo người dùng thử lại.
+      updateAssistant(setMessages, assistantId, {
+         kind: 'processing',
+         content: 'Câu hỏi đang được xử lý, vui lòng thử lại sau giây lát.',
       })
    } else if (event.event === 'citation') {
       const unitId = stringValue(event.data.unit_id)

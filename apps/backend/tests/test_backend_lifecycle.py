@@ -406,5 +406,7 @@ def _graphrag_settings(
         answer_generation_enabled=answer_generation_enabled,
         query_planning_enabled=query_planning_enabled,
         gemini_api_key="test-only" if needs_gemini else None,
+        database_url="postgresql+asyncpg://u:p@localhost:5432/test",
+        anonymous_principal_signing_key="x" * 32,
         _env_file=None,
     )

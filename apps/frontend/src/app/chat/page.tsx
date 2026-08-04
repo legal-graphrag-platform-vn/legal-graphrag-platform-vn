@@ -170,10 +170,11 @@ export default function ChatPage() {
    }
 
    const handleSend = () => {
-      if (!inputText.trim() || isStreaming) return
+      if (!inputText.trim() || isStreaming || !activeSessionId) return
       const textToSend = inputText
       setInputText('')
-      sendMessage(textToSend, messages, temporalDate || undefined)
+      // ChatSession.id chính là conversation_id gửi lên server (Plan 19 §5).
+      sendMessage(textToSend, activeSessionId, messages, temporalDate || undefined)
    }
 
    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

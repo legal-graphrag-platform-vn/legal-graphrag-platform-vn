@@ -35,6 +35,26 @@ services:
       retries: 10
       start_period: 30s
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: graphrag-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-graphrag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-graphrag_conversations}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-graphrag} -d ${POSTGRES_DB:-graphrag_conversations}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
 networks:
   default:
     name: graphrag-network

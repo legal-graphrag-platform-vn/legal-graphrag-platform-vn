@@ -70,6 +70,25 @@ class Settings(BaseSettings):
     # 7.   CORS — không dùng ["*"] trong production
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
+    # 8.   Conversation context store (Plan 19) — PostgreSQL
+    database_url: str | None = None
+    db_pool_size: int = Field(default=6, ge=1, le=64)
+    db_max_overflow: int = Field(default=0, ge=0, le=32)
+    db_pool_timeout_seconds: float = Field(default=10.0, gt=0, le=120)
+    # Session-level advisory lock acquisition deadline (Plan 19 §3).
+    conversation_lock_timeout_seconds: float = Field(default=1.0, gt=0, le=30)
+    conversation_lock_poll_interval_seconds: float = Field(
+        default=0.05,
+        gt=0,
+        le=1.0,
+    )
+
+    # 9.   Signed anonymous principal (Plan 19 §2)
+    anonymous_principal_signing_key: str | None = None
+    anonymous_principal_cookie_ttl_days: int = Field(default=180, ge=1, le=730)
+    # Set Secure cookie attribute in production deployments.
+    anonymous_principal_cookie_secure: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     def validate_runtime(self) -> None:
@@ -95,11 +114,29 @@ class Settings(BaseSettings):
                 raise RuntimeError(
                     "ANSWER_GENERATION_ENABLED=true yêu cầu GEMINI_API_KEY"
                 )
+            if self.answer_generation_enabled:
+                self._validate_conversation_store()
             if (
                 self.query_planning_enabled
                 and self.query_planner_provider == "gemini"
                 and not self.gemini_api_key
             ):
-                raise RuntimeError(
-                    "QUERY_PLANNING_ENABLED=true yêu cầu GEMINI_API_KEY"
-                )
+                raise RuntimeError("QUERY_PLANNING_ENABLED=true yêu cầu GEMINI_API_KEY")
+
+    def _validate_conversation_store(self) -> None:
+        """Grounded chat persists context in PostgreSQL and signs principals."""
+        if not self.database_url:
+            raise RuntimeError("ANSWER_GENERATION_ENABLED=true yêu cầu DATABASE_URL")
+        if not self.database_url.startswith("postgresql+asyncpg://"):
+            raise RuntimeError("DATABASE_URL phải dùng driver postgresql+asyncpg://")
+        key = self.anonymous_principal_signing_key
+        if not key or len(key.encode("utf-8")) < 32:
+            raise RuntimeError(
+                "ANSWER_GENERATION_ENABLED=true yêu cầu "
+                "ANONYMOUS_PRINCIPAL_SIGNING_KEY tối thiểu 32 bytes"
+            )
+        if self.db_pool_size < self.answer_max_concurrency:
+            raise RuntimeError(
+                "DB_POOL_SIZE không được nhỏ hơn ANSWER_MAX_CONCURRENCY "
+                f"({self.db_pool_size} < {self.answer_max_concurrency})"
+            )
