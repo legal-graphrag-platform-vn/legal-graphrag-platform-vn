@@ -38,10 +38,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # 2.   Startup: build container và lưu vào app.state
         container = await build_container(settings)
         app.state.container = container
+        app.state.settings = settings
         try:
+            # 2a.  Verify PostgreSQL connectivity + Alembic head (no auto-migrate).
+            if container.conversation_engine is not None:
+                from conversation.startup import verify_conversation_store
+
+                await verify_conversation_store(container.conversation_engine)
             yield
         finally:
-            # 3.   Shutdown: đóng resources (Neo4j driver khi graphrag mode)
+            # 3.   Shutdown: đóng resources (Neo4j driver, PostgreSQL engine).
             await container.close()
 
     app = FastAPI(

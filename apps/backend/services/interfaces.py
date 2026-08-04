@@ -10,14 +10,15 @@ from typing import AsyncIterator, Protocol, TypeVar
 
 from api.models import (
     ArticleResponse,
-    ChatRequest,
     ChatStreamEvent,
+    ConversationChatRequest,
     DocumentDetail,
     DocumentListResponse,
     GraphData,
     QueryRequest,
     RetrievalResponse,
 )
+from persistence.domain import Owner
 from src.retrieval.models import PreparedRetrievalRequest, RetrievalContext
 from src.retrieval.planning.models import UnlinkedSemanticPlan
 from src.retrieval.planning.ports import QueryPlannerPort as QueryPlannerPort
@@ -94,14 +95,16 @@ class AnswerGeneratorPort(Protocol):
 class ChatService(Protocol):
     async def stream_chat(
         self,
-        request: ChatRequest,
+        request: ConversationChatRequest,
+        owner: Owner,
     ) -> AsyncIterator[ChatStreamEvent]: ...
 
 
 class RAGService(ChatService, Protocol):
     async def stream_chat(
         self,
-        request: ChatRequest,
+        request: ConversationChatRequest,
+        owner: Owner,
     ) -> AsyncIterator[ChatStreamEvent]: ...
 
     async def list_documents(

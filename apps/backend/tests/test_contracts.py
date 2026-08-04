@@ -5,15 +5,12 @@ Chạy: cd apps/backend && PYTHONPATH=. pytest tests/ -v
 
 from __future__ import annotations
 
-import asyncio
 import json
+import uuid
 
 import pytest
 
-from api.models import ChatRequest
-from api.routes.chat import chat
 from main import create_app
-from services.mock_rag_service import MockRAGService
 from settings import Settings
 from tests.asgi_client import SyncASGIClient as TestClient
 
@@ -50,55 +47,53 @@ def test_graphrag_mode_fails_when_credentials_missing():
 # ---------------------------------------------------------------------------
 
 
-def _chat_stream(message: str) -> tuple[object, str]:
-    async def collect() -> tuple[object, str]:
-        response = await chat(
-            ChatRequest(message=message),
-            service=MockRAGService(),
-        )
-        chunks: list[str] = []
-        async for chunk in response.body_iterator:
-            chunks.append(chunk.decode("utf-8") if isinstance(chunk, bytes) else chunk)
-        return response, "".join(chunks)
-
-    return asyncio.run(collect())
+def _chat_stream(client: TestClient, message: str) -> tuple[object, str]:
+    response = client.post(
+        "/api/v1/chat",
+        json={
+            "conversation_id": str(uuid.uuid4()),
+            "client_turn_id": str(uuid.uuid4()),
+            "message": message,
+        },
+    )
+    return response, response.text
 
 
-def test_chat_sse_contains_named_events():
+def test_chat_sse_contains_named_events(client: TestClient):
     """Stream phải chứa event: metadata và event: token."""
-    _, raw = _chat_stream("Điều kiện thành lập công ty?")
+    _, raw = _chat_stream(client, "Điều kiện thành lập công ty?")
 
     assert "event: metadata" in raw
     assert "event: token" in raw
     assert "event: done" in raw
 
 
-def test_chat_sse_metadata_sent_only_once():
+def test_chat_sse_metadata_sent_only_once(client: TestClient):
     """event: metadata chỉ được gửi 1 lần."""
-    _, raw = _chat_stream("test")
+    _, raw = _chat_stream(client, "test")
 
     assert raw.count("event: metadata") == 1
 
 
-def test_chat_sse_headers_correct():
+def test_chat_sse_headers_correct(client: TestClient):
     """Response headers phải đúng cho SSE."""
-    response, _ = _chat_stream("test")
+    response, _ = _chat_stream(client, "test")
 
     assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
     assert response.headers.get("cache-control") == "no-cache"
 
 
-def test_chat_sse_unicode_tieng_viet():
+def test_chat_sse_unicode_tieng_viet(client: TestClient):
     """Unicode tiếng Việt phải được encode đúng, không bị escape thành \\uXXXX."""
-    _, raw = _chat_stream("test")
+    _, raw = _chat_stream(client, "test")
     # Các từ tiếng Việt phải xuất hiện dưới dạng UTF-8 thật, không phải \\uXXXX
     assert "\\u" not in raw or "công" in raw  # ensure_ascii=False hoạt động
     assert "Điều" in raw or "điều" in raw or "nghiệp" in raw
 
 
-def test_chat_no_answer_field_in_metadata():
+def test_chat_no_answer_field_in_metadata(client: TestClient):
     """Metadata event không được chứa answer field."""
-    _, raw = _chat_stream("test")
+    _, raw = _chat_stream(client, "test")
 
     # Parse metadata event
     for line in raw.split("\n"):
