@@ -45,9 +45,9 @@ def test_candidates_to_json_and_back_preserves_order() -> None:
     assert restored == candidates
 
 
-def test_empty_candidates_are_rejected() -> None:
-    with pytest.raises(InvalidClarificationCandidatesError):
-        validate_candidates(())
+def test_empty_candidates_are_allowed_for_restate() -> None:
+    # RESTATE clarifications carry no candidates (Plan 19 §4).
+    assert validate_candidates(()) == ()
 
 
 def test_more_than_five_candidates_are_rejected() -> None:
