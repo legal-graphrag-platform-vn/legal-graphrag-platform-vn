@@ -40,3 +40,5 @@ tree.txt
 !apps/backend/.env.example
 
 experiments
+
+.idea
