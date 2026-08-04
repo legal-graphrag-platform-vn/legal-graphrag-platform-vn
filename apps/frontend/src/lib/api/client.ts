@@ -24,7 +24,7 @@ export async function apiGet<T>(
          }
       })
    }
-   const res = await fetch(url.toString())
+   const res = await fetch(url.toString(), { credentials: 'include' })
    if (!res.ok) {
       throw await apiError(res, path)
    }
@@ -36,6 +36,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      credentials: 'include',
    })
    if (!res.ok) {
       throw await apiError(res, path)
@@ -56,6 +57,7 @@ export async function apiStream(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      credentials: 'include',
       signal,
    })
 }

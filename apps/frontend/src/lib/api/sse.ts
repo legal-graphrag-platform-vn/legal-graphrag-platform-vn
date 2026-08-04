@@ -1,4 +1,10 @@
-export type SseEventName = 'metadata' | 'token' | 'citation' | 'error' | 'done'
+export type SseEventName =
+   | 'metadata'
+   | 'token'
+   | 'citation'
+   | 'clarification'
+   | 'error'
+   | 'done'
 
 export interface ParsedSseEvent {
    event: SseEventName
@@ -73,6 +79,7 @@ function isEventName(value: string | null): value is SseEventName {
       value === 'metadata' ||
       value === 'token' ||
       value === 'citation' ||
+      value === 'clarification' ||
       value === 'error' ||
       value === 'done'
    )
