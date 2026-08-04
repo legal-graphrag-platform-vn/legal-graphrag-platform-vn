@@ -38,8 +38,13 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
 
                   <div className="flex-1 flex flex-col space-y-3 min-w-0">
                      {/* Metadata Badges */}
-                     {(message.intent || message.retrieval_mode) && (
+                     {(message.intent || message.retrieval_mode || message.kind === 'clarification') && (
                         <div className="flex flex-wrap gap-2 mb-1">
+                           {message.kind === 'clarification' && (
+                              <span className="text-[10px] uppercase font-bold text-amber-600 bg-amber-50 dark:bg-amber-500/10 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/20">
+                                 Cần làm rõ
+                              </span>
+                           )}
                            {message.intent && (
                               <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/20">
                                  {message.intent}
@@ -127,10 +132,10 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
                         )}
                      </div>
 
-                     {/* Citations / RAG sources */}
-                     {message.sources && message.sources.length > 0 && (
-                        <SourceCard sources={message.sources} />
-                     )}
+                     {/* Citations / RAG sources — clarification không render source cards */}
+                     {message.kind !== 'clarification' &&
+                        message.sources &&
+                        message.sources.length > 0 && <SourceCard sources={message.sources} />}
                   </div>
                </div>
             )}

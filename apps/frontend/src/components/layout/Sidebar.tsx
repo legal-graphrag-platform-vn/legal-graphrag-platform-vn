@@ -118,7 +118,7 @@ export function Sidebar({
                                  onDeleteSession(session.id)
                               }}
                               className="absolute right-1.5 opacity-0 group-hover:opacity-100 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
-                              title="Xóa cuộc trò chuyện"
+                              title="Xóa khỏi thiết bị"
                            >
                               <Trash2 size={13} />
                            </button>
@@ -166,15 +166,20 @@ export function Sidebar({
                      <div className="p-5 flex flex-col gap-4">
                         <div className="flex items-center justify-between py-2">
                            <div className="pr-4">
-                              <h4 className="text-sm font-medium text-foreground">Xóa dữ liệu</h4>
+                              <h4 className="text-sm font-medium text-foreground">
+                                 Xóa khỏi thiết bị
+                              </h4>
                               <p className="text-xs text-zinc-400 mt-0.5">
-                                 Xóa vĩnh viễn toàn bộ lịch sử trò chuyện
+                                 Xóa lịch sử trò chuyện được lưu trên thiết bị này. Dữ liệu hội thoại
+                                 trên máy chủ không bị ảnh hưởng.
                               </p>
                            </div>
                            <button
                               onClick={() => {
                                  if (
-                                    confirm('Bạn có chắc chắn muốn xóa tất cả các cuộc trò chuyện?')
+                                    confirm(
+                                       'Xóa toàn bộ lịch sử trò chuyện khỏi thiết bị này?',
+                                    )
                                  ) {
                                     onDeleteAllSessions()
                                     setShowSettings(false)
@@ -183,7 +188,7 @@ export function Sidebar({
                               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg cursor-pointer transition-colors shadow-xs shrink-0"
                            >
                               <Trash2 size={13} />
-                              <span>Delete all chats</span>
+                              <span>Xóa khỏi thiết bị</span>
                            </button>
                         </div>
                      </div>

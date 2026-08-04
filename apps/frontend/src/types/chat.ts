@@ -30,12 +30,21 @@ export interface Message {
    content: string
    sources?: Source[]
    timestamp: string
+   // Idempotency (Plan 19): mỗi user turn giữ client_turn_id ổn định qua retry.
+   client_turn_id?: string
+   // Phân loại turn phía server: câu trả lời, cần làm rõ, hay đang xử lý.
+   kind?: 'answer' | 'clarification' | 'processing'
+   resolution_status?: string
    // Metadata từ event: metadata
    intent?: string
    retrieval_mode?: string
    error?: string
 }
 
+/**
+ * ChatSession.id CHÍNH LÀ conversation_id gửi lên server (Plan 19 §5).
+ * LocalStorage chỉ là UI cache — server mới là nguồn context authority.
+ */
 export interface ChatSession {
    id: string
    title: string
