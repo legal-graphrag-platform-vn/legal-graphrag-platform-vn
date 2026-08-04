@@ -188,7 +188,9 @@ class AnswerGenerationRequest(BaseModel):
 Rules:
 
 - Query must exactly match the standalone query used to build
-  `RetrievalContext`. V1 performs no follow-up query rewriting.
+  `RetrievalContext`. Follow-up resolution/rewriting happens upstream in Plan 19;
+  by the time generation runs, the standalone query is already resolved and is
+  the same query used for retrieval.
 - History is bounded by count and total characters/tokens.
 - History cannot add legal evidence to the citation allowlist.
 - System/user content is clearly separated.
@@ -535,17 +537,26 @@ provider adapter.
 
 ### Conversation history policy for v1
 
+> SUPERSEDED for follow-up resolution by **Plan 19 — Conversation Context
+> Resolution before Retrieval**, which is now the authority for server-owned
+> history, deterministic reference resolution and structured rewriting. The
+> evidence invariants below still hold; the "follow-up query rewriting/retrieval
+> is deferred" clause no longer applies.
+
 History may influence tone and avoid repeated prose, but:
 
 - it cannot contribute legal evidence;
 - it cannot add citation/path IDs;
-- it cannot rewrite or resolve an ambiguous follow-up query;
 - it cannot change document filters, query date, intent, or capability;
-- the current message must be a standalone retrievable legal question.
+- the standalone query used for retrieval and generation must be a single
+  standalone retrievable legal question.
 
-If the current message depends on unresolved pronouns or an omitted legal
-subject, return a typed request asking for a standalone question. Follow-up
-query rewriting/retrieval is deferred.
+Follow-up references are resolved deterministically before retrieval per Plan 19:
+an explicit/anaphoric reference is resolved against server-owned focuses and the
+Neo4j canonical lookup, an ambiguous reference triggers a clarification turn (no
+retrieval or generation), and only a resolved standalone query proceeds. The LLM
+rewriter only rewrites from an already-resolved canonical candidate; it never
+introduces evidence.
 
 ### SSE path second
 
