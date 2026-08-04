@@ -2,6 +2,7 @@ import pytest
 
 from src.infrastructure.neo4j.retriever_repo import Neo4jRetrieverRepo
 from src.retrieval.models import RetrievalFilters
+from src.shared.ontology.hierarchy import MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH
 
 
 class FakeResult:
@@ -52,7 +53,7 @@ def test_repository_parameterizes_filters_and_closes_session() -> None:
     assert session.closed is True
     assert session.parameters["document_ids"] == ["doc"]
     assert session.parameters["legal_statuses"] == ["ACTIVE"]
-    assert "CONTAINS*1..3" in session.query
+    assert f"CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}" in session.query
 
 
 def test_repository_rejects_unsupported_graph_depth_before_db_session() -> None:

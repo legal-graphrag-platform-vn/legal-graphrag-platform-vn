@@ -9,6 +9,7 @@ from neo4j import Driver
 
 from src.shared.ontology.contract import PHASE1_PERSISTED_LABELS, PHASE1_RELATION_ENUM
 from src.shared.retrieval_contract import RetrievalFilters
+from src.shared.ontology.hierarchy import MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH
 
 
 _OUTGOING_PATH_QUERIES = {
@@ -123,7 +124,7 @@ class Neo4jRetrieverRepo:
           }}) AS path_node_refs
         }}
         OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(unit)
-        OPTIONAL MATCH (document:Document)-[:CONTAINS*1..3]->(unit)
+        OPTIONAL MATCH (document:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(unit)
         WITH path, path_node_refs, unit, parent_article, document
         WHERE NOT (unit:Article OR unit:Clause) OR ({_GRAPH_UNIT_FILTER})
         RETURN
@@ -327,12 +328,12 @@ class Neo4jRetrieverRepo:
     def inspect_capabilities(self, filters: RetrievalFilters) -> dict[str, object]:
         dependencies = self.inspect_dependencies()
         indexes = dependencies["indexes"]
-        query = """
+        query = f"""
         MATCH (document:Document)
         WHERE ($document_ids = [] OR document.id IN $document_ids)
           AND ($doc_types = [] OR document.doc_type IN $doc_types)
           AND ($legal_statuses = [] OR document.legal_status IN $legal_statuses)
-        OPTIONAL MATCH (document)-[:CONTAINS*0..3]->(unit)
+        OPTIONAL MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(unit)
         WITH collect(DISTINCT document) + collect(DISTINCT unit) AS scoped_nodes
         WITH scoped_nodes,
              [node IN scoped_nodes
@@ -376,12 +377,12 @@ class Neo4jRetrieverRepo:
         }
 
     def _multiple_versions_available(self, filters: RetrievalFilters) -> bool:
-        query = """
+        query = f"""
         MATCH (document:Document)
         WHERE ($document_ids = [] OR document.id IN $document_ids)
           AND ($doc_types = [] OR document.doc_type IN $doc_types)
           AND ($legal_statuses = [] OR document.legal_status IN $legal_statuses)
-        OPTIONAL MATCH (document)-[:CONTAINS*0..3]->(scoped)
+        OPTIONAL MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(scoped)
         WITH collect(DISTINCT document) + collect(DISTINCT scoped) AS scoped_nodes
         UNWIND scoped_nodes AS source
         OPTIONAL MATCH (source)-[relation:AMENDS|REPLACES]-(target)
@@ -396,9 +397,9 @@ class Neo4jRetrieverRepo:
             return [dict(record) for record in result]
 
 
-_LEGAL_UNIT_CONTEXT = """
+_LEGAL_UNIT_CONTEXT = f"""
 OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(node)
-MATCH (document:Document)-[:CONTAINS*1..3]->(node)
+MATCH (document:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(node)
 """
 
 _FILTER_PREDICATE = """

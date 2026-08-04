@@ -798,7 +798,424 @@ ontology version.
 
 ---
 
-## ADR-23: Bind target độc lập cho query plan multi-hop chính xác
+## ADR-23: `Section` Hierarchy and Local Chapter/Section References
+
+**Ngày**: 2026-07-31
+**Trạng thái**: ACCEPTED
+
+### Decision
+
+Ontology v1.7.0 persists `Section` (`Mục`) as a structural node with required
+`id`, `number`, and legal `title`:
+
+```text
+Document -> Chapter -> Section -> Article -> Clause -> Point
+```
+
+The canonical Section ID is
+`{document_id}_ch{normalized_chapter}_sec{normalized_section}`. A Section is
+created only from a structural heading in canonical source, never from a
+citation. Its title is mandatory; failure to recover the legal title is a
+parser/data-quality failure, not permission to invent `"Mục N"` as title.
+
+The corpus probe found 80 `Mục` headings across 19 raw documents, all 80 under
+an active `Chương`, and all 80 with a recoverable title. Therefore v1.7.0
+supports `Chapter -> Section -> Article` only. This is a verified corpus
+contract, not a universal statement about every Vietnamese legal document.
+
+`REFERS_TO` retains its canonical relation name and direction. Its target set
+is extended to `Chapter` and `Section`; sources remain `Article`, `Clause`, and
+`Point`. Deterministic grammar resolves local `Chương này`, `Chương V của Luật
+này`, `Mục 1 Chương III`, and `Mục 1 của Chương III`. External Chapter/Section
+mentions are parsed before local patterns but remain unresolved checkpoints in
+this migration; they do not fall back to the current document and do not create
+fake nodes or edges.
+
+The old direct `Document -> Article` and `Chapter -> Article` pairs remain
+valid for structures without Section. Reparsed Articles inside a Section use
+`Section -> Article`. Cleanup of an old `Chapter -> Article` edge is guarded:
+the writer verifies the exact `Chapter -> Section -> Article` chain first and
+preserves the legacy edge if verification fails.
+
+Named traversal bounds are shared by repositories:
+
+```text
+MAX_DOCUMENT_TO_ARTICLE_DEPTH = 3
+MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH = 4
+MAX_DOCUMENT_HIERARCHY_DEPTH = 5
+```
+
+Every query must still check labels/path semantics; depth alone does not define
+a valid hierarchy.
+
+### Consequences
+
+- Existing canonical raw sources containing `Mục` must be reparsed; changing
+  only schema and resolver code does not migrate old hierarchy artifacts.
+- `Section` has no temporal fields, embedding, full-text index, or vector index.
+- The browser/API returns both direct Chapter Articles and nested Sections.
+- External Chapter/Section materialization and compound-list expansion were
+  deferred by this ADR pending corpus-wide unique endpoint verification.
+  ADR-24 now defines the accepted external-materialization contract; compound
+  grammar expansion remains a separate implementation scope.
+
+---
+
+## ADR-24: Corpus-Wide External Structural Reference Materialization
+
+**Ngày**: 2026-07-31
+**Trạng thái**: IMPLEMENTED; live Neo4j integration verification pending
+**Amendment**: 2026-07-31 — registry/build identity, reconciliation, and
+cross-store durability contract hardened before implementation
+
+### Context
+
+An external structural reference targets a canonical structural unit owned by a
+different `Document` in the same accepted corpus. It does not target an external
+system and does not introduce an `ExternalNode`, `RegistryNode`, or a new
+relationship type.
+
+ADR-23 deliberately left external Chapter/Section materialization deferred.
+This decision defines the corpus-wide identity, resolution, validation, and
+write contract required to materialize external targets safely. It does not
+change the Section hierarchy or local-reference decisions of ADR-23.
+The implementation sequence and acceptance matrix are defined in
+`agent-plan-feats/17_external_structural_reference_materialization_plan.md`.
+
+### Decision
+
+#### Registry content and build evidence
+
+The structural registry is built only from hierarchy units that have passed:
+
+```text
+canonical source
+-> hierarchy parse
+-> schema and ontology validation
+-> accepted structural units
+-> immutable registry content
+-> immutable build receipt
+```
+
+Identity and provenance use three separate values:
+
+```text
+build_id         human-readable identifier for one registry build receipt
+snapshot_hash    content address of canonical accepted registry content
+provenance_hash  digest of stable source, projection, parser, and validator evidence
+```
+
+`snapshot_hash` covers the registry/ontology/canonicalization contract,
+canonical Documents, descendant structural units, and canonical
+parent/ownership structure. `provenance_hash` covers stable canonical-source and
+validated-structural-projection digests plus parser/hierarchy/validator contract
+versions and the resulting `snapshot_hash`. Neither hash includes `build_id`,
+`created_at`, filesystem paths, symlink targets, or operational artifact UUIDs.
+
+Two builds may have different `build_id` values while sharing the same content
+and provenance hashes. A source or parser change that preserves the accepted
+hierarchy may preserve `snapshot_hash` while changing `provenance_hash`. Existing
+content and build receipts are never mutated in place.
+
+Document representation is disjoint:
+
+```text
+RegistryEndpoint = RegistryDocument | RegistryUnit
+RegistryDocument = document identity and canonical Document endpoint
+RegistryUnit     = Part | Chapter | Section | Subsection | Article | Clause | Point only
+```
+
+`documents.jsonl` stores `RegistryDocument`; `units.jsonl` stores descendants.
+The structural-key index never contains Document. Therefore there is one source
+of truth for a Document endpoint.
+
+The registry must not treat any of the following as existence evidence:
+
+- a corpus manifest, crawler metadata, or `raw_doc_code`;
+- a canonical-looking ID derived from citation text;
+- a parser candidate that has not passed validation and acceptance;
+- a node that is not owned by an accepted canonical `CONTAINS` hierarchy.
+
+Canonical IDs remain deterministic and are created through shared helpers. A
+structural unit is registered only after acceptance; generating a canonical ID
+does not prove that the node or target exists.
+
+Document aliases retain all candidates. Valid local hierarchy rejects duplicate
+structural keys instead of overwriting one candidate. Resolution uses exact
+normalized identities and the following cardinality contract:
+
+```text
+0 candidates  -> UNRESOLVED
+1 candidate   -> RESOLVED
+>1 candidates -> AMBIGUOUS
+```
+
+Both source and target endpoints, including their unique Document ownership,
+must exist in the same verified `snapshot_hash`. Source evidence from one
+content snapshot cannot be combined with target evidence from another even when
+their inferred IDs match.
+
+#### Resolution and materialization state
+
+Resolution state and materialization state are independent. Resolution state is:
+
+```text
+resolution_status = UNRESOLVED | RESOLVED | AMBIGUOUS
+reference_scope   = LOCAL | EXTERNAL | UNKNOWN
+is_self_reference = boolean derived by the resolver
+```
+
+`is_self_reference=true` if and only if resolution is `RESOLVED`, scope is
+`LOCAL`, exactly one target exists, and that target ID equals the source ID.
+`SELF_REFERENCE` is not a resolution status. A local reference to a different
+endpoint remains `RESOLVED + LOCAL + false`.
+
+Materialization state is:
+
+```text
+NOT_APPLICABLE | PENDING | WRITTEN | FAILED | BLOCKED
+```
+
+Each reference checkpoint stores at least resolution/materialization state,
+reason codes, `build_id`, `snapshot_hash`, and `provenance_hash`. A
+registry-resolved target missing from Neo4j stays `RESOLVED` and becomes
+`FAILED/target_endpoint_missing_in_graph`; it does not revert to `UNRESOLVED`.
+
+When a newer build changes the resolved target set:
+
+```text
+old target was never durably or graph-observably written
+-> audit the old resolution
+-> replace pending targets
+-> allow materialization
+
+old target was ever WRITTEN or still exists for the bundle in Neo4j
+-> BLOCKED/resolved_target_changed_after_materialization
+-> create no new edge
+-> delete no old edge
+```
+
+The decision inspects durable attempt history and Neo4j state. Current
+checkpoint status alone is not evidence that a target was never written.
+
+#### Neo4j verification and relation-only write
+
+Before materializing `REFERS_TO`, one Neo4j transaction must:
+
+- `MATCH` exact source and target IDs with allowlisted labels;
+- require source type `Article|Clause|Point`;
+- require target type
+  `Document|Part|Chapter|Section|Subsection|Article|Clause|Point`;
+- verify source and target ownership against registry-proven Document IDs;
+- require source and target Documents to differ;
+- verify every member of the atomic bundle before any relation merge;
+- inspect existing `REFERS_TO` targets for the same source and
+  `reference_bundle_id` before writing.
+
+Document ownership is verified through canonical hierarchy rather than a
+denormalized `document_id` property:
+
+```text
+(sourceDocument)-[:CONTAINS*1..7]->(source)
+target type Document: targetDocument = target
+other target types:   (targetDocument)-[:CONTAINS*1..7]->(target)
+```
+
+The query must measure ownership-path count and distinct Document owners before
+deduplication:
+
+```text
+one owner, one path       -> canonical
+one owner, multiple paths -> continue with divergence warning/count
+multiple owners           -> hard-fail
+```
+
+`WITH DISTINCT` must not hide ownership divergence.
+
+For one atomic bundle, the transaction compares existing graph targets with the
+complete expected target set:
+
+```text
+existing set is empty         -> first write may proceed
+existing set equals expected  -> idempotent retry may proceed
+existing set is non-empty and unequal, including a proper subset
+-> rollback before MERGE
+```
+
+The writer must never `MERGE` source or target. Only validated relations may be
+merged after all checks:
+
+```text
+MATCH verified source
+MATCH verified target
+MERGE (source)-[:REFERS_TO {relation_id: $relation_id}]->(target)
+```
+
+The application consumes the transaction result and requires the exact expected
+endpoint, target, and relation-ID sets. Zero rows, unexpected multiplicity,
+wrong labels/owners, partial bundles, or conflicting old targets are typed
+failures and commit no new bundle edge.
+
+#### Cross-store durability and concurrency
+
+The checkpoint store and Neo4j are separate systems, so this decision does not
+claim a distributed atomic transaction. Materialization remains at-least-once
+and idempotent through deterministic `relation_id`, atomic bundles, and exact
+target-set comparison.
+
+Every cooperating reconciliation process uses a per-source-document advisory
+lock plus checkpoint compare-and-swap by canonical checkpoint-file hash. The
+append-only materialization-attempt ledger and checkpoint CAS execute under the
+same lock.
+
+After Neo4j returns a successful commit, persistence order is mandatory:
+
+```text
+Neo4j transaction commits
+-> append one schema-valid, hashed attempt row
+-> flush and fsync attempt ledger
+-> CAS checkpoint using the expected checkpoint hash
+-> fsync checkpoint replacement and parent directory
+```
+
+The attempt record includes the bundle/build/hash evidence, expected and
+observed target sets, relation IDs, expected checkpoint hash, timestamps, typed
+outcome, and record hash. A truncated or hash-invalid row never proves a
+successful write.
+
+Failure rules are fail-closed:
+
+- graph commit plus ledger/fsync failure never advances the checkpoint;
+- durable ledger plus checkpoint-CAS failure preserves graph and ledger and
+  never overwrites newer checkpoint state;
+- uncertain Neo4j commit records `UNKNOWN` when possible and never becomes
+  `WRITTEN` until a fresh transaction verifies graph state;
+- retry inspects both durable attempts and current bundle targets in Neo4j.
+
+Existing method-aware `REFERS_TO` provenance and atomic bundle validation remain
+mandatory. `build_id`, `snapshot_hash`, and `provenance_hash` remain
+checkpoint/attempt evidence linked through `reference_bundle_id`; making them
+required relationship properties would require a later ontology ADR/version
+bump.
+
+### Consequences
+
+- The corpus manifest remains discovery/orchestration input, not structural
+  existence evidence.
+- A corpus-wide content snapshot and immutable build receipt must be published
+  after accepted structural ingestion and before external reconciliation.
+- Ingesting a new target Document can trigger retry only for checkpoints keyed
+  by its normalized document identity; a full corpus re-resolution is not
+  required.
+- Registry/graph divergence, ownership-path divergence, blocked target changes,
+  uncertain commits, and stale checkpoint updates are observable through typed
+  state/reason codes instead of being collapsed into `UNRESOLVED`.
+- A successful graph commit is not reflected as `WRITTEN` until its attempt row
+  is durable and checkpoint CAS succeeds.
+- Automatic replacement or deletion of a previously materialized target is
+  outside this ADR; it requires explicit reconciliation policy and audit.
+- No ontology node or relationship type is added; verified external references
+  remain canonical `source -[:REFERS_TO]-> target` edges.
+- This ADR defines the external materialization contract. Compound-list grammar
+  expansion remains a separate implementation scope, while any resulting
+  multi-target bundle must continue to materialize atomically.
+
+---
+
+## ADR-25: Canonical `Part` and `Subsection` Hierarchy
+
+**Status:** Accepted
+
+**Date:** 2026-08-01
+
+**Ontology version:** 1.8.0
+
+### Context
+
+The v1.7 hierarchy represented `Document`, `Chapter`, `Section`, `Article`,
+`Clause`, and `Point`, but could not preserve the legal headings `Phần` and
+`Tiểu mục`. Flattening those headings loses exact ownership, prevents verified
+references to those units, and makes the document browser disagree with source
+structure.
+
+Article 62 of Decree 34/2016/ND-CP is historical evidence for six explicitly
+listed layouts. Article 63 of Decree 78/2025/ND-CP is the current composition
+rule and permits a Chapter to omit a Section. Together they require seven
+canonical parent chains to Article, including
+`Document -> Part -> Chapter -> Article`.
+
+### Decision
+
+Add persisted structural labels:
+
+```text
+Part        required: id, number, title
+Subsection  required: id, number, title
+```
+
+The exact structural `CONTAINS` pairs are:
+
+```text
+Document   -> Part | Chapter | Article
+Part       -> Chapter
+Chapter    -> Section | Article
+Section    -> Subsection | Article
+Subsection -> Article
+Article    -> Clause
+Clause     -> Point
+```
+
+Every descendant has exactly one direct canonical parent. Each concrete
+Document, Chapter, and Section uses one child mode and does not mix the
+alternatives shown above. `Document -> Article` remains valid.
+
+Canonical IDs are deterministic. Adding Part ownership does not rename an
+existing Chapter or Article:
+
+```text
+Part        {document_id}_part{normalized_part}
+Subsection  {document_id}_ch{chapter}_sec{section}_subsec{subsection}
+```
+
+`REFERS_TO` retains its existing direction and relation type. Its target
+allowlist expands to `Part` and `Subsection`; these targets are materialized
+only when the immutable corpus registry and Neo4j endpoint checks both verify
+them. Registry content uses `corpus-structural-registry-v2`; v1 snapshots remain
+read-only legacy snapshots.
+
+Ownership queries use shared semantic bounds: Article depth 5, retrieval-unit
+depth 6, and deepest citable/hierarchy depth 7. Depth alone is not structural
+evidence; validators enforce exact parent-label pairs.
+
+Migration reparses canonical source and writes the accepted hierarchy first.
+Only after the replacement chain exists may reconciliation remove legacy
+shortcuts:
+
+```text
+Document -> Chapter  after Document -> Part -> Chapter
+Section  -> Article  after Section -> Subsection -> Article
+```
+
+`Chapter -> Article` is preserved for the valid
+`Document -> Part -> Chapter -> Article` and `Document -> Chapter -> Article`
+paths.
+
+### Consequences
+
+- Parser, payload, validator, schema, registry, reference resolver/writer,
+  retrieval ownership, API, and UI share one v1.8 hierarchy contract.
+- `Part`, `Chapter`, `Section`, and `Subsection` remain non-embedded,
+  non-temporal grouping nodes.
+- A recognized Part or Subsection without an accepted legal title is a parser
+  failure; display fallback text is never persisted as the title.
+- Citation text cannot create a structural node. Missing or ambiguous targets
+  remain unresolved checkpoints.
+- Existing documents without Part/Subsection continue to use their canonical
+  direct paths without fake grouping nodes.
+
+---
+
+## ADR-26: Bind target độc lập cho query plan multi-hop chính xác
 
 **Ngày**: 2026-07-22
 **Trạng thái**: ACCEPTED
@@ -882,3 +1299,4 @@ evaluation dataset nhưng không còn được dùng làm bằng chứng cho pla
   metric riêng.
 - V1 vẫn không bao gồm branching, join, target predicate, legal entailment và
   automatic constraint relaxation.
+

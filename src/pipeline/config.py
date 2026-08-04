@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     data_raw_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "raw")
     data_processed_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "processed")
     data_reports_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "reports")
+    data_registry_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "registry")
     curated_manifest_path: Path = Field(
         default=Path(__file__).resolve().parents[2] / "configs" / "corpus" / "curated_v1.json"
     )

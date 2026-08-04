@@ -8,8 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-from src.shared.ontology.payload_consistency_validator import validate_payload_consistency
+from src.shared.ontology.payload_consistency_validator import (
+    validate_payload_consistency,
+)
 from src.shared.ontology.validators import validate_relation
+from src.shared.ontology.hierarchy import MAX_DOCUMENT_HIERARCHY_DEPTH
 
 
 class SessionProtocol(Protocol):
@@ -43,12 +46,19 @@ class GraphQualityReporter:
         return {
             "document_count": label_counts.get("Document", 0),
             "issuer_count": label_counts.get("Issuer", 0),
+            "part_count": label_counts.get("Part", 0),
+            "chapter_count": label_counts.get("Chapter", 0),
+            "section_count": label_counts.get("Section", 0),
+            "subsection_count": label_counts.get("Subsection", 0),
             "article_count": article_stats["total"],
             "clause_count": clause_stats["total"],
             "legal_concept_count": label_counts.get("LegalConcept", 0),
             "legal_subject_count": label_counts.get("LegalSubject", 0),
             "legal_action_count": label_counts.get("LegalAction", 0),
-            "semantic_node_count": sum(label_counts.get(label, 0) for label in ("LegalConcept", "LegalSubject", "LegalAction")),
+            "semantic_node_count": sum(
+                label_counts.get(label, 0)
+                for label in ("LegalConcept", "LegalSubject", "LegalAction")
+            ),
             "relation_count_by_type": dict(relation_counts),
             "ontology_violation_count": ontology_report["count"],
             "ontology_violation_rate": ontology_report["rate"],
@@ -57,7 +67,9 @@ class GraphQualityReporter:
             "duplicate_relation_identity_count": duplicate_relation_identity_count,
             "dangling_endpoint_count": dangling_endpoint_count,
             "orphan_node_count": orphan_node_count,
-            "article_semantic_coverage": _article_semantic_coverage(edges, article_stats["total"]),
+            "article_semantic_coverage": _article_semantic_coverage(
+                edges, article_stats["total"]
+            ),
             "graph_density": _directed_density(node_count, edge_count),
             "average_degree": _average_degree(node_count, edge_count),
             "topology_convention": {
@@ -78,7 +90,7 @@ class GraphQualityReporter:
             self.session.run(
                 (
                     "MATCH (d:Document {id: $graph_id}) "
-                    "OPTIONAL MATCH (d)-[:CONTAINS*0..4]->(s) "
+                    f"OPTIONAL MATCH (d)-[:CONTAINS*0..{MAX_DOCUMENT_HIERARCHY_DEPTH}]->(s) "
                     "WITH collect(DISTINCT d) + collect(DISTINCT s) AS structural_nodes "
                     "WITH [n IN structural_nodes WHERE n IS NOT NULL AND n.id IS NOT NULL] AS structural_nodes "
                     "WITH structural_nodes, [n IN structural_nodes | n.id] AS structural_ids "
@@ -112,7 +124,9 @@ class GraphQualityReporter:
                 counts[str(label)] += count
         return dict(counts)
 
-    def _embedding_stats(self, node_ids: set[str], label: str) -> dict[str, float | int]:
+    def _embedding_stats(
+        self, node_ids: set[str], label: str
+    ) -> dict[str, float | int]:
         row = _single_row(
             self.session.run(
                 f"MATCH (n:{label}) WHERE n.id IN $node_ids RETURN count(n) AS total, count(n.embedding) AS embedded",
@@ -220,9 +234,15 @@ class GraphQualityReporter:
 def build_graph_quality_report(payload: dict) -> dict:
     consistency = validate_payload_consistency(payload)
     node_counts = Counter(node.get("type") for node in payload.get("nodes", []))
-    relation_counts = Counter(relation.get("type") for relation in payload.get("relations", []))
-    article_nodes = [node for node in payload.get("nodes", []) if node.get("type") == "Article"]
-    clause_nodes = [node for node in payload.get("nodes", []) if node.get("type") == "Clause"]
+    relation_counts = Counter(
+        relation.get("type") for relation in payload.get("relations", [])
+    )
+    article_nodes = [
+        node for node in payload.get("nodes", []) if node.get("type") == "Article"
+    ]
+    clause_nodes = [
+        node for node in payload.get("nodes", []) if node.get("type") == "Clause"
+    ]
     embedded_articles = [node for node in article_nodes if node.get("embedding")]
     embedded_clauses = [node for node in clause_nodes if node.get("embedding")]
 
@@ -230,16 +250,27 @@ def build_graph_quality_report(payload: dict) -> dict:
         "document_count": node_counts.get("Document", 0),
         "article_count": node_counts.get("Article", 0),
         "clause_count": node_counts.get("Clause", 0),
-        "semantic_node_count": sum(node_counts.get(label, 0) for label in ("LegalConcept", "LegalSubject", "LegalAction")),
+        "semantic_node_count": sum(
+            node_counts.get(label, 0)
+            for label in ("LegalConcept", "LegalSubject", "LegalAction")
+        ),
         "relation_count_by_type": dict(relation_counts),
         "ontology_violation_rate": 0.0 if consistency.valid else 1.0,
         "duplicate_node_id_count": consistency.duplicate_node_id_count,
         "duplicate_relation_identity_count": consistency.duplicate_relation_identity_count,
-        "dangling_endpoint_count": sum(1 for error in consistency.errors if "dangling" in error.lower()),
+        "dangling_endpoint_count": sum(
+            1 for error in consistency.errors if "dangling" in error.lower()
+        ),
         "orphan_node_count": consistency.orphan_node_count,
-        "article_semantic_coverage": _payload_article_semantic_coverage(payload, len(article_nodes)),
-        "graph_density": _directed_density(len(payload.get("nodes", [])), len(payload.get("relations", []))),
-        "average_degree": _average_degree(len(payload.get("nodes", [])), len(payload.get("relations", []))),
+        "article_semantic_coverage": _payload_article_semantic_coverage(
+            payload, len(article_nodes)
+        ),
+        "graph_density": _directed_density(
+            len(payload.get("nodes", [])), len(payload.get("relations", []))
+        ),
+        "average_degree": _average_degree(
+            len(payload.get("nodes", [])), len(payload.get("relations", []))
+        ),
         "topology_convention": {
             "graph_density": "directed E/(N*(N-1)) without self-loops",
             "average_degree": "undirected projection 2E/N",
@@ -255,7 +286,9 @@ def build_graph_quality_report(payload: dict) -> dict:
 
 def write_graph_quality_report(report: dict, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "graph_quality.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out_dir / "graph_quality.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     lines = [
         "# Graph Quality Report",
         "",
@@ -311,7 +344,9 @@ def _average_degree(node_count: int, edge_count: int) -> float:
     return (2 * edge_count) / node_count
 
 
-def _article_semantic_coverage(edges: list[dict[str, Any]], article_total: int) -> float:
+def _article_semantic_coverage(
+    edges: list[dict[str, Any]], article_total: int
+) -> float:
     connected: set[str] = set()
     for edge in edges:
         if edge.get("relation_type") == "CONTAINS":
@@ -324,7 +359,9 @@ def _article_semantic_coverage(edges: list[dict[str, Any]], article_total: int) 
 
 
 def _payload_article_semantic_coverage(payload: dict, article_total: int) -> float:
-    node_types = {str(node.get("id")): node.get("type") for node in payload.get("nodes", [])}
+    node_types = {
+        str(node.get("id")): node.get("type") for node in payload.get("nodes", [])
+    }
     connected: set[str] = set()
     for relation in payload.get("relations", []):
         if relation.get("type") == "CONTAINS":
@@ -344,7 +381,11 @@ def decision_stats_from_paths(processed_doc_dir: Path) -> dict[str, Any]:
         records = _read_jsonl(path)
         counts[decision] = len(records)
         for record in records:
-            reason = record.get("review_reason") or record.get("rejection_reason") or record.get("reason")
+            reason = (
+                record.get("review_reason")
+                or record.get("rejection_reason")
+                or record.get("reason")
+            )
             if reason:
                 reasons[str(reason)] += 1
     total = sum(counts.values())
@@ -422,25 +463,40 @@ def _orphan_node_count(node_ids: set[str], edges: list[dict[str, Any]]) -> int:
 
 def _semantic_graph_metrics(edges: list[dict[str, Any]]) -> dict[str, Any]:
     semantic_relation_types = {
-        "DEFINES", "REGULATES", "REQUIRES", "REFERS_TO",
-        "AMENDS", "REPEALS", "REPLACES", "GUIDES",
+        "DEFINES",
+        "REGULATES",
+        "REQUIRES",
+        "REFERS_TO",
+        "AMENDS",
+        "REPEALS",
+        "REPLACES",
+        "GUIDES",
     }
     article_clause_nodes: set[str] = set()
     semantic_entity_nodes: set[str] = set()
     document_nodes: set[str] = set()
     node_labels: dict[str, set[str]] = {}
     for edge in edges:
-        node_labels.setdefault(str(edge["source"]), set()).update(edge.get("source_labels", []))
-        node_labels.setdefault(str(edge["target"]), set()).update(edge.get("target_labels", []))
+        node_labels.setdefault(str(edge["source"]), set()).update(
+            edge.get("source_labels", [])
+        )
+        node_labels.setdefault(str(edge["target"]), set()).update(
+            edge.get("target_labels", [])
+        )
     for node_id, labels in node_labels.items():
         if labels & {"Article", "Clause"}:
             article_clause_nodes.add(node_id)
         if labels & {"LegalConcept", "LegalSubject", "LegalAction"}:
             semantic_entity_nodes.add(node_id)
 
-    semantic_edges = [edge for edge in edges if edge.get("relation_type") in semantic_relation_types]
+    semantic_edges = [
+        edge for edge in edges if edge.get("relation_type") in semantic_relation_types
+    ]
     for edge in semantic_edges:
-        for endpoint, labels_key in (("source", "source_labels"), ("target", "target_labels")):
+        for endpoint, labels_key in (
+            ("source", "source_labels"),
+            ("target", "target_labels"),
+        ):
             if "Document" in edge.get(labels_key, []):
                 document_nodes.add(str(edge[endpoint]))
 
@@ -463,15 +519,20 @@ def _semantic_graph_metrics(edges: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "node_count": len(universe),
         "edge_count": len(edge_pairs),
-        "article_clause_semantic_orphan_count": sum(degree[node_id] == 0 for node_id in article_clause_nodes),
-        "semantic_entity_orphan_count": sum(degree[node_id] == 0 for node_id in semantic_entity_nodes),
+        "article_clause_semantic_orphan_count": sum(
+            degree[node_id] == 0 for node_id in article_clause_nodes
+        ),
+        "semantic_entity_orphan_count": sum(
+            degree[node_id] == 0 for node_id in semantic_entity_nodes
+        ),
         "connected_component_count": _count_components(universe, edge_pairs),
         "density": _directed_density(len(universe), len(edge_pairs)),
         "average_degree": _average_degree(len(universe), len(edge_pairs)),
         "semantic_relation_total": len(semantic_edges),
         "included_edge_count_by_type": dict(sorted(included_by_type.items())),
         "excluded_edge_count_by_type": dict(sorted(excluded_by_type.items())),
-        "edge_accounting_reconciles": len(semantic_edges) == len(edge_pairs) + sum(excluded_by_type.values()),
+        "edge_accounting_reconciles": len(semantic_edges)
+        == len(edge_pairs) + sum(excluded_by_type.values()),
         "exclusion_reason": "Endpoints outside semantic topology universe (for example Point endpoints)",
         "excluded_relations": ["CONTAINS", "ISSUED_BY"],
     }
@@ -482,6 +543,7 @@ def _canonical_label(labels: list[str]) -> str:
         "Document",
         "Issuer",
         "Chapter",
+        "Section",
         "Article",
         "Clause",
         "Point",

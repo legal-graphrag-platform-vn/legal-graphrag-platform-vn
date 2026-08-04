@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.3
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.6.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.8.0](./legal_ontology.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
@@ -70,7 +70,8 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
 │       LAYER 1: LEGAL KNOWLEDGE GRAPH          │
 │                                               │
 │  ├── Structural Knowledge                     │
-│  │      Document, Article, Clause             │
+│  │      Document, Part, Chapter, Section,      │
+│  │      Subsection, Article, Clause, Point     │
 │  │      Citation, Hierarchy                   │
 │  ├── Semantic Knowledge                       │
 │  │      Legal Concepts, Legal Entities        │
@@ -151,7 +152,9 @@ Luật Doanh nghiệp 2020
   │   ├── Điều 2 — Đối tượng áp dụng
   │   │   └── [nội dung]
   │   └── ...
-  ├── Chương II — ...
+  ├── Chương III — ...
+  │   └── Mục 1 — Công ty TNHH hai thành viên
+  │       └── Điều 46 — ...
   └── ...
 ```
 
@@ -159,6 +162,7 @@ Luật Doanh nghiệp 2020
 - Dùng raw text từ crawler để parse theo dòng và regex.
 - Rule-based parsing dựa trên regex pattern của luật VN:
   - `"Điều \d+"` → Article boundary
+  - `"Mục \d+[a-z]?"` → Section boundary dưới Chapter hiện tại
   - `"\d+\."` → Clause boundary
   - `"[a-zđ]\)"` → Point boundary
 - Handle edge cases: tables, footnotes, cross-references inline
@@ -297,7 +301,7 @@ class Neo4jRetriever:
             WHERE clause.effective_from <= date($query_date)
               AND (clause.effective_to IS NULL OR clause.effective_to > date($query_date))
             MATCH (clause)<-[:CONTAINS]-(article:Article)
-            MATCH (article)<-[:CONTAINS]-(doc:Document)
+            MATCH (doc:Document)-[:CONTAINS*2..4]->(clause)
             CALL apoc.path.expand(clause, $relations, null, 1, $max_depth)
             YIELD path
             RETURN clause, article, doc, path, score

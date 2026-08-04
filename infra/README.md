@@ -37,7 +37,7 @@ make verify-schema
 ```
 
 Sau bước 4, kết quả mong đợi:
-- `9` uniqueness constraints cho `Document`, `Issuer`, `Chapter`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction`
+- `10` uniqueness constraints cho `Document`, `Issuer`, `Chapter`, `Section`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction`
 - `10+` indexes (lookup + temporal + fulltext + vector)
 - `2` vector indexes (`article_embedding`, `clause_embedding` — 1024 dims, cosine)
 

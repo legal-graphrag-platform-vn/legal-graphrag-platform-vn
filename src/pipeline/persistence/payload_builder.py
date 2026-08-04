@@ -13,6 +13,16 @@ from src.shared.ontology.payload_consistency_validator import (
     deterministic_relation_id,
     relation_identity_discriminator,
 )
+from src.shared.ontology.hierarchy import (
+    chapter_id,
+    normalize_chapter_number,
+    normalize_part_number,
+    normalize_section_number,
+    normalize_subsection_number,
+    part_id,
+    section_id,
+    subsection_id,
+)
 
 
 SEMANTIC_LABEL_MAP = {
@@ -55,7 +65,9 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
                 continue
             record = json.loads(stripped)
             if record.get("decision") != "accepted":
-                raise PayloadBuildError(f"{path}:{line_no} is not an accepted decision record")
+                raise PayloadBuildError(
+                    f"{path}:{line_no} is not an accepted decision record"
+                )
             records.append(record)
     return records
 
@@ -65,7 +77,9 @@ def load_entity_index(path: Path) -> dict[str, dict[str, Any]]:
         raise PayloadBuildError(f"Missing required entity index: {path}")
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
-        raise PayloadBuildError("entity_index.json must be an object keyed by extraction entity id")
+        raise PayloadBuildError(
+            "entity_index.json must be an object keyed by extraction entity id"
+        )
     return {str(key): dict(value) for key, value in raw.items()}
 
 
@@ -74,10 +88,14 @@ def build_payload_from_paths(processed_doc_dir: Path) -> dict[str, Any]:
     if not hierarchy_path.exists():
         raise PayloadBuildError(f"Missing hierarchy.json: {hierarchy_path}")
 
-    parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
+    parsed = ParsedDocument.model_validate_json(
+        hierarchy_path.read_text(encoding="utf-8")
+    )
     accepted_records = load_jsonl(processed_doc_dir / "accepted.jsonl")
     entity_index = load_entity_index(processed_doc_dir / "entity_index.json")
-    return build_graph_payload(parsed, accepted_records, entity_index, raw_doc_code=processed_doc_dir.name)
+    return build_graph_payload(
+        parsed, accepted_records, entity_index, raw_doc_code=processed_doc_dir.name
+    )
 
 
 def build_graph_payload(
@@ -101,27 +119,135 @@ def build_graph_payload(
     _add_relation(relations, document_node["id"], "ISSUED_BY", issuer_node["id"], {})
 
     structural_ids: dict[str, str] = {document_node["id"]: document_node["id"]}
-    chapter_ids: dict[str, str] = {}
+    parts_by_key = {normalize_part_number(part.number): part for part in parsed.parts}
+    sections_by_key = {
+        (
+            normalize_part_number(section.part) if section.part else None,
+            normalize_chapter_number(section.chapter),
+            normalize_section_number(section.number),
+        ): section
+        for section in parsed.sections
+    }
+    subsections_by_key = {
+        (
+            normalize_part_number(subsection.part) if subsection.part else None,
+            normalize_chapter_number(subsection.chapter),
+            normalize_section_number(subsection.section),
+            normalize_subsection_number(subsection.number),
+        ): subsection
+        for subsection in parsed.subsections
+    }
     content_status = CONTENT_STATUS_FALLBACK.get(parsed.document.legal_status, "ACTIVE")
     effective_from = str(parsed.document.effective_from)
 
     for article in parsed.articles:
         parent_id = document_node["id"]
+        normalized_part = None
+        if article.part:
+            normalized_part = normalize_part_number(article.part)
+            part = parts_by_key.get(normalized_part)
+            if part is None:
+                raise PayloadBuildError(
+                    f"Article {article.number} references missing Part {article.part}"
+                )
+            part_node_id = part_id(document_node["id"], article.part)
+            structural_ids[part_node_id] = part_node_id
+            if part_node_id not in nodes:
+                _add_node(
+                    nodes,
+                    {
+                        "type": "Part",
+                        "id": part_node_id,
+                        "number": str(part.number),
+                        "title": part.title,
+                    },
+                )
+                _add_relation(
+                    relations, document_node["id"], "CONTAINS", part_node_id, {}
+                )
+            parent_id = part_node_id
+
         if article.chapter:
-            chapter_id = f"{document_node['id']}_ch{_normalize_chapter_number(article.chapter)}"
-            chapter_ids[article.chapter] = chapter_id
-            if chapter_id not in nodes:
+            chapter_node_id = chapter_id(document_node["id"], article.chapter)
+            structural_ids[chapter_node_id] = chapter_node_id
+            if chapter_node_id not in nodes:
                 _add_node(
                     nodes,
                     {
                         "type": "Chapter",
-                        "id": chapter_id,
+                        "id": chapter_node_id,
                         "number": str(article.chapter),
                         "title": article.chapter_title or f"Chương {article.chapter}",
                     },
                 )
-                _add_relation(relations, document_node["id"], "CONTAINS", chapter_id, {})
-            parent_id = chapter_id
+                _add_relation(relations, parent_id, "CONTAINS", chapter_node_id, {})
+            parent_id = chapter_node_id
+            if article.section:
+                section_key = (
+                    normalized_part,
+                    normalize_chapter_number(article.chapter),
+                    normalize_section_number(article.section),
+                )
+                section = sections_by_key.get(section_key)
+                if section is None:
+                    raise PayloadBuildError(
+                        f"Article {article.number} references missing Section "
+                        f"{article.section} in Chapter {article.chapter}"
+                    )
+                section_node_id = section_id(
+                    document_node["id"], article.chapter, article.section
+                )
+                structural_ids[section_node_id] = section_node_id
+                if section_node_id not in nodes:
+                    _add_node(
+                        nodes,
+                        {
+                            "type": "Section",
+                            "id": section_node_id,
+                            "number": str(section.number),
+                            "title": section.title,
+                        },
+                    )
+                    _add_relation(
+                        relations, chapter_node_id, "CONTAINS", section_node_id, {}
+                    )
+                parent_id = section_node_id
+                if article.subsection:
+                    subsection_key = (
+                        *section_key,
+                        normalize_subsection_number(article.subsection),
+                    )
+                    subsection = subsections_by_key.get(subsection_key)
+                    if subsection is None:
+                        raise PayloadBuildError(
+                            f"Article {article.number} references missing Subsection "
+                            f"{article.subsection} in Section {article.section}"
+                        )
+                    subsection_node_id = subsection_id(
+                        document_node["id"],
+                        article.chapter,
+                        article.section,
+                        article.subsection,
+                    )
+                    structural_ids[subsection_node_id] = subsection_node_id
+                    if subsection_node_id not in nodes:
+                        _add_node(
+                            nodes,
+                            {
+                                "type": "Subsection",
+                                "id": subsection_node_id,
+                                "number": str(subsection.number),
+                                "title": subsection.title,
+                            },
+                        )
+                        _add_relation(
+                            relations,
+                            section_node_id,
+                            "CONTAINS",
+                            subsection_node_id,
+                            {},
+                        )
+                    parent_id = subsection_node_id
 
         article_id = f"{document_node['id']}_art{article.number}"
         structural_ids[article_id] = article_id
@@ -174,8 +300,12 @@ def build_graph_payload(
 
     for record in accepted_records:
         relation = record.get("relation") or {}
-        head_id = _resolve_endpoint_id(relation.get("head"), structural_ids, entity_index)
-        tail_id = _resolve_endpoint_id(relation.get("tail"), structural_ids, entity_index)
+        head_id = _resolve_endpoint_id(
+            relation.get("head"), structural_ids, entity_index
+        )
+        tail_id = _resolve_endpoint_id(
+            relation.get("tail"), structural_ids, entity_index
+        )
 
         _ensure_semantic_node(nodes, relation.get("head"), entity_index)
         _ensure_semantic_node(nodes, relation.get("tail"), entity_index)
@@ -183,7 +313,9 @@ def build_graph_payload(
         relation_type = relation.get("relation")
         properties = dict(relation.get("properties") or {})
         discriminator = relation_identity_discriminator(relation_type, properties)
-        _add_relation(relations, head_id, relation_type, tail_id, properties, discriminator)
+        _add_relation(
+            relations, head_id, relation_type, tail_id, properties, discriminator
+        )
 
     return {
         "metadata": {
@@ -243,7 +375,10 @@ def _issuer_branch(issuer_name: str) -> str:
         return "LEGISLATIVE"
     if "toa an" in normalized or "vien kiem sat" in normalized:
         return "JUDICIAL"
-    if any(token in normalized for token in ("chinh phu", "bo ", "thu tuong", "uy ban nhan dan")):
+    if any(
+        token in normalized
+        for token in ("chinh phu", "bo ", "thu tuong", "uy ban nhan dan")
+    ):
         return "EXECUTIVE"
     return "OTHER"
 
@@ -296,7 +431,9 @@ def _add_node(nodes: dict[str, dict[str, Any]], node: dict[str, Any]) -> None:
         if existing != normalized_node:
             if existing.get("type") == "Issuer" or normalized_node.get("type") == "Issuer":
                 return
-            raise PayloadBuildError(f"Duplicate node id with different payload: {node_id}")
+            raise PayloadBuildError(
+                f"Duplicate node id with different payload: {node_id}"
+            )
         return
     nodes[node_id] = normalized_node
 
@@ -310,7 +447,9 @@ def _add_relation(
     discriminator: str | None = None,
 ) -> None:
     props = dict(properties or {})
-    relation_id = deterministic_relation_id(head_id, relation_type, tail_id, discriminator)
+    relation_id = deterministic_relation_id(
+        head_id, relation_type, tail_id, discriminator
+    )
     props.setdefault("relation_id", relation_id)
     relation = {
         "id": relation_id,
@@ -326,24 +465,11 @@ def _add_relation(
 def _semantic_id(label: Any) -> str:
     text = str(label or "")
     normalized = _strip_accents(text).lower().strip()
-    return KNOWN_SEMANTIC_IDS.get(text.lower().strip()) or KNOWN_SEMANTIC_IDS.get(normalized) or _slug(text)
-
-
-def _normalize_chapter_number(value: str) -> str:
-    text = value.strip().upper()
-    roman = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100}
-    if re.fullmatch(r"[IVXLC]+", text):
-        total = 0
-        prev = 0
-        for char in reversed(text):
-            current = roman[char]
-            if current < prev:
-                total -= current
-            else:
-                total += current
-                prev = current
-        return str(total)
-    return _slug(value)
+    return (
+        KNOWN_SEMANTIC_IDS.get(text.lower().strip())
+        or KNOWN_SEMANTIC_IDS.get(normalized)
+        or _slug(text)
+    )
 
 
 def _normalize_point_label(value: str) -> str:
@@ -361,7 +487,11 @@ def _slug(value: Any) -> str:
 
 def _strip_accents(value: str) -> str:
     decomposed = unicodedata.normalize("NFD", value)
-    return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").replace("đ", "d").replace("Đ", "D")
+    return (
+        "".join(char for char in decomposed if unicodedata.category(char) != "Mn")
+        .replace("đ", "d")
+        .replace("Đ", "D")
+    )
 
 
 def _optional_str(value: Any) -> str | None:
