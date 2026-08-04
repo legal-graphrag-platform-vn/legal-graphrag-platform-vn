@@ -227,7 +227,10 @@ class LockedTurn:
             _turn_t.c.conversation_id == self._conversation_id,
             _turn_t.c.client_turn_id == client_turn_id,
         )
-        row = (await self._conn.execute(stmt)).mappings().first()
+        # Wrap the read so it does not leave an autobegun transaction open on the
+        # locked connection ahead of the begin-turn transaction.
+        async with self._conn.begin():
+            row = (await self._conn.execute(stmt)).mappings().first()
         return _to_turn_record(row) if row is not None else None
 
     async def begin_turn_and_load_context(

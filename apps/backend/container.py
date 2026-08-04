@@ -39,15 +39,21 @@ class Container:
         query_planner: QueryPlannerPort | None = None,
         retrieval_runtime: SyncRetrievalRuntime | None = None,
         retrieval_runner: AsyncRetrievalRunner | None = None,
+        conversation_engine: object | None = None,
+        canonical_lookup_driver: object | None = None,
+        principal_signer: object | None = None,
     ) -> None:
         self.query_service = query_service
         self.chat_service = chat_service
         self.document_service = document_service
         self.rag_service = rag_service
+        self.principal_signer = principal_signer
         self._answer_generator = answer_generator
         self._query_planner = query_planner
         self._retrieval_runtime = retrieval_runtime
         self._retrieval_runner = retrieval_runner
+        self.conversation_engine = conversation_engine
+        self._canonical_lookup_driver = canonical_lookup_driver
         self._closed = False
 
     async def close(self) -> None:
@@ -55,11 +61,23 @@ class Container:
             return
         self._closed = True
         first_error: Exception | None = None
+        if self.conversation_engine is not None:
+            try:
+                await self.conversation_engine.dispose()
+            except Exception as exc:
+                first_error = exc
+        if self._canonical_lookup_driver is not None:
+            try:
+                self._canonical_lookup_driver.close()
+            except Exception as exc:
+                if first_error is None:
+                    first_error = exc
         if self._answer_generator is not None:
             try:
                 await self._answer_generator.aclose()
             except Exception as exc:
-                first_error = exc
+                if first_error is None:
+                    first_error = exc
         if self._query_planner is not None:
             try:
                 await self._query_planner.aclose()
@@ -156,8 +174,10 @@ async def build_container(
         raise
     answer_generator: AnswerGeneratorPort | None = None
     chat_service: ChatService | None = None
+    conversation_engine: object | None = None
+    lookup_driver: object | None = None
+    principal_signer: object | None = None
     if settings.answer_generation_enabled:
-        from services.graphrag_answer_service import GraphRAGAnswerService
         from src.application.answer_factory import (
             AnswerApplicationSettings,
             create_answer_generator,
@@ -196,11 +216,20 @@ async def build_container(
                 runtime,
             )
             raise
-        chat_service = GraphRAGAnswerService(
-            retrieval=retrieval,
-            generator=answer_generator,
-            stream_chunk_chars=settings.answer_stream_chunk_chars,
-        )
+        try:
+            conversation_engine, chat_service, lookup_driver, principal_signer = (
+                _build_conversation_chat(settings, retrieval, answer_generator, runner)
+            )
+        except Exception:
+            await _cleanup_after_answer_startup_failure(
+                document_service,
+                query_planner,
+                runner,
+                runtime,
+            )
+            if answer_generator is not None:
+                await answer_generator.aclose()
+            raise
     return Container(
         query_service=RetrievalQueryService(retrieval),
         chat_service=chat_service,
@@ -210,7 +239,68 @@ async def build_container(
         query_planner=query_planner,
         retrieval_runtime=runtime,
         retrieval_runner=runner,
+        conversation_engine=conversation_engine,
+        canonical_lookup_driver=lookup_driver,
+        principal_signer=principal_signer,
     )
+
+
+def _build_conversation_chat(
+    settings: Settings,
+    retrieval: object,
+    answer_generator: AnswerGeneratorPort,
+    runner: AsyncRetrievalRunner,
+) -> tuple[object, ChatService, object, object]:
+    """Compose the grounded conversation chat service (Plan 19 §4)."""
+    from neo4j import GraphDatabase
+
+    from auth.principal import PrincipalSigner
+    from conversation.service import ConversationChatService
+    from persistence.engine import EngineConfig, create_engine
+    from persistence.repository import SqlAlchemyConversationStore
+    from resolution.canonical_lookup import (
+        Neo4jCanonicalLookup,
+        Neo4jCanonicalLookupRepo,
+    )
+    from resolution.resolver import ReferenceResolver
+    from resolution.rewriter import StructuredRewriter
+
+    engine = create_engine(
+        EngineConfig(
+            database_url=settings.database_url,
+            pool_size=settings.db_pool_size,
+            max_overflow=settings.db_max_overflow,
+            pool_timeout_seconds=settings.db_pool_timeout_seconds,
+        )
+    )
+    lookup_driver = GraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=(settings.neo4j_user, settings.neo4j_password),
+    )
+    store = SqlAlchemyConversationStore(
+        engine,
+        lock_timeout_seconds=settings.conversation_lock_timeout_seconds,
+        lock_poll_interval_seconds=settings.conversation_lock_poll_interval_seconds,
+    )
+    resolver = ReferenceResolver(
+        Neo4jCanonicalLookup(Neo4jCanonicalLookupRepo(lookup_driver), runner)
+    )
+    # The Gemini structured-output fallback is a pluggable RewriterLLMPort; the
+    # rule fast path covers explicit references and anchored anaphora today.
+    rewriter = StructuredRewriter(llm=None)
+    signer = PrincipalSigner(
+        settings.anonymous_principal_signing_key or "",
+        ttl_seconds=settings.anonymous_principal_cookie_ttl_days * 86400,
+    )
+    chat_service = ConversationChatService(
+        store=store,
+        resolver=resolver,
+        rewriter=rewriter,
+        retrieval=retrieval,
+        generator=answer_generator,
+        stream_chunk_chars=settings.answer_stream_chunk_chars,
+    )
+    return engine, chat_service, lookup_driver, signer
 
 
 async def _cleanup_retrieval_after_startup_failure(

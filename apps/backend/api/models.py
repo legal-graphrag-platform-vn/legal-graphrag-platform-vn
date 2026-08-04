@@ -42,43 +42,6 @@ class DocumentLegalStatus(str, Enum):
 # ---------------------------------------------------------------------------
 
 
-class ChatMessage(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    role: Literal["user", "assistant"]
-    content: str = Field(min_length=1, max_length=4000)
-
-
-class ChatRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    message: str = Field(min_length=1, max_length=4000)
-    history: list[ChatMessage] = Field(default_factory=list)
-    document_ids: list[str] = Field(default_factory=list)
-    query_date: date | None = None
-    temporal_date: date | None = None
-    force_intent: IntentType | None = None
-    enable_reranker: bool | None = None
-
-    @model_validator(mode="after")
-    def validate_chat_request(self) -> "ChatRequest":
-        self.message = self.message.strip()
-        if not self.message:
-            raise ValueError("Message must not be blank")
-        if self.query_date is not None and self.temporal_date is not None:
-            if self.query_date != self.temporal_date:
-                raise ValueError("query_date conflicts with temporal_date")
-        elif self.temporal_date is not None:
-            self.query_date = self.temporal_date
-        normalized_ids = [value.strip() for value in self.document_ids]
-        if any(not value for value in normalized_ids):
-            raise ValueError("document_ids must not contain blank values")
-        if len(normalized_ids) != len(set(normalized_ids)):
-            raise ValueError("document_ids must be unique")
-        self.document_ids = normalized_ids
-        return self
-
-
 class ConversationChatRequest(BaseModel):
     """Grounded conversation request (Plan 19 §2).
 
