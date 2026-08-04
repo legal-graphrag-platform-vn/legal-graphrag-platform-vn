@@ -1,6 +1,20 @@
 Plan 19 — Conversation Context Resolution before Retrieval
 
-  Status: READY FOR IMPLEMENTATION
+  Status: IMPLEMENTED (backend + minimal frontend). This plan is the AUTHORITY for
+  conversation context resolution, server-owned history, idempotency, advisory
+  locking, deterministic reference resolution and structured rewriting. It
+  supersedes the "follow-up query rewriting/retrieval is deferred" clause of Plan
+  11 §"Conversation history policy for v1".
+
+  Deviations recorded during implementation (see backend README "Conversation
+  context store"):
+  - SSE always returns HTTP 200; an in-flight duplicate turn is signalled by
+    `done {status: "processing", retry_after_ms}` rather than a literal HTTP 202.
+  - The structured rewriter's Gemini fallback port is wired with `llm=None`
+    (rule-only) for the MVP; the adapter is deferred, not the port.
+  - `Neo4jCanonicalLookup` is wired but its live verification against a seeded
+    graph is deferred.
+  - Fine-tuning remains out of the MVP.
 
   ## 1. Mục tiêu và invariant
 
