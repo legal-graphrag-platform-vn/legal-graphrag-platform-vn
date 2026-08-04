@@ -32,6 +32,7 @@ class EvidenceBundle:
 class CompactionPlan:
     candidates: tuple[EvidenceCandidate, ...]
     paths: tuple[ValidatedPath, ...]
+    authoritative_path_ids: tuple[str, ...]
     required_bundle_sets: tuple[tuple[EvidenceBundle, ...], ...]
     omitted_evidence: tuple[OmittedEvidence, ...]
 
@@ -42,23 +43,52 @@ class EvidenceCompactor:
         context: RetrievalContext,
         validated: ValidatedEvidence,
     ) -> CompactionPlan:
+        paths, authoritative_path_ids = self._authoritative_paths(context, validated)
         protected_ids = {
             node.citable_unit_id
-            for path in validated.paths
+            for path in paths
             for node in path.path.nodes
             if node.citable_unit_id is not None
         }
+        source_candidates = (
+            tuple(
+                candidate
+                for candidate in validated.candidates
+                if candidate.unit.id in protected_ids
+            )
+            if context.intent is IntentType.MULTI_HOP
+            else validated.candidates
+        )
         candidates, omissions = self._deduplicate(
-            validated.candidates,
+            source_candidates,
             protected_ids=protected_ids,
         )
-        paths = validated.paths
         required = self._resolve_required_bundles(context, candidates, paths)
         return CompactionPlan(
             candidates=candidates,
             paths=paths,
+            authoritative_path_ids=authoritative_path_ids,
             required_bundle_sets=required,
             omitted_evidence=omissions,
+        )
+
+    @staticmethod
+    def _authoritative_paths(
+        context: RetrievalContext,
+        validated: ValidatedEvidence,
+    ) -> tuple[tuple[ValidatedPath, ...], tuple[str, ...]]:
+        if context.intent is not IntentType.MULTI_HOP:
+            return validated.paths, ()
+        execution = context.plan_execution
+        if execution is None:
+            return (), ()
+        authoritative_ids = execution.satisfied_path_fingerprints
+        authoritative_set = set(authoritative_ids)
+        return (
+            tuple(
+                path for path in validated.paths if path.path_id in authoritative_set
+            ),
+            authoritative_ids,
         )
 
     @staticmethod

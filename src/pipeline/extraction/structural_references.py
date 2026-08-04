@@ -242,7 +242,10 @@ _EXPLICIT_POINT = re.compile(
     r"\s+điều\s+(?P<article>\d+[a-z]?)\b"
 )
 _EXPLICIT_CLAUSE = re.compile(
-    r"(?i)\bkhoản\s+(?P<clause>\d+[a-z]?)\s+điều\s+(?P<article>\d+[a-z]?)\b"
+    r"(?i)\b(?:các\s+)?khoản\s+"
+    r"(?P<clauses>\d+[a-z]?(?:\s*,\s*(?:khoản\s+)?\d+[a-z]?)*"
+    r"(?:\s+và\s+(?:khoản\s+)?\d+[a-z]?)?)"
+    r"\s+điều\s+(?P<article>\d+[a-z]?)\b"
 )
 _CLAUSE_CURRENT_ARTICLE = re.compile(
     r"(?i)\bkhoản\s+(?P<clause>\d+[a-z]?)\s+điều\s+này\b"
@@ -302,7 +305,7 @@ class StructuralReferenceResolver:
             (_EXPLICIT_LOCAL_CHAPTER, self._resolve_explicit_local_chapter),
             (_POINTS_CURRENT_CLAUSE, self._resolve_points_current_clause),
             (_EXPLICIT_POINT, self._resolve_explicit_point),
-            (_EXPLICIT_CLAUSE, self._resolve_explicit_clause),
+            (_EXPLICIT_CLAUSE, self._resolve_explicit_clauses),
             (_CLAUSE_CURRENT_ARTICLE, self._resolve_clause_current_article),
             (_CURRENT_CLAUSE, self._resolve_current_clause),
             (_CURRENT_ARTICLE, self._resolve_current_article),
@@ -585,13 +588,17 @@ class StructuralReferenceResolver:
         )
         return _resolved_or_missing(mention, target, "explicit_point_target_missing")
 
-    def _resolve_explicit_clause(
+    def _resolve_explicit_clauses(
         self, mention: ReferenceMention, match: re.Match[str]
     ) -> ResolvedReference:
-        target = self.registry.clauses.get(
-            (match.group("article").lower(), match.group("clause").lower())
+        article_number = match.group("article").lower()
+        targets = tuple(
+            self.registry.clauses.get((article_number, clause_number)) or ""
+            for clause_number in _clause_numbers(match)
         )
-        return _resolved_or_missing(mention, target, "explicit_clause_target_missing")
+        if not targets or any(not target for target in targets):
+            return _unresolved(mention, "explicit_clause_target_missing")
+        return _resolved_or_self(mention, targets)
 
     def _resolve_clause_current_article(
         self, mention: ReferenceMention, match: re.Match[str]
@@ -834,6 +841,17 @@ def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
         clause_number=clause.lower() if clause else None,
         point_label=point.lower() if point else None,
     )
+
+
+def _clause_numbers(match: re.Match[str]) -> tuple[str, ...]:
+    groups = match.groupdict()
+    if groups.get("clauses"):
+        return tuple(
+            number.lower()
+            for number in re.findall(r"(?i)\b(\d+[a-z]?)\b", groups["clauses"])
+        )
+    clause = groups.get("clause")
+    return (clause.lower(),) if clause else ()
 
 
 def _external_unresolved(

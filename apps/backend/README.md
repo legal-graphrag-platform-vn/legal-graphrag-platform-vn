@@ -22,10 +22,11 @@ APP_MODE=mock PYTHONPATH=apps/backend \
 `APP_MODE=graphrag` constructs one retrieval runtime and one bounded executor
 for the FastAPI lifespan. It fails startup when enabled retrieval dependencies
 or required Neo4j configuration are unavailable; it never falls back to mock.
-Install the optional provider dependencies before enabling answers:
+Install the optional provider dependencies before enabling answers or query
+planning:
 
 ```bash
-uv sync --group llm
+uv sync --group embedding --group llm
 ```
 
 ```bash
@@ -37,6 +38,7 @@ BACKEND_RETRIEVAL_TIMEOUT_SECONDS=30 \
 BACKEND_RETRIEVAL_MAX_CONCURRENCY=4 \
 BACKEND_RETRIEVAL_SHUTDOWN_GRACE_SECONDS=5 \
 ANSWER_GENERATION_ENABLED=true \
+QUERY_PLANNING_ENABLED=false \
 ANSWER_PROVIDER=gemini \
 ANSWER_MODEL=gemini-3.1-flash-lite \
 GEMINI_API_KEY='<key>' \
@@ -55,6 +57,43 @@ constructed in that profile.
 GraphRAG mode is pilot development on the current graph. Gate 7 and M3-B13
 remain open, Milestone A is not passed, and Milestone B acceptance has not
 started.
+
+### Query-planning profile
+
+`QUERY_PLANNING_ENABLED=false` is the default. In this profile the backend does
+not construct a planner. Generic retrieval still runs, but MULTI_HOP has no
+trusted reasoning requirement, so `/chat` must fail-closed; this is not planned
+multi-hop support.
+
+When the flag is enabled in development, the backend runs `prepare` on the
+bounded retrieval worker, calls the planner asynchronously on the FastAPI event
+loop only for the `MULTI_HOP` intent, then runs bind/exact execution on the
+bounded worker. Other intents never call the planner. QG-1 currently still fails
+its preregistered thresholds, so the flag is not enabled by default and this
+profile must not be used for a production claim.
+
+| Variable | Default | Range / enable semantics |
+|---|---:|---|
+| `QUERY_PLANNING_ENABLED` | `false` | `true` only for development/evaluation; requires vector + full-text and `GEMINI_API_KEY` |
+| `QUERY_PLANNER_PROVIDER` | `gemini` | currently only `gemini` is supported |
+| `QUERY_PLANNER_MODEL` | `gemini-3.1-flash-lite` | non-empty model string |
+| `QUERY_PLANNER_TIMEOUT_SECONDS` | `30` | `0 < value <= 300` |
+| `QUERY_PLANNER_MAX_CONCURRENCY` | `2` | `1..16` |
+| `QUERY_PLANNER_MAX_RETRIES` | `2` | `0..5` |
+| `QUERY_PLANNER_MAX_OUTPUT_TOKENS` | `1024` | `128..4096` |
+| `QUERY_PLANNER_TEMPERATURE` | `0` | `0..1` |
+
+Planner provider failures use stable API errors:
+
+| HTTP | Code | Condition |
+|---:|---|---|
+| 504 | `QUERY_PLANNING_TIMEOUT` | planner exceeded timeout |
+| 503 | `QUERY_PLANNING_UNAVAILABLE` | provider/config/dependency unavailable |
+| 502 | `QUERY_PLANNING_OUTPUT_INVALID` | provider output failed strict plan schema |
+
+Binding/no-path failures never call the answer provider. The runtime keeps a
+typed `PlanReasonCode` in the retrieval context and the generation gate returns
+cannot-answer.
 
 ## Query API
 

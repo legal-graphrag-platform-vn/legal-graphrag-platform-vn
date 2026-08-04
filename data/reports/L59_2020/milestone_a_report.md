@@ -6,9 +6,9 @@
 - q3 relevant@5: PASS
 - article_embedding relevant@5: PASS
 - clause_embedding relevant@5: PASS
-- semantic_relation_total: 775
-- semantic_topology_edge_count: 746
-- semantic_excluded_edge_count_by_type: {'REFERS_TO': 29}
+- semantic_relation_total: 1094
+- semantic_topology_edge_count: 963
+- semantic_excluded_edge_count_by_type: {'REFERS_TO': 131}
 - semantic_edge_accounting_reconciles: True
 
 ## Gates

@@ -3,10 +3,20 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Mapping, Protocol, Sequence
+from typing import TYPE_CHECKING, Any, Mapping, Protocol, Sequence
 
 from src.retrieval.models import GraphExpansion, IntentType, RetrievedUnit
 from src.shared.retrieval_contract import RetrievalFilters
+
+if TYPE_CHECKING:
+    from src.retrieval.planning.executor import PlannedPathExecution
+    from src.retrieval.planning.linker import (
+        EndpointResolution,
+        EndpointRole,
+        SemanticEndpointResolution,
+        StructuralEndpointResolution,
+    )
+    from src.retrieval.planning.models import BoundSemanticPlan
 
 
 class VectorSearchPort(Protocol):
@@ -42,6 +52,74 @@ class GraphExpansionPort(Protocol):
         filters: RetrievalFilters,
         limit: int = 50,
     ) -> list[dict[str, Any]]: ...
+
+
+class StructuralEndpointLookupPort(Protocol):
+    def lookup_structural_endpoints(
+        self,
+        *,
+        label: str,
+        document_number: str | None,
+        article_number: str | None,
+        clause_number: str | None,
+        point_label: str | None,
+        filters: RetrievalFilters,
+        limit: int = 20,
+    ) -> list[Mapping[str, Any]]: ...
+
+
+class StructuralEndpointResolverPort(Protocol):
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: "EndpointRole | str",
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> "StructuralEndpointResolution": ...
+
+
+class SemanticEndpointResolverPort(Protocol):
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: "EndpointRole | str",
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> "SemanticEndpointResolution": ...
+
+
+class EndpointResolverPort(Protocol):
+    def resolve(
+        self,
+        *,
+        mention_text: str,
+        role: "EndpointRole | str",
+        expected_label: str | None,
+        filters: RetrievalFilters,
+    ) -> "EndpointResolution": ...
+
+
+class PlannedPathLookupPort(Protocol):
+    def lookup_exact_paths(
+        self,
+        *,
+        anchor_id: str,
+        target_id: str,
+        steps: Sequence[Mapping[str, str]],
+        filters: RetrievalFilters,
+        limit: int,
+    ) -> list[Mapping[str, Any]]: ...
+
+
+class PlannedPathExecutionPort(Protocol):
+    def execute(
+        self,
+        plan: "BoundSemanticPlan",
+        *,
+        filters: RetrievalFilters,
+    ) -> "PlannedPathExecution": ...
 
 
 class EmbeddingPort(Protocol):

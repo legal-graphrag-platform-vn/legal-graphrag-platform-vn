@@ -11,6 +11,7 @@ from src.retrieval.models import (
     RetrievedUnit,
     TemporalQuery,
 )
+from src.retrieval.execution_contract import PlanExecutionResult, PlanExecutionStatus
 
 
 class ContextBuilder:
@@ -34,6 +35,7 @@ class ContextBuilder:
         filters: RetrievalFilters | None = None,
         executed_channels: list[RetrievalChannel] | None = None,
         reranker_applied: bool = False,
+        plan_execution: PlanExecutionResult | None = None,
     ) -> RetrievalContext:
         """
         Build RetrievalContext.
@@ -93,5 +95,12 @@ class ContextBuilder:
             metrics=final_metrics,
             retrieval_mode=retrieval_mode,
             confidence_penalty=confidence_penalty,
+            plan_execution=plan_execution,
+            reasoning_requirement=(
+                plan_execution.derived_reasoning_requirement
+                if plan_execution is not None
+                and plan_execution.execution_status is PlanExecutionStatus.SATISFIED
+                else None
+            ),
             **context_fields,
         )

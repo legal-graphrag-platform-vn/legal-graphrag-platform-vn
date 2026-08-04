@@ -252,7 +252,8 @@ def test_approved_thirty_query_dataset_has_balanced_intents() -> None:
         for case in dataset.cases
         if case.intent is IntentType.MULTI_HOP
     }
-    assert list(graph_case_types.values()).count("multi_edge_traversal") == 4
+    assert list(graph_case_types.values()).count("multi_edge_traversal") == 3
+    assert list(graph_case_types.values()).count("direct_reference") == 1
     assert graph_case_types["multi_hop_05"] == "branching_reference"
 
 
@@ -363,9 +364,33 @@ def test_thirty_query_capabilities_and_gold_paths_match_pilot_artifacts() -> Non
                 properties = relation_properties[triple]
                 assert properties.get("citation_text"), case.query_id
                 assert properties.get("citation_type"), case.query_id
-                assert properties.get("confidence") is not None, case.query_id
-                assert properties.get("llm_model"), case.query_id
                 assert properties.get("created_at"), case.query_id
+                assert properties.get("reference_bundle_id"), case.query_id
+                assert properties.get("reference_target_count"), case.query_id
+                extraction_method = properties.get("extraction_method")
+                assert extraction_method in {"RULE", "ENTITY_LINKING", "LLM"}, (
+                    case.query_id
+                )
+                if extraction_method == "RULE":
+                    assert properties.get("resolver_name"), case.query_id
+                    assert properties.get("resolver_version"), case.query_id
+                    assert properties.get("source_unit_id"), case.query_id
+                    assert properties.get("source_char_start") is not None, (
+                        case.query_id
+                    )
+                    assert properties.get("source_char_end") is not None, case.query_id
+                elif extraction_method == "ENTITY_LINKING":
+                    assert properties.get("linker_name"), case.query_id
+                    assert properties.get("linker_version"), case.query_id
+                    assert properties.get("source_unit_id"), case.query_id
+                    assert properties.get("source_char_start") is not None, (
+                        case.query_id
+                    )
+                    assert properties.get("source_char_end") is not None, case.query_id
+                else:
+                    assert properties.get("confidence") is not None, case.query_id
+                    assert properties.get("llm_model"), case.query_id
+                    assert properties.get("checkpoint_id"), case.query_id
 
         if case.gold_temporal is not None:
             evidence = case.gold_temporal.temporal_evidence
@@ -387,8 +412,12 @@ def test_multi_hop_legal_gold_matches_reviewed_targets() -> None:
     assert cases["multi_hop_01"].gold_relevance[-1].unit_id == ("ldn_2020_art41_cl2")
     assert all(
         cases[query_id].minimum_hops >= 2
-        for query_id in ("multi_hop_01", "multi_hop_02", "multi_hop_03", "multi_hop_04")
+        for query_id in ("multi_hop_01", "multi_hop_02", "multi_hop_04")
     )
+    assert cases["multi_hop_03"].graph_case_type == "direct_reference"
+    assert cases["multi_hop_03"].minimum_hops == 1
+    assert cases["multi_hop_03"].gold_paths[0].relation_types == ["REFERS_TO"]
+    assert cases["multi_hop_03"].gold_paths[0].target_id == "ldn_2020_art49_cl2"
     assert cases["multi_hop_05"].minimum_hops == 1
     assert len(cases["multi_hop_05"].gold_paths) == 2
 

@@ -1,0 +1,94 @@
+{
+  "schema_version": "query-graph-linker-calibration-v1",
+  "evaluation_scope": "pilot_development",
+  "document_ids": ["ldn_2020"],
+  "embedding_contract": "flag_embedding:BAAI/bge-m3:1024",
+  "rrf_k": 60,
+  "candidate_budget": {"anchor": 10, "target": 10},
+  "selected_thresholds": {
+    "anchor_min_score": 0.063,
+    "anchor_min_margin": 0.001,
+    "target_min_score": 0.063,
+    "target_min_margin": 0.001
+  },
+  "cases": [
+    {
+      "case_id": "anchor_01",
+      "role": "anchor",
+      "mention_text": "tên doanh nghiệp bằng tiếng nước ngoài là tên được dịch từ tên tiếng Việt",
+      "expected_label": "Clause",
+      "gold_node_id": "ldn_2020_art39_cl1",
+      "gold_rank": 1,
+      "candidates": [
+        {"node_id": "ldn_2020_art39_cl1", "score": 0.064788933377},
+        {"node_id": "ldn_2020_art39_cl3", "score": 0.063780106139}
+      ]
+    },
+    {
+      "case_id": "anchor_02",
+      "role": "anchor",
+      "mention_text": "cuộc họp Hội đồng thành viên lần thứ ba không phụ thuộc số thành viên dự họp",
+      "expected_label": "Clause",
+      "gold_node_id": "ldn_2020_art145_cl3",
+      "gold_rank": 1,
+      "candidates": [
+        {"node_id": "ldn_2020_art145_cl3", "score": 0.048395490754},
+        {"node_id": "ldn_2020_art58_cl3", "score": 0.046943815757}
+      ]
+    },
+    {
+      "case_id": "anchor_03",
+      "role": "anchor",
+      "mention_text": "thành viên chưa góp vốn theo cam kết đương nhiên không còn là thành viên công ty",
+      "expected_label": "Clause",
+      "gold_node_id": "ldn_2020_art47_cl3",
+      "gold_rank": 2,
+      "candidates": [
+        {"node_id": "ldn_2020_art47_cl4", "score": 0.062597340849},
+        {"node_id": "ldn_2020_art47_cl3", "score": 0.048411885246}
+      ]
+    },
+    {
+      "case_id": "target_01",
+      "role": "target",
+      "mention_text": "các trường hợp được coi là tên gây nhầm lẫn với tên doanh nghiệp đã đăng ký",
+      "expected_label": "Clause",
+      "gold_node_id": "ldn_2020_art41_cl2",
+      "gold_rank": 1,
+      "candidates": [
+        {"node_id": "ldn_2020_art41_cl2", "score": 0.065044949762},
+        {"node_id": "ldn_2020_art38_cl1", "score": 0.062522546898}
+      ]
+    },
+    {
+      "case_id": "target_02",
+      "role": "target",
+      "mention_text": "cuộc họp Hội đồng thành viên lần thứ nhất có số thành viên dự họp sở hữu từ 65% vốn điều lệ",
+      "expected_label": "Clause",
+      "gold_node_id": "ldn_2020_art145_cl1",
+      "gold_rank": 4,
+      "candidates": [
+        {"node_id": "ldn_2020_art58_cl1", "score": 0.062697599532},
+        {"node_id": "ldn_2020_art80_cl6", "score": 0.045760287745}
+      ]
+    },
+    {
+      "case_id": "target_03",
+      "role": "target",
+      "mention_text": "thành viên công ty trách nhiệm hữu hạn hai thành viên trở lên có quyền chuyển nhượng phần vốn góp",
+      "expected_label": "Clause",
+      "gold_node_id": "ldn_2020_art52_cl1",
+      "gold_rank": 1,
+      "candidates": [
+        {"node_id": "ldn_2020_art52_cl1", "score": 0.063101373107},
+        {"node_id": "ldn_2020_art46_cl1", "score": 0.047891458496}
+      ]
+    }
+  ],
+  "path_execution": {
+    "source": "results/retrieval/query_graph_qg0.json",
+    "correct_count": 3,
+    "case_count": 3,
+    "accuracy": 1.0
+  }
+}

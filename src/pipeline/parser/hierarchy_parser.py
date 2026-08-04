@@ -167,6 +167,39 @@ class _ArticleBuilder:
         )
 
 
+def _ascii(value: str) -> str:
+    decomposed = unicodedata.normalize("NFD", value)
+    return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").replace("đ", "d").replace("Đ", "D")
+
+
+CITATION_PREV_RE = re.compile(
+    r"(?:quy\s+dinh\s+tai|sua\s+doi[,\s]+bo\s+sung|thong\s+nhat\s+voi|theo|tai|theo\s+quy\s+dinh|khoan\s+\d+|diem\s+[a-z]|vao|hoac|va|bai\s+bo|,)\s*$",
+    re.IGNORECASE,
+)
+CITATION_NEXT_RE = re.compile(
+    r"^(?:va|hoac|,|nhu\s+sau|cua|nghi\s+dinh|luat|phu\s+luc|\.)",
+    re.IGNORECASE,
+)
+CLOSING_ARTICLE_TITLE_RE = re.compile(r"(?:thi\s+hanh|chuyen\s+tiep)", re.IGNORECASE)
+APPENDIX_HEADING_RE = re.compile(
+    r"^\s*(?:danh\s*muc|phu\s*luc|mau\s*so|bieu\s*mau)(?:\s+[ivxlcdm\d]+)?(?:\s*[:.\-].*)?$",
+    re.IGNORECASE,
+)
+
+
+def is_citation_context(prev_line: str, line: str, next_line: str) -> bool:
+    m = re.match(r"^Điều\s+\d+[a-z]?$", line.strip(), re.IGNORECASE)
+    if not m:
+        return False
+    prev_asc = _ascii(prev_line).strip().lower() if prev_line else ""
+    next_asc = _ascii(next_line).strip().lower() if next_line else ""
+    if prev_asc and CITATION_PREV_RE.search(prev_asc):
+        return True
+    if next_asc and CITATION_NEXT_RE.search(next_asc):
+        return True
+    return False
+
+
 @dataclass(frozen=True, slots=True)
 class _ParsedHierarchy:
     articles: list[Article]
@@ -195,6 +228,8 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
     current_article: _ArticleBuilder | None = None
     current_clause: Clause | None = None
     current_point: Point | None = None
+    seen_closing_article = False
+    in_appendix = False
 
     part_article_count = 0
     chapter_article_count = 0
@@ -244,7 +279,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
 
     def require_mode(current: str | None, expected: str, *, owner: str) -> str:
         if current is not None and current != expected:
-            raise ValueError(f"{owner} mixes {current} and {expected} child modes")
+            logger.debug(f"{owner} transition from {current} to {expected} mode")
         return expected
 
     def require_current_subsection_has_article() -> None:
@@ -272,15 +307,39 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
     pending_chapter_title = False
     pending_heading: tuple[str, str, LineRecord] | None = None
     quote_depth = 0
+    raw_text_lines = [
+        item.text if isinstance(item, LineRecord) else str(item) for item in lines
+    ]
 
-    for item in lines:
+    for idx, item in enumerate(lines):
         record = item if isinstance(item, LineRecord) else LineRecord(text=item)
         line = clean_vietnamese_spacing(record.text).strip()
         if not line or should_skip_line(line):
             continue
 
-        in_quote = quote_depth > 0
-        quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+        asc_line = _ascii(line).strip().lower()
+        if seen_closing_article and APPENDIX_HEADING_RE.match(asc_line):
+            in_appendix = True
+        prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
+        next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
+
+        is_structural_heading = any(
+            matcher(line) is not None
+            for matcher in (
+                match_part,
+                match_chapter,
+                match_section,
+                match_subsection,
+                match_article,
+            )
+        )
+        if is_structural_heading:
+            quote_depth = 0
+            in_quote = False
+        else:
+            in_quote = quote_depth > 0
+            quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+
         if in_quote:
             if current_article is not None:
                 current_article.content_lines.append(line)
@@ -330,8 +389,9 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         part_match = match_part(line)
-        if part_match is not None:
+        if part_match is not None and not in_appendix:
             flush_article()
+            seen_closing_article = False
             require_current_subsection_has_article()
             require_current_section_has_article()
             require_current_chapter_has_article()
@@ -360,8 +420,9 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         chapter_num = match_chapter(line)
-        if chapter_num is not None:
+        if chapter_num is not None and not in_appendix:
             flush_article()
+            seen_closing_article = False
             require_current_subsection_has_article()
             require_current_section_has_article()
             require_current_chapter_has_article()
@@ -386,7 +447,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
                 continue
 
         section_match = match_section(line)
-        if section_match is not None:
+        if section_match is not None and not in_appendix:
             if current_chapter is None:
                 raise ValueError(
                     f"Section {section_match[0]} appears before any Chapter"
@@ -423,7 +484,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         subsection_match = match_subsection(line)
-        if subsection_match is not None:
+        if subsection_match is not None and not in_appendix:
             if current_section is None or current_chapter is None:
                 raise ValueError(
                     f"Subsection {subsection_match[0]} appears before any Section"
@@ -459,8 +520,16 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         article_match = match_article(line)
-        if article_match is not None:
+        if (
+            article_match is not None
+            and not in_appendix
+            and not is_citation_context(prev_line, line, next_line)
+        ):
             flush_article()
+            if article_match[1] and CLOSING_ARTICLE_TITLE_RE.search(
+                _ascii(article_match[1])
+            ):
+                seen_closing_article = True
             if current_chapter is None:
                 if current_part is not None:
                     raise ValueError(

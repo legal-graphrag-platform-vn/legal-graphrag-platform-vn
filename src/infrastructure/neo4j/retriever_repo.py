@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 from neo4j import Driver
 
+from src.shared.ontology.contract import PHASE1_PERSISTED_LABELS, PHASE1_RELATION_ENUM
 from src.shared.retrieval_contract import RetrievalFilters
 from src.shared.ontology.hierarchy import MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH
 
@@ -106,8 +107,7 @@ class Neo4jRetrieverRepo:
         OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(related)
         WITH path, related,
              CASE WHEN related:Point THEN parent_clause ELSE related END AS unit
-        CALL {{
-          WITH path
+        CALL (path) {{
           UNWIND nodes(path) AS path_node
           OPTIONAL MATCH (path_parent_clause:Clause)-[:CONTAINS]->(path_node)
           RETURN collect({{
@@ -168,6 +168,108 @@ class Neo4jRetrieverRepo:
             limit=limit,
             **_filter_parameters(filters),
         )
+
+    def lookup_structural_endpoints(
+        self,
+        *,
+        label: str,
+        document_number: str | None,
+        article_number: str | None,
+        clause_number: str | None,
+        point_label: str | None,
+        filters: RetrievalFilters,
+        limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        if label not in {"Document", "Article", "Clause", "Point"}:
+            raise ValueError(f"Unsupported structural endpoint label: {label}")
+        if not 1 <= limit <= 100:
+            raise ValueError(
+                "Structural endpoint lookup limit must be between 1 and 100"
+            )
+        query = """
+        MATCH (document:Document)
+        WHERE document.id IN $document_ids
+          AND ($doc_types = [] OR document.doc_type IN $doc_types)
+        MATCH (document)-[:CONTAINS*0..4]->(node)
+        WHERE $label IN labels(node)
+        OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(node)
+        OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(node)
+        OPTIONAL MATCH (point_article:Article)-[:CONTAINS]->(parent_clause)
+        WITH document, node, parent_clause,
+             CASE WHEN node:Article THEN node.number
+                  WHEN node:Clause THEN parent_article.number
+                  WHEN node:Point THEN point_article.number
+                  ELSE null END AS resolved_article_number,
+             CASE WHEN node:Clause THEN node.number
+                  WHEN node:Point THEN parent_clause.number
+                  ELSE null END AS resolved_clause_number,
+             CASE WHEN node:Point THEN node.label ELSE null END AS resolved_point_label,
+             CASE WHEN node:Point THEN parent_clause ELSE node END AS temporal_node
+        WHERE ($document_number IS NULL OR document.number = $document_number)
+          AND ($article_number IS NULL OR resolved_article_number = $article_number)
+          AND ($clause_number IS NULL OR resolved_clause_number = $clause_number)
+          AND ($point_label IS NULL OR resolved_point_label = $point_label)
+          AND ($legal_statuses = [] OR temporal_node.legal_status IN $legal_statuses)
+          AND ($query_date IS NULL OR (
+            temporal_node.effective_from IS NOT NULL
+            AND temporal_node.effective_from <= $query_date
+            AND (temporal_node.effective_to IS NULL
+                 OR temporal_node.effective_to > $query_date)
+          ))
+        RETURN DISTINCT node.id AS node_id,
+                        $label AS label,
+                        document.id AS document_id
+        ORDER BY node_id
+        LIMIT $limit
+        """
+        return self._run(
+            query,
+            label=label,
+            document_number=document_number,
+            article_number=article_number,
+            clause_number=clause_number,
+            point_label=point_label,
+            limit=limit,
+            **_filter_parameters(filters),
+        )
+
+    def lookup_exact_paths(
+        self,
+        *,
+        anchor_id: str,
+        target_id: str,
+        steps: Sequence[Mapping[str, str]],
+        filters: RetrievalFilters,
+        limit: int,
+    ) -> list[dict[str, Any]]:
+        depth = len(steps)
+        try:
+            query = _EXACT_PATH_QUERIES[depth]
+        except KeyError as exc:
+            raise ValueError("Exact path depth must be 2 or 3") from exc
+        if not 1 <= limit <= 101:
+            raise ValueError("Exact path lookup limit must be between 1 and 101")
+
+        parameters: dict[str, object] = {
+            "anchor_id": _required_lookup_text(anchor_id, "anchor ID"),
+            "target_id": _required_lookup_text(target_id, "target ID"),
+            "limit": limit,
+            **_filter_parameters(filters),
+        }
+        for index, step in enumerate(steps, start=1):
+            relation = step.get("relation")
+            direction = step.get("direction")
+            next_label = step.get("next_label")
+            if relation not in PHASE1_RELATION_ENUM:
+                raise ValueError(f"Unsupported exact path relation at step {index}")
+            if direction not in {"outgoing", "incoming"}:
+                raise ValueError(f"Unsupported exact path direction at step {index}")
+            if next_label not in PHASE1_PERSISTED_LABELS:
+                raise ValueError(f"Unsupported exact path label at step {index}")
+            parameters[f"relation_{index}"] = relation
+            parameters[f"direction_{index}"] = direction
+            parameters[f"next_label_{index}"] = next_label
+        return self._run(query, **parameters)
 
     def inspect_dependencies(self) -> dict[str, object]:
         query = """
@@ -361,3 +463,83 @@ def _index_online(indexes: object, name: str) -> bool:
         return False
     value = indexes.get(name)
     return isinstance(value, dict) and value.get("state") == "ONLINE"
+
+
+def _required_lookup_text(value: str, field_name: str) -> str:
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError(f"Exact path {field_name} must not be blank")
+    return normalized
+
+
+def _exact_path_query(depth: int) -> str:
+    node_names = [f"node_{index}" for index in range(depth + 1)]
+    edge_names = [f"edge_{index}" for index in range(1, depth + 1)]
+    pattern = f"({node_names[0]})" + "".join(
+        f"-[{edge_names[index - 1]}]-({node_names[index]})"
+        for index in range(1, depth + 1)
+    )
+    constraints = []
+    for index in range(1, depth + 1):
+        previous = node_names[index - 1]
+        current = node_names[index]
+        edge = edge_names[index - 1]
+        constraints.append(
+            f"""type({edge}) = $relation_{index}
+          AND $next_label_{index} IN labels({current})
+          AND ((
+            $direction_{index} = 'outgoing'
+            AND startNode({edge}) = {previous}
+            AND endNode({edge}) = {current}
+          ) OR (
+            $direction_{index} = 'incoming'
+            AND startNode({edge}) = {current}
+            AND endNode({edge}) = {previous}
+          ))"""
+        )
+    constraint_text = "\n          AND ".join(constraints)
+    return f"""
+        MATCH path = {pattern}
+        WHERE {node_names[0]}.id = $anchor_id
+          AND {node_names[-1]}.id = $target_id
+          AND {constraint_text}
+          AND all(path_node IN nodes(path) WHERE
+            single(other IN nodes(path) WHERE other = path_node))
+        CALL (path) {{
+          UNWIND nodes(path) AS path_node
+          OPTIONAL MATCH (path_parent_clause:Clause)-[:CONTAINS]->(path_node)
+          RETURN collect({{
+            node_id: path_node.id,
+            labels: labels(path_node),
+            effective_from: path_node.effective_from,
+            effective_to: path_node.effective_to,
+            legal_status: path_node.legal_status,
+            citable_unit_id: CASE
+              WHEN path_node:Article OR path_node:Clause THEN path_node.id
+              WHEN path_node:Point THEN path_parent_clause.id
+              ELSE null
+            END
+          }}) AS path_node_refs
+        }}
+        RETURN path_node_refs,
+          [rel IN relationships(path) | {{
+            relation_id: coalesce(rel.relation_id, elementId(rel)),
+            relation_type: type(rel),
+            source_id: startNode(rel).id,
+            target_id: endNode(rel).id,
+            effective_from: rel.effective_from,
+            effective_to: rel.effective_to,
+            citation_text: rel.citation_text,
+            citation_type: rel.citation_type,
+            extraction_method: rel.extraction_method
+          }}] AS path_edge_refs
+        ORDER BY length(path),
+                 [rel IN relationships(path) | type(rel)],
+                 [path_node IN nodes(path) | path_node.id],
+                 [rel IN relationships(path) | startNode(rel).id],
+                 [rel IN relationships(path) | endNode(rel).id]
+        LIMIT $limit
+        """
+
+
+_EXACT_PATH_QUERIES = {depth: _exact_path_query(depth) for depth in (2, 3)}

@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -40,3 +40,17 @@ class RetrievalConfig(BaseSettings):
         if not self.reranker_model.strip():
             raise ValueError("RETRIEVAL_RERANKER_MODEL must not be blank")
         return self
+
+
+class EndpointLinkerConfig(BaseModel):
+    """Calibrated semantic binding thresholds, isolated from retrieval ranking."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    rrf_k: int = Field(default=60, ge=1)
+    anchor_min_score: float = Field(default=0.063, gt=0.0, le=1.0)
+    target_min_score: float = Field(default=0.063, gt=0.0, le=1.0)
+    anchor_min_margin: float = Field(default=0.001, ge=0.0, le=1.0)
+    target_min_margin: float = Field(default=0.001, ge=0.0, le=1.0)
+    anchor_candidate_k: int = Field(default=10, ge=1, le=100)
+    target_candidate_k: int = Field(default=10, ge=1, le=100)

@@ -103,6 +103,12 @@ def test_normalize_id() -> None:
     assert provider._normalize_id("a-b-c!123") == "a_b_c_123"
 
 
+def test_extracted_entity_canonicalizes_unicode_id_before_schema_validation() -> None:
+    entity = ExtractedEntity(id="luật_này", type="Document", label="Luật này")
+
+    assert entity.id == "luat_nay"
+
+
 @pytest.mark.parametrize(
     ("message", "reason"),
     [
@@ -123,6 +129,17 @@ def test_gemini_transient_rate_limit_is_retryable() -> None:
             RuntimeError("429 RESOURCE_EXHAUSTED: per-minute request limit; retry in 5s"),
             "gemini-test",
         )
+
+
+def test_gemini_malformed_structured_output_is_retryable() -> None:
+    from src.pipeline.extraction.models import RelationExtractionResult
+    from src.pipeline.extraction.providers.base import RetryableExtractionProviderError
+    from src.pipeline.extraction.providers.gemini_provider import (
+        _validate_structured_response,
+    )
+
+    with pytest.raises(RetryableExtractionProviderError, match="invalid_structured_output"):
+        _validate_structured_response(RelationExtractionResult, '{"relations":[')
 
 
 def test_gemini_requests_use_global_minimum_interval(monkeypatch) -> None:
@@ -153,6 +170,17 @@ def test_semantic_entities_are_canonical_before_relation_pass() -> None:
             label="Bình đẳng trước pháp luật",
         )
     ]
+
+
+def test_normalize_entities_resolves_duplicate_canonical_ids() -> None:
+    raw_entities = [
+        ExtractedEntity(id="e1", type="Concept", label="Thủ tướng"),
+        ExtractedEntity(id="e2", type="Entity", label="Thủ Tướng"),
+    ]
+    res = normalize_entities_for_relations(raw_entities)
+    assert len(res) == 1
+    assert res[0].id == "thu_tuong"
+    assert res[0].type == "Entity"
 
 
 def test_extract_article_passes_canonical_entities_to_relation_provider() -> None:

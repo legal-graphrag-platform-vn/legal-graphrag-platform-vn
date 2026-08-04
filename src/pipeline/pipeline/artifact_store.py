@@ -40,16 +40,23 @@ def publish_staged_artifacts(processed_doc_dir: Path, artifact_set_id: str, stag
     # Stable aliases all follow one pointer. Install aliases first, then switch
     # the pointer once so readers can observe either the old set or the new set,
     # never a mixture of both.
-    for name in ACTIVE_ARTIFACT_NAMES:
-        alias = processed_doc_dir / name
-        alias_tmp = processed_doc_dir / f".{name}.{artifact_set_id}.tmp"
-        alias_tmp.symlink_to(Path("current_extraction") / name)
-        alias_tmp.replace(alias)
+    try:
+        for name in ACTIVE_ARTIFACT_NAMES:
+            alias = processed_doc_dir / name
+            alias_tmp = processed_doc_dir / f".{name}.{artifact_set_id}.tmp"
+            alias_tmp.symlink_to(Path("current_extraction") / name)
+            alias_tmp.replace(alias)
 
-    pointer = processed_doc_dir / "current_extraction"
-    pointer_tmp = processed_doc_dir / f".current_extraction.{artifact_set_id}.tmp"
-    pointer_tmp.symlink_to(Path("artifact_sets") / artifact_set_id, target_is_directory=True)
-    pointer_tmp.replace(pointer)
+        pointer = processed_doc_dir / "current_extraction"
+        pointer_tmp = processed_doc_dir / f".current_extraction.{artifact_set_id}.tmp"
+        pointer_tmp.symlink_to(
+            Path("artifact_sets") / artifact_set_id, target_is_directory=True
+        )
+        pointer_tmp.replace(pointer)
+    except OSError as exc:
+        if getattr(exc, "winerror", None) != 1314:
+            raise
+        _publish_without_symlinks(processed_doc_dir, artifact_set_id, final_dir)
 
     return final_dir
 
@@ -61,7 +68,29 @@ def discard_staging_artifacts(staging: Path) -> None:
 
 def active_artifact_dir(processed_doc_dir: Path) -> Path:
     pointer = processed_doc_dir / "current_extraction"
+    if pointer.is_file() and not pointer.is_symlink():
+        relative_target = pointer.read_text(encoding="utf-8").strip()
+        return (processed_doc_dir / relative_target).resolve(strict=True)
     return pointer.resolve(strict=True) if pointer.exists() else processed_doc_dir
+
+
+def _publish_without_symlinks(
+    processed_doc_dir: Path, artifact_set_id: str, final_dir: Path
+) -> None:
+    for name in ACTIVE_ARTIFACT_NAMES:
+        alias = processed_doc_dir / name
+        alias_tmp = processed_doc_dir / f".{name}.{artifact_set_id}.tmp"
+        alias_tmp.unlink(missing_ok=True)
+        shutil.copy2(final_dir / name, alias_tmp)
+        os.replace(alias_tmp, alias)
+
+    pointer = processed_doc_dir / "current_extraction"
+    pointer_tmp = processed_doc_dir / f".current_extraction.{artifact_set_id}.tmp"
+    pointer_tmp.unlink(missing_ok=True)
+    pointer_tmp.write_text(
+        str(Path("artifact_sets") / artifact_set_id), encoding="utf-8"
+    )
+    os.replace(pointer_tmp, pointer)
 
 
 def replace_text_atomic(path: Path, content: str) -> None:

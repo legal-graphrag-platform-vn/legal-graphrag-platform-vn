@@ -12,6 +12,9 @@ from api.models import APIErrorResponse, ValidationIssue
 from services.errors import (
     BackendDocumentNotFoundError,
     BackendFeatureUnavailableError,
+    BackendPlanningOutputError,
+    BackendPlanningTimeoutError,
+    BackendPlanningUnavailableError,
     BackendRetrievalClosedError,
     BackendRetrievalTimeoutError,
 )
@@ -141,6 +144,12 @@ def _retrieval_error_contract(error: RetrievalError) -> tuple[int, str]:
         return 501, "FEATURE_NOT_IMPLEMENTED"
     if isinstance(error, BackendRetrievalClosedError):
         return 503, "RETRIEVAL_SERVICE_UNAVAILABLE"
+    if isinstance(error, BackendPlanningTimeoutError):
+        return 504, "QUERY_PLANNING_TIMEOUT"
+    if isinstance(error, BackendPlanningUnavailableError):
+        return 503, "QUERY_PLANNING_UNAVAILABLE"
+    if isinstance(error, BackendPlanningOutputError):
+        return 502, "QUERY_PLANNING_OUTPUT_INVALID"
     if isinstance(error, RetrievalCapabilityError):
         return 409, "RETRIEVAL_CAPABILITY_UNSUPPORTED"
     if isinstance(error, RetrievalDependencyError):

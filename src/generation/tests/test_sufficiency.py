@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
-from src.generation.tests.factories import retrieval_context
+from src.generation.tests.factories import graph_path, retrieval_context
 from src.retrieval.models import IntentType
 
 
@@ -38,8 +38,56 @@ def test_multi_hop_requires_trusted_requirement_and_two_edge_path() -> None:
         intent=IntentType.MULTI_HOP,
         path_relations=["REFERS_TO", "REFERS_TO"],
     )
-    assert EvidenceSufficiencyPolicy().evaluate(missing).sufficient is False
+    missing_result = EvidenceSufficiencyPolicy().evaluate(missing)
+    assert missing_result.sufficient is False
+    assert missing_result.reason_code == "MULTI_HOP_REQUIREMENT_UNRESOLVED"
     assert EvidenceSufficiencyPolicy().evaluate(present).sufficient is True
+
+
+def test_multi_hop_rejects_matching_relations_outside_satisfied_set() -> None:
+    context = retrieval_context(
+        intent=IntentType.MULTI_HOP,
+        path_relations=["REFERS_TO", "REQUIRES"],
+    )
+    context.graph_paths = [
+        graph_path(
+            ["doc_art9", "doc_art2", "doc_art3"],
+            ["REFERS_TO", "REQUIRES"],
+        )
+    ]
+
+    result = EvidenceSufficiencyPolicy().evaluate(context)
+
+    assert result.sufficient is False
+    assert result.reason_code == "MISSING_MULTI_HOP_PATH"
+
+
+def test_multi_hop_rejects_flipped_direction_outside_satisfied_set() -> None:
+    context = retrieval_context(
+        intent=IntentType.MULTI_HOP,
+        path_relations=["REFERS_TO", "REQUIRES"],
+    )
+    original = context.graph_paths[0]
+    context.graph_paths = [
+        original.model_copy(
+            update={
+                "edges": tuple(
+                    edge.model_copy(
+                        update={
+                            "source_id": edge.target_id,
+                            "target_id": edge.source_id,
+                        }
+                    )
+                    for edge in original.edges
+                )
+            }
+        )
+    ]
+
+    result = EvidenceSufficiencyPolicy().evaluate(context)
+
+    assert result.sufficient is False
+    assert result.reason_code == "MISSING_MULTI_HOP_PATH"
 
 
 def test_validity_requires_resolved_date_and_interval() -> None:
