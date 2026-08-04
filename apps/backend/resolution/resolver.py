@@ -1,10 +1,18 @@
 """Deterministic reference resolver (Plan 19 §4).
 
 Candidate universe rules:
-  * With a pending clarification, the universe is exactly the pending snapshot;
-    it is never expanded by history or a new explicit mention.
+  * A pending SELECT is answered only by an ordinal/label selection or a cancel;
+    its candidate list is never expanded in place by history or a new mention.
+    A genuinely new question does not extend the list — it abandons the stale
+    clarification and is resolved fresh (see break-out below).
   * Without pending, explicit canonical candidates come from the current message
     and grounded focuses serve anaphora only.
+
+Pending SELECT break-out: a reply that is neither a valid selection nor a cancel
+is re-resolved as a fresh message. If that yields a committing outcome (resolved
+or standalone) or a new explicit-based SELECT, the user has asked a genuinely new
+question and the stale clarification is abandoned. A merely ambiguous reply
+(RESTATE) keeps the original numbered list.
 
 The resolver is deterministic; it never rewrites text or calls a model.
 """
@@ -42,6 +50,19 @@ from resolution.models import (
 _MAX_CLARIFICATION_CANDIDATES = 5
 
 
+def _breaks_out_of_pending_select(outcome: ResolutionOutcome) -> bool:
+    """A fresh outcome that supersedes a stale pending SELECT clarification.
+
+    Committing outcomes (resolved/standalone) and a new explicit-based SELECT
+    count as a new question; an ambiguous RESTATE does not.
+    """
+    if isinstance(outcome, (ResolvedResolution, StandaloneResolution)):
+        return True
+    if isinstance(outcome, ClarifyResolution):
+        return outcome.mode is ClarificationMode.SELECT
+    return False
+
+
 class ReferenceResolver:
     def __init__(self, lookup: CanonicalLookupPort) -> None:
         self._lookup = lookup
@@ -73,7 +94,11 @@ class ReferenceResolver:
                     candidate=ResolvedCandidate.from_clarification_candidate(candidate),
                     is_anaphora=True,
                 )
-            # Invalid reply re-asks the same snapshot (Plan 19 §4).
+            # A genuinely new question breaks out of the stale clarification; a
+            # merely ambiguous reply re-asks the same snapshot (Plan 19 §4).
+            fresh = await self._resolve_fresh(message, context)
+            if _breaks_out_of_pending_select(fresh):
+                return fresh
             return ClarifyResolution(
                 mode=ClarificationMode.SELECT,
                 resolution_status=ResolutionStatus.AMBIGUOUS,

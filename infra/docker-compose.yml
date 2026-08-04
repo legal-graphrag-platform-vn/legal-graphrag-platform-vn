@@ -36,7 +36,7 @@ services:
       start_period: 30s
 
   postgres:
-    image: postgres:18.3-alpine
+    image: postgres:16-alpine
     container_name: graphrag-postgres
     restart: unless-stopped
     ports:
