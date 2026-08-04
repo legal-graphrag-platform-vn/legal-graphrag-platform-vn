@@ -181,7 +181,10 @@ CITATION_NEXT_RE = re.compile(
     re.IGNORECASE,
 )
 CLOSING_ARTICLE_TITLE_RE = re.compile(r"(?:thi\s+hanh|chuyen\s+tiep)", re.IGNORECASE)
-APPENDIX_ASCII_RE = re.compile(r"^\s*(?:danh\s*muc|phu\s*luc|mau\s*so|bieu\s*mau)\b", re.IGNORECASE)
+APPENDIX_HEADING_RE = re.compile(
+    r"^\s*(?:danh\s*muc|phu\s*luc|mau\s*so|bieu\s*mau)(?:\s+[ivxlcdm\d]+)?(?:\s*[:.\-].*)?$",
+    re.IGNORECASE,
+)
 
 
 def is_citation_context(prev_line: str, line: str, next_line: str) -> bool:
@@ -276,7 +279,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
 
     def require_mode(current: str | None, expected: str, *, owner: str) -> str:
         if current is not None and current != expected:
-            raise ValueError(f"{owner} mixes {current} and {expected} child modes")
+            logger.debug(f"{owner} transition from {current} to {expected} mode")
         return expected
 
     def require_current_subsection_has_article() -> None:
@@ -315,13 +318,28 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         asc_line = _ascii(line).strip().lower()
-        if seen_closing_article and APPENDIX_ASCII_RE.search(asc_line):
+        if seen_closing_article and APPENDIX_HEADING_RE.match(asc_line):
             in_appendix = True
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
-        in_quote = quote_depth > 0
-        quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+        is_structural_heading = any(
+            matcher(line) is not None
+            for matcher in (
+                match_part,
+                match_chapter,
+                match_section,
+                match_subsection,
+                match_article,
+            )
+        )
+        if is_structural_heading:
+            quote_depth = 0
+            in_quote = False
+        else:
+            in_quote = quote_depth > 0
+            quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+
         if in_quote:
             if current_article is not None:
                 current_article.content_lines.append(line)
@@ -373,6 +391,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         part_match = match_part(line)
         if part_match is not None and not in_appendix:
             flush_article()
+            seen_closing_article = False
             require_current_subsection_has_article()
             require_current_section_has_article()
             require_current_chapter_has_article()
@@ -403,6 +422,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         chapter_num = match_chapter(line)
         if chapter_num is not None and not in_appendix:
             flush_article()
+            seen_closing_article = False
             require_current_subsection_has_article()
             require_current_section_has_article()
             require_current_chapter_has_article()

@@ -294,7 +294,8 @@ class ParsedDocument(BaseModel):
                 )
             referenced_subsections.add(subsection_key)
 
-        if len(root_modes) > 1:
+        structural_root_modes = root_modes - {"Article"}
+        if len(structural_root_modes) > 1:
             raise ValueError(
                 "Document mixes Part, Chapter, or direct Article child modes"
             )
