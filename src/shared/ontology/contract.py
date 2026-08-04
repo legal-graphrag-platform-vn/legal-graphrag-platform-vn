@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.6.0"
+ONTOLOGY_VERSION = "1.8.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -89,7 +89,10 @@ ONTOLOGY_LABEL_MAP: dict[str, str] = {
 PHASE1_PERSISTED_LABELS: set[str] = {
     "Document",
     "Issuer",
+    "Part",
     "Chapter",
+    "Section",
+    "Subsection",
     "Article",
     "Clause",
     "Point",
@@ -124,9 +127,15 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "CONTAINS": {
         "valid_pairs": [
+            ("Document", "Part"),
             ("Document", "Chapter"),
             ("Document", "Article"),
+            ("Part", "Chapter"),
+            ("Chapter", "Section"),
             ("Chapter", "Article"),
+            ("Section", "Subsection"),
+            ("Section", "Article"),
+            ("Subsection", "Article"),
             ("Article", "Clause"),
             ("Clause", "Point"),
         ],
@@ -167,7 +176,16 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "REFERS_TO": {
         "allowed_head": ["Article", "Clause", "Point"],
-        "allowed_tail": ["Article", "Clause", "Point", "Document"],
+        "allowed_tail": [
+            "Article",
+            "Clause",
+            "Point",
+            "Document",
+            "Part",
+            "Chapter",
+            "Section",
+            "Subsection",
+        ],
         "no_self_loop": False,
         "required_properties": [
             "citation_text",
@@ -259,11 +277,13 @@ NODE_REQUIRED_FIELDS: dict[str, list[str]] = {
         "issuer_name",
     ],
     "Issuer": ["id", "name", "branch"],
+    "Part": ["id", "number", "title"],
     "Chapter": ["id", "number", "title"],
+    "Section": ["id", "number", "title"],
+    "Subsection": ["id", "number", "title"],
     "Article": [
         "id",
         "number",
-        "title",
         "content_raw",
         "effective_from",
         "legal_status",

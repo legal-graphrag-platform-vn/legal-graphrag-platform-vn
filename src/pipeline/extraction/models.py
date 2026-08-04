@@ -15,7 +15,17 @@ from pydantic import BaseModel, Field, field_validator
 from src.pipeline.parser.models import LegalNumber
 
 EntityType = Literal[
-    "Document", "Chapter", "Article", "Clause", "Point", "Concept", "Entity", "Action"
+    "Document",
+    "Part",
+    "Chapter",
+    "Section",
+    "Subsection",
+    "Article",
+    "Clause",
+    "Point",
+    "Concept",
+    "Entity",
+    "Action",
 ]
 
 # Canonical active-voice relation types from plans/legal_ontology.md v1.4.0.

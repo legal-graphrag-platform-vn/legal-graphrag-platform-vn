@@ -7,18 +7,52 @@ from typing import Any, Protocol
 
 
 EXPECTED_CONSTRAINTS = {
-    "doc_id_unique", "ch_id_unique", "art_id_unique", "cls_id_unique", "pnt_id_unique",
-    "iss_id_unique", "lc_id_unique", "ls_id_unique", "la_id_unique",
+    "doc_id_unique",
+    "part_id_unique",
+    "ch_id_unique",
+    "sec_id_unique",
+    "subsec_id_unique",
+    "art_id_unique",
+    "cls_id_unique",
+    "pnt_id_unique",
+    "iss_id_unique",
+    "lc_id_unique",
+    "ls_id_unique",
+    "la_id_unique",
 }
 EXPECTED_USER_INDEXES = {
-    "doc_number", "doc_doc_type", "doc_normative", "doc_legal_status", "doc_issuer_name",
-    "art_number", "art_legal_status", "cls_legal_status", "issuer_name_idx",
-    "lc_name", "ls_name", "la_name", "doc_temporal", "art_temporal", "cls_temporal",
-    "amends_from", "replaces_from", "repeals_from", "issued_by_relation_id",
-    "contains_relation_id", "refers_to_relation_id", "guides_relation_id",
-    "amends_relation_id", "repeals_relation_id", "replaces_relation_id",
-    "defines_relation_id", "regulates_relation_id", "requires_relation_id",
-    "legal_article_clause_fulltext", "legal_point_fulltext", "article_embedding", "clause_embedding",
+    "doc_number",
+    "doc_doc_type",
+    "doc_normative",
+    "doc_legal_status",
+    "doc_issuer_name",
+    "art_number",
+    "art_legal_status",
+    "cls_legal_status",
+    "issuer_name_idx",
+    "lc_name",
+    "ls_name",
+    "la_name",
+    "doc_temporal",
+    "art_temporal",
+    "cls_temporal",
+    "amends_from",
+    "replaces_from",
+    "repeals_from",
+    "issued_by_relation_id",
+    "contains_relation_id",
+    "refers_to_relation_id",
+    "guides_relation_id",
+    "amends_relation_id",
+    "repeals_relation_id",
+    "replaces_relation_id",
+    "defines_relation_id",
+    "regulates_relation_id",
+    "requires_relation_id",
+    "legal_article_clause_fulltext",
+    "legal_point_fulltext",
+    "article_embedding",
+    "clause_embedding",
 }
 VECTOR_INDEXES = {"article_embedding", "clause_embedding"}
 FORBIDDEN_LEGACY_INDEXES = {"legal_fulltext", "entity_vector"}
@@ -39,9 +73,14 @@ class SchemaVerificationReport:
 
 
 def verify_canonical_schema(session: SessionProtocol) -> SchemaVerificationReport:
-    constraints = {str(row["name"]) for row in session.run("SHOW CONSTRAINTS YIELD name RETURN name")}
+    constraints = {
+        str(row["name"])
+        for row in session.run("SHOW CONSTRAINTS YIELD name RETURN name")
+    }
     index_rows = list(
-        session.run("SHOW INDEXES YIELD name, type, state, options RETURN name, type, state, options")
+        session.run(
+            "SHOW INDEXES YIELD name, type, state, options RETURN name, type, state, options"
+        )
     )
     user_rows = [row for row in index_rows if str(row["type"]).upper() != "LOOKUP"]
     indexes = {str(row["name"]) for row in user_rows}

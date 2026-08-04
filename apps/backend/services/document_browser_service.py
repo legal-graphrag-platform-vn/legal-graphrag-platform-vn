@@ -20,7 +20,10 @@ from api.models import (
     GraphEdge,
     GraphNode,
     PageMeta,
+    PartDetail,
     PointDetail,
+    SectionDetail,
+    SubsectionDetail,
 )
 from services.errors import BackendDocumentNotFoundError
 from services.interfaces import AsyncRetrievalRunner
@@ -143,13 +146,18 @@ class Neo4jDocumentBrowserService:
 def _document_detail(result: dict[str, Any]) -> DocumentDetail:
     document = result["document"]
     nodes = {str(node["id"]): node for node in result["nodes"]}
-    children: dict[str, list[str]] = {}
     parent: dict[str, str] = {}
     for edge in result["structural_edges"]:
         source = str(edge["source"])
         target = str(edge["target"])
+        existing = parent.get(target)
+        if existing is None or _parent_rank(
+            nodes, source, document["id"]
+        ) > _parent_rank(nodes, existing, document["id"]):
+            parent[target] = source
+    children: dict[str, list[str]] = {}
+    for target, source in parent.items():
         children.setdefault(source, []).append(target)
-        parent[target] = source
 
     clauses = {
         node_id: _clause(node, children, nodes)
@@ -161,7 +169,88 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
         for node_id, node in nodes.items()
         if node["label"] == "Article"
     }
-    chapters = [
+    subsections = {
+        node_id: SubsectionDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=str(node.get("title") or ""),
+            articles=_sorted_items(
+                [
+                    articles[item]
+                    for item in children.get(node_id, [])
+                    if item in articles
+                ]
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Subsection"
+    }
+    sections = {
+        node_id: SectionDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=str(node.get("title") or ""),
+            articles=_sorted_items(
+                [
+                    articles[item]
+                    for item in children.get(node_id, [])
+                    if item in articles
+                ]
+            ),
+            subsections=sorted(
+                [
+                    subsections[item]
+                    for item in children.get(node_id, [])
+                    if item in subsections
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Section"
+    }
+    chapters = {
+        node_id: ChapterDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=node.get("title"),
+            articles=_sorted_items(
+                [
+                    articles[item]
+                    for item in children.get(node_id, [])
+                    if item in articles
+                ]
+            ),
+            sections=sorted(
+                [
+                    sections[item]
+                    for item in children.get(node_id, [])
+                    if item in sections
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Chapter"
+    }
+    parts = [
+        PartDetail(
+            id=node_id,
+            number=str(node.get("number") or ""),
+            title=str(node.get("title") or ""),
+            chapters=sorted(
+                [
+                    chapters[item]
+                    for item in children.get(node_id, [])
+                    if item in chapters
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
+        )
+        for node_id, node in nodes.items()
+        if node["label"] == "Part" and parent.get(node_id) == document["id"]
+    ]
+    root_chapters = [
         ChapterDetail(
             id=node_id,
             number=str(node.get("number") or ""),
@@ -173,9 +262,17 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
                     if item in articles
                 ]
             ),
+            sections=sorted(
+                [
+                    sections[item]
+                    for item in children.get(node_id, [])
+                    if item in sections
+                ],
+                key=lambda item: _number_key(item.number),
+            ),
         )
         for node_id, node in nodes.items()
-        if node["label"] == "Chapter"
+        if node["label"] == "Chapter" and parent.get(node_id) == document["id"]
     ]
     ungrouped = [
         article
@@ -184,10 +281,26 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
     ]
     return DocumentDetail(
         **_document_fields(document),
-        chapters=sorted(chapters, key=lambda item: _number_key(item.number)),
+        parts=sorted(parts, key=lambda item: _number_key(item.number)),
+        chapters=sorted(root_chapters, key=lambda item: _number_key(item.number)),
         ungrouped_articles=_sorted_items(ungrouped),
         relations=[DocumentRelation(**relation) for relation in result["relations"]],
     )
+
+
+def _parent_rank(
+    nodes: dict[str, dict[str, Any]], parent_id: str, document_id: str
+) -> int:
+    if parent_id == document_id:
+        return 0
+    return {
+        "Part": 1,
+        "Chapter": 2,
+        "Section": 3,
+        "Subsection": 4,
+        "Article": 5,
+        "Clause": 6,
+    }.get(str(nodes.get(parent_id, {}).get("label") or ""), -1)
 
 
 def _article_clauses(children: list[dict[str, Any]]) -> list[ClauseDetail]:
@@ -286,12 +399,13 @@ def _graph_node_key(node: dict[str, Any]) -> tuple[int, tuple[int, str], str]:
     rank = {
         "Document": 0,
         "Chapter": 1,
-        "Article": 2,
-        "Clause": 3,
-        "Point": 4,
-        "Issuer": 5,
-        "LegalConcept": 6,
-        "LegalSubject": 7,
-        "LegalAction": 8,
+        "Section": 2,
+        "Article": 3,
+        "Clause": 4,
+        "Point": 5,
+        "Issuer": 6,
+        "LegalConcept": 7,
+        "LegalSubject": 8,
+        "LegalAction": 9,
     }.get(str(node["label"]), 99)
     return rank, _number_key(str(node.get("number") or "")), str(node["id"])

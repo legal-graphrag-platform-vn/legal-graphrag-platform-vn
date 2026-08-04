@@ -41,7 +41,11 @@ def _valid_payload() -> dict:
                 "head_id": "ldn_2020",
                 "type": "CONTAINS",
                 "tail_id": "ldn_2020_art17",
-                "properties": {"relation_id": deterministic_relation_id("ldn_2020", "CONTAINS", "ldn_2020_art17")},
+                "properties": {
+                    "relation_id": deterministic_relation_id(
+                        "ldn_2020", "CONTAINS", "ldn_2020_art17"
+                    )
+                },
             }
         ],
     }
@@ -67,6 +71,21 @@ def test_pipeline_ingestion_uses_root_validated_payload() -> None:
     assert "date($n_effective_from)" in document_call.args[0]
     assert document_call.kwargs["n_effective_from"] == "2021-01-01"
     assert "effective_from" not in document_call.kwargs["properties"]
+
+
+def test_pipeline_ingestion_reconciles_only_after_validated_write() -> None:
+    session = Mock()
+    reconciler = Mock()
+    reconciler.reconcile.return_value = {"deleted_legacy_edge_count": 0}
+    service = GraphIngestionService(
+        writer=Neo4jWriter(session=session),
+        hierarchy_reconciler=reconciler,
+    )
+
+    validated = service.ingest(_valid_payload())
+
+    reconciler.reconcile.assert_called_once_with(validated)
+    assert service.last_hierarchy_report == {"deleted_legacy_edge_count": 0}
 
 
 def test_pipeline_writer_rejects_validated_relation_without_relation_id() -> None:

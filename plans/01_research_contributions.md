@@ -5,7 +5,7 @@
 
 > [!CAUTION]
 > **Không dùng file này làm implementation contract.**
-> Xem **[legal_ontology.md v1.6.0](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
+> Xem **[legal_ontology.md v1.8.0](./legal_ontology.md)** cho ontology, **[04_graph_construction_pipeline.md](./04_graph_construction_pipeline.md)** cho pipeline, và **[08_dataset_and_scope.md](./08_dataset_and_scope.md)** cho dataset scope.
 >
 > | Nội dung | Trạng thái |
 > |---|---|
@@ -59,7 +59,7 @@ Tầng 3: Neo4j Schema
 
 | Relation | Ngữ Nghĩa | Head → Tail |
 |---|---|---|
-| `CONTAINS` | Cấu trúc phân cấp | Document → Chapter → Article → Clause → Point |
+| `CONTAINS` | Cấu trúc phân cấp | Document → Chapter → Section? → Article → Clause → Point |
 | `AMENDS` | Sửa đổi | Document/Article/Clause → Document/Article/Clause |
 | `REPLACES` | Thay thế hoàn toàn | Document → Document |
 | `GUIDES` | Hướng dẫn thi hành | Document → Document |
@@ -73,7 +73,7 @@ Tầng 3: Neo4j Schema
 
 ```python
 # Structural chain, with direct Document→Article fallback when no Chapter exists
-CONTAINS: Document | Chapter | Article | Clause → Chapter | Article | Clause | Point
+CONTAINS: Document | Chapter | Section | Article | Clause → Chapter | Section | Article | Clause | Point
 
 # AMENDS bắt buộc có effective_from
 AMENDS: Document | Article | Clause → Document | Article | Clause

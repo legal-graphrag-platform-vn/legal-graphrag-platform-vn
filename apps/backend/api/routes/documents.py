@@ -45,7 +45,7 @@ async def get_document(
     doc_id: str,
     service: DocumentBrowserService = Depends(get_document_service),
 ) -> DocumentDetail:
-    # 2.   Chi tiết văn bản với hierarchy đầy đủ Chapter→Article→Clause→Point
+    # Chi tiết đủ bảy path Part/Chapter/Section/Subsection đến Article/Clause/Point.
     return await service.get_document_detail(doc_id)
 
 

@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.6.0 (FROZEN 2026-07-18)
+// Source of truth: plans/legal_ontology.md v1.8.0
 //
 // Script idempotent nhờ IF NOT EXISTS.
 // Có thể chạy lại sau khi Neo4j khởi động:
@@ -23,6 +23,10 @@
 //   v4 (2026-07-10) — ADR-20 embedding migration:
 //     - BGE-M3 primary model
 //     - Article/Clause vector indexes changed from 768 to 1024 dimensions
+//   v5 (2026-07-31) — ADR-23 Section hierarchy:
+//     - Add Section.id uniqueness; hierarchy/property integrity remains Python-owned
+//   v6 (2026-08-01) — ADR-25 Part/Subsection hierarchy:
+//     - Add Part.id and Subsection.id uniqueness
 // =============================================================================
 // =============================================================================
 // SECTION 1: UNIQUENESS CONSTRAINTS
@@ -32,9 +36,18 @@
 CREATE CONSTRAINT doc_id_unique IF NOT EXISTS
 FOR (d:Document)
 REQUIRE d.id IS UNIQUE;
+CREATE CONSTRAINT part_id_unique IF NOT EXISTS
+FOR (p:Part)
+REQUIRE p.id IS UNIQUE;
 CREATE CONSTRAINT ch_id_unique IF NOT EXISTS
 FOR (c:Chapter)
 REQUIRE c.id IS UNIQUE;
+CREATE CONSTRAINT sec_id_unique IF NOT EXISTS
+FOR (s:Section)
+REQUIRE s.id IS UNIQUE;
+CREATE CONSTRAINT subsec_id_unique IF NOT EXISTS
+FOR (s:Subsection)
+REQUIRE s.id IS UNIQUE;
 CREATE CONSTRAINT art_id_unique IF NOT EXISTS
 FOR (a:Article)
 REQUIRE a.id IS UNIQUE;
@@ -194,7 +207,7 @@ ON EACH [p.content_raw];
 
 // =============================================================================
 // SECTION 5: VECTOR INDEXES (Neo4j 5.11+ native)
-// 1024 dims — khớp với BAAI/bge-m3 (ADR-20, ontology v1.6.0).
+// 1024 dims — khớp với BAAI/bge-m3 (ADR-20, ontology v1.8.0).
 // Cosine similarity — standard cho semantic search.
 //
 // ADR-08: Unified storage — không dùng Qdrant riêng biệt.
