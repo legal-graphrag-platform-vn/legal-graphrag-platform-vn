@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    fcntl = None  # type: ignore
 import hashlib
 import json
 import os
@@ -98,12 +101,14 @@ class ReferenceCheckpointStore:
         self.processed_dir.mkdir(parents=True, exist_ok=True)
         descriptor = os.open(self.lock_path, os.O_RDWR | os.O_CREAT, 0o600)
         try:
-            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            if fcntl is not None:
+                fcntl.flock(descriptor, fcntl.LOCK_EX)
             self._lock_depth += 1
             yield self
         finally:
             self._lock_depth -= 1
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
+            if fcntl is not None:
+                fcntl.flock(descriptor, fcntl.LOCK_UN)
             os.close(descriptor)
 
     def read_checkpoints(self) -> dict[str, ReferenceCheckpointV2]:
@@ -348,11 +353,16 @@ def _write_new_file_durable(path: Path, content: bytes) -> None:
 
 
 def _fsync_directory(path: Path) -> None:
-    descriptor = os.open(path, os.O_RDONLY)
+    if os.name == "nt":
+        return
     try:
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
+        descriptor = os.open(path, os.O_RDONLY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+    except OSError:
+        pass
 
 
 def _canonical_json(payload: object) -> str:
