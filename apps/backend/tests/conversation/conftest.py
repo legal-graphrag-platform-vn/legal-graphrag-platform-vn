@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import NullPool
 
 from persistence.models import Base
+from persistence.repository import SqlAlchemyConversationStore
 
 _ENV_VAR = "CONVERSATION_TEST_DATABASE_URL"
 
@@ -63,5 +64,27 @@ async def prepared_store(
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
         yield async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
+    finally:
+        await engine.dispose()
+
+
+@asynccontextmanager
+async def prepared_conversation_store(
+    url: str,
+    *,
+    lock_timeout_seconds: float = 1.0,
+    lock_poll_interval_seconds: float = 0.02,
+) -> AsyncIterator[SqlAlchemyConversationStore]:
+    """Reset schema, create ORM tables, yield an owner-scoped store."""
+    engine = build_test_engine(url)
+    try:
+        await reset_schema(engine)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        yield SqlAlchemyConversationStore(
+            engine,
+            lock_timeout_seconds=lock_timeout_seconds,
+            lock_poll_interval_seconds=lock_poll_interval_seconds,
+        )
     finally:
         await engine.dispose()
