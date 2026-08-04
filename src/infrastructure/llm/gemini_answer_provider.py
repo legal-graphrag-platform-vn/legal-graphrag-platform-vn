@@ -128,10 +128,16 @@ class GeminiAnswerProvider:
             return AnswerCandidate.model_validate_json(text)
         except ValidationError as exc:
             error_types = sorted({error["type"] for error in exc.errors()})
+            details = "; ".join(
+                f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}"
+                for error in exc.errors()
+            )
             logger.warning(
-                "Gemini structured output validation failed: model=%s error_types=%s",
+                "Gemini structured output validation failed: model=%s "
+                "error_types=%s details=[%s]",
                 self._model,
                 error_types,
+                details,
             )
             raise AnswerProviderOutputError(
                 "Gemini returned an invalid structured answer"
