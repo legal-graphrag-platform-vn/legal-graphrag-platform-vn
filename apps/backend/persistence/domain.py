@@ -119,11 +119,12 @@ class ClarificationCandidate:
 def validate_candidates(
     candidates: tuple[ClarificationCandidate, ...],
 ) -> tuple[ClarificationCandidate, ...]:
-    """Enforce the bounded, unique candidate universe (Plan 19 §3)."""
-    if not candidates:
-        raise InvalidClarificationCandidatesError(
-            "A pending clarification requires at least one candidate"
-        )
+    """Enforce the bounded, unique candidate universe (Plan 19 §3).
+
+    RESTATE clarifications carry zero candidates; SELECT clarifications carry
+    1-5. The 1-candidate floor for SELECT is enforced by the clarification
+    builder, not here.
+    """
     if len(candidates) > MAX_CLARIFICATION_CANDIDATES:
         raise InvalidClarificationCandidatesError(
             f"At most {MAX_CLARIFICATION_CANDIDATES} clarification candidates allowed"
