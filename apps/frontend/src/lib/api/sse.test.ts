@@ -23,6 +23,18 @@ describe('SseParser', () => {
       expect(events[1].data.deep_link).toBe('/explorer?document=doc')
    })
 
+   it('parses clarification events (Plan 19 §5)', () => {
+      const parser = new SseParser()
+      const events = parser.push(
+         'event: clarification\n' +
+            'data: {"mode":"SELECT","question":"Bạn hỏi điều nào?","candidates":[{"candidate_id":"c1","label":"Điều 4"}]}\n\n',
+      )
+
+      expect(events[0].event).toBe('clarification')
+      expect(events[0].data.mode).toBe('SELECT')
+      expect(events[0].data.question).toBe('Bạn hỏi điều nào?')
+   })
+
    it('rejects malformed JSON and unknown events', () => {
       expect(() => new SseParser().push('event: token\ndata: nope\n\n')).toThrow(SseProtocolError)
       expect(() => new SseParser().push('event: legacy\ndata: {}\n\n')).toThrow(
