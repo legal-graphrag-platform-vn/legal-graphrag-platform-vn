@@ -58,4 +58,5 @@ markers = [
   "retrieval_readonly: read-only retrieval checks against the disposable pilot graph",
   "retrieval_fixture: mutating retrieval mechanics isolated by a UUID namespace",
   "answer_provider_live: opt-in real answer provider smoke test",
+  "query_planner_live: opt-in real query planner provider smoke test",
 ]

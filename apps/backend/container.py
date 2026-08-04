@@ -14,6 +14,7 @@ from services.interfaces import (
     AsyncRetrievalRunner,
     ChatService,
     DocumentBrowserService,
+    QueryPlannerPort,
     QueryService,
     RAGService,
     SyncRetrievalRuntime,
@@ -35,6 +36,7 @@ class Container:
         document_service: DocumentBrowserService,
         rag_service: RAGService | None,
         answer_generator: AnswerGeneratorPort | None = None,
+        query_planner: QueryPlannerPort | None = None,
         retrieval_runtime: SyncRetrievalRuntime | None = None,
         retrieval_runner: AsyncRetrievalRunner | None = None,
     ) -> None:
@@ -43,6 +45,7 @@ class Container:
         self.document_service = document_service
         self.rag_service = rag_service
         self._answer_generator = answer_generator
+        self._query_planner = query_planner
         self._retrieval_runtime = retrieval_runtime
         self._retrieval_runner = retrieval_runner
         self._closed = False
@@ -57,6 +60,12 @@ class Container:
                 await self._answer_generator.aclose()
             except Exception as exc:
                 first_error = exc
+        if self._query_planner is not None:
+            try:
+                await self._query_planner.aclose()
+            except Exception as exc:
+                if first_error is None:
+                    first_error = exc
         try:
             await self.document_service.aclose()
         except Exception as exc:
@@ -84,6 +93,7 @@ async def build_container(
     runtime_factory: Callable[..., SyncRetrievalRuntime] | None = None,
     runner_factory: Callable[..., AsyncRetrievalRunner] = BoundedRetrievalRunner,
     answer_factory: Callable[..., AnswerGeneratorPort] | None = None,
+    planner_factory: Callable[..., QueryPlannerPort] | None = None,
     browser_factory: Callable[[Settings, AsyncRetrievalRunner], DocumentBrowserService]
     | None = None,
 ) -> Container:
@@ -112,6 +122,7 @@ async def build_container(
             NEO4J_USER=settings.neo4j_user,
             NEO4J_PASSWORD=settings.neo4j_password,
         ),
+        planning_enabled=settings.query_planning_enabled,
     )
     try:
         runner = runner_factory(
@@ -122,12 +133,26 @@ async def build_container(
     except Exception:
         _close_runtime_after_startup_failure(runtime)
         raise
-    retrieval = GraphRAGRetrievalService(runtime, runner)
+
+    query_planner: QueryPlannerPort | None = None
+    if settings.query_planning_enabled:
+        try:
+            query_planner = _create_query_planner(settings, planner_factory)
+        except Exception:
+            await _cleanup_retrieval_after_startup_failure(runner, runtime)
+            raise
+
+    retrieval = GraphRAGRetrievalService(
+        runtime,
+        runner,
+        planner=query_planner,
+        planning_enabled=settings.query_planning_enabled,
+    )
     create_browser = browser_factory or _create_document_browser_service
     try:
         document_service = create_browser(settings, runner)
     except Exception:
-        await _cleanup_retrieval_after_startup_failure(runner, runtime)
+        await _cleanup_planner_after_startup_failure(query_planner, runner, runtime)
         raise
     answer_generator: AnswerGeneratorPort | None = None
     chat_service: ChatService | None = None
@@ -166,6 +191,7 @@ async def build_container(
         except Exception:
             await _cleanup_after_answer_startup_failure(
                 document_service,
+                query_planner,
                 runner,
                 runtime,
             )
@@ -181,6 +207,7 @@ async def build_container(
         document_service=document_service,
         rag_service=None,
         answer_generator=answer_generator,
+        query_planner=query_planner,
         retrieval_runtime=runtime,
         retrieval_runner=runner,
     )
@@ -202,6 +229,7 @@ async def _cleanup_retrieval_after_startup_failure(
 
 async def _cleanup_after_answer_startup_failure(
     document_service: DocumentBrowserService,
+    query_planner: QueryPlannerPort | None,
     runner: AsyncRetrievalRunner,
     runtime: SyncRetrievalRuntime,
 ) -> None:
@@ -212,7 +240,46 @@ async def _cleanup_after_answer_startup_failure(
             "Document browser cleanup failed during startup rollback: error_type=%s",
             type(exc).__name__,
         )
+    await _cleanup_planner_after_startup_failure(query_planner, runner, runtime)
+
+
+async def _cleanup_planner_after_startup_failure(
+    query_planner: QueryPlannerPort | None,
+    runner: AsyncRetrievalRunner,
+    runtime: SyncRetrievalRuntime,
+) -> None:
+    if query_planner is not None:
+        try:
+            await query_planner.aclose()
+        except Exception as exc:
+            logger.error(
+                "Query planner cleanup failed during startup rollback: error_type=%s",
+                type(exc).__name__,
+            )
     await _cleanup_retrieval_after_startup_failure(runner, runtime)
+
+
+def _create_query_planner(
+    settings: Settings,
+    planner_factory: Callable[..., QueryPlannerPort] | None,
+) -> QueryPlannerPort:
+    if planner_factory is not None:
+        return planner_factory(settings)
+
+    from src.application.gemini_query_planner import GeminiQueryPlanner
+    from src.retrieval.planning.config import QueryPlannerConfig
+
+    return GeminiQueryPlanner(
+        api_key=settings.gemini_api_key or "",
+        model=settings.query_planner_model,
+        config=QueryPlannerConfig(
+            timeout_seconds=settings.query_planner_timeout_seconds,
+            max_concurrency=settings.query_planner_max_concurrency,
+            max_retries=settings.query_planner_max_retries,
+            max_output_tokens=settings.query_planner_max_output_tokens,
+            temperature=settings.query_planner_temperature,
+        ),
+    )
 
 
 def _create_document_browser_service(

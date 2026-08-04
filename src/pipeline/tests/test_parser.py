@@ -174,13 +174,13 @@ def test_parser_rejects_invalid_part_subsection_and_mixed_child_modes() -> None:
     with pytest.raises(ValueError, match="Part i is missing a valid title"):
         parse_text("Phần I\nChương I\nTÊN CHƯƠNG\nĐiều 1. Nội dung", _doc_info())
 
-    with pytest.raises(ValueError, match="mixes Article and Section child modes"):
+    with pytest.raises(ValueError, match="mixes Section and direct Article child modes"):
         parse_text(
             "Chương I\nTÊN CHƯƠNG\nĐiều 1. Trực tiếp\nMục 1. Có mục\nĐiều 2. Trong mục",
             _doc_info(),
         )
 
-    with pytest.raises(ValueError, match="mixes Article and Subsection child modes"):
+    with pytest.raises(ValueError, match="mixes Subsection and direct Article child modes"):
         parse_text(
             "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
             "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục",
@@ -215,6 +215,22 @@ def test_parser_supports_suffixed_article_and_clause_numbers() -> None:
     )
     assert parsed.articles[0].number == "5a"
     assert parsed.articles[0].clauses[0].number == "1b"
+
+
+def test_parser_does_not_treat_phone_numbers_as_clauses() -> None:
+    parsed = parse_text(
+        (
+            "Điều 218. Quy định chuyển tiếp\n"
+            "1. Khoản thứ nhất\n"
+            "2. Khoản thứ hai\n"
+            "Điện thoại:\n"
+            "024.6273.9468 | Fax:\n"
+            "024.6273.9359"
+        ),
+        _doc_info(),
+    )
+
+    assert [clause.number for clause in parsed.articles[0].clauses] == ["1", "2"]
 
 
 def test_clause_content_not_empty() -> None:

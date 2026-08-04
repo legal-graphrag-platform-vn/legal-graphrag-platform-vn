@@ -1,6 +1,6 @@
 # M3 / Milestone A Blocker Register
 
-> Last verified: 2026-07-18
+> Last verified: 2026-07-22
 > Parent plan: `06_m3_runtime_acceptance_and_milestone_a_plan.md`
 > Status authority for M3 blockers: this file
 
@@ -26,6 +26,31 @@ results until every `MILESTONE BLOCKER` below is closed.
 |---|---|---|---|---|
 | M3-B13 | Four-document minimum corpus is incomplete | MILESTONE BLOCKER | Pilot sign-off | All four required documents complete the pipeline end to end with per-document reports |
 | M3-B14 | Resolver-first ontology v1.6.0 artifacts and pilot graph are not rebuilt | MILESTONE BLOCKER | ADR-22 implementation | Reparse source spans, normalize v1.6.0 artifacts, validate payload, rebuild disposable pilot, and regenerate evidence |
+
+### M3-B14 latest verification — 2026-07-22
+
+The disposable graph is reachable, but a safe offline rebuild cannot start from
+the current workspace artifacts:
+
+```text
+data/raw/L59_2020/source.txt = absent
+data/processed/L59_2020 hierarchy source spans = 0 / 218 Articles
+data/processed/L59_2020/article_extractions.jsonl = absent
+GEMINI_API_KEY / root .env = absent
+scoped REFERS_TO = 7
+REFERS_TO missing extraction_method/reference_bundle_id/reference_target_count = 7 / 7
+```
+
+The guarded `graph-snapshot` command fails before database projection because
+the active payload is stale against ontology v1.6.0. Do not fabricate
+checkpoints or backfill resolver provenance directly in Neo4j. Resolution still
+requires canonical recrawl/reparse plus either the immutable 218 Article
+checkpoints or an explicitly authorized provider rerun.
+
+Related evidence:
+
+- `results/retrieval/query_graph_preflight.json`
+- `results/retrieval/query_graph_preflight.md`
 
 ## Closed Milestone Blockers
 

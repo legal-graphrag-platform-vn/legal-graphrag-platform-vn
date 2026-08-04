@@ -49,7 +49,17 @@ class Settings(BaseSettings):
     answer_history_max_chars: int = Field(default=4000, ge=0, le=20_000)
     answer_stream_chunk_chars: int = Field(default=160, ge=1, le=2000)
 
-    # 5.   LLM Providers
+    # 5.   Query planning (multi-hop) is an explicit runtime profile
+    query_planning_enabled: bool = False
+    query_planner_provider: Literal["gemini"] = "gemini"
+    query_planner_model: str = "gemini-3.1-flash-lite"
+    query_planner_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
+    query_planner_max_concurrency: int = Field(default=2, ge=1, le=16)
+    query_planner_max_retries: int = Field(default=2, ge=0, le=5)
+    query_planner_max_output_tokens: int = Field(default=1024, ge=128, le=4096)
+    query_planner_temperature: float = Field(default=0.0, ge=0.0, le=1.0)
+
+    # 6.   LLM Providers
     llm_provider: Literal["gemini", "deepseek", "openai", "ollama"] = "ollama"
     llm_model: str = "llama3"
     ollama_base_url: str = "http://localhost:11434"
@@ -57,7 +67,7 @@ class Settings(BaseSettings):
     deepseek_api_key: str | None = None
     openai_api_key: str | None = None
 
-    # 6.   CORS — không dùng ["*"] trong production
+    # 7.   CORS — không dùng ["*"] trong production
     cors_origins: list[str] = Field(default=["http://localhost:3000"])
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -84,4 +94,12 @@ class Settings(BaseSettings):
             if self.answer_generation_enabled and not self.gemini_api_key:
                 raise RuntimeError(
                     "ANSWER_GENERATION_ENABLED=true yêu cầu GEMINI_API_KEY"
+                )
+            if (
+                self.query_planning_enabled
+                and self.query_planner_provider == "gemini"
+                and not self.gemini_api_key
+            ):
+                raise RuntimeError(
+                    "QUERY_PLANNING_ENABLED=true yêu cầu GEMINI_API_KEY"
                 )

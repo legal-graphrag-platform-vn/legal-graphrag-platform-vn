@@ -9,7 +9,7 @@
   "review": {
     "reviewer": "lamdx4",
     "status": "approved",
-    "reviewed_at": "2026-07-13T22:00:00+07:00"
+    "reviewed_at": "2026-07-23T20:00:00+07:00"
   },
   "cases": [
     {
@@ -397,7 +397,7 @@
       "capability_requirement": {
         "name": "semantic_multi_hop_graph",
         "expected_available": true,
-        "reason": "Pilot contains accepted REFERS_TO from ldn_2020_art57_cl1 to ldn_2020_art49 and structural CONTAINS to the member-rights Clauses."
+        "reason": "Resolver v2.0.1 preserves the coordinated citation as atomic direct REFERS_TO edges from ldn_2020_art57_cl1 to Clauses 2 and 3 of Article 49; Clause 2 is the reviewed answer target."
       },
       "gold_relevance": [
         {
@@ -419,17 +419,16 @@
       "review": {
         "reviewer": "lamdx4",
         "status": "approved",
-        "reviewed_at": "2026-07-13T22:00:00+07:00"
+        "reviewed_at": "2026-07-23T20:00:00+07:00"
       },
       "requires_graph_path": true,
-      "minimum_hops": 2,
-      "graph_case_type": "multi_edge_traversal",
+      "minimum_hops": 1,
+      "graph_case_type": "direct_reference",
       "gold_paths": [
         {
           "source_id": "ldn_2020_art57_cl1",
           "relation_types": [
-            "REFERS_TO",
-            "CONTAINS"
+            "REFERS_TO"
           ],
           "target_id": "ldn_2020_art49_cl2"
         }

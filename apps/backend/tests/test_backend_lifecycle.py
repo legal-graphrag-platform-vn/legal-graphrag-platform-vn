@@ -66,6 +66,31 @@ class FakeDocumentBrowser:
             self.events.append("browser")
 
 
+class FakeQueryPlanner:
+    provider_name = "fake"
+    model_name = "fake-model"
+
+    def __init__(
+        self,
+        events: list[str] | None = None,
+        *,
+        close_error: Exception | None = None,
+    ) -> None:
+        self.close_count = 0
+        self.events = events
+        self.close_error = close_error
+
+    async def plan(self, query: str):
+        raise AssertionError("not used in lifecycle test")
+
+    async def aclose(self) -> None:
+        self.close_count += 1
+        if self.events is not None:
+            self.events.append("planner")
+        if self.close_error is not None:
+            raise self.close_error
+
+
 def fake_browser_factory(
     settings: object,
     runner: object,
@@ -96,7 +121,9 @@ def test_graphrag_mode_constructs_runtime_once_with_canonical_settings() -> None
     runtime = FakeRuntime()
     runners: list[FakeRunner] = []
 
-    def runtime_factory(config: object, settings: object) -> FakeRuntime:
+    def runtime_factory(
+        config: object, settings: object, **kwargs: object
+    ) -> FakeRuntime:
         calls.append((config, settings))
         return runtime
 
@@ -133,7 +160,7 @@ def test_partial_runner_startup_failure_closes_runtime() -> None:
         asyncio.run(
             build_container(
                 _graphrag_settings(),
-                runtime_factory=lambda *_: runtime,
+                runtime_factory=lambda *_, **__: runtime,
                 runner_factory=fail_runner,
                 browser_factory=fake_browser_factory,  # type: ignore[arg-type]
             )
@@ -197,7 +224,7 @@ def test_answer_profile_constructs_once_and_closes_before_retrieval() -> None:
 
         container = await build_container(
             _graphrag_settings(answer_generation_enabled=True),
-            runtime_factory=lambda *_: runtime,
+            runtime_factory=lambda *_, **__: runtime,
             runner_factory=lambda **_: runner,
             answer_factory=answer_factory,
             browser_factory=lambda *_: FakeDocumentBrowser(events),
@@ -221,7 +248,7 @@ def test_answer_startup_failure_closes_retrieval_resources() -> None:
         with pytest.raises(RuntimeError, match="answer startup failed"):
             await build_container(
                 _graphrag_settings(answer_generation_enabled=True),
-                runtime_factory=lambda *_: runtime,
+                runtime_factory=lambda *_, **__: runtime,
                 runner_factory=lambda **_: runner,
                 answer_factory=fail_answer,  # type: ignore[arg-type]
                 browser_factory=lambda *_: FakeDocumentBrowser(),
@@ -245,7 +272,7 @@ def test_answer_startup_failure_still_closes_runtime_when_runner_cleanup_fails()
         with pytest.raises(RuntimeError, match="answer startup failed"):
             await build_container(
                 _graphrag_settings(answer_generation_enabled=True),
-                runtime_factory=lambda *_: runtime,
+                runtime_factory=lambda *_, **__: runtime,
                 runner_factory=lambda **_: runner,
                 answer_factory=fail_answer,  # type: ignore[arg-type]
                 browser_factory=lambda *_: FakeDocumentBrowser(),
@@ -256,7 +283,118 @@ def test_answer_startup_failure_still_closes_runtime_when_runner_cleanup_fails()
     asyncio.run(scenario())
 
 
-def _graphrag_settings(*, answer_generation_enabled: bool = False) -> Settings:
+def test_planning_profile_constructs_planner_and_closes_before_document() -> None:
+    async def scenario() -> None:
+        events: list[str] = []
+        runtime = FakeRuntime(events)
+        runner = FakeRunner(events=events)
+        planner = FakeQueryPlanner(events)
+        planner_calls = 0
+
+        def planner_factory(settings: object) -> FakeQueryPlanner:
+            nonlocal planner_calls
+            planner_calls += 1
+            return planner
+
+        container = await build_container(
+            _graphrag_settings(query_planning_enabled=True),
+            runtime_factory=lambda *_, **__: runtime,
+            runner_factory=lambda **_: runner,
+            planner_factory=planner_factory,
+            browser_factory=lambda *_: FakeDocumentBrowser(events),
+        )
+        assert planner_calls == 1
+        await container.close()
+        await container.close()
+        assert events == ["planner", "browser", "runner", "runtime"]
+        assert planner.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_planner_startup_failure_closes_retrieval_resources() -> None:
+    async def scenario() -> None:
+        runtime = FakeRuntime()
+        runner = FakeRunner()
+
+        def fail_planner(settings: object) -> None:
+            raise RuntimeError("planner startup failed")
+
+        with pytest.raises(RuntimeError, match="planner startup failed"):
+            await build_container(
+                _graphrag_settings(query_planning_enabled=True),
+                runtime_factory=lambda *_, **__: runtime,
+                runner_factory=lambda **_: runner,
+                planner_factory=fail_planner,  # type: ignore[arg-type]
+                browser_factory=lambda *_: FakeDocumentBrowser(),
+            )
+        assert runner.close_count == 1
+        assert runtime.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_browser_startup_failure_closes_planner_runner_and_runtime() -> None:
+    async def scenario() -> None:
+        runtime = FakeRuntime()
+        runner = FakeRunner()
+        planner = FakeQueryPlanner()
+
+        def fail_browser(*args: object) -> None:
+            raise RuntimeError("browser startup failed")
+
+        with pytest.raises(RuntimeError, match="browser startup failed"):
+            await build_container(
+                _graphrag_settings(query_planning_enabled=True),
+                runtime_factory=lambda *_, **__: runtime,
+                runner_factory=lambda **_: runner,
+                planner_factory=lambda _: planner,
+                browser_factory=fail_browser,  # type: ignore[arg-type]
+            )
+
+        assert planner.close_count == 1
+        assert runner.close_count == 1
+        assert runtime.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def test_planner_close_failure_does_not_skip_remaining_cleanup() -> None:
+    async def scenario() -> None:
+        events: list[str] = []
+        runtime = FakeRuntime(events)
+        runner = FakeRunner(events=events)
+        planner = FakeQueryPlanner(
+            events,
+            close_error=RuntimeError("planner cleanup failed"),
+        )
+        container = Container(
+            query_service=object(),  # type: ignore[arg-type]
+            chat_service=None,
+            document_service=FakeDocumentBrowser(events),
+            rag_service=None,
+            query_planner=planner,
+            retrieval_runtime=runtime,
+            retrieval_runner=runner,  # type: ignore[arg-type]
+        )
+
+        with pytest.raises(RuntimeError, match="planner cleanup failed"):
+            await container.close()
+
+        assert events == ["planner", "browser", "runner", "runtime"]
+        assert planner.close_count == 1
+        assert runner.close_count == 1
+        assert runtime.close_count == 1
+
+    asyncio.run(scenario())
+
+
+def _graphrag_settings(
+    *,
+    answer_generation_enabled: bool = False,
+    query_planning_enabled: bool = False,
+) -> Settings:
+    needs_gemini = answer_generation_enabled or query_planning_enabled
     return Settings(
         app_mode="graphrag",
         neo4j_uri="bolt://localhost:7688",
@@ -266,6 +404,7 @@ def _graphrag_settings(*, answer_generation_enabled: bool = False) -> Settings:
         backend_retrieval_max_concurrency=2,
         backend_retrieval_shutdown_grace_seconds=1,
         answer_generation_enabled=answer_generation_enabled,
-        gemini_api_key="test-only" if answer_generation_enabled else None,
+        query_planning_enabled=query_planning_enabled,
+        gemini_api_key="test-only" if needs_gemini else None,
         _env_file=None,
     )

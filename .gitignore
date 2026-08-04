@@ -38,3 +38,7 @@ tree.txt
 
 # Safe, non-secret backend configuration template
 !apps/backend/.env.example
+
+experiments
+
+.idea

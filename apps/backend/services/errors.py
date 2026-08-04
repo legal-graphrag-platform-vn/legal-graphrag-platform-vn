@@ -17,3 +17,15 @@ class BackendFeatureUnavailableError(RetrievalError):
 
 class BackendDocumentNotFoundError(RetrievalError):
     pass
+
+
+class BackendPlanningTimeoutError(RetrievalError):
+    pass
+
+
+class BackendPlanningUnavailableError(RetrievalError):
+    pass
+
+
+class BackendPlanningOutputError(RetrievalError):
+    pass
