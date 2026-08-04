@@ -15,6 +15,9 @@ dependencies = [
   "tenacity>=8.3",
   "fastapi>=0.139.0",
   "uvicorn[standard]>=0.51.0",
+  "sqlalchemy[asyncio]>=2.0.30",
+  "asyncpg>=0.29",
+  "alembic>=1.13",
 ]
 
 [dependency-groups]
@@ -59,4 +62,5 @@ markers = [
   "retrieval_fixture: mutating retrieval mechanics isolated by a UUID namespace",
   "answer_provider_live: opt-in real answer provider smoke test",
   "query_planner_live: opt-in real query planner provider smoke test",
+  "conversation_db: requires a disposable PostgreSQL instance via CONVERSATION_TEST_DATABASE_URL",
 ]

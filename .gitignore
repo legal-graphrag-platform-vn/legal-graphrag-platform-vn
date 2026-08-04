@@ -15,6 +15,9 @@ infra/data/neo4j/import/*
 infra/data/neo4j/plugins/*
 !infra/data/neo4j/**/.gitkeep
 
+# PostgreSQL bind mount (Plan 19 conversation store)
+infra/data/postgres/
+
 # Runtime data (generated, not committed)
 data/raw/
 data/processed/
