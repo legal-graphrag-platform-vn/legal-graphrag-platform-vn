@@ -1,8 +1,7 @@
-"""Signed anonymous principal issued as an HttpOnly cookie (Plan 19 §2).
+"""Signed principal issued as HttpOnly cookies (Plan 19 & Plan 20).
 
-Cookie value: ``<payload_b64>.<hmac_b64>`` where payload is ``v:<uuid_hex>:<issued_at>``.
-The HMAC-SHA256 signature is verified in constant time. A tampered or expired
-cookie is treated as absent, and a fresh principal is issued.
+Supports both authenticated user tokens (`graphrag_user_token`) and fallback
+signed anonymous cookies (`graphrag_anon_principal`).
 """
 
 from __future__ import annotations
@@ -18,6 +17,7 @@ from persistence.domain import Owner
 from persistence.enums import OwnerKind
 
 PRINCIPAL_COOKIE_NAME = "graphrag_anon_principal"
+USER_COOKIE_NAME = "graphrag_user_token"
 PRINCIPAL_VERSION = 1
 _MIN_KEY_BYTES = 32
 
@@ -52,6 +52,43 @@ class PrincipalSigner:
         digest = hmac.new(self._key, payload_b64.encode("ascii"), sha256).digest()
         return _b64encode(digest)
 
+    def issue_user_token(
+        self, user_id: uuid.UUID, username: str, *, now: int | None = None
+    ) -> str:
+        """Issue a signed user token cookie string."""
+        issued_at = now or int(time.time())
+        payload = f"usr:{PRINCIPAL_VERSION}:{user_id.hex}:{username}:{issued_at}"
+        payload_b64 = _b64encode(payload.encode("utf-8"))
+        return f"{payload_b64}.{self._sign(payload_b64)}"
+
+    def parse_user_token(
+        self, token_value: str, *, now: int | None = None
+    ) -> tuple[uuid.UUID, str] | None:
+        """Return (user_id, username) or None if tampered/expired."""
+        parts = token_value.split(".")
+        if len(parts) != 2:
+            return None
+        payload_b64, signature = parts
+        if not hmac.compare_digest(signature, self._sign(payload_b64)):
+            return None
+        try:
+            payload = _b64decode(payload_b64).decode("utf-8")
+            parts = payload.split(":")
+            if len(parts) != 5 or parts[0] != "usr":
+                return None
+            _, version_str, user_hex, username, issued_str = parts
+            version = int(version_str)
+            issued_at = int(issued_str)
+            user_id = uuid.UUID(hex=user_hex)
+        except (ValueError, UnicodeDecodeError):
+            return None
+        if version != PRINCIPAL_VERSION:
+            return None
+        current = now or int(time.time())
+        if issued_at > current + 60 or current - issued_at > self._ttl_seconds:
+            return None
+        return user_id, username
+
     def issue(self, *, now: int | None = None) -> tuple[uuid.UUID, str]:
         principal_id = uuid.uuid4()
         return principal_id, self._encode(principal_id, now or int(time.time()))
@@ -85,9 +122,24 @@ class PrincipalSigner:
         return principal_id
 
     def authenticate(
-        self, cookie_value: str | None, *, now: int | None = None
+        self,
+        cookie_value: str | None,
+        *,
+        user_token: str | None = None,
+        now: int | None = None,
     ) -> AuthenticatedPrincipal:
-        """Resolve an owner from the cookie, issuing a fresh one when needed."""
+        """Resolve an owner from user token or anon cookie, issuing fresh anon cookie if needed."""
+        # 1. First priority: Check user authentication token
+        if user_token:
+            parsed_user = self.parse_user_token(user_token, now=now)
+            if parsed_user is not None:
+                user_id, _ = parsed_user
+                return AuthenticatedPrincipal(
+                    owner=Owner(owner_kind=OwnerKind.USER, owner_principal_id=user_id),
+                    set_cookie_value=None,
+                )
+
+        # 2. Fallback: Check anonymous cookie
         if cookie_value:
             principal_id = self.parse(cookie_value, now=now)
             if principal_id is not None:
@@ -95,6 +147,8 @@ class PrincipalSigner:
                     owner=_owner(principal_id),
                     set_cookie_value=None,
                 )
+
+        # 3. Final fallback: Issue fresh anonymous cookie
         principal_id, fresh_cookie = self.issue(now=now)
         return AuthenticatedPrincipal(
             owner=_owner(principal_id),

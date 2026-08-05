@@ -25,3 +25,21 @@ async def get_chat_service(request: Request) -> ChatService:
             "Answer generation is not enabled for this runtime profile"
         )
     return service
+
+
+def get_repository(request: Request):
+    repo = getattr(request.app.state.container, "conversation_repo", None)
+    if repo is None:
+        raise BackendFeatureUnavailableError(
+            "Conversation repository is not enabled for this runtime profile"
+        )
+    return repo
+
+
+def get_principal_signer(request: Request):
+    signer = getattr(request.app.state.container, "principal_signer", None)
+    if signer is None:
+        raise BackendFeatureUnavailableError(
+            "Principal signer is not configured"
+        )
+    return signer

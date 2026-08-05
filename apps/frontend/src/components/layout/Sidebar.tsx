@@ -1,8 +1,15 @@
-import { PanelLeftClose, Settings, SquarePen, Trash2, X, BookOpen } from 'lucide-react'
-import { useState } from 'react'
+import { PanelLeftClose, Settings, SquarePen, Trash2, X, BookOpen, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeToggle } from './ThemeToggle'
 import { ChatSession } from '../../types/chat'
+import { AuthModal } from '../auth/AuthModal'
+
+interface UserProfile {
+   user_id: string
+   username: string
+   full_name?: string | null
+}
 
 interface SidebarProps {
    sessions: ChatSession[]
@@ -13,6 +20,7 @@ interface SidebarProps {
    onDeleteAllSessions: () => void
    isOpen: boolean
    onToggle: () => void
+   onUserChange?: (user: UserProfile | null) => void
 }
 
 export function Sidebar({
@@ -24,10 +32,25 @@ export function Sidebar({
    onDeleteAllSessions,
    isOpen,
    onToggle,
+   onUserChange,
 }: SidebarProps) {
    const [showSettings, setShowSettings] = useState(false)
+   const [showAuthModal, setShowAuthModal] = useState(false)
+   const [user, setUser] = useState<UserProfile | null>(null)
    const pathname = usePathname()
    const router = useRouter()
+
+   useEffect(() => {
+      fetch('/api/v1/auth/me', { credentials: 'include' })
+         .then((res) => (res.ok ? res.json().catch(() => null) : null))
+         .then((data) => {
+            if (data && data.username) {
+               setUser(data)
+               if (onUserChange) onUserChange(data)
+            }
+         })
+         .catch(() => {})
+   }, [onUserChange])
 
    return (
       <div
@@ -129,16 +152,43 @@ export function Sidebar({
             </div>
          </div>
 
-         {/* Sidebar Footer with Settings */}
-         <div className="p-3 border-t border-border relative flex items-center gap-2">
+         {/* Sidebar Footer with Account & Settings */}
+         <div className="p-3 border-t border-border flex flex-col gap-1.5">
             <button
-               onClick={() => setShowSettings(!showSettings)}
-               className="flex-1 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer text-sm font-medium"
+               onClick={() => setShowAuthModal(true)}
+               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer text-sm font-medium"
             >
-               <Settings size={17} className="text-zinc-650 dark:text-zinc-400" />
-               <span>Settings</span>
+               <User size={17} className="text-indigo-500" />
+               <span className="truncate">
+                  {user ? (user.full_name || `@${user.username}`) : 'Đăng nhập / Đăng ký'}
+               </span>
             </button>
-            <ThemeToggle />
+
+            <div className="flex items-center gap-2">
+               <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="flex-1 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer text-sm font-medium"
+               >
+                  <Settings size={17} className="text-zinc-650 dark:text-zinc-400" />
+                  <span>Settings</span>
+               </button>
+               <ThemeToggle />
+            </div>
+
+            {/* Auth Modal */}
+            <AuthModal
+               isOpen={showAuthModal}
+               onClose={() => setShowAuthModal(false)}
+               user={user}
+               onLoginSuccess={(u) => {
+                  setUser(u)
+                  if (onUserChange) onUserChange(u)
+               }}
+               onLogout={() => {
+                  setUser(null)
+                  if (onUserChange) onUserChange(null)
+               }}
+            />
 
             {/* Settings Modal (Centered on Screen) */}
             {showSettings && (

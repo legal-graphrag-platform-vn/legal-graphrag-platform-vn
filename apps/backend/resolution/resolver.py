@@ -53,13 +53,13 @@ _MAX_CLARIFICATION_CANDIDATES = 5
 def _breaks_out_of_pending_select(outcome: ResolutionOutcome) -> bool:
     """A fresh outcome that supersedes a stale pending SELECT clarification.
 
-    Committing outcomes (resolved/standalone) and a new explicit-based SELECT
-    count as a new question; an ambiguous RESTATE does not.
+    Committing outcomes (resolved) and a new explicit-based SELECT
+    count as a new question; a generic statement or RESTATE does not.
     """
-    if isinstance(outcome, (ResolvedResolution, StandaloneResolution)):
+    if isinstance(outcome, ResolvedResolution):
         return True
-    if isinstance(outcome, ClarifyResolution):
-        return outcome.mode is ClarificationMode.SELECT
+    if isinstance(outcome, ClarifyResolution) and outcome.mode is ClarificationMode.SELECT:
+        return True
     return False
 
 
@@ -94,11 +94,6 @@ class ReferenceResolver:
                     candidate=ResolvedCandidate.from_clarification_candidate(candidate),
                     is_anaphora=True,
                 )
-            # A genuinely new question breaks out of the stale clarification; a
-            # merely ambiguous reply re-asks the same snapshot (Plan 19 §4).
-            fresh = await self._resolve_fresh(message, context)
-            if _breaks_out_of_pending_select(fresh):
-                return fresh
             return ClarifyResolution(
                 mode=ClarificationMode.SELECT,
                 resolution_status=ResolutionStatus.AMBIGUOUS,
