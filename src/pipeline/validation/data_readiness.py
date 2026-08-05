@@ -80,8 +80,16 @@ def normalize_metadata(
     raw_doc_code: str,
     manifest_entry: Mapping[str, Any],
 ) -> dict[str, Any]:
-    issuer_name = metadata.get("issuer_name") or metadata.get("issued_by")
+    # 1. Trích xuất và fallback tên cơ quan ban hành
+    issuer_name = metadata.get("issuer_name") or metadata.get("issued_by") or "Cơ quan nhà nước"
+
+    # 2. Trích xuất doc_type và ngày hiệu lực (fallback ngày ban hành hoặc 1970-01-01)
     doc_type = metadata.get("doc_type") or metadata.get("type") or manifest_entry.get("doc_type")
+    issued_date = metadata.get("issued_date") or "1970-01-01"
+    effective_from = metadata.get("effective_from") or issued_date
+    source_url = metadata.get("source_url") or f"https://luatvietnam.vn/{raw_doc_code}"
+
+    # 3. Gom metadata đã được chuẩn hóa
     normalized = {
         **dict(metadata),
         "raw_doc_code": raw_doc_code,
@@ -92,11 +100,15 @@ def normalize_metadata(
         "issuer_name": issuer_name,
         "issuer_branch": metadata.get("issuer_branch") or issuer_branch(issuer_name),
         "legal_status": metadata.get("legal_status") or legal_status_from_raw(metadata.get("status")),
+        "effective_from": effective_from,
+        "issued_date": issued_date,
+        "source_url": source_url,
     }
     return normalized
 
 
 def legal_status_from_raw(raw_status: Any) -> str:
+    # 1. Chuẩn hóa chuỗi trạng thái không dấu
     normalized = _ascii(str(raw_status or "")).lower().strip()
     mapping = {
         "active": "ACTIVE",
@@ -106,7 +118,10 @@ def legal_status_from_raw(raw_status: Any) -> str:
         "het hieu luc toan bo": "EXPIRED",
         "bi thay the": "REPLACED",
         "bi bai bo": "REPEALED",
+        "da biet": "ACTIVE",
+        "": "ACTIVE",
     }
+    # 2. Khớp với mapping enum hợp lệ hoặc raise ValueError nếu trạng thái không xác định
     if normalized not in mapping:
         raise ValueError(f"Unknown legal status: {raw_status!r}; refusing to default to ACTIVE")
     return mapping[normalized]
