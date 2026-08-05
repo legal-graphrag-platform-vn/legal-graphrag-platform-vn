@@ -44,3 +44,23 @@ class RetrievalExecutionError(RetrievalError):
 
 class RetrievalOutputError(RetrievalError):
     pass
+
+
+class QueryProcessingError(RetrievalError):
+    """Base class for query-processing failures upstream of retrieval."""
+
+
+class QueryProcessingParseError(QueryProcessingError):
+    """The LLM output could not be recovered into a JSON object.
+
+    The offending payload is preserved on ``raw_output`` for diagnostics; the
+    error is raised (never swallowed) so the caller decides how to react.
+    """
+
+    def __init__(self, message: str, *, raw_output: str) -> None:
+        super().__init__(message)
+        self.raw_output = raw_output
+
+
+class QueryProcessingContractError(QueryProcessingError):
+    """Parsed JSON violated the five-field query-processing contract."""
