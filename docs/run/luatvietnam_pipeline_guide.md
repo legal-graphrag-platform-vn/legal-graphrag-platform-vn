@@ -37,6 +37,24 @@ NEO4J_USER=neo4j
 NEO4J_PASSWORD=your_password
 ```
 
+### 1.3 Đường Dẫn Dữ Liệu Thô (Raw Data Location)
+Vị trí dữ liệu thô nằm tại thư mục `data/raw` tính từ thư mục gốc của dự án (`legal-graphrag-platform-vn\data`):
+
+Cấu trúc tổ chức bên trong thư mục `data/raw`:
+```text
+<project_root>/data/raw/
+├── L59_2020/
+├── ND01_2021/
+├── LTV_101180/
+│   ├── source.txt        # Nội dung chính văn
+│   ├── metadata.json     # Thông tin quản lý văn bản
+│   ├── source.html       # HTML thô cào từ LuatVietnam
+│   ├── diagram.json      # Lược đồ quan hệ cào bổ sung từ VBPL
+│   └── properties.json   # Thuộc tính cào bổ sung từ VBPL
+├── LTV_101333/
+└── ... (tổng cộng 1,850 thư mục văn bản)
+```
+
 ---
 
 ## 2. Quy Trình Vận Hành 4 Bước (Execution Workflow)
