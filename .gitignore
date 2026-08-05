@@ -22,6 +22,8 @@ infra/data/postgres/
 data/raw/
 data/processed/
 data/reports/
+data/registry/
+data/*.json
 
 # Frontend build artifacts
 apps/frontend/.next/

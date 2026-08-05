@@ -42,12 +42,21 @@ class Settings(BaseSettings):
     ollama_model: str = Field(default="qwen3:8b")
     ollama_base_url: str = Field(default="http://localhost:11434/v1")
 
+    # 1. Cấu hình thư mục lưu trữ dữ liệu thô và đã xử lý
     data_raw_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "raw")
     data_processed_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "processed")
     data_reports_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "reports")
     data_registry_dir: Path = Field(default=Path(__file__).resolve().parents[2] / "data" / "registry")
     curated_manifest_path: Path = Field(
         default=Path(__file__).resolve().parents[2] / "configs" / "corpus" / "curated_v1.json"
+    )
+
+    # 2. Cấu hình dataset LuatVietnam & Manifest
+    luatvietnam_raw_dir: Path = Field(
+        default=Path(__file__).resolve().parents[2] / "data" / "raw"
+    )
+    luatvietnam_manifest_path: Path = Field(
+        default=Path(__file__).resolve().parents[2] / "data" / "luatvietnam_v1.json"
     )
     extraction_max_workers: int = Field(default=1, ge=1, le=50, description="Số lượng luồng gọi LLM API song song")
 

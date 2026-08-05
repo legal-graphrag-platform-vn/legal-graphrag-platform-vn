@@ -33,8 +33,8 @@ CLAUSE_RE = re.compile(r"^(\d+[a-z]?)\.(?:\s+|$)(.*)$", re.IGNORECASE)
 # Pattern nhận diện dòng bắt đầu một Điểm luật (ví dụ: "a) ", "b) ").
 POINT_RE = re.compile(r"^([a-zđ])\)\s*(.*)$")
 
-# Pattern nhận diện dòng tiêu đề Chương dạng số La Mã (ví dụ: "Chương II").
-CHAPTER_RE = re.compile(r"^Chương\s+([IVXLCDM]+)\s*$", re.IGNORECASE)
+# Pattern nhận diện dòng tiêu đề Chương dạng số La Mã (ví dụ: "Chương II.", "Chương II:").
+CHAPTER_RE = re.compile(r"^Chương\s+([IVXLCDM]+)(?:(?:\.|:)\s*(.*))?$", re.IGNORECASE)
 
 _PART_NUMBER = (
     r"(?:[IVXLCDM]+|\d+[a-z]?|"
