@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
 from api.models import ConversationChatRequest, encode_sse
-from auth.principal import PRINCIPAL_COOKIE_NAME
+from auth.principal import PRINCIPAL_COOKIE_NAME, USER_COOKIE_NAME
 from dependencies import get_chat_service
 from persistence.domain import Owner
 from persistence.enums import OwnerKind
@@ -30,7 +30,17 @@ def _resolve_owner(request: Request) -> tuple[Owner, str | None]:
         return Owner(
             owner_kind=OwnerKind.ANONYMOUS, owner_principal_id=uuid.uuid4()
         ), None
-    authenticated = signer.authenticate(request.cookies.get(PRINCIPAL_COOKIE_NAME))
+    
+    user_token = request.cookies.get(USER_COOKIE_NAME)
+    if not user_token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            user_token = auth_header[7:].strip()
+            
+    authenticated = signer.authenticate(
+        request.cookies.get(PRINCIPAL_COOKIE_NAME),
+        user_token=user_token,
+    )
     return authenticated.owner, authenticated.set_cookie_value
 
 
@@ -69,7 +79,9 @@ async def chat(
                 "done",
                 {"status": "error", "citation_count": 0, "retry_after_ms": 1000},
             )
-        except Exception:
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).exception("Chat stream generation error: %s", exc)
             yield encode_sse(
                 "error",
                 {"code": "STREAM_ERROR", "message": "Đã xảy ra lỗi nội bộ."},

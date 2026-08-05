@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.error_handlers import register_error_handlers
-from api.routes import chat, documents, query
+from api.routes import auth, chat, conversations, documents, query
 from container import build_container
 from settings import Settings
 
@@ -70,9 +70,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_error_handlers(app)
 
     # 6.   Routes — tất cả prefix /api/v1
+    app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
     app.include_router(chat.router, prefix="/api/v1", tags=["chat"])
     app.include_router(query.router, prefix="/api/v1", tags=["query"])
     app.include_router(documents.router, prefix="/api/v1", tags=["documents"])
+    app.include_router(conversations.router, prefix="/api/v1", tags=["conversations"])
 
     return app
 

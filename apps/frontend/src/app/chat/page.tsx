@@ -32,7 +32,43 @@ export default function ChatPage() {
    const messagesEndRef = useRef<HTMLDivElement>(null)
    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-   // 1. Load sessions from localStorage on mount
+   // 1. Fetch server sessions list
+   const fetchServerConversations = async () => {
+      try {
+         const res = await fetch('/api/v1/conversations', { credentials: 'include' })
+         if (res.ok) {
+            const data = await res.json()
+            if (Array.isArray(data) && data.length > 0) {
+               const serverSessions: ChatSession[] = data.map((item: any) => ({
+                  id: item.id,
+                  title: item.title || 'Cuộc hội thoại mới',
+                  messages: [],
+                  createdAt: item.created_at || new Date().toISOString(),
+               }))
+               setSessions((prev) => {
+                  const map = new Map<string, ChatSession>()
+                  serverSessions.forEach((s) => map.set(s.id, s))
+                  prev.forEach((s) => {
+                     if (!map.has(s.id)) {
+                        map.set(s.id, s)
+                     } else {
+                        const existing = map.get(s.id)!
+                        map.set(s.id, {
+                           ...existing,
+                           messages: s.messages.length > 0 ? s.messages : existing.messages,
+                        })
+                     }
+                  })
+                  return Array.from(map.values())
+               })
+            }
+         }
+      } catch (e) {
+         console.error('Lỗi load conversations từ server:', e)
+      }
+   }
+
+   // Load sessions from localStorage on mount and sync with server
    useEffect(() => {
       const saved = localStorage.getItem('rag_sessions')
       if (saved) {
@@ -45,19 +81,8 @@ export default function ChatPage() {
          } catch (e) {
             console.error('Lỗi load sessions từ localStorage:', e)
          }
-      } else {
-         const defaultId = crypto.randomUUID()
-         const defaultSession: ChatSession = {
-            id: defaultId,
-            title: 'Cuộc hội thoại mới',
-            messages: [],
-            createdAt: new Date().toISOString(),
-         }
-         startTransition(() => {
-            setSessions([defaultSession])
-            setActiveSessionId(defaultId)
-         })
       }
+      fetchServerConversations()
    }, [])
 
    // 2. Save sessions to localStorage when updated
@@ -77,11 +102,17 @@ export default function ChatPage() {
                if (s.id !== activeSessionId) return s
 
                let newTitle = s.title
-               if (s.title === 'Cuộc hội thoại mới' && messages.length > 0) {
+               if ((s.title === 'Cuộc hội thoại mới' || s.title === 'Cuộc trò chuyện mới') && messages.length > 0) {
                   const firstUserMsg = messages.find((m) => m.role === 'user')
                   if (firstUserMsg) {
                      newTitle = firstUserMsg.content.slice(0, 30)
                      if (firstUserMsg.content.length > 30) newTitle += '...'
+                     fetch(`/api/v1/conversations/${activeSessionId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: newTitle }),
+                        credentials: 'include',
+                     }).catch(() => {})
                   }
                }
 
@@ -95,10 +126,43 @@ export default function ChatPage() {
       })
    }, [messages, activeSessionId])
 
-   const handleSelectSession = (sessionId: string) => {
-      const targetSession = sessions.find((session) => session.id === sessionId)
+   const handleSelectSession = async (sessionId: string) => {
       setActiveSessionId(sessionId)
-      setMessages(targetSession?.messages ?? [])
+      const targetSession = sessions.find((session) => session.id === sessionId)
+      if (targetSession && targetSession.messages && targetSession.messages.length > 0) {
+         setMessages(targetSession.messages)
+      } else {
+         clearMessages()
+      }
+
+      try {
+         const res = await fetch(`/api/v1/conversations/${sessionId}`, { credentials: 'include' })
+         if (res.ok) {
+            const data = await res.json()
+            if (data && Array.isArray(data.messages)) {
+               const loadedMessages = data.messages.map((m: any) => ({
+                  id: m.id,
+                  role: m.role === 'user' ? 'user' : 'assistant',
+                  content: m.content,
+                  sources: m.citations ? m.citations.map((c: any) => ({
+                     id: c.unit_id,
+                     title: c.citation_label,
+                     citation_label: c.citation_label,
+                     document_id: c.document_id,
+                     deep_link: c.deep_link,
+                     content: '',
+                  })) : [],
+                  timestamp: m.created_at || new Date().toISOString(),
+               }))
+               setMessages(loadedMessages)
+               setSessions((prev) =>
+                  prev.map((s) => (s.id === sessionId ? { ...s, messages: loadedMessages, title: data.title || s.title } : s))
+               )
+            }
+         }
+      } catch (e) {
+         console.error('Lỗi fetch chi tiết conversation:', e)
+      }
    }
 
    // 5. Scroll to bottom
@@ -133,13 +197,17 @@ export default function ChatPage() {
       setInputText('')
    }
 
-   const handleDeleteSession = (id: string) => {
+   const handleDeleteSession = async (id: string) => {
+      try {
+         await fetch(`/api/v1/conversations/${id}`, { method: 'DELETE', credentials: 'include' })
+      } catch {}
+
       const updated = sessions.filter((s) => s.id !== id)
       setSessions(updated)
 
       if (activeSessionId === id) {
          if (updated.length > 0) {
-            setActiveSessionId(updated[0].id)
+            handleSelectSession(updated[0].id)
          } else {
             const newId = crypto.randomUUID()
             const newSession: ChatSession = {
@@ -306,6 +374,7 @@ export default function ChatPage() {
             onDeleteAllSessions={handleDeleteAllSessions}
             isOpen={sidebarOpen}
             onToggle={() => setSidebarOpen(!sidebarOpen)}
+            onUserChange={() => fetchServerConversations()}
          />
 
          {/* Sidebar Backdrop Overlay on Mobile */}
