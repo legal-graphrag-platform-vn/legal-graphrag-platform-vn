@@ -66,6 +66,12 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
+    account_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("accounts.id", ondelete="CASCADE"),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
     full_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
@@ -82,7 +88,7 @@ class User(Base):
     )
 
     account: Mapped["Account"] = relationship(
-        back_populates="user", cascade="all, delete-orphan", uselist=False
+        back_populates="user", uselist=False
     )
 
 
@@ -90,12 +96,6 @@ class Account(Base):
     __tablename__ = "accounts"
 
     id: Mapped[uuid.UUID] = _uuid_pk()
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-        unique=True,
-        index=True,
-    )
     username: Mapped[str] = mapped_column(
         String(64), nullable=False, unique=True, index=True
     )
