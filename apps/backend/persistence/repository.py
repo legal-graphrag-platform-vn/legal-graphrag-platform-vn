@@ -695,34 +695,35 @@ class SqlAlchemyConversationStore:
         user_id = uuid.uuid4()
         account_id = uuid.uuid4()
         async with self._engine.begin() as conn:
-            # 1. Insert into users
-            await conn.execute(
-                _usr_t.insert().values(
-                    id=user_id,
-                    full_name=full_name,
-                    is_active=True,
-                )
-            )
-            # 2. Insert into accounts
+            # 1. Insert into accounts first
             await conn.execute(
                 _acc_t.insert().values(
                     id=account_id,
-                    user_id=user_id,
                     username=username.strip().lower(),
                     password_hash=password_hash,
                 )
             )
-        return {"id": user_id, "full_name": full_name, "is_active": True}, {
+            # 2. Insert into users referencing account_id
+            await conn.execute(
+                _usr_t.insert().values(
+                    id=user_id,
+                    account_id=account_id,
+                    full_name=full_name,
+                    is_active=True,
+                )
+            )
+        return {"id": user_id, "account_id": account_id, "full_name": full_name, "is_active": True}, {
             "id": account_id,
-            "user_id": user_id,
             "username": username.strip().lower(),
         }
 
     async def get_account_by_username(self, username: str) -> dict[str, Any] | None:
-        """Fetch account credentials by username."""
+        """Fetch account credentials and associated user_id by username."""
         async with self._engine.connect() as conn:
             res = await conn.execute(
-                select(_acc_t).where(_acc_t.c.username == username.strip().lower())
+                select(_acc_t, _usr_t.c.id.label("user_id"))
+                .join(_usr_t, _usr_t.c.account_id == _acc_t.c.id, isouter=True)
+                .where(_acc_t.c.username == username.strip().lower())
             )
             row = res.mappings().first()
             return dict(row) if row else None
@@ -732,7 +733,7 @@ class SqlAlchemyConversationStore:
         async with self._engine.connect() as conn:
             res = await conn.execute(
                 select(_usr_t, _acc_t.c.username).join(
-                    _acc_t, _acc_t.c.user_id == _usr_t.c.id
+                    _acc_t, _usr_t.c.account_id == _acc_t.c.id, isouter=True
                 ).where(_usr_t.c.id == user_id)
             )
             row = res.mappings().first()

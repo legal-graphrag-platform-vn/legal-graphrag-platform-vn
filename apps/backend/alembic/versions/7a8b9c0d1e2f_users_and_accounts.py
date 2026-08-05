@@ -20,34 +20,34 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # 1. Create users table
+    # 1. Create accounts table first
+    op.create_table(
+        'accounts',
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('username', sa.String(length=64), nullable=False),
+        sa.Column('password_hash', sa.String(length=255), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('username', name='uq_accounts_username')
+    )
+    op.create_index(op.f('ix_accounts_username'), 'accounts', ['username'], unique=True)
+
+    # 2. Create users table referencing accounts.id
     op.create_table(
         'users',
         sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('account_id', sa.Uuid(), nullable=True),
         sa.Column('full_name', sa.String(length=128), nullable=True),
         sa.Column('avatar_url', sa.Text(), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=False, server_default=sa.text('true')),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.PrimaryKeyConstraint('id')
-    )
-
-    # 2. Create accounts table
-    op.create_table(
-        'accounts',
-        sa.Column('id', sa.Uuid(), nullable=False),
-        sa.Column('user_id', sa.Uuid(), nullable=False),
-        sa.Column('username', sa.String(length=64), nullable=False),
-        sa.Column('password_hash', sa.String(length=255), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('user_id', name='uq_accounts_user_id'),
-        sa.UniqueConstraint('username', name='uq_accounts_username')
+        sa.UniqueConstraint('account_id', name='uq_users_account_id')
     )
-    op.create_index(op.f('ix_accounts_user_id'), 'accounts', ['user_id'], unique=True)
-    op.create_index(op.f('ix_accounts_username'), 'accounts', ['username'], unique=True)
+    op.create_index(op.f('ix_users_account_id'), 'users', ['account_id'], unique=True)
 
     # 3. Add title and is_deleted to conversations table
     op.add_column('conversations', sa.Column('title', sa.String(length=255), nullable=False, server_default='Cuộc trò chuyện mới'))
