@@ -6,6 +6,7 @@ from datetime import date
 from typing import TYPE_CHECKING, Any, Mapping, Protocol, Sequence
 
 from src.retrieval.models import GraphExpansion, IntentType, RetrievedUnit
+from src.shared.llm_ports import TextGenerationPort as TextGenerationPort  # re-export
 from src.shared.retrieval_contract import RetrievalFilters
 
 if TYPE_CHECKING:
@@ -128,16 +129,6 @@ class EmbeddingPort(Protocol):
 
 class IntentClassifierPort(Protocol):
     def classify(self, query: str) -> IntentType: ...
-
-
-class TextGenerationPort(Protocol):
-    def generate_text(
-        self,
-        system_prompt: str,
-        user_prompt: str,
-        temperature: float = 0.0,
-        response_format: str | None = None,
-    ) -> str: ...
 
 
 class RerankerPort(Protocol):
