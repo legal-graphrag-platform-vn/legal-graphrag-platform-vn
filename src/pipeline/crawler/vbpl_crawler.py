@@ -528,3 +528,79 @@ def crawl_by_search(
             logger.error("Lỗi khi crawl tài liệu %s từ %s: %s", doc_id_val, url_val, e)
 
     return results_metadata
+
+
+def fetch_vbpl_diagram_and_properties_by_number(
+    number: str, timeout_ms: int = 30000
+) -> tuple[dict[str, Any], dict[str, list[str]]]:
+    """1. Tìm kiếm trên vbpl.vn bằng số hiệu văn bản để trích xuất tab properties và diagram."""
+    if not number:
+        return {}, {}
+
+    logger.info("Đang tìm kiếm bổ sung diagram & properties trên VBPL cho số hiệu: %s", number)
+    properties: dict[str, Any] = {}
+    diagram: dict[str, list[str]] = {}
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent=_USER_AGENT,
+                viewport={"width": 1366, "height": 900},
+                locale="vi-VN",
+            )
+            page = context.new_page()
+            url = "https://vbpl.vn/van-ban/trung-uong"
+            page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page.wait_for_timeout(1500)
+
+            # Điền số hiệu vào ô tìm kiếm
+            page.fill("input#keyword", number)
+            page.wait_for_timeout(500)
+            page.keyboard.press("Enter")
+            page.wait_for_timeout(2500)
+
+            # Lấy URL kết quả đầu tiên
+            card = page.locator("div[class*='DocumentCard_documentTitle__'] a").first
+            if not card.is_visible():
+                logger.warning("Không tìm thấy kết quả VBPL cho số hiệu: %s", number)
+                browser.close()
+                return {}, {}
+
+            detail_url = str(card.get_attribute("href") or "")
+            if detail_url.startswith("/"):
+                detail_url = "https://vbpl.vn" + detail_url
+
+            # Tạo URL tab thuộc tính & lược đồ
+            if "/chi-tiet/" in detail_url:
+                thuoc_tinh_url = detail_url.replace("/chi-tiet/", "/thuoc-tinh/")
+                luoc_do_url = detail_url.replace("/chi-tiet/", "/luoc-do/")
+            else:
+                thuoc_tinh_url = detail_url
+                luoc_do_url = detail_url
+
+            # Tải tab thuộc tính
+            try:
+                page_prop = context.new_page()
+                page_prop.goto(thuoc_tinh_url, wait_until="domcontentloaded", timeout=timeout_ms)
+                page_prop.wait_for_timeout(1500)
+                properties = parse_properties_html(page_prop.content())
+                page_prop.close()
+            except Exception as exc:
+                logger.warning("Lỗi tải thuộc tính VBPL (%s): %s", number, exc)
+
+            # Tải tab lược đồ
+            try:
+                page_diag = context.new_page()
+                page_diag.goto(luoc_do_url, wait_until="domcontentloaded", timeout=timeout_ms)
+                page_diag.wait_for_timeout(1500)
+                diagram = parse_diagram_html(page_diag.content())
+                page_diag.close()
+            except Exception as exc:
+                logger.warning("Lỗi tải lược đồ VBPL (%s): %s", number, exc)
+
+            browser.close()
+    except Exception as exc:
+        logger.error("Lỗi tìm kiếm VBPL cho số hiệu %s: %s", number, exc)
+
+    return properties, diagram
