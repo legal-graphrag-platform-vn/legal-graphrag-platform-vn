@@ -86,6 +86,28 @@ async def patch_conversation_title(
     return {"id": str(conversation_id), "title": payload.title.strip()}
 
 
+@router.post("/{conversation_id}/generate-title")
+async def generate_conversation_title(
+    conversation_id: uuid.UUID,
+    request: Request,
+    repo=Depends(get_repository),
+) -> dict[str, Any]:
+    # 1. Resolve current principal
+    owner, _ = _resolve_owner(request)
+
+    # 2. Derive and persist a title from the first user message
+    title = await repo.generate_conversation_title(
+        conversation_id=conversation_id,
+        owner=owner,
+    )
+    if title is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Không tìm thấy cuộc trò chuyện hoặc chưa có tin nhắn để tạo tiêu đề.",
+        )
+    return {"id": str(conversation_id), "title": title}
+
+
 @router.delete("/{conversation_id}")
 async def delete_conversation(
     conversation_id: uuid.UUID,

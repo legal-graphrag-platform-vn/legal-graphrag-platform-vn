@@ -1,9 +1,26 @@
 # Plan 20 — User Authentication & Conversation History Management
 
-Status: PROPOSED
+Status: IMPLEMENTED (backend + frontend)
 Dependencies: `Plan 19 (19_conversation_context.md)`
 Author: Antigravity AI Team
 Created At: 2026-08-05
+
+Implementation notes (as of 2026-08-06):
+- Backend done: `auth/password.py`, `auth/principal.py` (user JWT-style signed
+  cookie + anonymous fallback), routes `auth.py` (register/login/logout/me/
+  claim-guest) and `conversations.py` (list/detail/rename/soft-delete/
+  generate-title), repository methods, Alembic migration
+  `7a8b9c0d1e2f_users_and_accounts`, router wiring in `main.py`.
+- Title generation: deterministic rule in `conversation/title.py` (`derive_title`,
+  ≤50 chars, word-boundary truncation) + `POST /conversations/{id}/generate-title`;
+  the frontend also derives a title client-side via PATCH after the first turn.
+- 1-1 user/account link is held on `users.account_id` (FK → accounts, UNIQUE,
+  ON DELETE CASCADE); `accounts` has no `user_id`. §2 and the schema dictionary
+  reflect this shipped model.
+- Tests: `tests/test_user_auth_and_history.py` (password/token/principal/title
+  units) + `tests/conversation/test_auth_history.py` (conversation_db-marked
+  integration: user/account creation, claim guest, owner isolation, CRUD,
+  generate-title). DB integration tests require `CONVERSATION_TEST_DATABASE_URL`.
 
 Bản kế hoạch này mở rộng kiến trúc **Plan 19** từ mô hình chỉ dùng Anonymous Principal sang hệ thống hỗ trợ **Đăng ký / Đăng nhập (User Authentication)** dựa trên **Username/Password đơn giản** (loại bỏ bảng `user_sessions`), tách biệt **Thông tin Đăng nhập (Account)** và **Hồ sơ Người dùng (User)**, cùng với **Lưu trữ / Tra cứu Lịch sử Hội thoại (Chat History Persistence)**.
 
@@ -33,7 +50,7 @@ Guest/Anonymous Browser
 2. **Kiến trúc Tinh gọn (Không dùng `user_sessions`)**: Không lưu trữ phiên/token revocation trong database. Việc xác thực JWT thực hiện trực tiếp qua mã hóa HMAC signature / Secret Key.
 3. **Tách biệt User và Account**:
    - Bảng `accounts`: Lưu trữ thông tin tài khoản đăng nhập (`username`, `password_hash`, liên kết 1-1 với `user_id`).
-   - Bảng `users`: Lưu trữ thông tin profile đại diện cho người dùng (`full_name`, `avatar_url`, `is_active`).
+   - Bảng `users`: Lưu trữ thông tin profile đại diện cho người dùng (`full_name`, `avatar_url`).
 4. **Tương thích ngược với Plan 19**: Không phá vỡ luồng `idempotency`, `advisory locking`, `context resolution`, `grounding` và `buffered SSE` đã triển khai ở Plan 19.
 5. **PostgreSQL là Source of Truth**: Bảng `users`, `accounts`, và `conversations` xác định quyền sở hữu hội thoại (ownership isolation).
 6. **Owner Isolation**: Người dùng A tuyệt đối không thể xem, sửa hoặc xóa hội thoại của người dùng B (trả về `404 CONVERSATION_NOT_FOUND`).
@@ -48,40 +65,43 @@ Bổ sung **2 bảng mới** (`users`, `accounts`) và cập nhật bảng `conv
 
 ```mermaid
 erDiagram
-    ACCOUNTS ||--|| USERS : belongs_to
+    USERS ||--|| ACCOUNTS : "authenticates_via (users.account_id)"
     USERS ||--o{ CONVERSATIONS : owns
     CONVERSATIONS ||--o{ CONVERSATION_TURNS : contains
 ```
 
+> Quan hệ 1-1 giữa `users` và `accounts` được giữ **từ phía `users.account_id`**
+> (FK → `accounts.id`), không đặt `user_id` trên `accounts`.
+
 ### 2.1. Bảng `users`
-Lưu trữ thông tin hồ sơ người dùng (Profile).
+Lưu trữ thông tin hồ sơ người dùng (Profile) và khóa ngoại `account_id` tới tài khoản đăng nhập.
 
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    account_id UUID UNIQUE REFERENCES accounts(id) ON DELETE CASCADE,
     full_name VARCHAR(128),
     avatar_url TEXT,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX ix_users_account_id ON users(account_id);
 ```
 
 ### 2.2. Bảng `accounts` (Đơn giản: Username & Password)
-Lưu trữ tài khoản đăng nhập chính của người dùng.
+Lưu trữ tài khoản đăng nhập chính của người dùng. Không có `user_id`; liên kết 1-1 do `users.account_id` nắm giữ.
 
 ```sql
 CREATE TABLE accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     username VARCHAR(64) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX ix_accounts_username ON accounts(LOWER(username));
-CREATE INDEX ix_accounts_user_id ON accounts(user_id);
+CREATE UNIQUE INDEX ix_accounts_username ON accounts(username);
 ```
 
 ### 2.3. Cập nhật Bảng `conversations` (từ Plan 19)

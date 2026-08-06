@@ -111,10 +111,10 @@ async def login(
 
     # 3. Fetch associated user profile
     user = await repo.get_user_by_id(account["user_id"])
-    if user is None or not user.get("is_active", True):
+    if user is None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Tài khoản của bạn đã bị vô hiệu hóa.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Tên đăng nhập hoặc mật khẩu không chính xác.",
         )
 
     # 4. Issue signed user token cookie
@@ -197,7 +197,6 @@ async def me(
         "user_id": str(user["id"]),
         "username": username,
         "full_name": user.get("full_name"),
-        "is_active": user.get("is_active", True),
     }
 
 
