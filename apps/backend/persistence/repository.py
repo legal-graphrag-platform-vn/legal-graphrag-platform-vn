@@ -38,6 +38,7 @@ from persistence.domain import (
     candidates_to_json,
     validate_candidates,
 )
+from conversation.title import derive_title
 from persistence.enums import (
     ClarificationMode,
     MessageKind,
@@ -249,7 +250,11 @@ class LockedTurn:
             )
             if conversation is None:
                 user_turn_no = 1
-                initial_title = user_message[:50].strip() if user_message and user_message.strip() else "Cuộc trò chuyện mới"
+                initial_title = (
+                    user_message[:50].strip()
+                    if user_message and user_message.strip()
+                    else "Cuộc trò chuyện mới"
+                )
                 await self._conn.execute(
                     _conv_t.insert().values(
                         id=self._conversation_id,
@@ -262,7 +267,14 @@ class LockedTurn:
             else:
                 user_turn_no = int(conversation["next_user_turn_no"])
                 title_update = {}
-                if (conversation.get("title") == "Cuộc trò chuyện mới" or not conversation.get("title")) and user_message and user_message.strip():
+                if (
+                    (
+                        conversation.get("title") == "Cuộc trò chuyện mới"
+                        or not conversation.get("title")
+                    )
+                    and user_message
+                    and user_message.strip()
+                ):
                     title_update["title"] = user_message[:50].strip()
                 await self._conn.execute(
                     update(_conv_t)
@@ -709,10 +721,13 @@ class SqlAlchemyConversationStore:
                     id=user_id,
                     account_id=account_id,
                     full_name=full_name,
-                    is_active=True,
                 )
             )
-        return {"id": user_id, "account_id": account_id, "full_name": full_name, "is_active": True}, {
+        return {
+            "id": user_id,
+            "account_id": account_id,
+            "full_name": full_name,
+        }, {
             "id": account_id,
             "username": username.strip().lower(),
         }
@@ -732,9 +747,9 @@ class SqlAlchemyConversationStore:
         """Fetch user profile by user_id."""
         async with self._engine.connect() as conn:
             res = await conn.execute(
-                select(_usr_t, _acc_t.c.username).join(
-                    _acc_t, _usr_t.c.account_id == _acc_t.c.id, isouter=True
-                ).where(_usr_t.c.id == user_id)
+                select(_usr_t, _acc_t.c.username)
+                .join(_acc_t, _usr_t.c.account_id == _acc_t.c.id, isouter=True)
+                .where(_usr_t.c.id == user_id)
             )
             row = res.mappings().first()
             return dict(row) if row else None
@@ -767,8 +782,12 @@ class SqlAlchemyConversationStore:
                 {
                     "id": str(r["id"]),
                     "title": r["title"],
-                    "created_at": r["created_at"].isoformat() if r["created_at"] else None,
-                    "updated_at": r["updated_at"].isoformat() if r["updated_at"] else None,
+                    "created_at": r["created_at"].isoformat()
+                    if r["created_at"]
+                    else None,
+                    "updated_at": r["updated_at"].isoformat()
+                    if r["updated_at"]
+                    else None,
                     "turn_count": max(0, r["next_user_turn_no"] - 1),
                 }
                 for r in rows
@@ -833,8 +852,12 @@ class SqlAlchemyConversationStore:
             return {
                 "id": str(conv["id"]),
                 "title": conv["title"],
-                "created_at": conv["created_at"].isoformat() if conv["created_at"] else None,
-                "updated_at": conv["updated_at"].isoformat() if conv["updated_at"] else None,
+                "created_at": conv["created_at"].isoformat()
+                if conv["created_at"]
+                else None,
+                "updated_at": conv["updated_at"].isoformat()
+                if conv["updated_at"]
+                else None,
                 "messages": formatted_msgs,
             }
 
@@ -853,6 +876,53 @@ class SqlAlchemyConversationStore:
                 .values(title=title.strip())
             )
             return res.rowcount > 0
+
+    async def generate_conversation_title(
+        self, conversation_id: uuid.UUID, owner: Owner
+    ) -> str | None:
+        """Derive and persist a title from the first user message (Plan 20 §5).
+
+        Owner-scoped. Returns the new title, or ``None`` when the conversation
+        does not exist for this owner or has no user message yet.
+        """
+        async with self._engine.begin() as conn:
+            # 1. Verify ownership and that the conversation is live.
+            conv = (
+                await conn.execute(
+                    select(_conv_t.c.id).where(
+                        _conv_t.c.id == conversation_id,
+                        _conv_t.c.owner_kind == owner.owner_kind,
+                        _conv_t.c.owner_principal_id == owner.owner_principal_id,
+                        _conv_t.c.is_deleted.is_(False),
+                    )
+                )
+            ).first()
+            if conv is None:
+                return None
+
+            # 2. Fetch the earliest user message content.
+            first_user = (
+                await conn.execute(
+                    select(_msg_t.c.content)
+                    .where(
+                        _msg_t.c.conversation_id == conversation_id,
+                        _msg_t.c.role == MessageRole.USER,
+                    )
+                    .order_by(_msg_t.c.ordinal.asc())
+                    .limit(1)
+                )
+            ).scalar_one_or_none()
+            if first_user is None:
+                return None
+
+            # 3. Derive a concise title and persist it.
+            title = derive_title(first_user)
+            await conn.execute(
+                update(_conv_t)
+                .where(_conv_t.c.id == conversation_id)
+                .values(title=title)
+            )
+            return title
 
     async def delete_conversation(
         self, conversation_id: uuid.UUID, owner: Owner

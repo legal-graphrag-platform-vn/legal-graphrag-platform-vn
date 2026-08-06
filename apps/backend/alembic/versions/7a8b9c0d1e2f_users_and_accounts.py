@@ -40,7 +40,6 @@ def upgrade() -> None:
         sa.Column('account_id', sa.Uuid(), nullable=True),
         sa.Column('full_name', sa.String(length=128), nullable=True),
         sa.Column('avatar_url', sa.Text(), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=False, server_default=sa.text('true')),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ondelete='CASCADE'),
@@ -73,7 +72,8 @@ def downgrade() -> None:
     op.drop_index('ix_conversations_owner_history', table_name='conversations')
     op.drop_column('conversations', 'is_deleted')
     op.drop_column('conversations', 'title')
+    op.drop_index(op.f('ix_users_account_id'), table_name='users')
     op.drop_index(op.f('ix_accounts_username'), table_name='accounts')
-    op.drop_index(op.f('ix_accounts_user_id'), table_name='accounts')
-    op.drop_table('accounts')
+    # Drop users first: it holds the FK to accounts.
     op.drop_table('users')
+    op.drop_table('accounts')

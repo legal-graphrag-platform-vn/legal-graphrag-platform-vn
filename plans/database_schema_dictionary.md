@@ -6,28 +6,27 @@ Tài liệu mô tả chi tiết các bảng dữ liệu trong hệ thống Postg
 ---
 
 ### 1. Bảng `USERS` (Hồ sơ người dùng)
-Lưu trữ thông tin hồ sơ (profile) của người dùng hệ thống.
+Lưu trữ thông tin hồ sơ (profile) của người dùng hệ thống. Giữ khóa ngoại `account_id` liên kết 1-1 tới tài khoản đăng nhập trong bảng `ACCOUNTS`.
 
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Giải thích |
 |---|---|---|---|
 | `id` | `uuid` | PK, NN, DF=gen_random_uuid() | Khóa chính định danh người dùng |
+| `account_id` | `uuid` | FK(accounts.id) ON DELETE CASCADE, UNIQUE, INDEX | Khóa ngoại liên kết 1-1 tới tài khoản đăng nhập trong bảng ACCOUNTS (nullable) |
 | `full_name` | `varchar(128)` | | Tên hiển thị đầy đủ của người dùng |
 | `avatar_url` | `text` | | Đường dẫn ảnh đại diện của người dùng |
-| `is_active` | `boolean` | NN, DF=true | Trạng thái hoạt động của tài khoản (true: đang hoạt động, false: bị khóa) |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm tạo hồ sơ người dùng |
 | `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm cập nhật thông tin người dùng mới nhất |
 
 ---
 
 ### 2. Bảng `ACCOUNTS` (Tài khoản đăng nhập)
-Lưu trữ thông tin xác thực đăng nhập (Username / Password) của người dùng, liên kết 1-1 với bảng `USERS`.
+Lưu trữ thông tin xác thực đăng nhập (Username / Password). Liên kết 1-1 với bảng `USERS` được thiết lập từ phía `users.account_id` (không có `user_id` ở bảng này).
 
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Giải thích |
 |---|---|---|---|
 | `id` | `uuid` | PK, NN, DF=gen_random_uuid() | Khóa chính định danh tài khoản đăng nhập |
-| `user_id` | `uuid` | FK(users.id), NN, UNIQUE | Khóa ngoại liên kết 1-1 với hồ sơ người dùng trong bảng USERS |
-| `username` | `varchar(64)` | NN, UNIQUE | Tên đăng nhập duy nhất của người dùng |
-| `password_hash` | `varchar(255)` | NN | Chuỗi băm mật khẩu bảo mật (PBKDF2 / Argon2id) |
+| `username` | `varchar(64)` | NN, UNIQUE, INDEX | Tên đăng nhập duy nhất của người dùng (lưu chữ thường) |
+| `password_hash` | `varchar(255)` | NN | Chuỗi băm mật khẩu bảo mật (PBKDF2-HMAC-SHA256) |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm đăng ký tài khoản |
 | `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm thay đổi thông tin đăng nhập gần nhất |
 
