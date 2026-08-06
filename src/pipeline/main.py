@@ -91,6 +91,11 @@ from src.pipeline.validation.data_readiness import (
     load_curated_manifest,
     validate_document_readiness,
 )
+from src.pipeline.validation.manifest_builder import generate_manifest_file
+from src.pipeline.pipeline.batch_progress_ledger import (
+    filter_documents_for_step,
+    record_doc_status,
+)
 from src.pipeline.validation.extraction_readiness import (
     ExtractionReadinessError,
     validate_extraction_readiness,
@@ -124,11 +129,15 @@ def _document_info_from_metadata(meta: dict) -> DocumentInfo:
     )
 
 
-def _ready_metadata(raw_doc_code: str) -> dict:
+def _ready_metadata(
+    raw_doc_code: str,
+    raw_root: Path | None = None,
+    manifest_path: Path | None = None,
+) -> dict:
     readiness = validate_document_readiness(
         raw_doc_code,
-        settings.data_raw_dir,
-        manifest_path=settings.curated_manifest_path,
+        raw_root or settings.data_raw_dir,
+        manifest_path=manifest_path or settings.curated_manifest_path,
     )
     if not readiness.valid:
         raise ValueError("; ".join(readiness.errors))
@@ -145,10 +154,15 @@ def _processed_dir(raw_doc_code: str) -> Path:
     return settings.data_processed_dir / raw_doc_code
 
 
-def _parse_folder_worker(raw_doc_code: str) -> bool:
+def _parse_folder_worker(
+    raw_doc_code: str,
+    raw_root: Path | None = None,
+    manifest_path: Path | None = None,
+) -> bool:
     """Worker xử lý parse cho 1 thư mục đơn lẻ."""
     try:
-        raw_dir = settings.data_raw_dir / raw_doc_code
+        base_raw_dir = raw_root or settings.data_raw_dir
+        raw_dir = base_raw_dir / raw_doc_code
         metadata_path = raw_dir / "metadata.json"
         source_path = raw_dir / "source.txt"
 
@@ -158,14 +172,16 @@ def _parse_folder_worker(raw_doc_code: str) -> bool:
             )
             return False
 
-        doc_info = _document_info_from_metadata(_ready_metadata(raw_doc_code))
+        doc_info = _document_info_from_metadata(
+            _ready_metadata(raw_doc_code, raw_root=base_raw_dir, manifest_path=manifest_path)
+        )
 
         text = source_path.read_text(encoding="utf-8")
         try:
             parsed = parse_text(text, doc_info)
         except ValueError as exc:
-            typer.echo(f"Parse validation error: {exc}", err=True)
-            raise typer.Exit(code=1) from exc
+            typer.echo(f"Parse validation error [{raw_doc_code}]: {exc}", err=True)
+            return False
 
         out_dir = settings.data_processed_dir / raw_doc_code
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -1016,6 +1032,124 @@ def ingest(
     crawl(url, raw_doc_code, number)
     parse(raw_doc_code)
     extract(raw_doc_code)
+
+
+# 1. Lệnh CLI sinh file manifest chuẩn cho dataset
+@app.command()
+def build_manifest(
+    raw_dir: Annotated[
+        Path, typer.Option(help="Thư mục lưu trữ dataset thô")
+    ] = settings.luatvietnam_raw_dir,
+    output: Annotated[
+        Path, typer.Option(help="Đường dẫn xuất file manifest JSON")
+    ] = settings.luatvietnam_manifest_path,
+) -> None:
+    """Tự động quét raw_dir, chuẩn hóa metadata và tạo file manifest JSON."""
+    count = generate_manifest_file(raw_dir, output)
+    typer.echo(f"Đã tạo file manifest thành công cho {count} văn bản tại: {output}")
+
+
+# 2. Lệnh CLI parse cấu trúc hàng loạt (Batch Parse)
+@app.command()
+def batch_parse(
+    manifest: Annotated[
+        Path, typer.Option(help="Đường dẫn file manifest JSON")
+    ] = settings.luatvietnam_manifest_path,
+    raw_dir: Annotated[
+        Path, typer.Option(help="Thư mục lưu trữ dataset thô")
+    ] = settings.luatvietnam_raw_dir,
+    workers: Annotated[int, typer.Option(min=1, max=32, help="Số lượng luồng xử lý song song")] = 4,
+    retry_failed: Annotated[bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")] = False,
+) -> None:
+    """Parse cấu trúc cây (Chương/Mục/Điều/Khoản/Điểm) cho toàn bộ dataset trong manifest."""
+    manifest_data = load_curated_manifest(manifest)
+    doc_codes = list(manifest_data.keys())
+
+    # Lọc các văn bản cần parse (hỗ trợ checkpoint resuming)
+    pending_codes = filter_documents_for_step(doc_codes, step="parse", retry_failed=retry_failed)
+    typer.echo(f"Tổng số văn bản trong manifest: {len(doc_codes)}. Cần parse: {len(pending_codes)}")
+
+    if not pending_codes:
+        typer.echo("Tất cả văn bản đã được parse xong thành công.")
+        return
+
+    success_count = 0
+    fail_count = 0
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_map = {
+            executor.submit(_parse_folder_worker, code, raw_root=raw_dir, manifest_path=manifest): code
+            for code in pending_codes
+        }
+        for future in as_completed(future_map):
+            code = future_map[future]
+            try:
+                ok = future.result()
+                if ok:
+                    success_count += 1
+                    record_doc_status(code, step="parse", status="SUCCESS")
+                else:
+                    fail_count += 1
+                    record_doc_status(code, step="parse", status="FAILED", error="Parse failed")
+            except Exception as exc:
+                fail_count += 1
+                record_doc_status(code, step="parse", status="FAILED", error=str(exc))
+
+    typer.echo(f"Hoàn thành Batch Parse. Thành công: {success_count}, Thất bại: {fail_count}")
+
+
+# 3. Lệnh CLI extract tri thức LLM hàng loạt (Batch Extract)
+@app.command()
+def batch_extract(
+    manifest: Annotated[
+        Path, typer.Option(help="Đường dẫn file manifest JSON")
+    ] = settings.luatvietnam_manifest_path,
+    raw_dir: Annotated[
+        Path, typer.Option(help="Thư mục lưu trữ dataset thô")
+    ] = settings.luatvietnam_raw_dir,
+    retry_failed: Annotated[bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")] = False,
+) -> None:
+    """Gọi LLM trích xuất tri thức song song cho tập dữ liệu trong manifest (hỗ trợ Article Checkpoint)."""
+    manifest_data = load_curated_manifest(manifest)
+    doc_codes = list(manifest_data.keys())
+
+    pending_codes = filter_documents_for_step(doc_codes, step="extract", retry_failed=retry_failed)
+    typer.echo(f"Tổng số văn bản trong manifest: {len(doc_codes)}. Cần extract: {len(pending_codes)}")
+
+    if not pending_codes:
+        typer.echo("Tất cả văn bản đã extract tri thức xong.")
+        return
+
+    success_count = 0
+    fail_count = 0
+
+    for code in pending_codes:
+        try:
+            # Đảm bảo văn bản đã được parse trước
+            processed_dir = _processed_dir(code)
+            if not (processed_dir / "hierarchy.json").exists():
+                _parse_folder_worker(code, raw_root=raw_dir, manifest_path=manifest)
+
+            # Chạy pipeline orchestrator cho văn bản
+            result = run_pipeline(
+                raw_doc_code=code,
+                raw_root=raw_dir,
+                manifest_path=manifest,
+            )
+            if result.summary.get("rejected_count", 0) == 0:
+                success_count += 1
+                record_doc_status(code, step="extract", status="SUCCESS")
+            else:
+                fail_count += 1
+                record_doc_status(code, step="extract", status="FAILED", error="Contains rejected records")
+        except Exception as exc:
+            fail_count += 1
+            record_doc_status(code, step="extract", status="FAILED", error=str(exc))
+            typer.echo(f"Lỗi extract {code}: {exc}", err=True)
+
+    typer.echo(f"Hoàn thành Batch Extract. Thành công: {success_count}, Thất bại: {fail_count}")
 
 
 if __name__ == "__main__":
