@@ -6,10 +6,12 @@ from datetime import date
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 RETRIEVAL_CONTRACT_VERSION = "retrieval-runtime-v2"
+
+QUERY_PROCESSING_CONTRACT_VERSION = "query-processing-v1"
 
 
 class IntentType(str, Enum):
@@ -103,3 +105,139 @@ class RetrievalRequest(BaseModel):
         if not normalized:
             raise ValueError("Retrieval query must not be blank")
         return normalized
+
+
+# ---------------------------------------------------------------------------
+# Query-processing contract (upstream of retrieval)
+#
+# The query processor resolves conversation context, rewrites a standalone
+# query, decomposes it into sub-queries and assigns a plan. Its output is the
+# five-field JSON contract mirrored by ``experiments/legal-query-processor``.
+# ---------------------------------------------------------------------------
+
+
+class ProcessingStatus(str, Enum):
+    READY = "ready"
+    NEEDS_CLARIFICATION = "needs_clarification"
+
+
+class PlanType(str, Enum):
+    SINGLE = "single"
+    PARALLEL = "parallel"
+    COMPARISON = "comparison"
+    MULTI_HOP = "multi_hop"
+
+
+class SubqueryIntent(str, Enum):
+    """The four intents a sub-query may carry (subset of ``IntentType``)."""
+
+    FACTUAL = "factual"
+    DEFINITION = "definition"
+    VALIDITY = "validity"
+    HIERARCHY = "hierarchy"
+
+
+# Backward-compatible bridge from a sub-query intent to the router's IntentType.
+_SUBQUERY_INTENT_TO_INTENT: dict["SubqueryIntent", IntentType] = {
+    SubqueryIntent.FACTUAL: IntentType.FACTUAL,
+    SubqueryIntent.DEFINITION: IntentType.DEFINITION,
+    SubqueryIntent.VALIDITY: IntentType.VALIDITY,
+    SubqueryIntent.HIERARCHY: IntentType.HIERARCHY,
+}
+
+
+class SubqueryDTO(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(min_length=1)
+    query: str = Field(min_length=1)
+    intent: SubqueryIntent
+    depends_on: list[str] = Field(default_factory=list)
+
+    @field_validator("id", "query")
+    @classmethod
+    def validate_non_blank(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("Subquery id and query must not be blank")
+        return normalized
+
+    @field_validator("depends_on")
+    @classmethod
+    def validate_dependencies(cls, values: list[str]) -> list[str]:
+        normalized = [value.strip() for value in values]
+        if any(not value for value in normalized):
+            raise ValueError("depends_on entries must not be blank")
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("depends_on entries must be unique")
+        return normalized
+
+
+class QueryProcessingResult(BaseModel):
+    """The five-field query-processing contract.
+
+    Invariants (mirrored from the fine-tuning system prompt):
+    - ``ready``: standalone_query and plan_type are set, subqueries is non-empty,
+      clarification_question is null.
+    - ``needs_clarification``: standalone_query and plan_type are null,
+      subqueries is empty, clarification_question is a non-empty question.
+    - ``depends_on`` only references sub-queries that appear earlier in the list.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    status: ProcessingStatus
+    standalone_query: str | None = None
+    plan_type: PlanType | None = None
+    subqueries: list[SubqueryDTO] = Field(default_factory=list)
+    clarification_question: str | None = None
+
+    @model_validator(mode="after")
+    def validate_contract(self) -> "QueryProcessingResult":
+        if self.status is ProcessingStatus.NEEDS_CLARIFICATION:
+            if self.standalone_query is not None or self.plan_type is not None:
+                raise ValueError(
+                    "needs_clarification must have null standalone_query and plan_type"
+                )
+            if self.subqueries:
+                raise ValueError("needs_clarification must have empty subqueries")
+            if not (self.clarification_question and self.clarification_question.strip()):
+                raise ValueError(
+                    "needs_clarification requires a clarification_question"
+                )
+        else:  # ProcessingStatus.READY
+            if not (self.standalone_query and self.standalone_query.strip()):
+                raise ValueError("ready requires a non-empty standalone_query")
+            if self.plan_type is None:
+                raise ValueError("ready requires a plan_type")
+            if not self.subqueries:
+                raise ValueError("ready requires at least one subquery")
+            if self.clarification_question is not None:
+                raise ValueError("ready must have null clarification_question")
+
+        seen: set[str] = set()
+        for subquery in self.subqueries:
+            if subquery.id in seen:
+                raise ValueError(f"Duplicate subquery id: {subquery.id}")
+            for dependency in subquery.depends_on:
+                if dependency not in seen:
+                    raise ValueError(
+                        f"Subquery {subquery.id} depends_on '{dependency}' "
+                        "which is not a preceding subquery"
+                    )
+            seen.add(subquery.id)
+        return self
+
+    def primary_intent(self) -> IntentType:
+        """Map the plan to a single router ``IntentType`` (backward compat).
+
+        ``comparison`` and ``multi_hop`` map to their dedicated ``IntentType``
+        members; ``single``/``parallel`` fall back to the first sub-query intent.
+        """
+        if self.status is not ProcessingStatus.READY:
+            raise ValueError("primary_intent is only defined for a ready result")
+        if self.plan_type is PlanType.COMPARISON:
+            return IntentType.COMPARISON
+        if self.plan_type is PlanType.MULTI_HOP:
+            return IntentType.MULTI_HOP
+        return _SUBQUERY_INTENT_TO_INTENT[self.subqueries[0].intent]
