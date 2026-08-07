@@ -1,9 +1,8 @@
 import { PanelLeftClose, Settings, SquarePen, Trash2, X, BookOpen, User } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeToggle } from './ThemeToggle'
 import { ChatSession } from '../../types/chat'
-import { AuthModal } from '../auth/AuthModal'
 
 interface UserProfile {
    user_id: string
@@ -20,7 +19,8 @@ interface SidebarProps {
    onDeleteAllSessions: () => void
    isOpen: boolean
    onToggle: () => void
-   onUserChange?: (user: UserProfile | null) => void
+   user: UserProfile | null
+   onOpenAuth: () => void
 }
 
 export function Sidebar({
@@ -32,25 +32,12 @@ export function Sidebar({
    onDeleteAllSessions,
    isOpen,
    onToggle,
-   onUserChange,
+   user,
+   onOpenAuth,
 }: SidebarProps) {
    const [showSettings, setShowSettings] = useState(false)
-   const [showAuthModal, setShowAuthModal] = useState(false)
-   const [user, setUser] = useState<UserProfile | null>(null)
    const pathname = usePathname()
    const router = useRouter()
-
-   useEffect(() => {
-      fetch('/api/v1/auth/me', { credentials: 'include' })
-         .then((res) => (res.ok ? res.json().catch(() => null) : null))
-         .then((data) => {
-            if (data && data.username) {
-               setUser(data)
-               if (onUserChange) onUserChange(data)
-            }
-         })
-         .catch(() => {})
-   }, [onUserChange])
 
    return (
       <div
@@ -155,7 +142,7 @@ export function Sidebar({
          {/* Sidebar Footer with Account & Settings */}
          <div className="p-3 border-t border-border flex flex-col gap-1.5">
             <button
-               onClick={() => setShowAuthModal(true)}
+               onClick={onOpenAuth}
                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-zinc-850 dark:text-zinc-200 text-left transition-colors cursor-pointer text-sm font-medium"
             >
                <User size={17} className="text-indigo-500" />
@@ -174,21 +161,6 @@ export function Sidebar({
                </button>
                <ThemeToggle />
             </div>
-
-            {/* Auth Modal */}
-            <AuthModal
-               isOpen={showAuthModal}
-               onClose={() => setShowAuthModal(false)}
-               user={user}
-               onLoginSuccess={(u) => {
-                  setUser(u)
-                  if (onUserChange) onUserChange(u)
-               }}
-               onLogout={() => {
-                  setUser(null)
-                  if (onUserChange) onUserChange(null)
-               }}
-            />
 
             {/* Settings Modal (Centered on Screen) */}
             {showSettings && (

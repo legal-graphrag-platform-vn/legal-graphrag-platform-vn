@@ -7,6 +7,14 @@ interface UserProfile {
   full_name?: string | null
 }
 
+interface AuthResponse {
+  user_id?: string
+  username?: string
+  full_name?: string | null
+  detail?: string | { msg?: string; message?: string }[]
+  message?: string
+}
+
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
@@ -52,7 +60,7 @@ export function AuthModal({
         credentials: 'include',
       })
 
-      let data: any = {}
+      let data: AuthResponse = {}
       try {
         data = await res.json()
       } catch {
@@ -78,8 +86,8 @@ export function AuthModal({
         isRegister ? 'Đăng ký tài khoản thành công!' : 'Đăng nhập thành công!'
       )
       onLoginSuccess({
-        user_id: data.user_id,
-        username: data.username,
+        user_id: data.user_id || '',
+        username: data.username || '',
         full_name: data.full_name,
       })
 

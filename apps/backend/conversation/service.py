@@ -47,7 +47,7 @@ from persistence.repository import (
     focus_upserts_from_citations,
 )
 from resolution.models import (
-    REASON_NO_REFERENCE_REQUIRED,
+    REASON_NO_ANAPHORA,
     REASON_USER_CANCELLED,
     CancelResolution,
     ClarifyResolution,
@@ -217,7 +217,7 @@ class ConversationChatService:
             begun,
             text=text,
             resolution_status=ResolutionStatus.UNRESOLVED,
-            reason_code=REASON_NO_REFERENCE_REQUIRED,
+            reason_code=REASON_NO_ANAPHORA,
         )
 
     async def _persist_direct(
@@ -422,8 +422,9 @@ def _answer_resolution(
     outcome: StandaloneResolution | ResolvedResolution,
 ) -> tuple[ResolutionStatus, str | None]:
     if isinstance(outcome, ResolvedResolution):
-        return ResolutionStatus.RESOLVED, None
-    return ResolutionStatus.UNRESOLVED, REASON_NO_REFERENCE_REQUIRED
+        # EXPLICIT_FOUND for direct mentions, ANAPHORA_RESOLVED for anaphora.
+        return ResolutionStatus.RESOLVED, outcome.reason_code
+    return ResolutionStatus.UNRESOLVED, REASON_NO_ANAPHORA
 
 
 def _clarification_metadata(resolution_status: str) -> ChatMetadataData:

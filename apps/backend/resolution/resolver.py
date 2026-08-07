@@ -35,7 +35,7 @@ from resolution.clarification import (
 )
 from resolution.explicit_parser import parse_explicit_references
 from resolution.models import (
-    REASON_MULTIPLE_MATCHES,
+    REASON_ANAPHORA_AMBIGUOUS,
     REASON_REFERENT_NOT_FOUND,
     REASON_SELECT_INPUT_INVALID,
     CancelResolution,
@@ -178,7 +178,7 @@ class ReferenceResolver:
         return ClarifyResolution(
             mode=ClarificationMode.SELECT,
             resolution_status=ResolutionStatus.AMBIGUOUS,
-            reason_code=REASON_MULTIPLE_MATCHES,
+            reason_code=REASON_ANAPHORA_AMBIGUOUS,
             question=build_select_question(bounded),
             candidates=bounded,
         )

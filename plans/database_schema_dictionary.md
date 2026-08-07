@@ -40,13 +40,13 @@ Lưu trữ thông tin xác thực đăng nhập (Username / Password). Liên k�
 ---
 
 ### 3. Bảng `CONVERSATIONS` (Phiên hội thoại)
-Quản lý các cuộc trò chuyện của người dùng ẩn danh (Anonymous) và người dùng chính thức (User).
+Quản lý các cuộc trò chuyện của người dùng chính thức (User).
 
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Giải thích |
 |---|---|---|---|
 | `id` | `uuid` | PK, NN | Khóa chính định danh phiên hội thoại |
-| `owner_kind` | `enum` | NN, CHECK | **Phân loại chủ sở hữu hội thoại**: <br>• `ANONYMOUS`: Khách vãng lai chưa đăng nhập (định danh bằng UUID ngẫu nhiên lưu trong Signed Cookie). <br>• `USER`: Người dùng chính thức đã đăng ký & đăng nhập (định danh bằng ID trong bảng `USERS`). |
-| `owner_principal_id` | `uuid` | NN | ID chủ sở hữu (UUID của khách ẩn danh hoặc ID của User) |
+<!-- | `owner_kind` | `enum` | NN, CHECK | Phân loại chủ sở hữu hội thoại ('USER': Người dùng đăng nhập, 'ANONYMOUS': Khách vãng lai) | -->
+| `owner_principal_id` | `uuid` | NN | ID chủ sở hữu (ID của User trong bảng `USERS`) |
 | `title` | `varchar(255)` | NN, DF='Cuộc trò chuyện mới' | Tiêu đề cuộc trò chuyện (tự động tạo từ câu hỏi đầu tiên) |
 | `is_deleted` | `boolean` | NN, DF=false | Cờ đánh dấu xóa mềm cuộc trò chuyện (Soft Delete) |
 | `next_user_turn_no` | `integer` | NN, DF=1, CHECK(>=1) | Số thứ tự lượt tương tác kế tiếp của người dùng |
@@ -113,6 +113,10 @@ Lưu trữ chi tiết các trích dẫn pháp lý kèm theo tin nhắn trả l�
 ### 7. Bảng `GROUNDED_FOCUSES` (Cửa sổ ngữ cảnh tham chiếu pháp lý)
 **Chức năng**: "Bộ nhớ tạm các Điều/Khoản luật vừa nhắc tới" trong vòng 5 câu hỏi gần nhất để AI giải quyết câu hỏi tắt.
 
+**Phân định các nhóm trường trong bảng**:
+- **Nhóm Đồ thị Neo4j (`node_id`, `node_type`)**: Mã Đỉnh duy nhất và loại Đỉnh để AI nhảy thẳng tới vị trí Đỉnh đó trên Đồ thị Neo4j khi cần mở rộng truy vấn tri thức.
+- **Nhóm Cơ sở dữ liệu PostgreSQL (`document_id`, `article_id`, `clause_id`)**: Phân cấp quan hệ rõ ràng để cơ sở dữ liệu SQL chạy các câu lệnh lọc `WHERE` cực nhanh và nhóm (Group By) dữ liệu hiển thị lên giao diện UI mà không phải cắt chuỗi `node_id`.
+
 **Ví dụ Kịch bản Update dữ liệu thực tế**:
 - **Lượt 1 (`user_turn_no = 1`)**: AI trích dẫn Điều 21 (đứng đầu) và Điều 23 (đứng thứ hai).
   ➔ Ghi nhận Điều 21 có `citation_order = 1`, `last_grounded_user_turn_no = 1`.
@@ -125,13 +129,13 @@ Lưu trữ chi tiết các trích dẫn pháp lý kèm theo tin nhắn trả l�
 |---|---|---|---|
 | `id` | `uuid` | PK, NN | Khóa chính định danh bản ghi bộ nhớ |
 | `conversation_id` | `uuid` | FK(conversations.id), NN | Thuộc cuộc trò chuyện nào |
-| `node_id` | `varchar(256)` | NN, UNIQUE(conv_id, node_id) | Mã Đỉnh đại diện điều luật trong Đồ thị Neo4j (ví dụ: `ldn_2020_art21` đại diện cho Điều 21 Luật Doanh nghiệp 2020) |
-| `node_type` | `varchar(64)` | NN | **Cấp độ điều luật được ghi nhớ**: <br>• `Document`: Toàn bộ Văn bản. <br>• `Article`: Một Điều luật cụ thể. <br>• `Clause`: Một Khoản luật cụ thể. |
+| `node_id` | `varchar(256)` | NN, UNIQUE(conv_id, node_id) | **Mã Đỉnh duy nhất trên Đồ thị Neo4j** (ví dụ: `ldn_2020_art21` trỏ thẳng tới Nút Điều 21 trên Neo4j). |
+| `node_type` | `varchar(64)` | NN | **Loại Nút trên Đồ thị Neo4j** (`Document`: Nút Văn bản, `Article`: Nút Điều, `Clause`: Nút Khoản). |
 | `document_type` | `varchar(64)` | | Loại văn bản luật ('Luật', 'Nghị định', 'Thông tư'...) |
 | `canonical_label` | `text` | NN | Tên hiển thị dễ đọc của điều luật (Ví dụ: "Điều 21, Luật Doanh nghiệp 2020") |
-| `document_id` | `varchar(256)` | NN | Mã văn bản gốc từ Neo4j |
-| `article_id` | `varchar(256)` | | Mã Điều gốc từ Neo4j |
-| `clause_id` | `varchar(256)` | | Mã Khoản gốc từ Neo4j |
+| `document_id` | `varchar(256)` | NN | **Mã văn bản gốc (Phục vụ SQL lọc nhanh)**: Dùng cho SQL lọc `WHERE document_id = 'ldn_2020'`. |
+| `article_id` | `varchar(256)` | | **Mã Điều gốc (Phục vụ SQL lọc nhanh)**: Dùng cho SQL lọc `WHERE article_id = 'ldn_2020_art21'`. |
+| `clause_id` | `varchar(256)` | | **Mã Khoản gốc (Phục vụ SQL lọc nhanh)**: Mã Khoản pháp luật liên quan. |
 | `document_metadata` | `jsonb` | | Thông tin bổ sung phụ trợ của văn bản (dạng JSON) |
 | `last_grounded_user_turn_no` | `integer` | NN | **Số lượt câu hỏi gần nhất mà điều luật này được trích dẫn**: Dùng để tính TTL của bộ nhớ tạm. Tự động UPDATE số lượt mới khi được nhắc lại, và tự động DELETE bản ghi nếu `Lượt_Hiện_Tại - last_grounded_user_turn_no > 5`. |
 | `citation_order` | `integer` | NN | **Thứ tự xuất hiện của điều luật trong câu trả lời của AI (1, 2, 3...)**: Ghi nhận vị trí xuất hiện đầu tiên, thứ hai... để giúp AI hiểu khi người dùng hỏi các câu hỏi thứ tự như *"nội dung đầu tiên"*, *"điều luật thứ hai"*. |
