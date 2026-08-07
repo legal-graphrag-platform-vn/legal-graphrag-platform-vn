@@ -130,6 +130,29 @@ def _ready_result(standalone: str) -> QueryProcessingResult:
     )
 
 
+def _ready_multi_result(standalone: str) -> QueryProcessingResult:
+    return QueryProcessingResult(
+        status=ProcessingStatus.READY,
+        standalone_query=standalone,
+        plan_type=PlanType.PARALLEL,
+        subqueries=[
+            SubqueryDTO(
+                id="q1",
+                query="Công ty cổ phần là gì?",
+                intent=SubqueryIntent.DEFINITION,
+                depends_on=[],
+            ),
+            SubqueryDTO(
+                id="q2",
+                query="Công ty TNHH là gì?",
+                intent=SubqueryIntent.DEFINITION,
+                depends_on=[],
+            ),
+        ],
+        clarification_question=None,
+    )
+
+
 def _clarification_result(question: str) -> QueryProcessingResult:
     return QueryProcessingResult(
         status=ProcessingStatus.NEEDS_CLARIFICATION,
@@ -254,6 +277,28 @@ def test_query_processor_ready_uses_standalone_query(db_url: str) -> None:
     assert generate_calls == 1
     assert retrieved_query == standalone
     assert processor.calls == ["cái đó là gì"]
+
+
+def test_query_processor_fans_out_subqueries(db_url: str) -> None:
+    owner = _owner()
+    processor = FakeQueryProcessor(_ready_multi_result("so sánh cổ phần và TNHH"))
+    request = ConversationChatRequest(
+        conversation_id=uuid.uuid4(),
+        client_turn_id=uuid.uuid4(),
+        message="so sánh hai loại đó",
+    )
+
+    async def _run() -> tuple[int, int]:
+        async with prepared_conversation_store(db_url) as store:
+            retrieval = CountingRetrieval()
+            generator = CountingGenerator()
+            service = _service(store, retrieval, generator, query_processor=processor)
+            await _collect(service, request, owner)
+            return retrieval.calls, generator.calls
+
+    retrieval_calls, generate_calls = asyncio.run(_run())
+    assert retrieval_calls == 2  # one retrieval per subquery
+    assert generate_calls == 1  # a single merged generation
 
 
 def test_query_processor_needs_clarification_skips_retrieval(db_url: str) -> None:
