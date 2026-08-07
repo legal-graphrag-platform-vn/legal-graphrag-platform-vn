@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
-    # Có thể uncomment phần tag bên dưới nếu bạn muốn build khi tạo release/tag mới
-    # tags:
-    #   - 'v*'
+    tags:
+      - 'v*'
+  release:
+    types: [published]
   workflow_dispatch: # Cho phép trigger bằng tay từ giao diện GitHub
 
 env:

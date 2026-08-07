@@ -3,6 +3,7 @@
 import React, { startTransition, useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MessageItem } from '@/components/chat/MessageItem'
+import { AuthModal } from '@/components/auth/AuthModal'
 import { useChatStream } from '@/hooks/useChatStream'
 import { ChatSession } from '@/types/chat'
 import {
@@ -14,17 +15,48 @@ import {
    Image as ImageIcon,
    PenLine,
    Globe,
-   CalendarDays,
-   X,
 } from 'lucide-react'
+
+interface UserProfile {
+   user_id: string
+   username: string
+   full_name?: string | null
+}
+
+interface ServerConversationSummary {
+   id: string
+   title?: string | null
+   created_at?: string | null
+}
+
+interface ServerCitation {
+   unit_id: string
+   citation_label: string
+   document_id: string
+   deep_link: string
+}
+
+interface ServerMessage {
+   id: string
+   role: string
+   content: string
+   citations?: ServerCitation[]
+   created_at?: string | null
+}
+
+interface ServerConversationDetail {
+   title?: string | null
+   messages?: ServerMessage[]
+}
 
 export default function ChatPage() {
    const [sessions, setSessions] = useState<ChatSession[]>([])
    const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
    const [inputText, setInputText] = useState('')
    const [sidebarOpen, setSidebarOpen] = useState(true)
-   const [temporalDate, setTemporalDate] = useState<string>('') // Ngày tra cứu hiệu lực
-   const [showDatePicker, setShowDatePicker] = useState(false)
+   // Auth state (login required to chat). null = not logged in; undefined = checking.
+   const [user, setUser] = useState<UserProfile | null | undefined>(undefined)
+   const [showAuth, setShowAuth] = useState(false)
 
    // Custom hook for SSE Streaming
    const { messages, setMessages, isStreaming, sendMessage, clearMessages } = useChatStream([])
@@ -32,33 +64,65 @@ export default function ChatPage() {
    const messagesEndRef = useRef<HTMLDivElement>(null)
    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-   // 1. Load sessions from localStorage on mount
-   useEffect(() => {
-      const saved = localStorage.getItem('rag_sessions')
-      if (saved) {
-         try {
-            const parsed = JSON.parse(saved)
-            startTransition(() => {
-               setSessions(parsed)
-               if (parsed.length > 0) setActiveSessionId(parsed[0].id)
-            })
-         } catch (e) {
-            console.error('Lỗi load sessions từ localStorage:', e)
-         }
-      } else {
-         const defaultId = crypto.randomUUID()
-         const defaultSession: ChatSession = {
-            id: defaultId,
-            title: 'Cuộc hội thoại mới',
+   // Rebuild the sidebar from the server for the CURRENT principal, dropping any
+   // locally cached sessions that belong to a different (previous) principal.
+   const reloadConversationsForPrincipal = async () => {
+      clearMessages()
+      try {
+         const res = await fetch('/api/v1/conversations', { credentials: 'include' })
+         const data: unknown = res.ok ? await res.json() : []
+         const items: ServerConversationSummary[] = Array.isArray(data) ? data : []
+         const serverSessions: ChatSession[] = items.map((item) => ({
+            id: item.id,
+            title: item.title || 'Cuộc hội thoại mới',
             messages: [],
-            createdAt: new Date().toISOString(),
-         }
-         startTransition(() => {
-            setSessions([defaultSession])
-            setActiveSessionId(defaultId)
-         })
+            createdAt: item.created_at || new Date().toISOString(),
+         }))
+         setSessions(serverSessions)
+         setActiveSessionId(serverSessions.length > 0 ? serverSessions[0].id : null)
+      } catch (e) {
+         console.error('Lỗi tải lại conversations theo principal:', e)
+         setSessions([])
+         setActiveSessionId(null)
       }
+   }
+
+   // Resolve the current user once on mount (login required to chat). When
+   // authenticated, load that principal's conversations; otherwise show nothing.
+   useEffect(() => {
+      fetch('/api/v1/auth/me', { credentials: 'include' })
+         .then((res) => (res.ok ? res.json().catch(() => null) : null))
+         .then((data) => {
+            const resolved: UserProfile | null = data && data.username ? data : null
+            setUser(resolved)
+            localStorage.removeItem('rag_sessions')
+            if (resolved) {
+               reloadConversationsForPrincipal()
+            } else {
+               setSessions([])
+               setActiveSessionId(null)
+            }
+         })
+         .catch(() => setUser(null))
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [])
+
+   // Handle login: adopt the profile, then rebuild the sidebar from the server
+   // for the now-authenticated principal (guest conversations were claimed).
+   const handleLoginSuccess = (u: UserProfile) => {
+      setUser(u)
+      localStorage.removeItem('rag_sessions')
+      reloadConversationsForPrincipal()
+   }
+
+   // Handle logout: clear identity and wipe the cached sidebar completely.
+   const handleLogout = () => {
+      setUser(null)
+      localStorage.removeItem('rag_sessions')
+      setSessions([])
+      setActiveSessionId(null)
+      clearMessages()
+   }
 
    // 2. Save sessions to localStorage when updated
    useEffect(() => {
@@ -77,11 +141,17 @@ export default function ChatPage() {
                if (s.id !== activeSessionId) return s
 
                let newTitle = s.title
-               if (s.title === 'Cuộc hội thoại mới' && messages.length > 0) {
+               if ((s.title === 'Cuộc hội thoại mới' || s.title === 'Cuộc trò chuyện mới') && messages.length > 0) {
                   const firstUserMsg = messages.find((m) => m.role === 'user')
                   if (firstUserMsg) {
                      newTitle = firstUserMsg.content.slice(0, 30)
                      if (firstUserMsg.content.length > 30) newTitle += '...'
+                     fetch(`/api/v1/conversations/${activeSessionId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: newTitle }),
+                        credentials: 'include',
+                     }).catch(() => {})
                   }
                }
 
@@ -95,10 +165,43 @@ export default function ChatPage() {
       })
    }, [messages, activeSessionId])
 
-   const handleSelectSession = (sessionId: string) => {
-      const targetSession = sessions.find((session) => session.id === sessionId)
+   const handleSelectSession = async (sessionId: string) => {
       setActiveSessionId(sessionId)
-      setMessages(targetSession?.messages ?? [])
+      const targetSession = sessions.find((session) => session.id === sessionId)
+      if (targetSession && targetSession.messages && targetSession.messages.length > 0) {
+         setMessages(targetSession.messages)
+      } else {
+         clearMessages()
+      }
+
+      try {
+         const res = await fetch(`/api/v1/conversations/${sessionId}`, { credentials: 'include' })
+         if (res.ok) {
+            const data: ServerConversationDetail = await res.json()
+            if (data && Array.isArray(data.messages)) {
+               const loadedMessages = data.messages.map((m) => ({
+                  id: m.id,
+                  role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
+                  content: m.content,
+                  sources: m.citations ? m.citations.map((c) => ({
+                     id: c.unit_id,
+                     title: c.citation_label,
+                     citation_label: c.citation_label,
+                     document_id: c.document_id,
+                     deep_link: c.deep_link,
+                     content: '',
+                  })) : [],
+                  timestamp: m.created_at || new Date().toISOString(),
+               }))
+               setMessages(loadedMessages)
+               setSessions((prev) =>
+                  prev.map((s) => (s.id === sessionId ? { ...s, messages: loadedMessages, title: data.title || s.title } : s))
+               )
+            }
+         }
+      } catch (e) {
+         console.error('Lỗi fetch chi tiết conversation:', e)
+      }
    }
 
    // 5. Scroll to bottom
@@ -133,13 +236,17 @@ export default function ChatPage() {
       setInputText('')
    }
 
-   const handleDeleteSession = (id: string) => {
+   const handleDeleteSession = async (id: string) => {
+      try {
+         await fetch(`/api/v1/conversations/${id}`, { method: 'DELETE', credentials: 'include' })
+      } catch {}
+
       const updated = sessions.filter((s) => s.id !== id)
       setSessions(updated)
 
       if (activeSessionId === id) {
          if (updated.length > 0) {
-            setActiveSessionId(updated[0].id)
+            handleSelectSession(updated[0].id)
          } else {
             const newId = crypto.randomUUID()
             const newSession: ChatSession = {
@@ -170,11 +277,12 @@ export default function ChatPage() {
    }
 
    const handleSend = () => {
-      if (!inputText.trim() || isStreaming || !activeSessionId) return
+      // Login required to chat: the send button is disabled, and Enter is a no-op.
+      if (!user || !inputText.trim() || isStreaming || !activeSessionId) return
       const textToSend = inputText
       setInputText('')
       // ChatSession.id chính là conversation_id gửi lên server (Plan 19 §5).
-      sendMessage(textToSend, activeSessionId, messages, temporalDate || undefined)
+      sendMessage(textToSend, activeSessionId, messages)
    }
 
    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -193,22 +301,6 @@ export default function ChatPage() {
    const renderInputBox = () => {
       return (
          <div className="relative flex flex-col w-full rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-[#f4f4f4] dark:bg-[#2f2f2f] focus-within:border-zinc-300 dark:focus-within:border-zinc-700 transition-colors shadow-2xs overflow-hidden">
-            {/* Temporal date indicator */}
-            {temporalDate && (
-               <div className="flex items-center gap-2 px-4 pt-2">
-                  <CalendarDays size={12} className="text-primary" />
-                  <span className="text-xs text-primary">
-                     Tra cứu theo ngày: {new Date(temporalDate).toLocaleDateString('vi-VN')}
-                  </span>
-                  <button
-                     onClick={() => setTemporalDate('')}
-                     className="ml-auto text-muted-foreground hover:text-foreground"
-                  >
-                     <X size={11} />
-                  </button>
-               </div>
-            )}
-
             <div className="flex items-center pl-4 pr-2.5 py-1.5">
                {/* Plus Button */}
                <button
@@ -225,64 +317,22 @@ export default function ChatPage() {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything"
+                  placeholder={user ? 'Ask anything' : 'Đăng nhập để bắt đầu trò chuyện'}
                   className="flex-1 max-h-[180px] min-h-[40px] py-2 px-3 text-sm bg-transparent border-0 outline-hidden resize-none placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-900 dark:text-zinc-150 leading-relaxed font-sans focus:ring-0"
                />
 
-               {/* Date picker toggle */}
-               <div className="relative">
-                  <button
-                     onClick={() => setShowDatePicker(!showDatePicker)}
-                     title="Chọn ngày tra cứu hiệu lực"
-                     className={`p-2 rounded-full transition-colors cursor-pointer ${
-                        temporalDate
-                           ? 'text-primary bg-primary/10'
-                           : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-200/50 dark:hover:bg-zinc-800'
-                     }`}
-                  >
-                     <CalendarDays size={16} />
-                  </button>
-                  {showDatePicker && (
-                     <div className="absolute bottom-10 right-0 bg-card border border-border rounded-xl shadow-lg p-3 z-50 w-64">
-                        <p className="text-xs font-medium mb-2 text-foreground">
-                           Tra cứu văn bản theo ngày hiệu lực
-                        </p>
-                        <input
-                           type="date"
-                           value={temporalDate}
-                           max={new Date().toISOString().split('T')[0]}
-                           onChange={(e) => {
-                              setTemporalDate(e.target.value)
-                              setShowDatePicker(false)
-                           }}
-                           className="w-full text-xs border border-border rounded-lg px-2 py-1.5 bg-background text-foreground"
-                        />
-                        {temporalDate && (
-                           <button
-                              onClick={() => {
-                                 setTemporalDate('')
-                                 setShowDatePicker(false)
-                              }}
-                              className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground"
-                           >
-                              Xóa ngày đã chọn
-                           </button>
-                        )}
-                     </div>
-                  )}
-               </div>
 
                {/* Send button */}
-               <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
+               <div className="flex items-center gap-1.5 shrink-0 ml-1">
                   <button
                      onClick={handleSend}
-                     disabled={!inputText.trim() || isStreaming}
+                     disabled={!user || !inputText.trim() || isStreaming}
                      className={`p-2.5 rounded-full flex items-center justify-center transition-all ${
-                        inputText.trim() && !isStreaming
+                        user && inputText.trim() && !isStreaming
                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-md cursor-pointer'
                            : 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-650 cursor-not-allowed'
                      }`}
-                     title="Gửi câu hỏi"
+                     title={user ? 'Gửi câu hỏi' : 'Vui lòng đăng nhập để gửi'}
                   >
                      <ArrowUp size={16} strokeWidth={2.5} />
                   </button>
@@ -306,6 +356,17 @@ export default function ChatPage() {
             onDeleteAllSessions={handleDeleteAllSessions}
             isOpen={sidebarOpen}
             onToggle={() => setSidebarOpen(!sidebarOpen)}
+            user={user ?? null}
+            onOpenAuth={() => setShowAuth(true)}
+         />
+
+         {/* Auth modal (login required to chat) */}
+         <AuthModal
+            isOpen={showAuth}
+            onClose={() => setShowAuth(false)}
+            user={user ?? null}
+            onLoginSuccess={handleLoginSuccess}
+            onLogout={handleLogout}
          />
 
          {/* Sidebar Backdrop Overlay on Mobile */}
