@@ -19,6 +19,13 @@ from persistence.errors import ConversationNotFoundError
 from resolution.models import StandaloneResolution
 from resolution.rewriter import StructuredRewriter
 from src.generation.models import AnswerResponse
+from src.shared.retrieval_contract import (
+    PlanType,
+    ProcessingStatus,
+    QueryProcessingResult,
+    SubqueryDTO,
+    SubqueryIntent,
+)
 from tests.conversation.conftest import prepared_conversation_store
 from tests.factories import retrieval_context
 
@@ -37,9 +44,11 @@ class FakeResolver:
 class CountingRetrieval:
     def __init__(self) -> None:
         self.calls = 0
+        self.last_query: str | None = None
 
     async def retrieve_context(self, request):
         self.calls += 1
+        self.last_query = request.query
         context = retrieval_context()
         context.query = request.query
         return context
@@ -82,7 +91,7 @@ class CountingGenerator:
         return None
 
 
-def _service(store, retrieval, generator) -> ConversationChatService:
+def _service(store, retrieval, generator, query_processor=None) -> ConversationChatService:
     return ConversationChatService(
         store=store,
         resolver=FakeResolver(),
@@ -90,6 +99,67 @@ def _service(store, retrieval, generator) -> ConversationChatService:
         retrieval=retrieval,
         generator=generator,
         stream_chunk_chars=20,
+        query_processor=query_processor,
+    )
+
+
+class FakeQueryProcessor:
+    def __init__(self, result: QueryProcessingResult) -> None:
+        self._result = result
+        self.calls: list[str] = []
+
+    async def process(self, current_query, conversation_history=()):
+        self.calls.append(current_query)
+        return self._result
+
+
+def _ready_result(standalone: str) -> QueryProcessingResult:
+    return QueryProcessingResult(
+        status=ProcessingStatus.READY,
+        standalone_query=standalone,
+        plan_type=PlanType.SINGLE,
+        subqueries=[
+            SubqueryDTO(
+                id="q1",
+                query=standalone,
+                intent=SubqueryIntent.DEFINITION,
+                depends_on=[],
+            )
+        ],
+        clarification_question=None,
+    )
+
+
+def _ready_multi_result(standalone: str) -> QueryProcessingResult:
+    return QueryProcessingResult(
+        status=ProcessingStatus.READY,
+        standalone_query=standalone,
+        plan_type=PlanType.PARALLEL,
+        subqueries=[
+            SubqueryDTO(
+                id="q1",
+                query="Công ty cổ phần là gì?",
+                intent=SubqueryIntent.DEFINITION,
+                depends_on=[],
+            ),
+            SubqueryDTO(
+                id="q2",
+                query="Công ty TNHH là gì?",
+                intent=SubqueryIntent.DEFINITION,
+                depends_on=[],
+            ),
+        ],
+        clarification_question=None,
+    )
+
+
+def _clarification_result(question: str) -> QueryProcessingResult:
+    return QueryProcessingResult(
+        status=ProcessingStatus.NEEDS_CLARIFICATION,
+        standalone_query=None,
+        plan_type=None,
+        subqueries=[],
+        clarification_question=question,
     )
 
 
@@ -183,3 +253,74 @@ def test_second_distinct_turn_persists_and_replays(db_url: str) -> None:
             return generator.calls
 
     assert asyncio.run(_run()) == 2
+
+
+def test_query_processor_ready_uses_standalone_query(db_url: str) -> None:
+    owner = _owner()
+    standalone = "Công ty cổ phần là gì theo Luật Doanh nghiệp 2020?"
+    processor = FakeQueryProcessor(_ready_result(standalone))
+    request = ConversationChatRequest(
+        conversation_id=uuid.uuid4(),
+        client_turn_id=uuid.uuid4(),
+        message="cái đó là gì",
+    )
+
+    async def _run() -> tuple[int, str]:
+        async with prepared_conversation_store(db_url) as store:
+            retrieval = CountingRetrieval()
+            generator = CountingGenerator()
+            service = _service(store, retrieval, generator, query_processor=processor)
+            await _collect(service, request, owner)
+            return generator.calls, retrieval.last_query
+
+    generate_calls, retrieved_query = asyncio.run(_run())
+    assert generate_calls == 1
+    assert retrieved_query == standalone
+    assert processor.calls == ["cái đó là gì"]
+
+
+def test_query_processor_fans_out_subqueries(db_url: str) -> None:
+    owner = _owner()
+    processor = FakeQueryProcessor(_ready_multi_result("so sánh cổ phần và TNHH"))
+    request = ConversationChatRequest(
+        conversation_id=uuid.uuid4(),
+        client_turn_id=uuid.uuid4(),
+        message="so sánh hai loại đó",
+    )
+
+    async def _run() -> tuple[int, int]:
+        async with prepared_conversation_store(db_url) as store:
+            retrieval = CountingRetrieval()
+            generator = CountingGenerator()
+            service = _service(store, retrieval, generator, query_processor=processor)
+            await _collect(service, request, owner)
+            return retrieval.calls, generator.calls
+
+    retrieval_calls, generate_calls = asyncio.run(_run())
+    assert retrieval_calls == 2  # one retrieval per subquery
+    assert generate_calls == 1  # a single merged generation
+
+
+def test_query_processor_needs_clarification_skips_retrieval(db_url: str) -> None:
+    owner = _owner()
+    processor = FakeQueryProcessor(
+        _clarification_result("Bạn hỏi về loại hình doanh nghiệp nào?")
+    )
+    request = ConversationChatRequest(
+        conversation_id=uuid.uuid4(),
+        client_turn_id=uuid.uuid4(),
+        message="so sánh hai loại đó",
+    )
+
+    async def _run() -> tuple[int, int, list[str]]:
+        async with prepared_conversation_store(db_url) as store:
+            retrieval = CountingRetrieval()
+            generator = CountingGenerator()
+            service = _service(store, retrieval, generator, query_processor=processor)
+            events = await _collect(service, request, owner)
+            return retrieval.calls, generator.calls, [e.event for e in events]
+
+    retrieval_calls, generate_calls, event_names = asyncio.run(_run())
+    assert retrieval_calls == 0
+    assert generate_calls == 0
+    assert any("clarification" in name for name in event_names)

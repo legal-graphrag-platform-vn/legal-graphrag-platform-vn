@@ -15,6 +15,7 @@ from services.interfaces import (
     ChatService,
     DocumentBrowserService,
     QueryPlannerPort,
+    QueryProcessorPort,
     QueryService,
     RAGService,
     SyncRetrievalRuntime,
@@ -296,6 +297,7 @@ def _build_conversation_chat(
         settings.anonymous_principal_signing_key or "",
         ttl_seconds=settings.anonymous_principal_cookie_ttl_days * 86400,
     )
+    query_processor = _build_query_processor(settings, runner)
     chat_service = ConversationChatService(
         store=store,
         resolver=resolver,
@@ -303,8 +305,33 @@ def _build_conversation_chat(
         retrieval=retrieval,
         generator=answer_generator,
         stream_chunk_chars=settings.answer_stream_chunk_chars,
+        query_processor=query_processor,
     )
     return engine, chat_service, lookup_driver, signer, store
+
+
+def _build_query_processor(
+    settings: Settings,
+    runner: AsyncRetrievalRunner,
+) -> QueryProcessorPort | None:
+    """Build the five-field query processor when enabled (provider-swappable)."""
+    if not settings.query_processor_enabled:
+        return None
+
+    from query_processing.adapter import QueryProcessorAdapter
+    from src.infrastructure.llm.text_generation_factory import build_text_generator
+    from src.retrieval.nlu.query_processor import QueryProcessor
+
+    text_generator = build_text_generator(
+        env={
+            "LLM_PROVIDER": settings.llm_provider,
+            "GEMINI_API_KEY": settings.gemini_api_key or "",
+            "GEMINI_QUERY_MODEL": settings.query_processor_model,
+            "OLLAMA_MODEL": settings.llm_model,
+            "OLLAMA_HOST": settings.ollama_base_url,
+        }
+    )
+    return QueryProcessorAdapter(QueryProcessor(text_generator), runner)
 
 
 async def _cleanup_retrieval_after_startup_failure(

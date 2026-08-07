@@ -36,6 +36,7 @@ from persistence.domain import (
     Owner,
 )
 from persistence.enums import (
+    ClarificationMode,
     MessageKind,
     ResolutionStatus,
     TurnStatus,
@@ -46,6 +47,7 @@ from persistence.repository import (
     SqlAlchemyConversationStore,
     focus_upserts_from_citations,
 )
+from query_processing.fanout import build_subquery_requests, merge_contexts
 from resolution.models import (
     REASON_NO_ANAPHORA,
     REASON_USER_CANCELLED,
@@ -57,22 +59,32 @@ from resolution.models import (
 from resolution.resolver import ReferenceResolver
 from resolution.rewriter import RewriteError, StructuredRewriter
 from services.conversation import greeting_response
-from services.interfaces import AnswerGeneratorPort, RetrievalApplicationPort
+from services.interfaces import (
+    AnswerGeneratorPort,
+    QueryProcessorPort,
+    RetrievalApplicationPort,
+)
 from services.retrieval_mapping import to_retrieval_response
 from src.generation.errors import AnswerGenerationError
 from src.generation.models import (
     ANSWER_CONTRACT_VERSION,
     AnswerGenerationRequest,
 )
-from src.retrieval.errors import RetrievalError
+from src.retrieval.errors import QueryProcessingError, RetrievalError
+from src.shared.llm_errors import TextGenerationError
 from src.shared.retrieval_contract import (
     RETRIEVAL_CONTRACT_VERSION,
+    ProcessingStatus,
     RetrievalFilters,
     RetrievalRequest,
 )
 
 PROCESSING_RETRY_AFTER_MS = 1000
 FILTER_CONFLICT_CODE = "CONVERSATION_FILTER_CONFLICT"
+QUERY_PROCESSING_FAILED_CODE = "QUERY_PROCESSING_FAILED"
+REASON_QUERY_PROCESSOR_CLARIFICATION = "QUERY_PROCESSOR_CLARIFICATION"
+_QUERY_PROCESSING_FAILED_MESSAGE = "Không thể xử lý câu hỏi. Vui lòng thử lại."
+_QUERY_PROCESSOR_FALLBACK_QUESTION = "Bạn có thể nói rõ hơn câu hỏi không?"
 
 _REPLAYABLE_STATUSES = frozenset(
     {
@@ -98,6 +110,7 @@ class ConversationChatService:
         retrieval: RetrievalApplicationPort,
         generator: AnswerGeneratorPort,
         stream_chunk_chars: int,
+        query_processor: QueryProcessorPort | None = None,
     ) -> None:
         if stream_chunk_chars < 1:
             raise ValueError("stream_chunk_chars must be positive")
@@ -107,6 +120,7 @@ class ConversationChatService:
         self._retrieval = retrieval
         self._generator = generator
         self._chunk_chars = stream_chunk_chars
+        self._query_processor = query_processor
 
     async def stream_chat(
         self, request: ConversationChatRequest, owner: Owner
@@ -152,6 +166,9 @@ class ConversationChatService:
         begun: BegunTurn,
         request: ConversationChatRequest,
     ) -> dict:
+        if self._query_processor is not None:
+            return await self._process_turn_with_query_processor(turn, begun, request)
+
         outcome = await self._resolver.resolve(
             message=request.message, context=begun.context
         )
@@ -167,6 +184,42 @@ class ConversationChatService:
                 return await self._persist_small_talk(turn, begun, greeting)
 
         return await self._persist_answer(turn, begun, request, outcome)
+
+    async def _process_turn_with_query_processor(
+        self,
+        turn: LockedTurn,
+        begun: BegunTurn,
+        request: ConversationChatRequest,
+    ) -> dict:
+        # Greetings short-circuit before spending an LLM call.
+        greeting = greeting_response(request.message)
+        if greeting is not None:
+            return await self._persist_small_talk(turn, begun, greeting)
+
+        history = _history_for_processor(begun)
+        try:
+            result = await self._query_processor.process(request.message, history)
+        except (QueryProcessingError, TextGenerationError):
+            return await self._persist_failure(
+                turn,
+                begun,
+                QUERY_PROCESSING_FAILED_CODE,
+                _QUERY_PROCESSING_FAILED_MESSAGE,
+            )
+
+        if result.status is ProcessingStatus.NEEDS_CLARIFICATION:
+            clarify = ClarifyResolution(
+                mode=ClarificationMode.RESTATE,
+                resolution_status=ResolutionStatus.UNRESOLVED,
+                reason_code=REASON_QUERY_PROCESSOR_CLARIFICATION,
+                question=result.clarification_question
+                or _QUERY_PROCESSOR_FALLBACK_QUESTION,
+                candidates=(),
+            )
+            return await self._persist_clarification(turn, begun, clarify)
+
+        # Ready: fan out the subqueries, merge contexts, and answer once.
+        return await self._answer_from_query_processing(turn, begun, request, result)
 
     # -- clarification / cancel / small talk -------------------------------- #
 
@@ -301,6 +354,67 @@ class ConversationChatService:
             code, message = stream_error_contract(exc)
             return await self._persist_failure(turn, begun, code, message)
 
+        return await self._finish_answer(
+            turn,
+            begun,
+            outcome,
+            standalone_query=standalone_query,
+            retrieval_context=retrieval_context,
+            answer=answer,
+        )
+
+    async def _answer_from_query_processing(
+        self,
+        turn: LockedTurn,
+        begun: BegunTurn,
+        request: ConversationChatRequest,
+        result,
+    ) -> dict:
+        # Fan out each subquery with its own temporal-safe intent, merge the
+        # per-subquery contexts, then generate a single grounded answer.
+        standalone_query = result.standalone_query
+        subquery_requests = build_subquery_requests(
+            result,
+            document_ids=list(request.document_ids),
+            query_date=request.query_date,
+            enable_reranker=request.enable_reranker,
+        )
+        try:
+            contexts = [
+                await self._retrieval.retrieve_context(subquery_request)
+                for subquery_request in subquery_requests
+            ]
+            merged_context = merge_contexts(contexts, query=standalone_query)
+            answer = await self._generator.generate(
+                AnswerGenerationRequest(
+                    query=standalone_query,
+                    retrieval_context=merged_context,
+                    conversation_history=(),
+                )
+            )
+        except (RetrievalError, AnswerGenerationError) as exc:
+            code, message = stream_error_contract(exc)
+            return await self._persist_failure(turn, begun, code, message)
+
+        return await self._finish_answer(
+            turn,
+            begun,
+            StandaloneResolution(),
+            standalone_query=standalone_query,
+            retrieval_context=merged_context,
+            answer=answer,
+        )
+
+    async def _finish_answer(
+        self,
+        turn: LockedTurn,
+        begun: BegunTurn,
+        outcome: StandaloneResolution | ResolvedResolution,
+        *,
+        standalone_query: str,
+        retrieval_context,
+        answer,
+    ) -> dict:
         retrieval = to_retrieval_response(retrieval_context)
         units_by_id = {unit.id: unit for unit in retrieval.retrieved_units}
         cited_ids = {citation.unit_id for citation in answer.citations}
@@ -396,6 +510,14 @@ class ConversationChatService:
         raise ConversationFilterConflictError(
             "Requested document filter excludes the resolved reference"
         )
+
+
+def _history_for_processor(begun: BegunTurn) -> tuple[dict[str, str], ...]:
+    """Serialize recent transcript messages into role/content pairs."""
+    return tuple(
+        {"role": msg.role.value, "content": msg.content}
+        for msg in begun.context.recent_messages
+    )
 
 
 def _citation_snapshot(citation, ordinal: int, unit) -> CitationSnapshot:

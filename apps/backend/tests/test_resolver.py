@@ -13,7 +13,7 @@ from persistence.domain import (
 from persistence.enums import ClarificationMode, ResolutionStatus
 from resolution.clarification import build_select_question, is_cancel, match_select
 from resolution.models import (
-    REASON_MULTIPLE_MATCHES,
+    REASON_ANAPHORA_AMBIGUOUS,
     REASON_REFERENT_NOT_FOUND,
     REASON_SELECT_INPUT_INVALID,
     CancelResolution,
@@ -119,7 +119,7 @@ def test_multiple_explicit_matches_are_ambiguous() -> None:
     assert isinstance(outcome, ClarifyResolution)
     assert outcome.mode is ClarificationMode.SELECT
     assert outcome.resolution_status is ResolutionStatus.AMBIGUOUS
-    assert outcome.reason_code == REASON_MULTIPLE_MATCHES
+    assert outcome.reason_code == REASON_ANAPHORA_AMBIGUOUS
     assert len(outcome.candidates) == 2
 
 

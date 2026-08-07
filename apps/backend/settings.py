@@ -83,6 +83,11 @@ class Settings(BaseSettings):
         le=1.0,
     )
 
+    # 9b.  Query Processor (five-field contract) — when enabled it replaces the
+    #      deterministic resolver+rewriter with an LLM query processor.
+    query_processor_enabled: bool = False
+    query_processor_model: str = "gemini-flash-lite-latest"
+
     # 9.   Signed anonymous principal (Plan 19 §2)
     anonymous_principal_signing_key: str | None = None
     anonymous_principal_cookie_ttl_days: int = Field(default=180, ge=1, le=730)
@@ -122,6 +127,15 @@ class Settings(BaseSettings):
                 and not self.gemini_api_key
             ):
                 raise RuntimeError("QUERY_PLANNING_ENABLED=true yêu cầu GEMINI_API_KEY")
+            if (
+                self.query_processor_enabled
+                and self.llm_provider == "gemini"
+                and not self.gemini_api_key
+            ):
+                raise RuntimeError(
+                    "QUERY_PROCESSOR_ENABLED=true với LLM_PROVIDER=gemini yêu cầu "
+                    "GEMINI_API_KEY"
+                )
 
     def _validate_conversation_store(self) -> None:
         """Grounded chat persists context in PostgreSQL and signs principals."""

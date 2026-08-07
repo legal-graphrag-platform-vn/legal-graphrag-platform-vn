@@ -5,7 +5,7 @@ Cả Mock và Real phải implement đúng interface này.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from typing import AsyncIterator, Protocol, TypeVar
 
 from api.models import (
@@ -23,7 +23,7 @@ from src.retrieval.models import PreparedRetrievalRequest, RetrievalContext
 from src.retrieval.planning.models import UnlinkedSemanticPlan
 from src.retrieval.planning.ports import QueryPlannerPort as QueryPlannerPort
 from src.generation.models import AnswerGenerationRequest, AnswerResponse
-from src.shared.retrieval_contract import RetrievalRequest
+from src.shared.retrieval_contract import QueryProcessingResult, RetrievalRequest
 
 
 ResultT = TypeVar("ResultT")
@@ -90,6 +90,16 @@ class AnswerGeneratorPort(Protocol):
     async def generate(self, request: AnswerGenerationRequest) -> AnswerResponse: ...
 
     async def aclose(self) -> None: ...
+
+
+class QueryProcessorPort(Protocol):
+    """Async surface over the five-field query processor (Query Processor)."""
+
+    async def process(
+        self,
+        current_query: str,
+        conversation_history: Sequence[Mapping[str, str]] = (),
+    ) -> QueryProcessingResult: ...
 
 
 class ChatService(Protocol):
