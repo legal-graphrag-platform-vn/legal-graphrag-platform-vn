@@ -66,7 +66,11 @@ def test_disabled_dependencies_are_not_required_or_loaded() -> None:
         raise AssertionError("disabled vector provider must not load")
 
     handle = create_retrieval_runtime(
-        RetrievalConfig(vector_enabled=False, fulltext_enabled=True),
+        RetrievalConfig(
+            vector_enabled=False,
+            fulltext_enabled=True,
+            intent_classifier_enabled=False,
+        ),
         RetrievalApplicationSettings(NEO4J_URI="bolt://example:7687"),
         driver_factory=lambda uri, auth: driver,
         embedding_factory=embedding_factory,
@@ -103,6 +107,7 @@ def test_factory_passes_explicit_reranker_contract() -> None:
             reranker_fp16=False,
             reranker_max_length=384,
             reranker_normalize=True,
+            intent_classifier_enabled=False,
         ),
         RetrievalApplicationSettings(NEO4J_URI="bolt://example:7687"),
         driver_factory=lambda uri, auth: driver,
@@ -167,6 +172,68 @@ def test_partial_factory_failure_closes_driver() -> None:
     else:
         raise AssertionError("Missing enabled dependency should fail startup")
     assert driver.closed == 1
+
+
+def _fulltext_only_driver() -> FakeDriver:
+    return FakeDriver(
+        [
+            {
+                "name": "legal_article_clause_fulltext",
+                "type": "FULLTEXT",
+                "state": "ONLINE",
+                "options": {},
+            }
+        ]
+    )
+
+
+def test_intent_classifier_wired_when_enabled() -> None:
+    driver = _fulltext_only_driver()
+    sentinel = object()
+    calls = 0
+
+    def classifier_factory():
+        nonlocal calls
+        calls += 1
+        return sentinel
+
+    handle = create_retrieval_runtime(
+        RetrievalConfig(
+            vector_enabled=False,
+            fulltext_enabled=True,
+            intent_classifier_enabled=True,
+        ),
+        RetrievalApplicationSettings(NEO4J_URI="bolt://example:7687"),
+        driver_factory=lambda uri, auth: driver,
+        classifier_factory=classifier_factory,
+    )
+    try:
+        assert calls == 1
+        assert handle._runtime._router._classifier is sentinel
+    finally:
+        handle.close()
+
+
+def test_intent_classifier_absent_when_disabled() -> None:
+    driver = _fulltext_only_driver()
+
+    def classifier_factory():
+        raise AssertionError("classifier must not be built when disabled")
+
+    handle = create_retrieval_runtime(
+        RetrievalConfig(
+            vector_enabled=False,
+            fulltext_enabled=True,
+            intent_classifier_enabled=False,
+        ),
+        RetrievalApplicationSettings(NEO4J_URI="bolt://example:7687"),
+        driver_factory=lambda uri, auth: driver,
+        classifier_factory=classifier_factory,
+    )
+    try:
+        assert handle._runtime._router._classifier is None
+    finally:
+        handle.close()
 
 
 def test_capability_inspection_closes_driver() -> None:
