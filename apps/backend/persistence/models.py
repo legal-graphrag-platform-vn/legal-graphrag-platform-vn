@@ -11,10 +11,12 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     Enum as SAEnum,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -60,6 +62,58 @@ class Base(DeclarativeBase):
     pass
 
 
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    account_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("accounts.id", ondelete="CASCADE"),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+    full_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    account: Mapped["Account"] = relationship(
+        back_populates="user", uselist=False
+    )
+
+
+class Account(Base):
+    __tablename__ = "accounts"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    username: Mapped[str] = mapped_column(
+        String(64), nullable=False, unique=True, index=True
+    )
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    user: Mapped[User] = relationship(back_populates="account")
+
+
 class Conversation(Base):
     __tablename__ = "conversations"
 
@@ -69,6 +123,10 @@ class Conversation(Base):
         nullable=False,
     )
     owner_principal_id: Mapped[uuid.UUID] = mapped_column(Uuid(), nullable=False)
+    title: Mapped[str] = mapped_column(
+        String(255), nullable=False, default="Cuộc trò chuyện mới"
+    )
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     # Monotonic allocator for the next user_turn_no in this conversation.
     next_user_turn_no: Mapped[int] = mapped_column(
         Integer,
@@ -94,6 +152,13 @@ class Conversation(Base):
 
     __table_args__ = (
         CheckConstraint("next_user_turn_no >= 1", name="ck_conversations_turn_no"),
+        Index(
+            "ix_conversations_owner_history",
+            "owner_kind",
+            "owner_principal_id",
+            "is_deleted",
+            "updated_at",
+        ),
     )
 
 

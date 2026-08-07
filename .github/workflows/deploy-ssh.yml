@@ -1,0 +1,56 @@
+name: Continuous Deployment (SSH GHCR Release)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    name: Deploy GHCR Containers to Server via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add Remote Host to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync Production Compose Files to Server via rsync
+        run: |
+          ssh -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}/infra"
+          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT || 22 }}" \
+            infra/docker-compose.prod.yml \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}/infra/docker-compose.prod.yml
+
+      - name: Login GHCR & Pull Images & Restart Containers on Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          envs: GITHUB_TOKEN
+          script: |
+            cd ${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}
+            
+            # Login GHCR
+            echo "${{ secrets.CR_PAT || github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            # Pull GHCR images and restart services
+            TAG="${{ github.event.release.tag_name || 'latest' }}"
+            if docker compose version >/dev/null 2>&1; then
+              TAG="$TAG" docker compose -f infra/docker-compose.prod.yml pull
+              TAG="$TAG" docker compose -f infra/docker-compose.prod.yml up -d
+            else
+              TAG="$TAG" docker-compose -f infra/docker-compose.prod.yml pull
+              TAG="$TAG" docker-compose -f infra/docker-compose.prod.yml up -d
+            fi
+            echo "Deployment completed for release tag: ${{ github.event.release.tag_name }}"

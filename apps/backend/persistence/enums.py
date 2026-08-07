@@ -7,6 +7,7 @@ from enum import Enum
 
 class OwnerKind(str, Enum):
     ANONYMOUS = "ANONYMOUS"
+    USER = "USER"
 
 
 class TurnStatus(str, Enum):

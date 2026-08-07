@@ -43,12 +43,14 @@ class Container:
         conversation_engine: object | None = None,
         canonical_lookup_driver: object | None = None,
         principal_signer: object | None = None,
+        conversation_repo: object | None = None,
     ) -> None:
         self.query_service = query_service
         self.chat_service = chat_service
         self.document_service = document_service
         self.rag_service = rag_service
         self.principal_signer = principal_signer
+        self.conversation_repo = conversation_repo
         self._answer_generator = answer_generator
         self._query_planner = query_planner
         self._retrieval_runtime = retrieval_runtime
@@ -178,6 +180,7 @@ async def build_container(
     conversation_engine: object | None = None
     lookup_driver: object | None = None
     principal_signer: object | None = None
+    conversation_repo: object | None = None
     if settings.answer_generation_enabled:
         from src.application.answer_factory import (
             AnswerApplicationSettings,
@@ -218,7 +221,7 @@ async def build_container(
             )
             raise
         try:
-            conversation_engine, chat_service, lookup_driver, principal_signer = (
+            conversation_engine, chat_service, lookup_driver, principal_signer, conversation_repo = (
                 _build_conversation_chat(settings, retrieval, answer_generator, runner)
             )
         except Exception:
@@ -243,6 +246,7 @@ async def build_container(
         conversation_engine=conversation_engine,
         canonical_lookup_driver=lookup_driver,
         principal_signer=principal_signer,
+        conversation_repo=conversation_repo,
     )
 
 
@@ -251,7 +255,7 @@ def _build_conversation_chat(
     retrieval: object,
     answer_generator: AnswerGeneratorPort,
     runner: AsyncRetrievalRunner,
-) -> tuple[object, ChatService, object, object]:
+) -> tuple[object, ChatService, object, object, object]:
     """Compose the grounded conversation chat service (Plan 19 §4)."""
     from neo4j import GraphDatabase
 
@@ -303,7 +307,7 @@ def _build_conversation_chat(
         stream_chunk_chars=settings.answer_stream_chunk_chars,
         query_processor=query_processor,
     )
-    return engine, chat_service, lookup_driver, signer
+    return engine, chat_service, lookup_driver, signer, store
 
 
 def _build_query_processor(
