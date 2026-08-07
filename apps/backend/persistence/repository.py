@@ -38,6 +38,7 @@ from persistence.domain import (
     candidates_to_json,
     validate_candidates,
 )
+from conversation.title import derive_title
 from persistence.enums import (
     ClarificationMode,
     MessageKind,
@@ -56,12 +57,14 @@ from persistence.lock import (
     conversation_lock_key,
 )
 from persistence.models import (
+    Account,
     Conversation,
     ConversationMessage,
     ConversationTurn,
     GroundedFocus as GroundedFocusModel,
     MessageCitation,
     PendingClarification as PendingClarificationModel,
+    User,
 )
 
 # Focus policy (Plan 19 §4).
@@ -77,6 +80,8 @@ _COMPLETED_TURN_STATUSES = (
     TurnStatus.NEEDS_CLARIFICATION,
 )
 
+_usr_t = User.__table__
+_acc_t = Account.__table__
 _conv_t = Conversation.__table__
 _turn_t = ConversationTurn.__table__
 _msg_t = ConversationMessage.__table__
@@ -245,20 +250,36 @@ class LockedTurn:
             )
             if conversation is None:
                 user_turn_no = 1
+                initial_title = (
+                    user_message[:50].strip()
+                    if user_message and user_message.strip()
+                    else "Cuộc trò chuyện mới"
+                )
                 await self._conn.execute(
                     _conv_t.insert().values(
                         id=self._conversation_id,
                         owner_kind=self._owner.owner_kind,
                         owner_principal_id=self._owner.owner_principal_id,
+                        title=initial_title,
                         next_user_turn_no=user_turn_no + 1,
                     )
                 )
             else:
                 user_turn_no = int(conversation["next_user_turn_no"])
+                title_update = {}
+                if (
+                    (
+                        conversation.get("title") == "Cuộc trò chuyện mới"
+                        or not conversation.get("title")
+                    )
+                    and user_message
+                    and user_message.strip()
+                ):
+                    title_update["title"] = user_message[:50].strip()
                 await self._conn.execute(
                     update(_conv_t)
                     .where(_conv_t.c.id == self._conversation_id)
-                    .values(next_user_turn_no=user_turn_no + 1)
+                    .values(next_user_turn_no=user_turn_no + 1, **title_update)
                 )
 
             turn_id = uuid.uuid4()
@@ -560,12 +581,19 @@ class LockedTurn:
     async def _load_focuses(
         self, current_user_turn_no: int
     ) -> tuple[GroundedFocus, ...]:
+        # Evict focuses idle for more than the TTL window (schema dictionary §7):
+        # a focus not re-grounded within FOCUS_TTL_USER_TURNS user turns is deleted.
+        await self._conn.execute(
+            delete(_focus_t).where(
+                _focus_t.c.conversation_id == self._conversation_id,
+                current_user_turn_no - _focus_t.c.last_grounded_user_turn_no
+                > FOCUS_TTL_USER_TURNS,
+            )
+        )
         stmt = (
             select(_focus_t)
             .where(
                 _focus_t.c.conversation_id == self._conversation_id,
-                current_user_turn_no - _focus_t.c.last_grounded_user_turn_no
-                <= FOCUS_TTL_USER_TURNS,
             )
             .order_by(
                 _focus_t.c.last_grounded_user_turn_no.desc(),
@@ -678,6 +706,261 @@ class SqlAlchemyConversationStore:
                 await advisory_unlock(conn, key)
         finally:
             await conn.close()
+
+    async def create_user_with_account(
+        self, username: str, password_hash: str, full_name: str | None = None
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Create a user profile and an associated login account."""
+        user_id = uuid.uuid4()
+        account_id = uuid.uuid4()
+        async with self._engine.begin() as conn:
+            # 1. Insert into accounts first
+            await conn.execute(
+                _acc_t.insert().values(
+                    id=account_id,
+                    username=username.strip().lower(),
+                    password_hash=password_hash,
+                )
+            )
+            # 2. Insert into users referencing account_id
+            await conn.execute(
+                _usr_t.insert().values(
+                    id=user_id,
+                    account_id=account_id,
+                    full_name=full_name,
+                )
+            )
+        return {
+            "id": user_id,
+            "account_id": account_id,
+            "full_name": full_name,
+        }, {
+            "id": account_id,
+            "username": username.strip().lower(),
+        }
+
+    async def get_account_by_username(self, username: str) -> dict[str, Any] | None:
+        """Fetch account credentials and associated user_id by username."""
+        async with self._engine.connect() as conn:
+            res = await conn.execute(
+                select(_acc_t, _usr_t.c.id.label("user_id"))
+                .join(_usr_t, _usr_t.c.account_id == _acc_t.c.id, isouter=True)
+                .where(_acc_t.c.username == username.strip().lower())
+            )
+            row = res.mappings().first()
+            return dict(row) if row else None
+
+    async def get_user_by_id(self, user_id: uuid.UUID) -> dict[str, Any] | None:
+        """Fetch user profile by user_id."""
+        async with self._engine.connect() as conn:
+            res = await conn.execute(
+                select(_usr_t, _acc_t.c.username)
+                .join(_acc_t, _usr_t.c.account_id == _acc_t.c.id, isouter=True)
+                .where(_usr_t.c.id == user_id)
+            )
+            row = res.mappings().first()
+            return dict(row) if row else None
+
+    async def list_conversations(
+        self, owner: Owner, limit: int = 50, offset: int = 0
+    ) -> list[dict[str, Any]]:
+        """List active conversation history for the authenticated owner."""
+        async with self._engine.connect() as conn:
+            query = (
+                select(
+                    _conv_t.c.id,
+                    _conv_t.c.title,
+                    _conv_t.c.created_at,
+                    _conv_t.c.updated_at,
+                    _conv_t.c.next_user_turn_no,
+                )
+                .where(
+                    _conv_t.c.owner_kind == owner.owner_kind,
+                    _conv_t.c.owner_principal_id == owner.owner_principal_id,
+                    _conv_t.c.is_deleted.is_(False),
+                )
+                .order_by(_conv_t.c.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            res = await conn.execute(query)
+            rows = res.mappings().all()
+            return [
+                {
+                    "id": str(r["id"]),
+                    "title": r["title"],
+                    "created_at": r["created_at"].isoformat()
+                    if r["created_at"]
+                    else None,
+                    "updated_at": r["updated_at"].isoformat()
+                    if r["updated_at"]
+                    else None,
+                    "turn_count": max(0, r["next_user_turn_no"] - 1),
+                }
+                for r in rows
+            ]
+
+    async def get_conversation_detail(
+        self, conversation_id: uuid.UUID, owner: Owner
+    ) -> dict[str, Any] | None:
+        """Fetch full conversation details and transcript messages."""
+        async with self._engine.connect() as conn:
+            # 1. Fetch conversation
+            conv_res = await conn.execute(
+                select(_conv_t).where(
+                    _conv_t.c.id == conversation_id,
+                    _conv_t.c.owner_kind == owner.owner_kind,
+                    _conv_t.c.owner_principal_id == owner.owner_principal_id,
+                    _conv_t.c.is_deleted.is_(False),
+                )
+            )
+            conv = conv_res.mappings().first()
+            if not conv:
+                return None
+
+            # 2. Fetch messages
+            msg_res = await conn.execute(
+                select(_msg_t)
+                .where(_msg_t.c.conversation_id == conversation_id)
+                .order_by(_msg_t.c.ordinal.asc())
+            )
+            messages = msg_res.mappings().all()
+
+            # 3. Fetch citations
+            cit_res = await conn.execute(
+                select(_cit_t)
+                .where(_cit_t.c.conversation_id == conversation_id)
+                .order_by(_cit_t.c.citation_ordinal.asc())
+            )
+            citations_by_msg: dict[uuid.UUID, list[dict[str, Any]]] = {}
+            for c in cit_res.mappings().all():
+                msg_id = c["message_id"]
+                citations_by_msg.setdefault(msg_id, []).append(
+                    {
+                        "unit_id": c["unit_id"],
+                        "citation_label": c["citation_label"],
+                        "document_id": c["document_id"],
+                        "deep_link": c["deep_link"],
+                    }
+                )
+
+            formatted_msgs = [
+                {
+                    "id": str(m["id"]),
+                    "role": m["role"],
+                    "kind": m["kind"],
+                    "content": m["content"],
+                    "ordinal": m["ordinal"],
+                    "citations": citations_by_msg.get(m["id"], []),
+                }
+                for m in messages
+            ]
+
+            return {
+                "id": str(conv["id"]),
+                "title": conv["title"],
+                "created_at": conv["created_at"].isoformat()
+                if conv["created_at"]
+                else None,
+                "updated_at": conv["updated_at"].isoformat()
+                if conv["updated_at"]
+                else None,
+                "messages": formatted_msgs,
+            }
+
+    async def patch_conversation_title(
+        self, conversation_id: uuid.UUID, owner: Owner, title: str
+    ) -> bool:
+        """Update conversation title."""
+        async with self._engine.begin() as conn:
+            res = await conn.execute(
+                update(_conv_t)
+                .where(
+                    _conv_t.c.id == conversation_id,
+                    _conv_t.c.owner_kind == owner.owner_kind,
+                    _conv_t.c.owner_principal_id == owner.owner_principal_id,
+                )
+                .values(title=title.strip())
+            )
+            return res.rowcount > 0
+
+    async def generate_conversation_title(
+        self, conversation_id: uuid.UUID, owner: Owner
+    ) -> str | None:
+        """Derive and persist a title from the first user message (Plan 20 §5).
+
+        Owner-scoped. Returns the new title, or ``None`` when the conversation
+        does not exist for this owner or has no user message yet.
+        """
+        async with self._engine.begin() as conn:
+            # 1. Verify ownership and that the conversation is live.
+            conv = (
+                await conn.execute(
+                    select(_conv_t.c.id).where(
+                        _conv_t.c.id == conversation_id,
+                        _conv_t.c.owner_kind == owner.owner_kind,
+                        _conv_t.c.owner_principal_id == owner.owner_principal_id,
+                        _conv_t.c.is_deleted.is_(False),
+                    )
+                )
+            ).first()
+            if conv is None:
+                return None
+
+            # 2. Fetch the earliest user message content.
+            first_user = (
+                await conn.execute(
+                    select(_msg_t.c.content)
+                    .where(
+                        _msg_t.c.conversation_id == conversation_id,
+                        _msg_t.c.role == MessageRole.USER,
+                    )
+                    .order_by(_msg_t.c.ordinal.asc())
+                    .limit(1)
+                )
+            ).scalar_one_or_none()
+            if first_user is None:
+                return None
+
+            # 3. Derive a concise title and persist it.
+            title = derive_title(first_user)
+            await conn.execute(
+                update(_conv_t)
+                .where(_conv_t.c.id == conversation_id)
+                .values(title=title)
+            )
+            return title
+
+    async def delete_conversation(
+        self, conversation_id: uuid.UUID, owner: Owner
+    ) -> bool:
+        """Soft delete a conversation."""
+        async with self._engine.begin() as conn:
+            res = await conn.execute(
+                update(_conv_t)
+                .where(
+                    _conv_t.c.id == conversation_id,
+                    _conv_t.c.owner_kind == owner.owner_kind,
+                    _conv_t.c.owner_principal_id == owner.owner_principal_id,
+                )
+                .values(is_deleted=True)
+            )
+            return res.rowcount > 0
+
+    async def claim_guest_conversations(
+        self, anon_principal_id: uuid.UUID, user_id: uuid.UUID
+    ) -> int:
+        """Transfer all anonymous conversations owned by anon_principal_id to user_id."""
+        async with self._engine.begin() as conn:
+            res = await conn.execute(
+                update(_conv_t)
+                .where(
+                    _conv_t.c.owner_kind == "ANONYMOUS",
+                    _conv_t.c.owner_principal_id == anon_principal_id,
+                )
+                .values(owner_kind="USER", owner_principal_id=user_id)
+            )
+            return res.rowcount
 
 
 def focus_upserts_from_citations(

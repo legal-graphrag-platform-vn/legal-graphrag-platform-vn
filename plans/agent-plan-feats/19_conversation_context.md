@@ -1,6 +1,6 @@
 Plan 19 — Conversation Context Resolution before Retrieval
 
-  Status: IMPLEMENTED (backend + minimal frontend). This plan is the AUTHORITY for
+  Status: IMPLEMENTED (backend + minimal frontend). Extended by `Plan 20 (20_user_auth_and_history.md)` for User Authentication & Account History. This plan is the AUTHORITY for
   conversation context resolution, server-owned history, idempotency, advisory
   locking, deterministic reference resolution and structured rewriting. It
   supersedes the "follow-up query rewriting/retrieval is deferred" clause of Plan

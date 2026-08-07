@@ -17,10 +17,13 @@ class ExpectedUnitType(str, Enum):
     POINT = "Point"
 
 
-# Resolution reason codes persisted on the turn (Plan 19 §4).
-REASON_NO_REFERENCE_REQUIRED = "NO_REFERENCE_REQUIRED"
+# Resolution reason codes persisted on the turn (schema dictionary §4).
+REASON_EXPLICIT_FOUND = "EXPLICIT_FOUND"
+REASON_ANAPHORA_RESOLVED = "ANAPHORA_RESOLVED"
+REASON_ANAPHORA_AMBIGUOUS = "ANAPHORA_AMBIGUOUS"
+REASON_NO_ANAPHORA = "NO_ANAPHORA"
+# Internal codes for branches the schema dictionary does not enumerate.
 REASON_REFERENT_NOT_FOUND = "REFERENT_NOT_FOUND"
-REASON_MULTIPLE_MATCHES = "MULTIPLE_MATCHES"
 REASON_USER_CANCELLED = "USER_CANCELLED"
 REASON_SELECT_INPUT_INVALID = "SELECT_INPUT_INVALID"
 
@@ -152,7 +155,7 @@ class ResolvedCandidate:
 class StandaloneResolution:
     """No context-dependent reference; retrieve the message verbatim."""
 
-    reason_code: str = REASON_NO_REFERENCE_REQUIRED
+    reason_code: str = REASON_NO_ANAPHORA
 
 
 @dataclass(frozen=True)
@@ -162,6 +165,11 @@ class ResolvedResolution:
     candidate: ResolvedCandidate
     is_anaphora: bool
     resolution_status: ResolutionStatus = ResolutionStatus.RESOLVED
+
+    @property
+    def reason_code(self) -> str:
+        """EXPLICIT_FOUND for direct mentions, ANAPHORA_RESOLVED for anaphora."""
+        return REASON_ANAPHORA_RESOLVED if self.is_anaphora else REASON_EXPLICIT_FOUND
 
 
 @dataclass(frozen=True)
