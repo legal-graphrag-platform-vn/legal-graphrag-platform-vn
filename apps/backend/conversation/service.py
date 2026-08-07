@@ -47,6 +47,7 @@ from persistence.repository import (
     SqlAlchemyConversationStore,
     focus_upserts_from_citations,
 )
+from query_processing.fanout import build_subquery_requests, merge_contexts
 from resolution.models import (
     REASON_NO_REFERENCE_REQUIRED,
     REASON_USER_CANCELLED,
@@ -73,7 +74,6 @@ from src.retrieval.errors import QueryProcessingError, RetrievalError
 from src.shared.llm_errors import TextGenerationError
 from src.shared.retrieval_contract import (
     RETRIEVAL_CONTRACT_VERSION,
-    IntentType,
     ProcessingStatus,
     RetrievalFilters,
     RetrievalRequest,
@@ -218,16 +218,8 @@ class ConversationChatService:
             )
             return await self._persist_clarification(turn, begun, clarify)
 
-        # Ready: the processor already produced the standalone query and intent.
-        # Stage 1 retrieves the first subquery only; fan-out is a later stage.
-        return await self._persist_answer(
-            turn,
-            begun,
-            request,
-            StandaloneResolution(),
-            standalone_query=result.standalone_query,
-            force_intent=result.primary_intent(),
-        )
+        # Ready: fan out the subqueries, merge contexts, and answer once.
+        return await self._answer_from_query_processing(turn, begun, request, result)
 
     # -- clarification / cancel / small talk -------------------------------- #
 
@@ -323,20 +315,14 @@ class ConversationChatService:
         begun: BegunTurn,
         request: ConversationChatRequest,
         outcome: StandaloneResolution | ResolvedResolution,
-        *,
-        standalone_query: str | None = None,
-        force_intent: IntentType | None = None,
     ) -> dict:
         recent = tuple(msg.content for msg in begun.context.recent_messages)
         try:
-            # A precomputed standalone query (e.g. from the query processor)
-            # bypasses the deterministic rewriter.
-            if standalone_query is None:
-                standalone_query = await self._rewriter.rewrite(
-                    message=request.message,
-                    recent_messages=recent,
-                    resolution=outcome,
-                )
+            standalone_query = await self._rewriter.rewrite(
+                message=request.message,
+                recent_messages=recent,
+                resolution=outcome,
+            )
             document_ids = self._effective_document_ids(request, outcome)
         except RewriteError as exc:
             return await self._persist_failure(turn, begun, exc.error_code, str(exc))
@@ -345,9 +331,6 @@ class ConversationChatService:
                 turn, begun, exc.error_code, "Bộ lọc tài liệu mâu thuẫn với tham chiếu."
             )
 
-        effective_force_intent = (
-            force_intent if force_intent is not None else request.force_intent
-        )
         try:
             retrieval_context = await self._retrieval.retrieve_context(
                 RetrievalRequest(
@@ -356,7 +339,7 @@ class ConversationChatService:
                         document_ids=document_ids,
                         query_date=request.query_date,
                     ),
-                    force_intent=effective_force_intent,
+                    force_intent=request.force_intent,
                     enable_reranker=request.enable_reranker,
                 )
             )
@@ -371,6 +354,67 @@ class ConversationChatService:
             code, message = stream_error_contract(exc)
             return await self._persist_failure(turn, begun, code, message)
 
+        return await self._finish_answer(
+            turn,
+            begun,
+            outcome,
+            standalone_query=standalone_query,
+            retrieval_context=retrieval_context,
+            answer=answer,
+        )
+
+    async def _answer_from_query_processing(
+        self,
+        turn: LockedTurn,
+        begun: BegunTurn,
+        request: ConversationChatRequest,
+        result,
+    ) -> dict:
+        # Fan out each subquery with its own temporal-safe intent, merge the
+        # per-subquery contexts, then generate a single grounded answer.
+        standalone_query = result.standalone_query
+        subquery_requests = build_subquery_requests(
+            result,
+            document_ids=list(request.document_ids),
+            query_date=request.query_date,
+            enable_reranker=request.enable_reranker,
+        )
+        try:
+            contexts = [
+                await self._retrieval.retrieve_context(subquery_request)
+                for subquery_request in subquery_requests
+            ]
+            merged_context = merge_contexts(contexts, query=standalone_query)
+            answer = await self._generator.generate(
+                AnswerGenerationRequest(
+                    query=standalone_query,
+                    retrieval_context=merged_context,
+                    conversation_history=(),
+                )
+            )
+        except (RetrievalError, AnswerGenerationError) as exc:
+            code, message = stream_error_contract(exc)
+            return await self._persist_failure(turn, begun, code, message)
+
+        return await self._finish_answer(
+            turn,
+            begun,
+            StandaloneResolution(),
+            standalone_query=standalone_query,
+            retrieval_context=merged_context,
+            answer=answer,
+        )
+
+    async def _finish_answer(
+        self,
+        turn: LockedTurn,
+        begun: BegunTurn,
+        outcome: StandaloneResolution | ResolvedResolution,
+        *,
+        standalone_query: str,
+        retrieval_context,
+        answer,
+    ) -> dict:
         retrieval = to_retrieval_response(retrieval_context)
         units_by_id = {unit.id: unit for unit in retrieval.retrieved_units}
         cited_ids = {citation.unit_id for citation in answer.citations}
