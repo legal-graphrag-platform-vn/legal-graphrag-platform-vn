@@ -8,6 +8,7 @@ release lock -> buffered SSE from the persisted snapshot.
 
 from __future__ import annotations
 
+import asyncio
 from typing import AsyncIterator
 
 from api.error_handlers import stream_error_contract
@@ -380,10 +381,15 @@ class ConversationChatService:
             enable_reranker=request.enable_reranker,
         )
         try:
-            contexts = [
-                await self._retrieval.retrieve_context(subquery_request)
-                for subquery_request in subquery_requests
-            ]
+            # Concurrent subject to the application-scoped retrieval concurrency bound.
+            # All subqueries are self-contained; depends_on is logical metadata only
+            # and does not affect retrieval scheduling in this version.
+            contexts = list(
+                await asyncio.gather(*[
+                    self._retrieval.retrieve_context(subquery_request)
+                    for subquery_request in subquery_requests
+                ])
+            )
             merged_context = merge_contexts(contexts, query=standalone_query)
             answer = await self._generator.generate(
                 AnswerGenerationRequest(
