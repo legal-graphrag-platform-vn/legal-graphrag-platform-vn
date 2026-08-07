@@ -76,6 +76,7 @@ from src.shared.llm_errors import TextGenerationError
 from src.shared.retrieval_contract import (
     RETRIEVAL_CONTRACT_VERSION,
     ProcessingStatus,
+    QueryProcessingResult,
     RetrievalFilters,
     RetrievalRequest,
 )
@@ -369,7 +370,7 @@ class ConversationChatService:
         turn: LockedTurn,
         begun: BegunTurn,
         request: ConversationChatRequest,
-        result,
+        result: QueryProcessingResult,
     ) -> dict:
         # Fan out each subquery with its own temporal-safe intent, merge the
         # per-subquery contexts, then generate a single grounded answer.
