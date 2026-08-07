@@ -9,10 +9,11 @@ from datetime import date
 from typing import Any, Protocol
 
 from neo4j import GraphDatabase
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.infrastructure.embedding.embedding_generator import EmbeddingGenerator
+from src.infrastructure.llm.text_generation_factory import build_text_generator
 from src.infrastructure.neo4j.retriever_repo import Neo4jRetrieverRepo
 from src.retrieval.config import EndpointLinkerConfig, RetrievalConfig
 from src.retrieval.context.context_builder import ContextBuilder
@@ -20,6 +21,7 @@ from src.retrieval.context.temporal_filter import TemporalFilter
 from src.retrieval.errors import RetrievalDependencyError
 from src.retrieval.evidence.verifier import EvidenceVerifier
 from src.retrieval.fusion.reciprocal_rank_fusion import ReciprocalRankFusion
+from src.retrieval.nlu.classifier import LLMIntentClassifier
 from src.retrieval.planning.binder import PlanBinder
 from src.retrieval.planning.executor import PlannedPathExecutor
 from src.retrieval.planning.linker import (
@@ -27,6 +29,7 @@ from src.retrieval.planning.linker import (
     SemanticEndpointResolver,
     StructuralEndpointResolver,
 )
+from src.retrieval.ports import IntentClassifierPort
 from src.retrieval.reranking.bge_reranker import BGEReranker
 from src.retrieval.retriever.fulltext import FULLTEXT_INDEX, FullTextRetriever
 from src.retrieval.retriever.graph import GraphRetriever
@@ -123,6 +126,52 @@ class SystemClock:
         return date.today()
 
 
+class LLMProviderSettings(BaseSettings):
+    """Provider selection read from ``.env`` (like the rest of the app).
+
+    ``build_text_generator`` reads ``os.environ`` directly, but the project loads
+    configuration through ``.env`` via pydantic-settings and never populates
+    ``os.environ``. This settings model bridges that gap so the classifier sees
+    the same ``.env`` values the rest of the runtime uses.
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore", frozen=True
+    )
+
+    llm_provider: str = Field(default="gemini", validation_alias="LLM_PROVIDER")
+    gemini_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY"),
+    )
+    gemini_query_model: str = Field(
+        default="gemini-2.5-flash", validation_alias="GEMINI_QUERY_MODEL"
+    )
+    ollama_model: str = Field(default="qwen3:4b", validation_alias="OLLAMA_MODEL")
+    ollama_host: str = Field(
+        default="http://localhost:11434", validation_alias="OLLAMA_HOST"
+    )
+
+
+def _default_classifier_factory() -> IntentClassifierPort:
+    """Build the LLM intent classifier from the configured provider.
+
+    Regex rules stay primary in ``IntentRouter``; this classifier only runs when
+    no high-confidence rule matches. The provider is selected by ``LLM_PROVIDER``
+    and is constructed here so it is never created unless intent classification
+    is enabled.
+    """
+    settings = LLMProviderSettings()
+    env = {
+        "LLM_PROVIDER": settings.llm_provider,
+        "GEMINI_API_KEY": settings.gemini_api_key,
+        "GEMINI_QUERY_MODEL": settings.gemini_query_model,
+        "OLLAMA_MODEL": settings.ollama_model,
+        "OLLAMA_HOST": settings.ollama_host,
+    }
+    return LLMIntentClassifier(build_text_generator(env=env))
+
+
 def create_retrieval_runtime(
     config: RetrievalConfig | None = None,
     application_settings: RetrievalApplicationSettings | None = None,
@@ -131,6 +180,7 @@ def create_retrieval_runtime(
     driver_factory: DriverFactory | None = None,
     embedding_factory: Callable[..., Any] = EmbeddingGenerator,
     reranker_factory: Callable[..., Any] = BGEReranker,
+    classifier_factory: Callable[[], IntentClassifierPort] | None = None,
 ) -> RetrievalRuntimeHandle:
     runtime_config = config or RetrievalConfig()
     settings = application_settings or RetrievalApplicationSettings()
@@ -167,8 +217,14 @@ def create_retrieval_runtime(
                 normalize=runtime_config.reranker_normalize,
             )
 
+        classifier: IntentClassifierPort | None = None
+        if runtime_config.intent_classifier_enabled:
+            classifier = (classifier_factory or _default_classifier_factory)()
+
         runtime = RetrievalRuntime(
-            router=IntentRouter(runtime_config, clock=SystemClock()),
+            router=IntentRouter(
+                runtime_config, classifier=classifier, clock=SystemClock()
+            ),
             seed_executor=SeedChannelExecutor(
                 vector=vector,
                 fulltext=fulltext,
