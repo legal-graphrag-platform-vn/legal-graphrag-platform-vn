@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Script triển khai (Deploy) dự án Legal GraphRAG lên Server qua SSH
+# Script triển khai sản xuất (Deploy) qua SSH sử dụng GHCR Docker Images
 # ==============================================================================
 
 set -euo pipefail
@@ -10,11 +10,13 @@ DEPLOY_HOST="${DEPLOY_HOST:-}"
 DEPLOY_USER="${DEPLOY_USER:-}"
 DEPLOY_PORT="${DEPLOY_PORT:-22}"
 REMOTE_DIR="${REMOTE_DIR:-/opt/legal-graphrag}"
+GHCR_PAT="${GHCR_PAT:-}"
+GHCR_USER="${GHCR_USER:-$DEPLOY_USER}"
+TAG="${TAG:-latest}"
 
-# Lấy root dir của dự án
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-echo "=== Deployment Pipeline: Legal GraphRAG ==="
+echo "=== Deployment Pipeline: Legal GraphRAG (GHCR Mode) ==="
 
 if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ]; then
     echo "Lỗi: Thiếu thông tin máy chủ từ xa."
@@ -33,27 +35,33 @@ fi
 
 # 2.   Tạo thư mục trên Server từ xa
 echo "--> [2/4] Đảm bảo thư mục mục tiêu $REMOTE_DIR tồn tại trên Server..."
-$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $REMOTE_DIR"
+$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $REMOTE_DIR/infra"
 
-# 3.   Đồng bộ mã nguồn bằng rsync
-echo "--> [3/4] Đồng bộ mã nguồn lên Server (rsync)..."
+# 3.   Đồng bộ file cấu hình sản xuất nhẹ (docker-compose.prod.yml & .env)
+echo "--> [3/4] Đồng bộ file cấu hình Production lên Server..."
 rsync -avz -e "ssh -i $KEY_PATH -p $DEPLOY_PORT" \
-    --exclude='.git' \
-    --exclude='.venv' \
-    --exclude='.cache' \
-    --exclude='node_modules' \
-    --exclude='apps/frontend/.next' \
-    --exclude='infra/data' \
-    --exclude='results' \
-    --exclude='experiments' \
-    "$PROJECT_ROOT/" "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_DIR/"
+    "$PROJECT_ROOT/infra/docker-compose.prod.yml" \
+    "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_DIR/infra/docker-compose.prod.yml"
 
-# 4.   Khởi chạy Docker Compose trên Server
-echo "--> [4/4] Khởi động các dịch vụ trên Server..."
-$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "cd $REMOTE_DIR && if docker compose version >/dev/null 2>&1; then docker compose -f infra/docker-compose.yml up -d --build; else docker-compose -f infra/docker-compose.yml up -d --build; fi"
+if [ -f "$PROJECT_ROOT/infra/.env" ]; then
+    rsync -avz -e "ssh -i $KEY_PATH -p $DEPLOY_PORT" \
+        "$PROJECT_ROOT/infra/.env" \
+        "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_DIR/infra/.env"
+fi
 
-# 5.   Kiểm tra trạng thái Container trên Server
+# 4.   Đăng nhập GHCR (nếu có PAT) & Pull images & Khởi động Docker Compose
+echo "--> [4/4] Kéo GHCR Images và khởi động lại container trên Server..."
+$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "
+    cd $REMOTE_DIR
+    if [ -n \"$GHCR_PAT\" ]; then
+        echo \"$GHCR_PAT\" | docker login ghcr.io -u \"$GHCR_USER\" --password-stdin
+    fi
+    TAG=\"$TAG\" docker compose -f infra/docker-compose.prod.yml pull || TAG=\"$TAG\" docker-compose -f infra/docker-compose.prod.yml pull
+    TAG=\"$TAG\" docker compose -f infra/docker-compose.prod.yml up -d || TAG=\"$TAG\" docker-compose -f infra/docker-compose.prod.yml up -d
+"
+
+# 5.   Trạng thái Container
 echo "================================================================="
 echo "✅ Triển khai hoàn tất! Trạng thái các container trên Server:"
-$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "cd $REMOTE_DIR && docker compose -f infra/docker-compose.yml ps || docker-compose -f infra/docker-compose.yml ps"
+$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "cd $REMOTE_DIR && docker compose -f infra/docker-compose.prod.yml ps || docker-compose -f infra/docker-compose.prod.yml ps"
 echo "================================================================="
