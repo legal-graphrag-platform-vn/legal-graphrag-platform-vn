@@ -36,6 +36,7 @@ from persistence.domain import (
     Owner,
 )
 from persistence.enums import (
+    ClarificationMode,
     MessageKind,
     ResolutionStatus,
     TurnStatus,
@@ -57,22 +58,33 @@ from resolution.models import (
 from resolution.resolver import ReferenceResolver
 from resolution.rewriter import RewriteError, StructuredRewriter
 from services.conversation import greeting_response
-from services.interfaces import AnswerGeneratorPort, RetrievalApplicationPort
+from services.interfaces import (
+    AnswerGeneratorPort,
+    QueryProcessorPort,
+    RetrievalApplicationPort,
+)
 from services.retrieval_mapping import to_retrieval_response
 from src.generation.errors import AnswerGenerationError
 from src.generation.models import (
     ANSWER_CONTRACT_VERSION,
     AnswerGenerationRequest,
 )
-from src.retrieval.errors import RetrievalError
+from src.retrieval.errors import QueryProcessingError, RetrievalError
+from src.shared.llm_errors import TextGenerationError
 from src.shared.retrieval_contract import (
     RETRIEVAL_CONTRACT_VERSION,
+    IntentType,
+    ProcessingStatus,
     RetrievalFilters,
     RetrievalRequest,
 )
 
 PROCESSING_RETRY_AFTER_MS = 1000
 FILTER_CONFLICT_CODE = "CONVERSATION_FILTER_CONFLICT"
+QUERY_PROCESSING_FAILED_CODE = "QUERY_PROCESSING_FAILED"
+REASON_QUERY_PROCESSOR_CLARIFICATION = "QUERY_PROCESSOR_CLARIFICATION"
+_QUERY_PROCESSING_FAILED_MESSAGE = "Không thể xử lý câu hỏi. Vui lòng thử lại."
+_QUERY_PROCESSOR_FALLBACK_QUESTION = "Bạn có thể nói rõ hơn câu hỏi không?"
 
 _REPLAYABLE_STATUSES = frozenset(
     {
@@ -98,6 +110,7 @@ class ConversationChatService:
         retrieval: RetrievalApplicationPort,
         generator: AnswerGeneratorPort,
         stream_chunk_chars: int,
+        query_processor: QueryProcessorPort | None = None,
     ) -> None:
         if stream_chunk_chars < 1:
             raise ValueError("stream_chunk_chars must be positive")
@@ -107,6 +120,7 @@ class ConversationChatService:
         self._retrieval = retrieval
         self._generator = generator
         self._chunk_chars = stream_chunk_chars
+        self._query_processor = query_processor
 
     async def stream_chat(
         self, request: ConversationChatRequest, owner: Owner
@@ -152,6 +166,9 @@ class ConversationChatService:
         begun: BegunTurn,
         request: ConversationChatRequest,
     ) -> dict:
+        if self._query_processor is not None:
+            return await self._process_turn_with_query_processor(turn, begun, request)
+
         outcome = await self._resolver.resolve(
             message=request.message, context=begun.context
         )
@@ -167,6 +184,50 @@ class ConversationChatService:
                 return await self._persist_small_talk(turn, begun, greeting)
 
         return await self._persist_answer(turn, begun, request, outcome)
+
+    async def _process_turn_with_query_processor(
+        self,
+        turn: LockedTurn,
+        begun: BegunTurn,
+        request: ConversationChatRequest,
+    ) -> dict:
+        # Greetings short-circuit before spending an LLM call.
+        greeting = greeting_response(request.message)
+        if greeting is not None:
+            return await self._persist_small_talk(turn, begun, greeting)
+
+        history = _history_for_processor(begun)
+        try:
+            result = await self._query_processor.process(request.message, history)
+        except (QueryProcessingError, TextGenerationError):
+            return await self._persist_failure(
+                turn,
+                begun,
+                QUERY_PROCESSING_FAILED_CODE,
+                _QUERY_PROCESSING_FAILED_MESSAGE,
+            )
+
+        if result.status is ProcessingStatus.NEEDS_CLARIFICATION:
+            clarify = ClarifyResolution(
+                mode=ClarificationMode.RESTATE,
+                resolution_status=ResolutionStatus.UNRESOLVED,
+                reason_code=REASON_QUERY_PROCESSOR_CLARIFICATION,
+                question=result.clarification_question
+                or _QUERY_PROCESSOR_FALLBACK_QUESTION,
+                candidates=(),
+            )
+            return await self._persist_clarification(turn, begun, clarify)
+
+        # Ready: the processor already produced the standalone query and intent.
+        # Stage 1 retrieves the first subquery only; fan-out is a later stage.
+        return await self._persist_answer(
+            turn,
+            begun,
+            request,
+            StandaloneResolution(),
+            standalone_query=result.standalone_query,
+            force_intent=result.primary_intent(),
+        )
 
     # -- clarification / cancel / small talk -------------------------------- #
 
@@ -262,14 +323,20 @@ class ConversationChatService:
         begun: BegunTurn,
         request: ConversationChatRequest,
         outcome: StandaloneResolution | ResolvedResolution,
+        *,
+        standalone_query: str | None = None,
+        force_intent: IntentType | None = None,
     ) -> dict:
         recent = tuple(msg.content for msg in begun.context.recent_messages)
         try:
-            standalone_query = await self._rewriter.rewrite(
-                message=request.message,
-                recent_messages=recent,
-                resolution=outcome,
-            )
+            # A precomputed standalone query (e.g. from the query processor)
+            # bypasses the deterministic rewriter.
+            if standalone_query is None:
+                standalone_query = await self._rewriter.rewrite(
+                    message=request.message,
+                    recent_messages=recent,
+                    resolution=outcome,
+                )
             document_ids = self._effective_document_ids(request, outcome)
         except RewriteError as exc:
             return await self._persist_failure(turn, begun, exc.error_code, str(exc))
@@ -278,6 +345,9 @@ class ConversationChatService:
                 turn, begun, exc.error_code, "Bộ lọc tài liệu mâu thuẫn với tham chiếu."
             )
 
+        effective_force_intent = (
+            force_intent if force_intent is not None else request.force_intent
+        )
         try:
             retrieval_context = await self._retrieval.retrieve_context(
                 RetrievalRequest(
@@ -286,7 +356,7 @@ class ConversationChatService:
                         document_ids=document_ids,
                         query_date=request.query_date,
                     ),
-                    force_intent=request.force_intent,
+                    force_intent=effective_force_intent,
                     enable_reranker=request.enable_reranker,
                 )
             )
@@ -396,6 +466,14 @@ class ConversationChatService:
         raise ConversationFilterConflictError(
             "Requested document filter excludes the resolved reference"
         )
+
+
+def _history_for_processor(begun: BegunTurn) -> tuple[dict[str, str], ...]:
+    """Serialize recent transcript messages into role/content pairs."""
+    return tuple(
+        {"role": msg.role.value, "content": msg.content}
+        for msg in begun.context.recent_messages
+    )
 
 
 def _citation_snapshot(citation, ordinal: int, unit) -> CitationSnapshot:
