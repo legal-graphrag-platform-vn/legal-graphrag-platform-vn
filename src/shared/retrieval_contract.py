@@ -66,6 +66,7 @@ class RetrievalDecisionReasonCode(str, Enum):
     COMPARISON_EXPLICIT = "COMPARISON_EXPLICIT"
     MULTI_HOP_EXPLICIT = "MULTI_HOP_EXPLICIT"
     FORCED_INTENT = "FORCED_INTENT"
+    INTENT_CLASSIFIER_LLM = "INTENT_CLASSIFIER_LLM"
 
 
 class RetrievalFilters(BaseModel):

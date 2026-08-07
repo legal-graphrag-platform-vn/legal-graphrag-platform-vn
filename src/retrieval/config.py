@@ -30,6 +30,7 @@ class RetrievalConfig(BaseSettings):
     reranker_normalize: bool = True
     hierarchy_vector_enabled: bool = False
     query_max_length: int = Field(default=4000, ge=1, le=10000)
+    intent_classifier_enabled: bool = False
 
     @model_validator(mode="after")
     def validate_limits_and_channels(self) -> "RetrievalConfig":

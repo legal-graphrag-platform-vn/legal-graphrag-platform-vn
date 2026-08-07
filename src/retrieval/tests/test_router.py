@@ -3,7 +3,11 @@ from datetime import date
 import pytest
 
 from src.retrieval.config import RetrievalConfig
-from src.retrieval.errors import RetrievalRequestError, TemporalRoutingError
+from src.retrieval.errors import (
+    IntentAnalysisError,
+    RetrievalRequestError,
+    TemporalRoutingError,
+)
 from src.retrieval.models import (
     IntentType,
     RetrievalDecisionReasonCode,
@@ -37,6 +41,100 @@ def test_six_intents_route_explicitly(query: str, intent: IntentType) -> None:
         .decision
     )
     assert decision.intent is intent
+
+
+class FakeClassifier:
+    def __init__(self, intent=None, error=None):
+        self._intent = intent
+        self._error = error
+        self.calls: list[str] = []
+
+    def classify(self, query: str) -> IntentType:
+        self.calls.append(query)
+        if self._error is not None:
+            raise self._error
+        assert self._intent is not None
+        return self._intent
+
+
+def test_high_confidence_rule_bypasses_classifier() -> None:
+    classifier = FakeClassifier(IntentType.FACTUAL)
+    result = IntentRouter(
+        RetrievalConfig(), classifier=classifier, clock=FixedClock()
+    ).route(RetrievalRequest(query="Vốn điều lệ là gì?"))
+
+    assert result.decision.intent is IntentType.DEFINITION
+    assert (
+        result.decision.decision_reason_code
+        is RetrievalDecisionReasonCode.DEFINITION_EXPLICIT
+    )
+    assert classifier.calls == []
+
+
+def test_low_confidence_rule_defers_to_classifier() -> None:
+    classifier = FakeClassifier(IntentType.FACTUAL)
+    result = IntentRouter(
+        RetrievalConfig(), classifier=classifier, clock=FixedClock()
+    ).route(RetrievalRequest(query="Thủ tục qua nhiều văn bản ra sao?"))
+
+    assert result.decision.intent is IntentType.FACTUAL
+    assert (
+        result.decision.decision_reason_code
+        is RetrievalDecisionReasonCode.INTENT_CLASSIFIER_LLM
+    )
+    assert classifier.calls == ["Thủ tục qua nhiều văn bản ra sao?"]
+
+
+def test_low_confidence_rule_used_without_classifier() -> None:
+    result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+        RetrievalRequest(query="Thủ tục qua nhiều văn bản ra sao?")
+    )
+
+    assert result.decision.intent is IntentType.MULTI_HOP
+    assert (
+        result.decision.decision_reason_code
+        is RetrievalDecisionReasonCode.MULTI_HOP_EXPLICIT
+    )
+
+
+def test_classifier_resolves_intent_when_no_rule_matches() -> None:
+    classifier = FakeClassifier(IntentType.DEFINITION)
+    result = IntentRouter(
+        RetrievalConfig(), classifier=classifier, clock=FixedClock()
+    ).route(RetrievalRequest(query="Điều kiện thành lập doanh nghiệp"))
+
+    assert result.decision.intent is IntentType.DEFINITION
+    assert (
+        result.decision.decision_reason_code
+        is RetrievalDecisionReasonCode.INTENT_CLASSIFIER_LLM
+    )
+    assert classifier.calls == ["Điều kiện thành lập doanh nghiệp"]
+
+
+def test_force_intent_bypasses_rule_and_classifier() -> None:
+    classifier = FakeClassifier(IntentType.FACTUAL)
+    result = IntentRouter(
+        RetrievalConfig(), classifier=classifier, clock=FixedClock()
+    ).route(
+        RetrievalRequest(
+            query="Vốn điều lệ là gì?", force_intent=IntentType.HIERARCHY
+        )
+    )
+
+    assert result.decision.intent is IntentType.HIERARCHY
+    assert (
+        result.decision.decision_reason_code
+        is RetrievalDecisionReasonCode.FORCED_INTENT
+    )
+    assert classifier.calls == []
+
+
+def test_classifier_failure_propagates_not_factual() -> None:
+    classifier = FakeClassifier(error=IntentAnalysisError("boom"))
+    with pytest.raises(IntentAnalysisError):
+        IntentRouter(
+            RetrievalConfig(), classifier=classifier, clock=FixedClock()
+        ).route(RetrievalRequest(query="Điều kiện thành lập doanh nghiệp"))
 
 
 def test_current_validity_uses_injected_clock() -> None:
