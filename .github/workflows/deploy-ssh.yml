@@ -1,4 +1,4 @@
-name: Continuous Deployment (SSH Release Only)
+name: Continuous Deployment (SSH GHCR Release)
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Production Server via SSH
+    name: Deploy GHCR Containers to Server via SSH
     runs-on: ubuntu-latest
 
     steps:
@@ -23,31 +23,34 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Sync Source Code to Server via rsync
+      - name: Sync Production Compose Files to Server via rsync
         run: |
+          ssh -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}/infra"
           rsync -avz -e "ssh -p ${{ secrets.SSH_PORT || 22 }}" \
-            --exclude='.git' \
-            --exclude='.venv' \
-            --exclude='.cache' \
-            --exclude='node_modules' \
-            --exclude='apps/frontend/.next' \
-            --exclude='infra/data' \
-            --exclude='results' \
-            --exclude='experiments' \
-            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}/
+            infra/docker-compose.prod.yml \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}/infra/docker-compose.prod.yml
 
-      - name: Build & Restart Docker Services on Server
+      - name: Login GHCR & Pull Images & Restart Containers on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          envs: GITHUB_TOKEN
           script: |
             cd ${{ secrets.REMOTE_DIR || '/opt/legal-graphrag' }}
+            
+            # Login GHCR
+            echo "${{ secrets.CR_PAT || github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            # Pull GHCR images and restart services
+            TAG="${{ github.event.release.tag_name || 'latest' }}"
             if docker compose version >/dev/null 2>&1; then
-              docker compose -f infra/docker-compose.yml up -d --build
+              TAG="$TAG" docker compose -f infra/docker-compose.prod.yml pull
+              TAG="$TAG" docker compose -f infra/docker-compose.prod.yml up -d
             else
-              docker-compose -f infra/docker-compose.yml up -d --build
+              TAG="$TAG" docker-compose -f infra/docker-compose.prod.yml pull
+              TAG="$TAG" docker-compose -f infra/docker-compose.prod.yml up -d
             fi
             echo "Deployment completed for release tag: ${{ github.event.release.tag_name }}"
