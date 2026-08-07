@@ -78,7 +78,16 @@ export function useChatStream(initialMessages: Message[] = []) {
          if (queryDate) body.query_date = queryDate
 
          const response = await apiStream('/api/v1/chat', body, controller.signal)
-         if (!response.ok) throw new Error(`HTTP ${response.status}`)
+         if (!response.ok) {
+            let errorMsg = `Lỗi hệ thống (${response.status})`
+            try {
+               const errJson = await response.json()
+               if (errJson && errJson.message) {
+                  errorMsg = errJson.message
+               }
+            } catch {}
+            throw new Error(errorMsg)
+         }
          const reader = response.body?.getReader()
          if (!reader) throw new SseProtocolError('Response does not provide an SSE stream')
 
@@ -109,7 +118,7 @@ export function useChatStream(initialMessages: Message[] = []) {
          if (controller.signal.aborted) return
          const message = error instanceof Error ? error.message : 'Không thể kết nối server'
          updateAssistant(setMessages, assistantId, {
-            content: `Không thể hoàn tất câu trả lời: ${message}`,
+            content: `⚠️ **Không thể hoàn tất câu trả lời**: ${message}`,
             error: message,
          })
       } finally {
