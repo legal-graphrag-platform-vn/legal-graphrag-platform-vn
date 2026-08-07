@@ -581,12 +581,19 @@ class LockedTurn:
     async def _load_focuses(
         self, current_user_turn_no: int
     ) -> tuple[GroundedFocus, ...]:
+        # Evict focuses idle for more than the TTL window (schema dictionary §7):
+        # a focus not re-grounded within FOCUS_TTL_USER_TURNS user turns is deleted.
+        await self._conn.execute(
+            delete(_focus_t).where(
+                _focus_t.c.conversation_id == self._conversation_id,
+                current_user_turn_no - _focus_t.c.last_grounded_user_turn_no
+                > FOCUS_TTL_USER_TURNS,
+            )
+        )
         stmt = (
             select(_focus_t)
             .where(
                 _focus_t.c.conversation_id == self._conversation_id,
-                current_user_turn_no - _focus_t.c.last_grounded_user_turn_no
-                <= FOCUS_TTL_USER_TURNS,
             )
             .order_by(
                 _focus_t.c.last_grounded_user_turn_no.desc(),

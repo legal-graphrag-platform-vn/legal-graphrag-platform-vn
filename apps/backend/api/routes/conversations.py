@@ -11,8 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 
-from api.routes.chat import _resolve_owner
-from dependencies import get_repository
+from dependencies import get_repository, require_user_owner
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -28,8 +27,8 @@ async def list_conversations(
     offset: int = Query(default=0, ge=0),
     repo=Depends(get_repository),
 ) -> list[dict[str, Any]]:
-    # 1. Resolve current principal (user or anonymous)
-    owner, _ = _resolve_owner(request)
+    # 1. Require an authenticated user (login-only mode)
+    owner = require_user_owner(request)
 
     # 2. Query repository for conversation list owned by principal
     conversations = await repo.list_conversations(
@@ -46,8 +45,8 @@ async def get_conversation_detail(
     request: Request,
     repo=Depends(get_repository),
 ) -> dict[str, Any]:
-    # 1. Resolve current principal
-    owner, _ = _resolve_owner(request)
+    # 1. Require an authenticated user (login-only mode)
+    owner = require_user_owner(request)
 
     # 2. Fetch conversation transcript details
     detail = await repo.get_conversation_detail(
@@ -69,8 +68,8 @@ async def patch_conversation_title(
     request: Request,
     repo=Depends(get_repository),
 ) -> dict[str, Any]:
-    # 1. Resolve current principal
-    owner, _ = _resolve_owner(request)
+    # 1. Require an authenticated user (login-only mode)
+    owner = require_user_owner(request)
 
     # 2. Update conversation title
     success = await repo.patch_conversation_title(
@@ -92,8 +91,8 @@ async def generate_conversation_title(
     request: Request,
     repo=Depends(get_repository),
 ) -> dict[str, Any]:
-    # 1. Resolve current principal
-    owner, _ = _resolve_owner(request)
+    # 1. Require an authenticated user (login-only mode)
+    owner = require_user_owner(request)
 
     # 2. Derive and persist a title from the first user message
     title = await repo.generate_conversation_title(
@@ -114,8 +113,8 @@ async def delete_conversation(
     request: Request,
     repo=Depends(get_repository),
 ) -> dict[str, Any]:
-    # 1. Resolve current principal
-    owner, _ = _resolve_owner(request)
+    # 1. Require an authenticated user (login-only mode)
+    owner = require_user_owner(request)
 
     # 2. Soft delete conversation in repository
     success = await repo.delete_conversation(

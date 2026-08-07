@@ -5,43 +5,16 @@ POST /api/v1/chat — grounded conversation SSE endpoint (Plan 19 §2, §4).
 from __future__ import annotations
 
 import asyncio
-import uuid
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
 from api.models import ConversationChatRequest, encode_sse
-from auth.principal import PRINCIPAL_COOKIE_NAME, USER_COOKIE_NAME
-from dependencies import get_chat_service
-from persistence.domain import Owner
-from persistence.enums import OwnerKind
+from dependencies import get_chat_service, require_user_owner
 from persistence.errors import ConversationBusyError, ConversationNotFoundError
 from services.interfaces import ChatService
 
 router = APIRouter()
-
-
-def _resolve_owner(request: Request) -> tuple[Owner, str | None]:
-    """Authenticate the signed principal, issuing a fresh cookie when needed."""
-    container = request.app.state.container
-    signer = getattr(container, "principal_signer", None)
-    if signer is None:
-        # Mock mode has no signing key; synthesize a throwaway anonymous owner.
-        return Owner(
-            owner_kind=OwnerKind.ANONYMOUS, owner_principal_id=uuid.uuid4()
-        ), None
-    
-    user_token = request.cookies.get(USER_COOKIE_NAME)
-    if not user_token:
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            user_token = auth_header[7:].strip()
-            
-    authenticated = signer.authenticate(
-        request.cookies.get(PRINCIPAL_COOKIE_NAME),
-        user_token=user_token,
-    )
-    return authenticated.owner, authenticated.set_cookie_value
 
 
 @router.post("/chat")
@@ -50,7 +23,8 @@ async def chat(
     http_request: Request,
     service: ChatService = Depends(get_chat_service),
 ) -> StreamingResponse:
-    owner, set_cookie = _resolve_owner(http_request)
+    # Login required: rejects unauthenticated callers with HTTP 401.
+    owner = require_user_owner(http_request)
 
     async def generate():
         try:
@@ -88,7 +62,7 @@ async def chat(
             )
             yield encode_sse("done", {"status": "error", "citation_count": 0})
 
-    response = StreamingResponse(
+    return StreamingResponse(
         generate(),
         media_type="text/event-stream",
         headers={
@@ -97,15 +71,3 @@ async def chat(
             "X-Accel-Buffering": "no",
         },
     )
-    if set_cookie is not None:
-        settings = http_request.app.state.settings
-        response.set_cookie(
-            key=PRINCIPAL_COOKIE_NAME,
-            value=set_cookie,
-            max_age=settings.anonymous_principal_cookie_ttl_days * 86400,
-            httponly=True,
-            samesite="lax",
-            path="/",
-            secure=settings.anonymous_principal_cookie_secure,
-        )
-    return response

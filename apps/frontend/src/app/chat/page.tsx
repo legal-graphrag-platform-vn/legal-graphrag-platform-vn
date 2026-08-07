@@ -3,6 +3,7 @@
 import React, { startTransition, useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MessageItem } from '@/components/chat/MessageItem'
+import { AuthModal } from '@/components/auth/AuthModal'
 import { useChatStream } from '@/hooks/useChatStream'
 import { ChatSession } from '@/types/chat'
 import {
@@ -18,6 +19,38 @@ import {
    X,
 } from 'lucide-react'
 
+interface UserProfile {
+   user_id: string
+   username: string
+   full_name?: string | null
+}
+
+interface ServerConversationSummary {
+   id: string
+   title?: string | null
+   created_at?: string | null
+}
+
+interface ServerCitation {
+   unit_id: string
+   citation_label: string
+   document_id: string
+   deep_link: string
+}
+
+interface ServerMessage {
+   id: string
+   role: string
+   content: string
+   citations?: ServerCitation[]
+   created_at?: string | null
+}
+
+interface ServerConversationDetail {
+   title?: string | null
+   messages?: ServerMessage[]
+}
+
 export default function ChatPage() {
    const [sessions, setSessions] = useState<ChatSession[]>([])
    const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
@@ -26,64 +59,75 @@ export default function ChatPage() {
    const [temporalDate, setTemporalDate] = useState<string>('') // Ngày tra cứu hiệu lực
    const [showDatePicker, setShowDatePicker] = useState(false)
 
+   // Auth state (login required to chat). null = not logged in; undefined = checking.
+   const [user, setUser] = useState<UserProfile | null | undefined>(undefined)
+   const [showAuth, setShowAuth] = useState(false)
+
    // Custom hook for SSE Streaming
    const { messages, setMessages, isStreaming, sendMessage, clearMessages } = useChatStream([])
 
    const messagesEndRef = useRef<HTMLDivElement>(null)
    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-   // 1. Fetch server sessions list
-   const fetchServerConversations = async () => {
+   // Rebuild the sidebar from the server for the CURRENT principal, dropping any
+   // locally cached sessions that belong to a different (previous) principal.
+   const reloadConversationsForPrincipal = async () => {
+      clearMessages()
       try {
          const res = await fetch('/api/v1/conversations', { credentials: 'include' })
-         if (res.ok) {
-            const data = await res.json()
-            if (Array.isArray(data) && data.length > 0) {
-               const serverSessions: ChatSession[] = data.map((item: any) => ({
-                  id: item.id,
-                  title: item.title || 'Cuộc hội thoại mới',
-                  messages: [],
-                  createdAt: item.created_at || new Date().toISOString(),
-               }))
-               setSessions((prev) => {
-                  const map = new Map<string, ChatSession>()
-                  serverSessions.forEach((s) => map.set(s.id, s))
-                  prev.forEach((s) => {
-                     if (!map.has(s.id)) {
-                        map.set(s.id, s)
-                     } else {
-                        const existing = map.get(s.id)!
-                        map.set(s.id, {
-                           ...existing,
-                           messages: s.messages.length > 0 ? s.messages : existing.messages,
-                        })
-                     }
-                  })
-                  return Array.from(map.values())
-               })
-            }
-         }
+         const data: unknown = res.ok ? await res.json() : []
+         const items: ServerConversationSummary[] = Array.isArray(data) ? data : []
+         const serverSessions: ChatSession[] = items.map((item) => ({
+            id: item.id,
+            title: item.title || 'Cuộc hội thoại mới',
+            messages: [],
+            createdAt: item.created_at || new Date().toISOString(),
+         }))
+         setSessions(serverSessions)
+         setActiveSessionId(serverSessions.length > 0 ? serverSessions[0].id : null)
       } catch (e) {
-         console.error('Lỗi load conversations từ server:', e)
+         console.error('Lỗi tải lại conversations theo principal:', e)
+         setSessions([])
+         setActiveSessionId(null)
       }
    }
 
-   // Load sessions from localStorage on mount and sync with server
+   // Resolve the current user once on mount (login required to chat). When
+   // authenticated, load that principal's conversations; otherwise show nothing.
    useEffect(() => {
-      const saved = localStorage.getItem('rag_sessions')
-      if (saved) {
-         try {
-            const parsed = JSON.parse(saved)
-            startTransition(() => {
-               setSessions(parsed)
-               if (parsed.length > 0) setActiveSessionId(parsed[0].id)
-            })
-         } catch (e) {
-            console.error('Lỗi load sessions từ localStorage:', e)
-         }
-      }
-      fetchServerConversations()
+      fetch('/api/v1/auth/me', { credentials: 'include' })
+         .then((res) => (res.ok ? res.json().catch(() => null) : null))
+         .then((data) => {
+            const resolved: UserProfile | null = data && data.username ? data : null
+            setUser(resolved)
+            localStorage.removeItem('rag_sessions')
+            if (resolved) {
+               reloadConversationsForPrincipal()
+            } else {
+               setSessions([])
+               setActiveSessionId(null)
+            }
+         })
+         .catch(() => setUser(null))
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [])
+
+   // Handle login: adopt the profile, then rebuild the sidebar from the server
+   // for the now-authenticated principal (guest conversations were claimed).
+   const handleLoginSuccess = (u: UserProfile) => {
+      setUser(u)
+      localStorage.removeItem('rag_sessions')
+      reloadConversationsForPrincipal()
+   }
+
+   // Handle logout: clear identity and wipe the cached sidebar completely.
+   const handleLogout = () => {
+      setUser(null)
+      localStorage.removeItem('rag_sessions')
+      setSessions([])
+      setActiveSessionId(null)
+      clearMessages()
+   }
 
    // 2. Save sessions to localStorage when updated
    useEffect(() => {
@@ -138,13 +182,13 @@ export default function ChatPage() {
       try {
          const res = await fetch(`/api/v1/conversations/${sessionId}`, { credentials: 'include' })
          if (res.ok) {
-            const data = await res.json()
+            const data: ServerConversationDetail = await res.json()
             if (data && Array.isArray(data.messages)) {
-               const loadedMessages = data.messages.map((m: any) => ({
+               const loadedMessages = data.messages.map((m) => ({
                   id: m.id,
-                  role: m.role === 'user' ? 'user' : 'assistant',
+                  role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
                   content: m.content,
-                  sources: m.citations ? m.citations.map((c: any) => ({
+                  sources: m.citations ? m.citations.map((c) => ({
                      id: c.unit_id,
                      title: c.citation_label,
                      citation_label: c.citation_label,
@@ -238,6 +282,11 @@ export default function ChatPage() {
    }
 
    const handleSend = () => {
+      // Login required to chat: prompt for auth instead of sending.
+      if (!user) {
+         setShowAuth(true)
+         return
+      }
       if (!inputText.trim() || isStreaming || !activeSessionId) return
       const textToSend = inputText
       setInputText('')
@@ -259,6 +308,22 @@ export default function ChatPage() {
 
    // Reusable Input Form Component rendering to keep layout unified
    const renderInputBox = () => {
+      // Login gate: block the composer until the user is authenticated.
+      if (user === null) {
+         return (
+            <div className="w-full rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-[#f4f4f4] dark:bg-[#2f2f2f] px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+               <span className="text-sm text-zinc-600 dark:text-zinc-300">
+                  Vui lòng đăng nhập để bắt đầu trò chuyện.
+               </span>
+               <button
+                  onClick={() => setShowAuth(true)}
+                  className="shrink-0 px-4 py-2 rounded-xl text-sm font-medium bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 transition-opacity cursor-pointer"
+               >
+                  Đăng nhập / Đăng ký
+               </button>
+            </div>
+         )
+      }
       return (
          <div className="relative flex flex-col w-full rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-[#f4f4f4] dark:bg-[#2f2f2f] focus-within:border-zinc-300 dark:focus-within:border-zinc-700 transition-colors shadow-2xs overflow-hidden">
             {/* Temporal date indicator */}
@@ -374,7 +439,17 @@ export default function ChatPage() {
             onDeleteAllSessions={handleDeleteAllSessions}
             isOpen={sidebarOpen}
             onToggle={() => setSidebarOpen(!sidebarOpen)}
-            onUserChange={() => fetchServerConversations()}
+            user={user ?? null}
+            onOpenAuth={() => setShowAuth(true)}
+         />
+
+         {/* Auth modal (login required to chat) */}
+         <AuthModal
+            isOpen={showAuth}
+            onClose={() => setShowAuth(false)}
+            user={user ?? null}
+            onLoginSuccess={handleLoginSuccess}
+            onLogout={handleLogout}
          />
 
          {/* Sidebar Backdrop Overlay on Mobile */}
