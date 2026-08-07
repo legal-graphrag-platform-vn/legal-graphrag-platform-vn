@@ -16,7 +16,7 @@ class QueryAnalyzer:
         self._temporal_parser = temporal_parser or TemporalParser()
 
     def analyze(self, query: str) -> tuple[IntentType, TemporalQuery]:
-        intent, _ = classify_intent_by_rule(query)
+        intent, _, _ = classify_intent_by_rule(query)
         if intent is None:
             intent = (
                 self._classifier.classify(query)

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+from enum import Enum
+
 from src.retrieval.config import RetrievalConfig
 from src.retrieval.errors import (
     RetrievalRequestError,
@@ -26,7 +28,18 @@ from src.retrieval.ports import Clock, IntentClassifierPort
 from src.retrieval.query.temporal_parser import TemporalParser
 
 
-_RULES: tuple[tuple[re.Pattern[str], IntentType, RetrievalDecisionReasonCode], ...] = (
+class RuleConfidence(Enum):
+    """How much a matched regex rule can be trusted without LLM confirmation."""
+
+    HIGH = "high"
+    LOW = "low"
+
+
+_Rule = tuple[
+    re.Pattern[str], IntentType, RetrievalDecisionReasonCode, RuleConfidence
+]
+
+_RULES: tuple[_Rule, ...] = (
     (
         re.compile(
             r"(nhiều bước|qua nhiều|liên hệ.*(?:điều|văn bản)|dẫn chiếu|"
@@ -35,6 +48,7 @@ _RULES: tuple[tuple[re.Pattern[str], IntentType, RetrievalDecisionReasonCode], .
         ),
         IntentType.MULTI_HOP,
         RetrievalDecisionReasonCode.MULTI_HOP_EXPLICIT,
+        RuleConfidence.LOW,
     ),
     (
         re.compile(
@@ -44,6 +58,7 @@ _RULES: tuple[tuple[re.Pattern[str], IntentType, RetrievalDecisionReasonCode], .
         ),
         IntentType.HIERARCHY,
         RetrievalDecisionReasonCode.HIERARCHY_EXPLICIT,
+        RuleConfidence.HIGH,
     ),
     (
         re.compile(
@@ -52,11 +67,13 @@ _RULES: tuple[tuple[re.Pattern[str], IntentType, RetrievalDecisionReasonCode], .
         ),
         IntentType.DEFINITION,
         RetrievalDecisionReasonCode.DEFINITION_EXPLICIT,
+        RuleConfidence.HIGH,
     ),
     (
         re.compile(r"(khác nhau|giống nhau|so sánh|trước và sau)", re.I),
         IntentType.COMPARISON,
         RetrievalDecisionReasonCode.COMPARISON_EXPLICIT,
+        RuleConfidence.HIGH,
     ),
     (
         re.compile(
@@ -66,6 +83,7 @@ _RULES: tuple[tuple[re.Pattern[str], IntentType, RetrievalDecisionReasonCode], .
         ),
         IntentType.VALIDITY,
         RetrievalDecisionReasonCode.VALIDITY_EXPLICIT_DATE,
+        RuleConfidence.HIGH,
     ),
 )
 
@@ -161,16 +179,31 @@ class IntentRouter:
                 RetrievalDecisionReasonCode.FORCED_INTENT,
                 f"Intent explicitly forced to {request.force_intent.value}",
             )
-        intent, reason_code = classify_intent_by_rule(request.query)
-        if intent is not None and reason_code is not None:
-            return intent, reason_code, f"Matched deterministic {intent.value} rule"
+
+        intent, reason_code, confidence = classify_intent_by_rule(request.query)
+
+        # High-confidence rules win outright and bypass the LLM classifier.
+        if (
+            intent is not None
+            and reason_code is not None
+            and confidence is RuleConfidence.HIGH
+        ):
+            return intent, reason_code, f"Matched high-confidence {intent.value} rule"
+
+        # Otherwise defer to the LLM classifier when available. Failures raise a
+        # typed error and are never silently downgraded to FACTUAL.
         if self._classifier is not None:
             classified = self._classifier.classify(request.query)
             return (
                 classified,
-                _reason_for(classified),
+                RetrievalDecisionReasonCode.INTENT_CLASSIFIER_LLM,
                 f"Intent classifier selected {classified.value}",
             )
+
+        # Low-confidence rule is a best-effort guess only when no classifier runs.
+        if intent is not None and reason_code is not None:
+            return intent, reason_code, f"Matched low-confidence {intent.value} rule"
+
         return (
             IntentType.FACTUAL,
             RetrievalDecisionReasonCode.FACTUAL_DEFAULT,
@@ -251,15 +284,19 @@ class IntentRouter:
 
 def classify_intent_by_rule(
     query: str,
-) -> tuple[IntentType | None, RetrievalDecisionReasonCode | None]:
-    for pattern, intent, reason in _RULES:
+) -> tuple[IntentType | None, RetrievalDecisionReasonCode | None, RuleConfidence | None]:
+    for pattern, intent, reason, confidence in _RULES:
         if pattern.search(query):
             if intent is IntentType.VALIDITY and re.search(
                 r"(hiện hành|hiện nay|đang có hiệu lực|còn hiệu lực)", query, re.I
             ):
-                return intent, RetrievalDecisionReasonCode.VALIDITY_CURRENT_DATE
-            return intent, reason
-    return None, None
+                return (
+                    intent,
+                    RetrievalDecisionReasonCode.VALIDITY_CURRENT_DATE,
+                    confidence,
+                )
+            return intent, reason, confidence
+    return None, None, None
 
 
 def _strategy_for(intent: IntentType) -> RetrievalStrategyType:
@@ -270,17 +307,6 @@ def _strategy_for(intent: IntentType) -> RetrievalStrategyType:
         IntentType.HIERARCHY: RetrievalStrategyType.HIERARCHY_GRAPH,
         IntentType.COMPARISON: RetrievalStrategyType.COMPARISON_TEMPORAL,
         IntentType.MULTI_HOP: RetrievalStrategyType.MULTI_HOP_HYBRID,
-    }[intent]
-
-
-def _reason_for(intent: IntentType) -> RetrievalDecisionReasonCode:
-    return {
-        IntentType.FACTUAL: RetrievalDecisionReasonCode.FACTUAL_DEFAULT,
-        IntentType.DEFINITION: RetrievalDecisionReasonCode.DEFINITION_EXPLICIT,
-        IntentType.VALIDITY: RetrievalDecisionReasonCode.VALIDITY_EXPLICIT_DATE,
-        IntentType.HIERARCHY: RetrievalDecisionReasonCode.HIERARCHY_EXPLICIT,
-        IntentType.COMPARISON: RetrievalDecisionReasonCode.COMPARISON_EXPLICIT,
-        IntentType.MULTI_HOP: RetrievalDecisionReasonCode.MULTI_HOP_EXPLICIT,
     }[intent]
 
 
