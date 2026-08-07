@@ -15,8 +15,6 @@ import {
    Image as ImageIcon,
    PenLine,
    Globe,
-   CalendarDays,
-   X,
 } from 'lucide-react'
 
 interface UserProfile {
@@ -56,9 +54,6 @@ export default function ChatPage() {
    const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
    const [inputText, setInputText] = useState('')
    const [sidebarOpen, setSidebarOpen] = useState(true)
-   const [temporalDate, setTemporalDate] = useState<string>('') // Ngày tra cứu hiệu lực
-   const [showDatePicker, setShowDatePicker] = useState(false)
-
    // Auth state (login required to chat). null = not logged in; undefined = checking.
    const [user, setUser] = useState<UserProfile | null | undefined>(undefined)
    const [showAuth, setShowAuth] = useState(false)
@@ -282,16 +277,12 @@ export default function ChatPage() {
    }
 
    const handleSend = () => {
-      // Login required to chat: prompt for auth instead of sending.
-      if (!user) {
-         setShowAuth(true)
-         return
-      }
-      if (!inputText.trim() || isStreaming || !activeSessionId) return
+      // Login required to chat: the send button is disabled, and Enter is a no-op.
+      if (!user || !inputText.trim() || isStreaming || !activeSessionId) return
       const textToSend = inputText
       setInputText('')
       // ChatSession.id chính là conversation_id gửi lên server (Plan 19 §5).
-      sendMessage(textToSend, activeSessionId, messages, temporalDate || undefined)
+      sendMessage(textToSend, activeSessionId, messages)
    }
 
    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -308,40 +299,8 @@ export default function ChatPage() {
 
    // Reusable Input Form Component rendering to keep layout unified
    const renderInputBox = () => {
-      // Login gate: block the composer until the user is authenticated.
-      if (user === null) {
-         return (
-            <div className="w-full rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-[#f4f4f4] dark:bg-[#2f2f2f] px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-               <span className="text-sm text-zinc-600 dark:text-zinc-300">
-                  Vui lòng đăng nhập để bắt đầu trò chuyện.
-               </span>
-               <button
-                  onClick={() => setShowAuth(true)}
-                  className="shrink-0 px-4 py-2 rounded-xl text-sm font-medium bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 transition-opacity cursor-pointer"
-               >
-                  Đăng nhập / Đăng ký
-               </button>
-            </div>
-         )
-      }
       return (
          <div className="relative flex flex-col w-full rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-[#f4f4f4] dark:bg-[#2f2f2f] focus-within:border-zinc-300 dark:focus-within:border-zinc-700 transition-colors shadow-2xs overflow-hidden">
-            {/* Temporal date indicator */}
-            {temporalDate && (
-               <div className="flex items-center gap-2 px-4 pt-2">
-                  <CalendarDays size={12} className="text-primary" />
-                  <span className="text-xs text-primary">
-                     Tra cứu theo ngày: {new Date(temporalDate).toLocaleDateString('vi-VN')}
-                  </span>
-                  <button
-                     onClick={() => setTemporalDate('')}
-                     className="ml-auto text-muted-foreground hover:text-foreground"
-                  >
-                     <X size={11} />
-                  </button>
-               </div>
-            )}
-
             <div className="flex items-center pl-4 pr-2.5 py-1.5">
                {/* Plus Button */}
                <button
@@ -358,64 +317,22 @@ export default function ChatPage() {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything"
+                  placeholder={user ? 'Ask anything' : 'Đăng nhập để bắt đầu trò chuyện'}
                   className="flex-1 max-h-[180px] min-h-[40px] py-2 px-3 text-sm bg-transparent border-0 outline-hidden resize-none placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-900 dark:text-zinc-150 leading-relaxed font-sans focus:ring-0"
                />
 
-               {/* Date picker toggle */}
-               <div className="relative">
-                  <button
-                     onClick={() => setShowDatePicker(!showDatePicker)}
-                     title="Chọn ngày tra cứu hiệu lực"
-                     className={`p-2 rounded-full transition-colors cursor-pointer ${
-                        temporalDate
-                           ? 'text-primary bg-primary/10'
-                           : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-200/50 dark:hover:bg-zinc-800'
-                     }`}
-                  >
-                     <CalendarDays size={16} />
-                  </button>
-                  {showDatePicker && (
-                     <div className="absolute bottom-10 right-0 bg-card border border-border rounded-xl shadow-lg p-3 z-50 w-64">
-                        <p className="text-xs font-medium mb-2 text-foreground">
-                           Tra cứu văn bản theo ngày hiệu lực
-                        </p>
-                        <input
-                           type="date"
-                           value={temporalDate}
-                           max={new Date().toISOString().split('T')[0]}
-                           onChange={(e) => {
-                              setTemporalDate(e.target.value)
-                              setShowDatePicker(false)
-                           }}
-                           className="w-full text-xs border border-border rounded-lg px-2 py-1.5 bg-background text-foreground"
-                        />
-                        {temporalDate && (
-                           <button
-                              onClick={() => {
-                                 setTemporalDate('')
-                                 setShowDatePicker(false)
-                              }}
-                              className="mt-2 w-full text-xs text-muted-foreground hover:text-foreground"
-                           >
-                              Xóa ngày đã chọn
-                           </button>
-                        )}
-                     </div>
-                  )}
-               </div>
 
                {/* Send button */}
-               <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
+               <div className="flex items-center gap-1.5 shrink-0 ml-1">
                   <button
                      onClick={handleSend}
-                     disabled={!inputText.trim() || isStreaming}
+                     disabled={!user || !inputText.trim() || isStreaming}
                      className={`p-2.5 rounded-full flex items-center justify-center transition-all ${
-                        inputText.trim() && !isStreaming
+                        user && inputText.trim() && !isStreaming
                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-md cursor-pointer'
                            : 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-650 cursor-not-allowed'
                      }`}
-                     title="Gửi câu hỏi"
+                     title={user ? 'Gửi câu hỏi' : 'Vui lòng đăng nhập để gửi'}
                   >
                      <ArrowUp size={16} strokeWidth={2.5} />
                   </button>
