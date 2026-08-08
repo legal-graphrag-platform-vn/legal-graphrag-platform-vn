@@ -19,12 +19,24 @@ Structural context canonical:
 Trích xuất tất cả entities được đề cập:
 
 1. Documents bên ngoài được viện dẫn rõ ràng
-2. Concepts pháp lý (khái niệm, thuật ngữ chuyên ngành)
-3. Entities (loại hình doanh nghiệp, cơ quan, chủ thể)
-4. Actions (hành vi pháp lý như thành lập, góp vốn, giải thể)
+
+2. Concept / LegalConcept:
+   Khái niệm, thuật ngữ, đối tượng hoặc chế định pháp lý được quy định,
+   định nghĩa hoặc sử dụng trong điều luật.
+   Ví dụ: "vốn điều lệ", "cổ phần phổ thông", "điều kiện kinh doanh".
+
+3. Entity / LegalSubject:
+   Cá nhân, tổ chức, cơ quan nhà nước, loại hình doanh nghiệp hoặc
+   chủ thể trực tiếp chịu sự điều chỉnh của quy định.
+   Ví dụ: "công ty cổ phần", "cổ đông sáng lập", "cơ quan đăng ký kinh doanh".
+
+4. Action / LegalAction:
+   Hành vi hoặc hoạt động pháp lý do chủ thể thực hiện, được phép thực hiện,
+   bị cấm hoặc được quy định trong điều luật.
+   Ví dụ: "thành lập công ty", "góp vốn", "chuyển nhượng cổ phần", "giải thể".
 
 QUY TẮC ĐẶT ID (BẮT BUỘC):
-- Đối với Concept/Entity/Document khác: Đặt tên tiếng Việt không dấu, viết thường, cách nhau bằng gạch dưới (Ví dụ: "cong_ty_co_phan", "co_quan_dang_ky_kinh_doanh").
+- Đối với Concept/Entity/Action/Document khác: Đặt tên tiếng Việt không dấu, viết thường, cách nhau bằng gạch dưới (Ví dụ: "cong_ty_co_phan", "co_quan_dang_ky_kinh_doanh").
 - KHÔNG trích xuất Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại thành entity. Chúng thuộc structural parser/resolver.
 
 Chỉ trích xuất entity thực sự được nhắc tới trong văn bản, không suy diễn thêm."""
@@ -37,9 +49,18 @@ Structural context: {structural_context}
 ---
 
 Xác định các quan hệ giữa entities. Chỉ sử dụng các loại quan hệ và tuân thủ chặt chẽ ràng buộc sau:
-- DEFINES: Đi từ Article/Clause -> Concept.
-- REGULATES: Đi từ Article/Clause -> Entity hoặc Action.
-- REQUIRES: Đi từ Entity -> Concept.
+
+- DEFINES: Đi từ Article/Clause -> LegalConcept.
+  Dùng khi điều khoản định nghĩa hoặc giải thích một khái niệm pháp lý.
+
+- REGULATES: Đi từ Article/Clause -> LegalSubject hoặc LegalAction.
+  Dùng khi điều khoản điều chỉnh trực tiếp một chủ thể hoặc một hành vi.
+
+- REQUIRES: Đi từ LegalSubject -> LegalConcept.
+  Dùng khi một chủ thể phải có, đáp ứng hoặc gắn với một khái niệm/điều kiện pháp lý.
+  KHÔNG dùng REQUIRES để biểu diễn điều kiện của một LegalAction. Điều kiện của
+  hành vi thuộc lớp runtime (HAS_CONDITION) và không được trích xuất ở Phase 1.
+
 - REFERS_TO: Đi từ Article/Clause/Point -> Document/Part/Chapter/Section/Subsection/Article/Clause/Point khác.
 - AMENDS / REPLACES / REPEALS: Quan hệ chủ động từ văn bản hoặc đơn vị mới sang văn bản hoặc đơn vị bị tác động.
 - GUIDES: Đi từ văn bản cấp cao hơn sang văn bản cấp thấp hơn trong whitelist ontology.
