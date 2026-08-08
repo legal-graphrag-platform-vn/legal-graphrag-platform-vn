@@ -655,9 +655,15 @@ def run_pipeline(
     # Diagram relations — document-level, deterministic, chạy sau rule records.
     if diagram:
         document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
-        diagram_candidates = parse_diagram(diagram)
+        diagram_result = parse_diagram(diagram)
+        for unknown_cat in diagram_result.unknown_categories:
+            logger.warning(
+                "Diagram: unknown category %r — không có trong DOCUMENT_RELATION_MAP "
+                "và không phải UNSUPPORTED. Kiểm tra vbpl.vn có thêm category mới không.",
+                unknown_cat,
+            )
         diagram_resolved, diagram_unresolved = resolve_diagram_relations(
-            diagram_candidates,
+            diagram_result.candidates,
             current_document_id=parsed.document.id,
             registry=document_registry,
         )
@@ -667,9 +673,10 @@ def run_pipeline(
             current_document_id=parsed.document.id,
         )
         logger.info(
-            "Diagram extraction: %d resolved, %d unresolved candidates",
+            "Diagram extraction: %d resolved, %d unresolved, %d unknown categories",
             len(diagram_resolved),
             len(diagram_unresolved),
+            len(diagram_result.unknown_categories),
         )
         all_records.extend(diagram_records)
 
