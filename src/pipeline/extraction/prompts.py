@@ -8,7 +8,9 @@ chỉ bổ sung hướng dẫn format JSON chặt hơn (Gemini structured output
 
 from __future__ import annotations
 
+
 ENTITY_EXTRACTION_PROMPT = """Cho điều luật sau:
+
 ---
 {article_text}
 ---
@@ -16,38 +18,110 @@ ENTITY_EXTRACTION_PROMPT = """Cho điều luật sau:
 Structural context canonical:
 {structural_context}
 
-Trích xuất tất cả entities được đề cập:
+Trích xuất các đối tượng pháp lý thực sự được đề cập trong văn bản:
 
-1. Documents bên ngoài được viện dẫn rõ ràng
-2. Concepts pháp lý (khái niệm, thuật ngữ chuyên ngành)
-3. Entities (loại hình doanh nghiệp, cơ quan, chủ thể)
-4. Actions (hành vi pháp lý như thành lập, góp vốn, giải thể)
+1. Document:
+   Văn bản pháp luật bên ngoài được viện dẫn rõ ràng.
+   ID do LLM tạo ở bước này chỉ là raw extraction ID; canonical Document ID
+   sẽ được document registry/resolver xác định.
 
-QUY TẮC ĐẶT ID (BẮT BUỘC):
-- Đối với Concept/Entity/Document khác: Đặt tên tiếng Việt không dấu, viết thường, cách nhau bằng gạch dưới (Ví dụ: "cong_ty_co_phan", "co_quan_dang_ky_kinh_doanh").
-- KHÔNG trích xuất Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại thành entity. Chúng thuộc structural parser/resolver.
+2. Concept / LegalConcept:
+   Khái niệm, thuật ngữ, đối tượng hoặc chế định pháp lý được quy định,
+   định nghĩa hoặc sử dụng trong điều luật.
+   Ví dụ: "vốn điều lệ", "cổ phần phổ thông", "điều kiện kinh doanh".
 
-Chỉ trích xuất entity thực sự được nhắc tới trong văn bản, không suy diễn thêm."""
+3. Entity / LegalSubject:
+   Cá nhân, tổ chức, cơ quan nhà nước, loại hình doanh nghiệp hoặc
+   chủ thể trực tiếp chịu sự điều chỉnh của quy định.
+   Ví dụ: "công ty cổ phần", "cổ đông sáng lập",
+   "cơ quan đăng ký kinh doanh".
 
-RELATION_EXTRACTION_PROMPT = """Cho điều luật sau và danh sách entities đã xác định:
+4. Action / LegalAction:
+   Hành vi hoặc hoạt động pháp lý do chủ thể thực hiện, được phép thực hiện,
+   bị cấm hoặc được quy định trong điều luật.
+   Ví dụ: "thành lập công ty", "góp vốn",
+   "chuyển nhượng cổ phần", "giải thể".
+
+QUY TẮC ĐẶT ID:
+
+- Concept/Entity/Action sử dụng ID tiếng Việt không dấu, viết thường,
+  các từ cách nhau bằng dấu gạch dưới.
+- Không trích xuất Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại
+  thành semantic entity. Các đơn vị này thuộc structural parser/resolver.
+- Không suy diễn thêm đối tượng không được nhắc đến trong văn bản.
+
+Chỉ trích xuất đối tượng có căn cứ trực tiếp trong điều luật."""
+
+
+RELATION_EXTRACTION_PROMPT = """Cho điều luật sau và danh sách entities
+đã xác định:
+
+Điều luật:
 ---
-Article: {article_text}
-Entities: {entities_json}
-Structural context: {structural_context}
+{article_text}
 ---
 
-Xác định các quan hệ giữa entities. Chỉ sử dụng các loại quan hệ và tuân thủ chặt chẽ ràng buộc sau:
-- DEFINES: Đi từ Article/Clause -> Concept.
-- REGULATES: Đi từ Article/Clause -> Entity hoặc Action.
-- REQUIRES: Đi từ Entity -> Concept.
-- REFERS_TO: Đi từ Article/Clause/Point -> Document/Part/Chapter/Section/Subsection/Article/Clause/Point khác.
-- AMENDS / REPLACES / REPEALS: Quan hệ chủ động từ văn bản hoặc đơn vị mới sang văn bản hoặc đơn vị bị tác động.
-- GUIDES: Đi từ văn bản cấp cao hơn sang văn bản cấp thấp hơn trong whitelist ontology.
+Semantic entities:
+{entities_json}
 
-Với mỗi relation, bắt buộc có "evidence" là câu văn nguyên gốc làm cơ sở, và "confidence" thể hiện mức tự tin của bạn (0.0-1.0).
-Không được trả về CONTAINS. Chỉ dùng canonical structural ID có trong structural context; không tự tạo ID Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm.
-Không trích xuất lại dẫn chiếu cấu trúc tương đối có thể xác định bằng quy tắc, ví dụ
-"khoản này", "Điều này" hoặc "các điểm a và b khoản này". Các dẫn chiếu này được
-structural resolver xử lý trước. Chỉ đề xuất REFERS_TO khi dẫn chiếu cần liên kết
-văn bản bên ngoài hoặc diễn giải ngữ nghĩa/mơ hồ.
-Chỉ trả về quan hệ có evidence rõ ràng trong văn bản, không suy diễn."""
+Structural context canonical:
+{structural_context}
+
+Xác định các quan hệ có căn cứ trực tiếp trong văn bản.
+
+Chỉ sử dụng các loại quan hệ sau:
+
+- DEFINES: Article/Clause -> LegalConcept.
+  Dùng khi điều khoản định nghĩa hoặc giải thích một khái niệm pháp lý.
+
+- REGULATES: Article/Clause -> LegalSubject hoặc LegalAction.
+  Dùng khi điều khoản trực tiếp điều chỉnh một chủ thể hoặc hành vi.
+
+- REQUIRES: LegalSubject -> LegalConcept.
+  Dùng khi một chủ thể phải có, đáp ứng hoặc gắn với một khái niệm
+  hoặc điều kiện pháp lý.
+  Không dùng REQUIRES cho điều kiện của LegalAction.
+  Các điều kiện hành vi thuộc runtime reasoning và không được persist
+  trong Phase 1.
+
+- REFERS_TO:
+  Article/Clause/Point -> Document/Part/Chapter/Section/Subsection/Article/Clause/Point
+  khác được viện dẫn.
+
+- AMENDS / REPLACES / REPEALS:
+  Quan hệ chủ động từ văn bản hoặc đơn vị mới sang văn bản hoặc đơn vị
+  bị tác động.
+
+- GUIDES:
+  Quan hệ từ văn bản cấp cao hơn sang văn bản cấp thấp hơn,
+  theo whitelist ontology.
+
+QUY TẮC ENDPOINT:
+
+- Với Article/Clause/Point thuộc văn bản hiện tại, chỉ sử dụng canonical ID
+  có trong structural_context. Không tự tạo structural ID mới.
+
+- Với LegalSubject, LegalConcept và LegalAction, chỉ sử dụng đúng ID
+  đã có trong entities_json. Không tạo semantic entity mới trong bước
+  relation extraction.
+
+- Với Document bên ngoài, chỉ sử dụng đúng raw Document ID đã được trích xuất
+  trong entities_json. Không tự tạo canonical Document ID; document
+  registry/resolver sẽ chuẩn hóa endpoint sau extraction.
+
+- Không trả về CONTAINS.
+
+QUY TẮC REFERS_TO:
+
+- Không trích xuất lại các dẫn chiếu cấu trúc tương đối có thể được
+  structural resolver xác định bằng quy tắc, ví dụ:
+  "khoản này", "Điều này", "các điểm a và b khoản này".
+- Chỉ đề xuất REFERS_TO khi dẫn chiếu cần xử lý bên ngoài hoặc không thể
+  giải quyết hoàn toàn bằng structural resolver.
+
+Với mỗi relation:
+- evidence phải là câu hoặc đoạn nguyên văn làm căn cứ;
+- confidence nằm trong khoảng 0.0-1.0.
+
+Chỉ trả về quan hệ có evidence rõ ràng trong văn bản.
+Không suy diễn."""

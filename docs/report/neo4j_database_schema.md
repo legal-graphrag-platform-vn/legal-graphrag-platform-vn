@@ -102,20 +102,20 @@ parent. Cạnh flattened cũ chỉ được xóa sau khi chain thay thế đã t
 
 ### Thuộc tính node
 
-| Label | Required bởi canonical validator | Optional hoặc được payload hiện tại ghi thêm |
-|---|---|---|
-| `Document` | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `title`, `effective_to`, `issued_by`, `issued_date`, `source_url`, `document_uri`, `jurisdiction`, `gazette_number` |
-| `Issuer` | `id`, `name`, `branch` | — |
-| `Part` | `id`, `number`, `title` | — |
-| `Chapter` | `id`, `number`, `title` | — |
-| `Section` | `id`, `number`, `title` | — |
-| `Subsection` | `id`, `number`, `title` | — |
-| `Article` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `title`, `effective_to`, `embedding` |
-| `Clause` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `effective_to`, `embedding` |
-| `Point` | `id`, `label`, `content_raw` | — |
-| `LegalConcept` | `id`, `name` | `aliases`, `description` |
-| `LegalSubject` | `id`, `name` | `aliases`, `description` |
-| `LegalAction` | `id`, `name` | `aliases`, `description` |
+| Label          | Required bởi canonical validator                                                         | Optional hoặc được payload hiện tại ghi thêm                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `Document`     | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `title`, `effective_to`, `issued_by`, `issued_date`, `source_url`, `document_uri`, `jurisdiction`, `gazette_number` |
+| `Issuer`       | `id`, `name`, `branch`                                                                   | —                                                                                                                   |
+| `Part`         | `id`, `number`, `title`                                                                  | —                                                                                                                   |
+| `Chapter`      | `id`, `number`, `title`                                                                  | —                                                                                                                   |
+| `Section`      | `id`, `number`, `title`                                                                  | —                                                                                                                   |
+| `Subsection`   | `id`, `number`, `title`                                                                  | —                                                                                                                   |
+| `Article`      | `id`, `number`, `content_raw`, `effective_from`, `legal_status`                          | `title`, `effective_to`, `embedding`                                                                                |
+| `Clause`       | `id`, `number`, `content_raw`, `effective_from`, `legal_status`                          | `effective_to`, `embedding`                                                                                         |
+| `Point`        | `id`, `label`, `content_raw`                                                             | —                                                                                                                   |
+| `LegalConcept` | `id`, `name`                                                                             | `aliases`, `description`                                                                                            |
+| `LegalSubject` | `id`, `name`                                                                             | `aliases`, `description`                                                                                            |
+| `LegalAction`  | `id`, `name`                                                                             | `aliases`, `description`                                                                                            |
 
 ### Ý nghĩa các thuộc tính node
 
@@ -125,27 +125,27 @@ Trong JSON payload, `type` là discriminator để chọn Neo4j label. Ví dụ
 
 #### Identity và cấu trúc
 
-| Property | Kiểu dữ liệu | Áp dụng cho | Ý nghĩa | Ví dụ |
-|---|---|---|---|---|
-| `id` | `string` | Mọi node | Canonical ID và `MERGE` key; unique theo từng label bằng Neo4j constraint | `ldn_2020_art46_cl1_pa` |
-| `number` | `string` | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause` | Số hiệu pháp lý hiển thị; luôn giữ dạng chuỗi để hỗ trợ `1a`, số La Mã và số hiệu văn bản | `59/2020/QH14`, `II`, `III`, `1a` |
-| `label` | `string` | `Point` | Ký hiệu Điểm theo văn bản; `d` và `đ` là hai label khác nhau | `a`, `đ` |
-| `title` | `string` | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article` | Tiêu đề pháp lý/hiển thị. Bắt buộc với bốn grouping node; optional với `Article` | `THỂ THỨC VĂN BẢN` |
-| `content_raw` | `string` | `Article`, `Clause`, `Point` | Nội dung canonical sau sanitize; là evidence gốc cho retrieval/citation | `Thành viên công ty có các quyền sau đây...` |
-| `name` | `string` | `Issuer`, ba semantic labels | Tên hiển thị đã normalize về một entity/concept/action | `Vốn điều lệ` |
-| `aliases` | `list[string]` | Ba semantic labels | Các tên đồng nghĩa dùng cho entity normalization | `["vốn đăng ký", "vốn góp"]` |
-| `description` | `string` | Ba semantic labels | Mô tả ngắn được lưu khi extraction có bằng chứng phù hợp | `Tổng giá trị tài sản do thành viên góp hoặc cam kết góp` |
+| Property      | Kiểu dữ liệu   | Áp dụng cho                                                                 | Ý nghĩa                                                                                   | Ví dụ                                                     |
+| ------------- | -------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `id`          | `string`       | Mọi node                                                                    | Canonical ID và `MERGE` key; unique theo từng label bằng Neo4j constraint                 | `ldn_2020_art46_cl1_pa`                                   |
+| `number`      | `string`       | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause` | Số hiệu pháp lý hiển thị; luôn giữ dạng chuỗi để hỗ trợ `1a`, số La Mã và số hiệu văn bản | `59/2020/QH14`, `II`, `III`, `1a`                         |
+| `label`       | `string`       | `Point`                                                                     | Ký hiệu Điểm theo văn bản; `d` và `đ` là hai label khác nhau                              | `a`, `đ`                                                  |
+| `title`       | `string`       | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`           | Tiêu đề pháp lý/hiển thị. Bắt buộc với bốn grouping node; optional với `Article`          | `THỂ THỨC VĂN BẢN`                                        |
+| `content_raw` | `string`       | `Article`, `Clause`, `Point`                                                | Nội dung canonical sau sanitize; là evidence gốc cho retrieval/citation                   | `Thành viên công ty có các quyền sau đây...`              |
+| `name`        | `string`       | `Issuer`, ba semantic labels                                                | Tên hiển thị đã normalize về một entity/concept/action                                    | `Vốn điều lệ`                                             |
+| `aliases`     | `list[string]` | Ba semantic labels                                                          | Các tên đồng nghĩa dùng cho entity normalization                                          | `["vốn đăng ký", "vốn góp"]`                              |
+| `description` | `string`       | Ba semantic labels                                                          | Mô tả ngắn được lưu khi extraction có bằng chứng phù hợp                                  | `Tổng giá trị tài sản do thành viên góp hoặc cam kết góp` |
 
 #### Phân loại và nguồn ban hành
 
-| Property | Kiểu dữ liệu | Áp dụng cho | Ý nghĩa | Ví dụ |
-|---|---|---|---|---|
-| `doc_type` | enum string | `Document` | Loại văn bản canonical | `Law`, `Decree`, `Circular` |
-| `normative` | `boolean` | `Document` | Văn bản có thuộc corpus văn bản quy phạm hay không | `true` |
-| `issuer_name` | `string` | `Document` | Tên cơ quan ban hành dùng để dựng `Issuer` | `Quốc hội` |
-| `issued_by` | `string` | `Document` | Metadata tên cơ quan từ parser/source; hiện payload vẫn giữ cùng document | `Quốc hội` |
-| `issued_date` | ISO date | `Document` | Ngày ban hành | `2020-06-17` |
-| `branch` | enum string | `Issuer` | Nhánh cơ quan: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER` | `LEGISLATIVE` |
+| Property      | Kiểu dữ liệu | Áp dụng cho | Ý nghĩa                                                                   | Ví dụ                       |
+| ------------- | ------------ | ----------- | ------------------------------------------------------------------------- | --------------------------- |
+| `doc_type`    | enum string  | `Document`  | Loại văn bản canonical                                                    | `Law`, `Decree`, `Circular` |
+| `normative`   | `boolean`    | `Document`  | Văn bản có thuộc corpus văn bản quy phạm hay không                        | `true`                      |
+| `issuer_name` | `string`     | `Document`  | Tên cơ quan ban hành dùng để dựng `Issuer`                                | `Quốc hội`                  |
+| `issued_by`   | `string`     | `Document`  | Metadata tên cơ quan từ parser/source; hiện payload vẫn giữ cùng document | `Quốc hội`                  |
+| `issued_date` | ISO date     | `Document`  | Ngày ban hành                                                             | `2020-06-17`                |
+| `branch`      | enum string  | `Issuer`    | Nhánh cơ quan: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER`            | `LEGISLATIVE`               |
 
 `Document.doc_type` chấp nhận:
 
@@ -156,12 +156,12 @@ Decision, Circular, JointCircular
 
 #### Hiệu lực và embedding
 
-| Property | Kiểu dữ liệu | Áp dụng cho | Ý nghĩa | Ví dụ |
-|---|---|---|---|---|
-| `legal_status` | enum string | `Document`, `Article`, `Clause` | Trạng thái pháp lý của node | `ACTIVE`, `AMENDED`, `REPEALED` |
-| `effective_from` | ISO date | `Document`, `Article`, `Clause` | Mốc bắt đầu hiệu lực, inclusive | `2021-01-01` |
-| `effective_to` | ISO date, nullable | `Document`, `Article`, `Clause` | Mốc kết thúc hiệu lực, exclusive trong temporal filter; field thường bị omit khi chưa có ngày kết thúc | `2025-07-01` |
-| `embedding` | `list[float]`, nullable | `Article`, `Clause` | Vector BGE-M3, đúng 1024 chiều; được ghi ở bước embedding sau structural write | `[0.012, -0.031, ...]` |
+| Property         | Kiểu dữ liệu            | Áp dụng cho                     | Ý nghĩa                                                                                                | Ví dụ                           |
+| ---------------- | ----------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| `legal_status`   | enum string             | `Document`, `Article`, `Clause` | Trạng thái pháp lý của node                                                                            | `ACTIVE`, `AMENDED`, `REPEALED` |
+| `effective_from` | ISO date                | `Document`, `Article`, `Clause` | Mốc bắt đầu hiệu lực, inclusive                                                                        | `2021-01-01`                    |
+| `effective_to`   | ISO date, nullable      | `Document`, `Article`, `Clause` | Mốc kết thúc hiệu lực, exclusive trong temporal filter; field thường bị omit khi chưa có ngày kết thúc | `2025-07-01`                    |
+| `embedding`      | `list[float]`, nullable | `Article`, `Clause`             | Vector BGE-M3, đúng 1024 chiều; được ghi ở bước embedding sau structural write                         | `[0.012, -0.031, ...]`          |
 
 Enum trạng thái không giống nhau giữa Document và content unit:
 
@@ -321,24 +321,24 @@ Mũi tên luôn giữ hướng canonical `source -[:RELATION]-> target`:
 
 ### Ma trận quan hệ chính xác
 
-| Relation | Source hợp lệ | Target hợp lệ | Required ontology properties |
-|---|---|---|---|
-| `ISSUED_BY` | `Document` | `Issuer` | — |
-| `CONTAINS` | `Document` | `Part`, `Chapter`, `Article` | — |
-| `CONTAINS` | `Part` | `Chapter` | — |
-| `CONTAINS` | `Chapter` | `Section`, `Article` | — |
-| `CONTAINS` | `Section` | `Subsection`, `Article` | — |
-| `CONTAINS` | `Subsection` | `Article` | — |
-| `CONTAINS` | `Article` | `Clause` | — |
-| `CONTAINS` | `Clause` | `Point` | — |
-| `AMENDS` | `Document`, `Article`, `Clause` | `Document`, `Article`, `Clause` | `effective_from` |
-| `REPEALS` | `Document` | `Document`, `Article`, `Clause` | `effective_from` |
-| `REPLACES` | `Document` | `Document` | `effective_from` |
-| `GUIDES` | `Document` | `Document` | Cặp `doc_type` phải thuộc whitelist |
-| `REFERS_TO` | `Article`, `Clause`, `Point` | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | Citation/bundle provenance và provenance theo extraction method |
-| `DEFINES` | `Article`, `Clause` | `LegalConcept` | `confidence`, `llm_model`, `created_at` |
-| `REGULATES` | `Article`, `Clause` | `LegalSubject`, `LegalAction` | `confidence`, `llm_model`, `created_at` |
-| `REQUIRES` | `LegalSubject` | `LegalConcept` | `confidence`, `llm_model`, `created_at` |
+| Relation    | Source hợp lệ                   | Target hợp lệ                                                                        | Required ontology properties                                    |
+| ----------- | ------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| `ISSUED_BY` | `Document`                      | `Issuer`                                                                             | —                                                               |
+| `CONTAINS`  | `Document`                      | `Part`, `Chapter`, `Article`                                                         | —                                                               |
+| `CONTAINS`  | `Part`                          | `Chapter`                                                                            | —                                                               |
+| `CONTAINS`  | `Chapter`                       | `Section`, `Article`                                                                 | —                                                               |
+| `CONTAINS`  | `Section`                       | `Subsection`, `Article`                                                              | —                                                               |
+| `CONTAINS`  | `Subsection`                    | `Article`                                                                            | —                                                               |
+| `CONTAINS`  | `Article`                       | `Clause`                                                                             | —                                                               |
+| `CONTAINS`  | `Clause`                        | `Point`                                                                              | —                                                               |
+| `AMENDS`    | `Document`, `Article`, `Clause` | `Document`, `Article`, `Clause`                                                      | `effective_from`                                                |
+| `REPEALS`   | `Document`                      | `Document`, `Article`, `Clause`                                                      | `effective_from`                                                |
+| `REPLACES`  | `Document`                      | `Document`                                                                           | `effective_from`                                                |
+| `GUIDES`    | `Document`                      | `Document`                                                                           | Cặp `doc_type` phải thuộc whitelist                             |
+| `REFERS_TO` | `Article`, `Clause`, `Point`    | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | Citation/bundle provenance và provenance theo extraction method |
+| `DEFINES`   | `Article`, `Clause`             | `LegalConcept`                                                                       | `confidence`, `llm_model`, `created_at`                         |
+| `REGULATES` | `Article`, `Clause`             | `LegalSubject`, `LegalAction`                                                        | `confidence`, `llm_model`, `created_at`                         |
+| `REQUIRES`  | `LegalSubject`                  | `LegalConcept`                                                                       | `confidence`, `llm_model`, `created_at`                         |
 
 `AMENDS` thực sự cho phép đủ 9 tổ hợp giữa
 `Document|Article|Clause -> Document|Article|Clause`. Nó không chỉ là quan hệ
@@ -369,11 +369,11 @@ reference_target_count
 
 Method-specific properties:
 
-| Method | Required thêm |
-|---|---|
-| `RULE` | `resolver_name`, `resolver_version`, `source_unit_id`, `source_char_start`, `source_char_end` |
-| `ENTITY_LINKING` | `linker_name`, `linker_version`, `source_unit_id`, `source_char_start`, `source_char_end` |
-| `LLM` | `confidence`, `llm_model`, `checkpoint_id` |
+| Method           | Required thêm                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| `RULE`           | `resolver_name`, `resolver_version`, `source_unit_id`, `source_char_start`, `source_char_end` |
+| `ENTITY_LINKING` | `linker_name`, `linker_version`, `source_unit_id`, `source_char_start`, `source_char_end`     |
+| `LLM`            | `confidence`, `llm_model`, `checkpoint_id`                                                    |
 
 `relation_id` là identity deterministic mà Neo4j writer yêu cầu cho **mọi**
 relation được ghi. Nó được index nhưng Neo4j Community không enforce uniqueness;
@@ -522,17 +522,17 @@ phải một tầng node trong graph. External writer:
 
 ## 5. Độ sâu hierarchy và ownership
 
-| Canonical path | Số cạnh `CONTAINS` từ Document |
-|---|---:|
-| `Document -> Article` | 1 |
-| `Document -> Chapter -> Article` | 2 |
-| `Document -> Chapter -> Section -> Article` | 3 |
-| `Document -> Chapter -> Section -> Subsection -> Article` | 4 |
-| `Document -> Part -> Chapter -> Article` | 3 |
-| `Document -> Part -> Chapter -> Section -> Article` | 4 |
-| `Document -> Part -> Chapter -> Section -> Subsection -> Article` | 5 |
-| Một trong các path Article ở trên `-> Clause` | tối đa 6 |
-| Một trong các path Clause ở trên `-> Point` | tối đa 7 |
+| Canonical path                                                    | Số cạnh `CONTAINS` từ Document |
+| ----------------------------------------------------------------- | -----------------------------: |
+| `Document -> Article`                                             |                              1 |
+| `Document -> Chapter -> Article`                                  |                              2 |
+| `Document -> Chapter -> Section -> Article`                       |                              3 |
+| `Document -> Chapter -> Section -> Subsection -> Article`         |                              4 |
+| `Document -> Part -> Chapter -> Article`                          |                              3 |
+| `Document -> Part -> Chapter -> Section -> Article`               |                              4 |
+| `Document -> Part -> Chapter -> Section -> Subsection -> Article` |                              5 |
+| Một trong các path Article ở trên `-> Clause`                     |                       tối đa 6 |
+| Một trong các path Clause ở trên `-> Point`                       |                       tối đa 7 |
 
 Named bounds dùng chung trong runtime:
 
@@ -550,12 +550,12 @@ mọi path dài tối đa 7 là hierarchy hợp lệ.
 
 Bootstrap hiện tạo:
 
-| Category | Số lượng | Chi tiết |
-|---|---:|---|
-| Node uniqueness constraints | 12 | `id` unique cho `Document`, `Issuer`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction` |
-| Range/property indexes | 28 | 12 lookup, 3 node-temporal, 3 relationship-temporal, 10 `relation_id` |
-| Full-text indexes | 2 | `Article|Clause(content_raw,title)` và `Point(content_raw)` |
-| Vector indexes | 2 | `article_embedding`, `clause_embedding`; cosine, 1024 chiều |
+| Category                    | Số lượng | Chi tiết                                                                                                                                                      |
+| --------------------------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Node uniqueness constraints |       12 | `id` unique cho `Document`, `Issuer`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction` |
+| Range/property indexes      |       28 | 12 lookup, 3 node-temporal, 3 relationship-temporal, 10 `relation_id`                                                                                         |
+| Full-text indexes           |        2 | `Article                                                                                                                                                      | Clause(content_raw,title)`và`Point(content_raw)` |
+| Vector indexes              |        2 | `article_embedding`, `clause_embedding`; cosine, 1024 chiều                                                                                                   |
 
 Relationship `relation_id` indexes hiện có cho:
 
