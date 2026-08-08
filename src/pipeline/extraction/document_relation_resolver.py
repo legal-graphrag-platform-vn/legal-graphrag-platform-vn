@@ -56,7 +56,7 @@ class UnresolvedDiagramRelation:
 
 
 def resolve_diagram_relations(
-    candidates: list[DiagramRelationCandidate],
+    candidates: tuple[DiagramRelationCandidate, ...] | list[DiagramRelationCandidate],
     current_document_id: str,
     registry: DocumentRegistry,
 ) -> tuple[list[ResolvedDiagramRelation], list[UnresolvedDiagramRelation]]:
