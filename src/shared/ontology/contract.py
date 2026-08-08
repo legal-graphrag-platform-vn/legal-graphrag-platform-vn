@@ -55,6 +55,7 @@ REFERENCE_EXTRACTION_METHODS: set[str] = {
     "RULE",
     "ENTITY_LINKING",
     "LLM",
+    "DIAGRAM",
 }
 
 GUIDES_WHITELIST: set[tuple[str, str]] = {
