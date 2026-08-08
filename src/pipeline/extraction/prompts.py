@@ -85,7 +85,8 @@ Chỉ sử dụng các loại quan hệ sau:
   trong Phase 1.
 
 - REFERS_TO:
-  Article/Clause/Point -> đơn vị pháp luật khác được viện dẫn.
+  Article/Clause/Point -> Document/Part/Chapter/Section/Subsection/Article/Clause/Point
+  khác được viện dẫn.
 
 - AMENDS / REPLACES / REPEALS:
   Quan hệ chủ động từ văn bản hoặc đơn vị mới sang văn bản hoặc đơn vị
@@ -97,11 +98,17 @@ Chỉ sử dụng các loại quan hệ sau:
 
 QUY TẮC ENDPOINT:
 
-- Chỉ sử dụng canonical structural ID có trong structural_context.
-- Không tự tạo Article/Clause/Point ID.
+- Với Article/Clause/Point thuộc văn bản hiện tại, chỉ sử dụng canonical ID
+  có trong structural_context. Không tự tạo structural ID mới.
+
 - Với LegalSubject, LegalConcept và LegalAction, chỉ sử dụng đúng ID
-  đã có trong entities_json.
-- Không tạo semantic entity mới trong bước relation extraction.
+  đã có trong entities_json. Không tạo semantic entity mới trong bước
+  relation extraction.
+
+- Với Document bên ngoài, chỉ sử dụng đúng raw Document ID đã được trích xuất
+  trong entities_json. Không tự tạo canonical Document ID; document
+  registry/resolver sẽ chuẩn hóa endpoint sau extraction.
+
 - Không trả về CONTAINS.
 
 QUY TẮC REFERS_TO:
