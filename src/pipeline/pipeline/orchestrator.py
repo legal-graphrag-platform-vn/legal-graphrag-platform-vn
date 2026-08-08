@@ -23,6 +23,11 @@ import re
 import unicodedata
 
 from src.pipeline.config import settings
+from src.pipeline.extraction.diagram_parser import parse_diagram
+from src.pipeline.extraction.document_relation_resolver import (
+    build_diagram_records,
+    resolve_diagram_relations,
+)
 from src.pipeline.extraction.llm_extractor import extract_article
 from src.pipeline.extraction.models import ExtractedEntity
 from src.pipeline.extraction.models import ExtractionResult
@@ -468,6 +473,7 @@ def run_pipeline(
     provider_calls_allowed: bool = True,
     article_numbers: set[str] | None = None,
     source_text: str | None = None,
+    diagram: dict | None = None,
 ) -> None:
     if not raw_doc_code:
         raise ValueError("raw_doc_code is required for pipeline output path")
@@ -645,6 +651,27 @@ def run_pipeline(
     )
     all_records.extend(rule_records)
     _mark_llm_relations_superseded_by_rules(all_records)
+
+    # Diagram relations — document-level, deterministic, chạy sau rule records.
+    if diagram:
+        document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
+        diagram_candidates = parse_diagram(diagram)
+        diagram_resolved, diagram_unresolved = resolve_diagram_relations(
+            diagram_candidates,
+            current_document_id=parsed.document.id,
+            registry=document_registry,
+        )
+        diagram_records = build_diagram_records(
+            diagram_resolved,
+            diagram_unresolved,
+            current_document_id=parsed.document.id,
+        )
+        logger.info(
+            "Diagram extraction: %d resolved, %d unresolved candidates",
+            len(diagram_resolved),
+            len(diagram_unresolved),
+        )
+        all_records.extend(diagram_records)
 
     for entity_id in semantic_type_conflicts:
         entity_index.pop(entity_id, None)
@@ -1114,7 +1141,7 @@ def _apply_decision_gate(record: dict) -> dict:
     extraction_method = (
         (record.get("relation") or {}).get("properties", {}).get("extraction_method")
     )
-    if extraction_method in {"RULE", "ENTITY_LINKING"}:
+    if extraction_method in {"RULE", "ENTITY_LINKING", "DIAGRAM"}:
         record["decision"] = "accepted"
         record["review_reason"] = None
         record["blocking"] = False
