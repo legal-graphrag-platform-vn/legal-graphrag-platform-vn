@@ -1300,3 +1300,109 @@ evaluation dataset nhưng không còn được dùng làm bằng chứng cho pla
 - V1 vẫn không bao gồm branching, join, target predicate, legal entailment và
   automatic constraint relaxation.
 
+---
+
+## ADR-27: Query Processing và phạm vi Multi-Hop Execution
+
+**Ngày**: 2026-08-08
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+`QueryProcessor` (five-field contract, chạy bằng Gemini, provider-swappable qua
+`build_text_generator`) thay resolver+rewriter deterministic ở Stage 1. Output:
+
+```text
+status                ready | needs_clarification
+standalone_query      câu hỏi đã self-contained (khi ready)
+plan_type             single | parallel | comparison | multi_hop
+subqueries[]          mỗi item: { id, query, intent, depends_on }
+clarification_question câu hỏi làm rõ (khi needs_clarification)
+```
+
+Sau khi sửa bug fan-out tuần tự (subqueries self-contained nay chạy đồng thời
+bằng `asyncio.gather`), vấn đề mở còn lại là: **`depends_on` có nghĩa gì ở
+runtime?** Câu test duy nhất quyết định phạm vi: *sau khi q1 chạy xong, request
+của q2 có thay đổi dựa trên output của q1 không?* Không → concurrent là đủ. Có →
+mới là data dependency thật.
+
+Từ "multi-hop" bị dùng lẫn cho bốn khái niệm khác nhau:
+
+| Khái niệm | Ý nghĩa | Output hop trước → input hop sau? |
+|---|---|---|
+| Graph multi-hop | 1 retrieval đi qua nhiều relationship trong Neo4j (REFERS_TO → CONTAINS) | Không bắt buộc — thuộc tầng GraphRAG |
+| Multi-query decomposition | Tách 1 câu hỏi thành nhiều subquery độc lập | Không |
+| Logical dependency | q2 "đi sau" q1 về reasoning nhưng vẫn self-contained | Không |
+| True multi-hop execution | q2 cần dữ liệu cụ thể sinh từ q1 (article_id, clause_id, unit_id, graph anchor) | **Có** |
+
+### Quyết định (MVP scope)
+
+1. Giữ **multi-query decomposition + graph multi-hop retrieval**; **chưa** làm
+   cross-subquery output binding.
+2. Mọi subquery phải **self-contained** theo generation/SFT contract, chạy
+   **concurrently** dưới giới hạn concurrency của application retrieval runner,
+   rồi `merge_contexts` trước khi generate.
+3. `depends_on` được **preserve + validate** như *logical/reasoning metadata*.
+   Nó **không điều khiển scheduling** trong MVP — bắt q2 chờ q1 khi q2 không nhận
+   dữ liệu từ q1 chỉ tăng latency mà không tăng độ chính xác.
+4. `plan_type=multi_hop` ở tầng Query Processing chỉ biểu diễn
+   decomposition/reasoning plan, **chưa** đồng nghĩa với true hop-to-hop
+   execution.
+5. `QueryProcessor` là adapter provider-swappable: bản hiện tại dùng Gemini;
+   Qwen/Ollama là dự phòng cho tương lai, không hardcode.
+
+### Vì sao chỉ có `depends_on` là chưa đủ cho true multi-hop
+
+`depends_on=["q1"]` mới nói "q2 phụ thuộc q1", nhưng runtime chưa biết: lấy dữ
+liệu gì từ q1 (document/article/clause/unit id, entity, graph path?), dùng như
+thế nào (hard filter, query hint, graph seed, temporal target, rewrite?), chọn
+candidate nào khi q1 trả nhiều, và xử lý ra sao khi q1 rỗng/ambiguous. Contract
+true multi-hop tương lai phải thêm **binding semantics** (ví dụ
+`bindings: [{ from: "q1", select: "article_ids", use_as: "anchor_unit_ids" }]`).
+
+### Điểm dừng đề xuất (ba mức)
+
+- **Mức 0 — MVP hiện tại (baseline, ĐÃ XONG):** concurrent self-contained
+  subqueries + merge; `depends_on` là metadata. Đúng và đủ về mặt kỹ thuật.
+- **Mức 1 — Narrow true multi-hop demo (điểm dừng khuyến nghị nếu còn thời
+  gian):** đúng **một** use case hai-hop, hard-code hình dạng — Hop 1 retrieval
+  nội dung → lấy grounded `article_ids/clause_ids` → bind cứng một luật duy nhất
+  (`article_ids → anchor_unit_ids`) → Hop 2 traverse `AMENDS/REPEALS/REPLACES`
+  theo `query_date`. Policy ca biên chốt cứng: nhiều kết quả → top-k grounded;
+  q1 rỗng/ambiguous → fail closed; temporal truyền y nguyên; depth ≤ 2, cấm hop
+  3. Thể hiện rõ giá trị Graph + Temporal mà scope kiểm soát được.
+- **Mức 2 — General `QueryPlanExecutor` (OUT OF SCOPE):** DAG tổng quát, typed
+  anchor mọi node type, binding DSL, branching, provenance, error propagation,
+  temporal policy cấu hình được. Ghi vào Future Work.
+
+### Kiến trúc tương lai (nếu nhóm quyết định làm true multi-hop)
+
+```text
+QueryProcessor → QueryPlan (subqueries + dependencies + bindings)
+   → QueryPlanExecutor:
+        1. Validate dependency DAG
+        2. Chạy root queries concurrently
+        3. Materialize RetrievalContext từng subquery
+        4. Extract typed anchors
+        5. Bind outputs vào dependent queries
+        6. Chạy next hops (giới hạn depth/branch/concurrency)
+        7. Merge evidence + provenance
+   → Answer Generator + Grounding
+```
+
+DTO output cho mỗi hop: `SubqueryExecutionResult { subquery_id,
+retrieval_context, document_ids, article_ids, clause_ids, unit_ids, graph_paths,
+temporal_context }`.
+
+### Hệ quả
+
+- Điểm cần thống nhất **không phải** "có field `depends_on` hay không", mà là
+  runtime **có dùng output của dependency để đổi input của subquery phụ thuộc
+  hay không**. Chưa có output binding → `depends_on` chỉ là logical metadata.
+- MVP không phát sinh contract mới; true multi-hop cần một ADR/DTO riêng
+  (`QueryPlan` + `bindings`) trước khi implement.
+- ADR-26 (exact-linear plan với `AnchorMention` + `TargetMention`) là hướng
+  tiếp cận cho Mức 1/2 khi làm true multi-hop, không áp dụng cho MVP fan-out.
+- 7 câu hỏi cần cả nhóm chốt trước khi lên Mức 1/2: xem
+  `Thao_luan_MultiHop_QueryProcessing_TemporalGraphRAG` (mục 12).
+

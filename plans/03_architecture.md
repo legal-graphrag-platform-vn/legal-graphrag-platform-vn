@@ -1,8 +1,8 @@
 # Kiến Trúc Hệ Thống — Legal GraphRAG
 
-> **Phiên bản**: 0.3
+> **Phiên bản**: 0.4
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.8.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.8.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
@@ -251,6 +251,44 @@ def process_extraction(llm_output):
 
 ---
 
+### 3b. Query Processor (Stage 1 — Query Understanding)
+
+**Input**: Câu hỏi hiện tại + lịch sử hội thoại
+**Output**: `QueryProcessingResult` (five-field contract)
+
+Query Processor thay resolver+rewriter deterministic ở Stage 1. Nó là adapter
+**provider-swappable** (bản hiện tại dùng Gemini qua `build_text_generator`;
+Qwen/Ollama là dự phòng, không hardcode). Chi tiết quyết định: **ADR-27**.
+
+```text
+status                 ready | needs_clarification
+standalone_query       câu hỏi đã self-contained (khi ready)
+plan_type              single | parallel | comparison | multi_hop
+subqueries[]           mỗi item: { id, query, intent, depends_on }
+clarification_question câu hỏi làm rõ (khi needs_clarification)
+```
+
+**Fan-out (Stage 2):** mỗi subquery self-contained → một `RetrievalRequest`
+riêng, route theo `intent` của chính nó, chạy **đồng thời** (`asyncio.gather`)
+dưới giới hạn concurrency của retrieval runner → `merge_contexts` dedupe
+evidence/units trước khi generate.
+
+```text
+QueryProcessor
+   ├─ needs_clarification → hỏi lại (KHÔNG retrieval)
+   └─ ready
+        self-contained q1 ─┐
+        self-contained q2 ─┼→ concurrent RetrievalRuntime → merge_contexts → Generator
+        self-contained q3 ─┘
+```
+
+**Ranh giới multi-hop (ADR-27):** `depends_on` là *logical metadata*, **không**
+điều khiển scheduling; `plan_type=multi_hop` chỉ biểu diễn decomposition plan,
+chưa phải true hop-to-hop execution (output q1 → input q2). True multi-hop
+(`QueryPlanExecutor` + binding semantics) nằm trong Future Work.
+
+---
+
 ### 4. Hybrid Retriever
 
 **Input**: User query + temporal context  
@@ -389,10 +427,13 @@ TEMPORAL_NOTE: [nếu câu trả lời phụ thuộc thời điểm]
 ```
 User: "Điều kiện vốn để thành lập công ty TNHH theo quy định năm 2022?"
 
-[Stage 1] Query Understanding (If enabled)
-    (Optional) Intent: "factual" (điều kiện)
+[Stage 1] Query Understanding — Query Processor (nếu enabled)
+    status: ready
+    standalone_query: "Điều kiện vốn để thành lập công ty TNHH năm 2022"
+    plan_type: single
+    subqueries: [{ id: q1, query: <standalone>, intent: factual, depends_on: [] }]
     Temporal: {year: 2022, from: "2022-01-01", to: "2022-12-31"}
-    (Optional) Entities: ["công ty TNHH", "vốn điều lệ"]
+    (needs_clarification → hỏi lại, bỏ qua Stage 2–6)
 
 [Stage 2] Evidence Retrieval
     Query embedding → Top-5 articles:
