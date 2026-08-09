@@ -1406,3 +1406,53 @@ temporal_context }`.
 - 7 câu hỏi cần cả nhóm chốt trước khi lên Mức 1/2: xem
   `Thao_luan_MultiHop_QueryProcessing_TemporalGraphRAG` (mục 12).
 
+---
+
+## ADR-28: Chapter cho phép direct preamble Article trước Section
+
+**Ngày**: 2026-08-08
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Một số văn bản có Điều mở đầu trực tiếp dưới Chương rồi mới chia thành các Mục.
+Ví dụ Chương XXIII Bộ luật Hình sự 100/2015/QH13 chứa Điều 352 trực tiếp, sau đó
+Mục 1 bắt đầu từ Điều 353 và Mục 2 bắt đầu từ Điều 360. Guard theo ADR-25 coi
+mọi `Chapter -> Article` kết hợp `Chapter -> Section` là mixed mode không hợp lệ,
+dù payload builder đã biểu diễn đúng hai loại cạnh cha-con này.
+
+### Quyết định
+
+Cho phép một Chapter có đồng thời direct Article và Section với điều kiện mọi
+direct Article có canonical legal number đứng trước mọi Article nằm dưới các
+Section của Chapter đó. Đây là preamble mode có điều kiện, không phải bỏ mixed
+mode validation:
+
+```text
+max(direct Article numbers) < min(Section descendant Article numbers)
+```
+
+Parser model và whole-payload consistency validator phải cùng enforce rule bằng
+natural legal-number ordering. Document vẫn không được mix Part, Chapter và
+direct Article; Section vẫn không được mix Subsection và direct Article.
+
+### Các phương án đã cân nhắc
+
+**Bỏ hoàn toàn Chapter mixed-mode validation**
+
+- Không chọn vì sẽ chấp nhận direct Article chen sau hoặc giữa các Section,
+  làm mất invariant cấu trúc mà parser có thể kiểm tra chắc chắn.
+
+**Giữ single-mode tuyệt đối theo ADR-25**
+
+- Không chọn vì reject cấu trúc pháp lý có thật và ngăn parse corpus BLHS 2015.
+
+### Hệ quả
+
+- `Chapter -> Article` và `Chapter -> Section` có thể cùng tồn tại cho preamble.
+- Payload builder không đổi: Article không có `section` vẫn gắn trực tiếp vào
+  Chapter; Article có `section` vẫn gắn vào Section.
+- Thiếu Article number hoặc direct Article không đứng trước Section Articles là
+  validation failure trước write.
+- Quyết định này thu hẹp và supersede phần cấm Chapter mixed mode trong ADR-25;
+  các boundary Document và Section của ADR-25 vẫn giữ nguyên.

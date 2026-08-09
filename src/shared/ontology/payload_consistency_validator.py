@@ -9,6 +9,8 @@ from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Iterable, Mapping
 
+from src.shared.ontology.hierarchy import legal_number_sort_key
+
 
 STRUCTURAL_PAIRS = {
     ("Document", "Part"),
@@ -115,6 +117,7 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
         errors.append(f"Duplicate node id: {node_id}")
 
     node_types = {str(node.get("id")): str(node.get("type")) for node in nodes}
+    node_numbers = {str(node.get("id")): node.get("number") for node in nodes}
     seen_relation_identities: set[str] = set()
     duplicate_relation_identity_count = 0
     relation_count_by_type: Counter[str] = Counter()
@@ -122,6 +125,7 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
     adjacency: dict[str, set[str]] = defaultdict(set)
     reference_bundles: dict[str, list[Mapping]] = defaultdict(list)
     structural_parents: dict[str, list[str]] = defaultdict(list)
+    structural_children: dict[str, list[str]] = defaultdict(list)
     structural_child_types: dict[str, set[str]] = defaultdict(set)
 
     for relation in relations:
@@ -159,6 +163,7 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
                 errors.append(f"Invalid CONTAINS chain: {pair[0]} -> {pair[1]}")
             elif head_id in node_types and tail_id in node_types:
                 structural_parents[tail_id].append(head_id)
+                structural_children[head_id].append(tail_id)
                 if (
                     pair[0] in GROUPING_CHILD_MODES
                     and pair[1] in GROUPING_CHILD_MODES[pair[0]]
@@ -179,7 +184,9 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
 
     _validate_structural_hierarchy(
         node_types,
+        node_numbers,
         structural_parents,
+        structural_children,
         structural_child_types,
         errors,
     )
@@ -226,7 +233,9 @@ def validate_payload_consistency(payload: Mapping) -> PayloadConsistencyReport:
 
 def _validate_structural_hierarchy(
     node_types: Mapping[str, str],
+    node_numbers: Mapping[str, object],
     structural_parents: Mapping[str, list[str]],
+    structural_children: Mapping[str, list[str]],
     structural_child_types: Mapping[str, set[str]],
     errors: list[str],
 ) -> None:
@@ -243,6 +252,16 @@ def _validate_structural_hierarchy(
     for parent_id, child_types in structural_child_types.items():
         parent_type = node_types[parent_id]
         if len(child_types) > 1:
+            if parent_type == "Chapter" and child_types == {"Article", "Section"}:
+                ordering_error = _chapter_preamble_ordering_error(
+                    chapter_id=parent_id,
+                    node_types=node_types,
+                    node_numbers=node_numbers,
+                    structural_children=structural_children,
+                )
+                if ordering_error is not None:
+                    errors.append(ordering_error)
+                continue
             errors.append(
                 f"{parent_type} {parent_id} mixes structural child modes: "
                 f"{', '.join(sorted(child_types))}"
@@ -262,6 +281,73 @@ def _validate_structural_hierarchy(
             if len(parents) != 1:
                 break
             current = parents[0]
+
+
+def _chapter_preamble_ordering_error(
+    *,
+    chapter_id: str,
+    node_types: Mapping[str, str],
+    node_numbers: Mapping[str, object],
+    structural_children: Mapping[str, list[str]],
+) -> str | None:
+    direct_article_ids = [
+        child_id
+        for child_id in structural_children.get(chapter_id, [])
+        if node_types.get(child_id) == "Article"
+    ]
+    section_article_ids: list[str] = []
+    for child_id in structural_children.get(chapter_id, []):
+        if node_types.get(child_id) == "Section":
+            section_article_ids.extend(
+                _descendant_article_ids(
+                    child_id,
+                    node_types=node_types,
+                    structural_children=structural_children,
+                )
+            )
+
+    direct_numbers = [node_numbers.get(node_id) for node_id in direct_article_ids]
+    section_numbers = [node_numbers.get(node_id) for node_id in section_article_ids]
+    if (
+        not direct_numbers
+        or not section_numbers
+        or any(number in (None, "") for number in direct_numbers + section_numbers)
+    ):
+        return f"Chapter {chapter_id} cannot validate mixed child ordering"
+
+    latest_direct = max(
+        (str(number) for number in direct_numbers), key=legal_number_sort_key
+    )
+    first_section = min(
+        (str(number) for number in section_numbers), key=legal_number_sort_key
+    )
+    if legal_number_sort_key(latest_direct) >= legal_number_sort_key(first_section):
+        return (
+            f"Chapter {chapter_id} direct Article {latest_direct} must precede "
+            f"first Section Article {first_section}"
+        )
+    return None
+
+
+def _descendant_article_ids(
+    root_id: str,
+    *,
+    node_types: Mapping[str, str],
+    structural_children: Mapping[str, list[str]],
+) -> list[str]:
+    article_ids: list[str] = []
+    queue = deque(structural_children.get(root_id, []))
+    visited: set[str] = set()
+    while queue:
+        node_id = queue.popleft()
+        if node_id in visited:
+            continue
+        visited.add(node_id)
+        if node_types.get(node_id) == "Article":
+            article_ids.append(node_id)
+            continue
+        queue.extend(structural_children.get(node_id, []))
+    return article_ids
 
 
 def validate_payload_consistency_or_raise(payload: Mapping) -> PayloadConsistencyReport:

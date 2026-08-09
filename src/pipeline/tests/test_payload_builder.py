@@ -169,6 +169,28 @@ def test_old_payload_without_sections_keeps_direct_chapter_article_edge() -> Non
     assert ("ldn_2020_ch2", "ldn_2020_art17") in contains
 
 
+def test_build_graph_payload_accepts_chapter_preamble_before_sections() -> None:
+    parsed = parse_text(
+        "Chương XXIII\nCÁC TỘI PHẠM VỀ CHỨC VỤ\n"
+        "Điều 352. Khái niệm tội phạm về chức vụ\n"
+        "Mục 1. Các tội phạm tham nhũng\n"
+        "Điều 353. Tội tham ô tài sản",
+        _parsed().document,
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="BLHS_2015")
+    validate_payload_consistency_or_raise(payload)
+    contains = {
+        (relation["head_id"], relation["tail_id"])
+        for relation in payload["relations"]
+        if relation["type"] == "CONTAINS"
+    }
+
+    assert ("ldn_2020_ch23", "ldn_2020_art352") in contains
+    assert ("ldn_2020_ch23", "ldn_2020_ch23_sec1") in contains
+    assert ("ldn_2020_ch23_sec1", "ldn_2020_art353") in contains
+
+
 def test_build_graph_payload_persists_part_and_subsection_chain() -> None:
     parsed = parse_text(
         "Phần I. Phần một\nChương II\nCHƯƠNG HAI\nMục 1. Mục một\n"

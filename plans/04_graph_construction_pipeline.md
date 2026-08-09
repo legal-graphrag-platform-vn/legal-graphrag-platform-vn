@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Liên quan đến**: RC2
-> **Depends on**: [legal_ontology.md v1.8.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.8.1](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
@@ -127,7 +127,7 @@ stateDiagram-v2
   ]
 }
 ```
-> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Parser phải normalize `raw_doc_code`/metadata thành `document.id = graph_id`, `type` thành `doc_type`, `status` thành `legal_status`, và bảo đảm `normative` tồn tại trước mọi bước downstream. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn_2020_art17_cl1`).
+> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Parser phải normalize `raw_doc_code`/metadata thành `document.id = graph_id`, `type` thành `doc_type`, `status` thành `legal_status`, và bảo đảm `normative` tồn tại trước mọi bước downstream. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn_2020_art17_cl1`). Chapter được có direct Article trước Mục đầu tiên như phần mở đầu; mọi direct Article phải có số đứng trước mọi Article thuộc các Mục trong cùng Chapter.
 
 ### 3. Extractor Output & Contract
 **Schema:** JSON danh sách entities và relations.
@@ -144,7 +144,7 @@ stateDiagram-v2
 > **Contract**: LLM chỉ được phép trả về JSON. Các key `entities` và `relations` luôn tồn tại (dù có thể rỗng rỗng). `type` của entity phải nằm trong danh sách Enum (Entity, Concept, Action).
 
 ### 4. Validator & Writer Contract
-> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.8.0. Nếu có lỗi, relation bị drop hoặc raise error.
+> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.8.1. Nếu có lỗi, relation bị drop hoặc raise error.
 > **Writer Guarantee (Neo4j)**: Quá trình MERGE mang tính Idempotent. Việc chạy lại cùng một file JSON 10 lần sẽ không sinh ra duplicate node hay edge nào trong đồ thị.
 
 ### 5. Embedding Contract
@@ -513,7 +513,7 @@ ONTOLOGY_LABEL_MAP = {
 ## Step 4: Ontology Validation
 
 > [!IMPORTANT]
-> Source of truth: `legal_ontology.md` v1.8.0.
+> Source of truth: `legal_ontology.md` v1.8.1.
 > ADR-15: `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j. Numeric precedence/level rules are legacy and must not be used in the current validator.
 > ADR-17: Tất cả relation names dùng active voice.
 

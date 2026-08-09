@@ -1,8 +1,8 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.8.0
-> **Frozen date**: 2026-08-01
+> **Version**: 1.8.1
+> **Frozen date**: 2026-08-08
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
 This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
@@ -177,14 +177,17 @@ These pairs produce seven canonical parent chains to `Article`: with or without
 Articles or `Subsection`. `Document -> Article` remains valid. Invalid shortcuts
 include `Document -> Section`, `Part -> Article`, and `Chapter -> Subsection`.
 Every structural descendant has exactly one direct canonical parent. Each
-Document, Chapter, and Section uses one child mode; alternatives are not mixed
-under the same concrete parent.
+`Document` and `Section` uses one child mode; alternatives are not mixed under
+the same concrete parent. A `Chapter` may mix direct `Article` children with
+`Section` children only for preamble Articles: every direct Article number must
+sort before every Article number contained by the Chapter's Sections. A direct
+Article at or after the first Section Article is invalid.
 
 `REFERS_TO.citation_type` must be one of `DIRECT`, `INDIRECT`, `RANGE`.
 
 `REFERS_TO` provenance is method-aware. Common required properties are `citation_text`, `citation_type`,
 `extraction_method`, `created_at`, `reference_bundle_id`, and `reference_target_count`. `extraction_method` is one of `RULE`,
-`ENTITY_LINKING`, or `LLM`; `HYBRID` is intentionally excluded from v1.8.0.
+`ENTITY_LINKING`, or `LLM`; `HYBRID` is intentionally excluded from v1.8.x.
 
 Method-specific requirements:
 
@@ -383,3 +386,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.6.0 | 2026-07-18 | Added resolver-first structural references, atomic bundles, and method-aware `REFERS_TO` provenance | ADR-22 |
 | 1.7.0 | 2026-07-31 | Added corpus-verified `Section` hierarchy, Chapter/Section reference targets, and guarded hierarchy migration | ADR-23 |
 | 1.8.0 | 2026-08-01 | Added canonical `Part` and `Subsection`, seven Article parent chains, registry v2, and verified reference/browser support | ADR-25 |
+| 1.8.1 | 2026-08-08 | Allowed direct preamble Articles before Section Articles within the same Chapter while retaining ordered mixed-mode validation | ADR-28 and BLHS 2015 Chapter XXIII |

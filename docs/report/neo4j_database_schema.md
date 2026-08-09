@@ -1,14 +1,14 @@
 # Lược đồ Neo4j hiện tại — Legal GraphRAG VN
 
 > **Phạm vi:** ontology và runtime contract đang có trong repository, phiên bản
-> `1.8.0`.
+> `1.8.1`.
 >
 > **Đã đối chiếu:** `plans/legal_ontology.md`,
 > `src/shared/ontology/contract.py`, `src/shared/ontology/validators.py`,
 > `src/pipeline/persistence/payload_builder.py`, các Neo4j writer/repository và
 > `infra/neo4j/init/01_schema_init.cypher`.
 >
-> **Ngày kiểm tra:** 01/08/2026.
+> **Ngày kiểm tra:** 08/08/2026.
 >
 > Đây là lược đồ **được code hiện tại chấp nhận và ghi**, không phải thống kê số
 > node/edge của một database live. Schema bootstrap không chứng minh dữ liệu đã
@@ -55,7 +55,7 @@ flowchart TB
         D -.->|CONTAINS — văn bản không có Chương| ART
         PART -->|CONTAINS| CH
         CH -->|CONTAINS| SEC
-        CH -.->|CONTAINS — Chương không có Mục| ART
+        CH -.->|CONTAINS — direct hoặc preamble trước Mục| ART
         SEC -->|CONTAINS| SUB
         SEC -.->|CONTAINS — Mục không có Tiểu mục| ART
         SUB -->|CONTAINS| ART
