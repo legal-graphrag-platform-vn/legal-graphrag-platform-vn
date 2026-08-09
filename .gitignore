@@ -22,6 +22,7 @@ infra/data/postgres/
 infra/data/logs/
 infra/data/loki/
 infra/data/grafana/
+infra/data/portainer/
 
 # Runtime data (generated, not committed)
 data/raw/
