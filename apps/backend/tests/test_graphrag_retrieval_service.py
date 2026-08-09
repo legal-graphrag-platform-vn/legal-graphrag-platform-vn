@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from api.models import QueryRequest
+from observability import bind_trace, clear_trace, get_turn_trace
 from services.graphrag_retrieval_service import (
     GraphRAGRetrievalService,
     RetrievalQueryService,
@@ -163,6 +164,36 @@ def test_multi_hop_plans_once_then_executes_with_plan() -> None:
         assert runtime.prepare_calls == 1
         assert runtime.executed_plans == [plan]
         assert context.metrics["planner_provider_calls"] == 1
+
+    asyncio.run(scenario())
+
+
+def test_multi_hop_planner_emits_bounded_trace_event() -> None:
+    async def scenario() -> None:
+        runtime = FakePlanningRuntime(IntentType.MULTI_HOP)
+        planner = FakePlanner(plan=_unlinked_plan())
+        runner = _runner()
+        service = GraphRAGRetrievalService(
+            runtime, runner, planner=planner, planning_enabled=True
+        )
+        bind_trace(turn_id="planner-trace")
+        try:
+            await service.retrieve_context(RetrievalRequest(query="multi hop secret"))
+            event = next(
+                item
+                for item in get_turn_trace()
+                if item["stage"] == "retrieval.planner"
+            )
+        finally:
+            clear_trace()
+            await runner.aclose()
+
+        assert event["status"] == "ok"
+        assert event["provider"] == "fake"
+        assert event["model"] == "fake-model"
+        assert event["plan_depth"] == 2
+        assert event["relations"] == ["REFERS_TO", "REFERS_TO"]
+        assert "steps" not in event
 
     asyncio.run(scenario())
 
