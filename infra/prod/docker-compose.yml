@@ -80,10 +80,10 @@ services:
     env_file:
       - env/.env.frontend
     ports:
-      - "${PORT:-3001}:${PORT:-3001}"
+      - "${PORT:?Lỗi: PORT chưa được cấu hình (ví dụ PORT=3001)}:${PORT:?Lỗi: PORT chưa được cấu hình}"
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-      PORT: ${PORT:-3001}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Lỗi: NEXT_PUBLIC_API_URL chưa được cấu hình}
+      PORT: ${PORT:?Lỗi: PORT chưa được cấu hình}
     depends_on:
       - backend
 
