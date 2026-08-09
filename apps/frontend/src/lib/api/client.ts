@@ -1,5 +1,12 @@
 // Base API client — xử lý fetch, error và base URL
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+export function getBaseUrl(): string {
+   if (typeof window === 'undefined') {
+      // Server-side execution (Node.js/SSR inside Docker)
+      return process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000'
+   }
+   // Client-side execution (inside Browser)
+   return process.env.NEXT_PUBLIC_API_URL || ''
+}
 
 export class ApiError extends Error {
    constructor(
@@ -12,11 +19,22 @@ export class ApiError extends Error {
    }
 }
 
+function resolveUrl(path: string): string {
+   const base = getBaseUrl()
+   if (!base) return path
+   const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base
+   const cleanPath = path.startsWith('/') ? path : `/${path}`
+   return `${cleanBase}${cleanPath}`
+}
+
 export async function apiGet<T>(
    path: string,
    params?: Record<string, string | undefined>,
 ): Promise<T> {
-   const url = new URL(`${BASE_URL}${path}`)
+   const rawUrl = resolveUrl(path)
+   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+   const url = rawUrl.startsWith('http') ? new URL(rawUrl) : new URL(rawUrl, origin)
+
    if (params) {
       Object.entries(params).forEach(([k, v]) => {
          if (v !== undefined && v !== null && v !== '') {
@@ -32,7 +50,8 @@ export async function apiGet<T>(
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-   const res = await fetch(`${BASE_URL}${path}`, {
+   const url = resolveUrl(path)
+   const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -53,7 +72,8 @@ export async function apiStream(
    body: unknown,
    signal?: AbortSignal,
 ): Promise<Response> {
-   return fetch(`${BASE_URL}${path}`, {
+   const url = resolveUrl(path)
+   return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
