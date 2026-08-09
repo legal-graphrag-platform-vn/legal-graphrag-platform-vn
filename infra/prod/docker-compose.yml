@@ -57,6 +57,7 @@ services:
       - "8000:8000"
     volumes:
       - ../data/logs:/var/log/chat
+      - ../data/huggingface:/root/.cache/huggingface
     depends_on:
       neo4j:
         condition: service_healthy

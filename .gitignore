@@ -23,6 +23,7 @@ infra/data/logs/
 infra/data/loki/
 infra/data/grafana/
 infra/data/portainer/
+infra/data/huggingface/
 
 # Runtime data (generated, not committed)
 data/raw/
