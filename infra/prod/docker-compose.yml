@@ -3,11 +3,12 @@ services:
     image: neo4j:5.26.28-community
     container_name: graphrag-neo4j-prod
     restart: unless-stopped
+    env_file:
+      - env/.env.compose
     ports:
-      - "${NEO4J_HTTP_PORT:-7474}:7474"
-      - "${NEO4J_BOLT_PORT:-7687}:7687"
+      - "7474:7474"
+      - "7687:7687"
     environment:
-      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_apoc_export_file_enabled: "true"
       NEO4J_apoc_import_file_enabled: "true"
@@ -33,16 +34,14 @@ services:
     image: postgres:16-alpine
     container_name: graphrag-postgres-prod
     restart: unless-stopped
+    env_file:
+      - env/.env.compose
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-graphrag}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: ${POSTGRES_DB:-graphrag_conversations}
+      - "5432:5432"
     volumes:
       - ../data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-graphrag} -d ${POSTGRES_DB:-graphrag_conversations}"]
+      test: ["CMD-SHELL", "pg_isready -U graphrag -d graphrag_conversations"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -55,7 +54,7 @@ services:
     env_file:
       - env/.env.backend
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "8000:8000"
     depends_on:
       neo4j:
         condition: service_healthy
@@ -69,7 +68,7 @@ services:
     env_file:
       - env/.env.frontend
     ports:
-      - "${PORT:?PORT is required (e.g. PORT=3001)}:${PORT:?PORT is required}"
+      - "3001:3001"
     depends_on:
       - backend
 
