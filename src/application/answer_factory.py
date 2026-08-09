@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,6 +13,7 @@ from src.generation.evidence_compaction import EvidenceCompactor
 from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import AnswerProviderDependencyError
 from src.generation.grounding import GroundingValidator
+from src.generation.ports import AnswerProviderPort
 from src.generation.service import AnswerGenerator
 from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
@@ -39,6 +42,9 @@ class AnswerApplicationSettings(BaseSettings):
 def create_answer_generator(
     config: GenerationConfig | None = None,
     settings: AnswerApplicationSettings | None = None,
+    *,
+    provider_decorator: Callable[[AnswerProviderPort], AnswerProviderPort]
+    | None = None,
 ) -> AnswerGenerator:
     runtime_config = config or GenerationConfig()
     application_settings = settings or AnswerApplicationSettings()
@@ -46,11 +52,13 @@ def create_answer_generator(
         raise AnswerProviderDependencyError(
             f"Unsupported answer provider: {application_settings.answer_provider}"
         )
-    provider = GeminiAnswerProvider(
+    provider: AnswerProviderPort = GeminiAnswerProvider(
         api_key=application_settings.gemini_api_key or "",
         model=application_settings.answer_model,
         config=runtime_config,
     )
+    if provider_decorator is not None:
+        provider = provider_decorator(provider)
     return AnswerGenerator(
         provider=provider,
         projector=ContextProjector(runtime_config),

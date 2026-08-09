@@ -58,6 +58,10 @@ def test_insufficient_evidence_does_not_call_provider() -> None:
         assert response.cannot_answer is True
         assert provider.calls == 0
         assert response.provider is None
+        assert context.metrics["generation_context"] == {
+            "sufficient": False,
+            "sufficiency_reason_code": response.insufficiency_reason,
+        }
 
     asyncio.run(scenario())
 
@@ -100,6 +104,11 @@ def test_supported_answer_uses_trusted_citation_metadata() -> None:
         assert response.citations[0].unit_id == "doc_art1"
         assert response.citations[0].deep_link == "/documents/doc/units/doc_art1"
         assert "Điều 1, Luật thử nghiệm" in response.answer_text
+        diagnostics = context.metrics["generation_context"]
+        assert diagnostics["sufficient"] is True
+        assert diagnostics["selected_unit_count"] == 1
+        assert diagnostics["omitted_evidence_count"] == 0
+        assert diagnostics["used_evidence_chars"] > 0
 
     asyncio.run(scenario())
 

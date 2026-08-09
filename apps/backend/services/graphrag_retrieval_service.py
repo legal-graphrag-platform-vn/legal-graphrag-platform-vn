@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from functools import partial
 
 from api.models import QueryRequest, RetrievalResponse
+from observability import log_event, redact
 from services.errors import (
     BackendPlanningOutputError,
     BackendPlanningTimeoutError,
@@ -76,22 +78,64 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         legitimate no-results or plan-failed outcome, and never leak provider payload.
         """
         assert self._planner is not None
+        started = time.perf_counter()
         try:
-            return await self._planner.plan(query)
+            plan = await self._planner.plan(query)
         except asyncio.CancelledError:
+            log_event(
+                "retrieval.planner",
+                "cancelled",
+                latency_ms=_elapsed_ms(started),
+                provider=self._planner.provider_name,
+                model=self._planner.model_name,
+                query=redact(query),
+            )
             raise
         except QueryPlannerTimeoutError as exc:
+            self._log_planner_failure(query, started, exc)
             raise BackendPlanningTimeoutError(
                 "Lập kế hoạch truy vấn vượt quá thời gian cho phép."
             ) from exc
         except QueryPlannerDependencyError as exc:
+            self._log_planner_failure(query, started, exc)
             raise BackendPlanningUnavailableError(
                 "Dịch vụ lập kế hoạch truy vấn hiện không khả dụng."
             ) from exc
         except QueryPlannerInvalidPlanError as exc:
+            self._log_planner_failure(query, started, exc)
             raise BackendPlanningOutputError(
                 "Bộ lập kế hoạch truy vấn trả về kế hoạch không hợp lệ."
             ) from exc
+        log_event(
+            "retrieval.planner",
+            "ok",
+            latency_ms=_elapsed_ms(started),
+            provider=self._planner.provider_name,
+            model=self._planner.model_name,
+            query=redact(query),
+            plan_depth=len(plan.steps),
+            relations=[step.relation for step in plan.steps],
+            directions=[step.direction for step in plan.steps],
+            next_labels=[step.next_label for step in plan.steps],
+        )
+        return plan
+
+    def _log_planner_failure(
+        self,
+        query: str,
+        started: float,
+        error: Exception,
+    ) -> None:
+        assert self._planner is not None
+        log_event(
+            "retrieval.planner",
+            "error",
+            latency_ms=_elapsed_ms(started),
+            provider=self._planner.provider_name,
+            model=self._planner.model_name,
+            query=redact(query),
+            error_type=type(error).__name__,
+        )
 
 
 class RetrievalQueryService:
@@ -114,3 +158,7 @@ class RetrievalQueryService:
             context.metrics.get("total_pipeline_latency_ms"),
         )
         return to_retrieval_response(context)
+
+
+def _elapsed_ms(started: float) -> int:
+    return int((time.perf_counter() - started) * 1000)

@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.error_handlers import register_error_handlers
 from api.routes import auth, chat, conversations, documents, query
 from container import build_container
+from observability import TraceConfig, configure_logging, configure_trace
 from settings import Settings
 
 
@@ -32,6 +33,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # 1.   Tạo settings một lần duy nhất — không tạo lại ở bất kỳ đâu khác
     settings = settings or Settings()
     settings.validate_runtime()
+
+    # 1b.  Structured trace logging (Plan 21) — JSON events on chat.trace logger.
+    configure_logging(settings.log_level, log_file=settings.chat_trace_log_file)
+    configure_trace(
+        TraceConfig(
+            llm_io=settings.chat_trace_llm_io,
+            max_raw=settings.chat_trace_max_raw,
+            persist=settings.chat_trace_persist,
+        )
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):

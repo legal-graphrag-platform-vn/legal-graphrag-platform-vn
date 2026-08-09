@@ -132,6 +132,14 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
                         )}
                      </div>
 
+                     {/* Không đủ căn cứ để trả lời — hiển thị lý do từ server */}
+                     {message.insufficiency_reason && (
+                        <div className="rounded-standard border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-amber-800 dark:text-amber-300">
+                           <span className="font-semibold">Chưa đủ căn cứ để trả lời: </span>
+                           {message.insufficiency_reason}
+                        </div>
+                     )}
+
                      {/* Citations / RAG sources — clarification không render source cards */}
                      {message.kind !== 'clarification' &&
                         message.sources &&

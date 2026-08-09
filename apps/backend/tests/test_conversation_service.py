@@ -31,6 +31,13 @@ from resolution.models import (
 from resolution.rewriter import RewriteTimeoutError, StructuredRewriter
 from src.generation.models import AnswerResponse
 from src.retrieval.errors import RetrievalDependencyError
+from src.shared.retrieval_contract import (
+    PlanType,
+    ProcessingStatus,
+    QueryProcessingResult,
+    SubqueryDTO,
+    SubqueryIntent,
+)
 from tests.factories import retrieval_context
 
 
@@ -180,7 +187,15 @@ class FailingRewriter:
         raise RewriteTimeoutError("timeout")
 
 
-def _service(store, resolver, *, rewriter=None, retrieval=None, generator=None):
+def _service(
+    store,
+    resolver,
+    *,
+    rewriter=None,
+    retrieval=None,
+    generator=None,
+    query_processor=None,
+):
     return ConversationChatService(
         store=store,
         resolver=resolver,
@@ -188,6 +203,7 @@ def _service(store, resolver, *, rewriter=None, retrieval=None, generator=None):
         retrieval=retrieval or FakeRetrieval(),
         generator=generator or FakeGenerator(),
         stream_chunk_chars=20,
+        query_processor=query_processor,
     )
 
 
@@ -237,6 +253,55 @@ def test_standalone_answer_retrieves_and_generates_once() -> None:
     assert kinds[-1] == "done"
     assert "citation" in kinds
     assert store.turn.persisted_answer["update_focus"] is True
+
+
+def test_query_processor_trace_preserves_subquery_ids_and_merge_counts() -> None:
+    class FakeQueryProcessor:
+        async def process(self, current_query, conversation_history=()):
+            return QueryProcessingResult(
+                status=ProcessingStatus.READY,
+                standalone_query=current_query,
+                plan_type=PlanType.PARALLEL,
+                subqueries=[
+                    SubqueryDTO(
+                        id="definition",
+                        query="Công ty cổ phần là gì?",
+                        intent=SubqueryIntent.DEFINITION,
+                    ),
+                    SubqueryDTO(
+                        id="requirements",
+                        query="Điều kiện thành lập công ty cổ phần?",
+                        intent=SubqueryIntent.FACTUAL,
+                    ),
+                ],
+            )
+
+    from observability import bind_trace, clear_trace, get_turn_trace
+
+    store = FakeStore()
+    service = _service(
+        store,
+        FakeResolver(StandaloneResolution()),
+        query_processor=FakeQueryProcessor(),
+    )
+    bind_trace(turn_id=uuid.uuid4())
+    try:
+        _run_events(service, _request("công ty cổ phần"), _owner())
+        trace = get_turn_trace()
+    finally:
+        clear_trace()
+
+    subquery_events = [
+        event for event in trace if event["stage"] == "retrieval.subquery"
+    ]
+    assert {event["subquery_id"] for event in subquery_events} == {
+        "definition",
+        "requirements",
+    }
+    merge = next(event for event in trace if event["stage"] == "retrieval.merge")
+    assert merge["input_unit_count"] == 2
+    assert merge["merged_unit_count"] == 1
+    assert merge["deduplicated_unit_count"] == 1
 
 
 def test_resolved_reference_intersects_document_filter() -> None:

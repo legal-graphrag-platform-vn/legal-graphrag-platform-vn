@@ -1,0 +1,38 @@
+# Promtail tails the backend's JSON trace file and ships it to Loki (Plan 21).
+# The backend writes to CHAT_TRACE_LOG_FILE (e.g. infra/data/logs/chat-trace.log),
+# which is bind-mounted read-only into this container at /var/log/chat.
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: warn
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: chat-trace
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: chat-trace
+          service: legal-graphrag-backend
+          __path__: /var/log/chat/*.log
+    pipeline_stages:
+      # Each line is one JSON trace event. Parse it, promote low-cardinality
+      # fields to labels, keep trace_id as a queryable field (high cardinality).
+      - json:
+          expressions:
+            stage: stage
+            status: status
+            trace_id: trace_id
+            ts: ts
+      - labels:
+          stage:
+          status:
+      - timestamp:
+          source: ts
+          format: RFC3339Nano

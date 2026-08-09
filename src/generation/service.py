@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
 from src.generation.context_projection import ContextProjector
 from src.generation.evidence_compaction import EvidenceCompactor
 from src.generation.evidence_validation import EvidenceValidator
@@ -39,12 +41,28 @@ class AnswerGenerator:
         )
         result = self._sufficiency.evaluate(request.retrieval_context)
         if not result.sufficient:
+            request.retrieval_context.metrics["generation_context"] = {
+                "sufficient": False,
+                "sufficiency_reason_code": result.reason_code,
+            }
             return self._cannot_answer(request, result.reason_code, result.reason)
 
         validated = self._evidence_validator.validate(request.retrieval_context)
         plan = self._compactor.compact(request.retrieval_context, validated)
         projection = self._projector.project(request, plan)
         if projection.projected is None:
+            request.retrieval_context.metrics["generation_context"] = {
+                "sufficient": False,
+                "sufficiency_reason_code": projection.reason_code,
+                "validated_candidate_count": len(validated.candidates),
+                "validated_path_count": len(validated.paths),
+                "compacted_candidate_count": len(plan.candidates),
+                "compacted_path_count": len(plan.paths),
+                "omitted_evidence_count": len(plan.omitted_evidence),
+                "omitted_reason_counts": dict(
+                    Counter(item.reason for item in plan.omitted_evidence)
+                ),
+            }
             return self._cannot_answer(
                 request,
                 projection.reason_code,
@@ -52,8 +70,18 @@ class AnswerGenerator:
             )
         projected = projection.projected
         result = self._projected_validator.evaluate(projected, plan)
+        diagnostics = _projection_diagnostics(validated, plan, projected)
         if not result.sufficient:
+            diagnostics.update(
+                {
+                    "sufficient": False,
+                    "sufficiency_reason_code": result.reason_code,
+                }
+            )
+            request.retrieval_context.metrics["generation_context"] = diagnostics
             return self._cannot_answer(request, result.reason_code, result.reason)
+        diagnostics["sufficient"] = True
+        request.retrieval_context.metrics["generation_context"] = diagnostics
         registry = self._projector.build_registry(projected)
         candidate = await self._provider.generate_structured(
             self._projector.provider_request(projected, registry)
@@ -92,3 +120,23 @@ class AnswerGenerator:
             intent=request.retrieval_context.intent.value,
             strategy=request.retrieval_context.strategy.value,
         )
+
+
+def _projection_diagnostics(validated, plan, projected) -> dict[str, object]:
+    omitted_reason_counts = Counter(item.reason for item in projected.omitted_evidence)
+    return {
+        "validated_candidate_count": len(validated.candidates),
+        "validated_path_count": len(validated.paths),
+        "compacted_candidate_count": len(plan.candidates),
+        "compacted_path_count": len(plan.paths),
+        "selected_unit_count": len(projected.selected_unit_ids),
+        "selected_path_count": len(projected.paths),
+        "selected_unit_ids": list(projected.selected_unit_ids[:10]),
+        "selected_unit_ids_truncated": len(projected.selected_unit_ids) > 10,
+        "omitted_evidence_count": len(projected.omitted_evidence),
+        "omitted_reason_counts": dict(omitted_reason_counts),
+        "used_evidence_chars": projected.budget.used_evidence_chars,
+        "evidence_budget_chars": projected.budget.evidence_budget_chars,
+        "truncated": projected.truncated,
+        "admitted_bundle_count": len(projected.admitted_bundle_ids),
+    }
