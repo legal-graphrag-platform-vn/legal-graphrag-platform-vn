@@ -125,6 +125,19 @@ services:
     depends_on:
       - loki
 
+  # ============================================================================
+  # Container Management Web UI (Portainer)
+  # ============================================================================
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: graphrag-portainer-prod
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../data/portainer:/data
+
 networks:
   default:
     name: graphrag-network-prod
