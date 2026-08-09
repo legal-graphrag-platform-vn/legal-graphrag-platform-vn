@@ -1,0 +1,12 @@
+# Auto-provision Loki as Grafana's default datasource (Plan 21 §5b).
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    version: 1
+    editable: true
