@@ -81,6 +81,7 @@ services:
     image: grafana/loki:3.2.1
     container_name: graphrag-loki-prod
     restart: unless-stopped
+    user: "0"
     command: -config.file=/etc/loki/config.yml
     ports:
       - "3100:3100"
