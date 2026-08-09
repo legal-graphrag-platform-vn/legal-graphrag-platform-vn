@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port ${PORT:-3000}",
     "build": "next build --webpack",
-    "start": "next start",
+    "start": "next start --port ${PORT:-3000}",
     "lint": "eslint",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "format:check": "prettier --check src/app/layout.tsx src/app/globals.css src/app/page.tsx src/app/chat/page.tsx src/app/explorer/page.tsx src/components/chat src/components/explorer/DocumentDetail.tsx src/hooks src/lib src/types/chat.ts",

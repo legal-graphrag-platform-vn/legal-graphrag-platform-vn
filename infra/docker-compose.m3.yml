@@ -4,7 +4,7 @@ services:
     container_name: graphrag-neo4j-m3
     restart: "no"
     env_file:
-      - env/.env.compose
+      - env.prod/.env.compose
     ports:
       - "127.0.0.1:7475:7474"
       - "127.0.0.1:7688:7687"
