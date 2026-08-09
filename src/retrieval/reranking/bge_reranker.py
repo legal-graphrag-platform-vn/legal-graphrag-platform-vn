@@ -20,14 +20,16 @@ class BGEReranker(BaseReranker):
             raise ValueError("max_length must be positive")
         if reranker is None:
             try:
+                import torch
                 from FlagEmbedding import FlagReranker
             except ImportError as exc:
                 raise RuntimeError(
                     "Install the embedding dependency group to use BGE reranking"
                 ) from exc
+            actual_use_fp16 = use_fp16 and torch.cuda.is_available()
             reranker = FlagReranker(
                 model_name,
-                use_fp16=use_fp16,
+                use_fp16=actual_use_fp16,
                 max_length=max_length,
                 normalize=normalize,
             )
