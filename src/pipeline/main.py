@@ -1147,9 +1147,68 @@ def batch_extract(
         except Exception as exc:
             fail_count += 1
             record_doc_status(code, step="extract", status="FAILED", error=str(exc))
-            typer.echo(f"Lỗi extract {code}: {exc}", err=True)
-
     typer.echo(f"Hoàn thành Batch Extract. Thành công: {success_count}, Thất bại: {fail_count}")
+
+
+@app.command("init-schema")
+def init_schema_command(
+    uri: Annotated[str, typer.Option(help="Neo4j Bolt URI")] = "",
+    user: Annotated[str, typer.Option(help="Neo4j User")] = "",
+    password: Annotated[str, typer.Option(help="Neo4j Password")] = "",
+) -> None:
+    """Apply all canonical constraints and indexes from 01_schema_init.cypher to Neo4j."""
+    from neo4j import GraphDatabase
+    from src.infrastructure.neo4j.schema_initializer import initialize_canonical_schema
+    from src.infrastructure.neo4j.schema_verifier import verify_canonical_schema
+
+    bolt_uri = uri or settings.neo4j_uri
+    neo_user = user or settings.neo4j_user
+    neo_pass = password or settings.neo4j_password
+
+    typer.echo(f"📐 Applying canonical Neo4j schema to {bolt_uri}...")
+    driver = GraphDatabase.driver(bolt_uri, auth=(neo_user, neo_pass))
+    try:
+        result = initialize_canonical_schema(driver)
+        typer.echo(f"Applied {result['applied_statements']}/{result['total_statements']} statements.")
+        if result["errors"]:
+            for err in result["errors"]:
+                typer.echo(f"  Warning: {err}", err=True)
+
+        with driver.session() as session:
+            status = verify_canonical_schema(session)
+        typer.echo(
+            f"✅ Schema active: {len(status.constraints)} constraints, "
+            f"{len(status.user_indexes)} indexes."
+        )
+    finally:
+        driver.close()
+
+
+@app.command("verify-schema")
+def verify_schema_command(
+    uri: Annotated[str, typer.Option(help="Neo4j Bolt URI")] = "",
+    user: Annotated[str, typer.Option(help="Neo4j User")] = "",
+    password: Annotated[str, typer.Option(help="Neo4j Password")] = "",
+) -> None:
+    """Verify that canonical constraints and indexes are present and online in Neo4j."""
+    from neo4j import GraphDatabase
+    from src.infrastructure.neo4j.schema_verifier import verify_canonical_schema
+
+    bolt_uri = uri or settings.neo4j_uri
+    neo_user = user or settings.neo4j_user
+    neo_pass = password or settings.neo4j_password
+
+    driver = GraphDatabase.driver(bolt_uri, auth=(neo_user, neo_pass))
+    try:
+        with driver.session() as session:
+            status = verify_canonical_schema(session)
+        typer.echo(
+            f"✅ Schema verified on {bolt_uri}:\n"
+            f"  - Constraints ({len(status.constraints)}/12): {sorted(status.constraints)}\n"
+            f"  - Indexes ({len(status.user_indexes)}/34): {sorted(status.user_indexes)}"
+        )
+    finally:
+        driver.close()
 
 
 if __name__ == "__main__":
