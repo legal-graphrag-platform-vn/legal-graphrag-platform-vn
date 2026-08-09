@@ -35,7 +35,7 @@ fi
 
 # 2.   Tạo thư mục trên Server từ xa
 echo "--> [2/4] Đảm bảo thư mục mục tiêu $REMOTE_DIR tồn tại trên Server..."
-$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $REMOTE_DIR/infra"
+$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $REMOTE_DIR/infra/prod/env"
 
 # 3.   Đồng bộ file cấu hình sản xuất nhẹ (docker-compose.prod.yml & .env)
 echo "--> [3/4] Đồng bộ file cấu hình Production lên Server..."
