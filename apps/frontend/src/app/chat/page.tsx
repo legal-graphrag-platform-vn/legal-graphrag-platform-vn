@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { MessageItem } from '@/components/chat/MessageItem'
 import { AuthModal } from '@/components/auth/AuthModal'
 import { useChatStream } from '@/hooks/useChatStream'
+import { apiGet, apiPatch, apiDelete } from '@/lib/api/client'
 import { ChatSession } from '@/types/chat'
 import {
    Plus,
@@ -69,10 +70,9 @@ export default function ChatPage() {
    const reloadConversationsForPrincipal = async () => {
       clearMessages()
       try {
-         const res = await fetch('/api/v1/conversations', { credentials: 'include' })
-         const data: unknown = res.ok ? await res.json() : []
-         const items: ServerConversationSummary[] = Array.isArray(data) ? data : []
-         const serverSessions: ChatSession[] = items.map((item) => ({
+         const items = await apiGet<ServerConversationSummary[]>('/api/v1/conversations')
+         const list = Array.isArray(items) ? items : []
+         const serverSessions: ChatSession[] = list.map((item) => ({
             id: item.id,
             title: item.title || 'Cuộc hội thoại mới',
             messages: [],
@@ -90,8 +90,7 @@ export default function ChatPage() {
    // Resolve the current user once on mount (login required to chat). When
    // authenticated, load that principal's conversations; otherwise show nothing.
    useEffect(() => {
-      fetch('/api/v1/auth/me', { credentials: 'include' })
-         .then((res) => (res.ok ? res.json().catch(() => null) : null))
+      apiGet<UserProfile>('/api/v1/auth/me')
          .then((data) => {
             const resolved: UserProfile | null = data && data.username ? data : null
             setUser(resolved)
@@ -146,12 +145,7 @@ export default function ChatPage() {
                   if (firstUserMsg) {
                      newTitle = firstUserMsg.content.slice(0, 30)
                      if (firstUserMsg.content.length > 30) newTitle += '...'
-                     fetch(`/api/v1/conversations/${activeSessionId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ title: newTitle }),
-                        credentials: 'include',
-                     }).catch(() => {})
+                     apiPatch(`/api/v1/conversations/${activeSessionId}`, { title: newTitle }).catch(() => {})
                   }
                }
 
@@ -175,29 +169,26 @@ export default function ChatPage() {
       }
 
       try {
-         const res = await fetch(`/api/v1/conversations/${sessionId}`, { credentials: 'include' })
-         if (res.ok) {
-            const data: ServerConversationDetail = await res.json()
-            if (data && Array.isArray(data.messages)) {
-               const loadedMessages = data.messages.map((m) => ({
-                  id: m.id,
-                  role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
-                  content: m.content,
-                  sources: m.citations ? m.citations.map((c) => ({
-                     id: c.unit_id,
-                     title: c.citation_label,
-                     citation_label: c.citation_label,
-                     document_id: c.document_id,
-                     deep_link: c.deep_link,
-                     content: '',
-                  })) : [],
-                  timestamp: m.created_at || new Date().toISOString(),
-               }))
-               setMessages(loadedMessages)
-               setSessions((prev) =>
-                  prev.map((s) => (s.id === sessionId ? { ...s, messages: loadedMessages, title: data.title || s.title } : s))
-               )
-            }
+         const data = await apiGet<ServerConversationDetail>(`/api/v1/conversations/${sessionId}`)
+         if (data && Array.isArray(data.messages)) {
+            const loadedMessages = data.messages.map((m) => ({
+               id: m.id,
+               role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
+               content: m.content,
+               sources: m.citations ? m.citations.map((c) => ({
+                  id: c.unit_id,
+                  title: c.citation_label,
+                  citation_label: c.citation_label,
+                  document_id: c.document_id,
+                  deep_link: c.deep_link,
+                  content: '',
+               })) : [],
+               timestamp: m.created_at || new Date().toISOString(),
+            }))
+            setMessages(loadedMessages)
+            setSessions((prev) =>
+               prev.map((s) => (s.id === sessionId ? { ...s, messages: loadedMessages, title: data.title || s.title } : s))
+            )
          }
       } catch (e) {
          console.error('Lỗi fetch chi tiết conversation:', e)
@@ -238,7 +229,7 @@ export default function ChatPage() {
 
    const handleDeleteSession = async (id: string) => {
       try {
-         await fetch(`/api/v1/conversations/${id}`, { method: 'DELETE', credentials: 'include' })
+         await apiDelete(`/api/v1/conversations/${id}`)
       } catch {}
 
       const updated = sessions.filter((s) => s.id !== id)
