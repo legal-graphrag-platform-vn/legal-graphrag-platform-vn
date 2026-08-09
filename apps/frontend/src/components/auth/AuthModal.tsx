@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { X, LogIn, UserPlus, LogOut, User as UserIcon, Check, Eye, EyeOff } from 'lucide-react'
+import { apiPost } from '@/lib/api/client'
 
 interface UserProfile {
   user_id: string
@@ -53,34 +54,7 @@ export function AuthModal({
       : { username: username.trim(), password }
 
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        credentials: 'include',
-      })
-
-      let data: AuthResponse = {}
-      try {
-        data = await res.json()
-      } catch {
-        data = {}
-      }
-
-      if (!res.ok) {
-        let errorMessage = 'Thao tác không thành công. Vui lòng thử lại.'
-        if (typeof data?.detail === 'string') {
-          errorMessage = data.detail
-        } else if (Array.isArray(data?.detail) && data.detail.length > 0) {
-          errorMessage = data.detail
-            .map((item: { msg?: string; message?: string }) => item.msg || item.message || '')
-            .filter(Boolean)
-            .join('; ')
-        } else if (typeof data?.message === 'string') {
-          errorMessage = data.message
-        }
-        throw new Error(errorMessage || 'Thao tác không thành công.')
-      }
+      const data = await apiPost<AuthResponse>(endpoint, payload)
 
       setSuccessMsg(
         isRegister ? 'Đăng ký tài khoản thành công!' : 'Đăng nhập thành công!'
@@ -109,7 +83,7 @@ export function AuthModal({
 
   const handleLogoutClick = async () => {
     try {
-      await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' })
+      await apiPost('/api/v1/auth/logout', {})
     } catch {}
     onLogout()
     onClose()
