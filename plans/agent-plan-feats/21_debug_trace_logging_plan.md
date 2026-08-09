@@ -1,9 +1,29 @@
 # Plan 21 — Structured Trace Logging cho luồng chat (AI-aware Debugging)
 
-Status: PHASE 1 + 2 + 3 IMPLEMENTED (server-side + Loki/Grafana + durable DB trace)
+Status: PHASE 1 + 2 + 3 + 4 IMPLEMENTED (server-side + Loki/Grafana + durable DB trace + detailed RAG telemetry)
 Dependencies: `Plan 19 (19_conversation_context.md)`, ADR-27 (Query Processing)
 Created At: 2026-08-09
 Branch: `feature/add-log`
+
+Implementation notes (Phase 4 — detailed RAG telemetry, 2026-08-09):
+- New `apps/backend/observability/rag.py`: bounded structured events for
+  `retrieval.route`, `retrieval.seed`, `retrieval.graph`,
+  `retrieval.ranking`, `retrieval.subquery`, `generation.context`,
+  `generation.projection`, `generation.llm`, `generation.call`, and
+  `generation.grounding`.
+- Every fan-out retrieval keeps the canonical query-processor `subquery_id`;
+  merge logging reports input, output, and deduplicated unit counts.
+- Existing runtime metrics are surfaced without changing retrieval behavior:
+  vector/full-text hits, graph paths/rejections, temporal filtering, planner,
+  reranker, and per-stage latency.
+- Multi-hop planner logging records provider/model, latency, plan depth and
+  bounded relation/direction/label lists; provider error payloads are excluded.
+- Answer-provider I/O uses the existing `off|redacted|full` policy. Projection
+  logging records selected/omitted evidence counts, omission reasons, and
+  context-budget usage without logging embeddings or full legal documents.
+- Grafana defaults `trace_id` to `.*` and includes a dedicated RAG pipeline
+  panel. Verified with focused observability/conversation/retrieval/generation
+  tests and live JSON log inspection.
 
 Implementation notes (Phase 1, 2026-08-09):
 - New package `apps/backend/observability/`: `trace.py` (contextvar trace binding,
@@ -102,10 +122,9 @@ có central config, **không** structlog, **không** trace correlation.
 
 ## Phạm vi
 
-**Giai đoạn này chỉ làm SERVER-SIDE LOG.** Việc surface lý do ra **client** (đưa
-`insufficiency_reason` / error detail vào response cho UI) **để sau**, là một item
-tách riêng (xem mục 9). Mục tiêu trước mắt: dev đọc log server là biết được vì sao
-một turn lỗi hoặc `cannot_answer`.
+Phạm vi observability của plan vẫn là server-side log. Việc surface
+`insufficiency_reason` ra client đã được triển khai sau đó như một thay đổi
+contract/UI riêng; xem mục 9. Log server tiếp tục là nguồn chẩn đoán chi tiết.
 
 ## Mục tiêu
 
@@ -125,8 +144,8 @@ một turn lỗi hoặc `cannot_answer`.
 - Không dựng APM/tracing phân tán (OpenTelemetry) ở giai đoạn này.
 - Không đổi business logic của service/retrieval/generation.
 - Không log full prompt ở mức mặc định (size + dữ liệu người dùng).
-- **Không đổi response/SSE contract ra client** — client giữ nguyên; chỉ thêm log
-  ở server (client surfacing để sau, mục 9).
+- Telemetry không tự ý đổi response/SSE contract; client surfacing được triển
+  khai và kiểm thử trong một commit riêng sau phần observability ban đầu.
 
 ---
 
@@ -296,13 +315,9 @@ provision Loki làm datasource mặc định của Grafana.
   subquery nào.
 - Grep `trace_id` ra full timeline có latency từng bước.
 
-## 9. Client surfacing — DEFERRED (ngoài phạm vi giai đoạn này)
+## 9. Client surfacing — IMPLEMENTED AS SEPARATE FOLLOW-UP
 
-Sau khi server-log ổn, một plan/PR riêng sẽ đưa lý do ra client:
-- Thêm `insufficiency_reason` vào `ChatMetadataData` / `ChatDoneData`
-  (`api/models.py`) và điền tại `_finish_answer` → UI hiển thị vì sao "không thể
-  trả lời".
-- (tuỳ chọn) map error code → thông điệp thân thiện hơn cho từng loại lỗi.
-
-Việc này **đổi response contract ra client** nên tách khỏi giai đoạn server-log để
-không lẫn phạm vi. Không làm ở Plan 21 phần này.
+Commit follow-up `1d92325` đã thêm `insufficiency_reason` vào
+`ChatMetadataData`, SSE metadata, frontend stream state và callout
+"Chưa đủ căn cứ để trả lời". Thay đổi này được tách khỏi phần server-log về mặt
+commit; error-code mapping thân thiện hơn vẫn là hạng mục riêng nếu cần.
