@@ -55,6 +55,8 @@ services:
       - env/.env.backend
     ports:
       - "8000:8000"
+    volumes:
+      - ../data/logs:/var/log/chat
     depends_on:
       neo4j:
         condition: service_healthy
@@ -71,6 +73,53 @@ services:
       - "3001:3001"
     depends_on:
       - backend
+
+  # ============================================================================
+  # Observability Stack (Loki + Promtail + Grafana)
+  # ============================================================================
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: graphrag-loki-prod
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ../observability/loki-config.yml:/etc/loki/config.yml:ro
+      - ../data/loki:/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: graphrag-promtail-prod
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ../observability/promtail-config.yml:/etc/promtail/config.yml:ro
+      - ../data/logs:/var/log/chat:ro
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: graphrag-grafana-prod
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_DEFAULT_THEME: "light"
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - ../data/grafana:/var/lib/grafana
+    depends_on:
+      - loki
 
 networks:
   default:

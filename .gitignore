@@ -18,6 +18,11 @@ infra/data/neo4j/plugins/*
 # PostgreSQL bind mount (Plan 19 conversation store)
 infra/data/postgres/
 
+# Observability data (Plan 21)
+infra/data/logs/
+infra/data/loki/
+infra/data/grafana/
+
 # Runtime data (generated, not committed)
 data/raw/
 data/processed/
