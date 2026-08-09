@@ -311,13 +311,15 @@ NODE_ENUMS: dict[str, dict[str, set[str]]] = {
     "Clause": {
         "legal_status": CONTENT_LEGAL_STATUSES,
     },
+    "Point": {
+        "legal_status": CONTENT_LEGAL_STATUSES,
+    },
 }
 
 # Node optional metadata fields per type
 NODE_OPTIONAL_FIELDS: dict[str, list[str]] = {
     "Document": [
         "title",
-        "issued_by",
         "issued_date",
         "effective_to",
         "expiry_date",
@@ -325,6 +327,8 @@ NODE_OPTIONAL_FIELDS: dict[str, list[str]] = {
         "field",
         "signer_title",
         "signer_name",
+        "source_url",
+        "updated_at",
     ],
     "Article": [
         "title",
@@ -334,9 +338,17 @@ NODE_OPTIONAL_FIELDS: dict[str, list[str]] = {
         "chapter_title",
         "section",
         "subsection",
+        "updated_at",
     ],
     "Clause": [
         "effective_to",
+        "updated_at",
+    ],
+    "Point": [
+        "effective_from",
+        "effective_to",
+        "legal_status",
+        "updated_at",
     ],
     "LegalConcept": [
         "aliases",
