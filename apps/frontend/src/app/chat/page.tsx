@@ -268,12 +268,29 @@ export default function ChatPage() {
    }
 
    const handleSend = () => {
-      // Login required to chat: the send button is disabled, and Enter is a no-op.
-      if (!user || !inputText.trim() || isStreaming || !activeSessionId) return
+      if (!user) {
+         setShowAuth(true)
+         return
+      }
+      if (!inputText.trim() || isStreaming) return
+
+      let targetSessionId = activeSessionId
+      if (!targetSessionId) {
+         targetSessionId = crypto.randomUUID()
+         const newSession: ChatSession = {
+            id: targetSessionId,
+            title: 'Cuộc hội thoại mới',
+            messages: [],
+            createdAt: new Date().toISOString(),
+         }
+         setSessions((prev) => [newSession, ...prev])
+         setActiveSessionId(targetSessionId)
+      }
+
       const textToSend = inputText
       setInputText('')
       // ChatSession.id chính là conversation_id gửi lên server (Plan 19 §5).
-      sendMessage(textToSend, activeSessionId, messages)
+      sendMessage(textToSend, targetSessionId, messages)
    }
 
    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -317,13 +334,13 @@ export default function ChatPage() {
                <div className="flex items-center gap-1.5 shrink-0 ml-1">
                   <button
                      onClick={handleSend}
-                     disabled={!user || !inputText.trim() || isStreaming}
+                     disabled={!inputText.trim() || isStreaming}
                      className={`p-2.5 rounded-full flex items-center justify-center transition-all ${
-                        user && inputText.trim() && !isStreaming
+                        inputText.trim() && !isStreaming
                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-md cursor-pointer'
                            : 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-650 cursor-not-allowed'
                      }`}
-                     title={user ? 'Gửi câu hỏi' : 'Vui lòng đăng nhập để gửi'}
+                     title={!user ? 'Đăng nhập để gửi câu hỏi' : 'Gửi câu hỏi'}
                   >
                      <ArrowUp size={16} strokeWidth={2.5} />
                   </button>
