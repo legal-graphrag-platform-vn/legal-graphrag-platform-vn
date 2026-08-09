@@ -42,10 +42,13 @@ class EmbeddingGenerator:
     def _load_encoder(self) -> EncoderProtocol:
         if self.provider == "flag_embedding":
             try:
+                import torch
                 from FlagEmbedding import BGEM3FlagModel
             except ImportError as exc:
                 raise RuntimeError("Install FlagEmbedding and torch to use the BGE-M3 embed command") from exc
-            return _FlagEmbeddingEncoder(BGEM3FlagModel(self.model_name, use_fp16=True))
+            use_fp16 = torch.cuda.is_available()
+            device = "cuda" if use_fp16 else "cpu"
+            return _FlagEmbeddingEncoder(BGEM3FlagModel(self.model_name, use_fp16=use_fp16, device=device))
 
         if self.provider == "sentence_transformers":
             try:
