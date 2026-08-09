@@ -6,7 +6,13 @@ Flask app.py được giữ nguyên cho đến khi SSE parity test pass.
 
 from __future__ import annotations
 
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+_backend_dir = str(Path(__file__).resolve().parent)
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
