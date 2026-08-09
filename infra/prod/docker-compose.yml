@@ -109,6 +109,8 @@ services:
     image: grafana/grafana:11.3.0
     container_name: graphrag-grafana-prod
     restart: unless-stopped
+    env_file:
+      - env/.env.compose
     ports:
       - "3002:3000"
     environment:
