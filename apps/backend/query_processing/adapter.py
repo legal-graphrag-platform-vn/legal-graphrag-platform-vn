@@ -8,6 +8,7 @@ blocked, and exposes the async ``QueryProcessorPort`` the chat service depends o
 
 from __future__ import annotations
 
+import contextvars
 from collections.abc import Mapping, Sequence
 
 from services.interfaces import AsyncRetrievalRunner
@@ -30,6 +31,9 @@ class QueryProcessorAdapter:
         conversation_history: Sequence[Mapping[str, str]] = (),
     ) -> QueryProcessingResult:
         history = tuple(dict(turn) for turn in conversation_history)
+        # The processor runs on a worker thread; copy the current context so the
+        # LLM trace events it emits stay bound to this turn (Plan 21).
+        ctx = contextvars.copy_context()
         return await self._runner.run(
-            lambda: self._processor.process(current_query, history)
+            lambda: ctx.run(self._processor.process, current_query, history)
         )
