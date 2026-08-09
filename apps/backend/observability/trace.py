@@ -28,6 +28,10 @@ _PREVIEW_CHARS = 500
 _trace_ctx: contextvars.ContextVar[dict[str, Any] | None] = contextvars.ContextVar(
     "chat_trace_ctx", default=None
 )
+# Per-turn collector so events can be persisted durably (Plan 21 §4).
+_turn_events_ctx: contextvars.ContextVar[list[dict[str, Any]] | None] = (
+    contextvars.ContextVar("chat_turn_events", default=None)
+)
 
 
 def bind_trace(
@@ -44,10 +48,17 @@ def bind_trace(
             "owner_id": str(owner_id) if owner_id else None,
         }
     )
+    _turn_events_ctx.set([])
 
 
 def clear_trace() -> None:
     _trace_ctx.set(None)
+    _turn_events_ctx.set(None)
+
+
+def get_turn_trace() -> list[dict[str, Any]]:
+    """Return the events collected for the current turn (empty if unbound)."""
+    return _turn_events_ctx.get() or []
 
 
 # --------------------------------------------------------------------------- #
@@ -61,6 +72,7 @@ class TraceConfig:
 
     llm_io: str = "redacted"  # off | redacted | full
     max_raw: int = 2000
+    persist: str = "failed"  # off | failed | all — durable turn trace (§4)
 
 
 _config = TraceConfig()
@@ -159,6 +171,29 @@ def log_event(stage: str, status: str = "ok", **fields: Any) -> None:
     logging.getLogger(_TRACE_LOGGER).log(
         level, stage, extra={"trace_payload": payload}
     )
+    buffer = _turn_events_ctx.get()
+    if buffer is not None:
+        buffer.append(payload)
+
+
+def overall_status(events: list[dict[str, Any]]) -> str:
+    """Collapse a turn's events into one outcome label."""
+    statuses = {e.get("status") for e in events}
+    if "error" in statuses or "failed" in statuses:
+        return "failed"
+    if any(e.get("stage") == "generation.cannot_answer" for e in events):
+        return "cannot_answer"
+    return "completed"
+
+
+def should_persist_turn(events: list[dict[str, Any]]) -> bool:
+    """Apply the CHAT_TRACE_PERSIST policy to a collected turn."""
+    mode = _config.persist
+    if mode == "off" or not events:
+        return False
+    if mode == "all":
+        return True
+    return overall_status(events) in {"failed", "cannot_answer"}
 
 
 def _now_iso() -> str:

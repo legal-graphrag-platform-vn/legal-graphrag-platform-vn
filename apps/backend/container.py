@@ -44,6 +44,7 @@ class Container:
         canonical_lookup_driver: object | None = None,
         principal_signer: object | None = None,
         conversation_repo: object | None = None,
+        debug_trace_store: object | None = None,
     ) -> None:
         self.query_service = query_service
         self.chat_service = chat_service
@@ -51,6 +52,7 @@ class Container:
         self.rag_service = rag_service
         self.principal_signer = principal_signer
         self.conversation_repo = conversation_repo
+        self.debug_trace_store = debug_trace_store
         self._answer_generator = answer_generator
         self._query_planner = query_planner
         self._retrieval_runtime = retrieval_runtime
@@ -234,6 +236,11 @@ async def build_container(
             if answer_generator is not None:
                 await answer_generator.aclose()
             raise
+    debug_trace_store: object | None = None
+    if conversation_engine is not None:
+        from persistence.debug_trace import TurnDebugTraceStore
+
+        debug_trace_store = TurnDebugTraceStore(conversation_engine)
     return Container(
         query_service=RetrievalQueryService(retrieval),
         chat_service=chat_service,
@@ -247,6 +254,7 @@ async def build_container(
         canonical_lookup_driver=lookup_driver,
         principal_signer=principal_signer,
         conversation_repo=conversation_repo,
+        debug_trace_store=debug_trace_store,
     )
 
 

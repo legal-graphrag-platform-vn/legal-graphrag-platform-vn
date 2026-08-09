@@ -95,6 +95,8 @@ class Settings(BaseSettings):
     # Set to a file path (e.g. infra/data/logs/chat-trace.log) so Promtail can
     # tail it into Loki. None → stdout only.
     chat_trace_log_file: str | None = None
+    # Durable per-turn trace in Postgres (turn_debug_trace): off | failed | all.
+    chat_trace_persist: Literal["off", "failed", "all"] = "failed"
 
     # 9.   Signed anonymous principal (Plan 19 §2)
     anonymous_principal_signing_key: str | None = None

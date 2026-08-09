@@ -357,3 +357,32 @@ class PendingClarification(Base):
     __table_args__ = (
         UniqueConstraint("conversation_id", name="uq_pending_conversation"),
     )
+
+
+class TurnDebugTrace(Base):
+    """Durable server-side debug trace of one turn (Plan 21 §4).
+
+    Deliberately not foreign-keyed to conversations/turns: a failed turn whose
+    conversation state is incomplete must still be recordable. Written
+    best-effort after the turn streams; persistence policy is CHAT_TRACE_PERSIST.
+    """
+
+    __tablename__ = "turn_debug_trace"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    trace_id: Mapped[uuid.UUID] = mapped_column(Uuid(), nullable=False, index=True)
+    conversation_id: Mapped[uuid.UUID] = mapped_column(Uuid(), nullable=False)
+    owner_principal_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(), nullable=True
+    )
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    events: Mapped[list] = mapped_column(JSONB, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    __table_args__ = (
+        Index("ix_turn_debug_trace_conversation", "conversation_id", "created_at"),
+    )

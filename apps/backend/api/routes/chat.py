@@ -10,8 +10,19 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
 from api.models import ConversationChatRequest, encode_sse
-from dependencies import get_chat_service, require_user_owner
-from observability import bind_trace, clear_trace, log_event
+from dependencies import (
+    get_chat_service,
+    get_debug_trace_store,
+    require_user_owner,
+)
+from observability import (
+    bind_trace,
+    clear_trace,
+    get_turn_trace,
+    log_event,
+    overall_status,
+    should_persist_turn,
+)
 from persistence.errors import ConversationBusyError, ConversationNotFoundError
 from services.interfaces import ChatService
 
@@ -23,6 +34,7 @@ async def chat(
     request: ConversationChatRequest,
     http_request: Request,
     service: ChatService = Depends(get_chat_service),
+    debug_store=Depends(get_debug_trace_store),
 ) -> StreamingResponse:
     # Login required: rejects unauthenticated callers with HTTP 401.
     owner = require_user_owner(http_request)
@@ -71,6 +83,7 @@ async def chat(
             )
             yield encode_sse("done", {"status": "error", "citation_count": 0})
         finally:
+            await _persist_debug_trace(debug_store, request, owner)
             clear_trace()
 
     return StreamingResponse(
@@ -82,3 +95,30 @@ async def chat(
             "X-Accel-Buffering": "no",
         },
     )
+
+
+async def _persist_debug_trace(
+    debug_store,
+    request: ConversationChatRequest,
+    owner,
+) -> None:
+    """Write the collected turn trace to Postgres, best-effort (Plan 21 §4)."""
+    if debug_store is None:
+        return
+    events = get_turn_trace()
+    if not should_persist_turn(events):
+        return
+    try:
+        await debug_store.save(
+            trace_id=request.client_turn_id,
+            conversation_id=request.conversation_id,
+            owner_id=getattr(owner, "owner_principal_id", None),
+            status=overall_status(events),
+            events=events,
+        )
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "Debug trace persist failed: %s", type(exc).__name__
+        )
