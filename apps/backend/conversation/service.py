@@ -494,6 +494,9 @@ class ConversationChatService:
             answer_contract_version=answer.contract_version,
             cannot_answer=cannot_answer,
             resolution_status=resolution_status.value,
+            insufficiency_reason=(
+                getattr(answer, "insufficiency_reason", None) if cannot_answer else None
+            ),
         )
         done = ChatDoneData(
             status="cannot_answer" if cannot_answer else "completed",
