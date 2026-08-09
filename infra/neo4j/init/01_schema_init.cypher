@@ -104,6 +104,9 @@ ON (a.legal_status); // F2: thêm mới
 CREATE INDEX cls_legal_status IF NOT EXISTS
 FOR (c:Clause)
 ON (c.legal_status); // F2: thêm mới
+CREATE INDEX pnt_legal_status IF NOT EXISTS
+FOR (p:Point)
+ON (p.legal_status);
 
 CREATE INDEX issuer_name_idx IF NOT EXISTS
 FOR (i:Issuer)
@@ -141,6 +144,9 @@ ON (a.effective_from, a.effective_to); // F2
 CREATE INDEX cls_temporal IF NOT EXISTS
 FOR (c:Clause)
 ON (c.effective_from, c.effective_to); // F2
+CREATE INDEX pnt_temporal IF NOT EXISTS
+FOR (p:Point)
+ON (p.effective_from, p.effective_to);
 
 // Indexes trên relation properties (Neo4j 5.x) — ADR-17: active voice
 CREATE INDEX amends_from IF NOT EXISTS
