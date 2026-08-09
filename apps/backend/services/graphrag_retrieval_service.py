@@ -48,6 +48,16 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         self._planner = planner
         self._planning_enabled = planning_enabled
 
+    async def warmup(self) -> None:
+        """Pre-load and warm up embedding encoder and reranker at startup."""
+        logger.info("Warming up GraphRAG embedding and retrieval models...")
+        try:
+            warmup_request = RetrievalRequest(query_text="khởi động hệ thống pháp luật")
+            await self._runner.run(partial(self._runtime.retrieve, warmup_request))
+            logger.info("GraphRAG model warm-up completed successfully.")
+        except Exception as exc:
+            logger.warning("GraphRAG model warm-up encountered a non-fatal error: %s", exc)
+
     async def retrieve_context(
         self,
         request: RetrievalRequest,
