@@ -141,6 +141,8 @@ function applyEvent(
          intent: stringValue(event.data.intent),
          retrieval_mode: stringValue(event.data.retrieval_mode),
          resolution_status: stringValue(event.data.resolution_status),
+         cannot_answer: event.data.cannot_answer === true,
+         insufficiency_reason: stringValue(event.data.insufficiency_reason),
       })
    } else if (event.event === 'clarification') {
       // Turn cần làm rõ: không có source cards; câu hỏi tới qua token stream.

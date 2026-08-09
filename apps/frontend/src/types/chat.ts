@@ -39,6 +39,9 @@ export interface Message {
    intent?: string
    retrieval_mode?: string
    error?: string
+   // Server không đủ căn cứ để trả lời — kèm lý do (nếu có).
+   cannot_answer?: boolean
+   insufficiency_reason?: string
 }
 
 /**

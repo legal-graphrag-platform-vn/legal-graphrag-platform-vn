@@ -1,0 +1,14 @@
+# Load JSON dashboards from /etc/grafana/dashboards (Plan 21 §5b).
+apiVersion: 1
+
+providers:
+  - name: chat-trace
+    orgId: 1
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false

@@ -9,6 +9,7 @@ release lock -> buffered SSE from the persisted snapshot.
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import AsyncIterator
 
 from api.error_handlers import stream_error_contract
@@ -43,6 +44,12 @@ from persistence.enums import (
     TurnStatus,
 )
 from persistence.errors import ConversationStoreError
+from observability import (
+    log_event,
+    log_retrieval_failure,
+    log_retrieval_result,
+    truncate,
+)
 from persistence.repository import (
     LockedTurn,
     SqlAlchemyConversationStore,
@@ -201,13 +208,29 @@ class ConversationChatService:
         history = _history_for_processor(begun)
         try:
             result = await self._query_processor.process(request.message, history)
-        except (QueryProcessingError, TextGenerationError):
+        except (QueryProcessingError, TextGenerationError) as exc:
+            # Preserve the diagnostic context the query processor already attached
+            # (raw LLM output / which contract field failed) instead of dropping it.
+            log_event(
+                "query_processor.failed",
+                "error",
+                error_type=type(exc).__name__,
+                raw_output=truncate(getattr(exc, "raw_output", None)),
+                validation_detail=getattr(exc, "validation_detail", None) or str(exc),
+            )
             return await self._persist_failure(
                 turn,
                 begun,
                 QUERY_PROCESSING_FAILED_CODE,
                 _QUERY_PROCESSING_FAILED_MESSAGE,
             )
+
+        log_event(
+            "query_processor.call",
+            status=result.status.value,
+            plan_type=result.plan_type.value if result.plan_type else None,
+            subquery_count=len(result.subqueries),
+        )
 
         if result.status is ProcessingStatus.NEEDS_CLARIFICATION:
             clarify = ClarifyResolution(
@@ -334,7 +357,7 @@ class ConversationChatService:
             )
 
         try:
-            retrieval_context = await self._retrieval.retrieve_context(
+            retrieval_context = await self._retrieve_with_trace(
                 RetrievalRequest(
                     query=standalone_query,
                     filters=RetrievalFilters(
@@ -343,7 +366,8 @@ class ConversationChatService:
                     ),
                     force_intent=request.force_intent,
                     enable_reranker=request.enable_reranker,
-                )
+                ),
+                subquery_id="standalone",
             )
             answer = await self._generator.generate(
                 AnswerGenerationRequest(
@@ -385,13 +409,39 @@ class ConversationChatService:
             # Concurrent subject to the application-scoped retrieval concurrency bound.
             # All subqueries are self-contained; depends_on is logical metadata only
             # and does not affect retrieval scheduling in this version.
-            contexts = list(
-                await asyncio.gather(*[
-                    self._retrieval.retrieve_context(subquery_request)
-                    for subquery_request in subquery_requests
-                ])
+            subquery_pairs = list(
+                zip(result.subqueries, subquery_requests, strict=True)
             )
+            contexts = list(
+                await asyncio.gather(
+                    *[
+                        self._retrieve_with_trace(
+                            subquery_request,
+                            subquery_id=subquery.id,
+                        )
+                        for subquery, subquery_request in subquery_pairs
+                    ]
+                )
+            )
+            input_unit_count = sum(len(context.retrieved_units) for context in contexts)
             merged_context = merge_contexts(contexts, query=standalone_query)
+            log_event(
+                "retrieval.merge",
+                subquery_count=len(subquery_requests),
+                subquery_ids=[subquery.id for subquery in result.subqueries],
+                input_unit_count=input_unit_count,
+                merged_unit_count=len(merged_context.retrieved_units),
+                deduplicated_unit_count=(
+                    input_unit_count - len(merged_context.retrieved_units)
+                ),
+                merged_evidence_count=len(merged_context.evidence),
+                merged_graph_path_count=len(merged_context.graph_paths),
+            )
+            log_event(
+                "retrieval.fanout",
+                subquery_count=len(subquery_requests),
+                merged_units=len(merged_context.retrieved_units),
+            )
             answer = await self._generator.generate(
                 AnswerGenerationRequest(
                     query=standalone_query,
@@ -411,6 +461,31 @@ class ConversationChatService:
             retrieval_context=merged_context,
             answer=answer,
         )
+
+    async def _retrieve_with_trace(
+        self,
+        request: RetrievalRequest,
+        *,
+        subquery_id: str,
+    ):
+        started = time.perf_counter()
+        try:
+            context = await self._retrieval.retrieve_context(request)
+        except Exception as error:
+            log_retrieval_failure(
+                request=request,
+                subquery_id=subquery_id,
+                latency_ms=_elapsed_ms(started),
+                error=error,
+            )
+            raise
+        log_retrieval_result(
+            request=request,
+            context=context,
+            subquery_id=subquery_id,
+            latency_ms=_elapsed_ms(started),
+        )
+        return context
 
     async def _finish_answer(
         self,
@@ -450,6 +525,16 @@ class ConversationChatService:
         status = TurnStatus.CANNOT_ANSWER if cannot_answer else TurnStatus.COMPLETED
         kind = MessageKind.CANNOT_ANSWER if cannot_answer else MessageKind.ANSWER
         resolution_status, reason_code = _answer_resolution(outcome)
+
+        # The generator computes an insufficiency_reason for cannot_answer but it
+        # is dropped from the client contract; surface it in the server trace.
+        if cannot_answer:
+            log_event(
+                "generation.cannot_answer",
+                insufficiency_reason=getattr(answer, "insufficiency_reason", None),
+                sources_count=len(cited_sources),
+                intent=answer.intent,
+            )
         metadata = ChatMetadataData(
             sources=cited_sources,
             intent=answer.intent,
@@ -459,6 +544,9 @@ class ConversationChatService:
             answer_contract_version=answer.contract_version,
             cannot_answer=cannot_answer,
             resolution_status=resolution_status.value,
+            insufficiency_reason=(
+                getattr(answer, "insufficiency_reason", None) if cannot_answer else None
+            ),
         )
         done = ChatDoneData(
             status="cannot_answer" if cannot_answer else "completed",
@@ -487,6 +575,13 @@ class ConversationChatService:
             focus_upserts=focus_upserts_from_citations(citation_snapshots),
             update_focus=not cannot_answer,
             response_snapshot=snapshot,
+        )
+        log_event(
+            "turn.finished",
+            status=status.value,
+            citation_count=len(citation_data),
+            provider=answer.provider,
+            model=answer.model,
         )
         return snapshot
 
@@ -525,6 +620,10 @@ def _history_for_processor(begun: BegunTurn) -> tuple[dict[str, str], ...]:
         {"role": msg.role.value, "content": msg.content}
         for msg in begun.context.recent_messages
     )
+
+
+def _elapsed_ms(started: float) -> int:
+    return int((time.perf_counter() - started) * 1000)
 
 
 def _citation_snapshot(citation, ordinal: int, unit) -> CitationSnapshot:

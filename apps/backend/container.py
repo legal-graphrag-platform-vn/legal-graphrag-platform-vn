@@ -44,6 +44,7 @@ class Container:
         canonical_lookup_driver: object | None = None,
         principal_signer: object | None = None,
         conversation_repo: object | None = None,
+        debug_trace_store: object | None = None,
     ) -> None:
         self.query_service = query_service
         self.chat_service = chat_service
@@ -51,6 +52,7 @@ class Container:
         self.rag_service = rag_service
         self.principal_signer = principal_signer
         self.conversation_repo = conversation_repo
+        self.debug_trace_store = debug_trace_store
         self._answer_generator = answer_generator
         self._query_planner = query_planner
         self._retrieval_runtime = retrieval_runtime
@@ -188,30 +190,42 @@ async def build_container(
         )
         from src.generation.config import GenerationConfig
 
-        generator_factory = answer_factory or create_answer_generator
         try:
-            answer_generator = generator_factory(
-                GenerationConfig(
-                    timeout_seconds=settings.answer_timeout_seconds,
-                    max_concurrency=settings.answer_max_concurrency,
-                    max_retries=settings.answer_max_retries,
-                    max_output_tokens=settings.answer_max_output_tokens,
-                    temperature=settings.answer_temperature,
-                    thinking_level=settings.answer_thinking_level,
-                    context_max_chars=settings.answer_context_max_chars,
-                    context_safety_reserve_chars=(
-                        settings.answer_context_safety_reserve_chars
-                    ),
-                    history_max_messages=settings.answer_history_max_messages,
-                    history_max_chars=settings.answer_history_max_chars,
-                    stream_chunk_chars=settings.answer_stream_chunk_chars,
+            generation_config = GenerationConfig(
+                timeout_seconds=settings.answer_timeout_seconds,
+                max_concurrency=settings.answer_max_concurrency,
+                max_retries=settings.answer_max_retries,
+                max_output_tokens=settings.answer_max_output_tokens,
+                temperature=settings.answer_temperature,
+                thinking_level=settings.answer_thinking_level,
+                context_max_chars=settings.answer_context_max_chars,
+                context_safety_reserve_chars=(
+                    settings.answer_context_safety_reserve_chars
                 ),
-                AnswerApplicationSettings(
-                    ANSWER_PROVIDER=settings.answer_provider,
-                    ANSWER_MODEL=settings.answer_model,
-                    GEMINI_API_KEY=settings.gemini_api_key,
-                ),
+                history_max_messages=settings.answer_history_max_messages,
+                history_max_chars=settings.answer_history_max_chars,
+                stream_chunk_chars=settings.answer_stream_chunk_chars,
             )
+            application_settings = AnswerApplicationSettings(
+                ANSWER_PROVIDER=settings.answer_provider,
+                ANSWER_MODEL=settings.answer_model,
+                GEMINI_API_KEY=settings.gemini_api_key,
+            )
+            from observability import TracedAnswerGenerator, TracedAnswerProvider
+
+            if answer_factory is None:
+                answer_generator = create_answer_generator(
+                    generation_config,
+                    application_settings,
+                    provider_decorator=TracedAnswerProvider,
+                )
+            else:
+                answer_generator = answer_factory(
+                    generation_config,
+                    application_settings,
+                )
+
+            answer_generator = TracedAnswerGenerator(answer_generator)
         except Exception:
             await _cleanup_after_answer_startup_failure(
                 document_service,
@@ -221,9 +235,13 @@ async def build_container(
             )
             raise
         try:
-            conversation_engine, chat_service, lookup_driver, principal_signer, conversation_repo = (
-                _build_conversation_chat(settings, retrieval, answer_generator, runner)
-            )
+            (
+                conversation_engine,
+                chat_service,
+                lookup_driver,
+                principal_signer,
+                conversation_repo,
+            ) = _build_conversation_chat(settings, retrieval, answer_generator, runner)
         except Exception:
             await _cleanup_after_answer_startup_failure(
                 document_service,
@@ -234,6 +252,11 @@ async def build_container(
             if answer_generator is not None:
                 await answer_generator.aclose()
             raise
+    debug_trace_store: object | None = None
+    if conversation_engine is not None:
+        from persistence.debug_trace import TurnDebugTraceStore
+
+        debug_trace_store = TurnDebugTraceStore(conversation_engine)
     return Container(
         query_service=RetrievalQueryService(retrieval),
         chat_service=chat_service,
@@ -247,6 +270,7 @@ async def build_container(
         canonical_lookup_driver=lookup_driver,
         principal_signer=principal_signer,
         conversation_repo=conversation_repo,
+        debug_trace_store=debug_trace_store,
     )
 
 
@@ -318,6 +342,7 @@ def _build_query_processor(
     if not settings.query_processor_enabled:
         return None
 
+    from observability import TracedTextGenerator
     from query_processing.adapter import QueryProcessorAdapter
     from src.infrastructure.llm.text_generation_factory import build_text_generator
     from src.retrieval.nlu.query_processor import QueryProcessor
@@ -331,7 +356,9 @@ def _build_query_processor(
             "OLLAMA_HOST": settings.ollama_base_url,
         }
     )
-    return QueryProcessorAdapter(QueryProcessor(text_generator), runner)
+    # Trace the LLM I/O (prompt + raw output) of the query processor (Plan 21).
+    traced_generator = TracedTextGenerator(text_generator, stage="query_processor")
+    return QueryProcessorAdapter(QueryProcessor(traced_generator), runner)
 
 
 async def _cleanup_retrieval_after_startup_failure(

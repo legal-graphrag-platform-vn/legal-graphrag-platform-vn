@@ -1,8 +1,107 @@
 # Plan 21 — Structured Trace Logging cho luồng chat (AI-aware Debugging)
 
-Status: PROPOSED
+Status: PHASE 1 + 2 + 3 + 4 IMPLEMENTED (server-side + Loki/Grafana + durable DB trace + detailed RAG telemetry)
 Dependencies: `Plan 19 (19_conversation_context.md)`, ADR-27 (Query Processing)
 Created At: 2026-08-09
+Branch: `feature/add-log`
+
+Implementation notes (Phase 4 — detailed RAG telemetry, 2026-08-09):
+- New `apps/backend/observability/rag.py`: bounded structured events for
+  `retrieval.route`, `retrieval.seed`, `retrieval.graph`,
+  `retrieval.ranking`, `retrieval.subquery`, `generation.context`,
+  `generation.projection`, `generation.llm`, `generation.call`, and
+  `generation.grounding`.
+- Every fan-out retrieval keeps the canonical query-processor `subquery_id`;
+  merge logging reports input, output, and deduplicated unit counts.
+- Existing runtime metrics are surfaced without changing retrieval behavior:
+  vector/full-text hits, graph paths/rejections, temporal filtering, planner,
+  reranker, and per-stage latency.
+- Multi-hop planner logging records provider/model, latency, plan depth and
+  bounded relation/direction/label lists; provider error payloads are excluded.
+- Answer-provider I/O uses the existing `off|redacted|full` policy. Projection
+  logging records selected/omitted evidence counts, omission reasons, and
+  context-budget usage without logging embeddings or full legal documents.
+- Grafana defaults `trace_id` to `.*` and includes a dedicated RAG pipeline
+  panel. Verified with focused observability/conversation/retrieval/generation
+  tests and live JSON log inspection.
+
+Implementation notes (Phase 1, 2026-08-09):
+- New package `apps/backend/observability/`: `trace.py` (contextvar trace binding,
+  JSON logging on the `chat.trace` logger, `log_event`, `TraceConfig`, `redact`,
+  `truncate`), `llm.py` (`TracedTextGenerator` wrapping `TextGenerationPort`),
+  `__init__.py` (exports).
+- `settings.py`: `log_level`, `chat_trace_llm_io` (off|redacted|full),
+  `chat_trace_max_raw`.
+- `main.py`: `configure_logging` + `configure_trace` at app build.
+- `api/routes/chat.py`: `bind_trace` per request + `request.received` /
+  `stream.error` events + `clear_trace` in finally.
+- `conversation/service.py`: `query_processor.call`, **`query_processor.failed`**
+  (stops swallowing — logs raw_output + validation_detail),
+  **`generation.cannot_answer`** (surfaces dropped `insufficiency_reason`),
+  `retrieval.fanout`, `answer.failed`, `turn.finished`.
+- `container.py`: query-processor text generator wrapped with
+  `TracedTextGenerator` (stage=`query_processor`).
+- Verified: observability smoke test emits JSON events; `test_conversation_service`
+  (12) + `test_contracts` (26, builds app) pass; ruff clean.
+
+Implementation notes (Phase 2 — Loki/Grafana sink, 2026-08-09):
+- `trace.py` `configure_logging(level, log_file=...)` adds a RotatingFileHandler
+  so trace JSON is also written to a file Promtail can tail; `settings.py`
+  `chat_trace_log_file` (env `CHAT_TRACE_LOG_FILE`); wired in `main.py`.
+- New opt-in stack `infra/docker-compose.observability.yml` (name
+  `graphrag-observability`): `loki` (3100), `promtail` (tails
+  `data/logs/*.log`), `grafana` (host 3001, anonymous admin, light theme).
+- Config: `infra/observability/loki-config.yml` (single-binary, tsdb/filesystem,
+  7-day retention), `promtail-config.yml` (json pipeline → labels stage/status,
+  trace_id kept as field), Grafana provisioning (Loki datasource uid=loki +
+  dashboard provider) and dashboard `grafana/dashboards/chat-trace.json`
+  (timeline filtered by `$trace_id` + an errors/cannot_answer panel).
+- Data dirs `infra/data/{logs,loki,grafana}` created (contents gitignored).
+- `infra/.env.example`: LOKI_PORT / GRAFANA_PORT / GRAFANA_ADMIN_PASSWORD +
+  backend CHAT_TRACE_* hints.
+- Validated: `docker compose config` valid, all YAML/JSON parse. Live bring-up
+  pending (Docker Desktop was not running at implementation time).
+
+Implementation notes (Phase 3 — durable DB trace, 2026-08-09):
+- `trace.py`: per-turn event collector (`_turn_events_ctx`), `get_turn_trace`,
+  `overall_status`, `should_persist_turn`; `TraceConfig.persist`
+  (off|failed|all); `settings.chat_trace_persist` (env `CHAT_TRACE_PERSIST`,
+  default `failed`); wired in `main.py`.
+- Model `TurnDebugTrace` (`persistence/models.py`, table `turn_debug_trace`:
+  id, trace_id, conversation_id, owner_principal_id, status, events JSONB,
+  created_at; not FK'd so incomplete turns still record). Migration
+  `b1c2d3e4f5a6` (down_revision `7a8b9c0d1e2f`).
+- `persistence/debug_trace.py` `TurnDebugTraceStore.save(...)`; built in
+  `container.py` when the conversation engine exists, exposed as
+  `Container.debug_trace_store`; DI `get_debug_trace_store`.
+- `api/routes/chat.py`: `_persist_debug_trace` in the stream `finally` writes the
+  collected turn (per policy) best-effort — never breaks the SSE.
+- Verified live: `alembic upgrade head` → `b1c2d3e4f5a6`; store insert/read on
+  real Postgres OK; persist policy unit-checked (cannot_answer persists under
+  `failed`, completed does not); 46 tests pass; ruff clean.
+
+### Query the durable trace (Phase 3)
+```sql
+-- Recent failed / cannot_answer turns for a conversation
+SELECT created_at, trace_id, status
+FROM turn_debug_trace
+WHERE conversation_id = '<uuid>'
+ORDER BY created_at DESC LIMIT 20;
+
+-- Full event timeline of one turn
+SELECT jsonb_pretty(events) FROM turn_debug_trace WHERE trace_id = '<client_turn_id>';
+```
+
+### How to run (Phase 2)
+```bash
+# 1. Start the log stack
+docker compose -f infra/docker-compose.observability.yml up -d
+# 2. Point the backend at the trace file, then restart the backend:
+#    apps/backend/.env → CHAT_TRACE_LOG_FILE=infra/data/logs/chat-trace.log
+# 3. Send a chat turn, then open Grafana:
+#    http://localhost:3001  → dashboard "Chat Trace"
+#    Explore query: {job="chat-trace"} | json | trace_id=~"<turn_id>"
+```
 
 ## Bối cảnh
 
@@ -23,10 +122,9 @@ có central config, **không** structlog, **không** trace correlation.
 
 ## Phạm vi
 
-**Giai đoạn này chỉ làm SERVER-SIDE LOG.** Việc surface lý do ra **client** (đưa
-`insufficiency_reason` / error detail vào response cho UI) **để sau**, là một item
-tách riêng (xem mục 9). Mục tiêu trước mắt: dev đọc log server là biết được vì sao
-một turn lỗi hoặc `cannot_answer`.
+Phạm vi observability của plan vẫn là server-side log. Việc surface
+`insufficiency_reason` ra client đã được triển khai sau đó như một thay đổi
+contract/UI riêng; xem mục 9. Log server tiếp tục là nguồn chẩn đoán chi tiết.
 
 ## Mục tiêu
 
@@ -46,8 +144,8 @@ một turn lỗi hoặc `cannot_answer`.
 - Không dựng APM/tracing phân tán (OpenTelemetry) ở giai đoạn này.
 - Không đổi business logic của service/retrieval/generation.
 - Không log full prompt ở mức mặc định (size + dữ liệu người dùng).
-- **Không đổi response/SSE contract ra client** — client giữ nguyên; chỉ thêm log
-  ở server (client surfacing để sau, mục 9).
+- Telemetry không tự ý đổi response/SSE contract; client surfacing được triển
+  khai và kiểm thử trong một commit riêng sau phần observability ban đầu.
 
 ---
 
@@ -154,6 +252,25 @@ Hai giá trị chẩn đoán quan trọng nhất đã được tính ra nhưng *
 - Milestones (INFO) luôn bật, rẻ; full AI I/O gate sau DEBUG/flag để không phình
   log và không tốn.
 
+## 5b. Log sink & nơi xem — Grafana Loki (quyết định)
+
+Không dừng ở terminal. Sink chính = **Grafana Loki** (bạn đã quen Grafana).
+
+- App in **JSON log** trên logger `chat.trace` (đã có ở Phase 1) → **Promtail /
+  Docker log driver** đẩy vào **Loki** → xem/lọc trong **Grafana** theo
+  `trace_id`, `stage`, `provider`, `status`.
+- Vì sao Loki chứ không Jaeger/OTel: pain là **đọc nội dung AI** (raw output,
+  `insufficiency_reason`) = dữ liệu LOG, Loki chứa/đọc text blob tốt và gần như
+  free vì log đã có; Jaeger tối ưu latency-waterfall (thứ cần ít nhất) và bắt
+  instrument span nhiều. Chi tiết trade-off: xem thảo luận trong session/ADR-27.
+- **Postgres `turn_debug_trace`** (Phase 3) vẫn giữ làm **hồ sơ bền** tra theo
+  `turn_id` cho turn FAILED (Loki có retention giới hạn) — bổ trợ, không thay Loki.
+- **Đường mở rộng waterfall**: sau này cắm **Tempo** (cùng nhà Grafana, chung UI,
+  trace-to-logs) thay vì Jaeger — không đổi UI, không vứt gì.
+
+Compose (Phase 2): thêm service `loki` + `grafana` (+ `promtail`) vào `infra`,
+provision Loki làm datasource mặc định của Grafana.
+
 ## 6. Phân rã công việc (phased)
 
 **Phase 1 — Quick win (nửa ngày), server-log cho đúng ba ca đau:**
@@ -198,13 +315,9 @@ Hai giá trị chẩn đoán quan trọng nhất đã được tính ra nhưng *
   subquery nào.
 - Grep `trace_id` ra full timeline có latency từng bước.
 
-## 9. Client surfacing — DEFERRED (ngoài phạm vi giai đoạn này)
+## 9. Client surfacing — IMPLEMENTED AS SEPARATE FOLLOW-UP
 
-Sau khi server-log ổn, một plan/PR riêng sẽ đưa lý do ra client:
-- Thêm `insufficiency_reason` vào `ChatMetadataData` / `ChatDoneData`
-  (`api/models.py`) và điền tại `_finish_answer` → UI hiển thị vì sao "không thể
-  trả lời".
-- (tuỳ chọn) map error code → thông điệp thân thiện hơn cho từng loại lỗi.
-
-Việc này **đổi response contract ra client** nên tách khỏi giai đoạn server-log để
-không lẫn phạm vi. Không làm ở Plan 21 phần này.
+Commit follow-up `1d92325` đã thêm `insufficiency_reason` vào
+`ChatMetadataData`, SSE metadata, frontend stream state và callout
+"Chưa đủ căn cứ để trả lời". Thay đổi này được tách khỏi phần server-log về mặt
+commit; error-code mapping thân thiện hơn vẫn là hạng mục riêng nếu cần.

@@ -5,7 +5,13 @@
          "name": "backend",
          "runtimeExecutable": "uv",
          "runtimeArgs": ["run", "uvicorn", "main:app", "--port", "8000"],
-         "env": { "PYTHONPATH": "apps/backend;.", "PYTHONIOENCODING": "utf-8" },
+         "env": {
+            "PYTHONPATH": "apps/backend;.",
+            "PYTHONIOENCODING": "utf-8",
+            "CHAT_TRACE_LOG_FILE": "infra/data/logs/chat-trace.log",
+            "CHAT_TRACE_PERSIST": "failed",
+            "CHAT_TRACE_LLM_IO": "redacted"
+         },
          "port": 8000
       },
       {
