@@ -88,6 +88,8 @@ class ChatMetadataData(BaseModel):
     cannot_answer: bool
     needs_clarification: bool = False
     resolution_status: str | None = None
+    # Why the model declined to answer (present only when cannot_answer).
+    insufficiency_reason: str | None = None
 
 
 class ChatTokenData(BaseModel):
