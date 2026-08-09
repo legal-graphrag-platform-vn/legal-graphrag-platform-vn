@@ -190,30 +190,42 @@ async def build_container(
         )
         from src.generation.config import GenerationConfig
 
-        generator_factory = answer_factory or create_answer_generator
         try:
-            answer_generator = generator_factory(
-                GenerationConfig(
-                    timeout_seconds=settings.answer_timeout_seconds,
-                    max_concurrency=settings.answer_max_concurrency,
-                    max_retries=settings.answer_max_retries,
-                    max_output_tokens=settings.answer_max_output_tokens,
-                    temperature=settings.answer_temperature,
-                    thinking_level=settings.answer_thinking_level,
-                    context_max_chars=settings.answer_context_max_chars,
-                    context_safety_reserve_chars=(
-                        settings.answer_context_safety_reserve_chars
-                    ),
-                    history_max_messages=settings.answer_history_max_messages,
-                    history_max_chars=settings.answer_history_max_chars,
-                    stream_chunk_chars=settings.answer_stream_chunk_chars,
+            generation_config = GenerationConfig(
+                timeout_seconds=settings.answer_timeout_seconds,
+                max_concurrency=settings.answer_max_concurrency,
+                max_retries=settings.answer_max_retries,
+                max_output_tokens=settings.answer_max_output_tokens,
+                temperature=settings.answer_temperature,
+                thinking_level=settings.answer_thinking_level,
+                context_max_chars=settings.answer_context_max_chars,
+                context_safety_reserve_chars=(
+                    settings.answer_context_safety_reserve_chars
                 ),
-                AnswerApplicationSettings(
-                    ANSWER_PROVIDER=settings.answer_provider,
-                    ANSWER_MODEL=settings.answer_model,
-                    GEMINI_API_KEY=settings.gemini_api_key,
-                ),
+                history_max_messages=settings.answer_history_max_messages,
+                history_max_chars=settings.answer_history_max_chars,
+                stream_chunk_chars=settings.answer_stream_chunk_chars,
             )
+            application_settings = AnswerApplicationSettings(
+                ANSWER_PROVIDER=settings.answer_provider,
+                ANSWER_MODEL=settings.answer_model,
+                GEMINI_API_KEY=settings.gemini_api_key,
+            )
+            from observability import TracedAnswerGenerator, TracedAnswerProvider
+
+            if answer_factory is None:
+                answer_generator = create_answer_generator(
+                    generation_config,
+                    application_settings,
+                    provider_decorator=TracedAnswerProvider,
+                )
+            else:
+                answer_generator = answer_factory(
+                    generation_config,
+                    application_settings,
+                )
+
+            answer_generator = TracedAnswerGenerator(answer_generator)
         except Exception:
             await _cleanup_after_answer_startup_failure(
                 document_service,
@@ -223,9 +235,13 @@ async def build_container(
             )
             raise
         try:
-            conversation_engine, chat_service, lookup_driver, principal_signer, conversation_repo = (
-                _build_conversation_chat(settings, retrieval, answer_generator, runner)
-            )
+            (
+                conversation_engine,
+                chat_service,
+                lookup_driver,
+                principal_signer,
+                conversation_repo,
+            ) = _build_conversation_chat(settings, retrieval, answer_generator, runner)
         except Exception:
             await _cleanup_after_answer_startup_failure(
                 document_service,

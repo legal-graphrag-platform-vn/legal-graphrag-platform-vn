@@ -9,6 +9,7 @@ release lock -> buffered SSE from the persisted snapshot.
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import AsyncIterator
 
 from api.error_handlers import stream_error_contract
@@ -43,7 +44,12 @@ from persistence.enums import (
     TurnStatus,
 )
 from persistence.errors import ConversationStoreError
-from observability import log_event, truncate
+from observability import (
+    log_event,
+    log_retrieval_failure,
+    log_retrieval_result,
+    truncate,
+)
 from persistence.repository import (
     LockedTurn,
     SqlAlchemyConversationStore,
@@ -351,7 +357,7 @@ class ConversationChatService:
             )
 
         try:
-            retrieval_context = await self._retrieval.retrieve_context(
+            retrieval_context = await self._retrieve_with_trace(
                 RetrievalRequest(
                     query=standalone_query,
                     filters=RetrievalFilters(
@@ -360,7 +366,8 @@ class ConversationChatService:
                     ),
                     force_intent=request.force_intent,
                     enable_reranker=request.enable_reranker,
-                )
+                ),
+                subquery_id="standalone",
             )
             answer = await self._generator.generate(
                 AnswerGenerationRequest(
@@ -402,13 +409,34 @@ class ConversationChatService:
             # Concurrent subject to the application-scoped retrieval concurrency bound.
             # All subqueries are self-contained; depends_on is logical metadata only
             # and does not affect retrieval scheduling in this version.
-            contexts = list(
-                await asyncio.gather(*[
-                    self._retrieval.retrieve_context(subquery_request)
-                    for subquery_request in subquery_requests
-                ])
+            subquery_pairs = list(
+                zip(result.subqueries, subquery_requests, strict=True)
             )
+            contexts = list(
+                await asyncio.gather(
+                    *[
+                        self._retrieve_with_trace(
+                            subquery_request,
+                            subquery_id=subquery.id,
+                        )
+                        for subquery, subquery_request in subquery_pairs
+                    ]
+                )
+            )
+            input_unit_count = sum(len(context.retrieved_units) for context in contexts)
             merged_context = merge_contexts(contexts, query=standalone_query)
+            log_event(
+                "retrieval.merge",
+                subquery_count=len(subquery_requests),
+                subquery_ids=[subquery.id for subquery in result.subqueries],
+                input_unit_count=input_unit_count,
+                merged_unit_count=len(merged_context.retrieved_units),
+                deduplicated_unit_count=(
+                    input_unit_count - len(merged_context.retrieved_units)
+                ),
+                merged_evidence_count=len(merged_context.evidence),
+                merged_graph_path_count=len(merged_context.graph_paths),
+            )
             log_event(
                 "retrieval.fanout",
                 subquery_count=len(subquery_requests),
@@ -436,6 +464,31 @@ class ConversationChatService:
             retrieval_context=merged_context,
             answer=answer,
         )
+
+    async def _retrieve_with_trace(
+        self,
+        request: RetrievalRequest,
+        *,
+        subquery_id: str,
+    ):
+        started = time.perf_counter()
+        try:
+            context = await self._retrieval.retrieve_context(request)
+        except Exception as error:
+            log_retrieval_failure(
+                request=request,
+                subquery_id=subquery_id,
+                latency_ms=_elapsed_ms(started),
+                error=error,
+            )
+            raise
+        log_retrieval_result(
+            request=request,
+            context=context,
+            subquery_id=subquery_id,
+            latency_ms=_elapsed_ms(started),
+        )
+        return context
 
     async def _finish_answer(
         self,
@@ -570,6 +623,10 @@ def _history_for_processor(begun: BegunTurn) -> tuple[dict[str, str], ...]:
         {"role": msg.role.value, "content": msg.content}
         for msg in begun.context.recent_messages
     )
+
+
+def _elapsed_ms(started: float) -> int:
+    return int((time.perf_counter() - started) * 1000)
 
 
 def _citation_snapshot(citation, ordinal: int, unit) -> CitationSnapshot:
