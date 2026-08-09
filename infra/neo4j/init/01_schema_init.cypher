@@ -3,107 +3,98 @@
 // Source of truth: plans/legal_ontology.md v1.8.0
 //
 // Script idempotent nhờ IF NOT EXISTS.
-// Có thể chạy lại sau khi Neo4j khởi động:
-//   make init-schema
-// hoặc thủ công:
-//   docker exec -i graphrag-neo4j cypher-shell -u neo4j -p <password> < infra/neo4j/init/01_schema_init.cypher
-//
-// Lịch sử:
-//   v1 (cũ) — dựa trên 02_ontology_specification.md (SUPERSEDED)
-//   v2 (2026-07-07) — rewrite theo legal_ontology.md v1.3.0:
-//     - Thêm Chapter, Issuer, LegalConcept, LegalSubject, LegalAction nodes
-//     - Đổi AMENDED_BY/REPLACED_BY/REPEALED_BY → AMENDS/REPLACES/REPEALS (ADR-17)
-//     - Đổi status → legal_status
-//     - Thêm normative, issuer_name indexes cho Document
-//     - Thêm effective_from/to + legal_status + embedding cho Article/Clause (F2)
-//     - content → content_raw
-//   v3 (2026-07-07) — aligned comments with legal_ontology.md v1.4.0:
-//     - Community Edition bootstrap = uniqueness constraints + indexes only
-//     - Required properties and relation endpoint rules are application-layer validation
-//   v4 (2026-07-10) — ADR-20 embedding migration:
-//     - BGE-M3 primary model
-//     - Article/Clause vector indexes changed from 768 to 1024 dimensions
-//   v5 (2026-07-31) — ADR-23 Section hierarchy:
-//     - Add Section.id uniqueness; hierarchy/property integrity remains Python-owned
-//   v6 (2026-08-01) — ADR-25 Part/Subsection hierarchy:
-//     - Add Part.id and Subsection.id uniqueness
 // =============================================================================
+
 // =============================================================================
 // SECTION 1: UNIQUENESS CONSTRAINTS
-// Structural Layer — legal_ontology.md §2.1
 // =============================================================================
+
 // --- Structural Layer ---
 CREATE CONSTRAINT doc_id_unique IF NOT EXISTS
 FOR (d:Document)
 REQUIRE d.id IS UNIQUE;
+
 CREATE CONSTRAINT part_id_unique IF NOT EXISTS
 FOR (p:Part)
 REQUIRE p.id IS UNIQUE;
+
 CREATE CONSTRAINT ch_id_unique IF NOT EXISTS
 FOR (c:Chapter)
 REQUIRE c.id IS UNIQUE;
+
 CREATE CONSTRAINT sec_id_unique IF NOT EXISTS
 FOR (s:Section)
 REQUIRE s.id IS UNIQUE;
+
 CREATE CONSTRAINT subsec_id_unique IF NOT EXISTS
 FOR (s:Subsection)
 REQUIRE s.id IS UNIQUE;
+
 CREATE CONSTRAINT art_id_unique IF NOT EXISTS
 FOR (a:Article)
 REQUIRE a.id IS UNIQUE;
+
 CREATE CONSTRAINT cls_id_unique IF NOT EXISTS
 FOR (c:Clause)
 REQUIRE c.id IS UNIQUE;
+
 CREATE CONSTRAINT pnt_id_unique IF NOT EXISTS
 FOR (p:Point)
 REQUIRE p.id IS UNIQUE;
+
 CREATE CONSTRAINT iss_id_unique IF NOT EXISTS
 FOR (i:Issuer)
-REQUIRE i.id IS UNIQUE; // Rev.1: MERGE key = id (slug), không phải name (ADR-14 Rev.1)
+REQUIRE i.id IS UNIQUE;
 
-// --- Semantic Layer --- legal_ontology.md §2.2
-// Phase 1 scope: LegalConcept, LegalSubject, LegalAction (từ extraction Entity/Concept/Action)
-// Obligation, Right, Condition, Exception — Future work (Out of scope)
+// --- Semantic Layer ---
 CREATE CONSTRAINT lc_id_unique IF NOT EXISTS
 FOR (c:LegalConcept)
 REQUIRE c.id IS UNIQUE;
+
 CREATE CONSTRAINT ls_id_unique IF NOT EXISTS
 FOR (s:LegalSubject)
 REQUIRE s.id IS UNIQUE;
+
 CREATE CONSTRAINT la_id_unique IF NOT EXISTS
 FOR (a:LegalAction)
 REQUIRE a.id IS UNIQUE;
 
 // =============================================================================
 // SECTION 2: LOOKUP INDEXES
-// Tìm kiếm nhanh theo số hiệu, loại, trạng thái — legal_ontology.md §2.1
 // =============================================================================
 
 CREATE INDEX doc_number IF NOT EXISTS
 FOR (d:Document)
 ON (d.number);
+
 CREATE INDEX doc_doc_type IF NOT EXISTS
 FOR (d:Document)
 ON (d.doc_type);
+
 CREATE INDEX doc_normative IF NOT EXISTS
 FOR (d:Document)
-ON (d.normative); // filter văn bản quy phạm
+ON (d.normative);
+
 CREATE INDEX doc_legal_status IF NOT EXISTS
 FOR (d:Document)
-ON (d.legal_status); // đổi từ doc_status
+ON (d.legal_status);
+
 CREATE INDEX doc_issuer_name IF NOT EXISTS
 FOR (d:Document)
-ON (d.issuer_name); // Writer dùng để MERGE Issuer
+ON (d.issuer_name);
 
 CREATE INDEX art_number IF NOT EXISTS
 FOR (a:Article)
 ON (a.number);
+
 CREATE INDEX art_legal_status IF NOT EXISTS
 FOR (a:Article)
-ON (a.legal_status); // F2: thêm mới
+ON (a.legal_status);
+
 CREATE INDEX cls_legal_status IF NOT EXISTS
 FOR (c:Clause)
-ON (c.legal_status); // F2: thêm mới
+ON (c.legal_status);
+
 CREATE INDEX pnt_legal_status IF NOT EXISTS
 FOR (p:Point)
 ON (p.legal_status);
@@ -114,93 +105,98 @@ ON (i.name);
 
 // =============================================================================
 // SECTION 2.5: SEMANTIC LOOKUP INDEXES
-// Hỗ trợ entity normalization, graph-quality, và debug semantic nodes.
 // =============================================================================
 
 CREATE INDEX lc_name IF NOT EXISTS
 FOR (c:LegalConcept)
 ON (c.name);
+
 CREATE INDEX ls_name IF NOT EXISTS
 FOR (s:LegalSubject)
 ON (s.name);
+
 CREATE INDEX la_name IF NOT EXISTS
 FOR (a:LegalAction)
 ON (a.name);
 
 // =============================================================================
 // SECTION 3: TEMPORAL INDEXES
-// Dùng cho temporal filter trong Cypher query (RC4).
-// Mọi truy vấn "văn bản còn hiệu lực tại ngày X" đều dùng indexes này.
-// F2: Article/Clause cần effective_from/to vì retrieval query filter trực tiếp
-//     trên node (xem 05_graphrag_retrieval.md Cypher templates).
 // =============================================================================
 
 CREATE INDEX doc_temporal IF NOT EXISTS
 FOR (d:Document)
 ON (d.effective_from, d.effective_to);
+
 CREATE INDEX art_temporal IF NOT EXISTS
 FOR (a:Article)
-ON (a.effective_from, a.effective_to); // F2
+ON (a.effective_from, a.effective_to);
+
 CREATE INDEX cls_temporal IF NOT EXISTS
 FOR (c:Clause)
-ON (c.effective_from, c.effective_to); // F2
+ON (c.effective_from, c.effective_to);
+
 CREATE INDEX pnt_temporal IF NOT EXISTS
 FOR (p:Point)
 ON (p.effective_from, p.effective_to);
 
-// Indexes trên relation properties (Neo4j 5.x) — ADR-17: active voice
 CREATE INDEX amends_from IF NOT EXISTS
 FOR ()-[r:AMENDS]-()
 ON (r.effective_from);
+
 CREATE INDEX replaces_from IF NOT EXISTS
 FOR ()-[r:REPLACES]-()
 ON (r.effective_from);
+
 CREATE INDEX repeals_from IF NOT EXISTS
 FOR ()-[r:REPEALS]-()
 ON (r.effective_from);
 
 // =============================================================================
 // SECTION 3.5: RELATION IDENTITY INDEXES
-// M3 writer uses deterministic relation_id for relationship idempotency.
-// Neo4j CE does not enforce relationship uniqueness; Python validates it.
-// These indexes speed up MERGE and graph-quality duplicate checks.
 // =============================================================================
 
 CREATE INDEX issued_by_relation_id IF NOT EXISTS
 FOR ()-[r:ISSUED_BY]-()
 ON (r.relation_id);
+
 CREATE INDEX contains_relation_id IF NOT EXISTS
 FOR ()-[r:CONTAINS]-()
 ON (r.relation_id);
+
 CREATE INDEX refers_to_relation_id IF NOT EXISTS
 FOR ()-[r:REFERS_TO]-()
 ON (r.relation_id);
+
 CREATE INDEX guides_relation_id IF NOT EXISTS
 FOR ()-[r:GUIDES]-()
 ON (r.relation_id);
+
 CREATE INDEX amends_relation_id IF NOT EXISTS
 FOR ()-[r:AMENDS]-()
 ON (r.relation_id);
+
 CREATE INDEX repeals_relation_id IF NOT EXISTS
 FOR ()-[r:REPEALS]-()
 ON (r.relation_id);
+
 CREATE INDEX replaces_relation_id IF NOT EXISTS
 FOR ()-[r:REPLACES]-()
 ON (r.relation_id);
+
 CREATE INDEX defines_relation_id IF NOT EXISTS
 FOR ()-[r:DEFINES]-()
 ON (r.relation_id);
+
 CREATE INDEX regulates_relation_id IF NOT EXISTS
 FOR ()-[r:REGULATES]-()
 ON (r.relation_id);
+
 CREATE INDEX requires_relation_id IF NOT EXISTS
 FOR ()-[r:REQUIRES]-()
 ON (r.relation_id);
 
 // =============================================================================
 // SECTION 4: FULL-TEXT SEARCH INDEXES
-// Hỗ trợ BM25 full-text search song song với vector search (ADR-08).
-// Dùng content_raw (theo legal_ontology.md §2.1, không phải content).
 // =============================================================================
 
 CREATE FULLTEXT INDEX legal_article_clause_fulltext IF NOT EXISTS
@@ -212,22 +208,12 @@ FOR (p:Point)
 ON EACH [p.content_raw];
 
 // =============================================================================
-// SECTION 5: VECTOR INDEXES (Neo4j 5.11+ native)
-// 1024 dims — khớp với BAAI/bge-m3 (ADR-20, ontology v1.8.0).
-// Cosine similarity — standard cho semantic search.
-//
-// ADR-08: Unified storage — không dùng Qdrant riêng biệt.
-// 1 Cypher query = vector search + graph traversal + temporal filter.
-//
-// F2 + ADR-02: embedding nullable, chỉ có ở Article + Clause.
-//   - Point: quá ngắn, không đủ ngữ cảnh để embed có ý nghĩa (ADR-02)
-//   - Nullable: Writer ghi node trước (Tuần 1 M3), Embedding Generator fill sau (Tuần 2 M3)
-//
-// ⚠️  DIMENSION CONTRACT: 1024 dim là schema contract, không phải tech detail.
-//     Đổi embedding model → phải DROP INDEX + re-embed toàn bộ → cần ADR mới.
+// SECTION 5: VECTOR INDEXES (Neo4j 5.11+ native, 1024-dim BAAI/bge-m3)
 // =============================================================================
 
-CREATE VECTOR INDEX article_embedding IF NOT EXISTS FOR (a:Article) ON (a.embedding)
+CREATE VECTOR INDEX article_embedding IF NOT EXISTS
+FOR (a:Article)
+ON (a.embedding)
 OPTIONS {
   indexConfig: {
     `vector.dimensions`: 1024,
@@ -235,21 +221,12 @@ OPTIONS {
   }
 };
 
-CREATE VECTOR INDEX clause_embedding IF NOT EXISTS FOR (c:Clause) ON (c.embedding)
+CREATE VECTOR INDEX clause_embedding IF NOT EXISTS
+FOR (c:Clause)
+ON (c.embedding)
 OPTIONS {
   indexConfig: {
     `vector.dimensions`: 1024,
     `vector.similarity_function`: 'cosine'
   }
 };
-
-// =============================================================================
-// VERIFY — Chạy để xác nhận schema đã được tạo đúng
-// =============================================================================
-
-// SHOW CONSTRAINTS;
-// SHOW INDEXES
-// YIELD name, type, state, labelsOrTypes, properties
-// RETURN name, type, state, labelsOrTypes, properties
-// ORDER BY type, name;
-// SHOW VECTOR INDEXES;
