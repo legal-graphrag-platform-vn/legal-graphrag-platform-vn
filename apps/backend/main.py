@@ -62,6 +62,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 from conversation.startup import verify_conversation_store
 
                 await verify_conversation_store(container.conversation_engine)
+
+            # 2b. Warm up Embedding and Retrieval models at boot (0 latency for user queries)
+            if container.rag_service is not None and hasattr(container.rag_service, "warmup"):
+                await container.rag_service.warmup()
+
             yield
         finally:
             # 3.   Shutdown: đóng resources (Neo4j driver, PostgreSQL engine).
