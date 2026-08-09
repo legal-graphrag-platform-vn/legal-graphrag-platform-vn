@@ -82,6 +82,8 @@ services:
     container_name: graphrag-loki-prod
     restart: unless-stopped
     command: -config.file=/etc/loki/config.yml
+    ports:
+      - "3100:3100"
     volumes:
       - ../observability/loki-config.yml:/etc/loki/config.yml:ro
       - ../data/loki:/loki
