@@ -451,9 +451,6 @@ class ConversationChatService:
             )
         except (RetrievalError, AnswerGenerationError) as exc:
             code, message = stream_error_contract(exc)
-            log_event(
-                "answer.failed", "error", error_type=type(exc).__name__, code=code
-            )
             return await self._persist_failure(turn, begun, code, message)
 
         return await self._finish_answer(
