@@ -318,6 +318,7 @@ def _build_query_processor(
     if not settings.query_processor_enabled:
         return None
 
+    from observability import TracedTextGenerator
     from query_processing.adapter import QueryProcessorAdapter
     from src.infrastructure.llm.text_generation_factory import build_text_generator
     from src.retrieval.nlu.query_processor import QueryProcessor
@@ -331,7 +332,9 @@ def _build_query_processor(
             "OLLAMA_HOST": settings.ollama_base_url,
         }
     )
-    return QueryProcessorAdapter(QueryProcessor(text_generator), runner)
+    # Trace the LLM I/O (prompt + raw output) of the query processor (Plan 21).
+    traced_generator = TracedTextGenerator(text_generator, stage="query_processor")
+    return QueryProcessorAdapter(QueryProcessor(traced_generator), runner)
 
 
 async def _cleanup_retrieval_after_startup_failure(

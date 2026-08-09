@@ -1,0 +1,58 @@
+# Opt-in observability stack for Plan 21 debug trace logs.
+# Run:  docker compose -f infra/docker-compose.observability.yml up -d
+# Then set backend env CHAT_TRACE_LOG_FILE=infra/data/logs/chat-trace.log and
+# open Grafana at http://localhost:3001 (dashboard "Chat Trace").
+name: graphrag-observability
+
+services:
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: graphrag-loki
+    command: -config.file=/etc/loki/config.yml
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./observability/loki-config.yml:/etc/loki/config.yml:ro
+      - ./data/loki:/loki
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3100/ready || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: graphrag-promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./observability/promtail-config.yml:/etc/promtail/config.yml:ro
+      # The backend writes JSON trace lines here (CHAT_TRACE_LOG_FILE).
+      - ./data/logs:/var/log/chat:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: graphrag-grafana
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      # Anonymous admin for local dev viewing — do not expose publicly.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_DEFAULT_THEME: "light"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - ./data/grafana:/var/lib/grafana
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+networks:
+  default:
+    name: graphrag-observability

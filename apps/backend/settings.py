@@ -88,6 +88,14 @@ class Settings(BaseSettings):
     query_processor_enabled: bool = False
     query_processor_model: str = "gemini-flash-lite-latest"
 
+    # 8b.  Observability / debug trace logging (Plan 21)
+    log_level: str = "INFO"
+    chat_trace_llm_io: Literal["off", "redacted", "full"] = "redacted"
+    chat_trace_max_raw: int = Field(default=2000, ge=200, le=20_000)
+    # Set to a file path (e.g. infra/data/logs/chat-trace.log) so Promtail can
+    # tail it into Loki. None → stdout only.
+    chat_trace_log_file: str | None = None
+
     # 9.   Signed anonymous principal (Plan 19 §2)
     anonymous_principal_signing_key: str | None = None
     anonymous_principal_cookie_ttl_days: int = Field(default=180, ge=1, le=730)

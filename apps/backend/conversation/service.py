@@ -43,6 +43,7 @@ from persistence.enums import (
     TurnStatus,
 )
 from persistence.errors import ConversationStoreError
+from observability import log_event, truncate
 from persistence.repository import (
     LockedTurn,
     SqlAlchemyConversationStore,
@@ -201,13 +202,29 @@ class ConversationChatService:
         history = _history_for_processor(begun)
         try:
             result = await self._query_processor.process(request.message, history)
-        except (QueryProcessingError, TextGenerationError):
+        except (QueryProcessingError, TextGenerationError) as exc:
+            # Preserve the diagnostic context the query processor already attached
+            # (raw LLM output / which contract field failed) instead of dropping it.
+            log_event(
+                "query_processor.failed",
+                "error",
+                error_type=type(exc).__name__,
+                raw_output=truncate(getattr(exc, "raw_output", None)),
+                validation_detail=getattr(exc, "validation_detail", None) or str(exc),
+            )
             return await self._persist_failure(
                 turn,
                 begun,
                 QUERY_PROCESSING_FAILED_CODE,
                 _QUERY_PROCESSING_FAILED_MESSAGE,
             )
+
+        log_event(
+            "query_processor.call",
+            status=result.status.value,
+            plan_type=result.plan_type.value if result.plan_type else None,
+            subquery_count=len(result.subqueries),
+        )
 
         if result.status is ProcessingStatus.NEEDS_CLARIFICATION:
             clarify = ClarifyResolution(
@@ -392,6 +409,11 @@ class ConversationChatService:
                 ])
             )
             merged_context = merge_contexts(contexts, query=standalone_query)
+            log_event(
+                "retrieval.fanout",
+                subquery_count=len(subquery_requests),
+                merged_units=len(merged_context.retrieved_units),
+            )
             answer = await self._generator.generate(
                 AnswerGenerationRequest(
                     query=standalone_query,
@@ -401,6 +423,9 @@ class ConversationChatService:
             )
         except (RetrievalError, AnswerGenerationError) as exc:
             code, message = stream_error_contract(exc)
+            log_event(
+                "answer.failed", "error", error_type=type(exc).__name__, code=code
+            )
             return await self._persist_failure(turn, begun, code, message)
 
         return await self._finish_answer(
@@ -450,6 +475,16 @@ class ConversationChatService:
         status = TurnStatus.CANNOT_ANSWER if cannot_answer else TurnStatus.COMPLETED
         kind = MessageKind.CANNOT_ANSWER if cannot_answer else MessageKind.ANSWER
         resolution_status, reason_code = _answer_resolution(outcome)
+
+        # The generator computes an insufficiency_reason for cannot_answer but it
+        # is dropped from the client contract; surface it in the server trace.
+        if cannot_answer:
+            log_event(
+                "generation.cannot_answer",
+                insufficiency_reason=getattr(answer, "insufficiency_reason", None),
+                sources_count=len(cited_sources),
+                intent=answer.intent,
+            )
         metadata = ChatMetadataData(
             sources=cited_sources,
             intent=answer.intent,
@@ -487,6 +522,13 @@ class ConversationChatService:
             focus_upserts=focus_upserts_from_citations(citation_snapshots),
             update_focus=not cannot_answer,
             response_snapshot=snapshot,
+        )
+        log_event(
+            "turn.finished",
+            status=status.value,
+            citation_count=len(citation_data),
+            provider=answer.provider,
+            model=answer.model,
         )
         return snapshot
 

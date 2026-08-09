@@ -1,8 +1,57 @@
 # Plan 21 — Structured Trace Logging cho luồng chat (AI-aware Debugging)
 
-Status: PROPOSED
+Status: PHASE 1 + 2 IMPLEMENTED (server-side + Loki/Grafana); Phase 3 pending
 Dependencies: `Plan 19 (19_conversation_context.md)`, ADR-27 (Query Processing)
 Created At: 2026-08-09
+Branch: `feature/add-log`
+
+Implementation notes (Phase 1, 2026-08-09):
+- New package `apps/backend/observability/`: `trace.py` (contextvar trace binding,
+  JSON logging on the `chat.trace` logger, `log_event`, `TraceConfig`, `redact`,
+  `truncate`), `llm.py` (`TracedTextGenerator` wrapping `TextGenerationPort`),
+  `__init__.py` (exports).
+- `settings.py`: `log_level`, `chat_trace_llm_io` (off|redacted|full),
+  `chat_trace_max_raw`.
+- `main.py`: `configure_logging` + `configure_trace` at app build.
+- `api/routes/chat.py`: `bind_trace` per request + `request.received` /
+  `stream.error` events + `clear_trace` in finally.
+- `conversation/service.py`: `query_processor.call`, **`query_processor.failed`**
+  (stops swallowing — logs raw_output + validation_detail),
+  **`generation.cannot_answer`** (surfaces dropped `insufficiency_reason`),
+  `retrieval.fanout`, `answer.failed`, `turn.finished`.
+- `container.py`: query-processor text generator wrapped with
+  `TracedTextGenerator` (stage=`query_processor`).
+- Verified: observability smoke test emits JSON events; `test_conversation_service`
+  (12) + `test_contracts` (26, builds app) pass; ruff clean.
+
+Implementation notes (Phase 2 — Loki/Grafana sink, 2026-08-09):
+- `trace.py` `configure_logging(level, log_file=...)` adds a RotatingFileHandler
+  so trace JSON is also written to a file Promtail can tail; `settings.py`
+  `chat_trace_log_file` (env `CHAT_TRACE_LOG_FILE`); wired in `main.py`.
+- New opt-in stack `infra/docker-compose.observability.yml` (name
+  `graphrag-observability`): `loki` (3100), `promtail` (tails
+  `data/logs/*.log`), `grafana` (host 3001, anonymous admin, light theme).
+- Config: `infra/observability/loki-config.yml` (single-binary, tsdb/filesystem,
+  7-day retention), `promtail-config.yml` (json pipeline → labels stage/status,
+  trace_id kept as field), Grafana provisioning (Loki datasource uid=loki +
+  dashboard provider) and dashboard `grafana/dashboards/chat-trace.json`
+  (timeline filtered by `$trace_id` + an errors/cannot_answer panel).
+- Data dirs `infra/data/{logs,loki,grafana}` created (contents gitignored).
+- `infra/.env.example`: LOKI_PORT / GRAFANA_PORT / GRAFANA_ADMIN_PASSWORD +
+  backend CHAT_TRACE_* hints.
+- Validated: `docker compose config` valid, all YAML/JSON parse. Live bring-up
+  pending (Docker Desktop was not running at implementation time).
+
+### How to run (Phase 2)
+```bash
+# 1. Start the log stack
+docker compose -f infra/docker-compose.observability.yml up -d
+# 2. Point the backend at the trace file, then restart the backend:
+#    apps/backend/.env → CHAT_TRACE_LOG_FILE=infra/data/logs/chat-trace.log
+# 3. Send a chat turn, then open Grafana:
+#    http://localhost:3001  → dashboard "Chat Trace"
+#    Explore query: {job="chat-trace"} | json | trace_id=~"<turn_id>"
+```
 
 ## Bối cảnh
 
@@ -153,6 +202,25 @@ Hai giá trị chẩn đoán quan trọng nhất đã được tính ra nhưng *
   nhân) — mặc định chỉ lưu preview + hash; `full` chỉ dùng khi debug cục bộ.
 - Milestones (INFO) luôn bật, rẻ; full AI I/O gate sau DEBUG/flag để không phình
   log và không tốn.
+
+## 5b. Log sink & nơi xem — Grafana Loki (quyết định)
+
+Không dừng ở terminal. Sink chính = **Grafana Loki** (bạn đã quen Grafana).
+
+- App in **JSON log** trên logger `chat.trace` (đã có ở Phase 1) → **Promtail /
+  Docker log driver** đẩy vào **Loki** → xem/lọc trong **Grafana** theo
+  `trace_id`, `stage`, `provider`, `status`.
+- Vì sao Loki chứ không Jaeger/OTel: pain là **đọc nội dung AI** (raw output,
+  `insufficiency_reason`) = dữ liệu LOG, Loki chứa/đọc text blob tốt và gần như
+  free vì log đã có; Jaeger tối ưu latency-waterfall (thứ cần ít nhất) và bắt
+  instrument span nhiều. Chi tiết trade-off: xem thảo luận trong session/ADR-27.
+- **Postgres `turn_debug_trace`** (Phase 3) vẫn giữ làm **hồ sơ bền** tra theo
+  `turn_id` cho turn FAILED (Loki có retention giới hạn) — bổ trợ, không thay Loki.
+- **Đường mở rộng waterfall**: sau này cắm **Tempo** (cùng nhà Grafana, chung UI,
+  trace-to-logs) thay vì Jaeger — không đổi UI, không vứt gì.
+
+Compose (Phase 2): thêm service `loki` + `grafana` (+ `promtail`) vào `infra`,
+provision Loki làm datasource mặc định của Grafana.
 
 ## 6. Phân rã công việc (phased)
 
