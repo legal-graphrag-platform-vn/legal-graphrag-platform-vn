@@ -1,6 +1,6 @@
 # Plan 21 — Structured Trace Logging cho luồng chat (AI-aware Debugging)
 
-Status: PHASE 1 + 2 IMPLEMENTED (server-side + Loki/Grafana); Phase 3 pending
+Status: PHASE 1 + 2 + 3 IMPLEMENTED (server-side + Loki/Grafana + durable DB trace)
 Dependencies: `Plan 19 (19_conversation_context.md)`, ADR-27 (Query Processing)
 Created At: 2026-08-09
 Branch: `feature/add-log`
@@ -41,6 +41,36 @@ Implementation notes (Phase 2 — Loki/Grafana sink, 2026-08-09):
   backend CHAT_TRACE_* hints.
 - Validated: `docker compose config` valid, all YAML/JSON parse. Live bring-up
   pending (Docker Desktop was not running at implementation time).
+
+Implementation notes (Phase 3 — durable DB trace, 2026-08-09):
+- `trace.py`: per-turn event collector (`_turn_events_ctx`), `get_turn_trace`,
+  `overall_status`, `should_persist_turn`; `TraceConfig.persist`
+  (off|failed|all); `settings.chat_trace_persist` (env `CHAT_TRACE_PERSIST`,
+  default `failed`); wired in `main.py`.
+- Model `TurnDebugTrace` (`persistence/models.py`, table `turn_debug_trace`:
+  id, trace_id, conversation_id, owner_principal_id, status, events JSONB,
+  created_at; not FK'd so incomplete turns still record). Migration
+  `b1c2d3e4f5a6` (down_revision `7a8b9c0d1e2f`).
+- `persistence/debug_trace.py` `TurnDebugTraceStore.save(...)`; built in
+  `container.py` when the conversation engine exists, exposed as
+  `Container.debug_trace_store`; DI `get_debug_trace_store`.
+- `api/routes/chat.py`: `_persist_debug_trace` in the stream `finally` writes the
+  collected turn (per policy) best-effort — never breaks the SSE.
+- Verified live: `alembic upgrade head` → `b1c2d3e4f5a6`; store insert/read on
+  real Postgres OK; persist policy unit-checked (cannot_answer persists under
+  `failed`, completed does not); 46 tests pass; ruff clean.
+
+### Query the durable trace (Phase 3)
+```sql
+-- Recent failed / cannot_answer turns for a conversation
+SELECT created_at, trace_id, status
+FROM turn_debug_trace
+WHERE conversation_id = '<uuid>'
+ORDER BY created_at DESC LIMIT 20;
+
+-- Full event timeline of one turn
+SELECT jsonb_pretty(events) FROM turn_debug_trace WHERE trace_id = '<client_turn_id>';
+```
 
 ### How to run (Phase 2)
 ```bash

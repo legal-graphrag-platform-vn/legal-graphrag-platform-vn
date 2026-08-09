@@ -40,6 +40,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         TraceConfig(
             llm_io=settings.chat_trace_llm_io,
             max_raw=settings.chat_trace_max_raw,
+            persist=settings.chat_trace_persist,
         )
     )
 

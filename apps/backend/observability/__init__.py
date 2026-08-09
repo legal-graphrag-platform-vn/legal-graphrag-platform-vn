@@ -9,8 +9,11 @@ from observability.trace import (
     clear_trace,
     configure_logging,
     configure_trace,
+    get_turn_trace,
     log_event,
+    overall_status,
     redact,
+    should_persist_turn,
     truncate,
 )
 
@@ -21,7 +24,10 @@ __all__ = [
     "clear_trace",
     "configure_logging",
     "configure_trace",
+    "get_turn_trace",
     "log_event",
+    "overall_status",
     "redact",
+    "should_persist_turn",
     "truncate",
 ]
