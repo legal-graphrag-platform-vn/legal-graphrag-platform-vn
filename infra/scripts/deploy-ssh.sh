@@ -40,8 +40,8 @@ $SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p $REMOTE_DIR/infra"
 # 3.   Đồng bộ file cấu hình sản xuất nhẹ (docker-compose.prod.yml & .env)
 echo "--> [3/4] Đồng bộ file cấu hình Production lên Server..."
 rsync -avz -e "ssh -i $KEY_PATH -p $DEPLOY_PORT" \
-    "$PROJECT_ROOT/infra/docker-compose.prod.yml" \
-    "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_DIR/infra/docker-compose.prod.yml"
+    "$PROJECT_ROOT/infra/prod/docker-compose.yml" \
+    "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_DIR/infra/prod/docker-compose.yml"
 
 if [ -f "$PROJECT_ROOT/infra/.env" ]; then
     rsync -avz -e "ssh -i $KEY_PATH -p $DEPLOY_PORT" \
@@ -56,12 +56,12 @@ $SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "
     if [ -n \"$GHCR_PAT\" ]; then
         echo \"$GHCR_PAT\" | docker login ghcr.io -u \"$GHCR_USER\" --password-stdin
     fi
-    TAG=\"$TAG\" docker compose -f infra/docker-compose.prod.yml pull || TAG=\"$TAG\" docker-compose -f infra/docker-compose.prod.yml pull
-    TAG=\"$TAG\" docker compose -f infra/docker-compose.prod.yml up -d || TAG=\"$TAG\" docker-compose -f infra/docker-compose.prod.yml up -d
+    TAG=\"$TAG\" docker compose -f infra/prod/docker-compose.yml pull || TAG=\"$TAG\" docker-compose -f infra/prod/docker-compose.yml pull
+    TAG=\"$TAG\" docker compose -f infra/prod/docker-compose.yml up -d || TAG=\"$TAG\" docker-compose -f infra/prod/docker-compose.yml up -d
 "
 
 # 5.   Trạng thái Container
 echo "================================================================="
 echo "✅ Triển khai hoàn tất! Trạng thái các container trên Server:"
-$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "cd $REMOTE_DIR && docker compose -f infra/docker-compose.prod.yml ps || docker-compose -f infra/docker-compose.prod.yml ps"
+$SSH_CMD "$DEPLOY_USER@$DEPLOY_HOST" "cd $REMOTE_DIR && docker compose -f infra/prod/docker-compose.yml ps || docker-compose -f infra/prod/docker-compose.yml ps"
 echo "================================================================="
