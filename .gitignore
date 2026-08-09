@@ -41,8 +41,9 @@ tree.txt
 # uv
 .venv/
 
-# Safe, non-secret backend configuration template
+# Safe, non-secret configuration templates
 !apps/backend/.env.example
+!infra/env/.env.example
 
 experiments
 

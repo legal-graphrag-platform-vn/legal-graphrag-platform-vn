@@ -3,6 +3,8 @@ services:
     image: neo4j:5.26.28-community
     container_name: graphrag-neo4j-m3
     restart: "no"
+    env_file:
+      - env/.env.compose
     ports:
       - "127.0.0.1:7475:7474"
       - "127.0.0.1:7688:7687"

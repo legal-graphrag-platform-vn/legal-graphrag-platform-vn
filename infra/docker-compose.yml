@@ -3,6 +3,8 @@ services:
     image: neo4j:5.26.28-community
     container_name: graphrag-neo4j
     restart: unless-stopped
+    env_file:
+      - env/.env.compose
     ports:
       - "${NEO4J_HTTP_PORT:-7474}:7474"   # Browser UI
       - "${NEO4J_BOLT_PORT:-7687}:7687"   # Bolt protocol (driver)
@@ -39,6 +41,8 @@ services:
     image: postgres:16-alpine
     container_name: graphrag-postgres
     restart: unless-stopped
+    env_file:
+      - env/.env.compose
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     environment:
