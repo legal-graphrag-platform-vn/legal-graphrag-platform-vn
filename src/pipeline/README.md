@@ -36,6 +36,10 @@ and `write` for curated ready documents. The write command verifies each new
 `Chapter -> Section -> Article` chain before removing its exact legacy direct
 `Chapter -> Article` edge.
 
+A `Chapter` may also retain direct preamble Articles before its first `Section`.
+The parser and payload consistency validator reject the mixed structure if any
+direct Article number is at or after the first Article contained by a Section.
+
 ## Dẫn chiếu cấu trúc liên văn bản
 
 Sau khi toàn bộ văn bản nguồn và đích đã chạy `validate-payload` rồi `write`, tạo

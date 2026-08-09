@@ -8,6 +8,17 @@ from src.shared.ontology.payload_consistency_validator import (
 )
 
 
+def _contains(head_id: str, tail_id: str) -> dict[str, object]:
+    return {
+        "head_id": head_id,
+        "type": "CONTAINS",
+        "tail_id": tail_id,
+        "properties": {
+            "relation_id": deterministic_relation_id(head_id, "CONTAINS", tail_id)
+        },
+    }
+
+
 def test_payload_consistency_detects_dangling_relation() -> None:
     report = validate_payload_consistency(
         {
@@ -131,3 +142,51 @@ def test_payload_consistency_rejects_incomplete_reference_bundle() -> None:
 
     assert report.valid is False
     assert any("Incomplete reference bundle" in error for error in report.errors)
+
+
+def test_payload_consistency_accepts_chapter_preamble_before_sections() -> None:
+    report = validate_payload_consistency(
+        {
+            "nodes": [
+                {"type": "Document", "id": "doc"},
+                {"type": "Chapter", "id": "doc_ch23"},
+                {"type": "Section", "id": "doc_ch23_sec1"},
+                {"type": "Article", "id": "doc_art99", "number": "99"},
+                {"type": "Article", "id": "doc_art100", "number": "100"},
+            ],
+            "relations": [
+                _contains("doc", "doc_ch23"),
+                _contains("doc_ch23", "doc_art99"),
+                _contains("doc_ch23", "doc_ch23_sec1"),
+                _contains("doc_ch23_sec1", "doc_art100"),
+            ],
+        }
+    )
+
+    assert report.valid is True
+
+
+def test_payload_consistency_rejects_direct_article_after_section_articles() -> None:
+    report = validate_payload_consistency(
+        {
+            "nodes": [
+                {"type": "Document", "id": "doc"},
+                {"type": "Chapter", "id": "doc_ch23"},
+                {"type": "Section", "id": "doc_ch23_sec1"},
+                {"type": "Article", "id": "doc_art353", "number": "353"},
+                {"type": "Article", "id": "doc_art354", "number": "354"},
+            ],
+            "relations": [
+                _contains("doc", "doc_ch23"),
+                _contains("doc_ch23", "doc_ch23_sec1"),
+                _contains("doc_ch23_sec1", "doc_art353"),
+                _contains("doc_ch23", "doc_art354"),
+            ],
+        }
+    )
+
+    assert report.valid is False
+    assert any(
+        "direct Article 354 must precede first Section Article 353" in error
+        for error in report.errors
+    )

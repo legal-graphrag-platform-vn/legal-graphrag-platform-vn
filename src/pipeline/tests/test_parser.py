@@ -4,7 +4,14 @@ import pytest
 from pydantic import ValidationError
 
 from src.pipeline.parser.hierarchy_parser import parse_text
-from src.pipeline.parser.models import Clause, DocumentInfo, Point
+from src.pipeline.parser.models import (
+    Article,
+    Clause,
+    DocumentInfo,
+    ParsedDocument,
+    Point,
+    Section,
+)
 from src.shared.ontology.hierarchy import (
     normalize_part_number,
     part_id,
@@ -167,20 +174,70 @@ def test_parser_preserves_part_and_subsection_metadata() -> None:
     ] == [("ii", "IV", "3", "1a", "Trình tự")]
 
 
-def test_parser_rejects_invalid_part_subsection_and_mixed_child_modes() -> None:
+def test_parser_accepts_direct_chapter_preamble_before_section_articles() -> None:
+    parsed = parse_text(
+        "Chương XXIII\nCÁC TỘI PHẠM VỀ CHỨC VỤ\n"
+        "Điều 352. Khái niệm tội phạm về chức vụ\n"
+        "Mục 1. Các tội phạm tham nhũng\n"
+        "Điều 353. Tội tham ô tài sản\n"
+        "Điều 354. Tội nhận hối lộ",
+        _doc_info(),
+    )
+
+    assert [article.number for article in parsed.articles] == ["352", "353", "354"]
+    assert [article.section for article in parsed.articles] == [None, "1", "1"]
+
+
+def test_parser_compares_preamble_articles_by_natural_legal_number() -> None:
+    parsed = parse_text(
+        "Chương I\nTÊN CHƯƠNG\n"
+        "Điều 98. Mở đầu một\n"
+        "Điều 99. Mở đầu hai\n"
+        "Mục 1. Mục một\n"
+        "Điều 100. Trong Mục",
+        _doc_info(),
+    )
+
+    assert [article.number for article in parsed.articles] == ["98", "99", "100"]
+    assert [article.section for article in parsed.articles] == [None, None, "1"]
+
+
+def test_parsed_document_rejects_direct_article_after_section_articles() -> None:
+    with pytest.raises(
+        ValueError,
+        match="direct Article 354 must precede first Section Article 353",
+    ):
+        ParsedDocument(
+            document=_doc_info(),
+            sections=[Section(number="1", title="Mục một", chapter="XXIII")],
+            articles=[
+                Article(
+                    number="353",
+                    title="Trong Mục",
+                    content_raw="Nội dung",
+                    chapter="XXIII",
+                    section="1",
+                ),
+                Article(
+                    number="354",
+                    title="Trực tiếp",
+                    content_raw="Nội dung",
+                    chapter="XXIII",
+                ),
+            ],
+        )
+
+
+def test_parser_rejects_invalid_part_subsection_and_section_child_modes() -> None:
     with pytest.raises(ValueError, match="Subsection 1 appears before any Section"):
         parse_text("Tiểu mục 1. Tên\nĐiều 1. Nội dung", _doc_info())
 
     with pytest.raises(ValueError, match="Part i is missing a valid title"):
         parse_text("Phần I\nChương I\nTÊN CHƯƠNG\nĐiều 1. Nội dung", _doc_info())
 
-    with pytest.raises(ValueError, match="mixes Section and direct Article child modes"):
-        parse_text(
-            "Chương I\nTÊN CHƯƠNG\nĐiều 1. Trực tiếp\nMục 1. Có mục\nĐiều 2. Trong mục",
-            _doc_info(),
-        )
-
-    with pytest.raises(ValueError, match="mixes Subsection and direct Article child modes"):
+    with pytest.raises(
+        ValueError, match="mixes Subsection and direct Article child modes"
+    ):
         parse_text(
             "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
             "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục",

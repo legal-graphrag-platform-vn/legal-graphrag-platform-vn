@@ -1,6 +1,6 @@
 # Lược đồ Neo4j — Node & Edge (Legal GraphRAG VN)
 
-> **Phiên bản ontology:** `1.8.0`
+> **Phiên bản ontology:** `1.8.1`
 > **Nguồn đối chiếu:** `src/shared/ontology/contract.py`,
 > `infra/neo4j/init/01_schema_init.cypher`, `docs/report/neo4j_database_schema.md`.
 > **Phạm vi:** 12 label được Phase 1 writer persist (9 structural + 3 semantic).
@@ -27,7 +27,7 @@ flowchart TB
         D -.->|CONTAINS — văn bản không có Chương| ART
         PART -->|CONTAINS| CH
         CH -->|CONTAINS| SEC
-        CH -.->|CONTAINS — Chương không có Mục| ART
+        CH -.->|CONTAINS — direct hoặc preamble trước Mục| ART
         SEC -->|CONTAINS| SUB
         SEC -.->|CONTAINS — Mục không có Tiểu mục| ART
         SUB -->|CONTAINS| ART
@@ -57,7 +57,8 @@ flowchart TB
 ```
 
 > **Ghi chú:** cạnh nét đứt là các "shortcut" hợp lệ khi văn bản thiếu một tầng
-> phân cấp (không có Phần / không có Chương / không có Mục / không có Tiểu mục).
+> phân cấp; riêng Chapter còn cho phép preamble Article đứng trước mọi Article
+> thuộc Mục trong cùng Chapter.
 > Mỗi structural descendant vẫn có đúng một direct canonical parent.
 > Neo4j Community chỉ enforce uniqueness + index; ràng buộc required/enum/endpoint
 > được validate ở tầng Python trước khi ghi.

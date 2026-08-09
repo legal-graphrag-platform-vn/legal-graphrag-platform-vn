@@ -14,6 +14,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, BeforeValidator, Field, field_validator, model_validator
 
 from src.shared.ontology.hierarchy import (
+    legal_number_sort_key,
     normalize_chapter_number,
     normalize_part_number,
     normalize_section_number,
@@ -227,6 +228,8 @@ class ParsedDocument(BaseModel):
         referenced_subsections: set[tuple[str | None, str, str, str]] = set()
         root_modes: set[str] = set()
         chapter_modes: dict[tuple[str | None, str], set[str]] = {}
+        chapter_direct_articles: dict[tuple[str | None, str], list[str]] = {}
+        chapter_section_articles: dict[tuple[str | None, str], list[str]] = {}
         section_modes: dict[tuple[str | None, str, str], set[str]] = {}
         chapter_parts: dict[str, str | None] = {}
         for article in self.articles:
@@ -270,9 +273,13 @@ class ParsedDocument(BaseModel):
 
             if article.section is None:
                 chapter_modes.setdefault(chapter_key, set()).add("Article")
+                chapter_direct_articles.setdefault(chapter_key, []).append(
+                    article.number
+                )
                 continue
 
             chapter_modes.setdefault(chapter_key, set()).add("Section")
+            chapter_section_articles.setdefault(chapter_key, []).append(article.number)
             key = _section_key(article.part, article.chapter, article.section)
             if key not in section_index:
                 raise ValueError(
@@ -299,10 +306,14 @@ class ParsedDocument(BaseModel):
             raise ValueError(
                 "Document mixes Part, Chapter, or direct Article child modes"
             )
-        for (_, chapter), modes in chapter_modes.items():
+        for chapter_key, modes in chapter_modes.items():
             if len(modes) > 1:
-                raise ValueError(
-                    f"Chapter {chapter} mixes Section and direct Article child modes"
+                _validate_chapter_preamble_order(
+                    chapter=chapter_key[1],
+                    direct_article_numbers=chapter_direct_articles.get(chapter_key, []),
+                    section_article_numbers=chapter_section_articles.get(
+                        chapter_key, []
+                    ),
                 )
         for (_, chapter, section), modes in section_modes.items():
             if len(modes) > 1:
@@ -338,3 +349,18 @@ def _section_key(
         normalize_chapter_number(chapter),
         normalize_section_number(section),
     )
+
+
+def _validate_chapter_preamble_order(
+    *,
+    chapter: str,
+    direct_article_numbers: list[str],
+    section_article_numbers: list[str],
+) -> None:
+    latest_direct = max(direct_article_numbers, key=legal_number_sort_key)
+    first_section = min(section_article_numbers, key=legal_number_sort_key)
+    if legal_number_sort_key(latest_direct) >= legal_number_sort_key(first_section):
+        raise ValueError(
+            f"Chapter {chapter} direct Article {latest_direct} must precede "
+            f"first Section Article {first_section}"
+        )

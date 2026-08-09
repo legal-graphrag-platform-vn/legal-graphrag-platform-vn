@@ -61,6 +61,13 @@ def normalize_subsection_number(value: str) -> str:
     return _slug(value.strip().lower())
 
 
+def legal_number_sort_key(value: str) -> tuple[tuple[int, int | str], ...]:
+    """Return a deterministic natural-order key for Article/Clause numbers."""
+    normalized = _slug(str(value))
+    chunks = re.findall(r"\d+|[a-z]+", normalized)
+    return tuple((0, int(chunk)) if chunk.isdigit() else (1, chunk) for chunk in chunks)
+
+
 def part_id(document_id: str, part_number: str) -> str:
     return f"{document_id}_part{normalize_part_number(part_number)}"
 
