@@ -1,7 +1,8 @@
-"""Shared ontology contract — single source of truth for all constants.
+"""Executable mirror of the canonical ontology contract.
 
-All validators (write-time and extraction-time) import from here.
-No constants should be duplicated outside this file.
+``plans/legal_ontology.md`` is normative. All validators (write-time and
+extraction-time) import constants from this module, which must carry the same
+version and rules as that document.
 """
 
 from __future__ import annotations
@@ -9,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.8.0"
+ONTOLOGY_VERSION = "1.9.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -55,6 +56,9 @@ REFERENCE_EXTRACTION_METHODS: set[str] = {
     "RULE",
     "ENTITY_LINKING",
     "LLM",
+}
+
+DOCUMENT_RELATION_EXTRACTION_METHODS: set[str] = {
     "DIAGRAM",
 }
 
@@ -243,7 +247,7 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "REGULATES": {
         "allowed_head": ["Article", "Clause"],
-        "allowed_tail": ["LegalSubject", "LegalAction", "Issuer"],
+        "allowed_tail": ["LegalSubject", "LegalAction"],
         "required_properties": ["confidence", "llm_model", "created_at"],
     },
     "REQUIRES": {
@@ -363,4 +367,3 @@ NODE_OPTIONAL_FIELDS: dict[str, list[str]] = {
         "description",
     ],
 }
-

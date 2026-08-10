@@ -61,7 +61,10 @@ from src.pipeline.pipeline.reference_checkpoint_store import (
 from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.scoring.confidence_scorer import score
 from src.shared.ontology.validators import validate_relation as validate_ontology
-from src.shared.ontology.contract import ONTOLOGY_VERSION
+from src.shared.ontology.contract import (
+    DOCUMENT_RELATION_EXTRACTION_METHODS,
+    ONTOLOGY_VERSION,
+)
 from src.pipeline.validation.record_consistency_validator import (
     validate_record_relation,
 )
@@ -73,6 +76,10 @@ logger = logging.getLogger(__name__)
 
 NORMALIZER_VERSION = "structural-endpoint-v2"
 RELATION_ENRICHER_VERSION = "checkpoint-provenance-v1"
+DIAGRAM_RELATION_TYPES = frozenset({"AMENDS", "REPEALS", "REPLACES", "GUIDES"})
+DIAGRAM_REVIEW_REASONS = frozenset(
+    {"unresolved_diagram_target", "temporal_metadata_incomplete"}
+)
 
 
 def _entity_type_lookup(entities: list[ExtractedEntity]) -> dict[str, str]:
@@ -465,6 +472,145 @@ def _process_article_worker(
     return records, entity_index, _checkpoint_row(result, context, article.content_raw)
 
 
+def _validate_diagram_records(
+    records: list[dict],
+    *,
+    current_document: DocumentInfo,
+    registry: DocumentRegistry,
+) -> list[dict]:
+    """Validate deterministic document relations without trusting builder flags."""
+    validated_records: list[dict] = []
+    known_document_ids = set(registry.document_ids) | {current_document.id}
+
+    for raw_record in records:
+        record = dict(raw_record)
+        relation = dict(record.get("relation") or {})
+        properties = dict(relation.get("properties") or {})
+        relation["properties"] = properties
+        record["relation"] = relation
+
+        parsed_relation, schema_error = validate_schema(relation)
+        schema_valid = parsed_relation is not None
+        record["schema_valid"] = schema_valid
+        record["schema_error"] = schema_error
+        if not schema_valid:
+            record.update(
+                ontology_valid=False,
+                ontology_error="diagram_schema_invalid",
+                consistency_valid=False,
+                consistency_error="diagram_schema_invalid",
+                review_reason=None,
+                blocking=True,
+            )
+            validated_records.append(record)
+            continue
+
+        endpoint_resolution = record.get("endpoint_resolution") or {}
+        if any(
+            endpoint_resolution.get(endpoint, {}).get("status") != "resolved"
+            for endpoint in ("head", "tail")
+        ):
+            record.update(
+                schema_valid=True,
+                ontology_valid=False,
+                consistency_valid=False,
+                review_reason="unresolved_diagram_target",
+                blocking=True,
+            )
+            validated_records.append(record)
+            continue
+
+        relation_type = str(relation.get("relation") or "")
+        extraction_method = properties.get("extraction_method")
+
+        if (
+            extraction_method not in DOCUMENT_RELATION_EXTRACTION_METHODS
+            or relation_type not in DIAGRAM_RELATION_TYPES
+        ):
+            record.update(
+                ontology_valid=False,
+                ontology_error=(
+                    "DIAGRAM only supports AMENDS, REPEALS, REPLACES, or GUIDES"
+                ),
+                consistency_valid=False,
+                consistency_error="unsupported_diagram_relation",
+                review_reason=None,
+                blocking=True,
+            )
+            validated_records.append(record)
+            continue
+
+        head_id = str(relation.get("head") or "")
+        tail_id = str(relation.get("tail") or "")
+        head_doc_type = (
+            current_document.doc_type
+            if head_id == current_document.id
+            else registry.document_type_for_id(head_id)
+        )
+        tail_doc_type = (
+            current_document.doc_type
+            if tail_id == current_document.id
+            else registry.document_type_for_id(tail_id)
+        )
+
+        if relation_type in {"AMENDS", "REPEALS", "REPLACES"} and not properties.get(
+            "effective_from"
+        ):
+            if head_id == current_document.id and current_document.effective_from:
+                properties["effective_from"] = str(current_document.effective_from)
+            else:
+                ontology_ok, ontology_error = validate_ontology(
+                    "Document",
+                    relation_type,
+                    "Document",
+                    head_id=head_id,
+                    tail_id=tail_id,
+                    properties=properties,
+                )
+                record.update(
+                    ontology_valid=ontology_ok,
+                    ontology_error=ontology_error,
+                    consistency_valid=False,
+                    consistency_error=f"{relation_type} missing effective_from",
+                    review_reason="temporal_metadata_incomplete",
+                    blocking=True,
+                )
+                validated_records.append(record)
+                continue
+
+        ontology_ok, ontology_error = validate_ontology(
+            "Document",
+            relation_type,
+            "Document",
+            head_id=head_id,
+            tail_id=tail_id,
+            properties=properties,
+            head_doc_type=head_doc_type,
+            tail_doc_type=tail_doc_type,
+        )
+        consistency = validate_record_relation(
+            relation_type=relation_type,
+            head_id=head_id,
+            tail_id=tail_id,
+            properties=properties,
+            known_entity_ids=known_document_ids,
+            ontology_valid=ontology_ok,
+            head_type="Document" if head_doc_type else None,
+            tail_type="Document" if tail_doc_type else None,
+        )
+        record.update(
+            ontology_valid=ontology_ok,
+            ontology_error=ontology_error,
+            consistency_valid=consistency.valid,
+            consistency_error=consistency.error,
+            review_reason=consistency.review_reason,
+            blocking=consistency.blocking,
+        )
+        validated_records.append(record)
+
+    return validated_records
+
+
 def run_pipeline(
     parsed: ParsedDocument,
     processed_dir: Path,
@@ -654,7 +800,9 @@ def run_pipeline(
 
     # Diagram relations — document-level, deterministic, chạy sau rule records.
     if diagram:
-        document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
+        document_registry = DocumentRegistry.from_manifest(
+            settings.curated_manifest_path
+        )
         diagram_result = parse_diagram(diagram)
         for unknown_cat in diagram_result.unknown_categories:
             logger.warning(
@@ -671,6 +819,11 @@ def run_pipeline(
             diagram_resolved,
             diagram_unresolved,
             current_document_id=parsed.document.id,
+        )
+        diagram_records = _validate_diagram_records(
+            diagram_records,
+            current_document=parsed.document,
+            registry=document_registry,
         )
         logger.info(
             "Diagram extraction: %d resolved, %d unresolved, %d unknown categories",
@@ -1134,7 +1287,19 @@ def _apply_decision_gate(record: dict) -> dict:
         record["review_reason"] = "superseded_by_deterministic_resolution"
         record["blocking"] = False
         return record
-    if not record.get("schema_valid") or not record.get("ontology_valid"):
+    if not record.get("schema_valid"):
+        record["decision"] = "rejected"
+        record["review_reason"] = record.get("review_reason")
+        record["blocking"] = bool(record.get("blocking"))
+        return record
+    if (
+        record.get("extraction_method") == "DIAGRAM"
+        and record.get("review_reason") in DIAGRAM_REVIEW_REASONS
+    ):
+        record["decision"] = "review"
+        record["blocking"] = True
+        return record
+    if not record.get("ontology_valid"):
         record["decision"] = "rejected"
         record["review_reason"] = record.get("review_reason")
         record["blocking"] = bool(record.get("blocking"))

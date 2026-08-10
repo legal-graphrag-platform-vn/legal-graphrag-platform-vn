@@ -1,14 +1,14 @@
 # Lược đồ Neo4j hiện tại — Legal GraphRAG VN
 
 > **Phạm vi:** ontology và runtime contract đang có trong repository, phiên bản
-> `1.8.1`.
+> `1.9.0`.
 >
 > **Đã đối chiếu:** `plans/legal_ontology.md`,
 > `src/shared/ontology/contract.py`, `src/shared/ontology/validators.py`,
 > `src/pipeline/persistence/payload_builder.py`, các Neo4j writer/repository và
 > `infra/neo4j/init/01_schema_init.cypher`.
 >
-> **Ngày kiểm tra:** 08/08/2026.
+> **Ngày kiểm tra:** 10/08/2026.
 >
 > Đây là lược đồ **được code hiện tại chấp nhận và ghi**, không phải thống kê số
 > node/edge của một database live. Schema bootstrap không chứng minh dữ liệu đã
@@ -47,7 +47,7 @@ flowchart TB
         SUB["Subsection / Tiểu mục<br/>id · number · title"]
         ART["Article / Điều<br/>id · number · title?<br/>content_raw · effective_from/to<br/>legal_status · embedding[1024]?"]
         CLA["Clause / Khoản<br/>id · number · content_raw<br/>effective_from/to · legal_status<br/>embedding[1024]?"]
-        PT["Point / Điểm<br/>id · label · content_raw"]
+        PT["Point / Điểm<br/>id · label · content_raw<br/>effective_from/to? · legal_status?"]
 
         D -->|ISSUED_BY| I
         D -->|CONTAINS| PART
@@ -76,6 +76,8 @@ flowchart TB
     CLA -->|REGULATES| LS
     ART -->|REGULATES| LA
     CLA -->|REGULATES| LA
+    ART -->|REGULATES| I
+    CLA -->|REGULATES| I
     LS -->|REQUIRES| LC
 
     classDef structural fill:#e8f1fb,stroke:#2563eb,color:#172554,stroke-width:1.5px;
@@ -104,15 +106,15 @@ parent. Cạnh flattened cũ chỉ được xóa sau khi chain thay thế đã t
 
 | Label          | Required bởi canonical validator                                                         | Optional hoặc được payload hiện tại ghi thêm                                                                        |
 | -------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `Document`     | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `title`, `effective_to`, `issued_by`, `issued_date`, `source_url`, `document_uri`, `jurisdiction`, `gazette_number` |
+| `Document`     | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `title`, `issued_date`, `effective_to`, `expiry_date`, `sector`, `field`, `signer_title`, `signer_name`, `source_url`, `updated_at` |
 | `Issuer`       | `id`, `name`, `branch`                                                                   | —                                                                                                                   |
 | `Part`         | `id`, `number`, `title`                                                                  | —                                                                                                                   |
 | `Chapter`      | `id`, `number`, `title`                                                                  | —                                                                                                                   |
 | `Section`      | `id`, `number`, `title`                                                                  | —                                                                                                                   |
 | `Subsection`   | `id`, `number`, `title`                                                                  | —                                                                                                                   |
-| `Article`      | `id`, `number`, `content_raw`, `effective_from`, `legal_status`                          | `title`, `effective_to`, `embedding`                                                                                |
-| `Clause`       | `id`, `number`, `content_raw`, `effective_from`, `legal_status`                          | `effective_to`, `embedding`                                                                                         |
-| `Point`        | `id`, `label`, `content_raw`                                                             | —                                                                                                                   |
+| `Article`      | `id`, `number`, `content_raw`, `effective_from`, `legal_status`                          | `title`, hierarchy metadata, `effective_to`, `updated_at`, embedding + provenance                                   |
+| `Clause`       | `id`, `number`, `content_raw`, `effective_from`, `legal_status`                          | `effective_to`, `updated_at`, embedding + provenance                                                               |
+| `Point`        | `id`, `label`, `content_raw`                                                             | `effective_from`, `effective_to`, `legal_status`, `updated_at`                                                      |
 | `LegalConcept` | `id`, `name`                                                                             | `aliases`, `description`                                                                                            |
 | `LegalSubject` | `id`, `name`                                                                             | `aliases`, `description`                                                                                            |
 | `LegalAction`  | `id`, `name`                                                                             | `aliases`, `description`                                                                                            |
@@ -143,8 +145,13 @@ Trong JSON payload, `type` là discriminator để chọn Neo4j label. Ví dụ
 | `doc_type`    | enum string  | `Document`  | Loại văn bản canonical                                                    | `Law`, `Decree`, `Circular` |
 | `normative`   | `boolean`    | `Document`  | Văn bản có thuộc corpus văn bản quy phạm hay không                        | `true`                      |
 | `issuer_name` | `string`     | `Document`  | Tên cơ quan ban hành dùng để dựng `Issuer`                                | `Quốc hội`                  |
-| `issued_by`   | `string`     | `Document`  | Metadata tên cơ quan từ parser/source; hiện payload vẫn giữ cùng document | `Quốc hội`                  |
 | `issued_date` | ISO date     | `Document`  | Ngày ban hành                                                             | `2020-06-17`                |
+| `expiry_date` | ISO date     | `Document`  | Ngày hết hiệu lực từ metadata nguồn                                       | `2025-07-01`                |
+| `sector`      | `string`     | `Document`  | Nhóm lĩnh vực nguồn                                                       | `Doanh nghiệp`              |
+| `field`       | `string`     | `Document`  | Lĩnh vực chi tiết                                                         | `Thành lập doanh nghiệp`    |
+| `signer_title` / `signer_name` | `string` | `Document` | Chức danh và tên người ký                                                 | `Chủ tịch Quốc hội`         |
+| `source_url`  | `string`     | `Document`  | URL nguồn canonical                                                       | `https://vbpl.vn/...`       |
+| `updated_at`  | datetime     | `Document`, `Article`, `Clause`, `Point` | Thời điểm cập nhật record                     | `2026-08-10T00:00:00Z`      |
 | `branch`      | enum string  | `Issuer`    | Nhánh cơ quan: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER`            | `LEGISLATIVE`               |
 
 `Document.doc_type` chấp nhận:
@@ -158,9 +165,9 @@ Decision, Circular, JointCircular
 
 | Property         | Kiểu dữ liệu            | Áp dụng cho                     | Ý nghĩa                                                                                                | Ví dụ                           |
 | ---------------- | ----------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------- |
-| `legal_status`   | enum string             | `Document`, `Article`, `Clause` | Trạng thái pháp lý của node                                                                            | `ACTIVE`, `AMENDED`, `REPEALED` |
-| `effective_from` | ISO date                | `Document`, `Article`, `Clause` | Mốc bắt đầu hiệu lực, inclusive                                                                        | `2021-01-01`                    |
-| `effective_to`   | ISO date, nullable      | `Document`, `Article`, `Clause` | Mốc kết thúc hiệu lực, exclusive trong temporal filter; field thường bị omit khi chưa có ngày kết thúc | `2025-07-01`                    |
+| `legal_status`   | enum string             | `Document`, `Article`, `Clause`; optional on `Point` | Trạng thái pháp lý của node                                                               | `ACTIVE`, `AMENDED`, `REPEALED` |
+| `effective_from` | ISO date                | `Document`, `Article`, `Clause`; optional on `Point` | Mốc bắt đầu hiệu lực, inclusive                                                           | `2021-01-01`                    |
+| `effective_to`   | ISO date, nullable      | `Document`, `Article`, `Clause`, `Point` | Mốc kết thúc hiệu lực, exclusive trong temporal filter; field thường bị omit khi chưa có ngày kết thúc | `2025-07-01`                    |
 | `embedding`      | `list[float]`, nullable | `Article`, `Clause`             | Vector BGE-M3, đúng 1024 chiều; được ghi ở bước embedding sau structural write                         | `[0.012, -0.031, ...]`          |
 
 Enum trạng thái không giống nhau giữa Document và content unit:
@@ -170,7 +177,7 @@ Document:
   ACTIVE | NOT_YET_EFFECTIVE | PARTIALLY_EFFECTIVE |
   REPLACED | REPEALED | EXPIRED
 
-Article / Clause:
+Article / Clause / Point (khi Point có temporal metadata):
   ACTIVE | AMENDED | REPEALED
 ```
 
@@ -191,7 +198,6 @@ trị được omit; vector 1024 chiều cũng được omit ở structural writ
     "legal_status": "ACTIVE",
     "effective_from": "2021-01-01",
     "issuer_name": "Quốc hội",
-    "issued_by": "Quốc hội",
     "issued_date": "2020-06-17"
   },
   {
@@ -366,6 +372,9 @@ created_at
 reference_bundle_id
 reference_target_count
 ```
+
+`DIAGRAM` thuộc provenance family riêng cho document relations
+`AMENDS|REPEALS|REPLACES|GUIDES`; nó không hợp lệ trên `REFERS_TO`.
 
 Method-specific properties:
 

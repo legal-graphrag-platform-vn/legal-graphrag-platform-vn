@@ -383,6 +383,9 @@ class DocumentRegistry:
 
     def __init__(self, aliases: dict[str, tuple[str, str]]) -> None:
         self.aliases = aliases
+        self._document_types = {
+            graph_id: doc_type for graph_id, doc_type in aliases.values()
+        }
 
     @classmethod
     def from_manifest(cls, path: Path) -> "DocumentRegistry":
@@ -411,6 +414,13 @@ class DocumentRegistry:
                 if alias and alias in candidate:
                     return identity
         return None
+
+    @property
+    def document_ids(self) -> frozenset[str]:
+        return frozenset(self._document_types)
+
+    def document_type_for_id(self, graph_id: str) -> str | None:
+        return self._document_types.get(graph_id)
 
 
 def normalize_point_label(label: str) -> str:

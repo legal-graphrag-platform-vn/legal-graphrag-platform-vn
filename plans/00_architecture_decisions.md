@@ -1456,3 +1456,46 @@ direct Article; Section vẫn không được mix Subsection và direct Article.
   validation failure trước write.
 - Quyết định này thu hẹp và supersede phần cấm Chapter mixed mode trong ADR-25;
   các boundary Document và Section của ADR-25 vẫn giữ nguyên.
+
+---
+
+## ADR-29: Đồng bộ executable ontology contract và diagram provenance
+
+**Ngày**: 2026-08-10
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Các thay đổi đã merge vào executable contract mở rộng metadata node, đặt
+`DIAGRAM` chung enum với `REFERS_TO`, mở `REGULATES -> Issuer`, và cho Point
+mang temporal metadata tùy chọn. Canonical ontology chưa phê duyệt các endpoint
+và provenance expansion đó; diagram runtime còn tự gắn validity trước validator.
+
+### Quyết định
+
+1. `plans/legal_ontology.md` tiếp tục là contract chuẩn tắc; module Python là
+   executable mirror và phải dùng cùng version.
+2. Bump ontology lên `1.9.0` vì đây là additive contract expansion, không chỉ
+   sửa diễn đạt.
+3. Đồng bộ optional metadata của Document, Article, Clause và Point theo
+   executable contract. Point temporal fields chỉ là schema capability; parser
+   và payload hiện tại vẫn kế thừa hiệu lực từ Clause.
+4. Giữ `REGULATES` ở `LegalSubject|LegalAction`; `Issuer` bị loại vì prompt và
+   evaluation chưa có semantic extraction contract tương ứng.
+5. Tách `DIAGRAM` khỏi enum của `REFERS_TO`. Nó chỉ là deterministic source cho
+   quan hệ Document-level
+   `AMENDS`, `REPEALS`, `REPLACES`, `GUIDES` sau canonical registry resolution.
+6. Diagram builder chỉ tạo validation-pending record. Orchestrator phải chạy
+   schema, ontology và consistency validation trước decision gate. Temporal
+   relation chỉ kế thừa `effective_from` khi acting head là current document;
+   external head thiếu ngày phải vào blocking review.
+
+### Hệ quả
+
+- Artifact mang ontology version `1.8.x` không được tự nhận là tương thích với
+  runtime `1.9.0`; phải re-normalize hoặc regenerate qua pipeline hiện hành.
+- Diagram target unresolved tiếp tục đi review/fail closed, không tạo Document
+  hoặc relation giả.
+- `DIAGRAM` confidence không có quyền nới ontology validation.
+- `DIAGRAM` không phải provenance hợp lệ của `REFERS_TO`.
+- Test parity khóa version, Point capability, semantic endpoint và diagram gate.
