@@ -829,6 +829,13 @@ def embed_graph(
         str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
     ],
     batch_size: Annotated[int, typer.Option(min=1, help="Embedding batch size")] = 32,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Verify vector indexes and report stale targets without loading the model or writing Neo4j",
+        ),
+    ] = False,
 ) -> None:
     """Generate and write configured-dimension Article/Clause embeddings."""
     payload = _validated_payload_for_raw_doc_code(raw_doc_code)
@@ -850,6 +857,16 @@ def embed_graph(
             provider=settings.embedding_provider,
             normalized=True,
         )
+        if dry_run:
+            typer.echo(
+                f"Embedding readiness for {raw_doc_code}: "
+                f"targets={len(texts_by_node_id)}, stale={len(stale_ids)}, "
+                f"current={len(texts_by_node_id) - len(stale_ids)}, "
+                f"model={settings.embedding_model}, "
+                f"provider={settings.embedding_provider}, "
+                f"dimension={settings.embedding_dimension}"
+            )
+            return
         generator = EmbeddingGenerator()
         for start in range(0, len(stale_ids), batch_size):
             batch_ids = stale_ids[start : start + batch_size]

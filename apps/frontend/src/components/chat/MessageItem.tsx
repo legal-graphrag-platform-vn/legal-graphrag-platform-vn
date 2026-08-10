@@ -61,6 +61,15 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
                         </div>
                      )}
 
+                     {message.resolved_references && message.resolved_references.length > 0 && (
+                        <div className="rounded-standard border border-violet-200 dark:border-violet-500/20 bg-violet-50 dark:bg-violet-500/10 px-3.5 py-2.5 text-[13px] text-violet-800 dark:text-violet-300">
+                           <span className="font-semibold">Đã xác định tham chiếu: </span>
+                           {message.resolved_references
+                              .map((reference) => reference.label)
+                              .join(', ')}
+                        </div>
+                     )}
+
                      {/* Markdown Content / Thinking Indicator */}
                      <div className="prose dark:prose-invert prose-zinc max-w-none text-zinc-900 dark:text-zinc-100 leading-relaxed text-[15px] space-y-4">
                         {isLast && isStreaming && !message.content ? (

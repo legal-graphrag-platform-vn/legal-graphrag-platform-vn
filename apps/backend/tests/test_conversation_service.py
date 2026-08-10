@@ -36,6 +36,8 @@ from src.generation.models import (
     GroundedStatement,
 )
 from src.retrieval.errors import RetrievalDependencyError
+from src.retrieval.resolved_reference import ResolutionMethod, ReferenceSource
+from src.retrieval.resolved_reference import RelationGoal
 from src.shared.retrieval_contract import (
     PlanType,
     ProcessingStatus,
@@ -138,13 +140,18 @@ class FakeRetrieval:
         self.calls = 0
         self.last_query = None
         self.last_document_ids = None
+        self.last_execution_context = None
 
-    async def retrieve_context(self, request):
+    async def retrieve_context(self, request, *, execution_context=None):
         self.calls += 1
         self.last_query = request.query
         self.last_document_ids = list(request.filters.document_ids)
+        self.last_execution_context = execution_context
         context = retrieval_context()
         context.query = request.query
+        if execution_context is not None:
+            context.resolved_references = execution_context.resolved_references
+            context.relation_goal = execution_context.relation_goal
         return context
 
 
@@ -242,6 +249,22 @@ def _resolved_candidate(document_id="doc-1"):
         document_number="59/2020/QH14",
         article_id="art-111",
         article_number="111",
+    )
+
+
+def _resolved(document_id="doc-1", *, anaphora=False) -> ResolvedResolution:
+    return ResolvedResolution(
+        candidate=_resolved_candidate(document_id),
+        resolution_method=(
+            ResolutionMethod.GROUNDED_HISTORY_FOCUS
+            if anaphora
+            else ResolutionMethod.EXACT_STRUCTURAL_LOOKUP
+        ),
+        source=(
+            ReferenceSource.GROUNDED_HISTORY
+            if anaphora
+            else ReferenceSource.CURRENT_MESSAGE
+        ),
     )
 
 
@@ -381,9 +404,7 @@ def test_query_processor_receives_canonical_query_and_resolved_filter() -> None:
                 ],
             )
 
-    resolver = FakeResolver(
-        ResolvedResolution(candidate=_resolved_candidate("doc-1"), is_anaphora=True)
-    )
+    resolver = FakeResolver(_resolved("doc-1", anaphora=True))
     processor = RecordingQueryProcessor()
     retrieval = FakeRetrieval()
     store = FakeStore()
@@ -399,6 +420,10 @@ def test_query_processor_receives_canonical_query_and_resolved_filter() -> None:
     assert processor.calls == [("Điều 111 59/2020/QH14 quy định gì", ())]
     assert retrieval.last_query == "Điều 111 59/2020/QH14 quy định gì"
     assert retrieval.last_document_ids == ["doc-1"]
+    assert retrieval.last_execution_context.anchor_node_ids == ("art-111",)
+    reference = retrieval.last_execution_context.resolved_references[0]
+    assert reference.resolution_method is ResolutionMethod.GROUNDED_HISTORY_FOCUS
+    assert reference.source is ReferenceSource.GROUNDED_HISTORY
     assert store.turn.persisted_answer["resolution_status"] is ResolutionStatus.RESOLVED
 
 
@@ -422,9 +447,7 @@ def test_query_processor_cannot_drop_resolved_canonical_anchor() -> None:
     store = FakeStore()
     service = _service(
         store,
-        FakeResolver(
-            ResolvedResolution(candidate=_resolved_candidate("doc-1"), is_anaphora=True)
-        ),
+        FakeResolver(_resolved("doc-1", anaphora=True)),
         retrieval=retrieval,
         query_processor=AnchorDroppingQueryProcessor(),
     )
@@ -472,12 +495,43 @@ def test_query_processor_cannot_replace_canonical_generation_query() -> None:
     )
 
 
+def test_typed_relation_lookup_bypasses_query_decomposition_in_v1() -> None:
+    class UnexpectedQueryProcessor:
+        calls = 0
+
+        async def process(self, current_query, conversation_history=()):
+            self.calls += 1
+            raise AssertionError("typed relation lookup must remain atomic")
+
+    processor = UnexpectedQueryProcessor()
+    retrieval = FakeRetrieval()
+    store = FakeStore()
+    service = _service(
+        store,
+        FakeResolver(_resolved("doc-1")),
+        retrieval=retrieval,
+        query_processor=processor,
+    )
+
+    _run_events(
+        service,
+        _request("Điều 111 59/2020/QH14 dẫn chiếu đến điều nào?"),
+        _owner(),
+    )
+
+    assert processor.calls == 0
+    assert retrieval.calls == 1
+    assert retrieval.last_execution_context.relation_goal is RelationGoal.REFERS_TO
+    assert retrieval.last_execution_context.anchor_node_ids == ("art-111",)
+    metadata = store.turn.persisted_answer["response_snapshot"]["metadata"]
+    assert metadata["relation_goal"] == "REFERS_TO"
+    assert metadata["resolved_references"][0]["node_id"] == "art-111"
+
+
 def test_resolved_reference_intersects_document_filter() -> None:
     store = FakeStore()
     retrieval = FakeRetrieval()
-    resolver = FakeResolver(
-        ResolvedResolution(candidate=_resolved_candidate("doc-1"), is_anaphora=False)
-    )
+    resolver = FakeResolver(_resolved("doc-1"))
     service = _service(store, resolver, retrieval=retrieval)
     _run_events(
         service,
@@ -487,12 +541,10 @@ def test_resolved_reference_intersects_document_filter() -> None:
     assert retrieval.last_document_ids == ["doc-1"]
 
 
-def test_filter_conflict_fails_before_retrieval() -> None:
+def test_filter_conflict_requests_clarification_before_retrieval() -> None:
     store = FakeStore()
     retrieval = FakeRetrieval()
-    resolver = FakeResolver(
-        ResolvedResolution(candidate=_resolved_candidate("doc-1"), is_anaphora=False)
-    )
+    resolver = FakeResolver(_resolved("doc-1"))
     service = _service(store, resolver, retrieval=retrieval)
     events = _run_events(
         service,
@@ -500,16 +552,17 @@ def test_filter_conflict_fails_before_retrieval() -> None:
         _owner(),
     )
     assert retrieval.calls == 0
-    assert store.turn.failed["error_code"] == "CONVERSATION_FILTER_CONFLICT"
-    assert events[0].event == "error"
+    assert store.turn.failed is None
+    assert store.turn.persisted_clarification["resolution_reason_code"] == (
+        "REFERENCE_FILTER_CONFLICT"
+    )
+    assert events[-1].data["status"] == "needs_clarification"
 
 
 def test_rewrite_failure_is_persisted_and_streamed() -> None:
     store = FakeStore()
     retrieval = FakeRetrieval()
-    resolver = FakeResolver(
-        ResolvedResolution(candidate=_resolved_candidate(), is_anaphora=True)
-    )
+    resolver = FakeResolver(_resolved(anaphora=True))
     service = _service(store, resolver, rewriter=FailingRewriter(), retrieval=retrieval)
     events = _run_events(service, _request("điều đó"), _owner())
     assert retrieval.calls == 0
@@ -522,7 +575,7 @@ def test_retrieval_error_is_persisted_as_failure() -> None:
     class BadRetrieval:
         calls = 0
 
-        async def retrieve_context(self, request):
+        async def retrieve_context(self, request, *, execution_context=None):
             raise RetrievalDependencyError("down")
 
     store = FakeStore()

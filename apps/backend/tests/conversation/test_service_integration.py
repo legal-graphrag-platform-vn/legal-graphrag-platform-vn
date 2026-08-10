@@ -51,7 +51,7 @@ class CountingRetrieval:
         self.calls = 0
         self.last_query: str | None = None
 
-    async def retrieve_context(self, request):
+    async def retrieve_context(self, request, *, execution_context=None):
         self.calls += 1
         self.last_query = request.query
         context = retrieval_context()
@@ -197,15 +197,17 @@ def test_same_client_turn_id_replays_without_second_generation(db_url: str) -> N
     )
 
     async def _run() -> tuple[int, bool]:
+        from api.models import encode_sse
+
         async with prepared_conversation_store(db_url) as store:
             retrieval = CountingRetrieval()
             generator = CountingGenerator()
             service = _service(store, retrieval, generator)
             first = await _collect(service, request, owner)
             second = await _collect(service, request, owner)
-            same = [(e.event, e.data) for e in first] == [
-                (e.event, e.data) for e in second
-            ]
+            first_bytes = "".join(encode_sse(e.event, e.data) for e in first)
+            replay_bytes = "".join(encode_sse(e.event, e.data) for e in second)
+            same = first_bytes == replay_bytes
             return generator.calls, same
 
     generate_calls, replay_identical = asyncio.run(_run())

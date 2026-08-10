@@ -32,6 +32,7 @@ from src.generation.errors import (
     TemporalAnswerValidationError,
 )
 from src.retrieval.errors import (
+    CanonicalReferenceUnavailableError,
     IntentAnalysisError,
     RetrievalCapabilityError,
     RetrievalDependencyError,
@@ -162,6 +163,8 @@ def _retrieval_error_contract(error: RetrievalError) -> tuple[int, str]:
         return 422, "TEMPORAL_ROUTING_INVALID"
     if isinstance(error, IntentAnalysisError):
         return 422, "INTENT_ANALYSIS_INVALID"
+    if isinstance(error, CanonicalReferenceUnavailableError):
+        return 409, "CANONICAL_REFERENCE_UNAVAILABLE"
     if isinstance(error, (RetrievalRequestError, RetrievalRoutingError)):
         return 422, "RETRIEVAL_REQUEST_INVALID"
     return 500, "RETRIEVAL_ERROR"

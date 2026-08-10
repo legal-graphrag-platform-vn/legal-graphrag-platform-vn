@@ -22,6 +22,7 @@ from api.models import (
     ChatExplanationData,
     ChatMetadataData,
     ChatReasoningPathData,
+    ChatResolvedReferenceData,
     ChatStreamEvent,
     ConversationChatRequest,
 )
@@ -68,6 +69,7 @@ from resolution.models import (
     StandaloneResolution,
 )
 from resolution.resolver import ReferenceResolver
+from resolution.relation_goal import detect_relation_goal
 from resolution.rewriter import RewriteError, StructuredRewriter
 from services.conversation import greeting_response
 from services.interfaces import (
@@ -90,9 +92,10 @@ from src.shared.retrieval_contract import (
     RetrievalFilters,
     RetrievalRequest,
 )
+from src.retrieval.resolved_reference import RetrievalExecutionContext
 
 PROCESSING_RETRY_AFTER_MS = 1000
-FILTER_CONFLICT_CODE = "CONVERSATION_FILTER_CONFLICT"
+REFERENCE_FILTER_CONFLICT_CODE = "REFERENCE_FILTER_CONFLICT"
 QUERY_PROCESSING_FAILED_CODE = "QUERY_PROCESSING_FAILED"
 REASON_QUERY_PROCESSOR_CLARIFICATION = "QUERY_PROCESSOR_CLARIFICATION"
 _QUERY_PROCESSING_FAILED_MESSAGE = "Không thể xử lý câu hỏi. Vui lòng thử lại."
@@ -109,7 +112,7 @@ _REPLAYABLE_STATUSES = frozenset(
 
 
 class ConversationFilterConflictError(Exception):
-    error_code = FILTER_CONFLICT_CODE
+    error_code = REFERENCE_FILTER_CONFLICT_CODE
 
 
 class ConversationChatService:
@@ -203,6 +206,7 @@ class ConversationChatService:
         *,
         standalone_query: str,
         document_ids: list[str],
+        execution_context: RetrievalExecutionContext,
     ) -> dict:
         try:
             assert self._query_processor is not None
@@ -272,6 +276,7 @@ class ConversationChatService:
             outcome,
             result,
             document_ids=document_ids,
+            execution_context=execution_context,
         )
 
     # -- clarification / cancel / small talk -------------------------------- #
@@ -377,14 +382,33 @@ class ConversationChatService:
                 resolution=outcome,
             )
             document_ids = self._effective_document_ids(request, outcome)
+            execution_context = _retrieval_execution_context(request, outcome)
         except RewriteError as exc:
             return await self._persist_failure(turn, begun, exc.error_code, str(exc))
-        except ConversationFilterConflictError as exc:
-            return await self._persist_failure(
-                turn, begun, exc.error_code, "Bộ lọc tài liệu mâu thuẫn với tham chiếu."
+        except ConversationFilterConflictError:
+            return await self._persist_clarification(
+                turn,
+                begun,
+                ClarifyResolution(
+                    mode=ClarificationMode.RESTATE,
+                    resolution_status=ResolutionStatus.UNRESOLVED,
+                    reason_code=REFERENCE_FILTER_CONFLICT_CODE,
+                    question=(
+                        "Tham chiếu pháp lý không thuộc bộ lọc tài liệu đã chọn. "
+                        "Bạn muốn đổi tài liệu hay hỏi lại trong phạm vi hiện tại?"
+                    ),
+                    candidates=(),
+                ),
             )
 
-        if self._query_processor is not None:
+        # A typed relation lookup is already an atomic execution plan in v1.
+        # Decomposing it would attach the same canonical anchor to unrelated
+        # forced-intent subqueries and could conflate semantic intent with graph
+        # topology. General standalone questions still use Query Processor.
+        if (
+            self._query_processor is not None
+            and execution_context.relation_goal is None
+        ):
             return await self._process_standalone_with_query_processor(
                 turn,
                 begun,
@@ -392,6 +416,7 @@ class ConversationChatService:
                 outcome,
                 standalone_query=standalone_query,
                 document_ids=document_ids,
+                execution_context=execution_context,
             )
 
         try:
@@ -406,6 +431,7 @@ class ConversationChatService:
                     enable_reranker=request.enable_reranker,
                 ),
                 subquery_id="standalone",
+                execution_context=execution_context,
             )
             answer = await self._generator.generate(
                 AnswerGenerationRequest(
@@ -436,6 +462,7 @@ class ConversationChatService:
         result: QueryProcessingResult,
         *,
         document_ids: list[str],
+        execution_context: RetrievalExecutionContext,
     ) -> dict:
         # Fan out each subquery with its own temporal-safe intent, merge the
         # per-subquery contexts, then generate a single grounded answer.
@@ -459,6 +486,7 @@ class ConversationChatService:
                         self._retrieve_with_trace(
                             subquery_request,
                             subquery_id=subquery.id,
+                            execution_context=execution_context,
                         )
                         for subquery, subquery_request in subquery_pairs
                     ]
@@ -508,10 +536,14 @@ class ConversationChatService:
         request: RetrievalRequest,
         *,
         subquery_id: str,
+        execution_context: RetrievalExecutionContext | None = None,
     ):
         started = time.perf_counter()
         try:
-            context = await self._retrieval.retrieve_context(request)
+            context = await self._retrieval.retrieve_context(
+                request,
+                execution_context=execution_context,
+            )
         except Exception as error:
             log_retrieval_failure(
                 request=request,
@@ -588,6 +620,23 @@ class ConversationChatService:
             resolution_status=resolution_status.value,
             insufficiency_message=(
                 _cannot_answer_message(insufficiency_reason) if cannot_answer else None
+            ),
+            resolved_references=[
+                ChatResolvedReferenceData(
+                    mention=reference.mention,
+                    node_id=reference.node_id,
+                    node_type=reference.node_type,
+                    label=reference.label,
+                    document_id=reference.document_id,
+                    resolution_method=reference.resolution_method.value,
+                    source=reference.source.value,
+                )
+                for reference in retrieval_context.resolved_references
+            ],
+            relation_goal=(
+                retrieval_context.relation_goal.value
+                if retrieval_context.relation_goal is not None
+                else None
             ),
         )
         done = ChatDoneData(
@@ -717,6 +766,21 @@ def _answer_resolution(
         # EXPLICIT_FOUND for direct mentions, ANAPHORA_RESOLVED for anaphora.
         return ResolutionStatus.RESOLVED, outcome.reason_code
     return ResolutionStatus.UNRESOLVED, REASON_NO_ANAPHORA
+
+
+def _retrieval_execution_context(
+    request: ConversationChatRequest,
+    outcome: StandaloneResolution | ResolvedResolution,
+) -> RetrievalExecutionContext:
+    if isinstance(outcome, StandaloneResolution):
+        return RetrievalExecutionContext()
+    reference = outcome.to_retrieval_reference(
+        mention=outcome.source_message or request.message
+    )
+    return RetrievalExecutionContext(
+        resolved_references=(reference,),
+        relation_goal=outcome.relation_goal or detect_relation_goal(request.message),
+    )
 
 
 def _clarification_metadata(resolution_status: str) -> ChatMetadataData:

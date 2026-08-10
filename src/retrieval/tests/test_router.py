@@ -16,6 +16,7 @@ from src.retrieval.models import (
     TemporalSource,
 )
 from src.retrieval.routing.router import IntentRouter
+from src.retrieval.resolved_reference import RelationGoal
 
 
 class FixedClock:
@@ -89,13 +90,24 @@ def test_low_confidence_rule_used_without_classifier() -> None:
     result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
         RetrievalRequest(query="Thủ tục qua nhiều văn bản ra sao?")
     )
-
     assert result.decision.intent is IntentType.MULTI_HOP
     assert (
         result.decision.decision_reason_code
         is RetrievalDecisionReasonCode.MULTI_HOP_EXPLICIT
     )
 
+
+def test_typed_reference_goal_is_factual_not_graph_topology_intent() -> None:
+    result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+        RetrievalRequest(query="Khoản 11 Điều 4 dẫn chiếu đến điều nào?"),
+        relation_goal=RelationGoal.REFERS_TO,
+    )
+
+    assert result.decision.intent is IntentType.FACTUAL
+    assert (
+        result.decision.decision_reason_code
+        is RetrievalDecisionReasonCode.EXPLICIT_REFERENCE_LOOKUP
+    )
 
 def test_classifier_resolves_intent_when_no_rule_matches() -> None:
     classifier = FakeClassifier(IntentType.DEFINITION)

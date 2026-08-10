@@ -152,6 +152,15 @@ class ContextProjector:
             temporal_source=request.retrieval_context.temporal_source.value,
             resolved_from=request.retrieval_context.temporal.resolved_from,
             resolved_to=request.retrieval_context.temporal.resolved_to,
+            relation_goal=(
+                request.retrieval_context.relation_goal.value
+                if request.retrieval_context.relation_goal is not None
+                else None
+            ),
+            anchor_node_ids=tuple(
+                reference.node_id
+                for reference in request.retrieval_context.resolved_references
+            ),
             evidence=tuple(evidence),
             paths=projected_paths,
             admitted_bundle_ids=tuple(bundle.bundle_id for bundle in chosen),
@@ -209,6 +218,14 @@ class ContextProjector:
                 if context.temporal.resolved_to
                 else None
             ),
+            "relation_goal": (
+                context.relation_goal.value
+                if context.relation_goal is not None
+                else None
+            ),
+            "anchor_node_ids": [
+                reference.node_id for reference in context.resolved_references
+            ],
         }
         # This deterministic character estimate includes prompt framing and routing
         # metadata. Evidence and graph paths are costed separately before admission.
@@ -282,6 +299,8 @@ def _provider_payload(projected: ProjectedAnswerContext) -> dict[str, object]:
         "resolved_to": (
             projected.resolved_to.isoformat() if projected.resolved_to else None
         ),
+        "relation_goal": projected.relation_goal,
+        "anchor_node_ids": list(projected.anchor_node_ids),
         "evidence": [item.model_dump(mode="json") for item in projected.evidence],
         "paths": [item.model_dump(mode="json") for item in projected.paths],
     }
@@ -309,6 +328,11 @@ def _output_contract(
             "Each statement reasoning_path_ids MUST contain only these IDs: "
             + json.dumps(registry.allowed_path_ids, ensure_ascii=False)
         )
+        if projected.relation_goal is not None:
+            rules.append(
+                "At least one supported statement reasoning_path_ids MUST contain "
+                "a path proving RELATION_GOAL from an ANCHOR_NODE_ID."
+            )
     else:
         rules.append("Every statement reasoning_path_ids MUST be an empty array.")
     if projected.resolved_from is None:

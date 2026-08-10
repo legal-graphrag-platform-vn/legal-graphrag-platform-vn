@@ -4,10 +4,15 @@ from datetime import date
 from src.retrieval.config import RetrievalConfig
 from src.retrieval.context.context_builder import ContextBuilder
 from src.retrieval.context.temporal_filter import TemporalFilter
-from src.retrieval.errors import RetrievalCapabilityError, RetrievalOutputError
+from src.retrieval.errors import (
+    CanonicalReferenceUnavailableError,
+    RetrievalCapabilityError,
+    RetrievalOutputError,
+)
 from src.retrieval.evidence.verifier import EvidenceVerifier
 from src.retrieval.fusion.reciprocal_rank_fusion import ReciprocalRankFusion
 from src.retrieval.models import (
+    CanonicalAnchorHydration,
     GraphEdge,
     GraphExpansion,
     GraphNodeRef,
@@ -15,6 +20,7 @@ from src.retrieval.models import (
     GraphReasoningRequirement,
     IntentType,
     RetrievalRequest,
+    RetrievedUnit,
 )
 from src.retrieval.path_identity import build_topology_path_fingerprint
 from src.retrieval.planning.executor import PlannedPathExecution
@@ -30,6 +36,13 @@ from src.retrieval.planning.models import (
 from src.retrieval.retriever.hybrid import SeedChannelExecutor
 from src.retrieval.routing.router import IntentRouter
 from src.retrieval.runtime.runtime import RetrievalRuntime
+from src.retrieval.resolved_reference import (
+    ReferenceSource,
+    RelationGoal,
+    ResolutionMethod,
+    ResolvedReference,
+    RetrievalExecutionContext,
+)
 
 
 class EmptyChannel:
@@ -41,13 +54,13 @@ class EmptyGraph:
     def __init__(self) -> None:
         self.calls = 0
 
-    def expand(self, entry_ids, intent, *, filters):
+    def expand(self, entry_ids, intent, *, filters, relation_goal=None):
         self.calls += 1
         return GraphExpansion()
 
 
 class GenericGraph(EmptyGraph):
-    def expand(self, entry_ids, intent, *, filters):
+    def expand(self, entry_ids, intent, *, filters, relation_goal=None):
         self.calls += 1
         return GraphExpansion(
             paths=[
@@ -68,6 +81,101 @@ class GenericGraph(EmptyGraph):
                 )
             ]
         )
+
+
+def _canonical_unit(unit_id: str, *, number: str) -> RetrievedUnit:
+    return RetrievedUnit(
+        id=unit_id,
+        label="Clause" if "_cl" in unit_id else "Article",
+        content_raw=f"Nội dung {unit_id}",
+        document_id="ldn_2020",
+        document_number="59/2020/QH14",
+        article_id=(unit_id if "_cl" not in unit_id else "ldn_2020_art4"),
+        clause_id=(unit_id if "_cl" in unit_id else None),
+        article_number=("4" if "_cl" in unit_id else number),
+        clause_number=(number if "_cl" in unit_id else None),
+        citation_label=f"Đơn vị {number}",
+        retrieval_sources=["graph"],
+    )
+
+
+class CanonicalRelationGraph:
+    def __init__(self, *, include_edge: bool = True) -> None:
+        self.include_edge = include_edge
+        self.hydration_calls: list[list[str]] = []
+        self.expansion_calls: list[tuple[list[str], object]] = []
+        self.anchor = _canonical_unit("ldn_2020_art4_cl11", number="11")
+        self.target = _canonical_unit("ldn_2020_art88", number="88")
+
+    def hydrate_anchors(self, anchor_ids, *, filters):
+        self.hydration_calls.append(list(anchor_ids))
+        if self.anchor.id not in anchor_ids:
+            return CanonicalAnchorHydration()
+        return CanonicalAnchorHydration(
+            matched_anchor_ids=(self.anchor.id,), units=[self.anchor]
+        )
+
+    def expand(self, entry_ids, intent, *, filters, relation_goal=None):
+        self.expansion_calls.append((list(entry_ids), relation_goal))
+        if not self.include_edge:
+            return GraphExpansion()
+        return GraphExpansion(
+            units=[self.target],
+            paths=[
+                GraphPath(
+                    nodes=(
+                        GraphNodeRef(
+                            node_id=self.anchor.id,
+                            labels=("Clause",),
+                            citable_unit_id=self.anchor.id,
+                        ),
+                        GraphNodeRef(
+                            node_id=self.target.id,
+                            labels=("Article",),
+                            citable_unit_id=self.target.id,
+                        ),
+                    ),
+                    edges=(
+                        GraphEdge(
+                            relation_id="ref-1",
+                            relation_type="REFERS_TO",
+                            source_id=self.anchor.id,
+                            target_id=self.target.id,
+                        ),
+                    ),
+                    path_description="Khoản 11 Điều 4 -> Điều 88",
+                )
+            ],
+        )
+
+
+def _reference_context() -> RetrievalExecutionContext:
+    return RetrievalExecutionContext(
+        resolved_references=(
+            ResolvedReference(
+                mention="Khoản 11 Điều 4 Luật Doanh nghiệp 2020",
+                node_id="ldn_2020_art4_cl11",
+                node_type="Clause",
+                label="Khoản 11 Điều 4",
+                document_id="ldn_2020",
+                resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+                source=ReferenceSource.CURRENT_MESSAGE,
+            ),
+        ),
+        relation_goal=RelationGoal.REFERS_TO,
+    )
+
+
+def test_anchor_node_ids_are_derived_with_stable_deduplication() -> None:
+    reference = _reference_context().resolved_references[0]
+    context = RetrievalExecutionContext(
+        resolved_references=(
+            reference,
+            reference.model_copy(update={"mention": "quy định này"}),
+        )
+    )
+
+    assert context.anchor_node_ids == ("ldn_2020_art4_cl11",)
 
 
 class CapabilityInspector:
@@ -242,6 +350,53 @@ def test_prepare_is_pure_and_execute_preserves_non_multi_hop_contract() -> None:
     assert context.plan_execution is None
     assert context.reasoning_requirement is None
     assert graph.calls == 1
+
+
+def test_exact_anchor_outside_seed_top_k_still_starts_one_graph_expansion() -> None:
+    graph = CanonicalRelationGraph()
+    context = _runtime(CapabilityInspector(), graph).retrieve(
+        "Khoản 11 Điều 4 dẫn chiếu đến điều nào?",
+        execution_context=_reference_context(),
+    )
+
+    assert graph.hydration_calls == [["ldn_2020_art4_cl11"]]
+    assert graph.expansion_calls == [
+        (["ldn_2020_art4_cl11"], RelationGoal.REFERS_TO)
+    ]
+    assert context.intent is IntentType.FACTUAL
+    assert [unit.id for unit in context.retrieved_units[:2]] == [
+        "ldn_2020_art4_cl11",
+        "ldn_2020_art88",
+    ]
+    assert context.resolved_references == _reference_context().resolved_references
+    assert context.relation_goal is RelationGoal.REFERS_TO
+
+
+def test_relation_goal_with_no_edge_does_not_fuzzy_fallback() -> None:
+    graph = CanonicalRelationGraph(include_edge=False)
+    context = _runtime(CapabilityInspector(), graph).retrieve(
+        "Khoản 11 Điều 4 dẫn chiếu đến điều nào?",
+        execution_context=_reference_context(),
+    )
+
+    assert len(graph.expansion_calls) == 1
+    assert context.graph_paths == []
+    assert [unit.id for unit in context.retrieved_units] == [
+        "ldn_2020_art4_cl11"
+    ]
+
+
+def test_unavailable_exact_anchor_fails_with_typed_error() -> None:
+    graph = CanonicalRelationGraph()
+    graph.anchor = _canonical_unit("another_anchor", number="1")
+
+    with pytest.raises(CanonicalReferenceUnavailableError):
+        _runtime(CapabilityInspector(), graph).retrieve(
+            "Khoản 11 Điều 4 dẫn chiếu đến điều nào?",
+            execution_context=_reference_context(),
+        )
+
+    assert graph.expansion_calls == []
 
 
 def test_multi_hop_without_bound_plan_remains_requirement_unresolved() -> None:

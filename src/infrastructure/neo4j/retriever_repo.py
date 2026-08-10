@@ -88,6 +88,45 @@ class Neo4jRetrieverRepo:
             **_filter_parameters(filters),
         )
 
+    def fetch_canonical_anchors(
+        self,
+        anchor_ids: list[str],
+        *,
+        filters: RetrievalFilters,
+    ) -> list[dict[str, Any]]:
+        """Hydrate server-resolved structural anchors under active filters."""
+        query = f"""
+        UNWIND $anchor_ids AS anchor_id
+        MATCH (anchor {{id: anchor_id}})
+        WHERE anchor:Document OR anchor:Article OR anchor:Clause OR anchor:Point
+        OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(anchor)
+        WITH anchor_id, anchor,
+             CASE WHEN anchor:Point THEN parent_clause
+                  WHEN anchor:Article OR anchor:Clause THEN anchor
+                  ELSE null END AS node
+        OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(node)
+        OPTIONAL MATCH (owner:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(node)
+        WITH anchor_id, anchor, node, parent_article,
+             CASE WHEN anchor:Document THEN anchor ELSE owner END AS document,
+             CASE WHEN anchor:Document THEN anchor ELSE node END AS temporal_node
+        WHERE ($document_ids = [] OR document.id IN $document_ids)
+          AND ($doc_types = [] OR document.doc_type IN $doc_types)
+          AND ($legal_statuses = [] OR document.legal_status IN $legal_statuses)
+          AND ($query_date IS NULL OR (
+            temporal_node.effective_from IS NOT NULL
+            AND temporal_node.effective_from <= $query_date
+            AND (temporal_node.effective_to IS NULL
+                 OR temporal_node.effective_to > $query_date)
+          ))
+        RETURN anchor_id, {_UNIT_PROJECTION}
+        ORDER BY anchor_id
+        """
+        return self._run(
+            query,
+            anchor_ids=anchor_ids,
+            **_filter_parameters(filters),
+        )
+
     def graph_expansion(
         self,
         entry_ids: list[str],
@@ -156,7 +195,7 @@ class Neo4jRetrieverRepo:
           unit.effective_from AS effective_from,
           unit.effective_to AS effective_to,
           unit.legal_status AS legal_status,
-          unit.version_family_id AS version_family_id
+          properties(unit)['version_family_id'] AS version_family_id
         ORDER BY length(path) ASC,
                  [node IN path_node_refs | node.node_id] ASC
         LIMIT $limit

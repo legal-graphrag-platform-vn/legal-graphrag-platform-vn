@@ -48,7 +48,7 @@ class GraphChannel:
     def __init__(self) -> None:
         self.calls = 0
 
-    def expand(self, entry_ids, intent, *, filters):
+    def expand(self, entry_ids, intent, *, filters, relation_goal=None):
         self.calls += 1
         return GraphExpansion(
             paths=[

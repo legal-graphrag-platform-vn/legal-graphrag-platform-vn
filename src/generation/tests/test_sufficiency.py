@@ -5,6 +5,12 @@ import pytest
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.generation.tests.factories import graph_path, retrieval_context
 from src.retrieval.models import IntentType
+from src.retrieval.resolved_reference import (
+    ReferenceSource,
+    RelationGoal,
+    ResolutionMethod,
+    ResolvedReference,
+)
 
 
 @pytest.mark.parametrize("intent", [IntentType.FACTUAL, IntentType.DEFINITION])
@@ -20,6 +26,28 @@ def test_basic_intents_require_sufficient_evidence(intent: IntentType) -> None:
 def test_no_results_is_insufficient() -> None:
     result = EvidenceSufficiencyPolicy().evaluate(retrieval_context(no_results=True))
     assert result.reason_code == "NO_RESULTS"
+
+
+def test_resolved_relation_without_matching_edge_is_typed_insufficient() -> None:
+    context = retrieval_context(intent=IntentType.FACTUAL)
+    context.resolved_references = (
+        ResolvedReference(
+            mention="Khoản 11 Điều 4",
+            node_id=context.retrieved_units[0].id,
+            node_type="Clause",
+            label="Khoản 11 Điều 4",
+            document_id=context.retrieved_units[0].document_id,
+            resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+            source=ReferenceSource.CURRENT_MESSAGE,
+        ),
+    )
+    context.relation_goal = RelationGoal.REFERS_TO
+    context.graph_paths = []
+
+    result = EvidenceSufficiencyPolicy().evaluate(context)
+
+    assert result.sufficient is False
+    assert result.reason_code == "NO_REFERENCE_EDGE"
 
 
 def test_hierarchy_requires_contains_path() -> None:

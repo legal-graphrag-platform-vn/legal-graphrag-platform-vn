@@ -5,7 +5,13 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING, Any, Mapping, Protocol, Sequence
 
-from src.retrieval.models import GraphExpansion, IntentType, RetrievedUnit
+from src.retrieval.models import (
+    CanonicalAnchorHydration,
+    GraphExpansion,
+    IntentType,
+    RetrievedUnit,
+)
+from src.retrieval.resolved_reference import RelationGoal
 from src.shared.llm_ports import TextGenerationPort as TextGenerationPort  # re-export
 from src.shared.retrieval_contract import RetrievalFilters
 
@@ -43,6 +49,13 @@ class FullTextSearchPort(Protocol):
 
 
 class GraphExpansionPort(Protocol):
+    def fetch_canonical_anchors(
+        self,
+        anchor_ids: list[str],
+        *,
+        filters: RetrievalFilters,
+    ) -> list[dict[str, Any]]: ...
+
     def graph_expansion(
         self,
         entry_ids: list[str],
@@ -158,12 +171,20 @@ class FullTextChannelPort(VectorChannelPort, Protocol):
 
 
 class GraphChannelPort(Protocol):
+    def hydrate_anchors(
+        self,
+        anchor_ids: list[str],
+        *,
+        filters: RetrievalFilters | None = None,
+    ) -> CanonicalAnchorHydration: ...
+
     def expand(
         self,
         entry_ids: list[str],
         intent: IntentType,
         *,
         filters: RetrievalFilters | None = None,
+        relation_goal: RelationGoal | None = None,
     ) -> GraphExpansion: ...
 
 

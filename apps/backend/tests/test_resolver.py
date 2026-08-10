@@ -24,6 +24,8 @@ from resolution.models import (
     StandaloneResolution,
 )
 from resolution.resolver import ReferenceResolver
+from src.retrieval.resolved_reference import ResolutionMethod, ReferenceSource
+from src.retrieval.resolved_reference import RelationGoal
 
 
 class FakeLookup:
@@ -102,6 +104,8 @@ def test_single_explicit_match_resolves() -> None:
     assert isinstance(outcome, ResolvedResolution)
     assert outcome.is_anaphora is False
     assert outcome.candidate.node_id == "art-111"
+    assert outcome.resolution_method is ResolutionMethod.EXACT_STRUCTURAL_LOOKUP
+    assert outcome.source is ReferenceSource.CURRENT_MESSAGE
 
 
 def test_multiple_explicit_matches_are_ambiguous() -> None:
@@ -166,6 +170,8 @@ def test_single_focus_anaphora_resolves() -> None:
     assert outcome.is_anaphora is True
     assert outcome.candidate.node_id == "art-111"
     assert outcome.candidate.article_number == "111"
+    assert outcome.resolution_method is ResolutionMethod.GROUNDED_HISTORY_FOCUS
+    assert outcome.source is ReferenceSource.GROUNDED_HISTORY
 
 
 def test_multiple_focus_anaphora_is_ambiguous_without_recency_tiebreak() -> None:
@@ -251,6 +257,38 @@ def test_pending_select_resolves_by_label() -> None:
     outcome = _resolve(resolver, "Điều 5 Luật B", _context(pending=_pending_select()))
     assert isinstance(outcome, ResolvedResolution)
     assert outcome.candidate.node_id == "art-doc2"
+
+
+def test_pending_selection_preserves_relation_goal_and_original_question() -> None:
+    import uuid
+
+    resolver = ReferenceResolver(
+        FakeLookup(
+            {
+                "5": (
+                    _candidate("a-doc1", article_number="5", document_id="doc-1"),
+                    _candidate("a-doc2", article_number="5", document_id="doc-2"),
+                )
+            }
+        )
+    )
+    message = "Điều 5 dẫn chiếu đến điều nào?"
+    first = _resolve(resolver, message, _context())
+    assert isinstance(first, ClarifyResolution)
+    pending = PendingClarification(
+        mode=ClarificationMode.SELECT,
+        question=first.question,
+        candidates=first.candidates,
+        source_turn_id=uuid.uuid4(),
+        source_user_turn_no=1,
+    )
+
+    selected = _resolve(resolver, "1", _context(pending=pending))
+
+    assert isinstance(selected, ResolvedResolution)
+    assert selected.source is ReferenceSource.PENDING_CLARIFICATION
+    assert selected.relation_goal is RelationGoal.REFERS_TO
+    assert selected.source_message == message
 
 
 def test_pending_select_invalid_reasks_same_snapshot() -> None:

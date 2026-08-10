@@ -104,11 +104,12 @@ class StructuredRewriter:
 
         candidate = resolution.candidate
         anchors = candidate.required_anchors()
-        ruled = self._rule_rewrite(message, resolution)
+        rewrite_message = resolution.source_message or message
+        ruled = self._rule_rewrite(rewrite_message, resolution)
         if ruled is not None and _contains_all(ruled, anchors):
             return self._finalize(ruled, anchors=anchors)
         return await self._model_rewrite(
-            message=message,
+            message=rewrite_message,
             recent_messages=recent_messages,
             candidate=candidate,
             anchors=anchors,

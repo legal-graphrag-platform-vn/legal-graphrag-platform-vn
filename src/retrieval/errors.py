@@ -9,6 +9,10 @@ class RetrievalRequestError(RetrievalError):
     pass
 
 
+class CanonicalReferenceUnavailableError(RetrievalRequestError):
+    """A server-resolved anchor is absent under the active retrieval scope."""
+
+
 class IntentAnalysisError(RetrievalError):
     pass
 

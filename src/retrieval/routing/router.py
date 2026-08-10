@@ -26,6 +26,7 @@ from src.retrieval.models import (
 )
 from src.retrieval.ports import Clock, IntentClassifierPort
 from src.retrieval.query.temporal_parser import TemporalParser
+from src.retrieval.resolved_reference import RelationGoal
 
 
 class RuleConfidence(Enum):
@@ -102,7 +103,12 @@ class IntentRouter:
         self._classifier = classifier
         self._clock = clock
 
-    def route(self, request: RetrievalRequest) -> RoutingResult:
+    def route(
+        self,
+        request: RetrievalRequest,
+        *,
+        relation_goal: RelationGoal | None = None,
+    ) -> RoutingResult:
         if len(request.query) > self._config.query_max_length:
             raise RetrievalRequestError(
                 f"Query exceeds configured maximum of {self._config.query_max_length}"
@@ -115,7 +121,9 @@ class IntentRouter:
         temporal, temporal_source, filters = self._resolve_temporal(
             request.filters, temporal
         )
-        intent, reason_code, reason = self._resolve_intent(request)
+        intent, reason_code, reason = self._resolve_intent(
+            request, relation_goal=relation_goal
+        )
         if intent is IntentType.VALIDITY and temporal.resolved_from is None:
             raise TemporalRoutingError(
                 "Validity retrieval requires a resolved temporal point"
@@ -171,13 +179,23 @@ class IntentRouter:
         )
 
     def _resolve_intent(
-        self, request: RetrievalRequest
+        self,
+        request: RetrievalRequest,
+        *,
+        relation_goal: RelationGoal | None,
     ) -> tuple[IntentType, RetrievalDecisionReasonCode, str]:
         if request.force_intent is not None:
             return (
                 request.force_intent,
                 RetrievalDecisionReasonCode.FORCED_INTENT,
                 f"Intent explicitly forced to {request.force_intent.value}",
+            )
+
+        if relation_goal is RelationGoal.REFERS_TO:
+            return (
+                IntentType.FACTUAL,
+                RetrievalDecisionReasonCode.EXPLICIT_REFERENCE_LOOKUP,
+                "Resolved source with an explicit REFERS_TO relation goal",
             )
 
         intent, reason_code, confidence = classify_intent_by_rule(request.query)

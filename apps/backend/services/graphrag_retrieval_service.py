@@ -29,6 +29,7 @@ from src.retrieval.planning.errors import (
 )
 from src.retrieval.planning.models import UnlinkedSemanticPlan
 from src.shared.retrieval_contract import RetrievalRequest
+from src.retrieval.resolved_reference import RetrievalExecutionContext
 
 
 logger = logging.getLogger(__name__)
@@ -61,13 +62,27 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
     async def retrieve_context(
         self,
         request: RetrievalRequest,
+        *,
+        execution_context: RetrievalExecutionContext | None = None,
     ) -> RetrievalContext:
         if self._planner is None or not self._planning_enabled:
-            context = await self._runner.run(partial(self._runtime.retrieve, request))
+            context = await self._runner.run(
+                partial(
+                    self._runtime.retrieve,
+                    request,
+                    execution_context=execution_context,
+                )
+            )
             context.metrics["planner_provider_calls"] = 0
             return context
 
-        prepared = await self._runner.run(partial(self._runtime.prepare, request))
+        prepared = await self._runner.run(
+            partial(
+                self._runtime.prepare,
+                request,
+                execution_context=execution_context,
+            )
+        )
         plan: UnlinkedSemanticPlan | None = None
         planner_provider_calls = 0
         if prepared.routing.decision.intent is IntentType.MULTI_HOP:

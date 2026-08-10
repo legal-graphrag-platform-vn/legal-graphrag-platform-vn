@@ -13,6 +13,7 @@ from src.retrieval.models import (
 from src.retrieval.planning.binder import PlanBinder, PlanBindingFailure
 from src.retrieval.planning.models import BoundSemanticPlan, UnlinkedSemanticPlan
 from src.retrieval.runtime.runtime import RetrievalRuntime
+from src.retrieval.resolved_reference import RetrievalExecutionContext
 
 
 class RetrievalRuntimeHandle:
@@ -40,14 +41,30 @@ class RetrievalRuntimeHandle:
         self.close()
 
     def retrieve(
-        self, request: RetrievalRequest | str, **kwargs: object
+        self,
+        request: RetrievalRequest | str,
+        *,
+        execution_context: RetrievalExecutionContext | None = None,
+        **kwargs: object,
     ) -> RetrievalContext:
-        return self._runtime.retrieve(request, **kwargs)
+        return self._runtime.retrieve(
+            request,
+            execution_context=execution_context,
+            **kwargs,
+        )
 
     def prepare(
-        self, request: RetrievalRequest | str, **kwargs: object
+        self,
+        request: RetrievalRequest | str,
+        *,
+        execution_context: RetrievalExecutionContext | None = None,
+        **kwargs: object,
     ) -> PreparedRetrievalRequest:
-        return self._runtime.prepare(request, **kwargs)
+        return self._runtime.prepare(
+            request,
+            execution_context=execution_context,
+            **kwargs,
+        )
 
     def execute(
         self,
