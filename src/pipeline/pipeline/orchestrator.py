@@ -58,6 +58,7 @@ from src.pipeline.pipeline.reference_checkpoint_store import (
     checkpoint_from_reference,
     committed_target_history,
 )
+from src.pipeline.parser.hierarchy_parser import canonicalize_source_text
 from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.scoring.confidence_scorer import score
 from src.shared.ontology.validators import validate_relation as validate_ontology
@@ -74,7 +75,7 @@ from src.pipeline.validation.schema_validator import (
 
 logger = logging.getLogger(__name__)
 
-NORMALIZER_VERSION = "structural-endpoint-v2"
+NORMALIZER_VERSION = "structural-endpoint-v3"
 RELATION_ENRICHER_VERSION = "checkpoint-provenance-v1"
 DIAGRAM_RELATION_TYPES = frozenset({"AMENDS", "REPEALS", "REPLACES", "GUIDES"})
 DIAGRAM_REVIEW_REASONS = frozenset(
@@ -611,6 +612,50 @@ def _validate_diagram_records(
     return validated_records
 
 
+def _validate_structural_reference_source(
+    articles: list[Article],
+    *,
+    source_text: str | None,
+    source_path: Path,
+) -> None:
+    structural_units = []
+    for article in articles:
+        structural_units.append((f"Article {article.number}", article))
+        for clause in article.clauses:
+            structural_units.append(
+                (f"Clause {article.number}.{clause.number}", clause)
+            )
+            structural_units.extend(
+                (
+                    f"Point {article.number}.{clause.number}.{point.label}",
+                    point,
+                )
+                for point in clause.points
+            )
+    has_source_spans = any(
+        unit.source_end_char > unit.source_start_char for _, unit in structural_units
+    )
+    if source_text is None:
+        if has_source_spans:
+            raise ValueError(
+                "Missing canonical source for structural reference resolution: "
+                f"{source_path}"
+            )
+        return
+
+    source_length = len(canonicalize_source_text(source_text))
+    invalid_units = [
+        label
+        for label, unit in structural_units
+        if not (0 <= unit.source_start_char < unit.source_end_char <= source_length)
+    ]
+    if invalid_units:
+        raise ValueError(
+            "Hierarchy has no usable canonical source span for structural unit(s): "
+            f"{', '.join(invalid_units[:10])}. Rerun parse before extraction."
+        )
+
+
 def run_pipeline(
     parsed: ParsedDocument,
     processed_dir: Path,
@@ -647,6 +692,12 @@ def run_pipeline(
             )
     if not selected_articles:
         raise ValueError("Extraction requires at least one selected Article")
+    source_path = settings.data_raw_dir / raw_doc_code / "source.txt"
+    _validate_structural_reference_source(
+        selected_articles,
+        source_text=source_text,
+        source_path=source_path,
+    )
     document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
     checkpoint_path = out_dir / "article_extractions.jsonl"
     checkpoints = _load_checkpoints(
@@ -760,17 +811,6 @@ def run_pipeline(
         if article.number in results_by_article:
             all_records.extend(results_by_article[article.number])
 
-    source_path = settings.data_raw_dir / raw_doc_code / "source.txt"
-    if source_text is None and source_path.exists():
-        source_text = source_path.read_text(encoding="utf-8")
-    has_source_spans = any(
-        article.source_end_char > article.source_start_char
-        for article in selected_articles
-    )
-    if source_text is None and has_source_spans:
-        raise ValueError(
-            f"Missing canonical source for structural reference resolution: {source_path}"
-        )
     reference_resolver = StructuralReferenceResolver(
         registry,
         source_text or "",
@@ -1247,7 +1287,10 @@ def _mark_llm_relations_superseded_by_rules(records: list[dict]) -> None:
     deterministic_records = [
         record
         for record in records
-        if (record.get("relation") or {}).get("properties", {}).get("extraction_method")
+        if (record.get("relation") or {}).get("relation") == "REFERS_TO"
+        and (record.get("relation") or {})
+        .get("properties", {})
+        .get("extraction_method")
         in {"RULE", "ENTITY_LINKING"}
     ]
     for record in records:
@@ -1265,15 +1308,17 @@ def _mark_llm_relations_superseded_by_rules(records: list[dict]) -> None:
             deterministic_evidence = _normalize_citation(
                 deterministic_properties["citation_text"]
             )
-            same_edge = relation.get("head") == deterministic_relation.get(
-                "head"
-            ) and relation.get("tail") == deterministic_relation.get("tail")
-            same_citation = (
-                deterministic_evidence == evidence
-                or deterministic_evidence in evidence
-                or evidence in deterministic_evidence
+            same_source = relation.get("head") == deterministic_relation.get("head")
+            same_citation = bool(
+                deterministic_evidence
+                and evidence
+                and (
+                    deterministic_evidence == evidence
+                    or deterministic_evidence in evidence
+                    or evidence in deterministic_evidence
+                )
             )
-            if same_edge and same_citation:
+            if same_source and same_citation:
                 record["superseded_by_deterministic_resolution"] = (
                     deterministic_properties["reference_bundle_id"]
                 )

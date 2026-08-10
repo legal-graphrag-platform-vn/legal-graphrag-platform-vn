@@ -127,7 +127,7 @@ stateDiagram-v2
   ]
 }
 ```
-> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Parser phải normalize `raw_doc_code`/metadata thành `document.id = graph_id`, `type` thành `doc_type`, `status` thành `legal_status`, và bảo đảm `normative` tồn tại trước mọi bước downstream. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn_2020_art17_cl1`). Chapter được có direct Article trước Mục đầu tiên như phần mở đầu; mọi direct Article phải có số đứng trước mọi Article thuộc các Mục trong cùng Chapter.
+> **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Parser phải normalize `raw_doc_code`/metadata thành `document.id = graph_id`, `type` thành `doc_type`, `status` thành `legal_status`, và bảo đảm `normative` tồn tại trước mọi bước downstream. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn_2020_art17_cl1`). Chapter được có direct Article trước Mục đầu tiên như phần mở đầu; mọi direct Article phải có số đứng trước mọi Article thuộc các Mục trong cùng Chapter. Mỗi Article/Clause/Point phải giữ `source_start_char` và `source_end_char` trong canonical `source.txt`; extraction/normalization có canonical source nhưng thiếu hoặc vượt giới hạn span phải fail-closed và yêu cầu parse lại, không được âm thầm giữ LLM structural reference.
 
 ### 3. Extractor Output & Contract
 **Schema:** JSON danh sách entities và relations.
@@ -330,6 +330,10 @@ Article/Clause/Point IDs from `hierarchy.json`; the LLM must not emit `CONTAINS`
 or invent structural IDs. Every proposed endpoint is normalized before ontology
 validation. Raw LLM endpoint IDs are audit data only and can never enter an
 accepted record or graph payload.
+When deterministic resolution covers the same source unit and citation mention,
+it supersedes the corresponding LLM `REFERS_TO` proposal even when the LLM chose
+a broader or otherwise different structural target. Canonical target selection
+belongs to the resolver, not the LLM.
 
 > [!NOTE]
 > **Phase 1 scope**: LLM extraction hiện tại chỉ cover 3 semantic type (`Entity/Concept/Action` → `LegalSubject/LegalConcept/LegalAction`). `Obligation/Right/Condition/Exception` thuộc Future work — xem `legal_ontology.md` §2.2 để biết rationale và điều kiện triển khai.
