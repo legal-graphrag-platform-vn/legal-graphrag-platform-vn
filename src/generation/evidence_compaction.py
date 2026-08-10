@@ -136,6 +136,8 @@ class EvidenceCompactor:
         paths: tuple[ValidatedPath, ...],
     ) -> tuple[tuple[EvidenceBundle, ...], ...]:
         intent = context.intent
+        if context.relation_goal is not None:
+            return self._relation_goal_bundles(context, candidates, paths)
         if intent in {IntentType.FACTUAL, IntentType.DEFINITION}:
             return tuple(
                 (self._bundle(intent, (candidate,), ()),)
@@ -231,6 +233,40 @@ class EvidenceCompactor:
                     )
             return tuple(alternatives)
         return ()
+
+    def _relation_goal_bundles(
+        self,
+        context: RetrievalContext,
+        candidates: tuple[EvidenceCandidate, ...],
+        paths: tuple[ValidatedPath, ...],
+    ) -> tuple[tuple[EvidenceBundle, ...], ...]:
+        assert context.relation_goal is not None
+        anchor_ids = {reference.node_id for reference in context.resolved_references}
+        by_id = {candidate.unit.id: candidate for candidate in candidates}
+        alternatives: list[tuple[EvidenceBundle, ...]] = []
+        for path in paths:
+            if not any(
+                edge.relation_type == context.relation_goal.value
+                and edge.source_id in anchor_ids
+                for edge in path.path.edges
+            ):
+                continue
+            citable_ids = tuple(
+                dict.fromkeys(
+                    node.citable_unit_id
+                    for node in path.path.nodes
+                    if node.citable_unit_id is not None
+                )
+            )
+            if len(citable_ids) < 2 or any(
+                node_id not in by_id for node_id in citable_ids
+            ):
+                continue
+            path_candidates = tuple(by_id[node_id] for node_id in citable_ids)
+            alternatives.append(
+                (self._bundle(context.intent, path_candidates, (path,)),)
+            )
+        return tuple(alternatives)
 
     @staticmethod
     def _bundle(

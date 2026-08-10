@@ -23,6 +23,7 @@ uv run python -m src.pipeline.main extract --raw-doc-code L59_2020   # cần GEM
 uv run python -m src.pipeline.main normalize-extraction --raw-doc-code L59_2020
 uv run python -m src.pipeline.main validate-payload --raw-doc-code L59_2020
 uv run python -m src.pipeline.main write --raw-doc-code L59_2020
+uv run python -m src.pipeline.main embed --raw-doc-code L59_2020 --dry-run
 uv run python -m src.pipeline.main embed --raw-doc-code L59_2020
 uv run python -m src.pipeline.main graph-quality --raw-doc-code L59_2020
 
@@ -39,6 +40,12 @@ and `write` for curated ready documents. The write command verifies each new
 A `Chapter` may also retain direct preamble Articles before its first `Section`.
 The parser and payload consistency validator reject the mixed structure if any
 direct Article number is at or after the first Article contained by a Section.
+
+Trước một đợt nạp hoặc cập nhật corpus lớn, chạy `embed --dry-run` cho từng
+document đã write. Lệnh này kiểm tra hai vector index đang `ONLINE`, dimension
+khớp BGE-M3/1024, và báo số Article/Clause stale theo content hash + provenance;
+nó không tải embedding model và không ghi Neo4j. Chỉ chạy `embed` không có
+`--dry-run` sau khi readiness report đúng với phạm vi dữ liệu dự kiến.
 
 ## Dẫn chiếu cấu trúc liên văn bản
 

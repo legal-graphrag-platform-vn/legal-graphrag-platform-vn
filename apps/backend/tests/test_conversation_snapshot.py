@@ -15,6 +15,7 @@ from api.models import (
     ChatMetadataData,
     ChatReasoningPathData,
     ConversationChatRequest,
+    encode_sse,
 )
 from conversation.snapshot import (
     KIND_ANSWER,
@@ -57,6 +58,19 @@ def test_conversation_request_rejects_legacy_history() -> None:
             client_turn_id=uuid.uuid4(),
             message="Điều 111",
             history=[{"role": "user", "content": "x"}],
+        )
+
+
+@pytest.mark.parametrize("field", ["resolved_references", "anchor_node_ids"])
+def test_conversation_request_rejects_client_owned_canonical_anchors(field: str) -> None:
+    with pytest.raises(ValidationError):
+        ConversationChatRequest.model_validate(
+            {
+                "conversation_id": uuid.uuid4(),
+                "client_turn_id": uuid.uuid4(),
+                "message": "Khoản 11 Điều 4 dẫn chiếu đến đâu?",
+                field: ["ldn_2020_art4_cl11"],
+            }
         )
 
 
@@ -121,7 +135,16 @@ def test_replay_parity_is_byte_identical() -> None:
     snapshot = _answer_snapshot()
     first = stream_from_snapshot(snapshot, chunk_chars=8)
     second = stream_from_snapshot(snapshot, chunk_chars=8)
-    assert [(e.event, e.data) for e in first] == [(e.event, e.data) for e in second]
+    first_bytes = "".join(encode_sse(e.event, e.data) for e in first)
+    replay_bytes = "".join(encode_sse(e.event, e.data) for e in second)
+    assert first_bytes == replay_bytes
+
+
+def test_sse_encoding_is_canonical_across_mapping_order() -> None:
+    first = {"status": "completed", "citation_count": 1, "confidence": 0.9}
+    jsonb_order = {"confidence": 0.9, "citation_count": 1, "status": "completed"}
+
+    assert encode_sse("done", first) == encode_sse("done", jsonb_order)
 
 
 def test_snapshot_persists_structured_answer_and_streams_xai() -> None:

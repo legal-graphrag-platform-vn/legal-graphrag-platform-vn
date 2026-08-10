@@ -40,7 +40,7 @@ class FakeRuntime:
         self.error = error
         self.requests: list[RetrievalRequest] = []
 
-    def retrieve(self, request: RetrievalRequest):
+    def retrieve(self, request: RetrievalRequest, *, execution_context=None):
         self.requests.append(request)
         if self.error is not None:
             raise self.error
@@ -62,7 +62,7 @@ class FakePlanningRuntime:
         self.prepare_thread_ids: list[int] = []
         self.execute_thread_ids: list[int] = []
 
-    def prepare(self, request: RetrievalRequest):
+    def prepare(self, request: RetrievalRequest, *, execution_context=None):
         self.prepare_calls += 1
         self.prepare_thread_ids.append(threading.get_ident())
         prepared = SimpleNamespace(

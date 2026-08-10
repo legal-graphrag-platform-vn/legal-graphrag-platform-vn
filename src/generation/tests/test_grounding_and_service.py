@@ -24,6 +24,13 @@ from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
 from src.generation.tests.factories import answer_candidate, retrieval_context
 from src.retrieval.models import IntentType
+from src.retrieval.path_identity import build_topology_path_fingerprint
+from src.retrieval.resolved_reference import (
+    ReferenceSource,
+    RelationGoal,
+    ResolutionMethod,
+    ResolvedReference,
+)
 from src.retrieval.execution_contract import (
     PlanExecutionResult,
     PlanExecutionStatus,
@@ -154,6 +161,47 @@ def test_invented_reasoning_path_is_rejected() -> None:
     asyncio.run(scenario())
 
 
+def test_relation_goal_answer_must_link_path_from_resolved_anchor() -> None:
+    async def scenario() -> None:
+        context = _relation_context()
+        with pytest.raises(ReasoningPathValidationError, match="must link"):
+            await _generator(FakeProvider(answer_candidate())).generate(
+                AnswerGenerationRequest(query=context.query, retrieval_context=context)
+            )
+
+    asyncio.run(scenario())
+
+
+def test_relation_goal_answer_exposes_verified_reasoning_path() -> None:
+    async def scenario() -> None:
+        context = _relation_context()
+        path_id = build_topology_path_fingerprint(context.graph_paths[0])
+        candidate = answer_candidate()
+        statement = (
+            candidate.direct_answer.paragraphs[0]
+            .statements[0]
+            .model_copy(update={"reasoning_path_ids": [path_id]})
+        )
+        paragraph = candidate.direct_answer.paragraphs[0].model_copy(
+            update={"statements": [statement]}
+        )
+        candidate = candidate.model_copy(
+            update={
+                "direct_answer": candidate.direct_answer.model_copy(
+                    update={"paragraphs": [paragraph]}
+                )
+            }
+        )
+
+        response = await _generator(FakeProvider(candidate)).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+
+        assert [path.path_id for path in response.reasoning_paths] == [path_id]
+
+    asyncio.run(scenario())
+
+
 def test_temporal_assertion_must_match_retrieved_interval() -> None:
     async def scenario() -> None:
         candidate = answer_candidate().model_copy(
@@ -204,3 +252,21 @@ def _generator(provider: FakeProvider) -> AnswerGenerator:
         projected_validator=ProjectedContextValidator(),
         grounding=GroundingValidator(),
     )
+
+
+def _relation_context():
+    context = retrieval_context(path_relations=["REFERS_TO"])
+    anchor = context.graph_paths[0].nodes[0].node_id
+    context.resolved_references = (
+        ResolvedReference(
+            mention="Điều 1 dẫn chiếu đến điều nào?",
+            node_id=anchor,
+            node_type="Article",
+            label="Điều 1",
+            document_id="doc",
+            resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+            source=ReferenceSource.CURRENT_MESSAGE,
+        ),
+    )
+    context.relation_goal = RelationGoal.REFERS_TO
+    return context

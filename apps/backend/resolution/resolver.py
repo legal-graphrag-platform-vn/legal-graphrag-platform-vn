@@ -34,6 +34,7 @@ from resolution.clarification import (
     match_select,
 )
 from resolution.explicit_parser import parse_explicit_references
+from resolution.relation_goal import detect_relation_goal
 from resolution.models import (
     REASON_ANAPHORA_AMBIGUOUS,
     REASON_REFERENT_NOT_FOUND,
@@ -45,6 +46,11 @@ from resolution.models import (
     ResolvedCandidate,
     ResolvedResolution,
     StandaloneResolution,
+)
+from src.retrieval.resolved_reference import (
+    ReferenceSource,
+    RelationGoal,
+    ResolutionMethod,
 )
 
 _MAX_CLARIFICATION_CANDIDATES = 5
@@ -92,7 +98,15 @@ class ReferenceResolver:
             if candidate is not None:
                 return ResolvedResolution(
                     candidate=ResolvedCandidate.from_clarification_candidate(candidate),
-                    is_anaphora=True,
+                    resolution_method=ResolutionMethod(
+                        candidate.metadata.get(
+                            "resolution_method",
+                            ResolutionMethod.GROUNDED_HISTORY_FOCUS.value,
+                        )
+                    ),
+                    source=ReferenceSource.PENDING_CLARIFICATION,
+                    relation_goal=_metadata_relation_goal(candidate.metadata),
+                    source_message=_metadata_source_message(candidate.metadata),
                 )
             return ClarifyResolution(
                 mode=ClarificationMode.SELECT,
@@ -110,14 +124,30 @@ class ReferenceResolver:
         self, message: str, context: HistoryContext
     ) -> ResolutionOutcome:
         explicit_references = parse_explicit_references(message)
+        relation_goal = detect_relation_goal(message)
         if explicit_references:
-            return await self._resolve_explicit(explicit_references)
+            return await self._resolve_explicit(
+                explicit_references,
+                source_message=message,
+                relation_goal=relation_goal,
+            )
         anaphora = detect_anaphora(message)
         if anaphora is not None:
-            return self._resolve_anaphora(anaphora.expected_type, context)
+            return self._resolve_anaphora(
+                anaphora.expected_type,
+                context,
+                source_message=message,
+                relation_goal=relation_goal,
+            )
         return StandaloneResolution()
 
-    async def _resolve_explicit(self, references) -> ResolutionOutcome:
+    async def _resolve_explicit(
+        self,
+        references,
+        *,
+        source_message: str,
+        relation_goal: RelationGoal | None,
+    ) -> ResolutionOutcome:
         candidates: list[ResolvedCandidate] = []
         seen: set[str] = set()
         for reference in references:
@@ -126,10 +156,24 @@ class ReferenceResolver:
                     seen.add(candidate.node_id)
                     candidates.append(candidate)
         if len(candidates) == 1:
-            return ResolvedResolution(candidate=candidates[0], is_anaphora=False)
+            return ResolvedResolution(
+                candidate=candidates[0],
+                resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+                source=ReferenceSource.CURRENT_MESSAGE,
+                relation_goal=relation_goal,
+                source_message=source_message,
+            )
         if len(candidates) > 1:
             return self._clarify_from_candidates(
-                tuple(c.to_clarification_candidate() for c in candidates)
+                tuple(
+                    c.to_clarification_candidate(
+                        resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+                        source=ReferenceSource.CURRENT_MESSAGE,
+                        source_message=source_message,
+                        relation_goal=relation_goal,
+                    )
+                    for c in candidates
+                )
             )
         # Explicit structural mention that does not exist.
         return ClarifyResolution(
@@ -141,7 +185,12 @@ class ReferenceResolver:
         )
 
     def _resolve_anaphora(
-        self, expected_type: ExpectedUnitType | None, context: HistoryContext
+        self,
+        expected_type: ExpectedUnitType | None,
+        context: HistoryContext,
+        *,
+        source_message: str,
+        relation_goal: RelationGoal | None,
     ) -> ResolutionOutcome:
         matches = [
             focus
@@ -151,7 +200,10 @@ class ReferenceResolver:
         if len(matches) == 1:
             return ResolvedResolution(
                 candidate=ResolvedCandidate.from_grounded_focus(matches[0]),
-                is_anaphora=True,
+                resolution_method=ResolutionMethod.GROUNDED_HISTORY_FOCUS,
+                source=ReferenceSource.GROUNDED_HISTORY,
+                relation_goal=relation_goal,
+                source_message=source_message,
             )
         if len(matches) > 1:
             # Recency never auto-breaks ambiguity (Plan 19 §4).
@@ -159,7 +211,12 @@ class ReferenceResolver:
                 tuple(
                     ResolvedCandidate.from_grounded_focus(
                         focus
-                    ).to_clarification_candidate()
+                    ).to_clarification_candidate(
+                        resolution_method=ResolutionMethod.GROUNDED_HISTORY_FOCUS,
+                        source=ReferenceSource.GROUNDED_HISTORY,
+                        source_message=source_message,
+                        relation_goal=relation_goal,
+                    )
                     for focus in matches
                 )
             )
@@ -182,3 +239,13 @@ class ReferenceResolver:
             question=build_select_question(bounded),
             candidates=bounded,
         )
+
+
+def _metadata_relation_goal(metadata: dict) -> RelationGoal | None:
+    value = metadata.get("relation_goal")
+    return RelationGoal(value) if value else None
+
+
+def _metadata_source_message(metadata: dict) -> str | None:
+    value = metadata.get("source_message")
+    return value if isinstance(value, str) and value.strip() else None

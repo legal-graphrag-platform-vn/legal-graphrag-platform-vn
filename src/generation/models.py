@@ -247,6 +247,8 @@ class ProjectedAnswerContext(BaseModel):
     temporal_source: str
     resolved_from: date | None
     resolved_to: date | None
+    relation_goal: str | None = None
+    anchor_node_ids: tuple[str, ...] = ()
     evidence: tuple[LegalEvidenceBlock, ...]
     paths: tuple[ProjectedPathBlock, ...]
     admitted_bundle_ids: tuple[str, ...]

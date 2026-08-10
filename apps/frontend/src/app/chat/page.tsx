@@ -56,6 +56,8 @@ interface ServerMessage {
       retrieval_mode?: string
       cannot_answer?: boolean
       insufficiency_message?: string
+      resolved_references?: import('@/types/chat').ResolvedReference[]
+      relation_goal?: string
    } | null
    created_at?: string | null
 }
@@ -210,6 +212,8 @@ export default function ChatPage() {
                retrieval_mode: m.metadata?.retrieval_mode,
                cannot_answer: m.metadata?.cannot_answer,
                insufficiency_message: m.metadata?.insufficiency_message,
+               resolved_references: m.metadata?.resolved_references || [],
+               relation_goal: m.metadata?.relation_goal,
                temporal_notes: m.explanation?.temporal_notes || [],
                reasoning_paths: m.explanation?.reasoning_paths || [],
                timestamp: m.created_at || new Date().toISOString(),

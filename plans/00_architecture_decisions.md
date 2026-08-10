@@ -1564,3 +1564,54 @@ notes khi tạo snapshot/API response.
   phải regenerate trước khi dùng làm evidence cho contract v2.
 - Hard grounding gate giữ deterministic; semantic support, completeness,
   naturalness và exception coverage được đánh giá ở quality/eval layer riêng.
+
+---
+
+## ADR-31: Typed canonical reference handoff vào retrieval v1
+
+**Ngày**: 2026-08-10
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Conversation resolver có thể resolve chính xác một mention thành canonical
+Clause/Article, nhưng boundary cũ chỉ chuyển standalone query dạng text vào
+`RetrievalRequest`. Retrieval vì vậy phải tìm lại identity qua lexical/vector
+search; nếu exact Clause nằm ngoài top-k thì graph expansion không bắt đầu từ
+Clause dù resolver đã xác định đúng.
+
+### Quyết định
+
+1. Public `ConversationChatRequest` chỉ nhận message và filters; client không
+   được gửi canonical ID.
+2. Resolver tạo server-owned `ResolvedReference` gồm canonical identity,
+   document ownership và provenance. `RetrievalExecutionContext` chỉ lưu
+   `resolved_references`; `anchor_node_ids` luôn derive stable từ các reference,
+   không phải source of truth thứ hai.
+3. `query` phục vụ lexical/vector retrieval; canonical anchors phục vụ hydrate
+   và graph traversal deterministic. Typed identity không được stringify rồi
+   fuzzy-resolve lại.
+4. Runtime hydrate mọi anchor dưới cùng document/temporal filters, prepend các
+   anchor vào graph entry set và graph-expand đúng một lần. Anchor/path evidence
+   bắt buộc được giữ qua fusion/rerank/final-k.
+5. `relation_goal` độc lập với semantic `intent`. Explicit `REFERS_TO` lookup là
+   `intent=factual`, không phải hierarchy hay multi-hop chỉ vì có graph edge.
+6. V1 coi typed relation lookup là atomic và không đưa qua Query Processor
+   decomposition. Query Processor tiếp tục xử lý các standalone query tổng quát.
+7. Anchor không tồn tại dưới active filters fail typed
+   `CANONICAL_REFERENCE_UNAVAILABLE`; anchor tồn tại nhưng không có requested
+   edge đi tới generation sufficiency gate với `NO_REFERENCE_EDGE`.
+8. Document filter xung đột với resolved reference tạo clarification trước
+   retrieval. Ambiguous/unresolved resolution không được fallback fuzzy.
+9. Response snapshot/SSE expose resolved reference provenance và relation goal
+   để UI cho người dùng thấy hệ thống đã hiểu tham chiếu nào.
+
+### Hệ quả
+
+- Exact anchor vẫn graph-expand khi không nằm trong lexical/vector top-k.
+- Full-text ranking, top-k, graph data, gold và ontology không cần thay đổi để
+  che information-loss bug ở boundary.
+- `ResolvedReference` là internal contract; public retrieval/query API giữ
+  backward compatibility v1 và reject client anchor injection.
+- Các relation goal khác (`DEFINES`, `REGULATES`, `GUIDES`) đã có enum contract
+  nhưng chỉ được activate khi có deterministic detector/resolver tương ứng.

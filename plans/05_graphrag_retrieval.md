@@ -235,6 +235,8 @@ class RetrievalContext:
     executed_channels: list[RetrievalChannel]
     retrieval_mode: str
     metrics: dict[str, Any]
+    resolved_references: tuple[ResolvedReference, ...]
+    relation_goal: RelationGoal | None
 
 class GraphNodeRef:
     node_id: str
@@ -270,6 +272,28 @@ Deep links use canonical graph IDs, never filesystem `raw_doc_code` values.
 When graph expansion reaches a `Point`, the path keeps the Point endpoint for
 explanation while retrieval context is lifted to its parent `Clause`; Point
 nodes are not added to the vector index.
+
+### Server-owned canonical anchors
+
+Conversation retrieval has a separate internal execution context; it is not a
+field of the public retrieval request:
+
+```python
+class RetrievalExecutionContext:
+    resolved_references: tuple[ResolvedReference, ...]
+    relation_goal: RelationGoal | None
+
+    @property
+    def anchor_node_ids(self) -> tuple[str, ...]:
+        return stable_unique(ref.node_id for ref in self.resolved_references)
+```
+
+The runtime hydrates these canonical IDs under the active filters before seed
+retrieval, then builds one graph entry set as `stable_unique(anchors + top seed
+IDs)`. A canonical anchor is therefore not dependent on lexical/vector recall.
+For an explicit relation lookup, source and target citable units on the matching
+path are pinned into final evidence; a missing edge is not replaced with a
+similar node.
 
 ---
 

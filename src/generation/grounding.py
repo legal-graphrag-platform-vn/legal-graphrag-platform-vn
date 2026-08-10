@@ -81,11 +81,24 @@ class GroundingValidator:
             for statement in statements
             for path_id in statement.reasoning_path_ids
         )
+        if projected.relation_goal is not None and not path_order:
+            raise ReasoningPathValidationError(
+                "A relation-goal answer must link at least one reasoning path"
+            )
+        anchor_node_ids = set(projected.anchor_node_ids)
         for path_id in path_order:
             path = paths_by_id.get(path_id)
             if path is None:
                 raise ReasoningPathValidationError(
                     f"Reasoning path is not allowlisted: {path_id}"
+                )
+            if projected.relation_goal is not None and not any(
+                edge.relation_type == projected.relation_goal
+                and edge.source_id in anchor_node_ids
+                for edge in path.edges
+            ):
+                raise ReasoningPathValidationError(
+                    "Reasoning path does not prove the requested relation goal"
                 )
             selected_paths.append(
                 AnswerReasoningPath(

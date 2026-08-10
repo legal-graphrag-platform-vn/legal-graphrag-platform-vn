@@ -101,6 +101,9 @@ def test_embedding_resume_requires_all_metadata_and_reachability() -> None:
         provider="flag_embedding",
         normalized=True,
     ) == []
+    readiness_query = session.run.call_args_list[0].args[0]
+    assert "properties(n)['embedding_model'] AS model" in readiness_query
+    assert "n.embedding_model AS model" not in readiness_query
     assert writer.stale_target_ids(
         "ldn_2020",
         {"ldn_2020_art17": "changed"},

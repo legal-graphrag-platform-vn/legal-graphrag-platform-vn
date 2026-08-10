@@ -11,6 +11,11 @@ from src.retrieval.execution_contract import (
     GraphReasoningRequirement,
     PlanExecutionResult,
 )
+from src.retrieval.resolved_reference import (
+    RelationGoal,
+    ResolvedReference,
+    RetrievalExecutionContext,
+)
 from src.shared.retrieval_contract import (
     IntentType,
     RetrievalChannel,
@@ -129,6 +134,11 @@ class GraphExpansion(BaseModel):
     )
 
 
+class CanonicalAnchorHydration(BaseModel):
+    matched_anchor_ids: tuple[str, ...] = ()
+    units: list[RetrievedUnit] = Field(default_factory=list)
+
+
 class EvidenceItem(BaseModel):
     unit_id: str
     evidence_type: Literal["vector", "bm25", "graph", "temporal", "rerank"]
@@ -191,6 +201,9 @@ class PreparedRetrievalRequest(BaseModel):
 
     request: RetrievalRequest
     routing: RoutingResult
+    execution_context: RetrievalExecutionContext = Field(
+        default_factory=RetrievalExecutionContext
+    )
     prepare_latency_ms: int = Field(ge=0)
 
 
@@ -224,3 +237,5 @@ class RetrievalContext(BaseModel):
         "no_results",
     ]
     confidence_penalty: bool = False
+    resolved_references: tuple[ResolvedReference, ...] = ()
+    relation_goal: RelationGoal | None = None

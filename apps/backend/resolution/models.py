@@ -8,6 +8,12 @@ from typing import Any
 
 from persistence.domain import ClarificationCandidate, GroundedFocus
 from persistence.enums import ClarificationMode, ResolutionStatus
+from src.retrieval.resolved_reference import (
+    ReferenceSource,
+    RelationGoal,
+    ResolutionMethod,
+    ResolvedReference,
+)
 
 
 class ExpectedUnitType(str, Enum):
@@ -92,7 +98,14 @@ class ResolvedCandidate:
             anchors.append(f"Điểm {self.point_label}")
         return tuple(anchors)
 
-    def to_clarification_candidate(self) -> ClarificationCandidate:
+    def to_clarification_candidate(
+        self,
+        *,
+        resolution_method: ResolutionMethod,
+        source: ReferenceSource,
+        source_message: str,
+        relation_goal: RelationGoal | None,
+    ) -> ClarificationCandidate:
         return ClarificationCandidate(
             candidate_id=self.node_id,
             label=self.canonical_label,
@@ -107,6 +120,10 @@ class ResolvedCandidate:
                 "point_id": self.point_id,
                 "point_label": self.point_label,
                 "document_metadata": self.document_metadata or {},
+                "resolution_method": resolution_method.value,
+                "reference_source": source.value,
+                "source_message": source_message,
+                "relation_goal": relation_goal.value if relation_goal else None,
             },
         )
 
@@ -163,13 +180,31 @@ class ResolvedResolution:
     """A single canonical referent was resolved."""
 
     candidate: ResolvedCandidate
-    is_anaphora: bool
+    resolution_method: ResolutionMethod
+    source: ReferenceSource
+    relation_goal: RelationGoal | None = None
+    source_message: str | None = None
     resolution_status: ResolutionStatus = ResolutionStatus.RESOLVED
+
+    @property
+    def is_anaphora(self) -> bool:
+        return self.resolution_method is ResolutionMethod.GROUNDED_HISTORY_FOCUS
 
     @property
     def reason_code(self) -> str:
         """EXPLICIT_FOUND for direct mentions, ANAPHORA_RESOLVED for anaphora."""
         return REASON_ANAPHORA_RESOLVED if self.is_anaphora else REASON_EXPLICIT_FOUND
+
+    def to_retrieval_reference(self, *, mention: str) -> ResolvedReference:
+        return ResolvedReference(
+            mention=mention,
+            node_id=self.candidate.node_id,
+            node_type=self.candidate.node_type.value,
+            label=self.candidate.canonical_label,
+            document_id=self.candidate.document_id,
+            resolution_method=self.resolution_method,
+            source=self.source,
+        )
 
 
 @dataclass(frozen=True)

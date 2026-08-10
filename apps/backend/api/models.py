@@ -90,6 +90,20 @@ class ChatMetadataData(BaseModel):
     resolution_status: str | None = None
     # Deterministic user-facing text; internal reason codes stay server-side.
     insufficiency_message: str | None = None
+    resolved_references: list["ChatResolvedReferenceData"] = Field(
+        default_factory=list
+    )
+    relation_goal: str | None = None
+
+
+class ChatResolvedReferenceData(BaseModel):
+    mention: str
+    node_id: str
+    node_type: Literal["Document", "Article", "Clause", "Point"]
+    label: str
+    document_id: str
+    resolution_method: str
+    source: str
 
 
 class ChatTokenData(BaseModel):
@@ -171,7 +185,16 @@ def encode_sse(event: str, data: BaseModel | dict[str, Any]) -> str:
         payload = data.model_dump(mode="json")
     else:
         payload = data
-    return f"event: {event}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+    # PostgreSQL JSONB does not preserve object key insertion order.  Canonical
+    # serialization keeps a freshly persisted response byte-identical to an
+    # idempotent replay loaded back from JSONB.
+    encoded = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return f"event: {event}\ndata: {encoded}\n\n"
 
 
 # ---------------------------------------------------------------------------

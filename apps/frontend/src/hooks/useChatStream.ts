@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiStream } from '@/lib/api/client'
 import { SseParser, SseProtocolError, type ParsedSseEvent } from '@/lib/api/sse'
-import type { Message, ReasoningPath, Source } from '@/types/chat'
+import type { Message, ReasoningPath, ResolvedReference, Source } from '@/types/chat'
 
 export function useChatStream(initialMessages: Message[] = []) {
    const [messages, setMessages] = useState<Message[]>(initialMessages)
@@ -143,6 +143,8 @@ function applyEvent(
          resolution_status: stringValue(event.data.resolution_status),
          cannot_answer: event.data.cannot_answer === true,
          insufficiency_message: stringValue(event.data.insufficiency_message),
+         resolved_references: resolvedReferences(event.data.resolved_references),
+         relation_goal: stringValue(event.data.relation_goal),
       })
    } else if (event.event === 'clarification') {
       // Turn cần làm rõ: không có source cards; câu hỏi tới qua token stream.
@@ -249,6 +251,36 @@ function reasoningPaths(value: unknown): ReasoningPath[] {
             path_id: pathId,
             description: stringValue(path.description) || '',
             nodes: stringArray(path.nodes),
+         },
+      ]
+   })
+}
+
+function resolvedReferences(value: unknown): ResolvedReference[] {
+   if (!Array.isArray(value)) return []
+   return value.flatMap((item) => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) return []
+      const reference = item as Record<string, unknown>
+      const nodeId = stringValue(reference.node_id)
+      const nodeType = stringValue(reference.node_type)
+      const method = stringValue(reference.resolution_method)
+      const source = stringValue(reference.source)
+      if (
+         !nodeId ||
+         !['Document', 'Article', 'Clause', 'Point'].includes(nodeType || '') ||
+         !['EXACT_STRUCTURAL_LOOKUP', 'GROUNDED_HISTORY_FOCUS'].includes(method || '') ||
+         !['CURRENT_MESSAGE', 'GROUNDED_HISTORY', 'PENDING_CLARIFICATION'].includes(source || '')
+      )
+         return []
+      return [
+         {
+            mention: stringValue(reference.mention) || '',
+            node_id: nodeId,
+            node_type: nodeType as ResolvedReference['node_type'],
+            label: stringValue(reference.label) || nodeId,
+            document_id: stringValue(reference.document_id) || '',
+            resolution_method: method as ResolvedReference['resolution_method'],
+            source: source as ResolvedReference['source'],
          },
       ]
    })

@@ -65,9 +65,11 @@ class Neo4jEmbeddingWriter:
                     f"MATCH (d:Document {{id: $graph_id}})-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(n) "
                     "WHERE n:Article OR n:Clause "
                     "RETURN n.id AS id, size(n.embedding) AS vector_size, "
-                    "n.embedding_model AS model, n.embedding_provider AS provider, "
-                    "n.embedding_dimension AS dimension, n.embedding_normalized AS normalized, "
-                    "n.embedding_content_hash AS content_hash"
+                    "properties(n)['embedding_model'] AS model, "
+                    "properties(n)['embedding_provider'] AS provider, "
+                    "properties(n)['embedding_dimension'] AS dimension, "
+                    "properties(n)['embedding_normalized'] AS normalized, "
+                    "properties(n)['embedding_content_hash'] AS content_hash"
                 ),
                 graph_id=graph_id,
             )

@@ -31,6 +31,16 @@ export interface ReasoningPath {
    nodes: string[]
 }
 
+export interface ResolvedReference {
+   mention: string
+   node_id: string
+   node_type: 'Document' | 'Article' | 'Clause' | 'Point'
+   label: string
+   document_id: string
+   resolution_method: 'EXACT_STRUCTURAL_LOOKUP' | 'GROUNDED_HISTORY_FOCUS'
+   source: 'CURRENT_MESSAGE' | 'GROUNDED_HISTORY' | 'PENDING_CLARIFICATION'
+}
+
 export interface Message {
    id: string
    role: 'user' | 'assistant'
@@ -51,6 +61,8 @@ export interface Message {
    insufficiency_message?: string
    temporal_notes?: string[]
    reasoning_paths?: ReasoningPath[]
+   resolved_references?: ResolvedReference[]
+   relation_goal?: string
 }
 
 /**

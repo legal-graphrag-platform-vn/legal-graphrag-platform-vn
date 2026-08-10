@@ -24,6 +24,7 @@ from src.retrieval.planning.models import UnlinkedSemanticPlan
 from src.retrieval.planning.ports import QueryPlannerPort as QueryPlannerPort
 from src.generation.models import AnswerGenerationRequest, AnswerResponse
 from src.shared.retrieval_contract import QueryProcessingResult, RetrievalRequest
+from src.retrieval.resolved_reference import RetrievalExecutionContext
 
 
 ResultT = TypeVar("ResultT")
@@ -33,15 +34,27 @@ class RetrievalApplicationPort(Protocol):
     async def retrieve_context(
         self,
         request: RetrievalRequest,
+        *,
+        execution_context: RetrievalExecutionContext | None = None,
     ) -> RetrievalContext: ...
 
 
 class SyncRetrievalRuntime(Protocol):
     """Minimal runtime surface consumed by the backend adapter."""
 
-    def retrieve(self, request: RetrievalRequest) -> RetrievalContext: ...
+    def retrieve(
+        self,
+        request: RetrievalRequest,
+        *,
+        execution_context: RetrievalExecutionContext | None = None,
+    ) -> RetrievalContext: ...
 
-    def prepare(self, request: RetrievalRequest) -> PreparedRetrievalRequest: ...
+    def prepare(
+        self,
+        request: RetrievalRequest,
+        *,
+        execution_context: RetrievalExecutionContext | None = None,
+    ) -> PreparedRetrievalRequest: ...
 
     def execute(
         self,

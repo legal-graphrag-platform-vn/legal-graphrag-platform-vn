@@ -56,6 +56,27 @@ def test_repository_parameterizes_filters_and_closes_session() -> None:
     assert f"CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}" in session.query
 
 
+def test_canonical_anchor_hydration_is_read_only_and_parameterized() -> None:
+    hostile_id = "clause'}) MATCH (secret) RETURN secret //"
+    driver = FakeDriver()
+    repo = Neo4jRetrieverRepo(driver)
+
+    assert repo.fetch_canonical_anchors(
+        [hostile_id], filters=RetrievalFilters(document_ids=["ldn_2020"])
+    ) == []
+
+    session = driver.last_session
+    assert session.parameters["anchor_ids"] == [hostile_id]
+    assert session.parameters["document_ids"] == ["ldn_2020"]
+    assert hostile_id not in session.query
+    assert "UNWIND $anchor_ids AS anchor_id" in session.query
+    upper_query = session.query.upper()
+    assert not any(
+        keyword in upper_query
+        for keyword in (" CREATE ", " MERGE ", " SET ", " DELETE ")
+    )
+
+
 def test_repository_rejects_unsupported_graph_depth_before_db_session() -> None:
     driver = FakeDriver()
     repo = Neo4jRetrieverRepo(driver)
@@ -96,6 +117,10 @@ def test_graph_projection_preserves_canonical_edge_endpoints_and_dates() -> None
     assert "effective_from: rel.effective_from" in query
     assert "effective_to: rel.effective_to" in query
     assert "citable_unit_id" in query
+    # version_family_id is optional and may be absent from an entire corpus.
+    # Dynamic lookup avoids Neo4j's UnknownPropertyKeyWarning in that case.
+    assert "properties(unit)['version_family_id'] AS version_family_id" in query
+    assert "unit.version_family_id" not in query
 
 
 def test_structural_endpoint_lookup_is_read_only_parameterized_and_stably_ordered() -> (

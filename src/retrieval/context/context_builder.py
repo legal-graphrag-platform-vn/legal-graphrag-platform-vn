@@ -12,6 +12,7 @@ from src.retrieval.models import (
     TemporalQuery,
 )
 from src.retrieval.execution_contract import PlanExecutionResult, PlanExecutionStatus
+from src.retrieval.resolved_reference import RelationGoal, ResolvedReference
 
 
 class ContextBuilder:
@@ -36,6 +37,8 @@ class ContextBuilder:
         executed_channels: list[RetrievalChannel] | None = None,
         reranker_applied: bool = False,
         plan_execution: PlanExecutionResult | None = None,
+        resolved_references: tuple[ResolvedReference, ...] = (),
+        relation_goal: RelationGoal | None = None,
     ) -> RetrievalContext:
         """
         Build RetrievalContext.
@@ -96,6 +99,8 @@ class ContextBuilder:
             retrieval_mode=retrieval_mode,
             confidence_penalty=confidence_penalty,
             plan_execution=plan_execution,
+            resolved_references=resolved_references,
+            relation_goal=relation_goal,
             reasoning_requirement=(
                 plan_execution.derived_reasoning_requirement
                 if plan_execution is not None

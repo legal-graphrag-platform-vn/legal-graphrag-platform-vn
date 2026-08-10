@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from src.retrieval.mapping import map_retrieved_unit
 from src.retrieval.errors import RetrievalOutputError
 from src.retrieval.models import (
+    CanonicalAnchorHydration,
     GraphEdge,
     GraphExpansion,
     GraphExpansionDiagnostics,
@@ -20,6 +21,7 @@ from src.retrieval.models import (
 from src.retrieval.path_identity import build_topology_path_fingerprint
 from src.retrieval.ports import GraphExpansionPort
 from src.retrieval.retriever.policies import policy_for
+from src.retrieval.resolved_reference import RelationGoal
 from src.shared.ontology.contract import RELATION_ENUM
 
 
@@ -31,21 +33,71 @@ class GraphRetriever:
     def __init__(self, repo: GraphExpansionPort) -> None:
         self._repo = repo
 
+    def hydrate_anchors(
+        self,
+        anchor_ids: list[str],
+        *,
+        filters: RetrievalFilters | None = None,
+    ) -> CanonicalAnchorHydration:
+        if not anchor_ids:
+            return CanonicalAnchorHydration()
+        active_filters = filters or RetrievalFilters()
+        rows = self._repo.fetch_canonical_anchors(
+            anchor_ids,
+            filters=active_filters,
+        )
+        matched = {str(row["anchor_id"]) for row in rows}
+        units_by_anchor: dict[str, RetrievedUnit] = {}
+        for row in rows:
+            if not row.get("id") or not row.get("document_id"):
+                continue
+            mapped_row = dict(row)
+            mapped_row["score"] = 0.0
+            units_by_anchor[str(row["anchor_id"])] = map_retrieved_unit(
+                mapped_row, score_field="graph_score"
+            )
+        units: list[RetrievedUnit] = []
+        seen_units: set[str] = set()
+        for rank, anchor_id in enumerate(anchor_ids, start=1):
+            unit = units_by_anchor.get(anchor_id)
+            if unit is None or unit.id in seen_units:
+                continue
+            seen_units.add(unit.id)
+            unit.graph_score = 1.0 / rank
+            unit.retrieval_sources = ["graph"]
+            units.append(unit)
+        return CanonicalAnchorHydration(
+            matched_anchor_ids=tuple(
+                anchor_id for anchor_id in anchor_ids if anchor_id in matched
+            ),
+            units=units,
+        )
+
     def expand(
         self,
         entry_ids: list[str],
         intent: IntentType,
         *,
         filters: RetrievalFilters | None = None,
+        relation_goal: RelationGoal | None = None,
     ) -> GraphExpansion:
         if not entry_ids:
             return GraphExpansion()
 
         active_filters = filters or RetrievalFilters()
         policy = policy_for(intent)
+        relations = (
+            (relation_goal.value,)
+            if relation_goal is not None
+            else policy.relations
+        )
+        if relation_goal is not None and relation_goal.value not in policy.relations:
+            raise RetrievalOutputError(
+                f"Relation goal {relation_goal.value} is incompatible with {intent.value}"
+            )
         rows = self._repo.graph_expansion(
             entry_ids,
-            policy.relations,
+            relations,
             policy.direction,
             policy.max_depth,
             filters=active_filters,

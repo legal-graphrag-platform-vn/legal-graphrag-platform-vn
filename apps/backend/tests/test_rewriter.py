@@ -22,6 +22,7 @@ from resolution.rewriter import (
     RewriteUnknownIdError,
     StructuredRewriter,
 )
+from src.retrieval.resolved_reference import ResolutionMethod, ReferenceSource
 
 
 class FakeLLM:
@@ -56,6 +57,22 @@ def _run(rewriter: StructuredRewriter, *, message, resolution, recent=()):
     )
 
 
+def _resolution(candidate: ResolvedCandidate, *, anaphora: bool) -> ResolvedResolution:
+    return ResolvedResolution(
+        candidate=candidate,
+        resolution_method=(
+            ResolutionMethod.GROUNDED_HISTORY_FOCUS
+            if anaphora
+            else ResolutionMethod.EXACT_STRUCTURAL_LOOKUP
+        ),
+        source=(
+            ReferenceSource.GROUNDED_HISTORY
+            if anaphora
+            else ReferenceSource.CURRENT_MESSAGE
+        ),
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Rule fast path (no model)                                                     #
 # --------------------------------------------------------------------------- #
@@ -77,9 +94,7 @@ def test_explicit_reference_with_anchor_needs_no_model() -> None:
     result = _run(
         rewriter,
         message="Điều 111 59/2020/QH14 quy định gì",
-        resolution=ResolvedResolution(
-            candidate=_article_candidate(), is_anaphora=False
-        ),
+        resolution=_resolution(_article_candidate(), anaphora=False),
     )
     assert "Điều 111" in result
     assert "59/2020/QH14" in result
@@ -92,10 +107,26 @@ def test_anaphora_rule_replaces_phrase_with_canonical_label() -> None:
     result = _run(
         rewriter,
         message="điều đó quy định gì",
-        resolution=ResolvedResolution(candidate=_article_candidate(), is_anaphora=True),
+        resolution=_resolution(_article_candidate(), anaphora=True),
     )
     assert result == "Điều 111 59/2020/QH14 quy định gì"
     assert llm.calls == []
+
+
+def test_pending_selection_rewrites_the_original_question_not_the_ordinal() -> None:
+    rewriter = StructuredRewriter(llm=None)
+    result = _run(
+        rewriter,
+        message="1",
+        resolution=ResolvedResolution(
+            candidate=_article_candidate(),
+            resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+            source=ReferenceSource.PENDING_CLARIFICATION,
+            source_message="Điều 111 dẫn chiếu đến điều nào?",
+        ),
+    )
+
+    assert result == "Điều 111 dẫn chiếu đến điều nào? (Điều 111 59/2020/QH14)"
 
 
 # --------------------------------------------------------------------------- #
@@ -129,9 +160,7 @@ def test_model_fallback_used_when_rule_loses_anchor() -> None:
     result = _run(
         rewriter,
         message="điều đó quy định gì",
-        resolution=ResolvedResolution(
-            candidate=_label_missing_anchor_candidate(), is_anaphora=True
-        ),
+        resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
     )
     assert "59/2020/QH14" in result
     assert len(llm.calls) == 1
@@ -145,9 +174,7 @@ def test_missing_fallback_raises_anchor_error() -> None:
         _run(
             rewriter,
             message="điều đó quy định gì",
-            resolution=ResolvedResolution(
-                candidate=_label_missing_anchor_candidate(), is_anaphora=True
-            ),
+            resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
         )
 
 
@@ -163,9 +190,7 @@ def test_model_output_with_unknown_id_is_rejected() -> None:
         _run(
             rewriter,
             message="điều đó quy định gì",
-            resolution=ResolvedResolution(
-                candidate=_label_missing_anchor_candidate(), is_anaphora=True
-            ),
+            resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
         )
 
 
@@ -181,9 +206,7 @@ def test_model_output_missing_anchor_is_rejected() -> None:
         _run(
             rewriter,
             message="điều đó quy định gì",
-            resolution=ResolvedResolution(
-                candidate=_label_missing_anchor_candidate(), is_anaphora=True
-            ),
+            resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
         )
 
 
@@ -196,9 +219,7 @@ def test_model_timeout_is_typed() -> None:
         _run(
             rewriter,
             message="điều đó quy định gì",
-            resolution=ResolvedResolution(
-                candidate=_label_missing_anchor_candidate(), is_anaphora=True
-            ),
+            resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
         )
 
 
@@ -211,9 +232,7 @@ def test_model_dependency_failure_is_typed() -> None:
         _run(
             rewriter,
             message="điều đó quy định gì",
-            resolution=ResolvedResolution(
-                candidate=_label_missing_anchor_candidate(), is_anaphora=True
-            ),
+            resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
         )
 
 
@@ -229,7 +248,5 @@ def test_empty_model_query_is_output_error() -> None:
         _run(
             rewriter,
             message="điều đó quy định gì",
-            resolution=ResolvedResolution(
-                candidate=_label_missing_anchor_candidate(), is_anaphora=True
-            ),
+            resolution=_resolution(_label_missing_anchor_candidate(), anaphora=True),
         )
