@@ -1,6 +1,6 @@
 # Hướng Dẫn Vận Hành Pipeline: Dataset LuatVietnam & Batch Processing Engine
 
-> **Mục đích**: Hướng dẫn chi tiết cách chạy pipeline cho tập dữ liệu LuatVietnam (gồm 1,850 văn bản trong `data/raw`), cơ chế Hybrid Crawl tự động kết hợp VBPL, và cách quản lý tiến độ batch với checkpoint 2 cấp độ.
+> **Mục đích**: Hướng dẫn chi tiết cách vận hành Pipeline đơn lẻ (Single Ingest) và hàng loạt (Batch Ingest) cho tập dữ liệu văn bản pháp luật, cơ chế cào dữ liệu Luật Việt Nam kết hợp VBPL, tự động quy ước mã tên 26 hình thức văn bản, và cơ chế nạp Đồ thị Neo4j + BGE-M3 Vector Embeddings.
 
 ---
 
@@ -37,152 +37,123 @@ NEO4J_USER=neo4j
 NEO4J_PASSWORD=your_password
 ```
 
-### 1.3 Đường Dẫn Dữ Liệu Thô (Raw Data Location)
-Vị trí dữ liệu thô nằm tại thư mục `data/raw` tính từ thư mục gốc của dự án (`legal-graphrag-platform-vn\data`):
+### 1.3 Vị Trí & Cấu Trúc Dữ Liệu Thô (Raw Data Location)
 
-Cấu trúc tổ chức bên trong thư mục `data/raw`:
+Để chạy luồng **Batch Ingest** (`batch-ingest-all`), toàn bộ các thư mục văn bản thô phải nằm tại thư mục:
+
+📁 **`data/raw/`** *(tính từ gốc thư mục dự án `legal-graphrag-platform-vn`)*
+
+Cấu trúc tổ chức thư mục dữ liệu thô bên trong `data/raw/`:
 ```text
 <project_root>/data/raw/
+├── TT94_2026/
 ├── L59_2020/
 ├── ND01_2021/
 ├── LTV_101180/
-│   ├── source.txt        # Nội dung chính văn
-│   ├── metadata.json     # Thông tin quản lý văn bản
-│   ├── source.html       # HTML thô cào từ LuatVietnam
-│   ├── diagram.json      # Lược đồ quan hệ cào bổ sung từ VBPL
-│   └── properties.json   # Thuộc tính cào bổ sung từ VBPL
-├── LTV_101333/
-└── ... (tổng cộng 1,850 thư mục văn bản)
+│   ├── source.txt        # [BẮT BUỘC] Nội dung chính văn bản
+│   ├── metadata.json     # [BẮT BUỘC] Thông tin siêu dữ liệu (tiêu đề, số hiệu, ngày ban hành)
+│   ├── source.html       # [TÙY CHỌN] HTML thô cào từ LuatVietnam
+│   ├── diagram.json      # [TÙY CHỌN] Sơ đồ quan hệ cào bổ sung từ VBPL
+│   └── properties.json   # [TÙY CHỌN] Thuộc tính cào bổ sung từ VBPL
+└── ... (tổng cộng 1,850+ thư mục văn bản)
 ```
+
+> **Lưu ý**: Mỗi thư mục văn bản chỉ cần có 2 file bắt buộc là `source.txt` và `metadata.json` là engine Batch đã đủ điều kiện tự động quét và xử lý thành công!
 
 ---
 
-## 2. Quy Trình Vận Hành 4 Bước (Execution Workflow)
+## 2. Luồng Chạy 1 Lệnh Duy Nhất (Single Command Execution)
 
-```text
-[1. Build Manifest] --> [2. Batch Parse] --> [3. Batch Extract] --> [4. Batch Ingest]
-```
+Hệ thống hỗ trợ 2 lệnh chạy tổng hợp tự động từ A $\rightarrow$ Z mà không cần thực hiện nhiều câu lệnh lẻ:
 
-### Bước 1: Sinh File Manifest & Chuẩn Hóa Metadata (`build-manifest`)
+### 2.1 Chạy 1 Văn bản Đơn lẻ từ URL (`ingest`)
 
-Lệnh này quét toàn bộ 1,850 thư mục văn bản thô tại `data/raw`, tự động chuẩn hóa `doc_type`, `legal_status`, `graph_id` và xuất file danh mục manifest tập trung tại `data/luatvietnam_v1.json`:
+Dùng khi bạn có 1 URL văn bản mới (trên `luatvietnam.vn` hoặc `vbpl.vn`) và muốn cào về nạp thẳng vào Neo4j:
 
 ```bash
-uv run python -m src.pipeline.main build-manifest
+uv run python -m src.pipeline.main ingest --url "https://luatvietnam.vn/thue/thong-tu-94-2026-tt-btc-quan-ly-tuan-thu-va-rui-ro-trong-quan-ly-thue-hieu-qua-439781-d1.html"
 ```
 
-- **Đầu ra**: `data/luatvietnam_v1.json`
-- **Tùy chọn nâng cao**:
-  - `--raw-dir`: Chỉ định thư mục chứa dữ liệu thô khác.
-  - `--output`: Thay đổi đường dẫn file manifest xuất ra.
+- **Tự động hóa hoàn toàn**:
+  - Không bắt buộc truyền `--raw-doc-code` hay `--number` (hệ thống tự động bóc tách số hiệu và tự sinh mã thư mục chuẩn theo 26 loại hình thức văn bản như `TT94_2026`, `L59_2020`, `DT_...`).
+  - Tự động cào chính văn `source.txt` và `metadata.json` từ Luật Việt Nam.
+  - Tự động tìm kiếm số hiệu trên VBPL để cào bổ sung `diagram.json` / `properties.json` (nếu trên VBPL chưa có sẽ tự động bỏ qua an toàn).
+  - Tự động chạy tuần tự: **Crawl $\rightarrow$ Parse $\rightarrow$ Extract LLM $\rightarrow$ Write Neo4j $\rightarrow$ Generate Embeddings**.
 
 ---
 
-### Bước 2: Phân Tách Cấu Trúc Cây Hàng Loạt (`batch-parse`)
+### 2.2 Chạy Hàng loạt cho Bộ Dữ liệu Có sẵn (`batch-ingest-all`)
 
-Parse file văn bản thô `source.txt` thành cây cấu trúc luật (`Chương` -> `Mục` -> `Điều` -> `Khoản` -> `Điểm`) cho toàn bộ 1,850 văn bản trong `data/raw`:
+Dùng khi bạn đã có sẵn tập hợp các thư mục văn bản trong `data/raw` và muốn xử lý toàn bộ tập dữ liệu vào Neo4j trong 1 lệnh:
 
 ```bash
-uv run python -m src.pipeline.main batch-parse --workers 4
+# Chạy toàn bộ dataset
+uv run python -m src.pipeline.main batch-ingest-all
+
+# Thử nghiệm nhanh với 3 văn bản đầu tiên
+uv run python -m src.pipeline.main batch-ingest-all --limit 3
 ```
 
-- **Đầu ra**: Lưu file cấu trúc tại `data/processed/<id>/hierarchy.json`.
-- **Cơ chế Checkpoint**: Lệnh ghi nhận trạng thái tại `data/processed/batch_progress.json`. Nếu bị gián đoạn giữa chừng, chạy lại lệnh trên hệ thống sẽ tự động bỏ qua các văn bản đã thành công.
-- **Chạy lại các văn bản từng lỗi**:
-  ```bash
-  uv run python -m src.pipeline.main batch-parse --retry-failed
-  ```
+- **Tự động chạy 6 bước liên hoàn**:
+  1. **Tạo Manifest**: Quét `data/raw` và xuất file danh mục `luatvietnam_v1.json`.
+  2. **Batch Parse**: Tách cây cấu trúc phân cấp đa luồng (`hierarchy.json`).
+  3. **Batch Extract**: Gọi Gemini LLM trích xuất tri thức song song (có Checkpoint Resume).
+  4. **Corpus Registry & Reconcile**: Đăng ký chỉ mục và đối soát các dẫn chiếu chéo liên văn bản.
+  5. **Batch Write Neo4j**: Nạp tất cả Nút & Quan hệ vào Neo4j Graph DB.
+  6. **Batch Generate Embeddings**: Sinh Vector BGE-M3 (1024 dims) inject vào Neo4j.
 
 ---
 
-### Bước 3: Trích Xuất Tri Thức LLM Hàng Loạt (`batch-extract`)
+## 3. Bảng Quy Ước Tiền Tố (Prefix) Cho Đầy Đủ 26 Hình Thức Văn Bản VBPL
 
-Gọi LLM trích xuất các thực thể pháp lý, định nghĩa, điều kiện áp dụng và các mốc dẫn chiếu giữa các văn bản:
+Hệ thống tự động bóc tách loại văn bản từ số hiệu hoặc tiêu đề và quy ước tiền tố chuẩn hóa tên thư mục (`raw_doc_code`) cho toàn bộ 26 loại hình thức văn bản của CSDL Quốc gia VBPL:
 
-```bash
-uv run python -m src.pipeline.main batch-extract
-```
-
-- **Cơ chế Checkpoint cấp Điều (Article Checkpoint)**:
-  Kết quả trích xuất từng Điều được ghi nối tiếp vào file `article_extractions.jsonl`. Nếu đứt mạng hoặc hết quota API, khi chạy lại hệ thống sẽ nhảy qua các Điều đã xong, bảo vệ chi phí API.
-
----
-
-### Bước 4: Nạp Đồ Thị Neo4j & Vector Embedding (`batch-ingest`)
-
-Nạp toàn bộ dữ liệu đã qua xác thực vào Neo4j Graph DB và sinh Vector Embedding `bge-m3` cho tìm kiếm ngữ nghĩa:
-
-```bash
-uv run python -m src.pipeline.main batch-ingest
-```
-
----
-
-## 3. Cơ Chế Crawl Trực Tiếp (Hybrid Crawler)
-
-Khi cào một văn bản mới từ `luatvietnam.vn`, hệ thống **mặc định tự động kết hợp với VBPL** để đảm bảo đầy đủ thông tin nhất:
-
-1. Tải chính văn chuẩn (`source.txt`) và metadata từ `luatvietnam.vn`.
-2. Dùng Số hiệu văn bản (`number`) tìm kiếm trên `vbpl.vn`.
-3. Bóc tách tab **Lược đồ** -> lưu file `diagram.json`.
-4. Bóc tách tab **Thuộc tính** -> lưu file `properties.json`.
-
-```bash
-# Crawl 1 văn bản trực tiếp (Tự động lấy chính văn LuatVietnam + diagram & properties từ VBPL)
-uv run python -m src.pipeline.main crawl \
-  --url "https://luatvietnam.vn/doanh-nghiep/luat-doanh-nghiep-2020-so-59-2020-qh14-186272-d1.html" \
-  --raw-doc-code LTV_186272 \
-  --number "59/2020/QH14"
-```
+| STT | Hình thức văn bản (VBPL) | Tiền tố (Prefix) | Ví dụ mã tự sinh |
+| :--- | :--- | :--- | :--- |
+| 1 | **Hiến pháp** | `HP` | `HP01_2013` |
+| 2 | **Bộ luật** | `BL` | `BL45_2019` |
+| 3 | **Luật** | `L` | `L59_2020` |
+| 4 | **Pháp lệnh** | `PL` | `PL02_2022` |
+| 5 | **Nghị định** | `ND` | `ND01_2021` |
+| 6 | **Nghị quyết** | `NQ` | `NQ01_2021` |
+| 7 | **Nghị quyết liên tịch** | `NQLT` | `NQLT01_2021` |
+| 8 | **Quyết định** | `QD` | `QD01_2021` |
+| 9 | **Thông tư** | `TT` | `TT01_2021` |
+| 10 | **Thông tư liên tịch** | `TTLT` | `TTLT01_2021` |
+| 11 | **Lệnh** | `LENH` | `LENH01_2021` |
+| 12 | **Chỉ thị** | `CT` | `CT01_2021` |
+| 13 | **Quy chế** | `QC` | `QC01_2021` |
+| 14 | **Quy định** | `QDINH` | `QDINH01_2021` |
+| 15 | **Công văn** | `CV` | `CV123_2022` |
+| 16 | **Công điện** | `CD` | `CD05_2023` |
+| 17 | **Tờ trình** | `TTR` | `TTR10_2022` |
+| 18 | **Thông báo** | `TB` | `TB50_2023` |
+| 19 | **Hướng dẫn** | `HD` | `HD02_2022` |
+| 20 | **Văn bản hợp nhất** | `VBHN` | `VBHN01_2023` |
+| 21 | **Văn bản hệ thống hóa** | `HTH` | `HTH01_2023` |
+| 22 | **Văn bản hành chính liên quan** | `HCKL` | `HCKL01_2023` |
+| 23 | **Bản dịch văn bản** | `BD` | `BD01_2023` |
+| 24 | **Dự thảo** | `DT` | `DT_du_thao_luat_dat_dai_1723315200` |
+| 25 | **Kế hoạch / Đề án** | `KH` | `KH01_2023` |
+| 26 | **Báo cáo / Biên bản** | `BC` | `BC01_2023` |
 
 ---
 
-## 4. Theo Dõi Tiến Độ & Báo Cáo Sự Cố
+## 4. Cơ Chế Crawl Hybrid & Xử Lý An Toàn
 
-### 4.1 Kiểm Tra File Trạng Thái Progress
-File `data/processed/batch_progress.json` lưu giữ chi tiết trạng thái từng văn bản:
-
-```json
-{
-  "LTV_101180": {
-    "status": "SUCCESS",
-    "last_step": "parse",
-    "history": {
-      "parse": {
-        "status": "SUCCESS",
-        "updated_at": "2026-08-06T00:22:01Z",
-        "error": null
-      }
-    }
-  }
-}
-```
-
-### 4.2 Lọc Danh Sách Văn Bản Lỗi
-Dùng lệnh Python nhanh để kiểm tra các văn bản bị lỗi parse/extract:
-
-```bash
-uv run python -c "
-import json
-with open('data/processed/batch_progress.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
-failed = [k for k, v in data.items() if v.get('status') == 'FAILED']
-print(f'Tổng số văn bản bị lỗi: {len(failed)}')
-print('Mẫu văn bản lỗi:', failed[:5])
-"
-```
+Khi chạy cào một văn bản từ Luật Việt Nam:
+1. **Dữ liệu bắt buộc**: Tải chính văn `source.txt` và `metadata.json` từ Luật Việt Nam.
+2. **Dữ liệu bổ sung từ VBPL**: Dùng Số hiệu văn bản tra cứu sang `vbpl.vn` để bóc tách `diagram.json` (sơ đồ quan hệ) và `properties.json` (bảng thuộc tính).
+3. **Cơ chế Graceful Fallback**: Nếu tìm kiếm số hiệu trên `vbpl.vn` không thấy (hoặc văn bản mới chưa cập nhật lên VBPL) $\rightarrow$ Hệ thống tự động log warning và bỏ qua VBPL, bảo toàn dữ liệu `source.txt` + `metadata.json` để tiếp tục xử lý các bước downstream.
 
 ---
 
-## 5. Quản Lý Git & Ignore Dữ Liệu
+## 5. Bảng Tra Cứu Câu Lệnh CLI Nhanh
 
-Toàn bộ dữ liệu thô, kết quả phân tách, file manifest và registry sinh ra đều được cấu hình tự động trong `.gitignore` để không bị push nhầm lên Git repository:
-
-```gitignore
-# Runtime data (generated, not committed)
-data/raw/
-data/processed/
-data/reports/
-data/registry/
-data/*.json
-```
+| Mục đích | Câu lệnh CLI |
+| :--- | :--- |
+| **Ingest đơn lẻ 1 URL** | `uv run python -m src.pipeline.main ingest --url "<URL>"` |
+| **Batch Ingest toàn bộ** | `uv run python -m src.pipeline.main batch-ingest-all` |
+| **Batch Ingest test N bài** | `uv run python -m src.pipeline.main batch-ingest-all --limit 3` |
+| **Chạy lại các bài lỗi** | `uv run python -m src.pipeline.main batch-ingest-all --retry-failed` |
+| **Kiểm tra trợ giúp** | `uv run python -m src.pipeline.main --help` |

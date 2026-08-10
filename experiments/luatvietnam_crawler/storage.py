@@ -16,12 +16,10 @@ def save_document(
     *,
     source_html: str | None = None,
 ) -> Path:
-    if not document.raw_doc_code.startswith("LTV_"):
-        raise ValueError("Experimental raw_doc_code must start with LTV_")
     output_root = output_root.resolve()
     document_dir = (output_root / document.raw_doc_code).resolve()
-    if output_root not in document_dir.parents:
-        raise ValueError("Refusing output path outside the experiment root")
+    if output_root not in document_dir.parents and output_root != document_dir:
+        raise ValueError("Refusing output path outside the designated output root")
     document_dir.mkdir(parents=True, exist_ok=True)
     _atomic_write(document_dir / "source.txt", document.source_text + "\n")
     _save_optional_html(document_dir, source_html)

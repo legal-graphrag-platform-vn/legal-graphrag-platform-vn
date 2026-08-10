@@ -203,20 +203,34 @@ def _parse_folder_worker(
         return False
 
 
-# Lệnh CLI để cào thông tin chi tiết và nội dung văn bản pháp luật từ trang vbpl.vn.
+# Lệnh CLI để cào thông tin chi tiết và nội dung văn bản pháp luật từ LuatVietnam hoặc VBPL.
 @app.command()
 def crawl(
-    url: Annotated[str, typer.Option(help="URL trang chi tiết vbpl.vn")],
+    url: Annotated[str, typer.Option(help="URL trang chi tiết (luatvietnam.vn hoặc vbpl.vn)")],
     raw_doc_code: Annotated[
-        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
-    ],
-    number: Annotated[str, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'")],
-) -> None:
-    """Crawl văn bản từ vbpl.vn -> data/raw/<raw_doc_code>/{source.txt,metadata.json}."""
-    metadata = crawl_and_save(
-        url, doc_id=raw_doc_code, number=number, raw_dir=settings.data_raw_dir
-    )
-    typer.echo(f"Đã crawl {raw_doc_code}: {metadata.title} ({metadata.status})")
+        str | None, typer.Option(help="Filesystem document code, vd 'L59_2020'. Tùy chọn (tự sinh nếu để trống)")
+    ] = None,
+    number: Annotated[
+        str | None, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'. Tùy chọn")
+    ] = None,
+) -> Path:
+    """Crawl văn bản từ LuatVietnam (kèm bổ sung VBPL nếu có) hoặc từ VBPL -> data/raw/<raw_doc_code>/."""
+    if "luatvietnam.vn" in url.lower():
+        from src.pipeline.crawler.luatvietnam_crawler import crawl_luatvietnam_url
+
+        saved_dir = crawl_luatvietnam_url(
+            url, raw_doc_code=raw_doc_code, number=number, output_raw_dir=settings.data_raw_dir
+        )
+        typer.echo(f"Đã crawl thành công LuatVietnam (bổ sung VBPL nếu có) tại: {saved_dir}")
+        return saved_dir
+    else:
+        doc_code = raw_doc_code or f"DOC_{int(datetime.now().timestamp())}"
+        doc_number = number or ""
+        metadata = crawl_and_save(
+            url, doc_id=doc_code, number=doc_number, raw_dir=settings.data_raw_dir
+        )
+        typer.echo(f"Đã crawl {doc_code}: {metadata.title} ({metadata.status})")
+        return settings.data_raw_dir / doc_code
 
 
 # Lệnh CLI để cào hàng loạt văn bản pháp luật dựa trên từ khóa tìm kiếm trên vbpl.vn.
@@ -638,7 +652,7 @@ def validate_payload(
 
 @app.command("build-reference-registry")
 def build_reference_registry(
-    build_id: Annotated[str, typer.Option(help="Immutable registry build receipt ID")],
+    build_id: Annotated[str, typer.Option(help="Immutable registry build receipt ID")] = "build_latest",
     raw_doc_code: Annotated[
         list[str] | None,
         typer.Option(help="Repeat for each explicitly selected processed document"),
@@ -1028,19 +1042,38 @@ def _graph_id(payload: dict) -> str:
     raise typer.BadParameter("Payload has no Document node")
 
 
-# Lệnh CLI để chạy toàn bộ luồng tích hợp: cào dữ liệu, phân tách cấu trúc và trích xuất tri thức.
+# Lệnh CLI để chạy toàn bộ luồng tích hợp: cào dữ liệu, phân tách cấu trúc, trích xuất tri thức, nạp Neo4j và tạo embedding.
 @app.command()
 def ingest(
-    url: Annotated[str, typer.Option(help="URL trang chi tiết vbpl.vn")],
+    url: Annotated[str, typer.Option(help="URL trang chi tiết (luatvietnam.vn hoặc vbpl.vn)")],
     raw_doc_code: Annotated[
-        str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
-    ],
-    number: Annotated[str, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'")],
+        str | None, typer.Option(help="Filesystem document code, vd 'L59_2020'. Tùy chọn (tự sinh nếu để trống)")
+    ] = None,
+    number: Annotated[
+        str | None, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'. Tùy chọn")
+    ] = None,
+    write_neo4j: Annotated[
+        bool, typer.Option(help="Tự động ghi đồ thị vào Neo4j sau khi extract")
+    ] = True,
+    generate_embedding: Annotated[
+        bool, typer.Option(help="Tự động tạo BGE-M3 embedding vào Neo4j")
+    ] = True,
 ) -> None:
-    """Full pipeline: crawl -> parse -> extract."""
-    crawl(url, raw_doc_code, number)
-    parse(raw_doc_code)
-    extract(raw_doc_code)
+    """Full pipeline đơn lẻ chạy 1 mạch: crawl -> parse -> extract -> write -> embed."""
+    saved_dir = crawl(url, raw_doc_code, number)
+    code = raw_doc_code or saved_dir.name
+    parse(code)
+    extract(code)
+    if write_neo4j:
+        try:
+            write_graph(code)
+        except Exception as exc:
+            typer.echo(f"Bỏ qua write Neo4j: {exc}", err=True)
+    if generate_embedding and write_neo4j:
+        try:
+            embed_graph(code)
+        except Exception as exc:
+            typer.echo(f"Bỏ qua embed: {exc}", err=True)
 
 
 # 1. Lệnh CLI sinh file manifest chuẩn cho dataset
@@ -1069,6 +1102,7 @@ def batch_parse(
     ] = settings.luatvietnam_raw_dir,
     workers: Annotated[int, typer.Option(min=1, max=32, help="Số lượng luồng xử lý song song")] = 4,
     retry_failed: Annotated[bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")] = False,
+    limit: Annotated[int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")] = None,
 ) -> None:
     """Parse cấu trúc cây (Chương/Mục/Điều/Khoản/Điểm) cho toàn bộ dataset trong manifest."""
     manifest_data = load_curated_manifest(manifest)
@@ -1076,6 +1110,9 @@ def batch_parse(
 
     # Lọc các văn bản cần parse (hỗ trợ checkpoint resuming)
     pending_codes = filter_documents_for_step(doc_codes, step="parse", retry_failed=retry_failed)
+    if limit and limit > 0:
+        pending_codes = pending_codes[:limit]
+
     typer.echo(f"Tổng số văn bản trong manifest: {len(doc_codes)}. Cần parse: {len(pending_codes)}")
 
     if not pending_codes:
@@ -1119,12 +1156,16 @@ def batch_extract(
         Path, typer.Option(help="Thư mục lưu trữ dataset thô")
     ] = settings.luatvietnam_raw_dir,
     retry_failed: Annotated[bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")] = False,
+    limit: Annotated[int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")] = None,
 ) -> None:
     """Gọi LLM trích xuất tri thức song song cho tập dữ liệu trong manifest (hỗ trợ Article Checkpoint)."""
     manifest_data = load_curated_manifest(manifest)
     doc_codes = list(manifest_data.keys())
 
     pending_codes = filter_documents_for_step(doc_codes, step="extract", retry_failed=retry_failed)
+    if limit and limit > 0:
+        pending_codes = pending_codes[:limit]
+
     typer.echo(f"Tổng số văn bản trong manifest: {len(doc_codes)}. Cần extract: {len(pending_codes)}")
 
     if not pending_codes:
@@ -1157,6 +1198,72 @@ def batch_extract(
             fail_count += 1
             record_doc_status(code, step="extract", status="FAILED", error=str(exc))
     typer.echo(f"Hoàn thành Batch Extract. Thành công: {success_count}, Thất bại: {fail_count}")
+
+
+# 4. Lệnh CLI chạy tuần tự TOÀN BỘ luồng Batch trong 1 câu lệnh (End-to-End Batch Ingest)
+@app.command("batch-ingest-all")
+def batch_ingest_all(
+    manifest: Annotated[
+        Path, typer.Option(help="Đường dẫn file manifest JSON")
+    ] = settings.luatvietnam_manifest_path,
+    raw_dir: Annotated[
+        Path, typer.Option(help="Thư mục lưu trữ dataset thô")
+    ] = settings.luatvietnam_raw_dir,
+    workers: Annotated[
+        int, typer.Option(min=1, max=32, help="Số lượng luồng xử lý song song")
+    ] = 4,
+    retry_failed: Annotated[
+        bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")
+    ] = False,
+    limit: Annotated[
+        int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")
+    ] = None,
+    write_neo4j: Annotated[
+        bool, typer.Option(help="Tự động ghi đồ thị vào Neo4j")
+    ] = True,
+    generate_embedding: Annotated[
+        bool, typer.Option(help="Tự động tạo BGE-M3 embedding vào Neo4j")
+    ] = True,
+) -> None:
+    """Chạy tuần tự TOÀN BỘ luồng Batch trong 1 lệnh duy nhất: manifest -> parse -> extract -> registry -> write -> embed."""
+    typer.echo("=== BƯỚC 1/6: Tạo Manifest Dataset ===")
+    build_manifest(raw_dir, output=manifest)
+
+    typer.echo("\n=== BƯỚC 2/6: Phân tách Cấu trúc Hàng loạt (Batch Parse) ===")
+    batch_parse(manifest=manifest, raw_dir=raw_dir, workers=workers, retry_failed=retry_failed, limit=limit)
+
+    typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
+    batch_extract(manifest=manifest, raw_dir=raw_dir, retry_failed=retry_failed, limit=limit)
+
+    typer.echo("\n=== BƯỚC 4/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
+    try:
+        build_reference_registry(manifest=manifest)
+        reconcile_external_references()
+    except Exception as exc:
+        typer.echo(f"Cảnh báo khi reconcile references: {exc}", err=True)
+
+    manifest_data = load_curated_manifest(manifest)
+    doc_codes = list(manifest_data.keys())
+    if limit and limit > 0:
+        doc_codes = doc_codes[:limit]
+
+    if write_neo4j:
+        typer.echo("\n=== BƯỚC 5/6: Ghi Đồ thị Hàng loạt vào Neo4j ===")
+        for code in doc_codes:
+            try:
+                write_graph(code)
+            except Exception as exc:
+                typer.echo(f"Lỗi khi write Neo4j cho {code}: {exc}", err=True)
+
+    if generate_embedding and write_neo4j:
+        typer.echo("\n=== BƯỚC 6/6: Sinh BGE-M3 Embedding Hàng loạt ===")
+        for code in doc_codes:
+            try:
+                embed_graph(code)
+            except Exception as exc:
+                typer.echo(f"Lỗi khi generate embedding cho {code}: {exc}", err=True)
+
+    typer.echo("\n🎉 HOÀN THÀNH TOÀN BỘ LUỒNG BATCH INGEST!")
 
 
 @app.command("init-schema")
