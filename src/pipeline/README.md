@@ -144,6 +144,13 @@ reject. Full run sau đó reuse các Article checkpoints đã hoàn tất.
 `normalize-extraction` chạy lại endpoint normalization, validation, scoring và
 decision artifacts từ checkpoint mà không gọi LLM. Structural IDs trong accepted
 records phải là canonical IDs từ `hierarchy.json`; LLM `CONTAINS` luôn bị reject.
+Lệnh này cũng yêu cầu hierarchy có canonical source spans hợp lệ cho mọi Article
+được chọn. Artifact cũ thiếu spans sẽ bị chặn và phải chạy lại `parse` trước;
+normalizer không được giữ lại LLM structural reference chỉ vì deterministic
+resolver không có tọa độ nguồn để chạy.
+Nếu resolver xác định cùng source unit và citation mention, relation deterministic
+sẽ thay thế proposal `REFERS_TO` của LLM kể cả khi LLM chọn target rộng hơn như
+Article thay vì Clause.
 
 Trước khi thay một extraction run không hợp lệ, archive bằng:
 

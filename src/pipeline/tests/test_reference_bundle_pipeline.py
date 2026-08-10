@@ -1,14 +1,18 @@
 import json
 
+import pytest
+
 from src.pipeline.extraction.structural_context import StructuralRegistry
 from src.pipeline.extraction.structural_references import StructuralReferenceResolver
 from src.pipeline.parser.hierarchy_parser import parse_text
-from src.pipeline.parser.models import DocumentInfo
+from src.pipeline.parser.models import Article, DocumentInfo, ParsedDocument
 from src.pipeline.pipeline.orchestrator import (
     _apply_atomic_bundle_decisions,
+    _mark_llm_relations_superseded_by_rules,
     _rule_reference_records,
     _structural_type_from_id,
     _update_reference_checkpoints,
+    run_pipeline,
 )
 
 
@@ -79,6 +83,150 @@ def test_atomic_decision_rejects_every_edge_when_one_edge_fails() -> None:
         record["review_reason"] == "atomic_reference_bundle_validation_failed"
         for record in decided
     )
+
+
+def test_deterministic_bundle_supersedes_broader_llm_target_for_same_mention() -> None:
+    llm_record = {
+        "relation": {
+            "head": "ldn_2020_art57_cl1",
+            "relation": "REFERS_TO",
+            "tail": "ldn_2020_art49",
+            "properties": {
+                "extraction_method": "LLM",
+                "citation_text": (
+                    "Thành viên hoặc nhóm thành viên quy định tại khoản 2 và "
+                    "khoản 3 Điều 49 của Luật này."
+                ),
+            },
+        }
+    }
+    rule_records = [
+        {
+            "relation": {
+                "head": "ldn_2020_art57_cl1",
+                "relation": "REFERS_TO",
+                "tail": target,
+                "properties": {
+                    "extraction_method": "RULE",
+                    "citation_text": "khoản 2 và khoản 3 Điều 49",
+                    "reference_bundle_id": "bundle-49",
+                },
+            }
+        }
+        for target in ("ldn_2020_art49_cl2", "ldn_2020_art49_cl3")
+    ]
+
+    _mark_llm_relations_superseded_by_rules([llm_record, *rule_records])
+
+    assert llm_record["superseded_by_deterministic_resolution"] == "bundle-49"
+
+
+def test_deterministic_reference_does_not_supersede_unrelated_llm_citation() -> None:
+    llm_record = {
+        "relation": {
+            "head": "ldn_2020_art57_cl1",
+            "relation": "REFERS_TO",
+            "tail": "ldn_2020_art72",
+            "properties": {
+                "extraction_method": "LLM",
+                "citation_text": "theo Điều 72 của Luật này",
+            },
+        }
+    }
+    rule_record = {
+        "relation": {
+            "head": "ldn_2020_art57_cl1",
+            "relation": "REFERS_TO",
+            "tail": "ldn_2020_art49_cl2",
+            "properties": {
+                "extraction_method": "RULE",
+                "citation_text": "khoản 2 Điều 49",
+                "reference_bundle_id": "bundle-49",
+            },
+        }
+    }
+
+    _mark_llm_relations_superseded_by_rules([llm_record, rule_record])
+
+    assert "superseded_by_deterministic_resolution" not in llm_record
+
+
+def test_deterministic_reference_does_not_match_empty_llm_citation() -> None:
+    llm_record = {
+        "relation": {
+            "head": "ldn_2020_art57_cl1",
+            "relation": "REFERS_TO",
+            "tail": "ldn_2020_art49",
+            "properties": {
+                "extraction_method": "LLM",
+                "citation_text": "",
+            },
+        }
+    }
+    rule_record = {
+        "relation": {
+            "head": "ldn_2020_art57_cl1",
+            "relation": "REFERS_TO",
+            "tail": "ldn_2020_art49_cl2",
+            "properties": {
+                "extraction_method": "RULE",
+                "citation_text": "khoản 2 Điều 49",
+                "reference_bundle_id": "bundle-49",
+            },
+        }
+    }
+
+    _mark_llm_relations_superseded_by_rules([llm_record, rule_record])
+
+    assert "superseded_by_deterministic_resolution" not in llm_record
+
+
+def test_run_pipeline_rejects_source_backed_hierarchy_without_spans(tmp_path) -> None:
+    parsed = ParsedDocument(
+        document=DocumentInfo(
+            id="ldn_2020",
+            title="Luật Doanh nghiệp",
+            number="59/2020/QH14",
+            doc_type="Law",
+        ),
+        articles=[Article(number="57", content_raw="Nội dung Điều 57")],
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"Hierarchy has no usable canonical source span for structural "
+            r"unit\(s\): Article 57"
+        ),
+    ):
+        run_pipeline(
+            parsed,
+            tmp_path,
+            raw_doc_code="L59_2020",
+            source_text="Điều 57. Triệu tập họp Hội đồng thành viên",
+        )
+
+    assert not (tmp_path / "L59_2020" / "article_extractions.jsonl").exists()
+
+
+def test_run_pipeline_rejects_missing_nested_clause_span(tmp_path) -> None:
+    text = "Điều 57. Triệu tập họp\n1. Nội dung khoản."
+    document = DocumentInfo(
+        id="ldn_2020",
+        title="Luật Doanh nghiệp",
+        number="59/2020/QH14",
+        doc_type="Law",
+    )
+    parsed = parse_text(text, document)
+    parsed.articles[0].clauses[0].source_end_char = 0
+
+    with pytest.raises(ValueError, match=r"unit\(s\): Clause 57.1"):
+        run_pipeline(
+            parsed,
+            tmp_path,
+            raw_doc_code="L59_2020",
+            source_text=text,
+        )
 
 
 def test_reference_checkpoint_reuses_created_at_for_unchanged_fingerprint(

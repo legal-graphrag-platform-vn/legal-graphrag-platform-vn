@@ -154,6 +154,13 @@ def _processed_dir(raw_doc_code: str) -> Path:
     return settings.data_processed_dir / raw_doc_code
 
 
+def _read_canonical_source(raw_doc_code: str) -> str:
+    source_path = _raw_dir(raw_doc_code) / "source.txt"
+    if not source_path.is_file():
+        raise ValueError(f"Missing canonical source: {source_path}")
+    return source_path.read_text(encoding="utf-8")
+
+
 def _parse_folder_worker(
     raw_doc_code: str,
     raw_root: Path | None = None,
@@ -413,6 +420,7 @@ def extract(
             settings.data_processed_dir,
             raw_doc_code=raw_doc_code,
             article_numbers=selected,
+            source_text=_read_canonical_source(raw_doc_code),
         )
     except (ExtractionProviderError, ValueError) as exc:
         typer.echo(f"Extraction blocked: {exc}", err=True)
@@ -455,6 +463,7 @@ def normalize_extraction(
             raw_doc_code=raw_doc_code,
             provider_calls_allowed=False,
             article_numbers=selected,
+            source_text=_read_canonical_source(raw_doc_code),
         )
     except (ExtractionProviderError, ValueError) as exc:
         typer.echo(f"Extraction normalization blocked: {exc}", err=True)
