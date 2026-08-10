@@ -41,18 +41,28 @@ async def _seed_conversation(
         begun = await turn.begin_turn_and_load_context(
             client_turn_id=uuid.uuid4(), user_message=message
         )
+        answer_text = "Trả lời: " + message
         await turn.persist_grounded_answer(
             turn_id=begun.turn_id,
             user_turn_no=begun.user_turn_no,
             status=TurnStatus.COMPLETED,
             kind=MessageKind.ANSWER,
-            content="Trả lời: " + message,
+            content=answer_text,
             standalone_query=message,
             resolution_status=ResolutionStatus.RESOLVED,
             resolution_reason_code=None,
             citations=(),
             focus_upserts=(),
             update_focus=False,
+            response_snapshot={
+                "kind": "answer",
+                "metadata": None,
+                "answer_text": answer_text,
+                "answer": {"markdown": answer_text},
+                "citations": [],
+                "explanation": {"temporal_notes": [], "reasoning_paths": []},
+                "done": {"status": "completed", "citation_count": 0},
+            },
         )
     return conversation_id
 
