@@ -9,10 +9,12 @@ from src.generation.eval.models import AnswerEvaluationDataset
 from src.generation.eval.runner import AnswerEvaluationRunner, EvaluationMetadata
 from src.generation.eval.cli import _write_atomic
 from src.generation.models import (
+    AnswerBlock,
     AnswerCitation,
-    AnswerClaim,
     AnswerGenerationRequest,
+    AnswerParagraph,
     AnswerResponse,
+    GroundedStatement,
 )
 from src.generation.tests.factories import retrieval_context
 from src.retrieval.errors import RetrievalCapabilityError
@@ -39,16 +41,21 @@ class FakeGeneration:
 
     async def generate(self, request: AnswerGenerationRequest) -> AnswerResponse:
         unit = request.retrieval_context.retrieved_units[0]
-        claim = AnswerClaim(
-            claim_id="claim-1",
+        statement = GroundedStatement(
+            statement_id="statement-1",
             text="Câu trả lời có căn cứ.",
             citation_ids=[self.citation_id],
+        )
+        direct_answer = AnswerBlock(
+            paragraphs=[AnswerParagraph(statements=[statement])]
         )
         return AnswerResponse(
             retrieval_contract_version=request.retrieval_context.contract_version,
             query=request.query,
             answer_text="Câu trả lời có căn cứ. [Điều 1]",
-            claims=(claim,),
+            direct_answer=direct_answer,
+            sections=(),
+            caveats=(),
             citations=(
                 AnswerCitation(
                     unit_id=self.citation_id,
@@ -159,7 +166,7 @@ def _metadata() -> EvaluationMetadata:
         dataset_sha256="dataset",
         graph_snapshot_hash="graph",
         retrieval_contract_version="retrieval-runtime-v2",
-        answer_contract_version="answer-generation-v1",
+        answer_contract_version="answer-generation-v2",
         prompt_sha256="prompt",
         generation_config_sha256="config",
         provider="fake",

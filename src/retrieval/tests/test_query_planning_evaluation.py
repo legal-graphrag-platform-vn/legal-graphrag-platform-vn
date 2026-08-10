@@ -216,56 +216,52 @@ def test_qg1_artifacts_round_trip_and_state_development_limitations(
     assert not list(tmp_path.glob(".*.tmp"))
 
 
-def test_observation_collector_runs_all_profiles_and_preserves_stage_outcomes() -> None:
-    async def scenario() -> None:
-        gold = load_gold_plan_config(GOLD_PATH)
-        planner = _FakePlanner(gold)
-        collector = QG1ObservationCollector(
-            generic_runtime=_FakeGenericRuntime(gold),
-            linker=_FakeLinker(gold),
-            executor=_FakeExecutor(gold),
-            llm_planner=planner,
-            rule_based_planner=RuleBasedPlannerBaseline(),
-        )
+@pytest.mark.asyncio
+async def test_observation_collector_runs_all_profiles_and_preserves_stage_outcomes() -> (
+    None
+):
+    gold = load_gold_plan_config(GOLD_PATH)
+    planner = _FakePlanner(gold)
+    collector = QG1ObservationCollector(
+        generic_runtime=_FakeGenericRuntime(gold),
+        linker=_FakeLinker(gold),
+        executor=_FakeExecutor(gold),
+        llm_planner=planner,
+        rule_based_planner=RuleBasedPlannerBaseline(),
+    )
 
-        observations = await collector.collect(gold)
+    observations = await collector.collect(gold)
 
-        assert len(observations) == len(gold.cases) * len(QG1Profile)
-        assert planner.calls == len(gold.cases)
-        llm = [item for item in observations if item.profile is QG1Profile.LLM_PLANNER]
-        gold_upper = [
-            item
-            for item in observations
-            if item.profile is QG1Profile.GOLD_MANUAL_UPPER_BOUND
-        ]
-        rule = [
-            item
-            for item in observations
-            if item.profile is QG1Profile.RULE_BASED_PLANNER
-        ]
-        assert all(item.reason_code == "SATISFIED" for item in llm)
-        assert all(item.reason_code == "SATISFIED" for item in gold_upper)
-        assert rule[0].bound_anchor_id == "ldn_2020_art38"
-        assert rule[0].reason_code == "NO_PATH"
+    assert len(observations) == len(gold.cases) * len(QG1Profile)
+    assert planner.calls == len(gold.cases)
+    llm = [item for item in observations if item.profile is QG1Profile.LLM_PLANNER]
+    gold_upper = [
+        item
+        for item in observations
+        if item.profile is QG1Profile.GOLD_MANUAL_UPPER_BOUND
+    ]
+    rule = [
+        item for item in observations if item.profile is QG1Profile.RULE_BASED_PLANNER
+    ]
+    assert all(item.reason_code == "SATISFIED" for item in llm)
+    assert all(item.reason_code == "SATISFIED" for item in gold_upper)
+    assert rule[0].bound_anchor_id == "ldn_2020_art38"
+    assert rule[0].reason_code == "NO_PATH"
 
-        report = evaluate_qg1(
-            gold,
-            load_qg1_thresholds(THRESHOLD_PATH),
-            observations,
-            metadata=_metadata(),
-        )
-        target_diagnostic = (
-            report.profile(QG1Profile.LLM_PLANNER).cases[0].target_diagnostic
-        )
-        assert target_diagnostic is not None
-        assert target_diagnostic.mention_text == gold.cases[0].target_mention
-        assert target_diagnostic.gold_rank == 1
-        assert target_diagnostic.top_score == 0.064
-        assert target_diagnostic.top_two_margin is None
-
-    import asyncio
-
-    asyncio.run(scenario())
+    report = evaluate_qg1(
+        gold,
+        load_qg1_thresholds(THRESHOLD_PATH),
+        observations,
+        metadata=_metadata(),
+    )
+    target_diagnostic = (
+        report.profile(QG1Profile.LLM_PLANNER).cases[0].target_diagnostic
+    )
+    assert target_diagnostic is not None
+    assert target_diagnostic.mention_text == gold.cases[0].target_mention
+    assert target_diagnostic.gold_rank == 1
+    assert target_diagnostic.top_score == 0.064
+    assert target_diagnostic.top_two_margin is None
 
 
 def _perfect_observations() -> tuple[QG1Observation, ...]:

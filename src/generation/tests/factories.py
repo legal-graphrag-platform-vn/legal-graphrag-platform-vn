@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from datetime import date
 
-from src.generation.models import AnswerCandidate, AnswerClaim
+from src.generation.models import (
+    AnswerBlock,
+    AnswerCandidate,
+    AnswerParagraph,
+    GroundedStatement,
+)
 from src.retrieval.models import (
     EvidenceItem,
     GraphEdge,
@@ -155,14 +160,21 @@ def graph_path(
 
 def answer_candidate(*, citation_id: str = "doc_art1") -> AnswerCandidate:
     return AnswerCandidate(
-        claims=[
-            AnswerClaim(
-                claim_id="claim-1",
-                text="Tổ chức, cá nhân có quyền thành lập doanh nghiệp.",
-                citation_ids=[citation_id],
-            )
-        ],
-        reasoning_path_ids=[],
+        direct_answer=AnswerBlock(
+            paragraphs=[
+                AnswerParagraph(
+                    statements=[
+                        GroundedStatement(
+                            statement_id="statement-1",
+                            text=("Tổ chức, cá nhân có quyền thành lập doanh nghiệp."),
+                            citation_ids=[citation_id],
+                        )
+                    ]
+                )
+            ]
+        ),
+        sections=[],
+        caveats=[],
         temporal_assertions=[],
         confidence=0.9,
         cannot_answer=False,

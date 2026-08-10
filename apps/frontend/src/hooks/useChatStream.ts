@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiStream } from '@/lib/api/client'
 import { SseParser, SseProtocolError, type ParsedSseEvent } from '@/lib/api/sse'
-import type { Message, Source } from '@/types/chat'
+import type { Message, ReasoningPath, Source } from '@/types/chat'
 
 export function useChatStream(initialMessages: Message[] = []) {
    const [messages, setMessages] = useState<Message[]>(initialMessages)
@@ -142,7 +142,7 @@ function applyEvent(
          retrieval_mode: stringValue(event.data.retrieval_mode),
          resolution_status: stringValue(event.data.resolution_status),
          cannot_answer: event.data.cannot_answer === true,
-         insufficiency_reason: stringValue(event.data.insufficiency_reason),
+         insufficiency_message: stringValue(event.data.insufficiency_message),
       })
    } else if (event.event === 'clarification') {
       // Turn cần làm rõ: không có source cards; câu hỏi tới qua token stream.
@@ -156,18 +156,24 @@ function applyEvent(
    } else if (event.event === 'citation') {
       const unitId = stringValue(event.data.unit_id)
       const deepLink = stringValue(event.data.deep_link)
+      const ordinal = numberValue(event.data.ordinal)
       setMessages((previous) =>
          previous.map((message) =>
             message.id === assistantId
                ? {
                     ...message,
                     sources: message.sources?.map((source) =>
-                       source.id === unitId ? { ...source, deep_link: deepLink } : source,
+                       source.id === unitId ? { ...source, deep_link: deepLink, ordinal } : source,
                     ),
                  }
                : message,
          ),
       )
+   } else if (event.event === 'explanation') {
+      updateAssistant(setMessages, assistantId, {
+         temporal_notes: stringArray(event.data.temporal_notes),
+         reasoning_paths: reasoningPaths(event.data.reasoning_paths),
+      })
    }
    return {
       token: event.event === 'token' ? (stringValue(event.data.content) ?? '') : '',
@@ -223,6 +229,29 @@ function numberValue(value: unknown): number | undefined {
 
 function labelValue(value: unknown): Source['label'] {
    return value === 'Article' || value === 'Clause' || value === 'Point' ? value : undefined
+}
+
+function stringArray(value: unknown): string[] {
+   return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === 'string')
+      : []
+}
+
+function reasoningPaths(value: unknown): ReasoningPath[] {
+   if (!Array.isArray(value)) return []
+   return value.flatMap((item) => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) return []
+      const path = item as Record<string, unknown>
+      const pathId = stringValue(path.path_id)
+      if (!pathId) return []
+      return [
+         {
+            path_id: pathId,
+            description: stringValue(path.description) || '',
+            nodes: stringArray(path.nodes),
+         },
+      ]
+   })
 }
 
 function clearActiveTimer(timerRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>) {

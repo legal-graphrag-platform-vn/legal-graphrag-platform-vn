@@ -69,7 +69,9 @@ def test_gemini_provider_returns_structured_candidate_and_closes() -> None:
         result = await provider.generate_structured(_request())
         await provider.aclose()
         await provider.aclose()
-        assert result.claims[0].citation_ids == ["doc_art1"]
+        assert result.direct_answer.paragraphs[0].statements[0].citation_ids == [
+            "doc_art1"
+        ]
         assert client.aio.close_count == 1
 
     asyncio.run(scenario())
@@ -174,7 +176,7 @@ def test_timeout_includes_provider_call() -> None:
 
 def test_malformed_output_is_typed() -> None:
     async def scenario() -> None:
-        client = FakeClient([FakeResponse(json.dumps({"claims": []}))])
+        client = FakeClient([FakeResponse(json.dumps({"direct_answer": None}))])
         provider = _provider(client)
         with pytest.raises(AnswerProviderOutputError):
             await provider.generate_structured(_request())

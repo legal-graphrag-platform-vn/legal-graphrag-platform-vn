@@ -31,6 +31,7 @@ interface ServerConversationSummary {
 }
 
 interface ServerCitation {
+   ordinal?: number
    unit_id: string
    citation_label: string
    document_id: string
@@ -42,6 +43,20 @@ interface ServerMessage {
    role: string
    content: string
    citations?: ServerCitation[]
+   explanation?: {
+      temporal_notes?: string[]
+      reasoning_paths?: Array<{
+         path_id: string
+         description: string
+         nodes: string[]
+      }>
+   } | null
+   metadata?: {
+      intent?: string
+      retrieval_mode?: string
+      cannot_answer?: boolean
+      insufficiency_message?: string
+   } | null
    created_at?: string | null
 }
 
@@ -140,12 +155,17 @@ export default function ChatPage() {
                if (s.id !== activeSessionId) return s
 
                let newTitle = s.title
-               if ((s.title === 'Cuộc hội thoại mới' || s.title === 'Cuộc trò chuyện mới') && messages.length > 0) {
+               if (
+                  (s.title === 'Cuộc hội thoại mới' || s.title === 'Cuộc trò chuyện mới') &&
+                  messages.length > 0
+               ) {
                   const firstUserMsg = messages.find((m) => m.role === 'user')
                   if (firstUserMsg) {
                      newTitle = firstUserMsg.content.slice(0, 30)
                      if (firstUserMsg.content.length > 30) newTitle += '...'
-                     apiPatch(`/api/v1/conversations/${activeSessionId}`, { title: newTitle }).catch(() => {})
+                     apiPatch(`/api/v1/conversations/${activeSessionId}`, {
+                        title: newTitle,
+                     }).catch(() => {})
                   }
                }
 
@@ -175,19 +195,32 @@ export default function ChatPage() {
                id: m.id,
                role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
                content: m.content,
-               sources: m.citations ? m.citations.map((c) => ({
-                  id: c.unit_id,
-                  title: c.citation_label,
-                  citation_label: c.citation_label,
-                  document_id: c.document_id,
-                  deep_link: c.deep_link,
-                  content: '',
-               })) : [],
+               sources: m.citations
+                  ? m.citations.map((c) => ({
+                       id: c.unit_id,
+                       title: c.citation_label,
+                       citation_label: c.citation_label,
+                       document_id: c.document_id,
+                       deep_link: c.deep_link,
+                       ordinal: c.ordinal,
+                       content: '',
+                    }))
+                  : [],
+               intent: m.metadata?.intent,
+               retrieval_mode: m.metadata?.retrieval_mode,
+               cannot_answer: m.metadata?.cannot_answer,
+               insufficiency_message: m.metadata?.insufficiency_message,
+               temporal_notes: m.explanation?.temporal_notes || [],
+               reasoning_paths: m.explanation?.reasoning_paths || [],
                timestamp: m.created_at || new Date().toISOString(),
             }))
             setMessages(loadedMessages)
             setSessions((prev) =>
-               prev.map((s) => (s.id === sessionId ? { ...s, messages: loadedMessages, title: data.title || s.title } : s))
+               prev.map((s) =>
+                  s.id === sessionId
+                     ? { ...s, messages: loadedMessages, title: data.title || s.title }
+                     : s,
+               ),
             )
          }
       } catch (e) {
@@ -328,7 +361,6 @@ export default function ChatPage() {
                   placeholder={user ? 'Ask anything' : 'Đăng nhập để bắt đầu trò chuyện'}
                   className="flex-1 max-h-[180px] min-h-[40px] py-2 px-3 text-sm bg-transparent border-0 outline-hidden resize-none placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-900 dark:text-zinc-150 leading-relaxed font-sans focus:ring-0"
                />
-
 
                {/* Send button */}
                <div className="flex items-center gap-1.5 shrink-0 ml-1">

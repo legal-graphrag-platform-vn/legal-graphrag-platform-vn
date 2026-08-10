@@ -32,12 +32,12 @@ async def get_chat_service(request: Request) -> ChatService:
     return service
 
 
-def get_debug_trace_store(request: Request):
+async def get_debug_trace_store(request: Request):
     """Optional durable debug-trace store; None when not configured (Plan 21)."""
     return getattr(request.app.state.container, "debug_trace_store", None)
 
 
-def get_repository(request: Request):
+async def get_repository(request: Request):
     repo = getattr(request.app.state.container, "conversation_repo", None)
     if repo is None:
         raise BackendFeatureUnavailableError(
@@ -46,12 +46,10 @@ def get_repository(request: Request):
     return repo
 
 
-def get_principal_signer(request: Request):
+async def get_principal_signer(request: Request):
     signer = getattr(request.app.state.container, "principal_signer", None)
     if signer is None:
-        raise BackendFeatureUnavailableError(
-            "Principal signer is not configured"
-        )
+        raise BackendFeatureUnavailableError("Principal signer is not configured")
     return signer
 
 

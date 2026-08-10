@@ -88,8 +88,8 @@ class ChatMetadataData(BaseModel):
     cannot_answer: bool
     needs_clarification: bool = False
     resolution_status: str | None = None
-    # Why the model declined to answer (present only when cannot_answer).
-    insufficiency_reason: str | None = None
+    # Deterministic user-facing text; internal reason codes stay server-side.
+    insufficiency_message: str | None = None
 
 
 class ChatTokenData(BaseModel):
@@ -97,6 +97,7 @@ class ChatTokenData(BaseModel):
 
 
 class ChatCitationData(BaseModel):
+    ordinal: int | None = Field(default=None, ge=1)
     unit_id: str
     citation_label: str
     document_id: str
@@ -136,11 +137,24 @@ class ChatClarificationData(BaseModel):
     candidates: list[ChatClarificationCandidateData] = Field(default_factory=list)
 
 
+class ChatReasoningPathData(BaseModel):
+    path_id: str
+    nodes: list[str]
+    edges: list[dict[str, Any]]
+    description: str
+
+
+class ChatExplanationData(BaseModel):
+    temporal_notes: list[str] = Field(default_factory=list)
+    reasoning_paths: list[ChatReasoningPathData] = Field(default_factory=list)
+
+
 class ChatStreamEvent(BaseModel):
     event: Literal[
         "metadata",
         "token",
         "citation",
+        "explanation",
         "clarification",
         "error",
         "done",

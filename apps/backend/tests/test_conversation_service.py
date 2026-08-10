@@ -29,7 +29,12 @@ from resolution.models import (
     StandaloneResolution,
 )
 from resolution.rewriter import RewriteTimeoutError, StructuredRewriter
-from src.generation.models import AnswerResponse
+from src.generation.models import (
+    AnswerBlock,
+    AnswerParagraph,
+    AnswerResponse,
+    GroundedStatement,
+)
 from src.retrieval.errors import RetrievalDependencyError
 from src.shared.retrieval_contract import (
     PlanType,
@@ -156,7 +161,21 @@ class FakeGenerator:
             retrieval_contract_version=request.retrieval_context.contract_version,
             query=request.query,
             answer_text="Câu trả lời đã kiểm chứng.",
-            claims=(),
+            direct_answer=AnswerBlock(
+                paragraphs=[
+                    AnswerParagraph(
+                        statements=[
+                            GroundedStatement(
+                                statement_id="statement-1",
+                                text="Câu trả lời đã kiểm chứng.",
+                                citation_ids=[unit.id],
+                            )
+                        ]
+                    )
+                ]
+            ),
+            sections=(),
+            caveats=(),
             citations=(
                 {
                     "unit_id": unit.id,
@@ -302,6 +321,155 @@ def test_query_processor_trace_preserves_subquery_ids_and_merge_counts() -> None
     assert merge["input_unit_count"] == 2
     assert merge["merged_unit_count"] == 1
     assert merge["deduplicated_unit_count"] == 1
+
+
+def test_reference_resolver_clarification_precedes_query_processor() -> None:
+    class UnexpectedQueryProcessor:
+        calls = 0
+
+        async def process(self, current_query, conversation_history=()):
+            self.calls += 1
+            raise AssertionError("query processor must not run before clarification")
+
+    resolver = FakeResolver(
+        ClarifyResolution(
+            mode=ClarificationMode.SELECT,
+            resolution_status=ResolutionStatus.AMBIGUOUS,
+            reason_code="MULTIPLE_MATCHES",
+            question="Ý bạn là văn bản nào?",
+            candidates=(),
+        )
+    )
+    processor = UnexpectedQueryProcessor()
+    retrieval = FakeRetrieval()
+    generator = FakeGenerator()
+    store = FakeStore()
+    service = _service(
+        store,
+        resolver,
+        retrieval=retrieval,
+        generator=generator,
+        query_processor=processor,
+    )
+
+    events = _run_events(service, _request("điều đó quy định gì"), _owner())
+
+    assert resolver.calls == 1
+    assert processor.calls == 0
+    assert retrieval.calls == 0
+    assert generator.calls == 0
+    assert events[-1].data["status"] == "needs_clarification"
+
+
+def test_query_processor_receives_canonical_query_and_resolved_filter() -> None:
+    class RecordingQueryProcessor:
+        def __init__(self) -> None:
+            self.calls = []
+
+        async def process(self, current_query, conversation_history=()):
+            self.calls.append((current_query, conversation_history))
+            return QueryProcessingResult(
+                status=ProcessingStatus.READY,
+                standalone_query=current_query,
+                plan_type=PlanType.SINGLE,
+                subqueries=[
+                    SubqueryDTO(
+                        id="canonical",
+                        query=current_query,
+                        intent=SubqueryIntent.FACTUAL,
+                    )
+                ],
+            )
+
+    resolver = FakeResolver(
+        ResolvedResolution(candidate=_resolved_candidate("doc-1"), is_anaphora=True)
+    )
+    processor = RecordingQueryProcessor()
+    retrieval = FakeRetrieval()
+    store = FakeStore()
+    service = _service(
+        store,
+        resolver,
+        retrieval=retrieval,
+        query_processor=processor,
+    )
+
+    _run_events(service, _request("điều đó quy định gì"), _owner())
+
+    assert processor.calls == [("Điều 111 59/2020/QH14 quy định gì", ())]
+    assert retrieval.last_query == "Điều 111 59/2020/QH14 quy định gì"
+    assert retrieval.last_document_ids == ["doc-1"]
+    assert store.turn.persisted_answer["resolution_status"] is ResolutionStatus.RESOLVED
+
+
+def test_query_processor_cannot_drop_resolved_canonical_anchor() -> None:
+    class AnchorDroppingQueryProcessor:
+        async def process(self, current_query, conversation_history=()):
+            return QueryProcessingResult(
+                status=ProcessingStatus.READY,
+                standalone_query="quy định gì",
+                plan_type=PlanType.SINGLE,
+                subqueries=[
+                    SubqueryDTO(
+                        id="lost-anchor",
+                        query="quy định gì",
+                        intent=SubqueryIntent.FACTUAL,
+                    )
+                ],
+            )
+
+    retrieval = FakeRetrieval()
+    store = FakeStore()
+    service = _service(
+        store,
+        FakeResolver(
+            ResolvedResolution(candidate=_resolved_candidate("doc-1"), is_anaphora=True)
+        ),
+        retrieval=retrieval,
+        query_processor=AnchorDroppingQueryProcessor(),
+    )
+
+    events = _run_events(service, _request("điều đó quy định gì"), _owner())
+
+    assert retrieval.calls == 0
+    assert store.turn.failed["error_code"] == "QUERY_PROCESSING_FAILED"
+    assert events[-1].data["status"] == "error"
+
+
+def test_query_processor_cannot_replace_canonical_generation_query() -> None:
+    class RephrasingQueryProcessor:
+        async def process(self, current_query, conversation_history=()):
+            return QueryProcessingResult(
+                status=ProcessingStatus.READY,
+                standalone_query="processor rephrase",
+                plan_type=PlanType.SINGLE,
+                subqueries=[
+                    SubqueryDTO(
+                        id="q1",
+                        query="retrieval decomposition",
+                        intent=SubqueryIntent.FACTUAL,
+                    )
+                ],
+            )
+
+    retrieval = FakeRetrieval()
+    generator = FakeGenerator()
+    store = FakeStore()
+    service = _service(
+        store,
+        FakeResolver(StandaloneResolution()),
+        retrieval=retrieval,
+        generator=generator,
+        query_processor=RephrasingQueryProcessor(),
+    )
+
+    _run_events(service, _request("canonical standalone query"), _owner())
+
+    assert retrieval.last_query == "retrieval decomposition"
+    assert generator.last_query == "canonical standalone query"
+    assert store.turn.persisted_answer["standalone_query"] == (
+        "canonical standalone query"
+    )
 
 
 def test_resolved_reference_intersects_document_filter() -> None:

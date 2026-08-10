@@ -14,8 +14,11 @@ from observability.rag import (
 )
 from src.generation.errors import CitationValidationError
 from src.generation.models import (
+    AnswerBlock,
     AnswerGenerationRequest,
+    AnswerParagraph,
     AnswerResponse,
+    GroundedStatement,
     ProviderAnswerRequest,
 )
 from src.generation.tests.factories import answer_candidate
@@ -117,7 +120,21 @@ class _SuccessfulGenerator:
             retrieval_contract_version=request.retrieval_context.contract_version,
             query=request.query,
             answer_text="Câu trả lời đã kiểm chứng.",
-            claims=(),
+            direct_answer=AnswerBlock(
+                paragraphs=[
+                    AnswerParagraph(
+                        statements=[
+                            GroundedStatement(
+                                statement_id="statement-1",
+                                text="Câu trả lời đã kiểm chứng.",
+                                citation_ids=[unit.id],
+                            )
+                        ]
+                    )
+                ]
+            ),
+            sections=(),
+            caveats=(),
             citations=(
                 {
                     "unit_id": unit.id,
@@ -237,7 +254,7 @@ def test_answer_provider_trace_captures_redacted_prompt_and_candidate_shape() ->
         assert event["model"] == "fake-model"
         assert event["prompt"]["chars"] > 0
         assert event["raw_output"]["chars"] > 0
-        assert event["claim_count"] == 1
+        assert event["statement_count"] == 1
         assert event["citation_reference_count"] == 1
 
     asyncio.run(scenario())

@@ -83,8 +83,8 @@ class Settings(BaseSettings):
         le=1.0,
     )
 
-    # 9b.  Query Processor (five-field contract) — when enabled it replaces the
-    #      deterministic resolver+rewriter with an LLM query processor.
+    # 9b. Query Processor (five-field contract). It decomposes the canonical
+    # standalone query after deterministic reference resolution and rewriting.
     query_processor_enabled: bool = False
     query_processor_model: str = "gemini-flash-lite-latest"
 

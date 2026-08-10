@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.9.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md), [ADR-28](./00_architecture_decisions.md), [ADR-29](./00_architecture_decisions.md)
+> **Depends on**: [legal_ontology.md v1.9.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md), [ADR-28](./00_architecture_decisions.md), [ADR-29](./00_architecture_decisions.md), [ADR-30](./00_architecture_decisions.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
@@ -256,7 +256,7 @@ def process_extraction(llm_output):
 **Input**: Câu hỏi hiện tại + lịch sử hội thoại
 **Output**: `QueryProcessingResult` (five-field contract)
 
-Query Processor thay resolver+rewriter deterministic ở Stage 1. Nó là adapter
+Query Processor chạy sau resolver+rewriter deterministic ở Stage 1. Nó là adapter
 **provider-swappable** (bản hiện tại dùng Gemini qua `build_text_generator`;
 Qwen/Ollama là dự phòng, không hardcode). Chi tiết quyết định: **ADR-27**.
 
@@ -274,7 +274,7 @@ dưới giới hạn concurrency của retrieval runner → `merge_contexts` ded
 evidence/units trước khi generate.
 
 ```text
-QueryProcessor
+HistoryContext → Canonical ReferenceResolver → Standalone Query → QueryProcessor
    ├─ needs_clarification → hỏi lại (KHÔNG retrieval)
    └─ ready
         self-contained q1 ─┐
@@ -389,24 +389,29 @@ class ContextBuilder:
 
 ### 6. Answer Generation
 
-**Input**: Query + Context (chunks + graph paths)  
-**Output**: Structured answer
+**Input**: canonical standalone query + projected evidence/path registry
+**Output**: `AnswerCandidateV2` → validated response → deterministic Markdown
 
-**System Prompt:**
+```text
+AnswerCandidateV2
+├── direct_answer.paragraphs[].statements[]
+├── sections[].paragraphs[].statements[]
+├── caveats[].statements[]
+├── temporal_assertions[]
+├── cannot_answer
+├── insufficiency_reason
+└── confidence
 ```
-Bạn là chuyên gia pháp luật doanh nghiệp Việt Nam.
-Trả lời câu hỏi pháp lý DỰA TRÊN và CHỈ DỰA TRÊN các điều luật được cung cấp.
 
-Định dạng câu trả lời:
-1. Trả lời trực tiếp câu hỏi
-2. Giải thích cơ sở pháp lý (điều nào, khoản nào, văn bản nào)
-3. Nếu có thay đổi theo thời gian, nêu rõ
+Mỗi statement có `statement_id`, `text`, `citation_ids[]` và optional linkage
+`reasoning_path_ids[]`, `temporal_assertion_ids[]`. Paragraph chỉ là đơn vị trình
+bày; statement là đơn vị grounding. Structural validator fail closed nếu ID
+không thuộc projected registry hoặc temporal assertion không khớp interval.
 
-Luôn kết thúc bằng:
-CITATIONS: [list of Article IDs used]
-REASONING_PATH: [mô tả đường suy luận trong graph]
-TEMPORAL_NOTE: [nếu câu trả lời phụ thuộc thời điểm]
-```
+Sau validation không còn bước generative. `DeterministicAnswerRenderer` chỉ ghép
+statement, escape Markdown, thêm heading và cấp citation ordinal theo first
+occurrence. Snapshot persist cả Markdown, structured answer, citations và XAI;
+live response/retry/history replay đều đọc chính snapshot đó.
 
 ---
 
@@ -427,7 +432,11 @@ TEMPORAL_NOTE: [nếu câu trả lời phụ thuộc thời điểm]
 ```
 User: "Điều kiện vốn để thành lập công ty TNHH theo quy định năm 2022?"
 
-[Stage 1] Query Understanding — Query Processor (nếu enabled)
+[Stage 1] Query Understanding
+    server-owned HistoryContext
+    → Canonical ReferenceResolver
+    → StandaloneQueryRewriter
+    → Query Processor (nếu enabled, chỉ decomposition standalone query)
     status: ready
     standalone_query: "Điều kiện vốn để thành lập công ty TNHH năm 2022"
     plan_type: single

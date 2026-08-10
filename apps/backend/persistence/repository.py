@@ -826,6 +826,19 @@ class SqlAlchemyConversationStore:
             )
             messages = msg_res.mappings().all()
 
+            # 2b. Load immutable answer snapshots for UI reconstruction. Internal
+            # diagnostics are deliberately not exposed through the history API.
+            turn_res = await conn.execute(
+                select(_turn_t.c.id, _turn_t.c.response_snapshot).where(
+                    _turn_t.c.conversation_id == conversation_id
+                )
+            )
+            snapshots_by_turn = {
+                row["id"]: row["response_snapshot"]
+                for row in turn_res.mappings().all()
+                if row["response_snapshot"] is not None
+            }
+
             # 3. Fetch citations
             cit_res = await conn.execute(
                 select(_cit_t)
@@ -837,6 +850,7 @@ class SqlAlchemyConversationStore:
                 msg_id = c["message_id"]
                 citations_by_msg.setdefault(msg_id, []).append(
                     {
+                        "ordinal": c["citation_ordinal"],
                         "unit_id": c["unit_id"],
                         "citation_label": c["citation_label"],
                         "document_id": c["document_id"],
@@ -844,17 +858,32 @@ class SqlAlchemyConversationStore:
                     }
                 )
 
-            formatted_msgs = [
-                {
-                    "id": str(m["id"]),
-                    "role": m["role"],
-                    "kind": m["kind"],
-                    "content": m["content"],
-                    "ordinal": m["ordinal"],
-                    "citations": citations_by_msg.get(m["id"], []),
-                }
-                for m in messages
-            ]
+            formatted_msgs = []
+            for m in messages:
+                snapshot = snapshots_by_turn.get(m["turn_id"]) or {}
+                formatted_msgs.append(
+                    {
+                        "id": str(m["id"]),
+                        "role": m["role"],
+                        "kind": m["kind"],
+                        "content": m["content"],
+                        "ordinal": m["ordinal"],
+                        "citations": citations_by_msg.get(m["id"], []),
+                        "answer": snapshot.get("answer")
+                        if m["role"].value == "assistant"
+                        else None,
+                        "explanation": (
+                            snapshot.get("explanation")
+                            if m["role"].value == "assistant"
+                            else None
+                        ),
+                        "metadata": (
+                            snapshot.get("metadata")
+                            if m["role"].value == "assistant"
+                            else None
+                        ),
+                    }
+                )
 
             return {
                 "id": str(conv["id"]),

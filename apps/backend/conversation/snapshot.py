@@ -13,6 +13,7 @@ from api.models import (
     ChatClarificationData,
     ChatCitationData,
     ChatDoneData,
+    ChatExplanationData,
     ChatMetadataData,
     ChatStreamEvent,
     ChatTokenData,
@@ -35,14 +36,25 @@ def answer_snapshot(
     answer_text: str,
     citations: list[ChatCitationData],
     done: ChatDoneData,
+    answer_structure: dict[str, Any] | None = None,
+    explanation: ChatExplanationData | None = None,
+    diagnostics: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
+    snapshot = {
         "kind": kind,
         "metadata": metadata.model_dump(mode="json"),
         "answer_text": answer_text,
+        "answer": {
+            "markdown": answer_text,
+            **(answer_structure or {}),
+        },
         "citations": [citation.model_dump(mode="json") for citation in citations],
+        "explanation": (explanation or ChatExplanationData()).model_dump(mode="json"),
         "done": done.model_dump(mode="json"),
     }
+    if diagnostics:
+        snapshot["diagnostics"] = diagnostics
+    return snapshot
 
 
 def clarification_snapshot(
@@ -118,13 +130,20 @@ def stream_from_snapshot(
         return events
 
     if kind in _ANSWER_KINDS:
-        for chunk in _chunks(snapshot.get("answer_text", ""), chunk_chars):
+        answer = snapshot.get("answer") or {}
+        markdown = answer.get("markdown", snapshot.get("answer_text", ""))
+        for chunk in _chunks(markdown, chunk_chars):
             events.append(
                 ChatStreamEvent(
                     event="token",
                     data=ChatTokenData(content=chunk).model_dump(mode="json"),
                 )
             )
+        explanation = snapshot.get("explanation")
+        if explanation and (
+            explanation.get("temporal_notes") or explanation.get("reasoning_paths")
+        ):
+            events.append(ChatStreamEvent(event="explanation", data=explanation))
         for citation in snapshot.get("citations", []):
             events.append(ChatStreamEvent(event="citation", data=citation))
         events.append(ChatStreamEvent(event="done", data=snapshot["done"]))

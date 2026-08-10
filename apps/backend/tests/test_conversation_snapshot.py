@@ -11,7 +11,9 @@ from api.models import (
     ChatCitationData,
     ChatClarificationData,
     ChatDoneData,
+    ChatExplanationData,
     ChatMetadataData,
+    ChatReasoningPathData,
     ConversationChatRequest,
 )
 from conversation.snapshot import (
@@ -31,7 +33,7 @@ def _metadata(**overrides) -> ChatMetadataData:
         strategy="factual_hybrid",
         retrieval_mode="graph",
         retrieval_contract_version="retrieval-runtime-v2",
-        answer_contract_version="answer-generation-v1",
+        answer_contract_version="answer-generation-v2",
         cannot_answer=False,
     )
     base.update(overrides)
@@ -120,6 +122,47 @@ def test_replay_parity_is_byte_identical() -> None:
     first = stream_from_snapshot(snapshot, chunk_chars=8)
     second = stream_from_snapshot(snapshot, chunk_chars=8)
     assert [(e.event, e.data) for e in first] == [(e.event, e.data) for e in second]
+
+
+def test_snapshot_persists_structured_answer_and_streams_xai() -> None:
+    snapshot = answer_snapshot(
+        kind=KIND_ANSWER,
+        metadata=_metadata(),
+        answer_text="Có. [1]",
+        answer_structure={
+            "direct_answer": {"paragraphs": [{"statements": [{"statement_id": "s1"}]}]},
+            "sections": [],
+            "caveats": [],
+        },
+        citations=[],
+        explanation=ChatExplanationData(
+            temporal_notes=["Điều 1 có hiệu lực tại ngày truy vấn."],
+            reasoning_paths=[
+                ChatReasoningPathData(
+                    path_id="path-1",
+                    nodes=["doc_art1", "doc_art2"],
+                    edges=[],
+                    description="Điều 1 dẫn chiếu Điều 2",
+                )
+            ],
+        ),
+        done=ChatDoneData(status="completed"),
+    )
+
+    assert snapshot["answer"]["markdown"] == "Có. [1]"
+    assert (
+        snapshot["answer"]["direct_answer"]["paragraphs"][0]["statements"][0][
+            "statement_id"
+        ]
+        == "s1"
+    )
+    events = stream_from_snapshot(snapshot, chunk_chars=100)
+    assert [event.event for event in events] == [
+        "metadata",
+        "token",
+        "explanation",
+        "done",
+    ]
 
 
 def test_clarification_snapshot_streams_clarification_event() -> None:

@@ -276,8 +276,9 @@ nodes are not added to the vector index.
 ## 4. Answer Generation Boundary
 
 Answer generation is governed by Plans 11 and 13. It consumes only a validated
-and projected `RetrievalContext`, emits structured claims with citation IDs, and
-must pass grounding validation before any response is returned or streamed.
+and projected `RetrievalContext`, emits structured paragraphs containing
+statement-level citation linkage, and must pass grounding validation before any
+response is returned or streamed.
 The provider cannot cite omitted evidence or invent graph paths. Multi-hop
 generation fails closed unless context carries a trusted explicit
 `GraphReasoningRequirement`.
