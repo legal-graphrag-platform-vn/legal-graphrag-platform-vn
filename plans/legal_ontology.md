@@ -1,8 +1,8 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.8.1
-> **Frozen date**: 2026-08-08
+> **Version**: 1.9.0
+> **Frozen date**: 2026-08-10
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
 This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
@@ -82,15 +82,15 @@ Required means mandatory before `Neo4jRepository.merge(...)`. Neo4j Community Ed
 
 | Node | Required fields | Optional fields | Enums |
 |---|---|---|---|
-| `Document` | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `effective_to`, `jurisdiction`, `source_url`, `document_uri`, `gazette_number` | `doc_type`: `Constitution`, `Law`, `Ordinance`, `Resolution`, `Decree`, `Decision`, `Circular`, `JointCircular`; `legal_status`: `ACTIVE`, `NOT_YET_EFFECTIVE`, `PARTIALLY_EFFECTIVE`, `REPLACED`, `REPEALED`, `EXPIRED` |
+| `Document` | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `title`, `issued_date`, `effective_to`, `expiry_date`, `sector`, `field`, `signer_title`, `signer_name`, `source_url`, `updated_at` | `doc_type`: `Constitution`, `Law`, `Ordinance`, `Resolution`, `Decree`, `Decision`, `Circular`, `JointCircular`; `legal_status`: `ACTIVE`, `NOT_YET_EFFECTIVE`, `PARTIALLY_EFFECTIVE`, `REPLACED`, `REPEALED`, `EXPIRED` |
 | `Issuer` | `id`, `name`, `branch` | none | `branch`: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER` |
 | `Part` | `id`, `number`, `title` | none | none |
 | `Chapter` | `id`, `number`, `title` | none | none |
 | `Section` | `id`, `number`, `title` | none | none |
 | `Subsection` | `id`, `number`, `title` | none | none |
-| `Article` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `title`, `effective_to`, `embedding` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
-| `Clause` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `effective_to`, `embedding` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
-| `Point` | `id`, `label`, `content_raw` | none | none |
+| `Article` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `title`, `effective_to`, `part`, `chapter`, `chapter_title`, `section`, `subsection`, `updated_at`, `embedding` and embedding provenance | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
+| `Clause` | `id`, `number`, `content_raw`, `effective_from`, `legal_status` | `effective_to`, `updated_at`, `embedding` and embedding provenance | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
+| `Point` | `id`, `label`, `content_raw` | `effective_from`, `effective_to`, `legal_status`, `updated_at` | `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` when present |
 
 Rules:
 
@@ -99,7 +99,7 @@ Rules:
 | `Issuer` creation | Writer derives `Issuer` from `Document.issuer_name`; LLM does not extract it directly |
 | `Issuer.id` | Slug of normalized issuer name; this is the `MERGE` key, not `name` |
 | Temporal denormalization | `Article` and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
-| Point temporal scope | Phase 1 does not store temporal fields on `Point`; point-level amendments are normalized to the nearest `Clause` |
+| Point temporal scope | Optional Point temporal fields are schema-reserved only. The current parser/payload builder does not emit them; runtime validity is inherited from the nearest `Clause` until point-level evidence is implemented and evaluated |
 | Grouping heading contract | `Part`, `Section`, and `Subsection` are created only from accepted headings in their canonical parent context; `title` is mandatory and is never replaced by a display fallback |
 | Grouping-node scope | `Part`, `Chapter`, `Section`, and `Subsection` do not carry temporal fields or embeddings |
 | Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[1024]` under the current BGE-M3 contract; grouping nodes and `Point` have no embedding |
@@ -186,14 +186,27 @@ Article at or after the first Section Article is invalid.
 `REFERS_TO.citation_type` must be one of `DIRECT`, `INDIRECT`, `RANGE`.
 
 `REFERS_TO` provenance is method-aware. Common required properties are `citation_text`, `citation_type`,
-`extraction_method`, `created_at`, `reference_bundle_id`, and `reference_target_count`. `extraction_method` is one of `RULE`,
-`ENTITY_LINKING`, or `LLM`; `HYBRID` is intentionally excluded from v1.8.x.
+`extraction_method`, `created_at`, `reference_bundle_id`, and `reference_target_count`. The reference extraction-method
+enum is `RULE`, `ENTITY_LINKING`, or `LLM`; `DIAGRAM` and `HYBRID` are not valid `REFERS_TO` methods.
 
 Method-specific requirements:
 
 - `RULE`: `resolver_name`, `resolver_version`, `source_unit_id`, `source_char_start`, `source_char_end`.
 - `ENTITY_LINKING`: `linker_name`, `linker_version`, `source_unit_id`, `source_char_start`, `source_char_end`.
 - `LLM`: `confidence`, `llm_model`, and `checkpoint_id`.
+
+`DIAGRAM` is the sole member of the separate document-relation extraction-method
+enum. It is a deterministic source derived from an explicit
+source-site category-to-relation map. It may materialize only canonical
+`AMENDS`, `REPEALS`, `REPLACES`, or `GUIDES` relations after registry-backed
+Document resolution. It carries `resolver_name`, `resolver_version`,
+`source_category`, `source_text`, and `created_at`; temporal relations still
+require `effective_from`, and `GUIDES` still requires the document-type
+whitelist. A diagram builder produces validation-pending records; schema,
+ontology, and consistency validation must run before the decision gate. When
+the acting head Document is external and its effective date is unavailable,
+the candidate goes to blocking review and cannot be materialized. Diagram
+confidence never bypasses ontology or consistency validation.
 
 Deterministic and entity-linked bundles bypass confidence scoring only. They still require schema, ontology,
 endpoint, atomic-bundle, and payload consistency validation. A multi-target reference is accepted as a whole or
@@ -387,3 +400,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.7.0 | 2026-07-31 | Added corpus-verified `Section` hierarchy, Chapter/Section reference targets, and guarded hierarchy migration | ADR-23 |
 | 1.8.0 | 2026-08-01 | Added canonical `Part` and `Subsection`, seven Article parent chains, registry v2, and verified reference/browser support | ADR-25 |
 | 1.8.1 | 2026-08-08 | Allowed direct preamble Articles before Section Articles within the same Chapter while retaining ordered mixed-mode validation | ADR-28 and BLHS 2015 Chapter XXIII |
+| 1.9.0 | 2026-08-10 | Synchronized executable metadata fields, reserved optional Point temporal fields, and fail-closed deterministic diagram relation provenance | ADR-29 |

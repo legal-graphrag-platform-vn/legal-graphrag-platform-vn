@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.pipeline.extraction.diagram_parser import (
     DiagramRelationCandidate,
     parse_diagram,
@@ -23,10 +21,12 @@ from src.pipeline.extraction.structural_context import DocumentRegistry
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _registry(*aliases: tuple[str, str, str]) -> DocumentRegistry:
     """Build a minimal DocumentRegistry from (raw_key, graph_id, doc_type) tuples."""
     alias_map: dict[str, tuple[str, str]] = {}
     import re
+
     for raw_key, graph_id, doc_type in aliases:
         normalized = re.sub(r"[^a-z0-9]+", "", raw_key.lower().replace("đ", "d"))
         alias_map[normalized] = (graph_id, doc_type)
@@ -42,7 +42,7 @@ def _candidate(
     return DiagramRelationCandidate(
         source_category=source_category,
         relation_type=relation_type,  # type: ignore[arg-type]
-        direction=direction,           # type: ignore[arg-type]
+        direction=direction,  # type: ignore[arg-type]
         raw_target=raw_target,
     )
 
@@ -51,13 +51,18 @@ def _candidate(
 # resolve_diagram_relations
 # ---------------------------------------------------------------------------
 
+
 class TestResolveDiagramRelations:
     def test_resolved_current_to_target(self):
         registry = _registry(("ldn_2014", "ldn_2014", "Law"))
         candidates = [
-            _candidate("Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "ldn_2014"),
+            _candidate(
+                "Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "ldn_2014"
+            ),
         ]
-        resolved, unresolved = resolve_diagram_relations(candidates, "ldn_2020", registry)
+        resolved, unresolved = resolve_diagram_relations(
+            candidates, "ldn_2020", registry
+        )
 
         assert len(resolved) == 1
         assert len(unresolved) == 0
@@ -70,22 +75,33 @@ class TestResolveDiagramRelations:
     def test_resolved_target_to_current(self):
         registry = _registry(("ldn_2025", "ldn_2025", "Law"))
         candidates = [
-            _candidate("Văn bản sửa đổi bổ sung", "AMENDS", "TARGET_TO_CURRENT", "ldn_2025"),
+            _candidate(
+                "Văn bản sửa đổi bổ sung", "AMENDS", "TARGET_TO_CURRENT", "ldn_2025"
+            ),
         ]
-        resolved, unresolved = resolve_diagram_relations(candidates, "ldn_2020", registry)
+        resolved, unresolved = resolve_diagram_relations(
+            candidates, "ldn_2020", registry
+        )
 
         assert len(resolved) == 1
         r = resolved[0]
-        assert r.head_id == "ldn_2025"   # target là head vì nó thực hiện AMENDS
-        assert r.tail_id == "ldn_2020"   # current là tail bị tác động
+        assert r.head_id == "ldn_2025"  # target là head vì nó thực hiện AMENDS
+        assert r.tail_id == "ldn_2020"  # current là tail bị tác động
         assert r.relation_type == "AMENDS"
 
     def test_unresolved_target_goes_to_unresolved(self):
         registry = DocumentRegistry({})  # empty
         candidates = [
-            _candidate("Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "Luật chưa biết"),
+            _candidate(
+                "Văn bản được thay thế",
+                "REPLACES",
+                "CURRENT_TO_TARGET",
+                "Luật chưa biết",
+            ),
         ]
-        resolved, unresolved = resolve_diagram_relations(candidates, "ldn_2020", registry)
+        resolved, unresolved = resolve_diagram_relations(
+            candidates, "ldn_2020", registry
+        )
 
         assert len(resolved) == 0
         assert len(unresolved) == 1
@@ -98,9 +114,13 @@ class TestResolveDiagramRelations:
         """Nếu registry trả về chính current document → bỏ qua."""
         registry = _registry(("ldn_2020", "ldn_2020", "Law"))
         candidates = [
-            _candidate("Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "ldn_2020"),
+            _candidate(
+                "Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "ldn_2020"
+            ),
         ]
-        resolved, unresolved = resolve_diagram_relations(candidates, "ldn_2020", registry)
+        resolved, unresolved = resolve_diagram_relations(
+            candidates, "ldn_2020", registry
+        )
 
         assert len(resolved) == 0
         assert len(unresolved) == 0
@@ -108,10 +128,19 @@ class TestResolveDiagramRelations:
     def test_mixed_resolved_and_unresolved(self):
         registry = _registry(("ldn_2014", "ldn_2014", "Law"))
         candidates = [
-            _candidate("Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "ldn_2014"),
-            _candidate("Văn bản sửa đổi bổ sung", "AMENDS", "TARGET_TO_CURRENT", "Luật chưa biết"),
+            _candidate(
+                "Văn bản được thay thế", "REPLACES", "CURRENT_TO_TARGET", "ldn_2014"
+            ),
+            _candidate(
+                "Văn bản sửa đổi bổ sung",
+                "AMENDS",
+                "TARGET_TO_CURRENT",
+                "Luật chưa biết",
+            ),
         ]
-        resolved, unresolved = resolve_diagram_relations(candidates, "ldn_2020", registry)
+        resolved, unresolved = resolve_diagram_relations(
+            candidates, "ldn_2020", registry
+        )
 
         assert len(resolved) == 1
         assert len(unresolved) == 1
@@ -126,7 +155,9 @@ class TestResolveDiagramRelations:
         """resolver signature nhận cả tuple lẫn list."""
         registry = DocumentRegistry({})
         result = parse_diagram({"Văn bản được thay thế (0)": []})
-        resolved, unresolved = resolve_diagram_relations(result.candidates, "ldn_2020", registry)
+        resolved, unresolved = resolve_diagram_relations(
+            result.candidates, "ldn_2020", registry
+        )
         assert resolved == []
         assert unresolved == []
 
@@ -134,6 +165,7 @@ class TestResolveDiagramRelations:
 # ---------------------------------------------------------------------------
 # build_diagram_records
 # ---------------------------------------------------------------------------
+
 
 class TestBuildDiagramRecords:
     def _resolved(self, head: str, rel: str, tail: str) -> ResolvedDiagramRelation:
@@ -166,12 +198,12 @@ class TestBuildDiagramRecords:
         assert r["document_id"] == "ldn_2020"
         assert r["article_number"] is None
         assert r["extraction_method"] == "DIAGRAM"
-        assert r["schema_valid"] is True
-        assert r["ontology_valid"] is True
-        assert r["consistency_valid"] is True
+        assert r["schema_valid"] is False
+        assert r["ontology_valid"] is False
+        assert r["consistency_valid"] is False
         assert r["confidence"] == 1.0
-        assert r["review_reason"] is None
-        assert r["blocking"] is False
+        assert r["review_reason"] == "diagram_validation_pending"
+        assert r["blocking"] is True
 
     def test_resolved_relation_content(self):
         records = build_diagram_records(
@@ -212,7 +244,7 @@ class TestBuildDiagramRecords:
         assert r["consistency_valid"] is False
         assert r["confidence"] == 0.0
         assert r["review_reason"] == "unresolved_diagram_target"
-        assert r["blocking"] is False
+        assert r["blocking"] is True
 
     def test_unresolved_relation_head_tail(self):
         records = build_diagram_records([], [self._unresolved()], "ldn_2020")
@@ -247,10 +279,14 @@ class TestBuildDiagramRecords:
             "ldn_2020",
         )
         assert len(records) == 2
-        accepted = [r for r in records if r["ontology_valid"]]
-        review = [r for r in records if not r["ontology_valid"]]
-        assert len(accepted) == 1
-        assert len(review) == 1
+        pending = [
+            r for r in records if r["review_reason"] == "diagram_validation_pending"
+        ]
+        unresolved = [
+            r for r in records if r["review_reason"] == "unresolved_diagram_target"
+        ]
+        assert len(pending) == 1
+        assert len(unresolved) == 1
 
     def test_created_at_iso_format(self):
         records = build_diagram_records(

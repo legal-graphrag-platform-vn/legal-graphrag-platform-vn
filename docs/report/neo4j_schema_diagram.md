@@ -1,6 +1,6 @@
 # Lược đồ Neo4j — Node & Edge (Legal GraphRAG VN)
 
-> **Phiên bản ontology:** `1.8.1`
+> **Phiên bản ontology:** `1.9.0`
 > **Nguồn đối chiếu:** `src/shared/ontology/contract.py`,
 > `infra/neo4j/init/01_schema_init.cypher`, `docs/report/neo4j_database_schema.md`.
 > **Phạm vi:** 12 label được Phase 1 writer persist (9 structural + 3 semantic).
@@ -48,6 +48,8 @@ flowchart TB
     CLA -->|REGULATES| LS
     ART -->|REGULATES| LA
     CLA -->|REGULATES| LA
+    ART -->|REGULATES| I
+    CLA -->|REGULATES| I
     LS -->|REQUIRES| LC
 
     classDef structural fill:#e8f1fb,stroke:#2563eb,color:#172554,stroke-width:1.5px;
@@ -83,11 +85,12 @@ required field bắt buộc; `NULL` = optional; `enum` = giới hạn tập giá
 | `issuer_name`                 | string       | NOT NULL       | Tên cơ quan ban hành, dùng để MERGE `Issuer`                                                        |
 | `title`                       | string       | NULL           | Tiêu đề hiển thị                                                                                    |
 | `effective_to`                | ISO date     | NULL           | Mốc kết thúc hiệu lực (exclusive); omit khi chưa có                                                 |
-| `issued_by`                   | string       | NULL           | Tên cơ quan từ parser/source                                                                        |
 | `issued_date`                 | ISO date     | NULL           | Ngày ban hành                                                                                       |
-| `source_url` / `document_uri` | string       | NULL           | Nguồn/URI gốc                                                                                       |
-| `jurisdiction`                | string       | NULL           | Phạm vi thẩm quyền                                                                                  |
-| `gazette_number`              | string       | NULL           | Số công báo                                                                                         |
+| `expiry_date`                 | ISO date     | NULL           | Ngày hết hiệu lực từ metadata nguồn                                                                 |
+| `sector` / `field`            | string       | NULL           | Phân loại lĩnh vực nguồn                                                                            |
+| `signer_title` / `signer_name` | string      | NULL           | Chức danh và tên người ký                                                                           |
+| `source_url`                  | string       | NULL           | URL nguồn canonical                                                                                 |
+| `updated_at`                  | datetime     | NULL           | Thời điểm cập nhật record                                                                           |
 
 ### 2.2. `Issuer` — Cơ quan ban hành
 
@@ -118,6 +121,9 @@ Bốn grouping node dùng chung bộ thuộc tính (không có temporal / embedd
 | `legal_status`   | enum string  | NOT NULL, enum | `ACTIVE, AMENDED, REPEALED`                               |
 | `title`          | string       | NULL           | Tiêu đề Điều (optional)                                   |
 | `effective_to`   | ISO date     | NULL           | Mốc kết thúc hiệu lực                                     |
+| `part` / `chapter` / `chapter_title` | string | NULL | Metadata hierarchy phục vụ display/audit                 |
+| `section` / `subsection` | string | NULL       | Metadata Mục/Tiểu mục phục vụ display/audit               |
+| `updated_at`     | datetime     | NULL           | Thời điểm cập nhật record                                 |
 | `embedding`      | list[float]  | NULL           | Vector BGE-M3, đúng 1024 chiều; fill ở bước embedding sau |
 
 ### 2.5. `Clause` — Khoản
@@ -130,15 +136,20 @@ Bốn grouping node dùng chung bộ thuộc tính (không có temporal / embedd
 | `effective_from` | ISO date     | NOT NULL       | Mốc bắt đầu hiệu lực                              |
 | `legal_status`   | enum string  | NOT NULL, enum | `ACTIVE, AMENDED, REPEALED`                       |
 | `effective_to`   | ISO date     | NULL           | Mốc kết thúc hiệu lực                             |
+| `updated_at`     | datetime     | NULL           | Thời điểm cập nhật record                         |
 | `embedding`      | list[float]  | NULL           | Vector BGE-M3, 1024 chiều                         |
 
 ### 2.6. `Point` — Điểm
 
-| Tên cột       | Kiểu dữ liệu | Ràng buộc    | Giải thích                                                     |
-| ------------- | ------------ | ------------ | -------------------------------------------------------------- |
-| `id`          | string       | PK, NOT NULL | Canonical ID / MERGE key                                       |
-| `label`       | string       | NOT NULL     | Ký hiệu Điểm; `d` và `đ` là hai label khác nhau                |
-| `content_raw` | string       | NOT NULL     | Nội dung; có full-text index nhưng không có embedding/temporal |
+| Tên cột        | Kiểu dữ liệu | Ràng buộc      | Giải thích                                                     |
+| -------------- | ------------ | -------------- | -------------------------------------------------------------- |
+| `id`           | string       | PK, NOT NULL   | Canonical ID / MERGE key                                       |
+| `label`        | string       | NOT NULL       | Ký hiệu Điểm; `d` và `đ` là hai label khác nhau                |
+| `content_raw`  | string       | NOT NULL       | Nội dung; có full-text index nhưng không có embedding          |
+| `effective_from` | ISO date   | NULL           | Schema-reserved; payload builder hiện chưa phát                 |
+| `effective_to` | ISO date     | NULL           | Schema-reserved; payload builder hiện chưa phát                 |
+| `legal_status` | enum string  | NULL, enum     | Schema-reserved: `ACTIVE, AMENDED, REPEALED`                    |
+| `updated_at`   | datetime     | NULL           | Thời điểm cập nhật record                                      |
 
 ### 2.7. `LegalConcept` / `LegalSubject` / `LegalAction` — Semantic node
 
@@ -203,7 +214,7 @@ Chung bộ property provenance của extraction record.
 | `source_article` | string       | NULL              | (Chỉ `REQUIRES`) Article gốc suy ra quan hệ                        |
 
 - `DEFINES`: `Article|Clause → LegalConcept`.
-- `REGULATES`: `Article|Clause → LegalSubject|LegalAction` (contract còn cho phép `Issuer`).
+- `REGULATES`: `Article|Clause → LegalSubject|LegalAction`.
 - `REQUIRES`: `LegalSubject → LegalConcept` (không phải hierarchy, không nối `Article→Clause`).
 
 ### 3.5. Cạnh `REFERS_TO` — dẫn chiếu (polymorphic)
@@ -223,6 +234,9 @@ Source: `Article|Clause|Point`. Target: `Article|Clause|Point|Document|Part|Chap
 | `reference_target_count` | integer      | NOT NULL          | Số target trong bundle                  |
 
 **Property bổ sung theo `extraction_method`:**
+
+`DIAGRAM` là provenance family riêng của document relations và không được dùng
+cho cạnh `REFERS_TO`.
 
 | Tên cột             | Kiểu dữ liệu | Ràng buộc                       | Giải thích                                               |
 | ------------------- | ------------ | ------------------------------- | -------------------------------------------------------- |

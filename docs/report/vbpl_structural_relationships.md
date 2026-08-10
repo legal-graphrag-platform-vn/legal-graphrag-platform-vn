@@ -3,15 +3,15 @@
 > **Mục đích:** mô tả cấu trúc pháp lý của văn bản quy phạm pháp luật (VBPL),
 > cách ánh xạ cấu trúc đó sang Neo4j và trạng thái hỗ trợ của repository.
 >
-> **Ngày đối chiếu:** 08/08/2026.
+> **Ngày đối chiếu:** 10/08/2026.
 >
-> **Trạng thái:** ontology/runtime contract hiện tại là `v1.8.1`; `Part`,
-> `Subsection` và Chapter preamble Articles đã được triển khai end-to-end. Việc
+> **Trạng thái:** ontology/runtime contract hiện tại là `v1.9.0`; `Part`,
+> `Subsection`, Chapter preamble Articles và diagram provenance đã được đồng bộ. Việc
 > một database live cụ thể đã được reparse/migrate hay chưa phải được xác minh
 > riêng.
 >
 > **Tài liệu liên quan:** [lược đồ Neo4j hiện tại](neo4j_database_schema.md),
-> [canonical ontology v1.8.1](../../plans/legal_ontology.md),
+> [canonical ontology v1.9.0](../../plans/legal_ontology.md),
 > [Plan 18](../../plans/agent-plan-feats/18_part_and_subsection_hierarchy_plan.md).
 
 ## 1. Cơ sở mô hình hóa
@@ -58,7 +58,7 @@ Document -> Part -> Chapter -> Article
 
 ## 2. Ánh xạ thuật ngữ pháp lý sang node
 
-| Thuật ngữ VBPL | Neo4j label | Vai trò | Runtime v1.8.1 |
+| Thuật ngữ VBPL | Neo4j label | Vai trò | Runtime v1.9.0 |
 |---|---|---|---|
 | Văn bản | `Document` | Root của một văn bản canonical | Có |
 | Cơ quan ban hành | `Issuer` | Chủ thể ban hành văn bản | Có |
@@ -112,7 +112,7 @@ flowchart TB
 
 Chú thích:
 
-- node xanh: runtime contract `v1.8.1` đã hỗ trợ;
+- node xanh: runtime contract `v1.9.0` đã hỗ trợ;
 - cạnh nét liền: đường phân cấp sâu;
 - cạnh nét đứt: đường trực tiếp hợp lệ khi tầng trung gian không xuất hiện;
   riêng Chapter còn có thể chứa preamble Article trước các Section.
@@ -230,7 +230,7 @@ Article | Clause | Point
 
 ### 7.2 `REFERS_TO` polymorphic
 
-Runtime `v1.8.1` cho phép target:
+Runtime `v1.9.0` cho phép target:
 
 ```text
 Document | Part | Chapter | Section | Subsection | Article | Clause | Point
@@ -279,7 +279,7 @@ hierarchy đã accepted mới chứng minh endpoint tồn tại.
 
 ### 8.1 Node payload minh họa
 
-Ví dụ dưới đây là fixture synthetic đúng contract `v1.8.1`; nó không đại diện
+Ví dụ dưới đây là fixture synthetic đúng contract `v1.9.0`; nó không đại diện
 cho một văn bản có thật và không chứng minh database live đã chạy migration.
 
 ```json
@@ -437,7 +437,7 @@ divergence. Pipeline phải kiểm tra direct parent chain trước khi tiếp t
 
 ## 11. Trạng thái hỗ trợ trong repository
 
-| Khả năng | Runtime contract v1.8.1 |
+| Khả năng | Runtime contract v1.9.0 |
 |---|---|
 | Bảy canonical parent chains tới `Article` | Có |
 | Node `Part` và `Subsection` | Có |
@@ -483,7 +483,7 @@ Không xóa `Chapter -> Article` trong path thứ bảy.
 ## 13. Kết luận dùng trong báo cáo
 
 > Cấu trúc VBPL được mô hình hóa dưới dạng cây canonical sử dụng quan hệ
-> `CONTAINS`. Ontology v1.8.1 hỗ trợ `Document`, `Part`, `Chapter`, `Section`,
+> `CONTAINS`. Ontology v1.9.0 hỗ trợ `Document`, `Part`, `Chapter`, `Section`,
 > `Subsection`, `Article`, `Clause` và `Point`, đồng thời giữ các trường hợp
 > Document hoặc Section chứa Điều trực tiếp khi tầng nhóm kế tiếp không xuất
 > hiện và Chapter chứa preamble Article trước các Mục. Bảy canonical parent

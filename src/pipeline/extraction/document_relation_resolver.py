@@ -132,8 +132,8 @@ def build_diagram_records(
 ) -> list[dict[str, Any]]:
     """Build record dicts với schema tương thích orchestrator cho diagram relations.
 
-    Records resolved đi qua gate bình thường (schema_valid=True, ontology_valid
-    được gate tự kiểm tra).
+    Records resolved được đánh dấu validation pending. Orchestrator phải chạy
+    schema, ontology và consistency validation trước decision gate.
     Records unresolved được đánh dấu review_reason="unresolved_diagram_target".
 
     Args:
@@ -183,21 +183,21 @@ def build_diagram_records(
                         "canonical_id": rel.tail_id,
                     },
                 },
-                "schema_valid": True,
+                "schema_valid": False,
                 "schema_error": None,
-                "ontology_valid": True,   # sẽ được gate verify lại
+                "ontology_valid": False,
                 "ontology_error": None,
-                "consistency_valid": True,
+                "consistency_valid": False,
                 "consistency_error": None,
                 "confidence": 1.0,
-                "review_reason": None,
-                "blocking": False,
+                "review_reason": "diagram_validation_pending",
+                "blocking": True,
             }
         )
 
     for unres in unresolved:
         # Không thể build head/tail chưa biết — placeholder head=current, tail=None
-        # Gate sẽ reject vì ontology_valid=False
+        # Orchestrator giữ candidate ở blocking review và không materialize.
         properties = {
             "extraction_method": "DIAGRAM",
             "source_category": unres.source_category,
@@ -237,7 +237,7 @@ def build_diagram_records(
                 "consistency_error": "Unresolved diagram target",
                 "confidence": 0.0,
                 "review_reason": "unresolved_diagram_target",
-                "blocking": False,
+                "blocking": True,
             }
         )
 

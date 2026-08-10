@@ -83,6 +83,15 @@ Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger đ
 append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
 ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
+Ontology v1.9.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
+Document-level `AMENDS`, `REPEALS`, `REPLACES`, và `GUIDES`. Diagram category
+phải map bằng bảng explicit, target phải resolve qua canonical registry, và
+relation vẫn phải qua required-property, temporal, whitelist và consistency
+validation trước decision gate. Builder không tự gắn validity. Temporal relation
+chỉ dùng ngày của current document khi document đó là acting head; external head
+thiếu ngày hoặc target chưa resolve đi blocking review và không được materialize.
+`DIAGRAM` không phải extraction method hợp lệ của `REFERS_TO`.
+
 ## Parse từ raw text
 
 Luồng hiện tại không parse PDF trực tiếp. `parse` đọc raw text đã crawl ở

@@ -4,7 +4,14 @@ Chạy: pytest tests/test_ontology_consistency.py
 Tốc độ: <1ms, không cần DB hay LLM.
 """
 
-from src.shared.ontology.contract import NODE_REQUIRED_FIELDS
+from src.shared.ontology.contract import (
+    DOCUMENT_RELATION_EXTRACTION_METHODS,
+    NODE_ENUMS,
+    NODE_OPTIONAL_FIELDS,
+    NODE_REQUIRED_FIELDS,
+    ONTOLOGY_VERSION,
+    REFERENCE_EXTRACTION_METHODS,
+)
 from src.shared.ontology.validators import CONSTRAINTS, RELATION_ENUM, validate_relation
 
 
@@ -31,6 +38,42 @@ def test_all_relations_have_constraints() -> None:
     assert missing == set(), f"Relations thiếu constraint: {missing}"
 
 
+def test_executable_contract_matches_frozen_ontology_version() -> None:
+    assert ONTOLOGY_VERSION == "1.9.0"
+
+
+def test_contract_separates_reference_and_document_relation_provenance() -> None:
+    assert REFERENCE_EXTRACTION_METHODS == {"RULE", "ENTITY_LINKING", "LLM"}
+    assert DOCUMENT_RELATION_EXTRACTION_METHODS == {"DIAGRAM"}
+
+
+def test_contract_exposes_merged_node_metadata() -> None:
+    assert set(NODE_OPTIONAL_FIELDS["Document"]) == {
+        "title",
+        "issued_date",
+        "effective_to",
+        "expiry_date",
+        "sector",
+        "field",
+        "signer_title",
+        "signer_name",
+        "source_url",
+        "updated_at",
+    }
+    assert {"part", "chapter", "chapter_title", "section", "subsection"} <= set(
+        NODE_OPTIONAL_FIELDS["Article"]
+    )
+    assert "updated_at" in NODE_OPTIONAL_FIELDS["Clause"]
+    assert {"effective_from", "effective_to", "legal_status", "updated_at"} <= set(
+        NODE_OPTIONAL_FIELDS["Point"]
+    )
+    assert NODE_ENUMS["Point"]["legal_status"] == {
+        "ACTIVE",
+        "AMENDED",
+        "REPEALED",
+    }
+
+
 def test_no_orphan_constraints() -> None:
     """Không có constraint nào cho relation không tồn tại trong enum."""
     orphans = set(CONSTRAINTS.keys()) - RELATION_ENUM
@@ -52,6 +95,20 @@ def test_refers_to_not_rejected() -> None:
         properties=REFERS_TO_PROPS,
     )
     assert ok, f"REFERS_TO bị reject: {err}"
+
+
+def test_refers_to_rejects_document_diagram_provenance() -> None:
+    properties = {**REFERS_TO_PROPS, "extraction_method": "DIAGRAM"}
+
+    ok, err = validate_relation(
+        "Article",
+        "REFERS_TO",
+        "Document",
+        properties=properties,
+    )
+
+    assert not ok
+    assert "REFERS_TO.extraction_method must be one of" in (err or "")
 
 
 def test_contains_structural_chain_allows_chapter() -> None:
@@ -103,6 +160,14 @@ def test_requires_not_rejected() -> None:
         "LegalSubject", "REQUIRES", "LegalConcept", properties=SEMANTIC_PROPS
     )
     assert ok, f"REQUIRES bị reject: {err}"
+
+
+def test_regulates_rejects_issuer_without_semantic_extraction_contract() -> None:
+    ok, err = validate_relation(
+        "Article", "REGULATES", "Issuer", properties=SEMANTIC_PROPS
+    )
+    assert not ok
+    assert err == "REGULATES does not allow tail type Issuer"
 
 
 def test_requires_entity_to_entity_rejected() -> None:
