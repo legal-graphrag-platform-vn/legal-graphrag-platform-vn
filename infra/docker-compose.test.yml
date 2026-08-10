@@ -1,0 +1,18 @@
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    ports:
+      - "127.0.0.1:${CONVERSATION_TEST_POSTGRES_PORT:-55432}:5432"
+    environment:
+      POSTGRES_USER: graphrag_test
+      POSTGRES_PASSWORD: graphrag_test
+      POSTGRES_DB: graphrag_conversations_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U graphrag_test -d graphrag_conversations_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 5s

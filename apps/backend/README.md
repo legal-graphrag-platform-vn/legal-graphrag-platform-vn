@@ -139,6 +139,25 @@ uv run ruff format --check apps/backend src/generation src/retrieval src/infrast
 git diff --check
 ```
 
+### PostgreSQL conversation integration tests
+
+The conversation fixtures reset the entire `public` schema. Run them only
+against the dedicated disposable PostgreSQL service, never the development or
+server database:
+
+```bash
+make conversation-db-up
+make test-conversation-db
+make conversation-db-down
+```
+
+The local test DSN is
+`postgresql+asyncpg://graphrag_test:graphrag_test@127.0.0.1:55432/graphrag_conversations_test`.
+The container stores PostgreSQL data in `tmpfs`, so stopping it discards the
+test database. Override only the host port with
+`CONVERSATION_TEST_POSTGRES_PORT`; if changed, also pass the matching
+`CONVERSATION_TEST_DATABASE_URL` to `make test-conversation-db`.
+
 Read-only disposable-Neo4j integration is opt-in and must target port `7688`:
 
 ```bash
