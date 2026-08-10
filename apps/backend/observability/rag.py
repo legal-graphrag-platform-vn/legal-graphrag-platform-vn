@@ -12,7 +12,11 @@ from src.generation.errors import (
     ReasoningPathValidationError,
     TemporalAnswerValidationError,
 )
-from src.generation.models import AnswerGenerationRequest, AnswerResponse
+from src.generation.models import (
+    AnswerGenerationRequest,
+    AnswerResponse,
+    iter_candidate_statements,
+)
 from src.retrieval.models import RetrievalContext
 from src.shared.retrieval_contract import RetrievalRequest
 
@@ -165,7 +169,7 @@ class TracedAnswerGenerator:
             latency_ms=latency_ms,
             provider=response.provider,
             model=response.model,
-            claim_count=len(response.claims),
+            statement_count=_response_statement_count(response),
             citation_count=len(response.citations),
             reasoning_path_count=len(response.reasoning_paths),
             confidence=response.confidence,
@@ -175,7 +179,7 @@ class TracedAnswerGenerator:
         log_event(
             "generation.grounding",
             "cannot_answer" if response.cannot_answer else "ok",
-            claim_count=len(response.claims),
+            statement_count=_response_statement_count(response),
             citation_count=len(response.citations),
             reasoning_path_count=len(response.reasoning_paths),
             temporal_note_count=len(response.temporal_notes),
@@ -227,11 +231,18 @@ class TracedAnswerProvider:
             system_instruction=redact(request.system_instruction),
             prompt=redact(request.prompt),
             raw_output=redact(candidate.model_dump_json()),
-            claim_count=len(candidate.claims),
+            statement_count=len(tuple(iter_candidate_statements(candidate))),
             citation_reference_count=sum(
-                len(claim.citation_ids) for claim in candidate.claims
+                len(statement.citation_ids)
+                for statement in iter_candidate_statements(candidate)
             ),
-            reasoning_path_count=len(candidate.reasoning_path_ids),
+            reasoning_path_count=len(
+                {
+                    path_id
+                    for statement in iter_candidate_statements(candidate)
+                    for path_id in statement.reasoning_path_ids
+                }
+            ),
             temporal_assertion_count=len(candidate.temporal_assertions),
             cannot_answer=candidate.cannot_answer,
             insufficiency_reason=candidate.insufficiency_reason,
@@ -261,3 +272,18 @@ def _log_generation_projection(context: RetrievalContext) -> None:
 
 def _elapsed_ms(started: float) -> int:
     return int((time.perf_counter() - started) * 1000)
+
+
+def _response_statement_count(response: AnswerResponse) -> int:
+    count = 0
+    if response.direct_answer is not None:
+        count += sum(
+            len(paragraph.statements) for paragraph in response.direct_answer.paragraphs
+        )
+    count += sum(
+        len(paragraph.statements)
+        for section in response.sections
+        for paragraph in section.paragraphs
+    )
+    count += sum(len(paragraph.statements) for paragraph in response.caveats)
+    return count

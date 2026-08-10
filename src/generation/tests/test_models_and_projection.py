@@ -11,32 +11,57 @@ from src.generation.evidence_compaction import EvidenceCompactor
 from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import AnswerRequestError
 from src.generation.models import (
+    AnswerBlock,
     AnswerCandidate,
-    AnswerClaim,
     AnswerGenerationRequest,
+    AnswerParagraph,
     GenerationHistoryMessage,
+    GroundedStatement,
 )
 from src.generation.tests.factories import retrieval_context
 
 
-def test_supported_candidate_requires_claim_citations() -> None:
+def test_supported_candidate_requires_statement_citations() -> None:
     with pytest.raises(ValidationError):
-        AnswerClaim(claim_id="claim-1", text="Kết luận", citation_ids=[])
+        GroundedStatement(statement_id="statement-1", text="Kết luận", citation_ids=[])
 
 
-def test_cannot_answer_candidate_cannot_contain_claims() -> None:
+def test_cannot_answer_candidate_cannot_contain_statements() -> None:
     with pytest.raises(ValidationError):
         AnswerCandidate(
-            claims=[
-                AnswerClaim(
-                    claim_id="claim-1",
-                    text="Kết luận",
-                    citation_ids=["doc_art1"],
-                )
-            ],
+            direct_answer=AnswerBlock(
+                paragraphs=[
+                    AnswerParagraph(
+                        statements=[
+                            GroundedStatement(
+                                statement_id="statement-1",
+                                text="Kết luận",
+                                citation_ids=["doc_art1"],
+                            )
+                        ]
+                    )
+                ]
+            ),
             confidence=0.0,
             cannot_answer=True,
             insufficiency_reason="missing",
+        )
+
+
+def test_statement_identity_is_unique_across_paragraphs() -> None:
+    statement = GroundedStatement(
+        statement_id="same", text="Kết luận", citation_ids=["doc_art1"]
+    )
+    with pytest.raises(ValidationError, match="statement_id"):
+        AnswerCandidate(
+            direct_answer=AnswerBlock(
+                paragraphs=[
+                    AnswerParagraph(statements=[statement]),
+                    AnswerParagraph(statements=[statement]),
+                ]
+            ),
+            confidence=0.8,
+            cannot_answer=False,
         )
 
 
@@ -83,7 +108,7 @@ def test_non_temporal_prompt_forbids_temporal_assertions() -> None:
         projected, projector.build_registry(projected)
     )
 
-    assert "temporal_assertions MUST be an empty array" in provider_request.prompt
+    assert "temporal_assertions and every statement" in provider_request.prompt
     assert "reasoning_path_ids MUST be an empty array" in provider_request.prompt
 
 

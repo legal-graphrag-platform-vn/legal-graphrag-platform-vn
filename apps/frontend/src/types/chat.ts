@@ -22,6 +22,13 @@ export interface Source {
    effective_to?: string
    final_score?: number
    deep_link?: string
+   ordinal?: number
+}
+
+export interface ReasoningPath {
+   path_id: string
+   description: string
+   nodes: string[]
 }
 
 export interface Message {
@@ -41,7 +48,9 @@ export interface Message {
    error?: string
    // Server không đủ căn cứ để trả lời — kèm lý do (nếu có).
    cannot_answer?: boolean
-   insufficiency_reason?: string
+   insufficiency_message?: string
+   temporal_notes?: string[]
+   reasoning_paths?: ReasoningPath[]
 }
 
 /**

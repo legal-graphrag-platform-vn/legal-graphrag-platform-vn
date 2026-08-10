@@ -55,7 +55,7 @@ export function SourceCard({ sources }: SourceCardProps) {
                   {/* Row 1: index + label badge + link icon */}
                   <div className="flex items-center gap-1.5">
                      <span className="flex items-center justify-center w-4.5 h-4.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">
-                        {index + 1}
+                        {source.ordinal ?? index + 1}
                      </span>
                      {source.label && (
                         <span

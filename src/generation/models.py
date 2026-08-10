@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from datetime import date
 from typing import Literal
 
@@ -10,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from src.retrieval.models import RetrievalContext
 
 
-ANSWER_CONTRACT_VERSION = "answer-generation-v1"
+ANSWER_CONTRACT_VERSION = "answer-generation-v2"
 PROJECTION_CONTRACT_VERSION = "answer-context-v2"
 
 
@@ -24,7 +25,7 @@ class GenerationHistoryMessage(BaseModel):
 class AnswerGenerationRequest(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    contract_version: Literal["answer-generation-v1"] = ANSWER_CONTRACT_VERSION
+    contract_version: Literal["answer-generation-v2"] = ANSWER_CONTRACT_VERSION
     query: str = Field(min_length=1, max_length=4000)
     retrieval_context: RetrievalContext
     conversation_history: tuple[GenerationHistoryMessage, ...] = ()
@@ -37,26 +38,48 @@ class AnswerGenerationRequest(BaseModel):
         return self
 
 
-class AnswerClaim(BaseModel):
+class GroundedStatement(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    claim_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9_-]+$")
+    statement_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9_-]+$")
     text: str = Field(min_length=1)
     citation_ids: list[str] = Field(min_length=1)
+    reasoning_path_ids: list[str] = Field(default_factory=list)
+    temporal_assertion_ids: list[str] = Field(default_factory=list)
 
-    @field_validator("citation_ids")
+    @field_validator("citation_ids", "reasoning_path_ids", "temporal_assertion_ids")
     @classmethod
-    def citations_are_unique(cls, values: list[str]) -> list[str]:
+    def linked_ids_are_unique(cls, values: list[str]) -> list[str]:
         if any(not value.strip() for value in values):
-            raise ValueError("Citation IDs must not be blank")
+            raise ValueError("Statement linkage IDs must not be blank")
         if len(values) != len(set(values)):
-            raise ValueError("Citation IDs must be unique within a claim")
+            raise ValueError("Statement linkage IDs must be unique")
         return values
+
+
+class AnswerParagraph(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    statements: list[GroundedStatement] = Field(min_length=1)
+
+
+class AnswerBlock(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    paragraphs: list[AnswerParagraph] = Field(min_length=1)
+
+
+class AnswerSection(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    heading: str = Field(min_length=1)
+    paragraphs: list[AnswerParagraph] = Field(min_length=1)
 
 
 class TemporalAssertion(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    assertion_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9_-]+$")
     subject_unit_id: str = Field(min_length=1)
     query_date: date
     asserted_valid: bool
@@ -66,8 +89,9 @@ class TemporalAssertion(BaseModel):
 class AnswerCandidate(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    claims: list[AnswerClaim]
-    reasoning_path_ids: list[str] = Field(default_factory=list)
+    direct_answer: AnswerBlock | None = None
+    sections: list[AnswerSection] = Field(default_factory=list)
+    caveats: list[AnswerParagraph] = Field(default_factory=list)
     temporal_assertions: list[TemporalAssertion] = Field(default_factory=list)
     confidence: float = Field(ge=0.0, le=1.0)
     cannot_answer: bool
@@ -76,21 +100,47 @@ class AnswerCandidate(BaseModel):
     @model_validator(mode="after")
     def validate_answer_shape(self) -> "AnswerCandidate":
         if self.cannot_answer:
-            if self.claims:
-                raise ValueError("cannot_answer candidate must not contain claims")
+            if self.direct_answer is not None or self.sections or self.caveats:
+                raise ValueError("cannot_answer candidate must not contain statements")
+            if self.temporal_assertions:
+                raise ValueError(
+                    "cannot_answer candidate must not contain temporal assertions"
+                )
             if not self.insufficiency_reason:
                 raise ValueError(
                     "cannot_answer candidate requires insufficiency_reason"
                 )
-        elif not self.claims:
-            raise ValueError("Supported candidate requires at least one claim")
-        elif self.insufficiency_reason is not None:
+            return self
+
+        if self.direct_answer is None:
+            raise ValueError("Supported candidate requires a direct_answer")
+        if self.insufficiency_reason is not None:
             raise ValueError(
                 "Supported candidate must not contain insufficiency_reason"
             )
-        if len(self.reasoning_path_ids) != len(set(self.reasoning_path_ids)):
-            raise ValueError("reasoning_path_ids must be unique")
+
+        statement_ids = [
+            statement.statement_id for statement in iter_candidate_statements(self)
+        ]
+        if len(statement_ids) != len(set(statement_ids)):
+            raise ValueError("statement_id must be unique across the answer")
+        assertion_ids = [item.assertion_id for item in self.temporal_assertions]
+        if len(assertion_ids) != len(set(assertion_ids)):
+            raise ValueError("assertion_id must be unique")
         return self
+
+
+def iter_candidate_statements(
+    candidate: AnswerCandidate,
+) -> Iterator[GroundedStatement]:
+    if candidate.direct_answer is not None:
+        for paragraph in candidate.direct_answer.paragraphs:
+            yield from paragraph.statements
+    for section in candidate.sections:
+        for paragraph in section.paragraphs:
+            yield from paragraph.statements
+    for paragraph in candidate.caveats:
+        yield from paragraph.statements
 
 
 class OmittedEvidence(BaseModel):
@@ -228,7 +278,7 @@ class ProjectedAnswerContext(BaseModel):
 class ProviderAnswerRequest(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    contract_version: Literal["answer-generation-v1"] = ANSWER_CONTRACT_VERSION
+    contract_version: Literal["answer-generation-v2"] = ANSWER_CONTRACT_VERSION
     system_instruction: str
     prompt: str
 
@@ -257,11 +307,13 @@ class AnswerReasoningPath(BaseModel):
 class AnswerResponse(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    contract_version: Literal["answer-generation-v1"] = ANSWER_CONTRACT_VERSION
+    contract_version: Literal["answer-generation-v2"] = ANSWER_CONTRACT_VERSION
     retrieval_contract_version: str
     query: str
     answer_text: str
-    claims: tuple[AnswerClaim, ...]
+    direct_answer: AnswerBlock | None
+    sections: tuple[AnswerSection, ...]
+    caveats: tuple[AnswerParagraph, ...]
     citations: tuple[AnswerCitation, ...]
     reasoning_paths: tuple[AnswerReasoningPath, ...]
     temporal_notes: tuple[str, ...]

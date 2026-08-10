@@ -35,6 +35,15 @@ describe('SseParser', () => {
       expect(events[0].data.question).toBe('Bạn hỏi điều nào?')
    })
 
+   it('parses structured explanation events', () => {
+      const events = new SseParser().push(
+         'event: explanation\ndata: {"temporal_notes":["Có hiệu lực"],"reasoning_paths":[]}\n\n',
+      )
+
+      expect(events[0].event).toBe('explanation')
+      expect(events[0].data.temporal_notes).toEqual(['Có hiệu lực'])
+   })
+
    it('rejects malformed JSON and unknown events', () => {
       expect(() => new SseParser().push('event: token\ndata: nope\n\n')).toThrow(SseProtocolError)
       expect(() => new SseParser().push('event: legacy\ndata: {}\n\n')).toThrow(

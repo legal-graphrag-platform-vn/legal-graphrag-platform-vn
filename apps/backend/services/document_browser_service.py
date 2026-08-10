@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import re
 from functools import partial
 from typing import Any, Protocol
@@ -140,7 +139,10 @@ class Neo4jDocumentBrowserService:
         )
 
     async def aclose(self) -> None:
-        await asyncio.to_thread(self._repo.close)
+        # Keep every blocking repository operation on the application-owned
+        # runner. Besides preserving its concurrency bound, this avoids creating
+        # an unrelated default executor during shutdown.
+        await self._runner.run(self._repo.close)
 
 
 def _document_detail(result: dict[str, Any]) -> DocumentDetail:

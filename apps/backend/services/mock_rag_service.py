@@ -69,7 +69,7 @@ class MockRAGService:
             strategy="factual_hybrid",
             retrieval_mode="mock",
             retrieval_contract_version="retrieval-runtime-v2",
-            answer_contract_version="answer-generation-v1",
+            answer_contract_version="answer-generation-v2",
             cannot_answer=False,
         )
         yield ChatStreamEvent(event="metadata", data=metadata.model_dump(mode="json"))

@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Message } from '../../types/chat'
 import { SourceCard } from './SourceCard'
+import { ExplanationPanel } from './ExplanationPanel'
 
 interface MessageItemProps {
    message: Message
@@ -38,7 +39,9 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
 
                   <div className="flex-1 flex flex-col space-y-3 min-w-0">
                      {/* Metadata Badges */}
-                     {(message.intent || message.retrieval_mode || message.kind === 'clarification') && (
+                     {(message.intent ||
+                        message.retrieval_mode ||
+                        message.kind === 'clarification') && (
                         <div className="flex flex-wrap gap-2 mb-1">
                            {message.kind === 'clarification' && (
                               <span className="text-[10px] uppercase font-bold text-amber-600 bg-amber-50 dark:bg-amber-500/10 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/20">
@@ -133,12 +136,17 @@ export function MessageItem({ message, isLast, isStreaming }: MessageItemProps) 
                      </div>
 
                      {/* Không đủ căn cứ để trả lời — hiển thị lý do từ server */}
-                     {message.insufficiency_reason && (
+                     {message.insufficiency_message && (
                         <div className="rounded-standard border border-amber-200 dark:border-amber-500/20 bg-amber-50 dark:bg-amber-500/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-amber-800 dark:text-amber-300">
                            <span className="font-semibold">Chưa đủ căn cứ để trả lời: </span>
-                           {message.insufficiency_reason}
+                           {message.insufficiency_message}
                         </div>
                      )}
+
+                     <ExplanationPanel
+                        temporalNotes={message.temporal_notes || []}
+                        reasoningPaths={message.reasoning_paths || []}
+                     />
 
                      {/* Citations / RAG sources — clarification không render source cards */}
                      {message.kind !== 'clarification' &&

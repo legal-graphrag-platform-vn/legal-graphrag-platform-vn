@@ -6,7 +6,7 @@ import os
 import pytest
 
 from src.generation.config import GenerationConfig
-from src.generation.models import ProviderAnswerRequest
+from src.generation.models import ProviderAnswerRequest, iter_candidate_statements
 from src.infrastructure.llm.gemini_answer_provider import GeminiAnswerProvider
 
 
@@ -34,11 +34,13 @@ def test_real_gemini_structured_answer_smoke() -> None:
                     ),
                     prompt=(
                         "Evidence doc_art1 states that organizations and individuals "
-                        "may establish enterprises. Produce one cited claim."
+                        "may establish enterprises. Produce one cited statement."
                     ),
                 )
             )
-            assert candidate.claims or candidate.cannot_answer
+            assert (
+                tuple(iter_candidate_statements(candidate)) or candidate.cannot_answer
+            )
         finally:
             await provider.aclose()
 

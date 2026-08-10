@@ -18,7 +18,12 @@ from persistence.enums import OwnerKind
 from persistence.errors import ConversationNotFoundError
 from resolution.models import StandaloneResolution
 from resolution.rewriter import StructuredRewriter
-from src.generation.models import AnswerResponse
+from src.generation.models import (
+    AnswerBlock,
+    AnswerParagraph,
+    AnswerResponse,
+    GroundedStatement,
+)
 from src.shared.retrieval_contract import (
     PlanType,
     ProcessingStatus,
@@ -65,7 +70,21 @@ class CountingGenerator:
             retrieval_contract_version=request.retrieval_context.contract_version,
             query=request.query,
             answer_text="Câu trả lời đã kiểm chứng.",
-            claims=(),
+            direct_answer=AnswerBlock(
+                paragraphs=[
+                    AnswerParagraph(
+                        statements=[
+                            GroundedStatement(
+                                statement_id="statement-1",
+                                text="Câu trả lời đã kiểm chứng.",
+                                citation_ids=[unit.id],
+                            )
+                        ]
+                    )
+                ]
+            ),
+            sections=(),
+            caveats=(),
             citations=(
                 {
                     "unit_id": unit.id,
@@ -91,7 +110,9 @@ class CountingGenerator:
         return None
 
 
-def _service(store, retrieval, generator, query_processor=None) -> ConversationChatService:
+def _service(
+    store, retrieval, generator, query_processor=None
+) -> ConversationChatService:
     return ConversationChatService(
         store=store,
         resolver=FakeResolver(),

@@ -2,7 +2,8 @@
 
 Flow: authenticate + idempotency pre-check -> advisory lock -> begin turn and
 load context -> deterministic resolution -> (clarification | standalone/resolved
--> rewrite -> retrieval once -> generation once -> grounding) -> persist ->
+-> rewrite -> optional query decomposition -> retrieval -> generation once ->
+grounding) -> persist ->
 release lock -> buffered SSE from the persisted snapshot.
 """
 
@@ -18,7 +19,9 @@ from api.models import (
     ChatClarificationCandidateData,
     ChatClarificationData,
     ChatDoneData,
+    ChatExplanationData,
     ChatMetadataData,
+    ChatReasoningPathData,
     ChatStreamEvent,
     ConversationChatRequest,
 )
@@ -175,9 +178,6 @@ class ConversationChatService:
         begun: BegunTurn,
         request: ConversationChatRequest,
     ) -> dict:
-        if self._query_processor is not None:
-            return await self._process_turn_with_query_processor(turn, begun, request)
-
         outcome = await self._resolver.resolve(
             message=request.message, context=begun.context
         )
@@ -194,20 +194,19 @@ class ConversationChatService:
 
         return await self._persist_answer(turn, begun, request, outcome)
 
-    async def _process_turn_with_query_processor(
+    async def _process_standalone_with_query_processor(
         self,
         turn: LockedTurn,
         begun: BegunTurn,
         request: ConversationChatRequest,
+        outcome: StandaloneResolution | ResolvedResolution,
+        *,
+        standalone_query: str,
+        document_ids: list[str],
     ) -> dict:
-        # Greetings short-circuit before spending an LLM call.
-        greeting = greeting_response(request.message)
-        if greeting is not None:
-            return await self._persist_small_talk(turn, begun, greeting)
-
-        history = _history_for_processor(begun)
         try:
-            result = await self._query_processor.process(request.message, history)
+            assert self._query_processor is not None
+            result = await self._query_processor.process(standalone_query, ())
         except (QueryProcessingError, TextGenerationError) as exc:
             # Preserve the diagnostic context the query processor already attached
             # (raw LLM output / which contract field failed) instead of dropping it.
@@ -243,8 +242,37 @@ class ConversationChatService:
             )
             return await self._persist_clarification(turn, begun, clarify)
 
+        if isinstance(outcome, ResolvedResolution):
+            anchors = outcome.candidate.required_anchors()
+            if any(
+                not _contains_all_anchors(subquery.query, anchors)
+                for subquery in result.subqueries
+            ):
+                log_event(
+                    "query_processor.failed",
+                    "error",
+                    error_type="CanonicalAnchorLoss",
+                )
+                return await self._persist_failure(
+                    turn,
+                    begun,
+                    QUERY_PROCESSING_FAILED_CODE,
+                    _QUERY_PROCESSING_FAILED_MESSAGE,
+                )
+
+        # The resolver/rewriter owns the canonical query. Query processing may
+        # decompose it, but its redundant standalone_query field cannot replace it.
+        result = result.model_copy(update={"standalone_query": standalone_query})
+
         # Ready: fan out the subqueries, merge contexts, and answer once.
-        return await self._answer_from_query_processing(turn, begun, request, result)
+        return await self._answer_from_query_processing(
+            turn,
+            begun,
+            request,
+            outcome,
+            result,
+            document_ids=document_ids,
+        )
 
     # -- clarification / cancel / small talk -------------------------------- #
 
@@ -356,6 +384,16 @@ class ConversationChatService:
                 turn, begun, exc.error_code, "Bộ lọc tài liệu mâu thuẫn với tham chiếu."
             )
 
+        if self._query_processor is not None:
+            return await self._process_standalone_with_query_processor(
+                turn,
+                begun,
+                request,
+                outcome,
+                standalone_query=standalone_query,
+                document_ids=document_ids,
+            )
+
         try:
             retrieval_context = await self._retrieve_with_trace(
                 RetrievalRequest(
@@ -394,14 +432,17 @@ class ConversationChatService:
         turn: LockedTurn,
         begun: BegunTurn,
         request: ConversationChatRequest,
+        outcome: StandaloneResolution | ResolvedResolution,
         result: QueryProcessingResult,
+        *,
+        document_ids: list[str],
     ) -> dict:
         # Fan out each subquery with its own temporal-safe intent, merge the
         # per-subquery contexts, then generate a single grounded answer.
         standalone_query = result.standalone_query
         subquery_requests = build_subquery_requests(
             result,
-            document_ids=list(request.document_ids),
+            document_ids=document_ids,
             query_date=request.query_date,
             enable_reranker=request.enable_reranker,
         )
@@ -456,7 +497,7 @@ class ConversationChatService:
         return await self._finish_answer(
             turn,
             begun,
-            StandaloneResolution(),
+            outcome,
             standalone_query=standalone_query,
             retrieval_context=merged_context,
             answer=answer,
@@ -499,9 +540,10 @@ class ConversationChatService:
     ) -> dict:
         retrieval = to_retrieval_response(retrieval_context)
         units_by_id = {unit.id: unit for unit in retrieval.retrieved_units}
-        cited_ids = {citation.unit_id for citation in answer.citations}
         cited_sources = [
-            unit for unit in retrieval.retrieved_units if unit.id in cited_ids
+            units_by_id[citation.unit_id]
+            for citation in answer.citations
+            if citation.unit_id in units_by_id
         ]
 
         citation_data: list[ChatCitationData] = []
@@ -509,6 +551,7 @@ class ConversationChatService:
         for ordinal, citation in enumerate(answer.citations, start=1):
             citation_data.append(
                 ChatCitationData(
+                    ordinal=ordinal,
                     unit_id=citation.unit_id,
                     citation_label=citation.citation_label,
                     document_id=citation.document_id,
@@ -526,12 +569,11 @@ class ConversationChatService:
         kind = MessageKind.CANNOT_ANSWER if cannot_answer else MessageKind.ANSWER
         resolution_status, reason_code = _answer_resolution(outcome)
 
-        # The generator computes an insufficiency_reason for cannot_answer but it
-        # is dropped from the client contract; surface it in the server trace.
+        insufficiency_reason = getattr(answer, "insufficiency_reason", None)
         if cannot_answer:
             log_event(
                 "generation.cannot_answer",
-                insufficiency_reason=getattr(answer, "insufficiency_reason", None),
+                insufficiency_reason=insufficiency_reason,
                 sources_count=len(cited_sources),
                 intent=answer.intent,
             )
@@ -544,8 +586,8 @@ class ConversationChatService:
             answer_contract_version=answer.contract_version,
             cannot_answer=cannot_answer,
             resolution_status=resolution_status.value,
-            insufficiency_reason=(
-                getattr(answer, "insufficiency_reason", None) if cannot_answer else None
+            insufficiency_message=(
+                _cannot_answer_message(insufficiency_reason) if cannot_answer else None
             ),
         )
         done = ChatDoneData(
@@ -561,6 +603,36 @@ class ConversationChatService:
             answer_text=answer.answer_text,
             citations=citation_data,
             done=done,
+            answer_structure={
+                "direct_answer": (
+                    answer.direct_answer.model_dump(mode="json")
+                    if answer.direct_answer is not None
+                    else None
+                ),
+                "sections": [
+                    section.model_dump(mode="json") for section in answer.sections
+                ],
+                "caveats": [
+                    paragraph.model_dump(mode="json") for paragraph in answer.caveats
+                ],
+            },
+            explanation=ChatExplanationData(
+                temporal_notes=list(answer.temporal_notes),
+                reasoning_paths=[
+                    ChatReasoningPathData(
+                        path_id=path.path_id,
+                        nodes=list(path.nodes),
+                        edges=[edge.model_dump(mode="json") for edge in path.edges],
+                        description=path.description,
+                    )
+                    for path in answer.reasoning_paths
+                ],
+            ),
+            diagnostics=(
+                {"insufficiency_reason_code": insufficiency_reason}
+                if insufficiency_reason
+                else None
+            ),
         )
         await turn.persist_grounded_answer(
             turn_id=begun.turn_id,
@@ -612,14 +684,6 @@ class ConversationChatService:
         raise ConversationFilterConflictError(
             "Requested document filter excludes the resolved reference"
         )
-
-
-def _history_for_processor(begun: BegunTurn) -> tuple[dict[str, str], ...]:
-    """Serialize recent transcript messages into role/content pairs."""
-    return tuple(
-        {"role": msg.role.value, "content": msg.content}
-        for msg in begun.context.recent_messages
-    )
 
 
 def _elapsed_ms(started: float) -> int:
@@ -679,3 +743,26 @@ def _small_talk_metadata() -> ChatMetadataData:
         answer_contract_version=ANSWER_CONTRACT_VERSION,
         cannot_answer=False,
     )
+
+
+def _cannot_answer_message(reason_code: str | None) -> str:
+    messages = {
+        "MISSING_HIERARCHY_PATH": (
+            "Chưa tìm thấy đầy đủ đường dẫn pháp lý cần thiết để trả lời câu hỏi này."
+        ),
+        "NO_PATH": (
+            "Chưa tìm thấy mối liên hệ pháp lý đủ chắc chắn để trả lời câu hỏi này."
+        ),
+        "REQUIRED_EVIDENCE_EXCEEDS_CONTEXT_BUDGET": (
+            "Căn cứ cần thiết vượt quá phạm vi xử lý của lượt hỏi này."
+        ),
+    }
+    return messages.get(
+        reason_code,
+        "Chưa tìm thấy đủ căn cứ pháp lý để trả lời câu hỏi này.",
+    )
+
+
+def _contains_all_anchors(query: str, anchors: tuple[str, ...]) -> bool:
+    normalized = query.casefold()
+    return all(anchor.casefold() in normalized for anchor in anchors)

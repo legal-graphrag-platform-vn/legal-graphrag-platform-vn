@@ -103,7 +103,9 @@ def test_supported_answer_uses_trusted_citation_metadata() -> None:
         assert provider.calls == 1
         assert response.citations[0].unit_id == "doc_art1"
         assert response.citations[0].deep_link == "/documents/doc/units/doc_art1"
-        assert "Điều 1, Luật thử nghiệm" in response.answer_text
+        assert response.answer_text == (
+            "Tổ chức, cá nhân có quyền thành lập doanh nghiệp. [1]"
+        )
         diagnostics = context.metrics["generation_context"]
         assert diagnostics["sufficient"] is True
         assert diagnostics["selected_unit_count"] == 1
@@ -127,8 +129,21 @@ def test_hallucinated_citation_is_hard_failure() -> None:
 
 def test_invented_reasoning_path_is_rejected() -> None:
     async def scenario() -> None:
-        candidate = answer_candidate().model_copy(
-            update={"reasoning_path_ids": ["path_invented"]}
+        candidate = answer_candidate()
+        statement = (
+            candidate.direct_answer.paragraphs[0]
+            .statements[0]
+            .model_copy(update={"reasoning_path_ids": ["path_invented"]})
+        )
+        paragraph = candidate.direct_answer.paragraphs[0].model_copy(
+            update={"statements": [statement]}
+        )
+        candidate = candidate.model_copy(
+            update={
+                "direct_answer": candidate.direct_answer.model_copy(
+                    update={"paragraphs": [paragraph]}
+                )
+            }
         )
         context = retrieval_context(path_relations=["REFERS_TO"])
         with pytest.raises(ReasoningPathValidationError):
@@ -145,12 +160,28 @@ def test_temporal_assertion_must_match_retrieved_interval() -> None:
             update={
                 "temporal_assertions": [
                     TemporalAssertion(
+                        assertion_id="valid-at-query-date",
                         subject_unit_id="doc_art1",
                         query_date=date(2022, 7, 1),
                         asserted_valid=False,
                         scope="scoped_pilot",
                     )
                 ]
+            }
+        )
+        statement = (
+            candidate.direct_answer.paragraphs[0]
+            .statements[0]
+            .model_copy(update={"temporal_assertion_ids": ["valid-at-query-date"]})
+        )
+        paragraph = candidate.direct_answer.paragraphs[0].model_copy(
+            update={"statements": [statement]}
+        )
+        candidate = candidate.model_copy(
+            update={
+                "direct_answer": candidate.direct_answer.model_copy(
+                    update={"paragraphs": [paragraph]}
+                )
             }
         )
         context = retrieval_context(intent=IntentType.VALIDITY, temporal=True)

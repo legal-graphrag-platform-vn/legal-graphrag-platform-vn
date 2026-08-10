@@ -1310,7 +1310,21 @@ evaluation dataset nhưng không còn được dùng làm bằng chứng cho pla
 ### Bối cảnh
 
 `QueryProcessor` (five-field contract, chạy bằng Gemini, provider-swappable qua
-`build_text_generator`) thay resolver+rewriter deterministic ở Stage 1. Output:
+`build_text_generator`) từng thay resolver+rewriter deterministic ở Stage 1.
+Cách ghép này tạo hai pipeline cạnh tranh quyền xác định nghĩa của câu hỏi và
+cho phép feature flag bỏ qua canonical reference resolution.
+
+Thứ tự chuẩn là:
+
+```text
+Current query + server-owned HistoryContext
+→ deterministic canonical reference resolution
+→ clarification hoặc canonical standalone query
+→ optional QueryProcessor decomposition
+```
+
+Query Processor không nhận raw conversation history và không có quyền tạo hay
+thay canonical ID. Output decomposition của nó vẫn dùng five-field contract:
 
 ```text
 status                ready | needs_clarification
@@ -1337,18 +1351,27 @@ Từ "multi-hop" bị dùng lẫn cho bốn khái niệm khác nhau:
 
 ### Quyết định (MVP scope)
 
-1. Giữ **multi-query decomposition + graph multi-hop retrieval**; **chưa** làm
+1. Canonical `ReferenceResolver` và `StandaloneQueryRewriter` luôn chạy trước;
+   ambiguity ở tầng này phải clarification và không gọi Query Processor.
+2. Query Processor chỉ decomposition canonical standalone query, không sở hữu
+   conversation reference resolution và không nhận raw history.
+3. Document filters đã resolve phải được giữ nguyên cho mọi subquery và trạng
+   thái resolution ban đầu phải được persist cùng answer.
+   Trường `standalone_query` dư thừa trong output processor không được thay
+   canonical query; mọi subquery của resolved reference phải giữ đủ canonical
+   anchors, nếu không fail closed trước retrieval.
+4. Giữ **multi-query decomposition + graph multi-hop retrieval**; **chưa** làm
    cross-subquery output binding.
-2. Mọi subquery phải **self-contained** theo generation/SFT contract, chạy
+5. Mọi subquery phải **self-contained** theo generation/SFT contract, chạy
    **concurrently** dưới giới hạn concurrency của application retrieval runner,
    rồi `merge_contexts` trước khi generate.
-3. `depends_on` được **preserve + validate** như *logical/reasoning metadata*.
+6. `depends_on` được **preserve + validate** như *logical/reasoning metadata*.
    Nó **không điều khiển scheduling** trong MVP — bắt q2 chờ q1 khi q2 không nhận
    dữ liệu từ q1 chỉ tăng latency mà không tăng độ chính xác.
-4. `plan_type=multi_hop` ở tầng Query Processing chỉ biểu diễn
+7. `plan_type=multi_hop` ở tầng Query Processing chỉ biểu diễn
    decomposition/reasoning plan, **chưa** đồng nghĩa với true hop-to-hop
    execution.
-5. `QueryProcessor` là adapter provider-swappable: bản hiện tại dùng Gemini;
+8. `QueryProcessor` là adapter provider-swappable: bản hiện tại dùng Gemini;
    Qwen/Ollama là dự phòng cho tương lai, không hardcode.
 
 ### Vì sao chỉ có `depends_on` là chưa đủ cho true multi-hop
@@ -1499,3 +1522,45 @@ và provenance expansion đó; diagram runtime còn tự gắn validity trước
 - `DIAGRAM` confidence không có quyền nới ontology validation.
 - `DIAGRAM` không phải provenance hợp lệ của `REFERS_TO`.
 - Test parity khóa version, Point capability, semantic endpoint và diagram gate.
+
+---
+
+## ADR-30: Statement-level grounding và deterministic answer rendering
+
+**Ngày**: 2026-08-10
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Contract `answer-generation-v1` dùng `claims[]` làm cả đơn vị grounding lẫn đơn
+vị trình bày. Renderer nối từng claim với citation label nên câu trả lời đúng về
+cấu trúc nhưng rời rạc, đồng thời backend làm mất reasoning paths và temporal
+notes khi tạo snapshot/API response.
+
+### Quyết định
+
+1. Bump contract thành `answer-generation-v2`.
+2. Paragraph là đơn vị trình bày; `GroundedStatement` là đơn vị grounding.
+3. Mỗi statement pháp lý bắt buộc có allowlisted `citation_ids`. Path/temporal
+   linkage là optional, nhưng nếu khai báo phải hard-validate ID và interval.
+4. Model sinh `direct_answer`, `sections`, `caveats` và statements. Structural
+   grounding không tuyên bố chứng minh semantic entailment; entailment thuộc eval.
+5. Sau validation, chỉ `DeterministicAnswerRenderer` được chạm nội dung: join,
+   heading, Markdown escaping và citation ordinal theo first occurrence. Không
+   provider hay LLM nào được paraphrase hậu validation.
+6. Persist immutable snapshot gồm Markdown, structured answer, citations,
+   temporal notes và reasoning paths. Buffered SSE và history replay cùng đọc
+   snapshot; không re-run renderer/generator.
+7. Internal `insufficiency_reason` chỉ dùng logging/eval và snapshot diagnostics.
+   Client chỉ nhận message do backend map deterministic.
+
+### Hệ quả
+
+- Citation trong prose dùng `[1]`, `[2]`; cùng citation ID giữ nguyên ordinal
+  trên toàn answer và source card dùng cùng ordinal.
+- Backend phát `explanation` SSE event riêng; frontend đặt XAI trong khối mở rộng,
+  không nhét graph path kỹ thuật vào prose chính.
+- Artifact answer-generation-v1 đã sinh trước quyết định này là historical và
+  phải regenerate trước khi dùng làm evidence cho contract v2.
+- Hard grounding gate giữ deterministic; semantic support, completeness,
+  naturalness và exception coverage được đánh giá ở quality/eval layer riêng.

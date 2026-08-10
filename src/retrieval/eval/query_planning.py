@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import json
 import math
@@ -233,8 +232,7 @@ class QG1ObservationCollector:
         self, case: GoldPlanCase, filters: RetrievalFilters
     ) -> QG1Observation:
         started = perf_counter_ns()
-        context = await asyncio.to_thread(
-            self._generic_runtime.retrieve,
+        context = self._generic_runtime.retrieve(
             RetrievalRequest(
                 query=case.query,
                 filters=filters,
@@ -278,8 +276,7 @@ class QG1ObservationCollector:
         self, case: GoldPlanCase, filters: RetrievalFilters
     ) -> QG1Observation:
         started = perf_counter_ns()
-        execution = await asyncio.to_thread(
-            self._executor.execute,
+        execution = self._executor.execute(
             case.bound_plan(),
             filters=filters,
         )
@@ -345,11 +342,7 @@ class QG1ObservationCollector:
         started: int,
         planner_latency_ms: float,
     ) -> QG1Observation:
-        anchor, target, execution = await asyncio.to_thread(
-            self._link_and_execute,
-            plan,
-            filters,
-        )
+        anchor, target, execution = self._link_and_execute(plan, filters)
         reason_code = (
             execution.result.reason_code.value
             if execution is not None
