@@ -1429,8 +1429,10 @@ def ingest_folder(
                     embed_graph(code)
 
                 typer.echo(f"✅ ĐÃ HOÀN THÀNH XỬ LÝ & NẠP NEO4J CHO VĂN BẢN: {code}")
+                record_doc_status(code, step="pipeline", status="SUCCESS")
             except Exception as exc:
                 typer.echo(f"❌ Lỗi khi xử lý văn bản {code}: {exc}", err=True)
+                record_doc_status(code, step="pipeline", status="FAILED", error=str(exc))
 
         # Reconcile references cho tất cả các văn bản đã nạp
         try:
