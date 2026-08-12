@@ -90,7 +90,7 @@ Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger đ
 append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
 ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
-Ontology v1.9.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
+Ontology v1.10.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
 Document-level `AMENDS`, `REPEALS`, `REPLACES`, và `GUIDES`. Diagram category
 phải map bằng bảng explicit, target phải resolve qua canonical registry, và
 relation vẫn phải qua required-property, temporal, whitelist và consistency
@@ -136,6 +136,17 @@ Với Gemini free tier, giữ `GEMINI_MIN_REQUEST_INTERVAL_SECONDS=7.0` và
 Extraction lưu raw output theo từng Điều trong `article_extractions.jsonl`.
 Checkpoint hợp lệ được reuse theo graph/context/provider/model/prompt fingerprint,
 vì vậy lỗi provider giữa chừng không bắt chạy lại các Điều đã hoàn tất.
+
+Với raw bundle LuatVietnam, `parse` còn tạo
+`provider_relation_candidates.jsonl`. Khi `extract` hoặc
+`normalize-extraction` chạy, chỉ candidate `RESOLVED` thuộc `AMENDS`/`REPEALS`
+được chuyển thành deterministic record `PROVIDER_HTML` rồi đi qua schema,
+ontology, consistency và decision gate hiện có. Ngày `effective_from` ưu tiên
+metadata đã xác thực; khi metadata thiếu mới lấy câu hiệu lực rõ ràng trong
+canonical `source.txt`; không dùng ngày ban hành thay ngày hiệu lực. Candidate unresolved, ambiguous và
+positional anchor vẫn chỉ nằm trong sidecar. Relation liên-document accepted có
+`materialization_route=CORPUS_RELATION_RECONCILIATION`; payload builder một
+document defer relation này để không tạo dangling endpoint hoặc node giả.
 
 Trước full run, chạy smoke 3-5 Điều bằng full hierarchy registry:
 

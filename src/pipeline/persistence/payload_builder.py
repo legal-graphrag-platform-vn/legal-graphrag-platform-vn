@@ -47,6 +47,7 @@ KNOWN_SEMANTIC_IDS = {
     "công ty": "cong_ty",
     "cong ty": "cong_ty",
 }
+CORPUS_RELATION_MATERIALIZATION_ROUTE = "CORPUS_RELATION_RECONCILIATION"
 
 
 class PayloadBuildError(ValueError):
@@ -110,6 +111,11 @@ def build_graph_payload(
 
     nodes: dict[str, dict[str, Any]] = {}
     relations: dict[str, dict[str, Any]] = {}
+    deferred_relation_count = sum(
+        1
+        for record in accepted_records
+        if record.get("materialization_route") == CORPUS_RELATION_MATERIALIZATION_ROUTE
+    )
 
     document_node = _document_node(parsed)
     _add_node(nodes, document_node)
@@ -299,6 +305,8 @@ def build_graph_payload(
                 _add_relation(relations, clause_id, "CONTAINS", point_id, {})
 
     for record in accepted_records:
+        if record.get("materialization_route") == CORPUS_RELATION_MATERIALIZATION_ROUTE:
+            continue
         relation = record.get("relation") or {}
         head_id = _resolve_endpoint_id(
             relation.get("head"), structural_ids, entity_index
@@ -321,6 +329,7 @@ def build_graph_payload(
         "metadata": {
             "raw_doc_code": raw_doc_code,
             "graph_id": parsed.document.id,
+            "deferred_relation_count": deferred_relation_count,
         },
         "nodes": list(nodes.values()),
         "relations": list(relations.values()),
@@ -429,7 +438,10 @@ def _add_node(nodes: dict[str, dict[str, Any]], node: dict[str, Any]) -> None:
     existing = nodes.get(node_id)
     if existing is not None:
         if existing != normalized_node:
-            if existing.get("type") == "Issuer" or normalized_node.get("type") == "Issuer":
+            if (
+                existing.get("type") == "Issuer"
+                or normalized_node.get("type") == "Issuer"
+            ):
                 return
             raise PayloadBuildError(
                 f"Duplicate node id with different payload: {node_id}"

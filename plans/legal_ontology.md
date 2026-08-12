@@ -1,7 +1,7 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.9.0
+> **Version**: 1.10.0
 > **Frozen date**: 2026-08-10
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
@@ -145,8 +145,8 @@ Only these relation names are current. Relation names use active voice.
 |---|---|---|---|---|---|
 | `ISSUED_BY` | `Document` | `Issuer` | none | no | yes |
 | `CONTAINS` | structural parent labels | structural child labels by exact allowed pair | none | no | yes |
-| `AMENDS` | `Document`, `Article`, `Clause` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
-| `REPEALS` | `Document` | `Document`, `Article`, `Clause` | `effective_from` | indexed only | yes |
+| `AMENDS` | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point` | `effective_from` | indexed only | yes |
+| `REPEALS` | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point` | `effective_from` | indexed only | yes |
 | `REPLACES` | `Document` | `Document` | `effective_from` | indexed only | yes |
 | `GUIDES` | `Document` | `Document` | none | no | yes, with whitelist |
 | `REFERS_TO` | `Article`, `Clause`, `Point` | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | common citation/bundle provenance plus method-specific provenance | no | yes |
@@ -238,7 +238,7 @@ Temporal relations always use active voice from the newer legal unit to the olde
 
 ```cypher
 (new_doc_or_unit)-[:AMENDS {effective_from}]->(old_doc_or_unit)
-(new_doc)-[:REPEALS {effective_from}]->(old_doc_or_unit)
+(new_doc_or_unit)-[:REPEALS {effective_from}]->(old_doc_or_unit)
 (new_doc)-[:REPLACES {effective_from}]->(old_doc)
 ```
 
@@ -401,3 +401,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.8.0 | 2026-08-01 | Added canonical `Part` and `Subsection`, seven Article parent chains, registry v2, and verified reference/browser support | ADR-25 |
 | 1.8.1 | 2026-08-08 | Allowed direct preamble Articles before Section Articles within the same Chapter while retaining ordered mixed-mode validation | ADR-28 and BLHS 2015 Chapter XXIII |
 | 1.9.0 | 2026-08-10 | Synchronized executable metadata fields, reserved optional Point temporal fields, and fail-closed deterministic diagram relation provenance | ADR-29 |
+| 1.10.0 | 2026-08-12 | Extended `AMENDS` and `REPEALS` to the smallest evidenced structural unit, including `Point`; unresolved provider endpoints remain outside graph persistence | ADR-32 |

@@ -104,6 +104,34 @@ uv run python -m src.pipeline.main batch-ingest-all --limit 3
 
 ---
 
+### 2.3 Chạy FULL PIPELINE Cho Một Thư Mục Tùy Chỉnh (`ingest-folder`)
+
+Dùng khi bạn muốn chỉ định trực tiếp một thư mục chứa dữ liệu thô (ví dụ: `data/raw/LTV_366692` hoặc một thư mục bất kỳ bên ngoài) để chạy toàn bộ luồng Pipeline end-to-end:
+
+```bash
+# Chạy cho một thư mục văn bản tùy chỉnh
+uv run python -m src.pipeline.main ingest-folder --folder "D:/path/to/your/folder"
+
+# Xử lý trọn gói (Parse -> LLM -> Write Neo4j -> Embed) từng văn bản một trước khi sang văn bản 2
+uv run python -m src.pipeline.main ingest-folder --folder data/raw --doc-by-doc
+
+# Hoặc dùng alias pipeline-folder
+uv run python -m src.pipeline.main pipeline-folder --folder "data/raw/LTV_366692"
+
+# Chạy thử nghiệm N văn bản đầu tiên trong thư mục
+uv run python -m src.pipeline.main ingest-folder --folder data/raw --limit 5
+
+# Bắt buộc chạy lại các văn bản từng lỗi / chưa xong
+uv run python -m src.pipeline.main ingest-folder --folder data/raw/LTV_186730 --retry-failed
+```
+
+- **Đặc điểm nổi bật**:
+  - Hỗ trợ linh hoạt cả **thư mục cha chứa nhiều văn bản** (như `data/raw`) lẫn **thư mục của 1 văn bản đơn lẻ** (như `data/raw/LTV_366692`).
+  - Tự động tạo file `manifest.json` trong thư mục được chỉ định.
+  - Tự động thực hiện 6 bước liên hoàn: **Manifest $\rightarrow$ Parse $\rightarrow$ LLM Extract $\rightarrow$ Reconcile $\rightarrow$ Write Neo4j $\rightarrow$ BGE-M3 Embeddings**.
+
+---
+
 ## 3. Bảng Quy Ước Tiền Tố (Prefix) Cho Đầy Đủ 26 Hình Thức Văn Bản VBPL
 
 Hệ thống tự động bóc tách loại văn bản từ số hiệu hoặc tiêu đề và quy ước tiền tố chuẩn hóa tên thư mục (`raw_doc_code`) cho toàn bộ 26 loại hình thức văn bản của CSDL Quốc gia VBPL:
@@ -148,12 +176,29 @@ Khi chạy cào một văn bản từ Luật Việt Nam:
 
 ---
 
-## 5. Bảng Tra Cứu Câu Lệnh CLI Nhanh
+## 5. Cơ Chế Checkpoint & An Toàn Dữ Liệu Raw
+
+1. **Bảo tồn Dữ liệu Thô (Pure Raw Dataset)**:
+   - Thư mục `data/raw/` được bảo vệ nguyên bản (Read-only Dataset), chỉ chứa các file thô ban đầu (`source.txt`, `metadata.json`, `source.html`...).
+   - Tất cả các file kết xuất tự sinh (`manifest.json`, `references.jsonl`, `hierarchy.json`, `extract.jsonl`, `accepted.jsonl`) đều được ghi tự động vào **`data/processed/`**.
+
+2. **Cơ chế Checkpoint 3 Cấp độ**:
+   - **Cấp Văn bản**: Lưu trạng thái tại `data/processed/batch_progress_ledger.json`. Khi bị ngắt giữa chừng, lần sau chạy lại sẽ **Skip** các văn bản đã xong.
+   - **Cấp Điều trong 1 Văn bản**: Lưu kết quả trích xuất từng Điều tại `data/processed/<doc_code>/article_extractions.jsonl`. Khi chạy lại, LLM chỉ trích xuất tiếp các Điều chưa xong.
+   - **Cấp Đồ thị & Vector**: Ghi đồ thị Idempotent `MERGE` (không trùng lặp nút) và chỉ sinh BGE-M3 Vector cho các nút chưa có thuộc tính nhúng.
+
+---
+
+## 6. Bảng Tra Cứu Câu Lệnh CLI Nhanh
 
 | Mục đích | Câu lệnh CLI |
 | :--- | :--- |
 | **Ingest đơn lẻ 1 URL** | `uv run python -m src.pipeline.main ingest --url "<URL>"` |
-| **Batch Ingest toàn bộ** | `uv run python -m src.pipeline.main batch-ingest-all` |
-| **Batch Ingest test N bài** | `uv run python -m src.pipeline.main batch-ingest-all --limit 3` |
-| **Chạy lại các bài lỗi** | `uv run python -m src.pipeline.main batch-ingest-all --retry-failed` |
+| **Batch Ingest toàn bộ `data/raw`** | `uv run python -m src.pipeline.main batch-ingest-all` |
+| **Ingest FULL PIPELINE cho 1 thư mục bất kỳ** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>"` |
+| **Xử lý trọn gói từng văn bản một (Doc-by-Doc)** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>" --doc-by-doc` |
+| **Xử lý trọn gói từng văn bản một (Test N bài)** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>" --limit 5 --doc-by-doc` |
+| **Chạy luồng Batch nhưng Parse từng văn bản một** | `uv run python -m src.pipeline.main batch-ingest-all --workers 1` |
+| **Chạy lại các bài bị lỗi / ép chạy lại LLM** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>" --retry-failed` |
 | **Kiểm tra trợ giúp** | `uv run python -m src.pipeline.main --help` |
+

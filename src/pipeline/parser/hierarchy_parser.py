@@ -10,6 +10,7 @@ import re
 import hashlib
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import date
 
 from src.pipeline.parser.models import (
     Article,
@@ -169,7 +170,11 @@ class _ArticleBuilder:
 
 def _ascii(value: str) -> str:
     decomposed = unicodedata.normalize("NFD", value)
-    return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").replace("đ", "d").replace("Đ", "D")
+    return (
+        "".join(char for char in decomposed if unicodedata.category(char) != "Mn")
+        .replace("đ", "d")
+        .replace("Đ", "D")
+    )
 
 
 CITATION_PREV_RE = re.compile(
@@ -323,22 +328,8 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
-        is_structural_heading = any(
-            matcher(line) is not None
-            for matcher in (
-                match_part,
-                match_chapter,
-                match_section,
-                match_subsection,
-                match_article,
-            )
-        )
-        if is_structural_heading:
-            quote_depth = 0
-            in_quote = False
-        else:
-            in_quote = quote_depth > 0
-            quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+        in_quote = quote_depth > 0 or line.startswith("“")
+        quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
 
         if in_quote:
             if current_article is not None:
@@ -550,7 +541,9 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
                     current_chapter = "0"
                     current_chapter_title = ""
                 else:
-                    document_mode = require_mode(document_mode, "Article", owner="Document")
+                    document_mode = require_mode(
+                        document_mode, "Article", owner="Document"
+                    )
             elif current_section is None:
                 chapter_key = (
                     current_part.number if current_part else None,
@@ -662,6 +655,12 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
 def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
     """Parse từ văn bản text thuần."""
     canonical_text = canonicalize_source_text(text)
+    if document.effective_from is None:
+        source_effective_from = infer_source_effective_from(canonical_text)
+        if source_effective_from:
+            document = document.model_copy(
+                update={"effective_from": source_effective_from}
+            )
     records = source_line_records(canonical_text)
     main_records, appendix_groups = partition_appendices(records)
     hierarchy = _parse_hierarchy(main_records)
@@ -678,6 +677,28 @@ def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
             for group in appendix_groups
         ],
     )
+
+
+def infer_source_effective_from(source_text: str) -> date | None:
+    """Extract one explicit Vietnamese commencement date, failing on conflict."""
+
+    matches = re.findall(
+        r"có\s+hiệu\s+lực(?:\s+thi\s+hành)?\s+(?:kể\s+)?từ\s+ngày\s+"
+        r"(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})",
+        source_text,
+        flags=re.IGNORECASE,
+    )
+    explicit_dates: set[date] = set()
+    for day, month, year in matches:
+        try:
+            explicit_dates.add(date(int(year), int(month), int(day)))
+        except ValueError as exc:
+            raise ValueError(
+                "Canonical source contains an invalid effective date"
+            ) from exc
+    if len(explicit_dates) > 1:
+        raise ValueError("Canonical source contains conflicting effective dates")
+    return next(iter(explicit_dates)) if explicit_dates else None
 
 
 def _bounded_title(kind: str, number: str, title: str) -> str:

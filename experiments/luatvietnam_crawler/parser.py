@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import uuid
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
@@ -14,6 +15,8 @@ from .errors import ContentUnavailableError, ParseError, UnsupportedUrlError
 from .models import (
     CrawledDocument,
     DetailMetadata,
+    ProviderItemSpan,
+    ProviderReferenceMention,
     SearchDocument,
     SearchPageMetadata,
 )
@@ -31,7 +34,7 @@ NUMBER_RE = re.compile(
 )
 ARTICLE_RE = re.compile(r"(?im)^\s*Điều\s+\d+[a-zđ]?\b")
 CONTENT_NOISE_LINES = {"Đang theo dõi", "Theo dõi văn bản"}
-CONTENT_SERIALIZER_VERSION = "luatvietnam-detail-v2"
+CONTENT_SERIALIZER_VERSION = "luatvietnam-detail-v3"
 REFERENCE_SPAN_SELECTOR = "span.noi-dung-tham-chieu"
 CONTENT_NOISE_SELECTORS = (
     "script",
@@ -130,6 +133,21 @@ DOC_TYPES = (
 class _SerializedBody:
     text: str
     reference_marker_count: int
+    references: tuple["_SerializedReference", ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class _SerializedReference:
+    citation_text: str
+    source_char_start: int
+    source_char_end: int
+    provider_source_document_id: str | None
+    provider_source_item_id: str | None
+    provider_target_document_id: str | None
+    provider_target_item_ids: tuple[str, ...]
+    provider_relation_id: str | None
+    provider_link_type: str
+    provider_href: str | None
 
 
 def validate_luatvietnam_url(url: str) -> None:
@@ -300,6 +318,14 @@ def parse_document(
         )
     if not source_text:
         raise ParseError(f"Legal body not found: {source_url}")
+    for reference in body.references:
+        if (
+            reference.provider_source_document_id is not None
+            and reference.provider_source_document_id != metadata.external_id
+        ):
+            raise ParseError(
+                "Provider reference source document conflicts with detail page"
+            )
 
     raw_doc_code = f"LTV_{metadata.external_id}"
     return CrawledDocument(
@@ -324,6 +350,21 @@ def parse_document(
         article_count=len(ARTICLE_RE.findall(source_text)),
         reference_marker_count=body.reference_marker_count,
         content_serializer_version=CONTENT_SERIALIZER_VERSION,
+        provider_references=tuple(
+            ProviderReferenceMention(
+                provider_source_document_id=metadata.external_id,
+                provider_source_item_id=reference.provider_source_item_id,
+                provider_target_document_id=reference.provider_target_document_id,
+                provider_target_item_ids=reference.provider_target_item_ids,
+                provider_relation_id=reference.provider_relation_id,
+                provider_link_type=reference.provider_link_type,  # type: ignore[arg-type]
+                citation_text=reference.citation_text,
+                source_char_start=reference.source_char_start,
+                source_char_end=reference.source_char_end,
+                provider_href=reference.provider_href,
+            )
+            for reference in body.references
+        ),
     )
 
 
@@ -496,6 +537,42 @@ def _document_text(soup: BeautifulSoup) -> str:
     return _document_body(soup).text
 
 
+def parse_provider_item_spans(
+    html: str, source_text: str, provider_item_ids: tuple[str, ...]
+) -> tuple[ProviderItemSpan, ...]:
+    """Map selected provider item IDs onto exact canonical source coordinates.
+
+    Mapping is deliberately fail-closed: the complete HTML serialization must
+    equal ``source_text`` and each selected item body must occur exactly once.
+    Missing or ambiguous items are omitted for the caller to keep unresolved.
+    """
+
+    canonical_source = source_text.rstrip("\n")
+    soup = BeautifulSoup(html, "lxml")
+    if _document_body(soup).text != canonical_source:
+        raise ParseError("Provider HTML does not match canonical source text")
+
+    spans: list[ProviderItemSpan] = []
+    for item_id in dict.fromkeys(provider_item_ids):
+        if not item_id.isdigit():
+            continue
+        element = soup.find(id=re.compile(rf"^demuc{re.escape(item_id)}$", re.I))
+        if not isinstance(element, Tag):
+            continue
+        item_text = _serialize_content_element(element).text
+        if not item_text or canonical_source.count(item_text) != 1:
+            continue
+        start = canonical_source.index(item_text)
+        spans.append(
+            ProviderItemSpan(
+                provider_item_id=item_id,
+                source_char_start=start,
+                source_char_end=start + len(item_text),
+            )
+        )
+    return tuple(spans)
+
+
 def _body_is_unavailable(text: str) -> bool:
     return (
         bool(text)
@@ -527,19 +604,98 @@ def _serialize_content_element(element: Tag) -> _SerializedBody:
     for noise in root.select(", ".join(CONTENT_NOISE_SELECTORS)):
         noise.decompose()
 
-    reference_count = 0
-    for reference in root.select(REFERENCE_SPAN_SELECTOR):
+    pending_references: list[dict[str, object]] = []
+    for index, reference in enumerate(root.select(REFERENCE_SPAN_SELECTOR)):
         text = _clean_text(reference.get_text(" ", strip=True))
         if not text:
             reference.decompose()
             continue
         marker = text if text.startswith("[") and text.endswith("]") else f"[{text}]"
-        reference.replace_with(NavigableString(marker))
-        reference_count += 1
+        token = f"LTVREFTOKEN{index:08d}{uuid.uuid4().hex}"
+        href = str(reference.get("data-href") or "") or None
+        query = {
+            key.lower(): value for key, value in parse_qsl(urlsplit(href or "").query)
+        }
+        source_container = reference.find_parent(
+            id=re.compile(r"^demuc\d+$", re.IGNORECASE)
+        )
+        container_source_item_id = None
+        if source_container is not None:
+            container_source_item_id = re.sub(
+                r"^demuc", "", str(source_container.get("id")), flags=re.IGNORECASE
+            )
+        href_source_item_id = query.get("docitemreferenceid")
+        if (
+            href_source_item_id
+            and container_source_item_id
+            and href_source_item_id != container_source_item_id
+        ):
+            raise ParseError(
+                "Provider reference source item conflicts with containing demuc"
+            )
+        source_item_id = href_source_item_id or container_source_item_id
+        raw_target_items = query.get("docitemids") or query.get("docitemid") or ""
+        target_item_ids = tuple(
+            item.strip() for item in raw_target_items.split(",") if item.strip()
+        )
+        if "docitemrelateid_select" in query:
+            link_type = "CHANGE_CONTENT"
+            relation_id = query["docitemrelateid_select"]
+        elif "docitemrelateid" in query:
+            link_type = "CHANGE_CONTENT"
+            relation_id = query["docitemrelateid"]
+        elif "docitemreferid" in query:
+            link_type = "REFERENCE"
+            relation_id = query["docitemreferid"]
+        else:
+            link_type = "UNKNOWN"
+            relation_id = None
+        pending_references.append(
+            {
+                "token": token,
+                "marker": marker,
+                "citation_text": text.strip("[]"),
+                "provider_source_document_id": query.get("docreferenceid"),
+                "provider_source_item_id": source_item_id,
+                "provider_target_document_id": query.get("docid"),
+                "provider_target_item_ids": target_item_ids,
+                "provider_relation_id": relation_id,
+                "provider_link_type": link_type,
+                "provider_href": href,
+            }
+        )
+        reference.replace_with(NavigableString(token))
+
+    serialized_text = _clean_multiline(_render_content_node(root))
+    resolved_references: list[_SerializedReference] = []
+    for pending in pending_references:
+        token = str(pending["token"])
+        marker = str(pending["marker"])
+        start = serialized_text.find(token)
+        if start < 0:
+            raise ParseError("Serialized reference token was lost during normalization")
+        serialized_text = (
+            serialized_text[:start] + marker + serialized_text[start + len(token) :]
+        )
+        resolved_references.append(
+            _SerializedReference(
+                citation_text=str(pending["citation_text"]),
+                source_char_start=start,
+                source_char_end=start + len(marker),
+                provider_source_document_id=pending["provider_source_document_id"],  # type: ignore[arg-type]
+                provider_source_item_id=pending["provider_source_item_id"],  # type: ignore[arg-type]
+                provider_target_document_id=pending["provider_target_document_id"],  # type: ignore[arg-type]
+                provider_target_item_ids=pending["provider_target_item_ids"],  # type: ignore[arg-type]
+                provider_relation_id=pending["provider_relation_id"],  # type: ignore[arg-type]
+                provider_link_type=str(pending["provider_link_type"]),
+                provider_href=pending["provider_href"],  # type: ignore[arg-type]
+            )
+        )
 
     return _SerializedBody(
-        text=_clean_multiline(_render_content_node(root)),
-        reference_marker_count=reference_count,
+        text=serialized_text,
+        reference_marker_count=len(resolved_references),
+        references=tuple(resolved_references),
     )
 
 
