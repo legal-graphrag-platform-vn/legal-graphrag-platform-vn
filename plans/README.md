@@ -3,7 +3,7 @@
 > **Tên đề tài**: Xây dựng nền tảng AI khai thác tri thức pháp luật doanh nghiệp Việt Nam dựa trên Knowledge Graph và Temporal GraphRAG  
 > **Loại**: Đồ án tốt nghiệp  
 > **Domain**: Pháp luật doanh nghiệp Việt Nam  
-> **Trạng thái**: Ontology/runtime contract v1.9.0 đã đồng bộ executable metadata và diagram provenance; curated artifact/database migration còn chờ; Gate 7/M3-B13 còn mở
+> **Trạng thái**: Ontology/runtime contract v1.10.0 hỗ trợ Point-level amendment/repeal theo ADR-32; curated artifact/database migration còn chờ; Gate 7/M3-B13 còn mở
 
 ---
 
@@ -13,7 +13,7 @@
 
 | File | Nội dung | Ưu Tiên |
 |---|---|---|
-| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.9.0 — Source of Truth** | 🔴 Đọc trước |
+| **[legal_ontology.md](./legal_ontology.md)** | **Ontology Contract FROZEN v1.10.0 — Source of Truth** | 🔴 Đọc trước |
 | [00_architecture_decisions.md](./00_architecture_decisions.md) | ADR — các quyết định kiến trúc | 🔴 Đọc trước |
 | [01_research_contributions.md](./01_research_contributions.md) | 5 đóng góp nghiên cứu chính | 🔴 Đọc trước |
 | [03_architecture.md](./03_architecture.md) | Kiến trúc hệ thống tổng thể | 🟡 Review |
@@ -30,7 +30,7 @@
 
 | Area | Current authority | Status |
 |---|---|---|
-| Ontology | `legal_ontology.md` v1.9.0 | Frozen; existing 1.8.x artifacts require re-normalization or regeneration |
+| Ontology | `legal_ontology.md` v1.10.0 | Frozen; existing 1.9.x artifacts require re-normalization or regeneration |
 | Section hierarchy | `agent-plan-feats/16_section_hierarchy_and_structural_reference_plan.md` | Implemented in code; curated reparse pending |
 | External structural references | `agent-plan-feats/17_external_structural_reference_materialization_plan.md` / ADR-24 | Implemented; live registry publication and corpus reconciliation are operator actions |
 | Part/Subsection hierarchy | `agent-plan-feats/18_part_and_subsection_hierarchy_plan.md` / ADR-25 | Implemented in runtime; live corpus migration pending |
@@ -84,7 +84,7 @@ listed above.
 
 ## Trạng Thái Thảo Luận
 
-- [x] RC1 — Ontology: **FROZEN v1.9.0** — xem [legal_ontology.md](./legal_ontology.md)
+- [x] RC1 — Ontology: **FROZEN v1.10.0** — xem [legal_ontology.md](./legal_ontology.md)
 - [ ] RC2 — Pipeline: **Pilot M3 đã sign-off; chờ corpus 4 văn bản (M3-B13)**
 - [ ] RC3 — GraphRAG: **Runtime v2 và intent taxonomy 6 lớp đã triển khai; official evaluation chưa chạy lại** — xem [05_graphrag_retrieval.md](./05_graphrag_retrieval.md)
 - [ ] RC4 — Temporal: **Tương đối rõ** — edge timestamps + legal_status

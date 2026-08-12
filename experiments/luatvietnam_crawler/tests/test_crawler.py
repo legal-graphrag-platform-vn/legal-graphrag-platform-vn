@@ -268,6 +268,7 @@ def test_crawl_search_saves_inside_isolated_output(tmp_path: Path) -> None:
         (document_dir / "source.txt").read_text(encoding="utf-8").startswith("Điều 1")
     )
     assert (document_dir / "source.html").read_text(encoding="utf-8") == _detail_html()
+    assert (document_dir / "references.jsonl").exists()
     metadata = json.loads((document_dir / "metadata.json").read_text(encoding="utf-8"))
     assert metadata["source_provider"] == "luatvietnam.vn"
     assert metadata["content"]["raw_html_saved"] is True

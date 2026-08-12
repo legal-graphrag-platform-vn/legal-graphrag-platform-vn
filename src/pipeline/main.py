@@ -29,6 +29,17 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 from src.pipeline.config import settings
 from src.pipeline.crawler.vbpl_crawler import crawl_and_save, crawl_by_search
 from src.pipeline.extraction.providers.base import ExtractionProviderError
+from src.pipeline.extraction.provider_references import (
+    ProviderReferenceMentionV1,
+    ensure_luatvietnam_reference_sidecar,
+)
+from src.pipeline.extraction.provider_identity_index import (
+    build_luatvietnam_identity_indexes,
+)
+from src.pipeline.extraction.provider_relation_candidates import (
+    build_provider_relation_candidates,
+    write_provider_relation_candidates,
+)
 from src.pipeline.extraction.corpus_structural_registry import (
     RegistryError,
     build_corpus_registry,
@@ -161,6 +172,38 @@ def _read_canonical_source(raw_doc_code: str) -> str:
     return source_path.read_text(encoding="utf-8")
 
 
+def _write_parse_artifacts(
+    out_dir: Path,
+    parsed: ParsedDocument,
+    source_text: str,
+    provider_references: tuple[ProviderReferenceMentionV1, ...] = (),
+    raw_root: Path | None = None,
+) -> None:
+    """Persist hierarchy plus fail-closed provider relation candidates."""
+
+    document_index, unit_index, failure_index = build_luatvietnam_identity_indexes(
+        raw_root or settings.data_raw_dir,
+        settings.data_processed_dir,
+        parsed,
+        provider_references,
+    )
+    candidates = build_provider_relation_candidates(
+        parsed,
+        source_text,
+        provider_references,
+        provider_document_index=document_index,
+        provider_unit_index=unit_index,
+        provider_failure_index=failure_index,
+    )
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "hierarchy.json").write_text(
+        parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
+    )
+    write_provider_relation_candidates(
+        out_dir / "provider_relation_candidates.jsonl", candidates
+    )
+
+
 def _parse_folder_worker(
     raw_doc_code: str,
     raw_root: Path | None = None,
@@ -183,6 +226,7 @@ def _parse_folder_worker(
             _ready_metadata(raw_doc_code, raw_root=base_raw_dir, manifest_path=manifest_path)
         )
 
+        provider_references = ensure_luatvietnam_reference_sidecar(raw_dir)
         text = source_path.read_text(encoding="utf-8")
         try:
             parsed = parse_text(text, doc_info)
@@ -191,10 +235,12 @@ def _parse_folder_worker(
             return False
 
         out_dir = settings.data_processed_dir / raw_doc_code
-        out_dir.mkdir(parents=True, exist_ok=True)
-        # Ghi đè file hierarchy.json nếu đã tồn tại
-        (out_dir / "hierarchy.json").write_text(
-            parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
+        _write_parse_artifacts(
+            out_dir,
+            parsed,
+            text,
+            provider_references,
+            raw_root=base_raw_dir,
         )
         typer.echo(f"Parsed thành công {raw_doc_code} -> {out_dir / 'hierarchy.json'}")
         return True
@@ -299,10 +345,7 @@ def parse(
             typer.echo(f"Parse validation error: {exc}", err=True)
             raise typer.Exit(code=1) from exc
         out_dir = settings.data_processed_dir / raw_doc_code
-        out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "hierarchy.json").write_text(
-            parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
-        )
+        _write_parse_artifacts(out_dir, parsed, text)
         typer.echo(
             f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}"
         )
@@ -327,6 +370,7 @@ def parse(
             typer.echo(str(exc), err=True)
             raise typer.Exit(code=1) from exc
 
+        provider_references = ensure_luatvietnam_reference_sidecar(raw_dir)
         text = source_path.read_text(encoding="utf-8")
         try:
             parsed = parse_text(text, doc_info)
@@ -334,10 +378,7 @@ def parse(
             typer.echo(f"Parse validation error: {exc}", err=True)
             raise typer.Exit(code=1) from exc
         out_dir = _processed_dir(raw_doc_code)
-        out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / "hierarchy.json").write_text(
-            parsed.model_dump_json(indent=2, exclude_none=True), encoding="utf-8"
-        )
+        _write_parse_artifacts(out_dir, parsed, text, provider_references)
         typer.echo(
             f"Parsed {raw_doc_code}: {len(parsed.articles)} Điều -> {out_dir / 'hierarchy.json'}"
         )

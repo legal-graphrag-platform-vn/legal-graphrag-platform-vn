@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.9.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md), [ADR-28](./00_architecture_decisions.md), [ADR-29](./00_architecture_decisions.md), [ADR-30](./00_architecture_decisions.md)
+> **Depends on**: [legal_ontology.md v1.10.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md), [ADR-28](./00_architecture_decisions.md), [ADR-29](./00_architecture_decisions.md), [ADR-30](./00_architecture_decisions.md), [ADR-32](./00_architecture_decisions.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
