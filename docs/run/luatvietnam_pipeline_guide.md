@@ -104,6 +104,31 @@ uv run python -m src.pipeline.main batch-ingest-all --limit 3
 
 ---
 
+### 2.3 Chạy FULL PIPELINE Cho Một Thư Mục Tùy Chỉnh (`ingest-folder`)
+
+Dùng khi bạn muốn chỉ định trực tiếp một thư mục chứa dữ liệu thô (ví dụ: `data/raw/LTV_366692` hoặc một thư mục bất kỳ bên ngoài) để chạy toàn bộ luồng Pipeline end-to-end:
+
+```bash
+# Chạy cho một thư mục văn bản tùy chỉnh
+uv run python -m src.pipeline.main ingest-folder --folder "D:/path/to/your/folder"
+
+# Hoặc dùng alias pipeline-folder
+uv run python -m src.pipeline.main pipeline-folder --folder "data/raw/LTV_366692"
+
+# Chạy thử nghiệm N văn bản đầu tiên trong thư mục
+uv run python -m src.pipeline.main ingest-folder --folder data/raw --limit 5
+
+# Bắt buộc chạy lại các văn bản từng lỗi / chưa xong
+uv run python -m src.pipeline.main ingest-folder --folder data/raw/LTV_186730 --retry-failed
+```
+
+- **Đặc điểm nổi bật**:
+  - Hỗ trợ linh hoạt cả **thư mục cha chứa nhiều văn bản** (như `data/raw`) lẫn **thư mục của 1 văn bản đơn lẻ** (như `data/raw/LTV_366692`).
+  - Tự động tạo file `manifest.json` trong thư mục được chỉ định.
+  - Tự động thực hiện 6 bước liên hoàn: **Manifest $\rightarrow$ Parse $\rightarrow$ LLM Extract $\rightarrow$ Reconcile $\rightarrow$ Write Neo4j $\rightarrow$ BGE-M3 Embeddings**.
+
+---
+
 ## 3. Bảng Quy Ước Tiền Tố (Prefix) Cho Đầy Đủ 26 Hình Thức Văn Bản VBPL
 
 Hệ thống tự động bóc tách loại văn bản từ số hiệu hoặc tiêu đề và quy ước tiền tố chuẩn hóa tên thư mục (`raw_doc_code`) cho toàn bộ 26 loại hình thức văn bản của CSDL Quốc gia VBPL:
@@ -153,7 +178,9 @@ Khi chạy cào một văn bản từ Luật Việt Nam:
 | Mục đích | Câu lệnh CLI |
 | :--- | :--- |
 | **Ingest đơn lẻ 1 URL** | `uv run python -m src.pipeline.main ingest --url "<URL>"` |
-| **Batch Ingest toàn bộ** | `uv run python -m src.pipeline.main batch-ingest-all` |
-| **Batch Ingest test N bài** | `uv run python -m src.pipeline.main batch-ingest-all --limit 3` |
-| **Chạy lại các bài lỗi** | `uv run python -m src.pipeline.main batch-ingest-all --retry-failed` |
+| **Batch Ingest toàn bộ `data/raw`** | `uv run python -m src.pipeline.main batch-ingest-all` |
+| **Ingest FULL PIPELINE cho 1 thư mục bất kỳ** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>"` |
+| **Ingest FULL PIPELINE test N bài** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>" --limit 5` |
+| **Chạy lại các bài bị lỗi / ép chạy lại LLM** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>" --retry-failed` |
 | **Kiểm tra trợ giúp** | `uv run python -m src.pipeline.main --help` |
+
