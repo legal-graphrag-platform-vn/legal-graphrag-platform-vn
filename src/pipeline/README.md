@@ -90,7 +90,7 @@ Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger đ
 append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
 ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
-Ontology v1.9.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
+Ontology v1.10.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
 Document-level `AMENDS`, `REPEALS`, `REPLACES`, và `GUIDES`. Diagram category
 phải map bằng bảng explicit, target phải resolve qua canonical registry, và
 relation vẫn phải qua required-property, temporal, whitelist và consistency

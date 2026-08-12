@@ -1,7 +1,7 @@
 # Lược đồ Neo4j hiện tại — Legal GraphRAG VN
 
 > **Phạm vi:** ontology và runtime contract đang có trong repository, phiên bản
-> `1.9.0`.
+> `1.10.0`.
 >
 > **Đã đối chiếu:** `plans/legal_ontology.md`,
 > `src/shared/ontology/contract.py`, `src/shared/ontology/validators.py`,
@@ -337,8 +337,8 @@ Mũi tên luôn giữ hướng canonical `source -[:RELATION]-> target`:
 | `CONTAINS`  | `Subsection`                    | `Article`                                                                            | —                                                               |
 | `CONTAINS`  | `Article`                       | `Clause`                                                                             | —                                                               |
 | `CONTAINS`  | `Clause`                        | `Point`                                                                              | —                                                               |
-| `AMENDS`    | `Document`, `Article`, `Clause` | `Document`, `Article`, `Clause`                                                      | `effective_from`                                                |
-| `REPEALS`   | `Document`                      | `Document`, `Article`, `Clause`                                                      | `effective_from`                                                |
+| `AMENDS`    | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point`                                      | `effective_from`                                                |
+| `REPEALS`   | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point`                                      | `effective_from`                                                |
 | `REPLACES`  | `Document`                      | `Document`                                                                           | `effective_from`                                                |
 | `GUIDES`    | `Document`                      | `Document`                                                                           | Cặp `doc_type` phải thuộc whitelist                             |
 | `REFERS_TO` | `Article`, `Clause`, `Point`    | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | Citation/bundle provenance và provenance theo extraction method |

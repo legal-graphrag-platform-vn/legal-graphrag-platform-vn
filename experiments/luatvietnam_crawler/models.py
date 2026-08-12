@@ -4,6 +4,53 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime
+from typing import Literal
+
+
+PROVIDER_REFERENCE_CONTRACT_VERSION = "provider-reference-mention-v1"
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderReferenceMention:
+    """Provider evidence for one bracket marker in canonical source text."""
+
+    provider_source_document_id: str
+    provider_source_item_id: str | None
+    provider_target_document_id: str | None
+    provider_target_item_ids: tuple[str, ...]
+    provider_relation_id: str | None
+    provider_link_type: Literal["CHANGE_CONTENT", "REFERENCE", "UNKNOWN"]
+    citation_text: str
+    source_char_start: int
+    source_char_end: int
+    provider_href: str | None
+    contract_version: str = PROVIDER_REFERENCE_CONTRACT_VERSION
+    provider: str = "luatvietnam"
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "contract_version": self.contract_version,
+            "provider": self.provider,
+            "provider_source_document_id": self.provider_source_document_id,
+            "provider_source_item_id": self.provider_source_item_id,
+            "provider_target_document_id": self.provider_target_document_id,
+            "provider_target_item_ids": list(self.provider_target_item_ids),
+            "provider_relation_id": self.provider_relation_id,
+            "provider_link_type": self.provider_link_type,
+            "citation_text": self.citation_text,
+            "source_char_start": self.source_char_start,
+            "source_char_end": self.source_char_end,
+            "provider_href": self.provider_href,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderItemSpan:
+    """Exact canonical-text span of one LuatVietnam ``demuc`` item."""
+
+    provider_item_id: str
+    source_char_start: int
+    source_char_end: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,6 +199,7 @@ class CrawledDocument:
     article_count: int
     reference_marker_count: int
     content_serializer_version: str
+    provider_references: tuple[ProviderReferenceMention, ...] = ()
 
     def metadata(self) -> dict[str, object]:
         return {
@@ -181,6 +229,7 @@ class CrawledDocument:
                 "article_count": self.article_count,
                 "character_count": len(self.source_text),
                 "reference_marker_count": self.reference_marker_count,
+                "provider_reference_count": len(self.provider_references),
                 "serializer_version": self.content_serializer_version,
             },
         }

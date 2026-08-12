@@ -323,22 +323,8 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
-        is_structural_heading = any(
-            matcher(line) is not None
-            for matcher in (
-                match_part,
-                match_chapter,
-                match_section,
-                match_subsection,
-                match_article,
-            )
-        )
-        if is_structural_heading:
-            quote_depth = 0
-            in_quote = False
-        else:
-            in_quote = quote_depth > 0
-            quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+        in_quote = quote_depth > 0 or line.startswith("“")
+        quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
 
         if in_quote:
             if current_article is not None:

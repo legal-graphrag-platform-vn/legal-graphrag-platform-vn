@@ -367,6 +367,22 @@ def test_parser_source_spans_use_canonical_source_coordinates() -> None:
     assert canonical[point.source_start_char : point.source_end_char] == "a) Điểm"
 
 
+def test_parser_keeps_structural_headings_inside_replacement_quote_in_host_article() -> None:
+    text = (
+        "Điều 1. Sửa đổi, bổ sung\n"
+        "1. Bổ sung mục mới như sau:\n"
+        "“Mục 3a\n"
+        "Điều 17a. Nội dung được bổ sung\n"
+        "Nội dung chi tiết.”.\n"
+        "Điều 2. Điều khoản thi hành"
+    )
+
+    parsed = parse_text(text, _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["1", "2"]
+    assert "Điều 17a. Nội dung được bổ sung" in parsed.articles[0].content_raw
+
+
 def test_clean_vietnamese_spacing() -> None:
     from src.pipeline.parser.hierarchy_parser import clean_vietnamese_spacing
 

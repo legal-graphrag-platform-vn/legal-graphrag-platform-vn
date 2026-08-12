@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from urllib.parse import parse_qsl, urlsplit
 
@@ -14,11 +15,56 @@ from experiments.luatvietnam_crawler.parser import (
     page_url,
     parse_detail_metadata,
     parse_document,
+    parse_provider_item_spans,
     parse_search_page_metadata,
     parse_search_results,
 )
+from experiments.luatvietnam_crawler.storage import save_document
 
 FIXTURE_DIR = Path(__file__).resolve().parents[1] / "Exp"
+
+
+def test_provider_item_span_uses_exact_canonical_serialization() -> None:
+    html = """
+    <div class="the-document-body">
+      <p>Điều 2. Xử phạt</p>
+      <div id="demuc1399134"><p>a) Nội dung được sửa đổi.</p></div>
+    </div>
+    """
+    source = "Điều 2. Xử phạt\na) Nội dung được sửa đổi."
+
+    spans = parse_provider_item_spans(html, source, ("1399134", "999"))
+
+    assert len(spans) == 1
+    assert spans[0].provider_item_id == "1399134"
+    assert source[spans[0].source_char_start : spans[0].source_char_end] == (
+        "a) Nội dung được sửa đổi."
+    )
+
+
+def test_storage_writes_provider_reference_sidecar(tmp_path: Path) -> None:
+    html = """
+    <h1>Nghị định số 117/2024/NĐ-CP</h1>
+    <table><tr><th>Số hiệu:</th><td>117/2024/NĐ-CP</td></tr></table>
+    <div class="the-document-body">
+      <p>Điều 1. Sửa đổi</p><div id="demuc2732412"><p>Sửa đổi
+      <span class="noi-dung-tham-chieu"
+        data-href="/x?docItemId=1399134&amp;docId=186730&amp;docItemRelateId=158258">điểm a khoản 2</span>.
+      </p></div>
+    </div>
+    """
+    document = parse_document(
+        html,
+        "https://luatvietnam.vn/x/nghi-dinh-117-2024-nd-cp-366692-d1.html",
+    )
+
+    directory = save_document(document, tmp_path, source_html=html)
+    row = json.loads((directory / "references.jsonl").read_text(encoding="utf-8"))
+
+    assert row["provider_source_document_id"] == "366692"
+    assert row["provider_target_document_id"] == "186730"
+    assert row["provider_target_item_ids"] == ["1399134"]
+    assert row["provider_relation_id"] == "158258"
 
 
 def test_page_url_preserves_duplicate_filters_and_replaces_page_index() -> None:
@@ -275,6 +321,71 @@ def test_parse_document_marks_only_semantic_reference_spans() -> None:
     assert document.metadata()["content"]["reference_marker_count"] == 1
 
 
+def test_parse_document_preserves_change_reference_endpoints_and_offsets() -> None:
+    html = """
+    <h1>Nghị định số 117/2024/NĐ-CP</h1>
+    <table><tr><th>Số hiệu:</th><td>117/2024/NĐ-CP</td></tr></table>
+    <div class="the-document-body">
+      <p>Điều 1. Sửa đổi, bổ sung</p>
+      <div id="demuc2732412">
+        <p>a) Sửa đổi, bổ sung
+          <span class="popupRelate text-link noi-dung-tham-chieu"
+                data-href="/van-ban/get/docitem-view-change-content?tab=content&amp;DocItemId=1399134&amp;DocId=186730&amp;DocReferenceId=366692&amp;DocItemReferenceId=2732412&amp;DocItemRelateId_Select=158258">
+            điểm a khoản 2
+          </span> như sau:</p>
+      </div>
+    </div>
+    """
+
+    document = parse_document(
+        html,
+        "https://luatvietnam.vn/doanh-nghiep/nghi-dinh-117-2024-nd-cp-366692-d1.html",
+    )
+
+    assert len(document.provider_references) == 1
+    reference = document.provider_references[0]
+    assert reference.provider_source_document_id == "366692"
+    assert reference.provider_source_item_id == "2732412"
+    assert reference.provider_target_document_id == "186730"
+    assert reference.provider_target_item_ids == ("1399134",)
+    assert reference.provider_relation_id == "158258"
+    assert reference.provider_link_type == "CHANGE_CONTENT"
+    assert (
+        document.source_text[reference.source_char_start : reference.source_char_end]
+        == "[điểm a khoản 2]"
+    )
+
+
+def test_parse_document_preserves_normal_reference_metadata() -> None:
+    html = """
+    <h1>Nghị định số 117/2024/NĐ-CP</h1>
+    <table><tr><th>Số hiệu:</th><td>117/2024/NĐ-CP</td></tr></table>
+    <div class="the-document-body">
+      <p>Điều 1. Nội dung</p>
+      <div id="demuc2732417">
+        <p>Thực hiện theo
+          <span class="noi-dung-tham-chieu text-link"
+                data-href="/van-ban/get/noi-dung-tham-chieu.html?docItemReferId=28799&amp;docId=71744&amp;docItemIds=21224,21225">
+            điểm a và b khoản 1 Điều 125 Luật Xử lý vi phạm hành chính
+          </span>.</p>
+      </div>
+    </div>
+    """
+
+    document = parse_document(
+        html,
+        "https://luatvietnam.vn/doanh-nghiep/nghi-dinh-117-2024-nd-cp-366692-d1.html",
+    )
+
+    reference = document.provider_references[0]
+    assert reference.provider_source_document_id == "366692"
+    assert reference.provider_source_item_id == "2732417"
+    assert reference.provider_target_document_id == "71744"
+    assert reference.provider_target_item_ids == ("21224", "21225")
+    assert reference.provider_relation_id == "28799"
+    assert reference.provider_link_type == "REFERENCE"
+
+
 def test_parse_document_saves_usable_body_without_article_markers() -> None:
     html = """
     <h1>Quyết định số 10/2026/QĐ-TTg</h1>
@@ -368,7 +479,7 @@ def test_parse_detail_metadata_from_saved_real_page() -> None:
     assert payload["content"]["html_full_text_available"] is True
     assert payload["content"]["article_count"] > 0
     assert payload["content"]["character_count"] > 10_000
-    assert payload["content"]["serializer_version"] == "luatvietnam-detail-v2"
+    assert payload["content"]["serializer_version"] == "luatvietnam-detail-v3"
     assert payload["content"]["reference_marker_count"] >= 1
 
 
