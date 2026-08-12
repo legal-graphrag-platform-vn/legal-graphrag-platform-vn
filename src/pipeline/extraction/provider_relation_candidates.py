@@ -55,6 +55,33 @@ class ProviderRelationCandidateV1(BaseModel):
         )
 
 
+def load_provider_relation_candidates(
+    path: Path,
+) -> tuple[ProviderRelationCandidateV1, ...]:
+    if not path.is_file():
+        return ()
+    candidates: list[ProviderRelationCandidateV1] = []
+    seen_ids: set[str] = set()
+    for line_number, line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(), 1
+    ):
+        if not line.strip():
+            continue
+        try:
+            candidate = ProviderRelationCandidateV1.model_validate_json(line)
+        except Exception as exc:
+            raise ValueError(
+                f"Malformed provider relation candidate at {path}:{line_number}"
+            ) from exc
+        if candidate.candidate_id in seen_ids:
+            raise ValueError(
+                f"Duplicate provider relation candidate: {candidate.candidate_id}"
+            )
+        seen_ids.add(candidate.candidate_id)
+        candidates.append(candidate)
+    return tuple(candidates)
+
+
 def build_provider_relation_candidates(
     parsed: ParsedDocument,
     source_text: str,

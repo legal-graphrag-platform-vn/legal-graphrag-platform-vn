@@ -137,6 +137,17 @@ Extraction lưu raw output theo từng Điều trong `article_extractions.jsonl`
 Checkpoint hợp lệ được reuse theo graph/context/provider/model/prompt fingerprint,
 vì vậy lỗi provider giữa chừng không bắt chạy lại các Điều đã hoàn tất.
 
+Với raw bundle LuatVietnam, `parse` còn tạo
+`provider_relation_candidates.jsonl`. Khi `extract` hoặc
+`normalize-extraction` chạy, chỉ candidate `RESOLVED` thuộc `AMENDS`/`REPEALS`
+được chuyển thành deterministic record `PROVIDER_HTML` rồi đi qua schema,
+ontology, consistency và decision gate hiện có. Ngày `effective_from` ưu tiên
+metadata đã xác thực; khi metadata thiếu mới lấy câu hiệu lực rõ ràng trong
+canonical `source.txt`; không dùng ngày ban hành thay ngày hiệu lực. Candidate unresolved, ambiguous và
+positional anchor vẫn chỉ nằm trong sidecar. Relation liên-document accepted có
+`materialization_route=CORPUS_RELATION_RECONCILIATION`; payload builder một
+document defer relation này để không tạo dangling endpoint hoặc node giả.
+
 Trước full run, chạy smoke 3-5 Điều bằng full hierarchy registry:
 
 ```bash

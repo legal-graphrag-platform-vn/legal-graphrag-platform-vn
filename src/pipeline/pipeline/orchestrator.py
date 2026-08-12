@@ -32,6 +32,13 @@ from src.pipeline.extraction.llm_extractor import extract_article
 from src.pipeline.extraction.models import ExtractedEntity
 from src.pipeline.extraction.models import ExtractionResult
 from src.pipeline.extraction.providers.base import ExtractionProviderError
+from src.pipeline.extraction.provider_relation_candidates import (
+    load_provider_relation_candidates,
+)
+from src.pipeline.extraction.provider_relation_records import (
+    PROVIDER_EXTRACTION_METHOD,
+    build_provider_relation_records,
+)
 from src.pipeline.extraction.structural_context import (
     ENDPOINT_CONTRACT_VERSION,
     PROMPT_VERSION,
@@ -699,6 +706,16 @@ def run_pipeline(
         source_path=source_path,
     )
     document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
+    provider_candidates = load_provider_relation_candidates(
+        out_dir / "provider_relation_candidates.jsonl"
+    )
+    provider_relation_records = build_provider_relation_records(
+        provider_candidates,
+        document=parsed.document,
+        registry=registry,
+        source_text=source_text or "",
+        selected_article_numbers={article.number for article in selected_articles},
+    )
     checkpoint_path = out_dir / "article_extractions.jsonl"
     checkpoints = _load_checkpoints(
         checkpoint_path,
@@ -838,6 +855,8 @@ def run_pipeline(
     all_records.extend(rule_records)
     _mark_llm_relations_superseded_by_rules(all_records)
 
+    all_records.extend(provider_relation_records)
+
     # Diagram relations — document-level, deterministic, chạy sau rule records.
     if diagram:
         document_registry = DocumentRegistry.from_manifest(
@@ -948,6 +967,8 @@ def run_pipeline(
                     "semantic_type_conflicts": sorted(semantic_type_conflicts),
                     "structural_reference_count": len(resolved_references),
                     "rule_relation_count": len(rule_records),
+                    "provider_candidate_count": len(provider_candidates),
+                    "provider_relation_record_count": len(provider_relation_records),
                     "completed_at": datetime.now(timezone.utc)
                     .isoformat()
                     .replace("+00:00", "Z"),
@@ -1358,7 +1379,12 @@ def _apply_decision_gate(record: dict) -> dict:
     extraction_method = (
         (record.get("relation") or {}).get("properties", {}).get("extraction_method")
     )
-    if extraction_method in {"RULE", "ENTITY_LINKING", "DIAGRAM"}:
+    if extraction_method in {
+        "RULE",
+        "ENTITY_LINKING",
+        "DIAGRAM",
+        PROVIDER_EXTRACTION_METHOD,
+    }:
         record["decision"] = "accepted"
         record["review_reason"] = None
         record["blocking"] = False
@@ -1384,9 +1410,18 @@ def _apply_atomic_bundle_decisions(records: list[dict]) -> list[dict]:
     bundles: dict[str, list[dict]] = {}
     for record in records:
         properties = (record.get("relation") or {}).get("properties") or {}
-        if properties.get("extraction_method") not in {"RULE", "ENTITY_LINKING"}:
+        extraction_method = properties.get("extraction_method")
+        if extraction_method not in {
+            "RULE",
+            "ENTITY_LINKING",
+            PROVIDER_EXTRACTION_METHOD,
+        }:
             continue
-        bundle_id = properties.get("reference_bundle_id")
+        bundle_id = (
+            record.get("provider_bundle_id")
+            if extraction_method == PROVIDER_EXTRACTION_METHOD
+            else properties.get("reference_bundle_id")
+        )
         if bundle_id:
             bundles.setdefault(str(bundle_id), []).append(record)
 

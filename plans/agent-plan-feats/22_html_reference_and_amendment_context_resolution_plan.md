@@ -427,6 +427,11 @@ Implemented:
   from the nearest resolved governing `CHANGE_CONTENT` target;
 - parse emits `provider_relation_candidates.jsonl` with typed statuses
   `RESOLVED`, `UNRESOLVED`, `AMBIGUOUS`, or `NOT_APPLICABLE`;
+- extraction consumes resolved `AMENDS`/`REPEALS` candidates as deterministic
+  `PROVIDER_HTML` records through the existing schema, ontology, consistency and
+  decision gates; explicit source-text effective dates override missing metadata;
+- accepted cross-document provider relations are deferred from the single-document
+  graph payload under `CORPUS_RELATION_RECONCILIATION`;
 - missing documents/items remain unresolved and no graph placeholder is created;
 - ADR-32 and ontology 1.10.0 add Point-level `AMENDS`/`REPEALS`.
 
