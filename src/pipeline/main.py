@@ -737,6 +737,10 @@ def build_reference_registry(
                 )
             payloads[code] = loaded.validated_payload
             sources[code] = source_path.read_text(encoding="utf-8")
+        build_dir = settings.data_registry_dir / "builds" / build_id
+        if build_dir.exists():
+            import shutil
+            shutil.rmtree(build_dir, ignore_errors=True)
         build = build_corpus_registry(payloads, sources, build_id=build_id)
         publish_registry_build(build, settings.data_registry_dir)
     except (ValidatedPayloadLoadError, RegistryError, OSError, ValueError) as exc:
@@ -1166,6 +1170,9 @@ def batch_parse(
     limit: Annotated[int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")] = None,
 ) -> None:
     """Parse cấu trúc cây (Chương/Mục/Điều/Khoản/Điểm) cho toàn bộ dataset trong manifest."""
+    if (raw_dir / "metadata.json").exists() or (raw_dir / "source.txt").exists():
+        raw_dir = raw_dir.parent
+
     manifest_data = load_curated_manifest(manifest)
     doc_codes = list(manifest_data.keys())
 
@@ -1220,10 +1227,16 @@ def batch_extract(
     limit: Annotated[int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")] = None,
 ) -> None:
     """Gọi LLM trích xuất tri thức song song cho tập dữ liệu trong manifest (hỗ trợ Article Checkpoint)."""
+    if (raw_dir / "metadata.json").exists() or (raw_dir / "source.txt").exists():
+        raw_dir = raw_dir.parent
     manifest_data = load_curated_manifest(manifest)
     doc_codes = list(manifest_data.keys())
 
-    pending_codes = filter_documents_for_step(doc_codes, step="extract", retry_failed=retry_failed)
+    filtered_codes = filter_documents_for_step(doc_codes, step="extract", retry_failed=retry_failed)
+    pending_codes = [
+        code for code in doc_codes
+        if code in filtered_codes or not (_processed_dir(code) / "extract.jsonl").exists()
+    ]
     if limit and limit > 0:
         pending_codes = pending_codes[:limit]
 
@@ -1240,23 +1253,29 @@ def batch_extract(
         try:
             # Đảm bảo văn bản đã được parse trước
             processed_dir = _processed_dir(code)
-            if not (processed_dir / "hierarchy.json").exists():
+            hierarchy_path = processed_dir / "hierarchy.json"
+            if not hierarchy_path.exists():
                 _parse_folder_worker(code, raw_root=raw_dir, manifest_path=manifest)
 
-            # Chạy pipeline orchestrator cho văn bản
-            result = run_pipeline(
-                raw_doc_code=code,
-                raw_root=raw_dir,
-                manifest_path=manifest,
+            parsed = ParsedDocument.model_validate_json(
+                hierarchy_path.read_text(encoding="utf-8")
             )
-            if result.summary.get("rejected_count", 0) == 0:
-                success_count += 1
-                record_doc_status(code, step="extract", status="SUCCESS")
-            else:
-                fail_count += 1
-                record_doc_status(code, step="extract", status="FAILED", error="Contains rejected records")
+            raw_doc_dir = raw_dir / code if (raw_dir / code).exists() else settings.data_raw_dir / code
+            source_file = raw_doc_dir / "source.txt"
+            source_text = source_file.read_text(encoding="utf-8") if source_file.exists() else None
+
+            # Chạy pipeline orchestrator cho văn bản
+            run_pipeline(
+                parsed,
+                settings.data_processed_dir,
+                raw_doc_code=code,
+                source_text=source_text,
+            )
+            success_count += 1
+            record_doc_status(code, step="extract", status="SUCCESS")
         except Exception as exc:
             fail_count += 1
+            typer.echo(f"Lỗi extract [{code}]: {exc}", err=True)
             record_doc_status(code, step="extract", status="FAILED", error=str(exc))
     typer.echo(f"Hoàn thành Batch Extract. Thành công: {success_count}, Thất bại: {fail_count}")
 
@@ -1366,13 +1385,19 @@ def ingest_folder(
 
     is_single_doc = (raw_dir / "metadata.json").exists() or (raw_dir / "source.txt").exists()
     base_raw_dir = raw_dir.parent if is_single_doc else raw_dir
-    manifest_path = manifest or (raw_dir / "manifest.json" if not is_single_doc else raw_dir / "manifest.json")
+    manifest_path = manifest or (_processed_dir(raw_dir.name) / "manifest.json" if is_single_doc else settings.data_processed_dir / "manifest.json")
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
 
     typer.echo(f"🚀 BẮT ĐẦU CHẠY FULL PIPELINE CHO THƯ MỤC: {raw_dir}")
 
     # 2.   Bước 1: Tạo Manifest
     typer.echo("\n=== BƯỚC 1/6: Tạo Manifest Dataset ===")
     build_manifest(raw_dir, output=manifest_path)
+
+    manifest_data = load_curated_manifest(manifest_path)
+    doc_codes = list(manifest_data.keys())
+    if limit and limit > 0:
+        doc_codes = doc_codes[:limit]
 
     # 3.   Bước 2: Parse cấu trúc cây
     typer.echo("\n=== BƯỚC 2/6: Phân tách Cấu trúc Hàng loạt (Batch Parse) ===")
@@ -1386,14 +1411,9 @@ def ingest_folder(
     typer.echo("\n=== BƯỚC 4/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
     try:
         build_reference_registry(manifest=manifest_path)
-        reconcile_external_reference_command(manifest=manifest_path, apply_changes=True)
+        reconcile_external_reference_command(build_id="build_latest", raw_doc_code=doc_codes, apply=write_neo4j)
     except Exception as exc:
         typer.echo(f"Cảnh báo khi reconcile references: {exc}", err=True)
-
-    manifest_data = load_curated_manifest(manifest_path)
-    doc_codes = list(manifest_data.keys())
-    if limit and limit > 0:
-        doc_codes = doc_codes[:limit]
 
     # 6.   Bước 5: Write vào Neo4j
     if write_neo4j:

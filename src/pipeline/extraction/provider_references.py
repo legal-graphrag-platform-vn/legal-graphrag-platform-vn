@@ -38,7 +38,8 @@ class ProviderReferenceMentionV1(BaseModel):
 def load_provider_references(
     raw_dir: Path, source_text: str | None = None
 ) -> tuple[ProviderReferenceMentionV1, ...]:
-    path = raw_dir / "references.jsonl"
+    processed_path = settings.data_processed_dir / raw_dir.name / "references.jsonl"
+    path = processed_path if processed_path.is_file() else raw_dir / "references.jsonl"
     if not path.is_file():
         return ()
     rows: list[ProviderReferenceMentionV1] = []
@@ -114,7 +115,9 @@ def ensure_luatvietnam_reference_sidecar(
             "HTML serialization does not match canonical source.txt"
         )
 
-    path = raw_dir / "references.jsonl"
+    processed_dir = settings.data_processed_dir / raw_dir.name
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    path = processed_dir / "references.jsonl"
     content = "".join(
         json.dumps(reference.as_dict(), ensure_ascii=False, sort_keys=True) + "\n"
         for reference in document.provider_references
