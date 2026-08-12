@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.3
 > **Liên quan đến**: RC3 + RC4
-> **Depends on**: [legal_ontology.md v1.9.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.10.0](./legal_ontology.md)
 
 ---
 

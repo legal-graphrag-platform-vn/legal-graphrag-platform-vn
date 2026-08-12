@@ -39,7 +39,7 @@ def test_all_relations_have_constraints() -> None:
 
 
 def test_executable_contract_matches_frozen_ontology_version() -> None:
-    assert ONTOLOGY_VERSION == "1.9.0"
+    assert ONTOLOGY_VERSION == "1.10.0"
 
 
 def test_contract_separates_reference_and_document_relation_provenance() -> None:
@@ -225,16 +225,17 @@ def test_replaces_document_only() -> None:
     assert ok, f"REPLACES Document-Document bị reject sai: {err}"
 
 
-def test_repeals_document_head() -> None:
-    """REPEALS đi từ Document sang Document/Article/Clause."""
-    ok, err = validate_relation(
-        "Article", "REPEALS", "Document", properties={"effective_from": "2021-01-01"}
-    )
-    assert not ok
-    ok, err = validate_relation(
-        "Document", "REPEALS", "Article", properties={"effective_from": "2021-01-01"}
-    )
-    assert ok, f"REPEALS Document-Article bị reject sai: {err}"
+def test_repeals_supports_smallest_structural_unit() -> None:
+    """Instruction unit and affected unit may both be a Point."""
+    for head, tail in (
+        ("Document", "Point"),
+        ("Point", "Point"),
+        ("Clause", "Article"),
+    ):
+        ok, err = validate_relation(
+            head, "REPEALS", tail, properties={"effective_from": "2021-01-01"}
+        )
+        assert ok, f"REPEALS {head}-{tail} bị reject sai: {err}"
 
 
 def test_amends_document_to_document_allowed() -> None:
@@ -243,6 +244,13 @@ def test_amends_document_to_document_allowed() -> None:
         "Document", "AMENDS", "Document", properties={"effective_from": "2021-01-01"}
     )
     assert ok, f"AMENDS Document-Document bị reject sai: {err}"
+
+
+def test_amends_supports_point_to_point() -> None:
+    ok, err = validate_relation(
+        "Point", "AMENDS", "Point", properties={"effective_from": "2024-11-15"}
+    )
+    assert ok, f"AMENDS Point-Point bị reject sai: {err}"
 
 
 def test_amends_missing_effective_from_rejected() -> None:

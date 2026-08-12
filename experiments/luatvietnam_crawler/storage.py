@@ -22,6 +22,11 @@ def save_document(
         raise ValueError("Refusing output path outside the designated output root")
     document_dir.mkdir(parents=True, exist_ok=True)
     _atomic_write(document_dir / "source.txt", document.source_text + "\n")
+    reference_content = "".join(
+        json.dumps(reference.as_dict(), ensure_ascii=False, sort_keys=True) + "\n"
+        for reference in document.provider_references
+    )
+    _atomic_write(document_dir / "references.jsonl", reference_content)
     _save_optional_html(document_dir, source_html)
     metadata_payload = document.metadata()
     content = metadata_payload.get("content")

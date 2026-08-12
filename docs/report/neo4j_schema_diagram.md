@@ -1,6 +1,6 @@
 # Lược đồ Neo4j — Node & Edge (Legal GraphRAG VN)
 
-> **Phiên bản ontology:** `1.9.0`
+> **Phiên bản ontology:** `1.10.0`
 > **Nguồn đối chiếu:** `src/shared/ontology/contract.py`,
 > `infra/neo4j/init/01_schema_init.cypher`, `docs/report/neo4j_database_schema.md`.
 > **Phạm vi:** 12 label được Phase 1 writer persist (9 structural + 3 semantic).

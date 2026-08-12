@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -365,6 +366,44 @@ def test_parser_source_spans_use_canonical_source_coordinates() -> None:
     canonical = text.replace("\r\n", "\n")
     point = parsed.articles[0].clauses[0].points[0]
     assert canonical[point.source_start_char : point.source_end_char] == "a) Điểm"
+
+
+def test_parser_keeps_structural_headings_inside_replacement_quote_in_host_article() -> (
+    None
+):
+    text = (
+        "Điều 1. Sửa đổi, bổ sung\n"
+        "1. Bổ sung mục mới như sau:\n"
+        "“Mục 3a\n"
+        "Điều 17a. Nội dung được bổ sung\n"
+        "Nội dung chi tiết.”.\n"
+        "Điều 2. Điều khoản thi hành"
+    )
+
+    parsed = parse_text(text, _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["1", "2"]
+    assert "Điều 17a. Nội dung được bổ sung" in parsed.articles[0].content_raw
+
+
+def test_parser_uses_explicit_source_effective_date_when_metadata_is_missing() -> None:
+    parsed = parse_text(
+        "Điều 1. Hiệu lực\n"
+        "Nghị định này có hiệu lực thi hành từ ngày 15 tháng 11 năm 2024.",
+        _doc_info().model_copy(update={"effective_from": None}),
+    )
+
+    assert parsed.document.effective_from == date(2024, 11, 15)
+
+
+def test_parser_keeps_metadata_effective_date_over_quoted_source_date() -> None:
+    parsed = parse_text(
+        "Điều 1. Nội dung sửa đổi\n"
+        "Văn bản được trích dẫn có hiệu lực thi hành từ ngày 15 tháng 11 năm 2024.",
+        _doc_info().model_copy(update={"effective_from": date(2025, 1, 1)}),
+    )
+
+    assert parsed.document.effective_from == date(2025, 1, 1)
 
 
 def test_clean_vietnamese_spacing() -> None:

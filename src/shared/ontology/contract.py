@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.9.0"
+ONTOLOGY_VERSION = "1.10.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -148,24 +148,18 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
     },
     "AMENDS": {
         "valid_pairs": [
-            ("Document", "Document"),
-            ("Document", "Article"),
-            ("Document", "Clause"),
-            ("Article", "Document"),
-            ("Article", "Article"),
-            ("Article", "Clause"),
-            ("Clause", "Document"),
-            ("Clause", "Clause"),
-            ("Clause", "Article"),
+            (head, tail)
+            for head in ("Document", "Article", "Clause", "Point")
+            for tail in ("Document", "Article", "Clause", "Point")
         ],
         "no_self_loop": True,
         "required_properties": ["effective_from"],
     },
     "REPEALS": {
         "valid_pairs": [
-            ("Document", "Document"),
-            ("Document", "Article"),
-            ("Document", "Clause"),
+            (head, tail)
+            for head in ("Document", "Article", "Clause", "Point")
+            for tail in ("Document", "Article", "Clause", "Point")
         ],
         "no_self_loop": True,
         "required_properties": ["effective_from"],

@@ -1615,3 +1615,44 @@ Clause dù resolver đã xác định đúng.
   backward compatibility v1 và reject client anchor injection.
 - Các relation goal khác (`DEFINES`, `REGULATES`, `GUIDES`) đã có enum contract
   nhưng chỉ được activate khi có deterministic detector/resolver tương ứng.
+
+---
+
+## ADR-32: Provider reference evidence và quan hệ sửa đổi ở đơn vị nhỏ nhất
+
+**Ngày**: 2026-08-12
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+LuatVietnam đặt citation trong `[]` và gắn URL có `docId`, `docItemId`,
+`DocReferenceId`, `DocItemReferenceId` hoặc `DocItemRelateId`. Text trong ngoặc
+không đủ để xác định chắc chắn document/unit đích; đồng thời một instruction tại
+Point có thể sửa đổi hoặc bãi bỏ Point của văn bản khác. Ontology 1.9.0 chưa cho
+`Point` làm endpoint của `AMENDS`/`REPEALS`.
+
+### Quyết định
+
+1. HTML provider là evidence xác định identity; `source.txt` tiếp tục là canonical
+   text dùng cho offset và extraction.
+2. Persist sidecar reference có source/target provider IDs, loại link, evidence
+   text và exact source span. Không suy ra target document chỉ từ chữ “này”.
+3. Resolve provider item sang canonical node chỉ khi raw document, serialized HTML,
+   canonical source và parsed hierarchy đều khớp. Thiếu một mắt xích thì giữ
+   `UNRESOLVED`; không tạo placeholder graph node.
+4. Quan hệ dùng smallest evidenced structural unit. Ontology 1.10.0 cho
+   `Document|Article|Clause|Point` làm cả head và tail của `AMENDS`, `REPEALS`.
+5. Link “bổ sung ... vào sau/trước” là positional anchor, không tự tạo
+   `AMENDS`. Citation nằm trong replacement quote mang ownership `PROJECTED` và
+   chưa được persist đến khi resolve được structural owner của nội dung mới.
+6. LLM có thể phân loại operation khi rule không chắc chắn, nhưng không được
+   thay provider identity hay bypass checkpoint endpoint.
+
+### Hệ quả
+
+- Cặp mẫu `366692/2732412 -> 186730/1399134` có thể resolve thành
+  `Point --AMENDS--> Point` khi cả hai hierarchy tồn tại.
+- Crawl/parse có thể chạy không theo thứ tự; rerun parse/reconciliation sau khi
+  target xuất hiện sẽ resolve candidate cũ.
+- `UNRESOLVED`, `AMBIGUOUS`, `NOT_APPLICABLE` không được đưa vào Neo4j.
+- Artifact ontology 1.9.x cần regenerate trước khi ghi theo contract 1.10.0.
