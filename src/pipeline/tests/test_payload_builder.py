@@ -121,6 +121,29 @@ def test_build_graph_payload_fails_for_missing_entity_index_entry() -> None:
         )
 
 
+def test_build_graph_payload_defers_provider_cross_document_relation() -> None:
+    payload = build_graph_payload(
+        _parsed(),
+        [
+            {
+                "decision": "accepted",
+                "materialization_route": "CORPUS_RELATION_RECONCILIATION",
+                "relation": {
+                    "head": "ldn_2020_art17_cl1_pa",
+                    "relation": "AMENDS",
+                    "tail": "external_doc_art2_cl2_pa",
+                    "properties": {"effective_from": "2021-01-01"},
+                },
+            }
+        ],
+        {},
+        raw_doc_code="LDN2020",
+    )
+
+    assert payload["metadata"]["deferred_relation_count"] == 1
+    assert not any(relation["type"] == "AMENDS" for relation in payload["relations"])
+
+
 def test_point_d_and_dd_do_not_collide() -> None:
     parsed = _parsed()
     parsed.articles[0].clauses[0].points = [
