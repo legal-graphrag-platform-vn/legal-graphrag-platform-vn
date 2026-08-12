@@ -1315,17 +1315,17 @@ def batch_ingest_all(
     typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
     batch_extract(manifest=manifest, raw_dir=raw_dir, retry_failed=retry_failed, limit=limit)
 
-    typer.echo("\n=== BƯỚC 4/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
-    try:
-        build_reference_registry(manifest=manifest)
-        reconcile_external_references()
-    except Exception as exc:
-        typer.echo(f"Cảnh báo khi reconcile references: {exc}", err=True)
-
     manifest_data = load_curated_manifest(manifest)
     doc_codes = list(manifest_data.keys())
     if limit and limit > 0:
         doc_codes = doc_codes[:limit]
+
+    typer.echo("\n=== BƯỚC 4/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
+    try:
+        build_reference_registry(manifest=manifest)
+        reconcile_external_reference_command(build_id="build_latest", raw_doc_code=doc_codes, apply=write_neo4j)
+    except Exception as exc:
+        typer.echo(f"Cảnh báo khi reconcile references: {exc}", err=True)
 
     if write_neo4j:
         typer.echo("\n=== BƯỚC 5/6: Ghi Đồ thị Hàng loạt vào Neo4j ===")
@@ -1372,9 +1372,9 @@ def ingest_folder(
     write_neo4j: Annotated[
         bool, typer.Option(help="Tự động ghi đồ thị vào Neo4j")
     ] = True,
-    generate_embedding: Annotated[
-        bool, typer.Option(help="Tự động tạo BGE-M3 embedding vào Neo4j")
-    ] = True,
+    doc_by_doc: Annotated[
+        bool, typer.Option(help="Xử lý trọn gói (Parse -> Extract -> Write Neo4j -> Embed) lần lượt cho từng văn bản một trước khi sang văn bản tiếp theo")
+    ] = False,
 ) -> None:
     """Chạy FULL PIPELINE end-to-end cho một thư mục văn bản: Manifest -> Parse -> LLM Extract -> Reference Reconcile -> Write Neo4j -> BGE-M3 Embed."""
     # 1.   Xác định đường dẫn thư mục và file manifest
@@ -1398,6 +1398,49 @@ def ingest_folder(
     doc_codes = list(manifest_data.keys())
     if limit and limit > 0:
         doc_codes = doc_codes[:limit]
+
+    # Xử lý tuần tự từng văn bản một (Document by Document End-to-End)
+    if doc_by_doc:
+        typer.echo(f"\n🔄 CHẾ ĐỘ XỬ LÝ TUẦN TỰ TỪNG VĂN BẢN (END-TO-END DOCUMENT BY DOCUMENT): {len(doc_codes)} văn bản")
+        for idx, code in enumerate(doc_codes, 1):
+            typer.echo(f"\n--------------------------------------------------")
+            typer.echo(f"📄 [{idx}/{len(doc_codes)}] ĐANG XỬ LÝ VĂN BẢN: {code}")
+            typer.echo(f"--------------------------------------------------")
+            try:
+                # Parse
+                _parse_folder_worker(code, raw_root=base_raw_dir, manifest_path=manifest_path)
+
+                # LLM Extract
+                processed_dir = _processed_dir(code)
+                hierarchy_path = processed_dir / "hierarchy.json"
+                if hierarchy_path.exists():
+                    parsed = ParsedDocument.model_validate_json(hierarchy_path.read_text(encoding="utf-8"))
+                    raw_doc_dir = base_raw_dir / code if (base_raw_dir / code).exists() else settings.data_raw_dir / code
+                    source_file = raw_doc_dir / "source.txt"
+                    source_text = source_file.read_text(encoding="utf-8") if source_file.exists() else None
+                    run_pipeline(parsed, settings.data_processed_dir, raw_doc_code=code, source_text=source_text)
+
+                # Write Neo4j
+                if write_neo4j:
+                    write_graph(code)
+
+                # Embeddings
+                if generate_embedding and write_neo4j:
+                    embed_graph(code)
+
+                typer.echo(f"✅ ĐÃ HOÀN THÀNH XỬ LÝ & NẠP NEO4J CHO VĂN BẢN: {code}")
+            except Exception as exc:
+                typer.echo(f"❌ Lỗi khi xử lý văn bản {code}: {exc}", err=True)
+
+        # Reconcile references cho tất cả các văn bản đã nạp
+        try:
+            build_reference_registry(manifest=manifest_path)
+            reconcile_external_reference_command(build_id="build_latest", raw_doc_code=doc_codes, apply=write_neo4j)
+        except Exception as exc:
+            typer.echo(f"Cảnh báo khi reconcile references: {exc}", err=True)
+
+        typer.echo(f"\n🎉 HOÀN THÀNH TUẦN TỰ TOÀN BỘ VĂN BẢN CHO THƯ MỤC: {raw_dir}")
+        return
 
     # 3.   Bước 2: Parse cấu trúc cây
     typer.echo("\n=== BƯỚC 2/6: Phân tách Cấu trúc Hàng loạt (Batch Parse) ===")
