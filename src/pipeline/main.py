@@ -226,7 +226,10 @@ def _parse_folder_worker(
             _ready_metadata(raw_doc_code, raw_root=base_raw_dir, manifest_path=manifest_path)
         )
 
-        provider_references = ensure_luatvietnam_reference_sidecar(raw_dir)
+        try:
+            provider_references = ensure_luatvietnam_reference_sidecar(raw_dir)
+        except Exception:
+            provider_references = ()
         text = source_path.read_text(encoding="utf-8")
         try:
             parsed = parse_text(text, doc_info)
@@ -1324,6 +1327,95 @@ def batch_ingest_all(
     typer.echo("\n🎉 HOÀN THÀNH TOÀN BỘ LUỒNG BATCH INGEST!")
 
 
+# 4b. Lệnh CLI chạy FULL PIPELINE cho một thư mục văn bản bất kỳ (Folder -> Parse -> LLM Extract -> Reconcile -> Write Neo4j -> Embed)
+@app.command("ingest-folder")
+@app.command("pipeline-folder")
+def ingest_folder(
+    folder: Annotated[
+        Path,
+        typer.Option(
+            help="Đường dẫn thư mục chứa các thư mục văn bản thô (VD: data/raw hoặc custom_folder)"
+        ),
+    ] = settings.data_raw_dir,
+    manifest: Annotated[
+        Path | None,
+        typer.Option(help="Đường dẫn file manifest JSON (tự tạo tự động nếu để trống)"),
+    ] = None,
+    workers: Annotated[
+        int, typer.Option(min=1, max=32, help="Số lượng luồng xử lý song song")
+    ] = 4,
+    retry_failed: Annotated[
+        bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")
+    ] = False,
+    limit: Annotated[
+        int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")
+    ] = None,
+    write_neo4j: Annotated[
+        bool, typer.Option(help="Tự động ghi đồ thị vào Neo4j")
+    ] = True,
+    generate_embedding: Annotated[
+        bool, typer.Option(help="Tự động tạo BGE-M3 embedding vào Neo4j")
+    ] = True,
+) -> None:
+    """Chạy FULL PIPELINE end-to-end cho một thư mục văn bản: Manifest -> Parse -> LLM Extract -> Reference Reconcile -> Write Neo4j -> BGE-M3 Embed."""
+    # 1.   Xác định đường dẫn thư mục và file manifest
+    raw_dir = folder.resolve()
+    if not raw_dir.exists() or not raw_dir.is_dir():
+        typer.echo(f"❌ Thư mục không tồn tại: {raw_dir}", err=True)
+        raise typer.Exit(code=1)
+
+    is_single_doc = (raw_dir / "metadata.json").exists() or (raw_dir / "source.txt").exists()
+    base_raw_dir = raw_dir.parent if is_single_doc else raw_dir
+    manifest_path = manifest or (raw_dir / "manifest.json" if not is_single_doc else raw_dir / "manifest.json")
+
+    typer.echo(f"🚀 BẮT ĐẦU CHẠY FULL PIPELINE CHO THƯ MỤC: {raw_dir}")
+
+    # 2.   Bước 1: Tạo Manifest
+    typer.echo("\n=== BƯỚC 1/6: Tạo Manifest Dataset ===")
+    build_manifest(raw_dir, output=manifest_path)
+
+    # 3.   Bước 2: Parse cấu trúc cây
+    typer.echo("\n=== BƯỚC 2/6: Phân tách Cấu trúc Hàng loạt (Batch Parse) ===")
+    batch_parse(manifest=manifest_path, raw_dir=base_raw_dir, workers=workers, retry_failed=retry_failed, limit=limit)
+
+    # 4.   Bước 3: LLM Extraction
+    typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
+    batch_extract(manifest=manifest_path, raw_dir=base_raw_dir, retry_failed=retry_failed, limit=limit)
+
+    # 5.   Bước 4: Reference Registry & Reconciliation
+    typer.echo("\n=== BƯỚC 4/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
+    try:
+        build_reference_registry(manifest=manifest_path)
+        reconcile_external_reference_command(manifest=manifest_path, apply_changes=True)
+    except Exception as exc:
+        typer.echo(f"Cảnh báo khi reconcile references: {exc}", err=True)
+
+    manifest_data = load_curated_manifest(manifest_path)
+    doc_codes = list(manifest_data.keys())
+    if limit and limit > 0:
+        doc_codes = doc_codes[:limit]
+
+    # 6.   Bước 5: Write vào Neo4j
+    if write_neo4j:
+        typer.echo("\n=== BƯỚC 5/6: Ghi Đồ thị Hàng loạt vào Neo4j ===")
+        for code in doc_codes:
+            try:
+                write_graph(code)
+            except Exception as exc:
+                typer.echo(f"Lỗi khi write Neo4j cho {code}: {exc}", err=True)
+
+    # 7.   Bước 6: Generate BGE-M3 Embeddings
+    if generate_embedding and write_neo4j:
+        typer.echo("\n=== BƯỚC 6/6: Sinh BGE-M3 Embedding Hàng loạt ===")
+        for code in doc_codes:
+            try:
+                embed_graph(code)
+            except Exception as exc:
+                typer.echo(f"Lỗi khi generate embedding cho {code}: {exc}", err=True)
+
+    typer.echo(f"\n🎉 HOÀN THÀNH TOÀN BỘ FULL PIPELINE CHO THƯ MỤC: {raw_dir}")
+
+
 @app.command("init-schema")
 def init_schema_command(
     uri: Annotated[str, typer.Option(help="Neo4j Bolt URI")] = "",
@@ -1387,3 +1479,4 @@ def verify_schema_command(
 
 if __name__ == "__main__":
     app()
+

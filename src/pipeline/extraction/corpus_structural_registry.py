@@ -454,7 +454,13 @@ def publish_registry_build(build: RegistryBuild, root: Path) -> Path:
     temporary_pointer = root / f".current_reference_registry.{os.getpid()}.tmp"
     if temporary_pointer.exists() or temporary_pointer.is_symlink():
         temporary_pointer.unlink()
-    temporary_pointer.symlink_to(Path("builds") / build.receipt.build_id)
+    
+    target_rel = Path("builds") / build.receipt.build_id
+    try:
+        temporary_pointer.symlink_to(target_rel)
+    except OSError:
+        temporary_pointer.write_text(str(target_rel.as_posix()), encoding="utf-8")
+        
     os.replace(temporary_pointer, pointer)
     _fsync_directory(root)
     return build_dir
@@ -464,9 +470,14 @@ def load_registry_build(root: Path, build_id: str | None = None) -> RegistryBuil
     root = root.resolve()
     if build_id is None:
         pointer = root / "current_reference_registry"
-        if not pointer.is_symlink():
-            raise RegistryError("Current registry pointer is missing or not a symlink")
-        resolved = pointer.resolve(strict=True)
+        if pointer.is_file() and not pointer.is_symlink():
+            rel_str = pointer.read_text(encoding="utf-8").strip()
+            resolved = (root / rel_str).resolve(strict=True)
+        elif pointer.is_symlink():
+            resolved = pointer.resolve(strict=True)
+        else:
+            raise RegistryError("Current registry pointer is missing or invalid")
+
         builds_root = (root / "builds").resolve(strict=True)
         if resolved.parent != builds_root:
             raise RegistryError("Current registry pointer escapes builds directory")

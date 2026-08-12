@@ -86,8 +86,11 @@ def build_manifest_from_raw_dir(
     """Quét toàn bộ thư mục raw_dir và trả về dictionary manifest hoàn chỉnh."""
     documents: list[dict[str, Any]] = []
 
-    # 1. Lấy danh sách tất cả các thư mục con trong raw_dir
-    doc_dirs = sorted([d for d in raw_dir.iterdir() if d.is_dir()])
+    # 1. Lấy danh sách thư mục văn bản: nếu raw_dir là thư mục văn bản đơn lẻ thì dùng chính nó
+    if (raw_dir / "metadata.json").exists() or (raw_dir / "source.txt").exists():
+        doc_dirs = [raw_dir]
+    else:
+        doc_dirs = sorted([d for d in raw_dir.iterdir() if d.is_dir()])
     logger.info(f"Tìm thấy {len(doc_dirs)} thư mục văn bản trong {raw_dir}")
 
     # 2. Duyệt từng thư mục văn bản để trích xuất metadata
