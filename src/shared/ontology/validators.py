@@ -142,7 +142,6 @@ class OntologyValidator:
                 "id",
                 "doc_type",
                 "number",
-                "normative",
                 "legal_status",
                 "effective_from",
                 "issuer_name",
@@ -157,8 +156,7 @@ class OntologyValidator:
         return self._validate_node(
             issuer,
             node_type="Issuer",
-            required_fields=("id", "name", "branch"),
-            enum_fields={"branch": ISSUER_BRANCHES},
+            required_fields=("id", "name"),
         )
 
     def validate_chapter(self, chapter: Mapping[str, Any]) -> ValidatedNode:

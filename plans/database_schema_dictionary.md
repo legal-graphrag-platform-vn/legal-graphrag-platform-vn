@@ -22,7 +22,6 @@ Lưu trữ thông tin hồ sơ (profile) của người dùng hệ thống. Gi�
 | `full_name` | `varchar(128)` | | Tên hiển thị đầy đủ của người dùng |
 | `avatar_url` | `text` | | Đường dẫn ảnh đại diện của người dùng |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm tạo hồ sơ người dùng |
-| `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm cập nhật thông tin người dùng mới nhất |
 
 ---
 
@@ -35,7 +34,6 @@ Lưu trữ thông tin xác thực đăng nhập (Username / Password). Liên k�
 | `username` | `varchar(64)` | NN, UNIQUE, INDEX | Tên đăng nhập duy nhất của người dùng (lưu chữ thường) |
 | `password_hash` | `varchar(255)` | NN | Chuỗi băm mật khẩu bảo mật (PBKDF2-HMAC-SHA256) |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm đăng ký tài khoản |
-| `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm thay đổi thông tin đăng nhập gần nhất |
 
 ---
 
@@ -51,7 +49,6 @@ Quản lý các cuộc trò chuyện của người dùng chính thức (User).
 | `is_deleted` | `boolean` | NN, DF=false | Cờ đánh dấu xóa mềm cuộc trò chuyện (Soft Delete) |
 | `next_user_turn_no` | `integer` | NN, DF=1, CHECK(>=1) | Số thứ tự lượt tương tác kế tiếp của người dùng |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm khởi tạo cuộc trò chuyện |
-| `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm cập nhật tin nhắn cuối cùng |
 
 ---
 
@@ -71,7 +68,6 @@ Bảng này điều phối và lưu trữ trạng thái xử lý tổng thể c�
 | `error_code` | `varchar(64)` | | Mã lỗi chuẩn hóa (nếu lượt tương tác bị `FAILED`) |
 | `response_snapshot` | `jsonb` | | Snapshot dữ liệu câu trả lời chuẩn (JSONB) dùng để Replay lại luồng stream SSE nếu trình duyệt client bị rớt mạng giữa chừng mà không phải gọi lại AI. |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm bắt đầu lượt tương tác |
-| `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm hoàn thành lượt tương tác |
 
 ---
 
@@ -155,7 +151,6 @@ Tạm giữ trạng thái khi câu hỏi người dùng có tham chiếu bị nh
 | `question` | `text` | NN | Câu hỏi làm rõ gửi tới người dùng (ví dụ: *"Bạn đang muốn hỏi về vốn điều lệ theo Luật Doanh nghiệp 2020 hay Nghị định 01/2021/NĐ-CP?"*) |
 | `candidates` | `jsonb` | NN | Danh sách ứng viên pháp lý dạng JSONB để hiển thị trên UI. |
 | `created_at` | `timestamptz` | NN, DF=NOW() | Thời điểm tạo câu hỏi làm rõ |
-<!-- | `updated_at` | `timestamptz` | NN, DF=NOW() | Thời điểm cập nhật câu hỏi làm rõ | -->
 
 ---
 

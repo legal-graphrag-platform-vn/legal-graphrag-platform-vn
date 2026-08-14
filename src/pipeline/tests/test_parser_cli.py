@@ -62,7 +62,6 @@ def test_parse_cli_single_folder(tmp_path: Path) -> None:
         parsed_data = json.loads(processed_file.read_text(encoding="utf-8"))
         assert parsed_data["document"]["id"] == "ldn_2020"
         assert parsed_data["document"]["doc_type"] == "Law"
-        assert parsed_data["document"]["normative"] is True
         assert parsed_data["document"]["issuer_name"] == "Quốc hội"
         assert parsed_data["document"]["legal_status"] == "ACTIVE"
         assert "status" not in parsed_data["document"]

@@ -154,21 +154,34 @@ DATETIME_PROPERTIES = {"created_at", "updated_at"}
 def _neo4j_properties(
     alias: str, raw_properties: Mapping[str, Any]
 ) -> tuple[dict[str, Any], str, dict[str, str]]:
-    properties = dict(raw_properties)
+    properties = {}
+    for key, value in raw_properties.items():
+        if value is None:
+            if key == "aliases":
+                properties[key] = []
+            elif key != "embedding":
+                properties[key] = ""
+            else:
+                properties[key] = None
+        else:
+            properties[key] = value
+
     assignments: list[str] = []
     parameters: dict[str, str] = {}
-    for field in sorted(DATE_PROPERTIES | DATETIME_PROPERTIES):
-        value = properties.pop(field, None)
-        if value in (None, ""):
-            continue
-        parameter = f"{alias}_{field}"
-        if field in DATE_PROPERTIES:
-            serialized = _iso_date(value, field)
-            assignments.append(f"SET {alias}.{field} = date(${parameter})")
-        else:
-            serialized = _iso_datetime(value, field)
-            assignments.append(f"SET {alias}.{field} = datetime(${parameter})")
-        parameters[parameter] = serialized
+    for field in list(properties.keys()):
+        if field in (DATE_PROPERTIES | DATETIME_PROPERTIES):
+            value = properties.pop(field)
+            if value in (None, ""):
+                properties[field] = ""
+            else:
+                parameter = f"{alias}_{field}"
+                if field in DATE_PROPERTIES:
+                    serialized = _iso_date(value, field)
+                    assignments.append(f"SET {alias}.{field} = date(${parameter})")
+                else:
+                    serialized = _iso_datetime(value, field)
+                    assignments.append(f"SET {alias}.{field} = datetime(${parameter})")
+                parameters[parameter] = serialized
     return properties, " ".join(assignments), parameters
 
 
