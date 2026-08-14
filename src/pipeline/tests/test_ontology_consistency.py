@@ -60,7 +60,7 @@ def test_contract_exposes_merged_node_metadata() -> None:
         "source_url",
         "updated_at",
     }
-    assert {"part", "chapter", "chapter_title", "section", "subsection"} <= set(
+    assert {"title", "effective_to", "embedding", "updated_at"} <= set(
         NODE_OPTIONAL_FIELDS["Article"]
     )
     assert "updated_at" in NODE_OPTIONAL_FIELDS["Clause"]

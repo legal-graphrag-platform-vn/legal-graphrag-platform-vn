@@ -270,12 +270,11 @@ NODE_REQUIRED_FIELDS: dict[str, list[str]] = {
         "id",
         "doc_type",
         "number",
-        "normative",
         "legal_status",
         "effective_from",
         "issuer_name",
     ],
-    "Issuer": ["id", "name", "branch"],
+    "Issuer": ["id", "name"],
     "Part": ["id", "number", "title"],
     "Chapter": ["id", "number", "title"],
     "Section": ["id", "number", "title"],
@@ -299,9 +298,6 @@ NODE_ENUMS: dict[str, dict[str, set[str]]] = {
     "Document": {
         "doc_type": DOCUMENT_TYPES,
         "legal_status": DOCUMENT_LEGAL_STATUSES,
-    },
-    "Issuer": {
-        "branch": ISSUER_BRANCHES,
     },
     "Article": {
         "legal_status": CONTENT_LEGAL_STATUSES,
@@ -331,15 +327,12 @@ NODE_OPTIONAL_FIELDS: dict[str, list[str]] = {
     "Article": [
         "title",
         "effective_to",
-        "part",
-        "chapter",
-        "chapter_title",
-        "section",
-        "subsection",
+        "embedding",
         "updated_at",
     ],
     "Clause": [
         "effective_to",
+        "embedding",
         "updated_at",
     ],
     "Point": [

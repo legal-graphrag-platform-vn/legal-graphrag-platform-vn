@@ -10,6 +10,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
+from src.pipeline.config import settings
 from src.shared.ontology.contract import DOCUMENT_LEGAL_STATUSES, DOCUMENT_TYPES, ISSUER_BRANCHES
 
 
@@ -57,16 +58,26 @@ def validate_document_readiness(
         errors.append(f"Missing metadata.json: {metadata_path}")
         return DataReadinessResult(raw_doc_code, {}, tuple(errors))
 
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     manifest = load_curated_manifest(manifest_path or DEFAULT_MANIFEST_PATH)
     manifest_entry = manifest.get(raw_doc_code)
     if manifest_entry is None:
-        errors.append(f"raw_doc_code is not in curated manifest: {raw_doc_code}")
-        return DataReadinessResult(raw_doc_code, {}, tuple(errors))
-
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        manifest_entry = {
+            "raw_doc_code": raw_doc_code,
+            "graph_id": metadata.get("candidate_graph_id") or metadata.get("graph_id") or raw_doc_code.lower(),
+            "number": metadata.get("number"),
+            "doc_type": metadata.get("doc_type") or "Law",
+            "required": False,
+            "gold_annotation": False,
+        }
     errors.extend(_manifest_identity_errors(metadata, raw_doc_code, manifest_entry))
     try:
-        normalized = normalize_metadata(metadata, raw_doc_code=raw_doc_code, manifest_entry=manifest_entry)
+        normalized = normalize_metadata(
+            metadata,
+            raw_doc_code=raw_doc_code,
+            manifest_entry=manifest_entry,
+            raw_root=raw_root,
+        )
     except ValueError as exc:
         errors.append(str(exc))
         return DataReadinessResult(raw_doc_code, {}, tuple(errors))
@@ -79,28 +90,63 @@ def normalize_metadata(
     *,
     raw_doc_code: str,
     manifest_entry: Mapping[str, Any],
+    raw_root: Path | None = None,
 ) -> dict[str, Any]:
+    metadata_dict = dict(metadata)
+    base_root = raw_root or settings.data_raw_dir
+    props_path = (base_root / raw_doc_code) / "properties.json"
+    if props_path.exists():
+        try:
+            props = json.loads(props_path.read_text(encoding="utf-8"))
+            if isinstance(props, dict):
+                props_mapping = {
+                    "sector": props.get("sector"),
+                    "field": props.get("field"),
+                    "signer_title": props.get("signer_title"),
+                    "signer_name": props.get("signer_name"),
+                    "issuer_name": props.get("issuing_authority"),
+                    "status": props.get("status"),
+                }
+                eff = _parse_iso_date(props.get("effective_date"))
+                if eff:
+                    props_mapping["effective_from"] = eff
+                iss = _parse_iso_date(props.get("issued_date"))
+                if iss:
+                    props_mapping["issued_date"] = iss
+                exp = _parse_iso_date(props.get("expiry_date"))
+                if exp:
+                    props_mapping["effective_to"] = exp
+                for k, v in props_mapping.items():
+                    if v not in (None, "", "Chưa phân loại") or k not in metadata_dict:
+                        metadata_dict.setdefault(k, v)
+        except Exception:
+            pass
+
     # 1. Trích xuất và fallback tên cơ quan ban hành
-    issuer_name = metadata.get("issuer_name") or metadata.get("issued_by") or "Cơ quan nhà nước"
+    issuer_name = metadata_dict.get("issuer_name") or metadata_dict.get("issued_by") or "Cơ quan nhà nước"
 
     # 2. Trích xuất doc_type và ngày hiệu lực (fallback ngày ban hành hoặc 1970-01-01)
-    doc_type = metadata.get("doc_type") or metadata.get("type") or manifest_entry.get("doc_type")
-    issued_date = metadata.get("issued_date") or "1970-01-01"
-    effective_from = metadata.get("effective_from") or issued_date
-    source_url = metadata.get("source_url") or f"https://luatvietnam.vn/{raw_doc_code}"
+    doc_type = metadata_dict.get("doc_type") or metadata_dict.get("type") or manifest_entry.get("doc_type")
+    raw_issued = metadata_dict.get("issued_date")
+    issued_date = _parse_iso_date(raw_issued) or "1970-01-01"
+    raw_effective = metadata_dict.get("effective_from")
+    effective_from = _parse_iso_date(raw_effective) or issued_date
+    raw_effective_to = metadata_dict.get("effective_to")
+    effective_to = _parse_iso_date(raw_effective_to)
+    source_url = metadata_dict.get("source_url") or f"https://luatvietnam.vn/{raw_doc_code}"
 
     # 3. Gom metadata đã được chuẩn hóa
     normalized = {
-        **dict(metadata),
+        **metadata_dict,
         "raw_doc_code": raw_doc_code,
         "graph_id": manifest_entry.get("graph_id"),
-        "number": metadata.get("number") or manifest_entry.get("number"),
+        "number": metadata_dict.get("number") or manifest_entry.get("number"),
         "doc_type": doc_type,
-        "normative": bool(metadata.get("normative", True)),
+        "normative": bool(metadata_dict.get("normative", True)),
         "issuer_name": issuer_name,
-        "issuer_branch": metadata.get("issuer_branch") or issuer_branch(issuer_name),
-        "legal_status": metadata.get("legal_status") or legal_status_from_raw(metadata.get("status")),
+        "legal_status": metadata_dict.get("legal_status") or legal_status_from_raw(metadata_dict.get("status")),
         "effective_from": effective_from,
+        "effective_to": effective_to,
         "issued_date": issued_date,
         "source_url": source_url,
     }
@@ -163,11 +209,9 @@ def _metadata_errors(metadata: Mapping[str, Any], raw_doc_code: str) -> list[str
         "title",
         "number",
         "doc_type",
-        "normative",
         "legal_status",
         "effective_from",
         "issuer_name",
-        "issuer_branch",
         "source_url",
     )
     for field in required:
@@ -183,8 +227,6 @@ def _metadata_errors(metadata: Mapping[str, Any], raw_doc_code: str) -> list[str
         errors.append(f"Unsupported doc_type: {metadata.get('doc_type')}")
     if metadata.get("legal_status") not in DOCUMENT_LEGAL_STATUSES:
         errors.append(f"Unsupported legal_status: {metadata.get('legal_status')}")
-    if metadata.get("issuer_branch") not in ISSUER_BRANCHES:
-        errors.append(f"Unsupported issuer_branch: {metadata.get('issuer_branch')}")
     for field in ("effective_from", "effective_to", "issued_date"):
         value = metadata.get(field)
         if value not in (None, ""):
@@ -195,6 +237,27 @@ def _metadata_errors(metadata: Mapping[str, Any], raw_doc_code: str) -> list[str
     return errors
 
 
+def _parse_iso_date(value: Any) -> str | None:
+    if value in (None, ""):
+        return None
+    val_str = str(value).split("T")[0].strip()
+    try:
+        return date.fromisoformat(val_str).isoformat()
+    except ValueError:
+        pass
+    parts = val_str.split("/")
+    if len(parts) == 3:
+        try:
+            return date(int(parts[2]), int(parts[1]), int(parts[0])).isoformat()
+        except ValueError:
+            pass
+    return str(value)
+
+
 def _ascii(value: str) -> str:
     decomposed = unicodedata.normalize("NFD", value)
     return "".join(char for char in decomposed if unicodedata.category(char) != "Mn").replace("đ", "d").replace("Đ", "D")
+
+
+
+

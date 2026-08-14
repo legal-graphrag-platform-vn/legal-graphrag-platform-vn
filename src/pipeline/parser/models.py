@@ -158,16 +158,18 @@ class DocumentInfo(BaseModel):
     doc_type: str = Field(
         description="Document type: Law|Decree|Circular|Resolution|Decision"
     )
-    normative: bool = Field(
-        default=True,
-        description="True for normative legal documents in the selected corpus",
-    )
+    normative: bool | None = None
     issued_by: str | None = None
     issued_date: date | None = None
     effective_from: date | None = None
     effective_to: date | None = None
     issuer_name: str | None = None
     legal_status: str = Field(default="ACTIVE")
+    source_url: str | None = None
+    sector: str | None = None
+    field: str | None = None
+    signer_title: str | None = None
+    signer_name: str | None = None
 
 
 class ParsedDocument(BaseModel):

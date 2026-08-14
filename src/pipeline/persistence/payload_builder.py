@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from src.pipeline.parser.models import ParsedDocument
+from src.shared.ontology.contract import NODE_OPTIONAL_FIELDS
 from src.shared.ontology.payload_consistency_validator import (
     deterministic_relation_id,
     relation_identity_discriminator,
@@ -300,6 +301,9 @@ def build_graph_payload(
                         "id": point_id,
                         "label": point.label,
                         "content_raw": point.content,
+                        "effective_from": effective_from,
+                        "effective_to": _optional_str(parsed.document.effective_to),
+                        "legal_status": content_status,
                     },
                 )
                 _add_relation(relations, clause_id, "CONTAINS", point_id, {})
@@ -342,7 +346,6 @@ def _document_node(parsed: ParsedDocument) -> dict[str, Any]:
         "id": document.id,
         "doc_type": document.doc_type,
         "number": document.number,
-        "normative": document.normative,
         "legal_status": document.legal_status,
         "effective_from": document.effective_from,
         "issuer_name": document.issuer_name,
@@ -357,13 +360,16 @@ def _document_node(parsed: ParsedDocument) -> dict[str, Any]:
         "title": document.title,
         "number": document.number,
         "doc_type": document.doc_type,
-        "normative": document.normative,
         "legal_status": document.legal_status,
         "effective_from": str(document.effective_from),
         "effective_to": _optional_str(document.effective_to),
         "issuer_name": document.issuer_name,
-        "issued_by": document.issued_by,
         "issued_date": _optional_str(document.issued_date),
+        "source_url": _optional_str(document.source_url),
+        "sector": _optional_str(document.sector),
+        "field": _optional_str(document.field),
+        "signer_title": _optional_str(document.signer_title),
+        "signer_name": _optional_str(document.signer_name),
     }
 
 
@@ -374,22 +380,7 @@ def _issuer_node(issuer_name: str | None) -> dict[str, Any]:
         "type": "Issuer",
         "id": _slug(issuer_name),
         "name": issuer_name,
-        "branch": _issuer_branch(issuer_name),
     }
-
-
-def _issuer_branch(issuer_name: str) -> str:
-    normalized = _strip_accents(issuer_name).lower()
-    if "quoc hoi" in normalized or "uy ban thuong vu quoc hoi" in normalized:
-        return "LEGISLATIVE"
-    if "toa an" in normalized or "vien kiem sat" in normalized:
-        return "JUDICIAL"
-    if any(
-        token in normalized
-        for token in ("chinh phu", "bo ", "thu tuong", "uy ban nhan dan")
-    ):
-        return "EXECUTIVE"
-    return "OTHER"
 
 
 def _ensure_semantic_node(
@@ -434,7 +425,12 @@ def _resolve_endpoint_id(
 
 def _add_node(nodes: dict[str, dict[str, Any]], node: dict[str, Any]) -> None:
     node_id = str(node["id"])
-    normalized_node = {key: value for key, value in node.items() if value is not None}
+    node_type = str(node.get("type"))
+    optional_fields = NODE_OPTIONAL_FIELDS.get(node_type, [])
+    normalized_node = dict(node)
+    for field in optional_fields:
+        if field not in normalized_node:
+            normalized_node[field] = None
     existing = nodes.get(node_id)
     if existing is not None:
         if existing != normalized_node:

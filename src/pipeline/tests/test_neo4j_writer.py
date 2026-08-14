@@ -22,7 +22,6 @@ def _valid_payload() -> dict:
                 "id": "ldn_2020",
                 "doc_type": "Law",
                 "number": "59/2020/QH14",
-                "normative": True,
                 "legal_status": "ACTIVE",
                 "effective_from": "2021-01-01",
                 "issuer_name": "Quốc hội",
