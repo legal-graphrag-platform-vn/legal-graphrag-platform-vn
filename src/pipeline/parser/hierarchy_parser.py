@@ -328,8 +328,12 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
-        in_quote = quote_depth > 0 or line.startswith("“")
-        quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
+        total_quotes = line.count("“") + line.count("”")
+        if total_quotes > 0 and total_quotes % 2 == 0:
+            in_quote = False
+        else:
+            in_quote = quote_depth > 0 or line.startswith("“")
+            quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
 
         if in_quote:
             if current_article is not None:
