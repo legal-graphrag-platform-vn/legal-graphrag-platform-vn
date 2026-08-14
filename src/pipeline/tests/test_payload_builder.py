@@ -29,7 +29,6 @@ def _parsed() -> ParsedDocument:
             title="Luật Doanh nghiệp",
             number="59/2020/QH14",
             doc_type="Law",
-            normative=True,
             legal_status="ACTIVE",
             effective_from=date(2021, 1, 1),
             issuer_name="Quốc hội",

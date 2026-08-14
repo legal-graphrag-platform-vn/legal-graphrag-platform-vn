@@ -10,6 +10,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.pipeline.config import settings
+
 
 PROVIDER_REFERENCE_CONTRACT_VERSION = "provider-reference-mention-v1"
 
@@ -122,10 +124,12 @@ def ensure_luatvietnam_reference_sidecar(
         json.dumps(reference.as_dict(), ensure_ascii=False, sort_keys=True) + "\n"
         for reference in document.provider_references
     )
-    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
-    try:
-        temporary.write_text(content, encoding="utf-8")
-        os.replace(temporary, path)
-    finally:
-        temporary.unlink(missing_ok=True)
+    for target_path in (path, raw_dir / "references.jsonl"):
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = target_path.with_name(f".{target_path.name}.{uuid.uuid4().hex}.tmp")
+        try:
+            temporary.write_text(content, encoding="utf-8")
+            os.replace(temporary, target_path)
+        finally:
+            temporary.unlink(missing_ok=True)
     return load_provider_references(raw_dir, canonical_source)

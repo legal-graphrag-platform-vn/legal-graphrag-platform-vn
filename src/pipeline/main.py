@@ -130,13 +130,17 @@ def _document_info_from_metadata(meta: dict) -> DocumentInfo:
         title=meta["title"],
         number=meta["number"],
         doc_type=meta.get("doc_type") or meta.get("type"),
-        normative=meta.get("normative", True),
         issued_by=meta.get("issued_by"),
         issuer_name=meta.get("issuer_name") or meta.get("issued_by"),
         issued_date=meta.get("issued_date"),
         effective_from=meta.get("effective_from"),
         effective_to=meta.get("effective_to"),
         legal_status=meta["legal_status"],
+        source_url=meta.get("source_url"),
+        sector=meta.get("sector"),
+        field=meta.get("field"),
+        signer_title=meta.get("signer_title"),
+        signer_name=meta.get("signer_name"),
     )
 
 

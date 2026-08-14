@@ -23,7 +23,6 @@ EXPECTED_CONSTRAINTS = {
 EXPECTED_USER_INDEXES = {
     "doc_number",
     "doc_doc_type",
-    "doc_normative",
     "doc_legal_status",
     "doc_issuer_name",
     "art_number",
