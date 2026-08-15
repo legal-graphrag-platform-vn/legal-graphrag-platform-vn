@@ -3,7 +3,7 @@
 > **Cập nhật**: 2026-07-17
 > **Đánh giá**: Research ⭐⭐⭐⭐⭐ | Engineering ⭐⭐⭐⭐☆ | Hoàn thành ⭐⭐⭐⭐☆  
 > **Triết lý**: Ưu tiên giá trị nghiên cứu → Experiment → Portal.
-> **Depends on**: [legal_ontology.md v1.11.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.12.0](./legal_ontology.md)
 
 ---
 

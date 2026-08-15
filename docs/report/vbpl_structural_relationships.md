@@ -3,15 +3,15 @@
 > **Mục đích:** mô tả cấu trúc pháp lý của văn bản quy phạm pháp luật (VBPL),
 > cách ánh xạ cấu trúc đó sang Neo4j và trạng thái hỗ trợ của repository.
 >
-> **Ngày đối chiếu:** 10/08/2026.
+> **Ngày đối chiếu:** 15/08/2026.
 >
-> **Trạng thái:** ontology/runtime contract hiện tại là `v1.10.0`; `Part`,
-> `Subsection`, Chapter preamble Articles và diagram provenance đã được đồng bộ. Việc
-> một database live cụ thể đã được reparse/migrate hay chưa phải được xác minh
-> riêng.
+> **Trạng thái:** ontology/runtime contract hiện tại là `v1.12.0`; cấu trúc
+> `Part`, `Section`, `Subsection`, Chapter preamble Articles và dual provenance
+> cho projected provider relations đã được chuẩn hóa. Việc một database live cụ
+> thể đã được reparse/migrate hay chưa phải được xác minh riêng.
 >
 > **Tài liệu liên quan:** [lược đồ Neo4j hiện tại](neo4j_database_schema.md),
-> [canonical ontology v1.10.0](../../plans/legal_ontology.md),
+> [canonical ontology v1.12.0](../../plans/legal_ontology.md),
 > [Plan 18](../../plans/agent-plan-feats/18_part_and_subsection_hierarchy_plan.md).
 
 ## 1. Cơ sở mô hình hóa
@@ -54,11 +54,11 @@ trực tiếp:
 Document -> Part -> Chapter -> Article
 ```
 
-Đây là đường cấu trúc thứ bảy cần được ontology mục tiêu hỗ trợ.
+Đây là một trong các đường cấu trúc trực tiếp mà ontology phải hỗ trợ.
 
 ## 2. Ánh xạ thuật ngữ pháp lý sang node
 
-| Thuật ngữ VBPL | Neo4j label | Vai trò | Runtime v1.10.0 |
+| Thuật ngữ VBPL | Neo4j label | Vai trò | Runtime v1.12.0 |
 |---|---|---|---|
 | Văn bản | `Document` | Root của một văn bản canonical | Có |
 | Cơ quan ban hành | `Issuer` | Chủ thể ban hành văn bản | Có |
@@ -92,9 +92,12 @@ flowchart TB
 
     D -->|CONTAINS| P
     D -.->|CONTAINS| C
+    D -.->|CONTAINS| S
     D -.->|CONTAINS| A
 
     P -->|CONTAINS| C
+    P -.->|CONTAINS| S
+    P -.->|CONTAINS| A
 
     C -->|CONTAINS| S
     C -.->|CONTAINS| A
@@ -112,24 +115,29 @@ flowchart TB
 
 Chú thích:
 
-- node xanh: runtime contract `v1.10.0` đã hỗ trợ;
+- node xanh: runtime contract `v1.12.0` đã hỗ trợ;
 - cạnh nét liền: đường phân cấp sâu;
 - cạnh nét đứt: đường trực tiếp hợp lệ khi tầng trung gian không xuất hiện;
   riêng Chapter còn có thể chứa preamble Article trước các Section.
 
-## 4. Bảy canonical parent chains tới Điều
+## 4. Mười hai canonical parent chains tới Điều
 
 | # | Canonical path tới `Article` | Nguồn quy tắc |
 |---|---|---|
 | 1 | `Document -> Part -> Chapter -> Section -> Subsection -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
 | 2 | `Document -> Part -> Chapter -> Section -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
 | 3 | `Document -> Part -> Chapter -> Article` | Suy ra từ quy tắc hiện hành: Chapter có thể không có Section |
-| 4 | `Document -> Chapter -> Section -> Subsection -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
-| 5 | `Document -> Chapter -> Section -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
-| 6 | `Document -> Chapter -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
-| 7 | `Document -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
+| 4 | `Document -> Part -> Section -> Subsection -> Article` | Cấu trúc packaging được corpus chứng minh |
+| 5 | `Document -> Part -> Section -> Article` | Cấu trúc packaging được corpus chứng minh |
+| 6 | `Document -> Part -> Article` | Phần chứa Điều trực tiếp trong corpus |
+| 7 | `Document -> Chapter -> Section -> Subsection -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
+| 8 | `Document -> Chapter -> Section -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
+| 9 | `Document -> Chapter -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
+| 10 | `Document -> Section -> Subsection -> Article` | Mục trực thuộc Văn bản trong corpus |
+| 11 | `Document -> Section -> Article` | Mục trực thuộc Văn bản trong corpus |
+| 12 | `Document -> Article` | Bố cục lịch sử được liệt kê trực tiếp |
 
-Đây là bảy đường cha tới `Article`, không phải bảy biến thể bắt buộc chứa đủ
+Đây là mười hai đường cha tới `Article`, không phải các biến thể bắt buộc chứa đủ
 `Clause` và `Point`. Hai tầng cuối là tùy chọn:
 
 ```text
@@ -143,8 +151,11 @@ Clause  -> Point         hoặc Clause không có Point
 |---|---|---|
 | `Document` | `Part` | Văn bản được chia thành các Phần |
 | `Document` | `Chapter` | Văn bản không có Phần, bắt đầu bằng Chương |
+| `Document` | `Section` | Mục trực thuộc Văn bản trong cấu trúc packaging |
 | `Document` | `Article` | Văn bản không có Phần và Chương |
 | `Part` | `Chapter` | Một Phần chứa các Chương |
+| `Part` | `Section` | Một Phần chứa Mục trực tiếp |
+| `Part` | `Article` | Một Phần chứa Điều trực tiếp |
 | `Chapter` | `Section` | Chương được chia thành các Mục |
 | `Chapter` | `Article` | Chương không có Mục, hoặc Điều mở đầu đứng trước mọi Điều thuộc Mục |
 | `Section` | `Subsection` | Mục được chia thành các Tiểu mục |
@@ -156,10 +167,7 @@ Clause  -> Point         hoặc Clause không có Point
 Các cặp sau không canonical:
 
 ```text
-Document -> Section
 Document -> Subsection
-Part -> Section
-Part -> Article
 Chapter -> Subsection
 Subsection -> Clause
 Article -> Point
@@ -176,9 +184,9 @@ canonical `CONTAINS` path.
 |---|---|
 | `Part` | `Document` |
 | `Chapter` | `Document` hoặc `Part` |
-| `Section` | `Chapter` |
+| `Section` | `Document`, `Part` hoặc `Chapter` |
 | `Subsection` | `Section` |
-| `Article` | `Document`, `Chapter`, `Section` hoặc `Subsection` |
+| `Article` | `Document`, `Part`, `Chapter`, `Section` hoặc `Subsection` |
 | `Clause` | `Article` |
 | `Point` | `Clause` |
 
@@ -195,15 +203,16 @@ Không đồng thời tạo thêm `Section 3 -> Article 77` hoặc
 ### 6.2 Một child mode cho mỗi grouping parent
 
 ```text
-Document -> Part children | Chapter children | Article children
-Part     -> Chapter children
+Document -> Part/Chapter/Section/Article children theo cấu trúc packaging
+Part     -> Chapter/Section/Article children theo cấu trúc packaging
 Chapter  -> Section children | Article children
 Section  -> Subsection children | Article children
 ```
 
-Dấu `|` biểu thị lựa chọn. Một parent cụ thể không trộn hai mode trên cùng dòng.
-Ví dụ, một `Section` đã được chia thành `Subsection` thì các Điều của Section đó
-phải nằm dưới Subsection tương ứng, không đồng thời có direct Article children.
+Document và Part có thể trộn direct Article với grouping children khi canonical
+source thể hiện đúng cấu trúc packaging. Chapter chỉ được trộn direct Article và
+Section khi direct Article là preamble đứng trước mọi Article thuộc Section.
+Section không trộn direct Article với Subsection Article.
 
 ## 7. Các quan hệ ngoài hierarchy
 
@@ -230,7 +239,7 @@ Article | Clause | Point
 
 ### 7.2 `REFERS_TO` polymorphic
 
-Runtime `v1.10.0` cho phép target:
+Runtime `v1.12.0` cho phép target:
 
 ```text
 Document | Part | Chapter | Section | Subsection | Article | Clause | Point
@@ -279,7 +288,7 @@ hierarchy đã accepted mới chứng minh endpoint tồn tại.
 
 ### 8.1 Node payload minh họa
 
-Ví dụ dưới đây là fixture synthetic đúng contract `v1.10.0`; nó không đại diện
+Ví dụ dưới đây là fixture synthetic đúng contract `v1.12.0`; nó không đại diện
 cho một văn bản có thật và không chứng minh database live đã chạy migration.
 
 ```json
@@ -378,7 +387,7 @@ source/metadata đã validate.
 ]
 ```
 
-## 9. Ví dụ riêng cho path thứ bảy
+## 9. Ví dụ Chapter trực tiếp chứa Article
 
 Một Document có Part, nhưng Chapter bên trong không có Section:
 
@@ -390,8 +399,9 @@ flowchart LR
     C -->|CONTAINS| A2[Article 21]
 ```
 
-Không tạo các node `Section` hoặc cạnh tắt `Part -> Article` khi nguồn không có
-heading Mục:
+Khi nguồn có Chapter nhưng không có heading Mục, không tạo `Section` giả và
+không bỏ qua Chapter bằng cạnh `Part -> Article`. Cặp `Part -> Article` chỉ hợp
+lệ ở văn bản mà Điều thực sự trực thuộc Phần:
 
 ```text
 Đúng:
@@ -437,9 +447,9 @@ divergence. Pipeline phải kiểm tra direct parent chain trước khi tiếp t
 
 ## 11. Trạng thái hỗ trợ trong repository
 
-| Khả năng | Runtime contract v1.10.0 |
+| Khả năng | Runtime contract v1.12.0 |
 |---|---|
-| Bảy canonical parent chains tới `Article` | Có |
+| Mười hai canonical parent chains tới `Article` | Có |
 | Node `Part` và `Subsection` | Có |
 | Reference target `Part`/`Subsection` | Có, phải resolve và verify |
 | Immutable structural registry | v2; loader vẫn đọc v1 legacy |
@@ -478,15 +488,15 @@ Section -> Article
 chỉ xóa khi Section -> Subsection -> Article đã verified.
 ```
 
-Không xóa `Chapter -> Article` trong path thứ bảy.
+Không xóa `Chapter -> Article` trong direct/preamble Chapter case.
 
 ## 13. Kết luận dùng trong báo cáo
 
 > Cấu trúc VBPL được mô hình hóa dưới dạng cây canonical sử dụng quan hệ
-> `CONTAINS`. Ontology v1.10.0 hỗ trợ `Document`, `Part`, `Chapter`, `Section`,
+> `CONTAINS`. Ontology v1.12.0 hỗ trợ `Document`, `Part`, `Chapter`, `Section`,
 > `Subsection`, `Article`, `Clause` và `Point`, đồng thời giữ các trường hợp
-> Document hoặc Section chứa Điều trực tiếp khi tầng nhóm kế tiếp không xuất
-> hiện và Chapter chứa preamble Article trước các Mục. Bảy canonical parent
+> Document, Part hoặc Section chứa Điều trực tiếp khi tầng nhóm kế tiếp không
+> xuất hiện và Chapter chứa preamble Article trước các Mục. Mười hai canonical parent
 > chains tới Điều được biểu diễn mà không tạo
 > node nhóm giả.
 > Mỗi structural node có đúng một direct parent và một owning Document. Dẫn

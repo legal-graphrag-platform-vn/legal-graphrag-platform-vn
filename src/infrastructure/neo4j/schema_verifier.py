@@ -23,6 +23,7 @@ EXPECTED_CONSTRAINTS = {
 EXPECTED_USER_INDEXES = {
     "doc_number",
     "doc_doc_type",
+    "doc_normative",
     "doc_legal_status",
     "doc_issuer_name",
     "art_number",
@@ -83,7 +84,11 @@ def verify_canonical_schema(session: SessionProtocol) -> SchemaVerificationRepor
             "SHOW INDEXES YIELD name, type, state, options RETURN name, type, state, options"
         )
     )
-    user_rows = [row for row in index_rows if str(row["type"]).upper() != "LOOKUP"]
+    user_rows = [
+        row
+        for row in index_rows
+        if str(row["type"]).upper() != "LOOKUP" and str(row["name"]) not in constraints
+    ]
     indexes = {str(row["name"]) for row in user_rows}
     errors: list[str] = []
 
@@ -91,7 +96,7 @@ def verify_canonical_schema(session: SessionProtocol) -> SchemaVerificationRepor
     unexpected_constraints = constraints - EXPECTED_CONSTRAINTS
     missing_indexes = EXPECTED_USER_INDEXES - indexes
     legacy_indexes = FORBIDDEN_LEGACY_INDEXES & indexes
-    unexpected_indexes = indexes - EXPECTED_USER_INDEXES - EXPECTED_CONSTRAINTS
+    unexpected_indexes = indexes - EXPECTED_USER_INDEXES
     if missing_constraints:
         errors.append(f"Missing constraints: {sorted(missing_constraints)}")
     if unexpected_constraints:
