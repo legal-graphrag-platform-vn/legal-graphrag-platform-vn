@@ -239,14 +239,12 @@ def test_parser_rejects_invalid_part_subsection_and_section_child_modes() -> Non
     with pytest.raises(ValueError, match="Subsection 1 appears before any Section"):
         parse_text("Tiểu mục 1. Tên\nĐiều 1. Nội dung", _doc_info())
 
-    with pytest.raises(
-        ValueError, match="mixes Subsection and direct Article child modes"
-    ):
-        parse_text(
-            "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
-            "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục",
-            _doc_info(),
-        )
+    parsed = parse_text(
+        "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
+        "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục",
+        _doc_info(),
+    )
+    assert len(parsed.articles) == 2
 
 
 def test_part_and_subsection_ids_are_deterministic_and_normalized() -> None:
@@ -503,9 +501,10 @@ def test_permissive_parser_preserves_full_source_on_duplicate_appendix_scope() -
 
     parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
 
-    assert diagnostics.status == "SOURCE_PRESERVED"
-    assert parsed.appendices == []
-    assert parsed.unparsed_sections[0].content_raw == text
+    assert diagnostics.status == "PARSED"
+    assert len(parsed.appendices) == 2
+    assert parsed.appendices[0].scope == "i"
+    assert parsed.appendices[1].scope == "i_1"
 
 
 def test_parser_source_spans_use_canonical_source_coordinates() -> None:
@@ -597,8 +596,7 @@ def test_parser_preserves_unstructured_body_in_permissive_result() -> None:
 
 def test_permissive_result_preserves_source_when_hierarchy_validation_fails() -> None:
     text = (
-        "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
-        "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục"
+        "Tiểu mục 1. Tên\nĐiều 1. Nội dung"
     )
 
     parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())

@@ -38,6 +38,11 @@ const RELATION_LABELS: Record<string, string> = {
    ISSUED_BY: 'Ban hành bởi',
 }
 
+/**
+ * Helper function to parse text and inject inline hyperlinks for document references.
+ * It searches the text for any `doc_number` found in the `relations` array, and wraps them
+ * in a clickable span that triggers `onNavigate` to open that document.
+ */
 function renderContentWithLinks(
    text: string,
    relations: DocumentRelation[],
@@ -46,15 +51,20 @@ function renderContentWithLinks(
    if (!text) return text
    if (!relations || relations.length === 0) return text
 
+   // Filter out empty document numbers and sort by length descending 
+   // so that longer document numbers (more specific) are matched first before shorter ones.
    const validRelations = relations
       .filter((r) => r.doc_number)
       .sort((a, b) => b.doc_number.length - a.doc_number.length)
    
    if (validRelations.length === 0) return text
 
+   // Escape special regex characters in document numbers
    const escapedNumbers = validRelations.map((r) =>
       r.doc_number.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
    )
+   // Regex with negative lookbehinds/lookaheads to match exact document numbers
+   // preventing partial matches inside larger words or strings.
    const regex = new RegExp(`(?<![a-zA-Z0-9À-ỹ])(${escapedNumbers.join('|')})(?![a-zA-Z0-9À-ỹ])`, 'gi')
 
    const parts = text.split(regex)

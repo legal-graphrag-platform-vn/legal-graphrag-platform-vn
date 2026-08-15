@@ -41,7 +41,7 @@ def test_all_relations_have_constraints() -> None:
 
 
 def test_executable_contract_matches_frozen_ontology_version() -> None:
-    assert ONTOLOGY_VERSION == "1.14.0"
+    assert ONTOLOGY_VERSION == "1.15.0"
 
 
 def test_contract_separates_reference_and_document_relation_provenance() -> None:

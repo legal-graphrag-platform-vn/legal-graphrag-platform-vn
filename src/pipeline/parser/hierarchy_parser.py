@@ -369,29 +369,52 @@ def _parse_hierarchy(
     *,
     warnings: list[ParseWarning] | None = None,
 ) -> _ParsedHierarchy:
-    """Parse the canonical seven-path structural hierarchy deterministically."""
+    """Parse the canonical seven-path structural hierarchy deterministically.
+
+    Đây là State Machine một chiều (single-pass) xử lý từng dòng văn bản pháp luật
+    và phân tách theo cây phân cấp 7 tầng:
+        Document > Part > Chapter > Section > Subsection > Article > Clause > Point
+    """
+    # ── Danh sách kết quả đầu ra ──────────────────────────────────────────────
     articles: list[Article] = []
     parts: list[Part] = []
     sections: list[Section] = []
     subsections: list[Subsection] = []
+    # Tập hợp các số hiệu Phần đã gặp — dùng để phát hiện và xử lý trùng lặp
+    # (vd: văn bản có 2 lần "PHẦN V" do lỗi crawler -> tự đổi thành V, V_1)
+    seen_parts: set[str] = set()
 
-    current_part: Part | None = None
-    current_chapter: str | None = None
-    current_chapter_title: str | None = None
-    current_section: Section | None = None
-    current_subsection: Subsection | None = None
-    current_article: _ArticleBuilder | None = None
-    current_clause: Clause | None = None
-    current_point: Point | None = None
+    # ── Con trỏ theo dõi ngữ cảnh hiện tại của State Machine ─────────────────
+    current_part: Part | None = None          # Phần đang được xử lý
+    current_chapter: str | None = None        # Số hiệu Chương hiện tại
+    current_chapter_title: str | None = None  # Tiêu đề Chương hiện tại
+    current_section: Section | None = None    # Mục đang được xử lý
+    current_subsection: Subsection | None = None  # Tiểu mục đang được xử lý
+    current_article: _ArticleBuilder | None = None  # Điều đang được build
+    current_clause: Clause | None = None      # Khoản đang được xử lý
+    current_point: Point | None = None        # Điểm đang được xử lý
+
+    # ── Đếm số Điều thuộc mỗi cấp — dùng để loại bỏ cấp rỗng (orphan) ───────
+    # Nếu một Phần/Chương/Mục/Tiểu mục không chứa Điều nào thì bị loại khỏi output
     part_article_count = 0
     chapter_article_count = 0
     section_article_count = 0
     subsection_article_count = 0
+
+    # ── Theo dõi "mode" (chế độ) để phát hiện cấu trúc cha-con không hợp lệ ──
+    # Ví dụ: một Chương chứa "Điều" trực tiếp thì mode = "Article",
+    #         nếu sau đó xuất hiện "Mục" thì chuyển mode = "Section" và log warning.
     document_mode: str | None = None
     chapter_modes: dict[tuple[str | None, str], str] = {}
     section_modes: dict[tuple[str | None, str, str], str] = {}
 
+    # ── Hàm xả (flush) từng cấp vào danh sách kết quả ───────────────────────
+
     def flush_point() -> None:
+        """Xả Điểm (Point) hiện tại vào Khoản (Clause) đang build.
+
+        Nếu Điểm bị trùng label: merge nội dung thay vì tạo Điểm mới.
+        """
         nonlocal current_point
         if current_point is not None and current_clause is not None:
             duplicate = next(
@@ -406,10 +429,12 @@ def _parse_hierarchy(
             if duplicate is None:
                 current_clause.points.append(current_point)
             elif duplicate.content.strip() == current_point.content.strip():
+                # Trùng nội dung hoàn toàn -> chỉ cập nhật source_end_char
                 duplicate.source_end_char = max(
                     duplicate.source_end_char, current_point.source_end_char
                 )
             else:
+                # Trùng label nhưng nội dung khác -> nối text
                 duplicate.content = (
                     f"{duplicate.content} {current_point.content}".strip()
                 )
@@ -419,6 +444,7 @@ def _parse_hierarchy(
         current_point = None
 
     def flush_clause() -> None:
+        """Xả Khoản (Clause) hiện tại vào Điều (Article) đang build."""
         nonlocal current_clause, current_point
         if current_clause is not None and current_article is not None:
             flush_point()
@@ -427,6 +453,7 @@ def _parse_hierarchy(
         current_point = None
 
     def flush_article() -> None:
+        """Xả Điều (Article) hoàn chỉnh vào danh sách kết quả."""
         nonlocal current_article, current_clause, current_point
         if current_article is not None:
             flush_clause()
@@ -436,11 +463,15 @@ def _parse_hierarchy(
         current_point = None
 
     def require_mode(current: str | None, expected: str, *, owner: str) -> str:
+        """Ghi log khi cấp cha chuyển chế độ con (mode transition)."""
         if current is not None and current != expected:
             logger.debug(f"{owner} transition from {current} to {expected} mode")
         return expected
 
+    # ── Hàm loại bỏ các cấp rỗng (không chứa Điều nào) ─────────────────────
+
     def require_current_subsection_has_article() -> None:
+        """Xóa Tiểu mục khỏi output nếu không có Điều nào bên trong."""
         nonlocal current_subsection
         if current_subsection is not None and subsection_article_count == 0:
             if subsections and subsections[-1] == current_subsection:
@@ -448,6 +479,7 @@ def _parse_hierarchy(
             current_subsection = None
 
     def require_current_section_has_article() -> None:
+        """Xóa Mục khỏi output nếu không có Điều nào bên trong."""
         nonlocal current_section
         if current_section is not None and section_article_count == 0:
             if sections and sections[-1] == current_section:
@@ -455,20 +487,30 @@ def _parse_hierarchy(
             current_section = None
 
     def require_current_chapter_has_article() -> None:
+        """Reset Chương hiện tại nếu không có Điều nào bên trong."""
         nonlocal current_chapter
         if current_chapter is not None and chapter_article_count == 0:
             current_chapter = None
 
     def require_current_part_has_article() -> None:
+        """Xóa Phần khỏi output nếu không có Điều nào bên trong."""
         nonlocal current_part
         if current_part is not None and part_article_count == 0:
             if parts and parts[-1] == current_part:
                 parts.pop()
             current_part = None
 
+    # ── Cờ trạng thái chờ đọc dòng tiêu đề tiếp theo ────────────────────────
+    # Một số dạng như "Chương I\nTÊN CHƯƠNG" có tiêu đề nằm ở dòng kế tiếp
     pending_chapter_title = False
     pending_article_title = False
+    # pending_heading: (kind, number, record) khi Part/Section/Subsection
+    # chưa đọc được inline title từ cùng dòng
     pending_heading: tuple[str, str, LineRecord] | None = None
+
+    # ── Phát hiện các dòng nằm trong dấu ngoặc trích dẫn thay thế ─────────
+    # Ví dụ: "... khoản 1 được sửa đổi như sau: [Điều 5. Nội dung mới]"
+    # Các dòng này không được parse cấu trúc mà được gắn thẳng vào nội dung Điều cha.
     replacement_quote_lines, quote_warnings = _replacement_quote_lines(lines)
     if warnings is not None:
         warnings.extend(quote_warnings)
@@ -476,6 +518,7 @@ def _parse_hierarchy(
         item.text if isinstance(item, LineRecord) else str(item) for item in lines
     ]
 
+    # ── Vòng lặp chính: xử lý từng dòng ────────────────────────────────────
     for idx, item in enumerate(lines):
         record = item if isinstance(item, LineRecord) else LineRecord(text=item)
         line = clean_vietnamese_spacing(record.text).strip()
@@ -485,6 +528,8 @@ def _parse_hierarchy(
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
+        # Dòng nằm trong khối trích dẫn thay thế -> gắn vào content Điều cha,
+        # không parse cấu trúc (tránh tạo Article giả bên trong đoạn trích dẫn)
         if idx in replacement_quote_lines:
             if current_article is not None:
                 current_article.content_lines.append(line)
@@ -497,9 +542,12 @@ def _parse_hierarchy(
                     current_clause.source_end_char = record.source_end_char
             continue
 
+        # Xử lý pending_heading: đọc tiêu đề của Part/Section/Subsection
+        # từ dòng tiếp theo khi inline_title bị None (tiêu đề nằm tách riêng)
         if pending_heading is not None:
             kind, number, heading_record = pending_heading
             if not _looks_like_structural_title(record, line):
+                # Dòng tiếp theo không phải tiêu đề -> dùng tiêu đề mặc định
                 default_title = f"{kind} {number}"
                 if kind == "Part":
                     current_part = Part(
@@ -532,6 +580,7 @@ def _parse_hierarchy(
                     subsections.append(current_subsection)
                 pending_heading = None
             else:
+                # Dòng tiếp theo chính là tiêu đề của cấp cha vừa được mở
                 if kind == "Part":
                     current_part = Part(
                         number=number,
@@ -564,6 +613,7 @@ def _parse_hierarchy(
                 pending_heading = None
                 continue
 
+        # ── PHẦN (Part): "PHẦN I", "PHẦN II", ... ────────────────────────────
         part_match = match_part(line)
         if part_match is not None:
             flush_article()
@@ -601,6 +651,7 @@ def _parse_hierarchy(
                 parts.append(current_part)
             continue
 
+        # ── CHƯƠNG (Chapter): "Chương I", "Chương II", ... ───────────────────
         chapter_match = match_chapter_heading(line)
         if chapter_match is not None:
             flush_article()
@@ -625,12 +676,14 @@ def _parse_hierarchy(
             pending_chapter_title = inline_chapter_title is None
             continue
 
+        # Tiêu đề Chương nằm ở dòng kế tiếp (ví dụ: "ĐIỀU KHOẢN CHUNG")
         if pending_chapter_title:
             pending_chapter_title = False
             if looks_like_title(line):
                 current_chapter_title = line
                 continue
 
+        # ── MỤC (Section): "Mục 1", "Mục 2", ... ────────────────────────────
         section_match = match_section(line)
         if section_match is not None:
             flush_article()
@@ -665,6 +718,7 @@ def _parse_hierarchy(
                 sections.append(current_section)
             continue
 
+        # ── TIỂU MỤC (Subsection): "Tiểu mục 1", "Tiểu mục 2", ... ─────────
         subsection_match = match_subsection(line)
         if subsection_match is not None:
             if current_section is None:
@@ -701,16 +755,19 @@ def _parse_hierarchy(
                 subsections.append(current_subsection)
             continue
 
+        # ── ĐIỀU (Article): "Điều 1.", "Điều 12.", ... ───────────────────────
         article_match = match_article(line)
         if article_match is not None and not is_citation_context(
             prev_line, line, next_line
         ):
             flush_article()
             number, inline_title = article_match
+            # Tăng bộ đếm để parent cấp trên biết đây có Điều bên trong
             part_article_count += 1
             chapter_article_count += 1
             section_article_count += 1
             subsection_article_count += 1
+            # Ghi nhận mode khi Chương chứa Điều trực tiếp (không qua Mục)
             if current_chapter is not None and current_section is None:
                 chapter_key = (
                     current_part.number if current_part else None,
@@ -721,6 +778,7 @@ def _parse_hierarchy(
                     "Article",
                     owner=f"Chapter {current_chapter}",
                 )
+            # Ghi nhận mode khi Mục chứa Điều trực tiếp (không qua Tiểu mục)
             if current_section is not None and current_subsection is None:
                 section_key = (
                     current_part.number if current_part else None,
@@ -751,6 +809,7 @@ def _parse_hierarchy(
                 current_article.content_lines.append(inline_title)
             continue
 
+        # Tiêu đề Điều nằm ở dòng kế tiếp (ví dụ: "Điều 5.\nVề quyền sở hữu")
         if pending_article_title:
             pending_article_title = False
             title = _bounded_title("Article", current_article.number, line)
@@ -758,10 +817,12 @@ def _parse_hierarchy(
             current_article.content_lines.append(title)
             continue
 
+        # Dòng nằm ngoài bất kỳ Điều nào -> bỏ qua (phần mào đầu, chữ ký, v.v.)
         if current_article is None:
             logger.debug("Bỏ qua dòng ngoài cấu trúc Điều: %r", line)
             continue
 
+        # ── KHOẢN (Clause): "1.", "2.", "3.", ... ────────────────────────────
         clause_match = match_clause(line)
         if clause_match is not None:
             number, content = clause_match
@@ -769,6 +830,7 @@ def _parse_hierarchy(
             if current_clause is not None and (
                 number in existing_clauses or number == current_clause.number
             ):
+                # Khoản trùng số -> không phải khoản mới, là continuation của text
                 clause_match = None
 
         if clause_match is not None:
@@ -784,11 +846,13 @@ def _parse_hierarchy(
             current_article.source_end_char = record.source_end_char
             continue
 
+        # ── ĐIỂM (Point): "a)", "b)", "c)", ... ─────────────────────────────
         point_match = match_point(line)
         if point_match is not None and current_clause is not None:
             label, content = point_match
             existing_points = {p.label.strip().lower() for p in current_clause.points}
             if current_point is not None and label.strip().lower() in existing_points:
+                # Điểm trùng label -> continuation, không tạo Điểm mới
                 point_match = None
 
         if point_match is not None and current_clause is not None:
@@ -805,6 +869,7 @@ def _parse_hierarchy(
             current_clause.source_end_char = record.source_end_char
             continue
 
+        # Dòng văn bản thông thường -> nối vào nội dung (content) của cấp đang mở
         current_article.content_lines.append(line)
         current_article.source_end_char = record.source_end_char
         if current_point is not None:
@@ -816,6 +881,7 @@ def _parse_hierarchy(
             current_clause.content = f"{current_clause.content} {line}".strip()
             current_clause.source_end_char = record.source_end_char
 
+    # ── Kết thúc: xả các cấp còn đang mở và loại bỏ các cấp rỗng ───────────
     flush_article()
     if pending_heading is not None:
         raise ValueError(
