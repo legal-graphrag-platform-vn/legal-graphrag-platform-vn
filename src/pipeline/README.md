@@ -91,7 +91,7 @@ Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger đ
 append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
 ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
-Ontology v1.11.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
+Ontology v1.12.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
 Document-level `AMENDS`, `REPEALS`, `REPLACES`, và `GUIDES`. Diagram category
 phải map bằng bảng explicit, target phải resolve qua canonical registry, và
 relation vẫn phải qua required-property, temporal, whitelist và consistency
@@ -139,15 +139,39 @@ Checkpoint hợp lệ được reuse theo graph/context/provider/model/prompt fi
 vì vậy lỗi provider giữa chừng không bắt chạy lại các Điều đã hoàn tất.
 
 Với raw bundle LuatVietnam, `parse` còn tạo
-`provider_relation_candidates.jsonl`. Khi `extract` hoặc
-`normalize-extraction` chạy, chỉ candidate `RESOLVED` thuộc `AMENDS`/`REPEALS`
-được chuyển thành deterministic record `PROVIDER_HTML` rồi đi qua schema,
-ontology, consistency và decision gate hiện có. Ngày `effective_from` ưu tiên
+`provider_relation_candidates.jsonl`. Sau batch parse, candidate được rebuild
+một lần từ toàn bộ hierarchy đã tồn tại để kết quả không phụ thuộc thứ tự worker.
+Khi `extract` hoặc `normalize-extraction` chạy, candidate `RESOLVED` thuộc
+`AMENDS`/`REPEALS`/`REFERS_TO` được chuyển thành deterministic record rồi đi qua
+schema, ontology, consistency và decision gate hiện có. `REFERS_TO` dùng
+`ENTITY_LINKING`; span dấu ngoặc vuông thuộc provider và bị loại khỏi generic
+structural resolver, kể cả khi provider candidate chưa resolve. Ngày
+`effective_from` ưu tiên
 metadata đã xác thực; khi metadata thiếu mới lấy câu hiệu lực rõ ràng trong
 canonical `source.txt`; không dùng ngày ban hành thay ngày hiệu lực. Candidate unresolved, ambiguous và
 positional anchor vẫn chỉ nằm trong sidecar. Relation liên-document accepted có
 `materialization_route=CORPUS_RELATION_RECONCILIATION`; payload builder một
-document defer relation này để không tạo dangling endpoint hoặc node giả.
+document defer relation này để không tạo dangling endpoint hoặc node giả. Batch
+write toàn bộ endpoint trước rồi mới chạy corpus reconciliation. Reconciliation
+materialize provider `REFERS_TO` theo một checkpoint cho toàn bundle; mọi target
+được kiểm chứng và commit trong cùng transaction.
+
+Provider target còn phải khớp số hiệu văn bản xuất hiện tường minh trong
+`citation_text`. Nếu HTML trỏ sang một văn bản nhưng phần chữ hiển thị ghi số
+hiệu khác, candidate chuyển thành `UNRESOLVED` với
+`provider_text_target_conflict`; pipeline không tin ngầm provider ID và cũng
+không cho generic resolver tìm lại bằng text.
+
+Sau decision gate, reconciliation materialize các candidate
+`AMENDS`/`REPEALS` có đúng một target bằng relation-only writer: endpoint được
+đối chiếu lại với registry và graph trước khi `MERGE`, còn `relation_id` giữ ổn
+định để rerun idempotent. Candidate thiếu record `accepted` không được ghi.
+Candidate `PROJECTED` dùng dual provenance: canonical source thuộc amended
+document, còn host document/unit/span và governing candidate được lưu riêng.
+Sidecar v1 thiếu `projection_basis_candidate_id` vẫn fail closed và phải rebuild.
+Nội dung được bổ sung sau/trước một positional anchor chỉ được mở lại khi đơn vị
+mới đã có canonical node trong corpus; anchor cũ không bao giờ được dùng thay
+legal source của nội dung mới.
 
 Trước full run, chạy smoke 3-5 Điều bằng full hierarchy registry:
 

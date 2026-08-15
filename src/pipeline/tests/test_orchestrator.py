@@ -251,6 +251,82 @@ def test_run_pipeline_accepts_resolved_provider_amendment_through_existing_gates
     assert extraction_run["provider_relation_record_count"] == 1
 
 
+def test_run_pipeline_materializes_local_provider_reference_without_rule_duplicate(
+    tmp_path,
+) -> None:
+    source = "Điều 1. Dẫn chiếu\n1. Thực hiện theo [Điều 2].\nĐiều 2. Quy định\n"
+    parsed = parse_text(
+        source,
+        DocumentInfo(
+            id="ldn_2020",
+            title="Luật Doanh nghiệp",
+            number="59/2020/QH14",
+            doc_type="Law",
+        ),
+    )
+    marker_start = source.index("[Điều 2]")
+    reference = ProviderReferenceMentionV1(
+        contract_version="provider-reference-mention-v1",
+        provider="luatvietnam",
+        provider_source_document_id="100",
+        provider_target_document_id="100",
+        provider_target_item_ids=("2",),
+        provider_link_type="REFERENCE",
+        citation_text="Điều 2",
+        source_char_start=marker_start,
+        source_char_end=marker_start + len("[Điều 2]"),
+    )
+    candidate = ProviderRelationCandidateV1(
+        candidate_id="provider-ref-local",
+        provider_relation_id=None,
+        relation_candidate="REFERS_TO",
+        source_ownership="HOST",
+        host_source_id="ldn_2020_art1_cl1",
+        canonical_source_id="ldn_2020_art1_cl1",
+        canonical_source_type="Clause",
+        canonical_target_ids=("ldn_2020_art2",),
+        canonical_target_types=("Article",),
+        status="RESOLVED",
+        reason_code="provider_endpoints_resolved",
+        evidence="1. Thực hiện theo [Điều 2].",
+        reference=reference,
+    )
+    out_dir = tmp_path / "LTV_100"
+    write_provider_relation_candidates(
+        out_dir / "provider_relation_candidates.jsonl", (candidate,)
+    )
+
+    with (
+        patch.object(settings, "extraction_max_workers", 1),
+        patch(
+            "src.pipeline.pipeline.orchestrator.extract_article",
+            side_effect=lambda article_number, *_args, **_kwargs: ExtractionResult(
+                article_number=str(article_number), entities=[], relations=[]
+            ),
+        ),
+    ):
+        run_pipeline(
+            parsed,
+            tmp_path,
+            raw_doc_code="LTV_100",
+            source_text=source,
+        )
+
+    accepted = [
+        json.loads(line)
+        for line in (out_dir / "accepted.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    references = [row for row in accepted if row["relation"]["relation"] == "REFERS_TO"]
+    assert len(references) == 1
+    relation = references[0]
+    assert relation["relation"]["head"] == "ldn_2020_art1_cl1"
+    assert relation["relation"]["tail"] == "ldn_2020_art2"
+    assert relation["relation"]["properties"]["extraction_method"] == "ENTITY_LINKING"
+    assert relation["materialization_route"] is None
+
+
 def test_process_article_rejects_llm_contains_and_normalizes_clause() -> None:
     article = Article(
         number=5,

@@ -227,7 +227,8 @@ def checkpoint_from_reference(
     prior_written: bool = False,
 ) -> ReferenceCheckpointV2:
     now = detected_at or datetime.now(timezone.utc)
-    evidence = reference.registry_evidence
+    evidences = reference.all_registry_evidences()
+    evidence = evidences[0] if evidences else None
     resolution = ReferenceResolutionState(
         status=reference.status,
         reference_scope=reference.reference_scope,
@@ -240,14 +241,21 @@ def checkpoint_from_reference(
         resolved_at=now if reference.status == "RESOLVED" else None,
     )
     initial_status: Literal["NOT_APPLICABLE", "PENDING", "WRITTEN", "FAILED", "BLOCKED"]
-    if reference.status == "RESOLVED" and reference.reference_scope == "EXTERNAL":
+    if reference.status == "RESOLVED" and (
+        reference.reference_scope == "EXTERNAL"
+        or reference.projection_evidence is not None
+    ):
         initial_status = "PENDING"
     else:
         initial_status = "NOT_APPLICABLE"
     materialization_reason = None
     if reference.is_self_reference:
         materialization_reason = "self_reference_no_edge"
-    elif reference.status == "RESOLVED" and reference.reference_scope == "LOCAL":
+    elif (
+        reference.status == "RESOLVED"
+        and reference.reference_scope == "LOCAL"
+        and reference.projection_evidence is None
+    ):
         materialization_reason = "local_reference_not_external"
     materialization = ReferenceMaterializationState(
         status=initial_status,

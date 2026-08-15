@@ -1696,3 +1696,48 @@ nguồn nhưng payload bị write gate từ chối.
 - Neo4j bootstrap không cần constraint hoặc index mới vì label `Section` và
   relation `CONTAINS` đã tồn tại. Endpoint validity tiếp tục do application
   write gate enforce trong Neo4j Community Edition.
+
+---
+
+## ADR-34: Dual provenance cho quan hệ provider được chiếu vào văn bản đích
+
+**Ngày**: 2026-08-15
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Trong văn bản sửa đổi, citation nằm bên trong nội dung thay thế có hai identity
+khác nhau: vị trí bằng chứng thuộc văn bản sửa đổi đang parse, còn nguồn pháp lý
+của quan hệ thuộc đơn vị được sửa đổi. Dùng host offset như offset của canonical
+source làm sai provenance; chặn toàn bộ projected candidate lại làm mất các cạnh
+có đủ bằng chứng trong corpus.
+
+### Quyết định
+
+1. `source_unit_id` luôn là canonical legal source. Frontend/provider không được
+   tự truyền identity này vào write boundary.
+2. Candidate `PROJECTED` bắt buộc có `projection_basis_candidate_id` trỏ tới
+   governing provider candidate đã resolve.
+3. Host evidence được lưu riêng bằng document ID, structural unit ID và exact
+   character span. Không diễn giải host span như tọa độ của legal source.
+4. Registry validator kiểm chứng độc lập legal source, mọi target và host source
+   trước khi cấp root validation token.
+5. Một provider mention nhiều target được lưu trong một checkpoint và ghi bằng
+   một Neo4j transaction. Thiếu hoặc lệch bất kỳ endpoint nào thì không ghi cạnh
+   nào trong bundle.
+6. Projected `REFERS_TO` được phép cùng văn bản hoặc liên văn bản. Host-owned
+   same-document reference tiếp tục đi qua normal document payload, không qua
+   corpus reconciliation.
+7. Sidecar v1 thiếu projection basis không được suy đoán bù; phải rebuild bằng
+   candidate contract v2.
+8. `Bổ sung X vào sau/trước [Y]` chỉ chứng minh positional anchor `Y`, không
+   chứng minh `Y` là owner của nội dung mới `X`. Nếu `X` chưa có canonical node
+   trong corpus thì các relation bên trong `X` giữ `UNRESOLVED`.
+
+### Hệ quả
+
+- Không còn hạ cấp canonical legal source thành host text coordinates.
+- Projected `REFERS_TO`, `AMENDS` và `REPEALS` có thể materialize sau các gate
+  hiện có mà không tạo placeholder node.
+- Neo4j bootstrap không đổi; thay đổi nằm ở ontology property contract,
+  checkpoint evidence và relation-only reconciliation.

@@ -59,7 +59,7 @@ class Neo4jWriter:
             self._merge_relation(relation)
 
     def _merge_node(self, node: Any) -> None:
-        properties, temporal_cypher, temporal_parameters = _neo4j_properties(
+        properties, temporal_cypher, temporal_parameters = neo4j_properties(
             "n", node.properties
         )
         cypher = f"MERGE (n:{node.node_type} {{id: $id}}) SET n += $properties {temporal_cypher}"
@@ -76,7 +76,7 @@ class Neo4jWriter:
             raise WriteAttemptError(
                 f"Validated relation missing relation_id: {relation.relation_type}"
             )
-        properties, temporal_cypher, temporal_parameters = _neo4j_properties(
+        properties, temporal_cypher, temporal_parameters = neo4j_properties(
             "r", relation.properties
         )
         cypher = (
@@ -151,7 +151,7 @@ DATE_PROPERTIES = {"effective_from", "effective_to", "issued_date"}
 DATETIME_PROPERTIES = {"created_at", "updated_at"}
 
 
-def _neo4j_properties(
+def neo4j_properties(
     alias: str, raw_properties: Mapping[str, Any]
 ) -> tuple[dict[str, Any], str, dict[str, str]]:
     properties = {}

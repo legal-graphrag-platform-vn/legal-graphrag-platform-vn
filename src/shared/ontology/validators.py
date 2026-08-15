@@ -15,7 +15,6 @@ from src.shared.ontology.contract import (
     DOCUMENT_TYPES,
     CONTENT_LEGAL_STATUSES,
     GUIDES_WHITELIST,
-    ISSUER_BRANCHES,
     LEGACY_RELATION_ALIASES,
     ONTOLOGY_LABEL_MAP as ONTOLOGY_LABEL_MAP,
     PHASE1_PERSISTED_LABELS as PHASE1_PERSISTED_LABELS,
@@ -125,6 +124,27 @@ class ValidatedRelationBatch:
     """Root-gated relation-only write boundary for external references."""
 
     references: tuple[ValidatedExternalReference, ...]
+    registry_build_id: str
+    registry_snapshot_hash: str
+    registry_provenance_hash: str
+    validation_token: object
+
+
+@dataclass(frozen=True, slots=True)
+class ValidatedProviderTemporalRelation:
+    """Registry-owned temporal relation derived from one provider candidate."""
+
+    relation: ValidatedRelation
+    source_document_id: str
+    target_document_id: str
+    provider_candidate_id: str
+
+
+@dataclass(frozen=True, slots=True)
+class ValidatedProviderTemporalBatch:
+    """Root-gated relation-only batch for provider AMENDS/REPEALS edges."""
+
+    relations: tuple[ValidatedProviderTemporalRelation, ...]
     registry_build_id: str
     registry_snapshot_hash: str
     registry_provenance_hash: str
@@ -299,6 +319,55 @@ class OntologyValidator:
                 return False, (
                     f"{relation_type} with extraction_method={extraction_method} requires properties: "
                     f"{', '.join(missing_method_properties)}"
+                )
+
+        if relation_type == "REFERS_TO" and properties.get(
+            "extraction_method"
+        ) == "ENTITY_LINKING":
+            ownership = properties.get("source_ownership", "HOST")
+            ownership_requirements = {
+                "HOST": ("source_char_start", "source_char_end"),
+                "PROJECTED": (
+                    "host_evidence_document_id",
+                    "host_evidence_source_unit_id",
+                    "host_evidence_char_start",
+                    "host_evidence_char_end",
+                    "projection_basis_candidate_id",
+                ),
+            }
+            required = ownership_requirements.get(ownership)
+            if required is None:
+                return False, f"REFERS_TO.source_ownership is invalid: {ownership}"
+            missing = [
+                key
+                for key in required
+                if key not in properties or properties[key] in (None, "")
+            ]
+            if missing:
+                return False, (
+                    f"REFERS_TO with source_ownership={ownership} requires properties: "
+                    f"{', '.join(missing)}"
+                )
+
+        if relation_type in {"AMENDS", "REPEALS"} and properties.get(
+            "source_ownership"
+        ) == "PROJECTED":
+            required = (
+                "host_evidence_document_id",
+                "host_evidence_source_unit_id",
+                "host_evidence_char_start",
+                "host_evidence_char_end",
+                "projection_basis_candidate_id",
+            )
+            missing = [
+                key
+                for key in required
+                if key not in properties or properties[key] in (None, "")
+            ]
+            if missing:
+                return False, (
+                    f"{relation_type} with source_ownership=PROJECTED requires "
+                    f"properties: {', '.join(missing)}"
                 )
 
         for key, allowed_values in constraint.get("property_enums", {}).items():
@@ -525,7 +594,10 @@ def validate_external_relation_batch(
             errors.append("External reference source type does not match relation")
         if relation.tail_type != reference.target_type:
             errors.append("External reference target type does not match relation")
-        if reference.source_document_id == reference.target_document_id:
+        if (
+            reference.source_document_id == reference.target_document_id
+            and relation.properties.get("source_ownership") != "PROJECTED"
+        ):
             errors.append(
                 "External reference endpoints must belong to different Documents"
             )
@@ -566,6 +638,70 @@ def validate_external_relation_batch(
         raise GraphValidationError(errors)
     return ValidatedRelationBatch(
         references=tuple(references),
+        registry_build_id=registry_build_id,
+        registry_snapshot_hash=registry_snapshot_hash,
+        registry_provenance_hash=registry_provenance_hash,
+        validation_token=_VALIDATION_TOKEN,
+    )
+
+
+def validate_provider_temporal_relation_batch(
+    relations: Sequence[ValidatedProviderTemporalRelation],
+    *,
+    registry_build_id: str,
+    registry_snapshot_hash: str,
+    registry_provenance_hash: str,
+) -> ValidatedProviderTemporalBatch:
+    """Validate provider temporal edges before relation-only persistence."""
+
+    errors: list[str] = []
+    seen_relation_ids: set[str] = set()
+    seen_candidate_ids: set[str] = set()
+    validator = OntologyValidator()
+    for wrapped in relations:
+        relation = wrapped.relation
+        if relation.relation_type not in {"AMENDS", "REPEALS"}:
+            errors.append("Provider temporal batch only accepts AMENDS/REPEALS")
+        if relation.head_type not in {"Document", "Article", "Clause", "Point"}:
+            errors.append(f"Unsupported temporal source type: {relation.head_type}")
+        if relation.tail_type not in {"Document", "Article", "Clause", "Point"}:
+            errors.append(f"Unsupported temporal target type: {relation.tail_type}")
+        relation_id = str(relation.properties.get("relation_id") or "")
+        if not relation_id:
+            errors.append("Provider temporal relation requires relation_id")
+        elif relation_id in seen_relation_ids:
+            errors.append(f"Duplicate provider temporal relation_id: {relation_id}")
+        seen_relation_ids.add(relation_id)
+        if not wrapped.provider_candidate_id:
+            errors.append("Provider temporal relation requires provider_candidate_id")
+        elif wrapped.provider_candidate_id in seen_candidate_ids:
+            errors.append(
+                "Duplicate provider temporal candidate: "
+                f"{wrapped.provider_candidate_id}"
+            )
+        seen_candidate_ids.add(wrapped.provider_candidate_id)
+        if (
+            relation.properties.get("provider_candidate_id")
+            != wrapped.provider_candidate_id
+        ):
+            errors.append("Provider candidate wrapper does not match relation")
+        ok, error = validator.validate_relation(
+            relation.head_type,
+            relation.relation_type,
+            relation.tail_type,
+            properties=relation.properties,
+            head_id=relation.head_id,
+            tail_id=relation.tail_id,
+        )
+        if not ok:
+            errors.append(error or "Invalid provider temporal relation")
+
+    if not relations:
+        errors.append("Provider temporal relation batch must not be empty")
+    if errors:
+        raise GraphValidationError(errors)
+    return ValidatedProviderTemporalBatch(
+        relations=tuple(relations),
         registry_build_id=registry_build_id,
         registry_snapshot_hash=registry_snapshot_hash,
         registry_provenance_hash=registry_provenance_hash,

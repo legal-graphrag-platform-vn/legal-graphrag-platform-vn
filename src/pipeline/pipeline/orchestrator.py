@@ -34,6 +34,7 @@ from src.pipeline.extraction.models import ExtractionResult
 from src.pipeline.extraction.providers.base import ExtractionProviderError
 from src.pipeline.extraction.provider_relation_candidates import (
     load_provider_relation_candidates,
+    provider_owned_source_spans,
 )
 from src.pipeline.extraction.provider_relation_records import (
     PROVIDER_EXTRACTION_METHOD,
@@ -831,6 +832,9 @@ def run_pipeline(
     reference_resolver = StructuralReferenceResolver(
         registry,
         source_text or "",
+        excluded_source_spans=provider_owned_source_spans(
+            provider_candidates, source_text or ""
+        ),
     )
     resolved_references = (
         [

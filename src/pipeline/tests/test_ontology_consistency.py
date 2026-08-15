@@ -39,7 +39,7 @@ def test_all_relations_have_constraints() -> None:
 
 
 def test_executable_contract_matches_frozen_ontology_version() -> None:
-    assert ONTOLOGY_VERSION == "1.11.0"
+    assert ONTOLOGY_VERSION == "1.12.0"
 
 
 def test_contract_separates_reference_and_document_relation_provenance() -> None:
@@ -109,6 +109,66 @@ def test_refers_to_rejects_document_diagram_provenance() -> None:
 
     assert not ok
     assert "REFERS_TO.extraction_method must be one of" in (err or "")
+
+
+def test_entity_linking_refers_to_requires_ownership_specific_coordinates() -> None:
+    base = {
+        "citation_text": "Điều 35",
+        "citation_type": "DIRECT",
+        "extraction_method": "ENTITY_LINKING",
+        "created_at": "2026-08-15T00:00:00+00:00",
+        "reference_bundle_id": "provider-1",
+        "reference_target_count": 1,
+        "source_unit_id": "doc_art1",
+        "linker_name": "corpus-structural-registry",
+        "linker_version": "2.0.0",
+    }
+    host_ok, _ = validate_relation(
+        "Article",
+        "REFERS_TO",
+        "Article",
+        properties={**base, "source_char_start": 1, "source_char_end": 10},
+    )
+    projected_ok, _ = validate_relation(
+        "Article",
+        "REFERS_TO",
+        "Article",
+        properties={
+            **base,
+            "source_ownership": "PROJECTED",
+            "host_evidence_document_id": "host_doc",
+            "host_evidence_source_unit_id": "host_art1",
+            "host_evidence_char_start": 1,
+            "host_evidence_char_end": 10,
+            "projection_basis_candidate_id": "provider-basis-1",
+        },
+    )
+    projected_bad, error = validate_relation(
+        "Article",
+        "REFERS_TO",
+        "Article",
+        properties={**base, "source_ownership": "PROJECTED"},
+    )
+
+    assert host_ok
+    assert projected_ok
+    assert not projected_bad
+    assert "host_evidence_document_id" in (error or "")
+
+
+def test_projected_temporal_relation_requires_dual_provenance() -> None:
+    ok, error = validate_relation(
+        "Article",
+        "AMENDS",
+        "Article",
+        properties={
+            "effective_from": "2024-01-01",
+            "source_ownership": "PROJECTED",
+        },
+    )
+
+    assert not ok
+    assert "projection_basis_candidate_id" in (error or "")
 
 
 def test_contains_structural_chain_allows_chapter() -> None:

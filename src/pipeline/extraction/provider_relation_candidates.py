@@ -10,16 +10,17 @@ import uuid
 from pathlib import Path
 from typing import Literal, Mapping
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from src.pipeline.extraction.provider_references import ProviderReferenceMentionV1
 from src.pipeline.extraction.structural_context import StructuralRegistry
 from src.pipeline.parser.models import ParsedDocument
 
 
-PROVIDER_RELATION_CANDIDATE_VERSION = "provider-relation-candidate-v1"
+PROVIDER_RELATION_CANDIDATE_VERSION = "provider-relation-candidate-v2"
 
 ProviderDocumentIndex = Mapping[tuple[str, str], str]
+ProviderDocumentNumberIndex = Mapping[tuple[str, str], str]
 ProviderUnitIndex = Mapping[tuple[str, str, str], tuple[str, str]]
 ProviderFailureIndex = Mapping[tuple[str, str, str | None], str]
 
@@ -27,7 +28,9 @@ ProviderFailureIndex = Mapping[tuple[str, str, str | None], str]
 class ProviderRelationCandidateV1(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    contract_version: Literal["provider-relation-candidate-v1"] = (
+    contract_version: Literal[
+        "provider-relation-candidate-v1", "provider-relation-candidate-v2"
+    ] = (
         PROVIDER_RELATION_CANDIDATE_VERSION
     )
     candidate_id: str
@@ -41,10 +44,26 @@ class ProviderRelationCandidateV1(BaseModel):
     canonical_source_type: str | None
     canonical_target_ids: tuple[str, ...] = ()
     canonical_target_types: tuple[str, ...] = ()
+    projection_basis_candidate_id: str | None = None
     status: Literal["RESOLVED", "UNRESOLVED", "AMBIGUOUS", "NOT_APPLICABLE"]
     reason_code: str
     evidence: str
     reference: ProviderReferenceMentionV1
+
+    @model_validator(mode="after")
+    def validate_projection_basis(self) -> "ProviderRelationCandidateV1":
+        if (
+            self.contract_version == "provider-relation-candidate-v2"
+            and self.source_ownership == "PROJECTED"
+            and self.status == "RESOLVED"
+            and not self.projection_basis_candidate_id
+        ):
+            raise ValueError(
+                "Resolved PROJECTED candidate requires projection_basis_candidate_id"
+            )
+        if self.source_ownership == "HOST" and self.projection_basis_candidate_id:
+            raise ValueError("HOST candidate cannot carry projection basis")
+        return self
 
     @property
     def canonical_target_id(self) -> str | None:
@@ -82,16 +101,35 @@ def load_provider_relation_candidates(
     return tuple(candidates)
 
 
+def provider_owned_source_spans(
+    candidates: tuple[ProviderRelationCandidateV1, ...], source_text: str
+) -> tuple[tuple[int, int], ...]:
+    """Return provider-owned spans only after verifying source-coordinate identity."""
+
+    spans: list[tuple[int, int]] = []
+    for candidate in candidates:
+        reference = candidate.reference
+        marker = source_text[reference.source_char_start : reference.source_char_end]
+        if marker != f"[{reference.citation_text}]":
+            raise ValueError(
+                f"Provider candidate source span drift: {candidate.candidate_id}"
+            )
+        spans.append((reference.source_char_start, reference.source_char_end))
+    return tuple(spans)
+
+
 def build_provider_relation_candidates(
     parsed: ParsedDocument,
     source_text: str,
     references: tuple[ProviderReferenceMentionV1, ...],
     *,
     provider_document_index: ProviderDocumentIndex | None = None,
+    provider_document_number_index: ProviderDocumentNumberIndex | None = None,
     provider_unit_index: ProviderUnitIndex | None = None,
     provider_failure_index: ProviderFailureIndex | None = None,
 ) -> tuple[ProviderRelationCandidateV1, ...]:
     document_index = provider_document_index or {}
+    document_number_index = provider_document_number_index or {}
     unit_index = provider_unit_index or {}
     failure_index = provider_failure_index or {}
     registry = StructuralRegistry.from_parsed_document(
@@ -118,6 +156,10 @@ def build_provider_relation_candidates(
             reference.provider_target_document_id or "",
         )
         target_document_exists = target_document_key in document_index
+        target_number_conflict = provider_target_document_number_conflicts(
+            reference.citation_text,
+            document_number_index.get(target_document_key),
+        )
         if target_document_exists and not reference.provider_target_item_ids:
             resolved_targets = (document_index[target_document_key],)
             resolved_target_types = ("Document",)
@@ -161,15 +203,24 @@ def build_provider_relation_candidates(
         elif relation == "UNKNOWN":
             status = "AMBIGUOUS"
             reason = "governing_operation_ambiguous"
-        elif projected and projected_source is None:
+        elif projected and (
+            projected_source is None or projected_source[0] is None
+        ):
             status = "UNRESOLVED"
-            reason = "projected_source_owner_not_resolved"
+            reason = (
+                projected_source[3]
+                if projected_source is not None
+                else "projected_source_owner_not_resolved"
+            )
         elif not projected and host_source_id is None:
             status = "UNRESOLVED"
             reason = "source_structural_unit_not_found"
         elif not reference.provider_target_document_id or not target_document_exists:
             status = "UNRESOLVED"
             reason = "target_document_not_in_corpus"
+        elif target_number_conflict:
+            status = "UNRESOLVED"
+            reason = "provider_text_target_conflict"
         elif reference.provider_target_item_ids and len(resolved_targets) != len(
             reference.provider_target_item_ids
         ):
@@ -197,6 +248,13 @@ def build_provider_relation_candidates(
             status = "RESOLVED"
             reason = "provider_endpoints_resolved"
 
+        # Multiple provider item IDs may identify the same smallest canonical
+        # unit. Preserve provider evidence on the mention, but expose a stable
+        # unique graph target set to checkpointing and materialization.
+        canonical_targets = tuple(
+            dict.fromkeys(zip(resolved_targets, resolved_target_types, strict=True))
+        )
+
         candidates.append(
             ProviderRelationCandidateV1(
                 candidate_id=_candidate_id(reference),
@@ -218,8 +276,11 @@ def build_provider_relation_candidates(
                     if projected
                     else host_source_type
                 ),
-                canonical_target_ids=resolved_targets,
-                canonical_target_types=resolved_target_types,
+                canonical_target_ids=tuple(item[0] for item in canonical_targets),
+                canonical_target_types=tuple(item[1] for item in canonical_targets),
+                projection_basis_candidate_id=(
+                    projected_source[2] if projected_source is not None else None
+                ),
                 status=status,
                 reason_code=reason,
                 evidence=evidence,
@@ -227,6 +288,28 @@ def build_provider_relation_candidates(
             )
         )
     return tuple(candidates)
+
+
+_DOCUMENT_NUMBER_RE = re.compile(
+    r"(?<!\d)(\d{1,4}\s*/\s*\d{4}\s*/\s*[A-ZĐ0-9-]+)", re.IGNORECASE
+)
+
+
+def provider_target_document_number_conflicts(
+    citation_text: str, target_document_number: str | None
+) -> bool:
+    """Reject a provider target that contradicts an explicit visible number."""
+
+    if not target_document_number:
+        return False
+    visible_numbers = {
+        re.sub(r"\s+", "", match).upper()
+        for match in _DOCUMENT_NUMBER_RE.findall(citation_text)
+    }
+    if not visible_numbers:
+        return False
+    normalized_target = re.sub(r"\s+", "", target_document_number).upper()
+    return normalized_target not in visible_numbers
 
 
 def write_provider_relation_candidates(
@@ -299,7 +382,7 @@ def _projected_source_endpoint(
     references: tuple[ProviderReferenceMentionV1, ...],
     source_text: str,
     unit_index: ProviderUnitIndex,
-) -> tuple[str, str] | None:
+) -> tuple[str | None, str | None, str, str | None] | None:
     """Resolve quoted content ownership from its governing amendment target."""
 
     governing_references = sorted(
@@ -316,6 +399,15 @@ def _projected_source_endpoint(
         reverse=True,
     )
     for governing in governing_references:
+        basis_id = _candidate_id(governing)
+        governing_relation = _classify_relation(governing, source_text)
+        if governing_relation == "POSITIONAL_ANCHOR":
+            return (
+                None,
+                None,
+                basis_id,
+                "projected_added_source_not_in_corpus",
+            )
         endpoints = {
             unit_index[
                 (
@@ -333,7 +425,10 @@ def _projected_source_endpoint(
             in unit_index
         }
         if len(endpoints) == 1:
-            return next(iter(endpoints))
+            endpoint_id, endpoint_type = next(iter(endpoints))
+            if governing_relation in {"AMENDS", "REPEALS"}:
+                return endpoint_id, endpoint_type, basis_id, None
+            return None, None, basis_id, "projected_source_operation_ambiguous"
     return None
 
 

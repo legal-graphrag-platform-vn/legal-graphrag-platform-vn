@@ -67,6 +67,9 @@ class StructuralRegistry:
         self.article_chapters: dict[str, str] = {}
         self.article_sections: dict[str, str] = {}
         self.article_subsections: dict[str, str] = {}
+        self._article_keys_by_id: dict[str, str] = {}
+        self._article_numbers_by_id: dict[str, str] = {}
+        self._article_node_ids_by_span: dict[tuple[int, int, str, str | None], str] = {}
 
         for part in parsed.parts:
             part_number = normalize_part_number(part.number)
@@ -124,9 +127,17 @@ class StructuralRegistry:
             )
             self.subsections[key] = subsection_node_id
             if (chapter_number, section_number) not in self.sections:
-                matching = [k for k in self.sections if k[0] == chapter_number and k[1].startswith(section_number)]
+                matching = [
+                    k
+                    for k in self.sections
+                    if k[0] == chapter_number and k[1].startswith(section_number)
+                ]
                 if not matching:
-                    chapter_label = f" in Chapter {subsection.chapter}" if subsection.chapter else ""
+                    chapter_label = (
+                        f" in Chapter {subsection.chapter}"
+                        if subsection.chapter
+                        else ""
+                    )
                     raise ValueError(
                         f"Subsection {subsection.number} references missing Section "
                         f"{subsection.section}{chapter_label}"
@@ -148,6 +159,16 @@ class StructuralRegistry:
 
             self.articles[article_key] = article_id
             self.types[article_id] = "Article"
+            self._article_keys_by_id[article_id] = article_key
+            self._article_numbers_by_id[article_id] = article.number
+            self._article_node_ids_by_span[
+                (
+                    article.source_start_char,
+                    article.source_end_char,
+                    article.number,
+                    article.part,
+                )
+            ] = article_id
             if article.part:
                 part_number = normalize_part_number(article.part)
                 part_node_id = self.parts.get(part_number)
@@ -174,7 +195,9 @@ class StructuralRegistry:
                             )
                             subsection_node_id = self.subsections.get(subsection_key)
                             if subsection_node_id is not None:
-                                self.article_subsections[article_id] = subsection_node_id
+                                self.article_subsections[article_id] = (
+                                    subsection_node_id
+                                )
             elif article.section:
                 section_key = (None, article.section.strip().lower())
                 section_node_id = self.sections.get(section_key)
@@ -243,13 +266,26 @@ class StructuralRegistry:
         return None
 
     def article_number_for_id(self, article_id: str) -> str | None:
-        return next(
+        return self._article_numbers_by_id.get(article_id)
+
+    def article_key_for_id(self, article_id: str) -> str | None:
+        return self._article_keys_by_id.get(article_id)
+
+    def article_id_for_model(self, article: Article) -> str | None:
+        return self._article_node_ids_by_span.get(
             (
-                number
-                for number, node_id in self.articles.items()
-                if node_id == article_id
-            ),
-            None,
+                article.source_start_char,
+                article.source_end_char,
+                article.number,
+                article.part,
+            )
+        )
+
+    def article_ids_for_number(self, article_number: str) -> tuple[str, ...]:
+        return tuple(
+            article_id
+            for article_id, number in self._article_numbers_by_id.items()
+            if number == article_number
         )
 
     def chapter_for_article_id(self, article_id: str) -> str | None:

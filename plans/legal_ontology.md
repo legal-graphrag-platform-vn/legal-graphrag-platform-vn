@@ -1,7 +1,7 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.11.0
+> **Version**: 1.12.0
 > **Frozen date**: 2026-08-15
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
@@ -197,7 +197,12 @@ enum is `RULE`, `ENTITY_LINKING`, or `LLM`; `DIAGRAM` and `HYBRID` are not valid
 Method-specific requirements:
 
 - `RULE`: `resolver_name`, `resolver_version`, `source_unit_id`, `source_char_start`, `source_char_end`.
-- `ENTITY_LINKING`: `linker_name`, `linker_version`, `source_unit_id`, `source_char_start`, `source_char_end`.
+- `ENTITY_LINKING`: `linker_name`, `linker_version`, and `source_unit_id`.
+  A host-owned citation additionally requires `source_char_start` and
+  `source_char_end`. A projected citation instead requires
+  `source_ownership=PROJECTED`, `host_evidence_document_id`,
+  `host_evidence_source_unit_id`, `host_evidence_char_start`,
+  `host_evidence_char_end`, and `projection_basis_candidate_id`.
 - `LLM`: `confidence`, `llm_model`, and `checkpoint_id`.
 
 `DIAGRAM` is the sole member of the separate document-relation extraction-method
@@ -216,6 +221,14 @@ confidence never bypasses ontology or consistency validation.
 Deterministic and entity-linked bundles bypass confidence scoring only. They still require schema, ontology,
 endpoint, atomic-bundle, and payload consistency validation. A multi-target reference is accepted as a whole or
 not accepted at all.
+
+For projected provider relations, `source_unit_id` is always the canonical legal
+source in the amended document. Host coordinates prove where the provider exposed
+the evidence and never replace that legal identity. The same contract applies
+whether source and target belong to the same Document or different Documents.
+Projected `AMENDS` and `REPEALS` require the same host-evidence and projection-basis
+properties even though their legal provenance remains `PROVIDER_HTML` rather than
+`ENTITY_LINKING`.
 
 Other semantic relation provenance is mandatory. The confidence scorer produces `confidence`; the extraction or runtime layer must provide `llm_model` and `created_at` before repository write.
 
@@ -408,3 +421,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.9.0 | 2026-08-10 | Synchronized executable metadata fields, reserved optional Point temporal fields, and fail-closed deterministic diagram relation provenance | ADR-29 |
 | 1.10.0 | 2026-08-12 | Extended `AMENDS` and `REPEALS` to the smallest evidenced structural unit, including `Point`; unresolved provider endpoints remain outside graph persistence | ADR-32 |
 | 1.11.0 | 2026-08-15 | Added corpus-evidenced `Document -> Section`, `Part -> Section`, `Part -> Article`, and packaging-document mixed root structure | ADR-33 |
+| 1.12.0 | 2026-08-15 | Added dual provenance for projected provider relations and atomic multi-target reconciliation | ADR-34 |

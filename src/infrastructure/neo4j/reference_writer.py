@@ -1,4 +1,4 @@
-"""Transaction-guarded relation-only writer for external REFERS_TO bundles."""
+"""Transaction-guarded relation-only writers for corpus reconciliation."""
 
 from __future__ import annotations
 
@@ -8,8 +8,11 @@ from typing import Any, Iterable, Mapping
 from src.shared.ontology import validators as root_validator
 from src.shared.ontology.validators import (
     ValidatedExternalReference,
+    ValidatedProviderTemporalBatch,
+    ValidatedProviderTemporalRelation,
     ValidatedRelationBatch,
 )
+from src.infrastructure.neo4j.writer import neo4j_properties
 from src.shared.ontology.hierarchy import MAX_DOCUMENT_HIERARCHY_DEPTH
 
 
@@ -53,6 +56,16 @@ class BundleMaterializationResult:
     final_target_ids: tuple[str, ...]
     relation_ids: tuple[str, ...]
     ownership_path_divergence_count: int
+    matched_existing: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderTemporalMaterializationResult:
+    provider_candidate_id: str
+    relation_id: str
+    relation_type: str
+    source_id: str
+    target_id: str
     matched_existing: bool
 
 
@@ -100,7 +113,11 @@ class Neo4jExternalReferenceWriter:
         for reference in references:
             _require_label(reference.source_type, SOURCE_LABELS, "source")
             _require_label(reference.target_type, TARGET_LABELS, "target")
-            if reference.source_document_id == reference.target_document_id:
+            if (
+                reference.source_document_id == reference.target_document_id
+                and reference.relation.properties.get("source_ownership")
+                != "PROJECTED"
+            ):
                 raise ExternalReferenceWriteError(
                     "same_document_reference_not_external"
                 )
@@ -217,6 +234,103 @@ class Neo4jExternalReferenceWriter:
         )
 
 
+@dataclass(slots=True)
+class Neo4jProviderTemporalWriter:
+    session: Any
+
+    def write(self, batch: Any) -> tuple[ProviderTemporalMaterializationResult, ...]:
+        if (
+            not isinstance(batch, ValidatedProviderTemporalBatch)
+            or batch.validation_token is not root_validator._VALIDATION_TOKEN
+        ):
+            raise TypeError(
+                "Neo4jProviderTemporalWriter.write expects a root "
+                "ValidatedProviderTemporalBatch"
+            )
+        return tuple(
+            self.session.execute_write(self._write_relation, wrapped)
+            for wrapped in batch.relations
+        )
+
+    def _write_relation(
+        self,
+        tx: Any,
+        wrapped: ValidatedProviderTemporalRelation,
+    ) -> ProviderTemporalMaterializationResult:
+        relation = wrapped.relation
+        if relation.relation_type not in {"AMENDS", "REPEALS"}:
+            raise ExternalReferenceWriteError(
+                "unsupported_provider_temporal_relation", relation.relation_type
+            )
+        temporal_labels = frozenset({"Document", "Article", "Clause", "Point"})
+        _require_label(relation.head_type, temporal_labels, "source")
+        _require_label(relation.tail_type, temporal_labels, "target")
+        for endpoint_id, endpoint_type, expected_owner in (
+            (relation.head_id, relation.head_type, wrapped.source_document_id),
+            (relation.tail_id, relation.tail_type, wrapped.target_document_id),
+        ):
+            evidence = _verify_endpoint(
+                tx, endpoint_id=endpoint_id, endpoint_type=endpoint_type
+            )
+            if evidence["endpoint_count"] != 1:
+                raise ExternalReferenceWriteError(
+                    "endpoint_missing_or_non_unique_in_graph", endpoint_id
+                )
+            if tuple(sorted(evidence["owner_ids"])) != (expected_owner,):
+                raise ExternalReferenceWriteError(
+                    "endpoint_document_ownership_mismatch_in_graph", endpoint_id
+                )
+            if int(evidence["ownership_path_count"]) < 1:
+                raise ExternalReferenceWriteError(
+                    "endpoint_document_ownership_missing_in_graph", endpoint_id
+                )
+
+        existing = _existing_provider_candidate_relation(
+            tx,
+            source_id=relation.head_id,
+            source_type=relation.head_type,
+            provider_candidate_id=wrapped.provider_candidate_id,
+        )
+        expected = (relation.relation_type, relation.tail_id)
+        if existing and existing != (expected,):
+            raise ExternalReferenceWriteError(
+                "provider_temporal_target_conflict_in_graph",
+                f"existing={existing}, expected={expected}",
+            )
+
+        properties, temporal_cypher, temporal_parameters = neo4j_properties(
+            "relation", relation.properties
+        )
+        query = (
+            f"MATCH (source:{relation.head_type} {{id: $source_id}}) "
+            f"MATCH (target:{relation.tail_type} {{id: $target_id}}) "
+            f"MERGE (source)-[relation:{relation.relation_type} "
+            "{relation_id: $relation_id}]->(target) "
+            f"SET relation += $properties {temporal_cypher} "
+            "RETURN relation.relation_id AS relation_id, target.id AS target_id"
+        )
+        rows = _result_rows(
+            tx.run(
+                query,
+                source_id=relation.head_id,
+                target_id=relation.tail_id,
+                relation_id=relation.properties["relation_id"],
+                properties=properties,
+                **temporal_parameters,
+            )
+        )
+        if len(rows) != 1 or str(rows[0].get("target_id")) != relation.tail_id:
+            raise ExternalReferenceWriteError("incomplete_provider_temporal_write")
+        return ProviderTemporalMaterializationResult(
+            provider_candidate_id=wrapped.provider_candidate_id,
+            relation_id=str(relation.properties["relation_id"]),
+            relation_type=relation.relation_type,
+            source_id=relation.head_id,
+            target_id=relation.tail_id,
+            matched_existing=bool(existing),
+        )
+
+
 def _verify_endpoint(
     tx: Any,
     *,
@@ -271,6 +385,41 @@ def _existing_bundle_targets(
     if len(rows) != 1:
         raise ExternalReferenceWriteError("bundle_inspection_result_cardinality")
     return tuple(sorted(str(value) for value in (rows[0].get("target_ids") or ())))
+
+
+def _existing_provider_candidate_relation(
+    tx: Any,
+    *,
+    source_id: str,
+    source_type: str,
+    provider_candidate_id: str,
+) -> tuple[tuple[str, str], ...]:
+    query = (
+        f"MATCH (source:{source_type} {{id: $source_id}}) "
+        "OPTIONAL MATCH (source)-[existing:AMENDS|REPEALS]->(target) "
+        "WHERE existing.provider_candidate_id = $provider_candidate_id "
+        "RETURN collect({relation_type: type(existing), target_id: target.id}) "
+        "AS existing_relations"
+    )
+    rows = _result_rows(
+        tx.run(
+            query,
+            source_id=source_id,
+            provider_candidate_id=provider_candidate_id,
+        )
+    )
+    if len(rows) != 1:
+        raise ExternalReferenceWriteError(
+            "provider_temporal_inspection_result_cardinality"
+        )
+    values = rows[0].get("existing_relations") or ()
+    return tuple(
+        sorted(
+            (str(value["relation_type"]), str(value["target_id"]))
+            for value in values
+            if value.get("relation_type") and value.get("target_id")
+        )
+    )
 
 
 def _require_label(label: str, allowed: frozenset[str], role: str) -> None:

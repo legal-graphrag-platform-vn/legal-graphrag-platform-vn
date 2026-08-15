@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.11.0"
+ONTOLOGY_VERSION = "1.12.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -157,6 +157,15 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         ],
         "no_self_loop": True,
         "required_properties": ["effective_from"],
+        "property_types": {
+            "source_ownership": "string",
+            "host_evidence_document_id": "string",
+            "host_evidence_source_unit_id": "string",
+            "host_evidence_char_start": "integer",
+            "host_evidence_char_end": "integer",
+            "projection_basis_candidate_id": "string",
+        },
+        "property_enums": {"source_ownership": {"HOST", "PROJECTED"}},
     },
     "REPEALS": {
         "valid_pairs": [
@@ -166,6 +175,15 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         ],
         "no_self_loop": True,
         "required_properties": ["effective_from"],
+        "property_types": {
+            "source_ownership": "string",
+            "host_evidence_document_id": "string",
+            "host_evidence_source_unit_id": "string",
+            "host_evidence_char_start": "integer",
+            "host_evidence_char_end": "integer",
+            "projection_basis_candidate_id": "string",
+        },
+        "property_enums": {"source_ownership": {"HOST", "PROJECTED"}},
     },
     "REPLACES": {
         "valid_pairs": [("Document", "Document")],
@@ -209,8 +227,6 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
                 "linker_name",
                 "linker_version",
                 "source_unit_id",
-                "source_char_start",
-                "source_char_end",
             ],
             "LLM": ["confidence", "llm_model", "checkpoint_id"],
         },
@@ -231,10 +247,17 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
             "source_char_start": "integer",
             "source_char_end": "integer",
             "checkpoint_id": "string",
+            "source_ownership": "string",
+            "host_evidence_document_id": "string",
+            "host_evidence_source_unit_id": "string",
+            "host_evidence_char_start": "integer",
+            "host_evidence_char_end": "integer",
+            "projection_basis_candidate_id": "string",
         },
         "property_enums": {
             "citation_type": CITATION_TYPES,
             "extraction_method": REFERENCE_EXTRACTION_METHODS,
+            "source_ownership": {"HOST", "PROJECTED"},
         },
     },
     "DEFINES": {

@@ -412,7 +412,7 @@ Costs:
 Option B was selected and accepted by ADR-32. Ontology `1.10.0` now permits
 `Document|Article|Clause|Point` as endpoints of `AMENDS` and `REPEALS`.
 
-## 12.1 Implementation checkpoint (2026-08-12)
+## 12.1 Implementation checkpoint (2026-08-15)
 
 Implemented:
 
@@ -420,7 +420,9 @@ Implemented:
 - existing LuatVietnam raw bundles can backfill the sidecar only when regenerated
   text exactly matches canonical `source.txt`;
 - selected `demuc<docItemId>` blocks map to exact source spans and then to the
-  smallest existing canonical Article/Clause/Point;
+  smallest existing canonical Part/Chapter/Section/Subsection/Article/Clause/Point;
+  Chapter headings are identified from the provider span and must map to an
+  existing Chapter in the structural registry;
 - quoted replacement headings such as `Điều 17a` remain content of the host
   amendment Article instead of becoming a top-level host Article;
 - references inside replacement quotes inherit their projected canonical source
@@ -428,8 +430,26 @@ Implemented:
 - parse emits `provider_relation_candidates.jsonl` with typed statuses
   `RESOLVED`, `UNRESOLVED`, `AMBIGUOUS`, or `NOT_APPLICABLE`;
 - extraction consumes resolved `AMENDS`/`REPEALS` candidates as deterministic
-  `PROVIDER_HTML` records through the existing schema, ontology, consistency and
-  decision gates; explicit source-text effective dates override missing metadata;
+  `PROVIDER_HTML` records and resolved `REFERS_TO` candidates as
+  `ENTITY_LINKING` records through the existing schema, ontology, consistency
+  and decision gates; explicit source-text effective dates override missing metadata;
+- every provider-owned source span is excluded from generic structural
+  resolution, independent of candidate status; an unresolved provider target
+  therefore cannot fall back to a same-number local unit;
+- batch parse rebuilds provider candidates only after all available hierarchy
+  artifacts are durable, removing parse-worker ordering from endpoint identity;
+- provider `REFERS_TO` candidates are revalidated against the published corpus
+  registry and use one crash-safe checkpoint/transaction per atomic target bundle;
+- explicit document numbers in citation text are cross-checked against the
+  provider target document; conflicts fail closed as
+  `provider_text_target_conflict`;
+- decision-gated single-target candidates for `AMENDS` and `REPEALS` are
+  revalidated against the registry and materialized by an idempotent
+  relation-only writer after all endpoints exist;
+- resolved `PROJECTED` candidates carry separate canonical legal-source and host
+  evidence provenance; same-document and cross-document targets share this rule;
+- batch ingestion writes graph endpoints before relation-only reconciliation and
+  reconciliation failures are terminal rather than warnings;
 - accepted cross-document provider relations are deferred from the single-document
   graph payload under `CORPUS_RELATION_RECONCILIATION`;
 - missing documents/items remain unresolved and no graph placeholder is created;
@@ -450,9 +470,10 @@ nd_82_2020_art2_cl2_pa
 Still intentionally blocked from graph write:
 
 - projected citations whose governing amendment target cannot be resolved;
+- citations inside newly inserted units whose canonical owner does not yet exist
+  in the target corpus; the positional anchor is not a substitute source;
+- stale v1 projected sidecars without `projection_basis_candidate_id`;
 - ambiguous operation wording requiring bounded LLM fallback;
-- provider candidates not yet revalidated against a published corpus-registry
-  receipt through the crash-safe graph reconciliation path.
 
 ## 13. Proposed Implementation Phases
 
