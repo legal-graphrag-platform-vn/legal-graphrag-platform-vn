@@ -133,14 +133,55 @@ def _registry_build():
             ],
         }
     )
+    appendix_payload = validate_graph_payload(
+        {
+            "nodes": [
+                {
+                    "type": "Document",
+                    "id": "tt20_2015",
+                    "number": "20/2015/TT-BKHĐT",
+                    "doc_type": "Circular",
+                    "normative": True,
+                    "legal_status": "ACTIVE",
+                    "effective_from": "2016-01-01",
+                    "issuer_name": "Bộ Kế hoạch và Đầu tư",
+                },
+                {
+                    "type": "Appendix",
+                    "id": "tt20_2015_appvii_2",
+                    "scope": "vii_2",
+                    "number": "VII-2",
+                    "heading": "PHỤ LỤC VII-2",
+                    "content_raw": "Danh mục mã",
+                    "appendix_kind": "LIST",
+                    "effective_from": "2016-01-01",
+                    "legal_status": "ACTIVE",
+                },
+            ],
+            "relations": [
+                {
+                    "head_id": "tt20_2015",
+                    "type": "CONTAINS",
+                    "tail_id": "tt20_2015_appvii_2",
+                    "properties": {},
+                }
+            ],
+        }
+    )
 
     return build_corpus_registry(
         {
             "L59": payload("ldn_2020", "59/2020/QH14", "1", "1", "a"),
             "L68": payload("ldn_2014", "68/2014/QH13", "35", "1", "m"),
             "ND34": grouping_payload,
+            "TT20": appendix_payload,
         },
-        {"L59": "source", "L68": "target", "ND34": "grouping target"},
+        {
+            "L59": "source",
+            "L68": "target",
+            "ND34": "grouping target",
+            "TT20": "appendix target",
+        },
         build_id="test-registry",
     )
 
@@ -380,6 +421,8 @@ Mục 1. Nội dung
     assert section.target_candidate.model_dump() == {
         "target_type": "Section",
         "document_number": "57/2026/NĐ-CP",
+        "appendix_scope": None,
+        "appendix_number": None,
         "part_number": None,
         "chapter_number": "III",
         "section_number": "1",
@@ -391,6 +434,8 @@ Mục 1. Nội dung
     assert chapter.target_candidate.model_dump() == {
         "target_type": "Chapter",
         "document_number": "57/2026/NĐ-CP",
+        "appendix_scope": None,
+        "appendix_number": None,
         "part_number": None,
         "chapter_number": "V",
         "section_number": None,
@@ -399,6 +444,73 @@ Mục 1. Nội dung
         "clause_number": None,
         "point_label": None,
     }
+
+
+def test_resolver_resolves_local_appendix_reference_to_canonical_node() -> None:
+    text = """Điều 1. Biểu mẫu
+1. Hồ sơ lập theo Phụ lục I kèm theo văn bản này.
+PHỤ LỤC I: MẪU HỒ SƠ
+Nội dung biểu mẫu
+"""
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[0]
+    )
+
+    appendix = next(
+        item
+        for item in references
+        if item.target_candidate and item.target_candidate.target_type == "Appendix"
+    )
+    assert appendix.status == "RESOLVED"
+    assert appendix.target_unit_ids == ("ldn_2020_appi",)
+    assert appendix.target_candidate.appendix_scope == "i"
+
+
+def test_resolver_preserves_external_appendix_candidate_without_registry() -> None:
+    text = """Điều 1. Biểu mẫu
+1. Áp dụng Phụ lục VII-2 ban hành kèm theo Thông tư số 20/2015/TT-BKHĐT.
+"""
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[0]
+    )
+
+    assert len(references) == 1
+    reference = references[0]
+    assert reference.status == "UNRESOLVED"
+    assert reference.reference_scope == "EXTERNAL"
+    assert reference.reason_code == "target_document_not_in_snapshot"
+    assert reference.target_candidate.target_type == "Appendix"
+    assert reference.target_candidate.appendix_scope == "vii_2"
+    assert reference.target_candidate.document_number == "20/2015/TT-BKHĐT"
+
+
+def test_resolver_links_external_appendix_from_corpus_registry() -> None:
+    text = """Điều 1. Biểu mẫu
+1. Áp dụng Phụ lục VII-2 ban hành kèm theo Thông tư số 20/2015/TT-BKHĐT.
+"""
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+    registry_build = _registry_build()
+
+    references = StructuralReferenceResolver(
+        registry,
+        text,
+        corpus_registry=registry_build.registry,
+        registry_receipt=registry_build.receipt,
+    ).resolve_article(parsed.articles[0])
+
+    assert len(references) == 1
+    reference = references[0]
+    assert reference.status == "RESOLVED"
+    assert reference.reference_scope == "EXTERNAL"
+    assert reference.target_unit_ids == ("tt20_2015_appvii_2",)
+    assert reference.registry_evidence.target_type == "Appendix"
 
 
 def test_section_parent_mismatch_is_unresolved() -> None:

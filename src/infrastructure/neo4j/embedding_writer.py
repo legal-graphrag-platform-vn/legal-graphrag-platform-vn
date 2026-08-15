@@ -1,4 +1,4 @@
-"""Neo4j updater for Article/Clause embeddings."""
+"""Neo4j updater for Appendix/Article/Clause embeddings."""
 
 from __future__ import annotations
 
@@ -14,7 +14,11 @@ class SessionProtocol(Protocol):
     def run(self, cypher: str, **parameters: Any) -> Any: ...
 
 
-REQUIRED_VECTOR_INDEXES = {"article_embedding", "clause_embedding"}
+REQUIRED_VECTOR_INDEXES = {
+    "appendix_embedding",
+    "article_embedding",
+    "clause_embedding",
+}
 
 
 @dataclass(slots=True)
@@ -45,7 +49,9 @@ class Neo4jEmbeddingWriter:
             if name in REQUIRED_VECTOR_INDEXES and state != "ONLINE"
         }
         if missing:
-            raise RuntimeError(f"Missing required Neo4j vector indexes: {sorted(missing)}")
+            raise RuntimeError(
+                f"Missing required Neo4j vector indexes: {sorted(missing)}"
+            )
         if offline:
             raise RuntimeError(f"Neo4j vector indexes are not ONLINE: {offline}")
         mismatched = {
@@ -63,7 +69,7 @@ class Neo4jEmbeddingWriter:
             self.session.run(
                 (
                     f"MATCH (d:Document {{id: $graph_id}})-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(n) "
-                    "WHERE n:Article OR n:Clause "
+                    "WHERE n:Appendix OR n:Article OR n:Clause "
                     "RETURN n.id AS id, size(n.embedding) AS vector_size, "
                     "properties(n)['embedding_model'] AS model, "
                     "properties(n)['embedding_provider'] AS provider, "
@@ -98,11 +104,14 @@ class Neo4jEmbeddingWriter:
         state = self.reachable_embedding_state(graph_id)
         unknown = set(content_hashes) - set(state)
         if unknown:
-            raise ValueError(f"Embedding targets are not reachable from Document {graph_id}: {sorted(unknown)[:10]}")
+            raise ValueError(
+                f"Embedding targets are not reachable from Document {graph_id}: {sorted(unknown)[:10]}"
+            )
         return [
             node_id
             for node_id, content_hash in content_hashes.items()
-            if state[node_id] != {
+            if state[node_id]
+            != {
                 "vector_size": self.expected_dimension,
                 "model": model,
                 "provider": provider,
@@ -130,13 +139,15 @@ class Neo4jEmbeddingWriter:
                     f"Embedding for {node_id} has dimension {len(embedding)}; expected {self.expected_dimension}"
                 )
             if node_id not in state:
-                raise ValueError(f"Embedding target is not reachable from Document {graph_id}: {node_id}")
+                raise ValueError(
+                    f"Embedding target is not reachable from Document {graph_id}: {node_id}"
+                )
             if node_id not in content_hashes or not model or not provider:
                 raise ValueError(f"Embedding metadata is incomplete for {node_id}")
             result = self.session.run(
                 (
                     "MATCH (n) "
-                    "WHERE (n:Article OR n:Clause) AND n.id = $id "
+                    "WHERE (n:Appendix OR n:Article OR n:Clause) AND n.id = $id "
                     "SET n.embedding = $embedding, n.embedding_model = $model, "
                     "n.embedding_provider = $provider, n.embedding_dimension = $dimension, "
                     "n.embedding_normalized = $normalized, n.embedding_content_hash = $content_hash, "
@@ -154,7 +165,9 @@ class Neo4jEmbeddingWriter:
             )
             rows = list(result)
             if not rows or int(_row_value(rows[0], "updated") or 0) != 1:
-                raise RuntimeError(f"Embedding target disappeared during write: {node_id}")
+                raise RuntimeError(
+                    f"Embedding target disappeared during write: {node_id}"
+                )
 
 
 def _row_value(row: Any, key: str) -> Any:

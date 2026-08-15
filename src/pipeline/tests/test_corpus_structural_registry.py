@@ -354,14 +354,14 @@ def test_registry_document_number_lookup_is_exact() -> None:
     assert registry.document_candidates("Nghị định 59/2020/QH14") == ()
 
 
-def test_registry_v2_indexes_part_subsection_and_complete_ancestry() -> None:
+def test_registry_v4_indexes_part_subsection_and_complete_ancestry() -> None:
     build = build_corpus_registry(
         {"ND34": _part_subsection_payload()},
         {"ND34": "canonical source"},
         build_id="registry-v2-test",
     )
 
-    assert build.registry.manifest.contract_version == ("corpus-structural-registry-v2")
+    assert build.registry.manifest.contract_version == ("corpus-structural-registry-v4")
     part = build.registry.unit_candidates(
         document_id="nd34_2016", unit_type="Part", part_number="thứ hai"
     )
@@ -380,3 +380,149 @@ def test_registry_v2_indexes_part_subsection_and_complete_ancestry() -> None:
         "nd34_2016_ch5",
         "nd34_2016_ch5_sec3",
     )
+
+
+def test_registry_v3_scopes_appendix_descendants() -> None:
+    raw = {
+        "nodes": [
+            {
+                "type": "Document",
+                "id": "tt_demo",
+                "number": "01/2026/TT-DEMO",
+                "doc_type": "Circular",
+                "normative": True,
+                "legal_status": "ACTIVE",
+                "effective_from": "2021-01-01",
+                "issuer_name": "Bộ Demo",
+            },
+            {
+                "type": "Appendix",
+                "id": "tt_demo_appi",
+                "scope": "i",
+                "number": "I",
+                "heading": "PHỤ LỤC I",
+                "content_raw": "Điều 8. Nội dung phụ lục",
+                "appendix_kind": "LEGAL_CONTENT",
+                "effective_from": "2021-01-01",
+                "legal_status": "ACTIVE",
+            },
+            {
+                "type": "Article",
+                "id": "tt_demo_appi_art8",
+                "number": "8",
+                "content_raw": "Nội dung phụ lục",
+                "effective_from": "2021-01-01",
+                "legal_status": "ACTIVE",
+            },
+        ],
+        "relations": [
+            {
+                "head_id": "tt_demo",
+                "type": "CONTAINS",
+                "tail_id": "tt_demo_appi",
+                "properties": {},
+            },
+            {
+                "head_id": "tt_demo_appi",
+                "type": "CONTAINS",
+                "tail_id": "tt_demo_appi_art8",
+                "properties": {},
+            },
+        ],
+    }
+
+    build = build_corpus_registry(
+        {"TT_DEMO": validate_graph_payload(raw)},
+        {"TT_DEMO": "canonical source"},
+        build_id="registry-v3-appendix",
+    )
+
+    appendix = build.registry.unit_candidates(
+        document_id="tt_demo",
+        unit_type="Appendix",
+        appendix_scope="i",
+    )
+    article = build.registry.unit_candidates(
+        document_id="tt_demo",
+        unit_type="Article",
+        appendix_scope="i",
+        article_number="8",
+    )
+    main_article = build.registry.unit_candidates(
+        document_id="tt_demo",
+        unit_type="Article",
+        article_number="8",
+    )
+
+    assert [item.unit_id for item in appendix] == ["tt_demo_appi"]
+    assert [item.unit_id for item in article] == ["tt_demo_appi_art8"]
+    assert main_article == ()
+
+
+def test_registry_v4_scopes_attached_instrument_descendants() -> None:
+    raw = {
+        "nodes": [
+            {
+                "type": "Document",
+                "id": "qd_demo",
+                "number": "01/2026/QĐ-DEMO",
+                "doc_type": "Decision",
+                "normative": True,
+                "legal_status": "ACTIVE",
+                "effective_from": "2026-01-01",
+                "issuer_name": "Cơ quan Demo",
+            },
+            {
+                "type": "AttachedInstrument",
+                "id": "qd_demo_instregulation_1",
+                "scope": "regulation_1",
+                "heading": "QUY CHẾ HOẠT ĐỘNG",
+                "adoption_text": "Ban hành kèm theo Quyết định số 01/2026/QĐ-DEMO",
+                "content_raw": "Điều 1. Nội dung",
+                "instrument_kind": "REGULATION",
+            },
+            {
+                "type": "Article",
+                "id": "qd_demo_instregulation_1_art1",
+                "number": "1",
+                "content_raw": "Nội dung",
+                "effective_from": "2026-01-01",
+                "legal_status": "ACTIVE",
+            },
+        ],
+        "relations": [
+            {
+                "head_id": "qd_demo",
+                "type": "CONTAINS",
+                "tail_id": "qd_demo_instregulation_1",
+                "properties": {},
+            },
+            {
+                "head_id": "qd_demo_instregulation_1",
+                "type": "CONTAINS",
+                "tail_id": "qd_demo_instregulation_1_art1",
+                "properties": {},
+            },
+        ],
+    }
+
+    build = build_corpus_registry(
+        {"QD_DEMO": validate_graph_payload(raw)},
+        {"QD_DEMO": "canonical source"},
+        build_id="registry-v4-attached-instrument",
+    )
+
+    instrument = build.registry.unit_candidates(
+        document_id="qd_demo",
+        unit_type="AttachedInstrument",
+        attached_instrument_scope="regulation_1",
+    )
+    article = build.registry.unit_candidates(
+        document_id="qd_demo",
+        unit_type="Article",
+        attached_instrument_scope="regulation_1",
+        article_number="1",
+    )
+
+    assert [item.unit_id for item in instrument] == ["qd_demo_instregulation_1"]
+    assert [item.unit_id for item in article] == ["qd_demo_instregulation_1_art1"]

@@ -33,8 +33,13 @@ CLAUSE_RE = re.compile(r"^(\d+[a-z]?)\.(?:\s+|$)(.*)$", re.IGNORECASE)
 # Pattern nhận diện dòng bắt đầu một Điểm luật (ví dụ: "a) ", "b) ").
 POINT_RE = re.compile(r"^([a-zđ])\)\s*(.*)$")
 
-# Pattern nhận diện dòng tiêu đề Chương dạng số La Mã (ví dụ: "Chương II.", "Chương II:").
-CHAPTER_RE = re.compile(r"^Chương\s+([IVXLCDM]+)(?:(?:\.|:)\s*(.*))?$", re.IGNORECASE)
+# Chương có thể dùng số La Mã hoặc Ả Rập, với tiêu đề inline có hoặc không có
+# dấu phân cách. Full-line matching prevents inline citations from becoming headings.
+CHAPTER_RE = re.compile(
+    r"^Chương\s+([IVXLCDM]+|\d+[a-z]?)(?=\s|[.:]|$)"
+    r"(?:\s*(?:\.|:)\s*|\s+)?(.*)$",
+    re.IGNORECASE,
+)
 
 _PART_NUMBER = (
     r"(?:[IVXLCDM]+|\d+[a-z]?|"
@@ -85,12 +90,19 @@ def match_point(line: str) -> tuple[str, str] | None:
     return m.group(1), m.group(2).strip()
 
 
-# Thực hiện khớp và bóc tách thông tin Chương (số thứ tự La Mã).
-def match_chapter(line: str) -> str | None:
+# Thực hiện khớp và bóc tách heading Chương.
+def match_chapter_heading(line: str) -> tuple[str, str | None] | None:
     m = CHAPTER_RE.match(line.strip())
     if not m:
         return None
-    return m.group(1)
+    number = m.group(1).upper() if not m.group(1).isdigit() else m.group(1)
+    title = m.group(2).strip() or None
+    return number, title
+
+
+def match_chapter(line: str) -> str | None:
+    matched = match_chapter_heading(line)
+    return matched[0] if matched is not None else None
 
 
 def match_part(line: str) -> tuple[str, str | None] | None:

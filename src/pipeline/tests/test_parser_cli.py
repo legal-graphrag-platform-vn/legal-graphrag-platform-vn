@@ -81,7 +81,7 @@ def test_parse_cli_single_folder(tmp_path: Path) -> None:
         assert parsed_data["articles"][0]["number"] == "1"
         diagnostics = parsed_data["parser_metadata"]
         assert diagnostics["parser_name"] == "hierarchy_parser"
-        assert diagnostics["parser_version"] == "1.0"
+        assert diagnostics["parser_version"] == "2.1"
         assert len(diagnostics["source_sha256"]) == 64
         assert diagnostics["status"] == "PARSED"
         assert diagnostics["article_count"] == 1

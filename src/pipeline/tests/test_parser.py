@@ -54,6 +54,23 @@ def test_chapter_attached_to_article() -> None:
     assert art17.chapter_title == "THÀNH LẬP DOANH NGHIỆP"
 
 
+@pytest.mark.parametrize(
+    ("heading", "expected_number", "expected_title"),
+    [
+        ("Chương 1.", "1", None),
+        ("Chương I QUY ĐỊNH CHUNG", "I", "QUY ĐỊNH CHUNG"),
+        ("Chương 2: Thi hành", "2", "Thi hành"),
+    ],
+)
+def test_parser_supports_corpus_chapter_heading_variants(
+    heading: str, expected_number: str, expected_title: str | None
+) -> None:
+    parsed = parse_text(f"{heading}\nĐiều 1. Nội dung", _doc_info())
+
+    assert parsed.articles[0].chapter == expected_number
+    assert parsed.articles[0].chapter_title == expected_title
+
+
 def test_parser_builds_section_hierarchy_for_supported_heading_variants() -> None:
     text = """Chương III
 CÔNG TY
@@ -321,7 +338,7 @@ def test_parser_deduplicates_identical_point_around_vbpl_annotation() -> None:
     ] == [("c", "Nội dung")]
 
 
-def test_parser_preserves_appendix_without_attaching_it_to_last_article() -> None:
+def test_parser_creates_appendix_without_attaching_it_to_last_article() -> None:
     text = (
         "Điều 1. Nội dung\n1. Khoản chính\n"
         "PHỤ LỤC I\n1. Không phải khoản\na) Không phải điểm\n"
@@ -331,13 +348,133 @@ def test_parser_preserves_appendix_without_attaching_it_to_last_article() -> Non
 
     assert len(parsed.articles) == 1
     assert parsed.articles[0].clauses[0].content == "Khoản chính"
-    assert len(parsed.unparsed_sections) == 1
-    appendix = parsed.unparsed_sections[0]
+    assert parsed.unparsed_sections == []
+    assert len(parsed.appendices) == 1
+    appendix = parsed.appendices[0]
     assert appendix.heading == "PHỤ LỤC I"
     assert appendix.content_raw == "1. Không phải khoản\na) Không phải điểm"
     assert text[appendix.source_start_char : appendix.source_end_char].startswith(
         "PHỤ LỤC I"
     )
+
+
+@pytest.mark.parametrize(
+    ("heading", "expected_scope", "expected_number"),
+    [
+        ("Phụ lục I-1", "i_1", "I-1"),
+        ("Phụ lục V-28", "v_28", "V-28"),
+        (
+            "Phụ lục số 01/TĐG: Mẫu Giấy đăng ký",
+            "01_tdg",
+            "01/TĐG",
+        ),
+    ],
+)
+def test_parser_recognizes_real_appendix_heading_variants(
+    heading: str, expected_scope: str, expected_number: str
+) -> None:
+    parsed = parse_text(f"Điều 1. Chính văn\n{heading}\nNội dung phụ lục", _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["1"]
+    assert len(parsed.appendices) == 1
+    assert parsed.appendices[0].scope == expected_scope
+    assert parsed.appendices[0].number == expected_number
+
+
+def test_parser_scopes_legal_appendix_articles_under_appendix() -> None:
+    parsed = parse_text(
+        "Điều 1. Chính văn\n"
+        "PHỤ LỤC I\n"
+        "Điều 1. Điều thuộc phụ lục\n"
+        "1. Khoản thuộc phụ lục",
+        _doc_info(),
+    )
+
+    assert [article.number for article in parsed.articles] == ["1"]
+    appendix = parsed.appendices[0]
+    assert appendix.appendix_kind == "LEGAL_CONTENT"
+    assert [article.number for article in appendix.articles] == ["1"]
+    assert appendix.articles[0].clauses[0].number == "1"
+
+
+def test_parser_scopes_articles_under_evidenced_attached_instrument() -> None:
+    text = (
+        "NGHỊ ĐỊNH\n"
+        "Điều 1. Ban hành Điều lệ mẫu\n"
+        "Điều 2. Trách nhiệm thi hành\n"
+        "THỦ TƯỚNG\n"
+        "ĐIỀU LỆ VỀ TỔ CHỨC VÀ HOẠT ĐỘNG\n"
+        "(Ban hành kèm theo Nghị định số 39-CP ngày 27-6-1995)\n"
+        "Chương 1: QUY ĐỊNH CHUNG\n"
+        "Điều 1. Phạm vi điều chỉnh\n"
+        "1. Điều lệ này áp dụng cho tổng công ty."
+    )
+
+    parsed = parse_text(text, _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["1", "2"]
+    assert len(parsed.attached_instruments) == 1
+    instrument = parsed.attached_instruments[0]
+    assert instrument.scope == "charter_1"
+    assert instrument.instrument_kind == "CHARTER"
+    assert instrument.adoption_text.startswith("(Ban hành kèm theo Nghị định")
+    assert [article.number for article in instrument.articles] == ["1"]
+    assert instrument.articles[0].chapter == "1"
+    assert instrument.articles[0].clauses[0].number == "1"
+
+
+def test_parser_does_not_open_attached_instrument_without_adoption_evidence() -> None:
+    parsed = parse_text(
+        "NGHỊ ĐỊNH\nQUY ĐỊNH VỀ QUẢN LÝ DOANH NGHIỆP\nĐiều 1. Phạm vi điều chỉnh",
+        _doc_info(),
+    )
+
+    assert parsed.attached_instruments == []
+    assert [article.number for article in parsed.articles] == ["1"]
+
+
+def test_parser_preserves_ambiguous_attached_instrument_in_main_hierarchy() -> None:
+    parsed, diagnostics = parse_text_with_diagnostics(
+        "Điều 1. Chính văn\n"
+        "QUY CHẾ HOẠT ĐỘNG\n"
+        "Điều 1. Nội dung không có dòng ban hành kèm theo",
+        _doc_info(),
+    )
+
+    assert parsed.attached_instruments == []
+    assert diagnostics.status == "SOURCE_PRESERVED"
+    assert "Duplicate Article number" in diagnostics.warnings[-1].message
+
+
+def test_parser_keeps_form_articles_inside_appendix_raw_content_only() -> None:
+    parsed = parse_text(
+        "Điều 1. Chính văn\n"
+        "Phụ lục số 01/TĐG: Mẫu Quyết định\n"
+        "Điều 1. Nội dung quyết định mẫu",
+        _doc_info(),
+    )
+
+    appendix = parsed.appendices[0]
+    assert appendix.appendix_kind == "FORM"
+    assert appendix.articles == []
+    assert "Điều 1" in appendix.content_raw
+
+
+def test_parser_preserves_trailing_table_of_contents_outside_graph_hierarchy() -> None:
+    parsed = parse_text(
+        "Điều 1. Một\n"
+        "Nội dung\n"
+        "Điều 2. Hai\n"
+        "Nội dung\n"
+        "MỤC LỤC\n"
+        "Điều 1. Một 1\n"
+        "Điều 2. Hai 2",
+        _doc_info(),
+    )
+
+    assert [article.number for article in parsed.articles] == ["1", "2"]
+    assert len(parsed.unparsed_sections) == 1
+    assert parsed.unparsed_sections[0].section_type == "TABLE_OF_CONTENTS"
 
 
 def test_parser_does_not_treat_inline_appendix_word_as_heading() -> None:
@@ -346,6 +483,29 @@ def test_parser_does_not_treat_inline_appendix_word_as_heading() -> None:
     )
     assert parsed.unparsed_sections == []
     assert "phụ lục" in parsed.articles[0].clauses[0].content
+
+
+def test_parser_does_not_treat_full_line_appendix_amendment_sentence_as_heading() -> (
+    None
+):
+    sentence = (
+        "Phụ lục 5 ban hành kèm theo Thông tư này được thay thế bởi "
+        "Phụ lục 5 ban hành kèm theo Thông tư khác."
+    )
+    parsed = parse_text(f"Điều 1. Nội dung\n{sentence}", _doc_info())
+
+    assert parsed.appendices == []
+    assert sentence in parsed.articles[0].content_raw
+
+
+def test_permissive_parser_preserves_full_source_on_duplicate_appendix_scope() -> None:
+    text = "Điều 1. Nội dung\nPHỤ LỤC I\nNội dung một\nPHỤ LỤC I\nNội dung hai"
+
+    parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
+
+    assert diagnostics.status == "SOURCE_PRESERVED"
+    assert parsed.appendices == []
+    assert parsed.unparsed_sections[0].content_raw == text
 
 
 def test_parser_source_spans_use_canonical_source_coordinates() -> None:

@@ -53,7 +53,7 @@ class TemporalQuery(BaseModel):
 
 class RetrievedUnit(BaseModel):
     id: str
-    label: Literal["Article", "Clause", "Point"]
+    label: Literal["Appendix", "Article", "Clause", "Point"]
     content_raw: str
     title: str | None = None
     document_id: str
@@ -64,6 +64,7 @@ class RetrievedUnit(BaseModel):
     clause_id: str | None = None
     article_number: str | None = None
     clause_number: str | None = None
+    appendix_number: str | None = None
     version_family_id: str | None = None
     effective_from: date | None = None
     effective_to: date | None = None
@@ -151,6 +152,7 @@ class EvidenceItem(BaseModel):
 class CapabilitySnapshot(BaseModel):
     model_config = ConfigDict(frozen=True)
 
+    vector_appendix_index_available: bool = False
     vector_article_index_available: bool = False
     vector_clause_index_available: bool = False
     fulltext_index_available: bool = False

@@ -17,17 +17,27 @@ from src.infrastructure.embedding.embedding_generator import (
 from src.infrastructure.neo4j.embedding_writer import Neo4jEmbeddingWriter
 
 
-def test_embedding_targets_include_only_article_and_clause() -> None:
+def test_embedding_targets_include_leaf_appendix_article_and_clause() -> None:
     payload = {
         "nodes": [
+            {"type": "Appendix", "id": "leaf", "heading": "PHỤ LỤC I"},
+            {"type": "Appendix", "id": "structured", "heading": "PHỤ LỤC II"},
             {"type": "Article", "id": "a"},
             {"type": "Clause", "id": "c"},
             {"type": "Point", "id": "p"},
             {"type": "LegalConcept", "id": "x"},
-        ]
+        ],
+        "relations": [
+            {
+                "head_id": "structured",
+                "type": "CONTAINS",
+                "tail_id": "a",
+                "properties": {},
+            }
+        ],
     }
 
-    assert [node["id"] for node in embedding_targets(payload)] == ["a", "c"]
+    assert [node["id"] for node in embedding_targets(payload)] == ["leaf", "a", "c"]
 
 
 def test_embedding_dimension_must_match_configured_schema() -> None:
@@ -51,7 +61,10 @@ def test_unknown_embedding_provider_fails_fast() -> None:
 def test_clause_embedding_text_includes_parent_article_title() -> None:
     text = build_clause_embedding_text(
         {"number": "17", "title": "Quyền thành lập doanh nghiệp"},
-        {"number": "1", "content_raw": "Tổ chức, cá nhân có quyền thành lập doanh nghiệp."},
+        {
+            "number": "1",
+            "content_raw": "Tổ chức, cá nhân có quyền thành lập doanh nghiệp.",
+        },
     )
 
     assert "Quyền thành lập doanh nghiệp" in text
@@ -61,11 +74,27 @@ def test_clause_embedding_text_includes_parent_article_title() -> None:
 def test_embedding_texts_by_node_id_uses_parent_article_context() -> None:
     payload = {
         "nodes": [
-            {"type": "Article", "id": "ldn_2020_art17", "number": "17", "title": "Quyền thành lập", "content_raw": "Điều 17"},
-            {"type": "Clause", "id": "ldn_2020_art17_cl1", "number": "1", "content_raw": "Khoản 1"},
+            {
+                "type": "Article",
+                "id": "ldn_2020_art17",
+                "number": "17",
+                "title": "Quyền thành lập",
+                "content_raw": "Điều 17",
+            },
+            {
+                "type": "Clause",
+                "id": "ldn_2020_art17_cl1",
+                "number": "1",
+                "content_raw": "Khoản 1",
+            },
         ],
         "relations": [
-            {"head_id": "ldn_2020_art17", "type": "CONTAINS", "tail_id": "ldn_2020_art17_cl1", "properties": {}}
+            {
+                "head_id": "ldn_2020_art17",
+                "type": "CONTAINS",
+                "tail_id": "ldn_2020_art17_cl1",
+                "properties": {},
+            }
         ],
     }
 
@@ -94,13 +123,16 @@ def test_embedding_resume_requires_all_metadata_and_reachability() -> None:
     ]
     writer = Neo4jEmbeddingWriter(session=session)
 
-    assert writer.stale_target_ids(
-        "ldn_2020",
-        {"ldn_2020_art17": "same"},
-        model="BAAI/bge-m3",
-        provider="flag_embedding",
-        normalized=True,
-    ) == []
+    assert (
+        writer.stale_target_ids(
+            "ldn_2020",
+            {"ldn_2020_art17": "same"},
+            model="BAAI/bge-m3",
+            provider="flag_embedding",
+            normalized=True,
+        )
+        == []
+    )
     readiness_query = session.run.call_args_list[0].args[0]
     assert "properties(n)['embedding_model'] AS model" in readiness_query
     assert "n.embedding_model AS model" not in readiness_query
@@ -139,6 +171,11 @@ def test_vector_index_verification_fails_when_required_index_missing() -> None:
 def test_vector_index_verification_fails_when_index_is_offline() -> None:
     session = Mock()
     session.run.return_value = [
+        {
+            "name": "appendix_embedding",
+            "state": "ONLINE",
+            "options": {"indexConfig": {"vector.dimensions": 1024}},
+        },
         {"name": "article_embedding", "state": "POPULATING"},
         {
             "name": "clause_embedding",
@@ -154,6 +191,11 @@ def test_vector_index_verification_fails_when_index_is_offline() -> None:
 def test_vector_index_verification_fails_on_dimension_mismatch() -> None:
     session = Mock()
     session.run.return_value = [
+        {
+            "name": "appendix_embedding",
+            "state": "ONLINE",
+            "options": {"indexConfig": {"vector.dimensions": 1024}},
+        },
         {
             "name": "article_embedding",
             "state": "ONLINE",

@@ -19,12 +19,15 @@ def map_retrieved_unit(
     unit_id = _required_text(record, "id")
     document_id = _required_text(record, "document_id")
     label = _required_text(record, "label")
-    if label not in {"Article", "Clause", "Point"}:
+    if label not in {"Appendix", "Article", "Clause", "Point"}:
         raise RetrievalRecordError(f"Unsupported retrieved label: {label!r}")
 
     article_number = _optional_text(record.get("article_number"))
     clause_number = _optional_text(record.get("clause_number"))
-    article_id = _required_text(record, "article_id")
+    appendix_number = _optional_text(record.get("appendix_number"))
+    article_id = _optional_text(record.get("article_id"))
+    if label in {"Article", "Clause", "Point"} and not article_id:
+        raise RetrievalRecordError(f"{label} retrieval row requires article_id")
     clause_id = _optional_text(record.get("clause_id"))
     if label == "Clause" and not clause_id:
         raise RetrievalRecordError("Clause retrieval row requires clause_id")
@@ -45,6 +48,7 @@ def map_retrieved_unit(
         clause_id=clause_id,
         article_number=article_number,
         clause_number=clause_number,
+        appendix_number=appendix_number,
         version_family_id=_optional_text(record.get("version_family_id")),
         effective_from=_native_date(record.get("effective_from")),
         effective_to=_native_date(record.get("effective_to")),
@@ -54,6 +58,7 @@ def map_retrieved_unit(
             document_number=document_number,
             article_number=article_number,
             clause_number=clause_number,
+            appendix_number=appendix_number,
         ),
         deep_link=build_deep_link(document_id, unit_id),
         retrieval_sources=[_retrieval_source(score_field)] if score_field else [],

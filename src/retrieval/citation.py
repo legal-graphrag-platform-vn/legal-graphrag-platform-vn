@@ -9,9 +9,12 @@ def build_citation_label(
     document_number: str | None,
     article_number: str | None,
     clause_number: str | None,
+    appendix_number: str | None = None,
 ) -> str:
     parts: list[str] = []
-    if article_number:
+    if label == "Appendix":
+        parts.append(f"Phụ lục {appendix_number}" if appendix_number else "Phụ lục")
+    elif article_number:
         parts.append(f"Điều {article_number}")
     if label == "Clause" and clause_number:
         parts.append(f"Khoản {clause_number}")

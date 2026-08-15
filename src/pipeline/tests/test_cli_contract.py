@@ -68,4 +68,4 @@ def test_schema_embedding_dimension_matches_settings(monkeypatch) -> None:
     schema = (REPO_ROOT / "infra" / "neo4j" / "init" / "01_schema_init.cypher").read_text(encoding="utf-8")
 
     dimension_contract = f"`vector.dimensions`: {settings.embedding_dimension}"
-    assert schema.count(dimension_contract) == 2
+    assert schema.count(dimension_contract) == 3

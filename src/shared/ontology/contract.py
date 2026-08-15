@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.12.0"
+ONTOLOGY_VERSION = "1.14.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -37,6 +37,20 @@ CONTENT_LEGAL_STATUSES: set[str] = {
     "ACTIVE",
     "AMENDED",
     "REPEALED",
+}
+
+APPENDIX_KINDS: set[str] = {
+    "LEGAL_CONTENT",
+    "FORM",
+    "LIST",
+    "TABLE",
+    "UNCLASSIFIED",
+}
+
+ATTACHED_INSTRUMENT_KINDS: set[str] = {
+    "REGULATION",
+    "CHARTER",
+    "STANDARD",
 }
 
 ISSUER_BRANCHES: set[str] = {
@@ -94,6 +108,8 @@ ONTOLOGY_LABEL_MAP: dict[str, str] = {
 PHASE1_PERSISTED_LABELS: set[str] = {
     "Document",
     "Issuer",
+    "Appendix",
+    "AttachedInstrument",
     "Part",
     "Chapter",
     "Section",
@@ -136,6 +152,17 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
             ("Document", "Chapter"),
             ("Document", "Section"),
             ("Document", "Article"),
+            ("Document", "Appendix"),
+            ("Document", "AttachedInstrument"),
+            ("AttachedInstrument", "Appendix"),
+            ("AttachedInstrument", "Part"),
+            ("AttachedInstrument", "Chapter"),
+            ("AttachedInstrument", "Section"),
+            ("AttachedInstrument", "Article"),
+            ("Appendix", "Part"),
+            ("Appendix", "Chapter"),
+            ("Appendix", "Section"),
+            ("Appendix", "Article"),
             ("Part", "Chapter"),
             ("Part", "Section"),
             ("Part", "Article"),
@@ -195,8 +222,9 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         "rule": "guides_whitelist",
     },
     "REFERS_TO": {
-        "allowed_head": ["Article", "Clause", "Point"],
+        "allowed_head": ["Appendix", "Article", "Clause", "Point"],
         "allowed_tail": [
+            "Appendix",
             "Article",
             "Clause",
             "Point",
@@ -301,6 +329,23 @@ NODE_REQUIRED_FIELDS: dict[str, list[str]] = {
         "issuer_name",
     ],
     "Issuer": ["id", "name"],
+    "Appendix": [
+        "id",
+        "scope",
+        "heading",
+        "content_raw",
+        "appendix_kind",
+        "effective_from",
+        "legal_status",
+    ],
+    "AttachedInstrument": [
+        "id",
+        "scope",
+        "heading",
+        "adoption_text",
+        "content_raw",
+        "instrument_kind",
+    ],
     "Part": ["id", "number", "title"],
     "Chapter": ["id", "number", "title"],
     "Section": ["id", "number", "title"],
@@ -325,6 +370,13 @@ NODE_ENUMS: dict[str, dict[str, set[str]]] = {
         "doc_type": DOCUMENT_TYPES,
         "legal_status": DOCUMENT_LEGAL_STATUSES,
     },
+    "Appendix": {
+        "appendix_kind": APPENDIX_KINDS,
+        "legal_status": CONTENT_LEGAL_STATUSES,
+    },
+    "AttachedInstrument": {
+        "instrument_kind": ATTACHED_INSTRUMENT_KINDS,
+    },
     "Article": {
         "legal_status": CONTENT_LEGAL_STATUSES,
     },
@@ -348,6 +400,17 @@ NODE_OPTIONAL_FIELDS: dict[str, list[str]] = {
         "signer_title",
         "signer_name",
         "source_url",
+        "updated_at",
+    ],
+    "Appendix": [
+        "number",
+        "title",
+        "effective_to",
+        "embedding",
+        "updated_at",
+    ],
+    "AttachedInstrument": [
+        "title",
         "updated_at",
     ],
     "Article": [

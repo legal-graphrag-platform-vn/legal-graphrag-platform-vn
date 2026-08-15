@@ -23,14 +23,20 @@ def test_graph_quality_report_counts_nodes_and_relations() -> None:
                 "head_id": "ldn_2020",
                 "type": "CONTAINS",
                 "tail_id": "ldn_2020_art17",
-                "properties": {"relation_id": deterministic_relation_id("ldn_2020", "CONTAINS", "ldn_2020_art17")},
+                "properties": {
+                    "relation_id": deterministic_relation_id(
+                        "ldn_2020", "CONTAINS", "ldn_2020_art17"
+                    )
+                },
             },
             {
                 "head_id": "ldn_2020_art17",
                 "type": "CONTAINS",
                 "tail_id": "ldn_2020_art17_cl1",
                 "properties": {
-                    "relation_id": deterministic_relation_id("ldn_2020_art17", "CONTAINS", "ldn_2020_art17_cl1")
+                    "relation_id": deterministic_relation_id(
+                        "ldn_2020_art17", "CONTAINS", "ldn_2020_art17_cl1"
+                    )
                 },
             },
             {
@@ -38,7 +44,9 @@ def test_graph_quality_report_counts_nodes_and_relations() -> None:
                 "type": "DEFINES",
                 "tail_id": "von_dieu_le",
                 "properties": {
-                    "relation_id": deterministic_relation_id("ldn_2020_art17", "DEFINES", "von_dieu_le")
+                    "relation_id": deterministic_relation_id(
+                        "ldn_2020_art17", "DEFINES", "von_dieu_le"
+                    )
                 },
             },
         ],
@@ -78,6 +86,7 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
             {"labels": ["LegalSubject"], "count": 1},
             {"labels": ["LegalConcept"], "count": 2},
         ],
+        [{"total": 0, "embedded": 0}],
         [{"total": 2, "embedded": 2}],
         [{"total": 1, "embedded": 0}],
         [{"count": 1}],
@@ -121,7 +130,11 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
                 "source_labels": ["Article"],
                 "source_doc_type": None,
                 "relation_type": "REGULATES",
-                "properties": {"confidence": 0.9, "llm_model": "test", "created_at": "2026-07-10T00:00:00Z"},
+                "properties": {
+                    "confidence": 0.9,
+                    "llm_model": "test",
+                    "created_at": "2026-07-10T00:00:00Z",
+                },
                 "relation_id": "regulates",
                 "target": "cong_ty",
                 "target_labels": ["LegalSubject"],
@@ -132,7 +145,11 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
                 "source_labels": ["LegalSubject"],
                 "source_doc_type": None,
                 "relation_type": "REQUIRES",
-                "properties": {"confidence": 0.9, "llm_model": "test", "created_at": "2026-07-10T00:00:00Z"},
+                "properties": {
+                    "confidence": 0.9,
+                    "llm_model": "test",
+                    "created_at": "2026-07-10T00:00:00Z",
+                },
                 "relation_id": "requires",
                 "target": "von_dieu_le",
                 "target_labels": ["LegalConcept"],
@@ -157,12 +174,14 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
     assert report["source"] == "neo4j"
     assert report["document_count"] == 1
     assert report["issuer_count"] == 1
+    assert report["appendix_count"] == 0
     assert report["article_count"] == 2
     assert report["clause_count"] == 1
     assert report["legal_concept_count"] == 2
     assert report["legal_subject_count"] == 1
     assert report["semantic_node_count"] == 3
     assert report["embedding_coverage"]["Article"] == 1.0
+    assert report["embedding_coverage"]["Appendix"] == 1.0
     assert report["embedding_coverage"]["Clause"] == 0.0
     assert report["relation_count_by_type"]["DEFINES"] == 1
     assert report["relation_count_by_type"]["REQUIRES"] == 1
@@ -179,12 +198,15 @@ def test_online_graph_quality_uses_neo4j_embedding_coverage() -> None:
 
 
 def test_decision_stats_are_separate_from_database_ontology_rate(tmp_path) -> None:
-    (tmp_path / "accepted.jsonl").write_text('{"decision":"accepted"}\n', encoding="utf-8")
+    (tmp_path / "accepted.jsonl").write_text(
+        '{"decision":"accepted"}\n', encoding="utf-8"
+    )
     (tmp_path / "review.jsonl").write_text(
         '{"decision":"review","review_reason":"low_confidence"}\n', encoding="utf-8"
     )
     (tmp_path / "rejected.jsonl").write_text(
-        '{"decision":"rejected","rejection_reason":"invalid_endpoint"}\n', encoding="utf-8"
+        '{"decision":"rejected","rejection_reason":"invalid_endpoint"}\n',
+        encoding="utf-8",
     )
 
     stats = decision_stats_from_paths(tmp_path)
@@ -193,4 +215,7 @@ def test_decision_stats_are_separate_from_database_ontology_rate(tmp_path) -> No
     assert stats["acceptance_rate"] == 1 / 3
     assert stats["review_rate"] == 1 / 3
     assert stats["rejection_rate"] == 1 / 3
-    assert stats["decision_reason_counts"] == {"low_confidence": 1, "invalid_endpoint": 1}
+    assert stats["decision_reason_counts"] == {
+        "low_confidence": 1,
+        "invalid_endpoint": 1,
+    }

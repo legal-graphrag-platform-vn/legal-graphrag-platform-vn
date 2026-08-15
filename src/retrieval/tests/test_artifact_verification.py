@@ -117,6 +117,7 @@ def test_clean_approved_artifact_is_official_candidate(tmp_path) -> None:
 
 def _pilot_capabilities() -> dict[str, object]:
     return {
+        "vector_appendix_index_available": True,
         "vector_article_index_available": True,
         "vector_clause_index_available": True,
         "fulltext_index_available": True,

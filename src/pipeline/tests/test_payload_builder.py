@@ -120,6 +120,58 @@ def test_parser_metadata_does_not_create_graph_nodes_or_relations() -> None:
     ]
 
 
+def test_appendix_and_descendants_use_owner_scoped_canonical_ids() -> None:
+    parsed = parse_text(
+        "Điều 1. Chính văn\n"
+        "PHỤ LỤC I\n"
+        "Điều 1. Điều thuộc phụ lục\n"
+        "1. Khoản thuộc phụ lục",
+        _parsed().document,
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+    node_types = {node["id"]: node["type"] for node in payload["nodes"]}
+
+    assert node_types["ldn_2020_art1"] == "Article"
+    assert node_types["ldn_2020_appi"] == "Appendix"
+    assert node_types["ldn_2020_appi_art1"] == "Article"
+    assert node_types["ldn_2020_appi_art1_cl1"] == "Clause"
+    validate_payload_consistency_or_raise(payload)
+
+
+def test_attached_instrument_and_descendants_use_owner_scoped_canonical_ids() -> None:
+    parsed = parse_text(
+        "Điều 1. Chính văn\n"
+        "ĐIỀU LỆ VỀ TỔ CHỨC VÀ HOẠT ĐỘNG\n"
+        "(Ban hành kèm theo Luật số 59/2020/QH14)\n"
+        "Điều 1. Điều thuộc Điều lệ\n"
+        "1. Khoản thuộc Điều lệ",
+        _parsed().document,
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+    node_types = {node["id"]: node["type"] for node in payload["nodes"]}
+
+    assert node_types["ldn_2020_art1"] == "Article"
+    assert node_types["ldn_2020_instcharter_1"] == "AttachedInstrument"
+    assert node_types["ldn_2020_instcharter_1_art1"] == "Article"
+    assert node_types["ldn_2020_instcharter_1_art1_cl1"] == "Clause"
+    validate_payload_consistency_or_raise(payload)
+
+
+def test_table_of_contents_remains_artifact_only() -> None:
+    parsed = parse_text(
+        "Điều 1. Một\nNội dung\nĐiều 2. Hai\nNội dung\n"
+        "MỤC LỤC\nĐiều 1. Một 1\nĐiều 2. Hai 2",
+        _parsed().document,
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+
+    assert parsed.unparsed_sections[0].section_type == "TABLE_OF_CONTENTS"
+    assert all(node["type"] != "TableOfContents" for node in payload["nodes"])
+
+
 def test_build_graph_payload_fails_for_missing_entity_index_entry() -> None:
     with pytest.raises(PayloadBuildError, match="missing entity"):
         build_graph_payload(

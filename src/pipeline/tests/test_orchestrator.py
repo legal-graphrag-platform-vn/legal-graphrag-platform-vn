@@ -521,7 +521,7 @@ def test_duplicate_article_checkpoint_is_rejected(tmp_path) -> None:
     checkpoint = tmp_path / "L59_2020" / "article_extractions.jsonl"
     row = checkpoint.read_text(encoding="utf-8")
     checkpoint.write_text(row + row, encoding="utf-8")
-    with pytest.raises(ValueError, match="Duplicate Article checkpoint: 5"):
+    with pytest.raises(ValueError, match="Duplicate Article checkpoint: ldn_2020_art5"):
         run_pipeline(
             parsed, tmp_path, raw_doc_code="L59_2020", provider_calls_allowed=False
         )
@@ -630,3 +630,47 @@ def test_global_semantic_type_conflict_moves_relations_to_review(tmp_path) -> No
     assert len(review) == 2
     assert {record["review_reason"] for record in review} == {"semantic_type_conflict"}
     assert "doanh_nghiep" not in entity_index
+
+
+def test_main_and_appendix_articles_use_distinct_checkpoint_identities(
+    tmp_path,
+) -> None:
+    document = DocumentInfo(
+        id="tt_demo",
+        title="Thông tư demo",
+        number="01/2026/TT-DEMO",
+        doc_type="Circular",
+    )
+    source_text = "Điều 1. Chính văn\nPHỤ LỤC I\nĐiều 1. Điều thuộc phụ lục"
+    parsed = parse_text(source_text, document)
+
+    def extract(article_number, *_args, **_kwargs):
+        return ExtractionResult(
+            article_number=article_number,
+            entities=[],
+            relations=[],
+        )
+
+    with (
+        patch.object(settings, "extraction_max_workers", 1),
+        patch(
+            "src.pipeline.pipeline.orchestrator.extract_article", side_effect=extract
+        ),
+    ):
+        run_pipeline(
+            parsed,
+            tmp_path,
+            raw_doc_code="TT_DEMO",
+            source_text=source_text,
+        )
+
+    rows = [
+        json.loads(line)
+        for line in (tmp_path / "TT_DEMO" / "article_extractions.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert {row["article_id"] for row in rows} == {
+        "tt_demo_art1",
+        "tt_demo_appi_art1",
+    }

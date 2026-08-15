@@ -1,11 +1,11 @@
-"""Vector retrieval over canonical Article and Clause indexes."""
+"""Vector retrieval over canonical Appendix, Article, and Clause indexes."""
 
 from src.retrieval.mapping import map_retrieved_unit
 from src.retrieval.models import RetrievalFilters, RetrievedUnit
 from src.retrieval.ports import EmbeddingPort, VectorSearchPort
 
 
-VECTOR_INDEXES = ("article_embedding", "clause_embedding")
+VECTOR_INDEXES = ("appendix_embedding", "article_embedding", "clause_embedding")
 
 
 class VectorRetriever:

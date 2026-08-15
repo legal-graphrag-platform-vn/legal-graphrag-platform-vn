@@ -28,18 +28,20 @@ from src.shared.ontology.hierarchy import (
 from src.shared.ontology.validators import ValidatedGraphPayload, ValidatedNode
 
 
-REGISTRY_CONTRACT_VERSION = "corpus-structural-registry-v2"
+REGISTRY_CONTRACT_VERSION = "corpus-structural-registry-v4"
 LEGACY_REGISTRY_CONTRACT_VERSION = "corpus-structural-registry-v1"
-REGISTRY_BUILD_CONTRACT_VERSION = "corpus-structural-registry-build-v2"
+REGISTRY_BUILD_CONTRACT_VERSION = "corpus-structural-registry-build-v4"
 LEGACY_REGISTRY_BUILD_CONTRACT_VERSION = "corpus-structural-registry-build-v1"
 REGISTRY_CANONICALIZATION_VERSION = "registry-canonical-json-v1"
-PARSER_CONTRACT_VERSION = "hierarchy-parser-v1.8"
-HIERARCHY_CONTRACT_VERSION = "document-hierarchy-v1.8"
-VALIDATOR_VERSION = "ontology-validator-v1.8"
+PARSER_CONTRACT_VERSION = "hierarchy-parser-v2.1"
+HIERARCHY_CONTRACT_VERSION = "document-hierarchy-v2.1"
+VALIDATOR_VERSION = "ontology-validator-v1.14"
 
 STRUCTURAL_TYPES = frozenset(
     {
         "Document",
+        "Appendix",
+        "AttachedInstrument",
         "Part",
         "Chapter",
         "Section",
@@ -56,6 +58,17 @@ ALLOWED_CONTAINS_PAIRS = frozenset(
         ("Document", "Chapter"),
         ("Document", "Section"),
         ("Document", "Article"),
+        ("Document", "Appendix"),
+        ("Document", "AttachedInstrument"),
+        ("AttachedInstrument", "Appendix"),
+        ("AttachedInstrument", "Part"),
+        ("AttachedInstrument", "Chapter"),
+        ("AttachedInstrument", "Section"),
+        ("AttachedInstrument", "Article"),
+        ("Appendix", "Part"),
+        ("Appendix", "Chapter"),
+        ("Appendix", "Section"),
+        ("Appendix", "Article"),
         ("Part", "Chapter"),
         ("Part", "Section"),
         ("Part", "Article"),
@@ -82,7 +95,10 @@ class _FrozenModel(BaseModel):
 
 class RegistryContentManifest(_FrozenModel):
     contract_version: Literal[
-        "corpus-structural-registry-v1", "corpus-structural-registry-v2"
+        "corpus-structural-registry-v1",
+        "corpus-structural-registry-v2",
+        "corpus-structural-registry-v3",
+        "corpus-structural-registry-v4",
     ] = REGISTRY_CONTRACT_VERSION
     snapshot_hash: str
     ontology_version: str
@@ -103,6 +119,8 @@ class RegistryBuildReceipt(_FrozenModel):
     contract_version: Literal[
         "corpus-structural-registry-build-v1",
         "corpus-structural-registry-build-v2",
+        "corpus-structural-registry-build-v3",
+        "corpus-structural-registry-build-v4",
     ] = REGISTRY_BUILD_CONTRACT_VERSION
     build_id: str
     snapshot_hash: str
@@ -124,11 +142,23 @@ class RegistryDocument(_FrozenModel):
 class RegistryUnit(_FrozenModel):
     unit_id: str = Field(min_length=1)
     unit_type: Literal[
-        "Part", "Chapter", "Section", "Subsection", "Article", "Clause", "Point"
+        "Appendix",
+        "AttachedInstrument",
+        "Part",
+        "Chapter",
+        "Section",
+        "Subsection",
+        "Article",
+        "Clause",
+        "Point",
     ]
     document_id: str = Field(min_length=1)
     parent_id: str = Field(min_length=1)
     ancestor_ids: tuple[str, ...]
+    appendix_scope: str | None = None
+    appendix_number: str | None = None
+    attached_instrument_scope: str | None = None
+    attached_instrument_kind: str | None = None
     part_number: str | None = None
     chapter_number: str | None = None
     section_number: str | None = None
@@ -198,6 +228,8 @@ class CorpusStructuralRegistry:
         *,
         document_id: str,
         unit_type: str,
+        appendix_scope: str | None = None,
+        attached_instrument_scope: str | None = None,
         part_number: str | None = None,
         chapter_number: str | None = None,
         section_number: str | None = None,
@@ -209,6 +241,8 @@ class CorpusStructuralRegistry:
         key = structural_lookup_key(
             document_id=document_id,
             unit_type=unit_type,
+            appendix_scope=appendix_scope,
+            attached_instrument_scope=attached_instrument_scope,
             part_number=part_number,
             chapter_number=chapter_number,
             section_number=section_number,
@@ -222,6 +256,8 @@ class CorpusStructuralRegistry:
     def _validate_content(self) -> None:
         if self.manifest.contract_version not in {
             LEGACY_REGISTRY_CONTRACT_VERSION,
+            "corpus-structural-registry-v2",
+            "corpus-structural-registry-v3",
             REGISTRY_CONTRACT_VERSION,
         }:
             raise RegistryError(
@@ -247,15 +283,31 @@ class CorpusStructuralRegistry:
             raise RegistryError(
                 "Every registry unit must have exactly one canonical parent"
             )
-        if self.manifest.contract_version == LEGACY_REGISTRY_CONTRACT_VERSION:
+        if self.manifest.contract_version in {
+            LEGACY_REGISTRY_CONTRACT_VERSION,
+            "corpus-structural-registry-v2",
+            "corpus-structural-registry-v3",
+        }:
             unsupported = sorted(
                 unit.unit_type
                 for unit in self.units
-                if unit.unit_type in {"Part", "Subsection"}
+                if unit.unit_type == "AttachedInstrument"
+                or (
+                    self.manifest.contract_version
+                    in {
+                        LEGACY_REGISTRY_CONTRACT_VERSION,
+                        "corpus-structural-registry-v2",
+                    }
+                    and unit.unit_type == "Appendix"
+                )
+                or (
+                    self.manifest.contract_version == LEGACY_REGISTRY_CONTRACT_VERSION
+                    and unit.unit_type in {"Part", "Subsection"}
+                )
             )
             if unsupported:
                 raise RegistryError(
-                    "Registry v1 cannot contain Part or Subsection units"
+                    "Legacy registry contract contains unsupported structural units"
                 )
 
         endpoint_ids = [item.document_id for item in self.documents] + [
@@ -539,6 +591,8 @@ def structural_key(unit: RegistryUnit) -> tuple[str, ...]:
     return structural_lookup_key(
         document_id=unit.document_id,
         unit_type=unit.unit_type,
+        appendix_scope=unit.appendix_scope,
+        attached_instrument_scope=unit.attached_instrument_scope,
         part_number=unit.part_number,
         chapter_number=unit.chapter_number,
         section_number=unit.section_number,
@@ -553,6 +607,8 @@ def structural_lookup_key(
     *,
     document_id: str,
     unit_type: str,
+    appendix_scope: str | None = None,
+    attached_instrument_scope: str | None = None,
     part_number: str | None = None,
     chapter_number: str | None = None,
     section_number: str | None = None,
@@ -561,34 +617,57 @@ def structural_lookup_key(
     clause_number: str | None = None,
     point_label: str | None = None,
 ) -> tuple[str, ...]:
+    owner_key: tuple[str, ...] = (document_id,)
+    if attached_instrument_scope is not None:
+        owner_key = (*owner_key, "attached_instrument", attached_instrument_scope)
+    if appendix_scope is not None:
+        owner_key = (*owner_key, "appendix", appendix_scope)
+    if unit_type == "AttachedInstrument":
+        if attached_instrument_scope is None:
+            raise RegistryError(
+                "AttachedInstrument lookup requires attached_instrument_scope"
+            )
+        return (document_id, unit_type, attached_instrument_scope)
+    if unit_type == "Appendix":
+        if appendix_scope is None:
+            raise RegistryError("Appendix lookup requires appendix_scope")
+        if attached_instrument_scope is not None:
+            return (
+                document_id,
+                "attached_instrument",
+                attached_instrument_scope,
+                unit_type,
+                appendix_scope,
+            )
+        return (document_id, unit_type, appendix_scope)
     if unit_type == "Part":
         if part_number is None:
             raise RegistryError("Part lookup requires part_number")
-        return (document_id, unit_type, normalize_part_number(part_number))
+        return (*owner_key, unit_type, normalize_part_number(part_number))
     if unit_type == "Chapter":
         if chapter_number is None:
             raise RegistryError("Chapter lookup requires chapter_number")
-        return (document_id, unit_type, normalize_chapter_number(chapter_number))
+        return (*owner_key, unit_type, normalize_chapter_number(chapter_number))
     if unit_type == "Section":
         if section_number is None:
             raise RegistryError("Section lookup requires section_number")
         normalized_section = normalize_section_number(section_number)
         if chapter_number is not None:
             return (
-                document_id,
+                *owner_key,
                 unit_type,
                 normalize_chapter_number(chapter_number),
                 normalized_section,
             )
         if part_number is not None:
             return (
-                document_id,
+                *owner_key,
                 unit_type,
                 "part",
                 normalize_part_number(part_number),
                 normalized_section,
             )
-        return (document_id, unit_type, "document", normalized_section)
+        return (*owner_key, unit_type, "document", normalized_section)
     if unit_type == "Subsection":
         if section_number is None or subsection_number is None:
             raise RegistryError(
@@ -598,7 +677,7 @@ def structural_lookup_key(
         normalized_subsection = normalize_subsection_number(subsection_number)
         if chapter_number is not None:
             return (
-                document_id,
+                *owner_key,
                 unit_type,
                 normalize_chapter_number(chapter_number),
                 normalized_section,
@@ -606,7 +685,7 @@ def structural_lookup_key(
             )
         if part_number is not None:
             return (
-                document_id,
+                *owner_key,
                 unit_type,
                 "part",
                 normalize_part_number(part_number),
@@ -614,7 +693,7 @@ def structural_lookup_key(
                 normalized_subsection,
             )
         return (
-            document_id,
+            *owner_key,
             unit_type,
             "document",
             normalized_section,
@@ -623,12 +702,12 @@ def structural_lookup_key(
     if unit_type == "Article":
         if article_number is None:
             raise RegistryError("Article lookup requires article_number")
-        return (document_id, unit_type, normalize_legal_number(article_number))
+        return (*owner_key, unit_type, normalize_legal_number(article_number))
     if unit_type == "Clause":
         if article_number is None or clause_number is None:
             raise RegistryError("Clause lookup requires article and clause")
         return (
-            document_id,
+            *owner_key,
             unit_type,
             normalize_legal_number(article_number),
             normalize_legal_number(clause_number),
@@ -637,7 +716,7 @@ def structural_lookup_key(
         if article_number is None or clause_number is None or point_label is None:
             raise RegistryError("Point lookup requires article, clause, and point")
         return (
-            document_id,
+            *owner_key,
             unit_type,
             normalize_legal_number(article_number),
             normalize_legal_number(clause_number),
@@ -756,12 +835,27 @@ def _registry_unit(
             raise RegistryError(f"Missing {node_type}.{property_name} for {node.id}")
         return str(value)
 
+    def optional_value_for(node_type: str, property_name: str) -> str | None:
+        candidates = [item for item in chain_nodes if item.node_type == node_type]
+        if not candidates:
+            return None
+        if len(candidates) != 1:
+            raise RegistryError(f"Ambiguous {node_type} ancestry for {node.id}")
+        value = candidates[0].properties.get(property_name)
+        return None if value in (None, "") else str(value)
+
     return RegistryUnit(
         unit_id=node.id,
         unit_type=node.node_type,
         document_id=document_id,
         parent_id=parent_id,
         ancestor_ids=ancestor_ids,
+        appendix_scope=number_for("Appendix", "scope"),
+        appendix_number=optional_value_for("Appendix", "number"),
+        attached_instrument_scope=number_for("AttachedInstrument", "scope"),
+        attached_instrument_kind=optional_value_for(
+            "AttachedInstrument", "instrument_kind"
+        ),
         part_number=number_for("Part"),
         chapter_number=number_for("Chapter"),
         section_number=number_for("Section"),
@@ -790,6 +884,19 @@ def _unit_snapshot_payload(
     unit: RegistryUnit, contract_version: str
 ) -> dict[str, object]:
     payload = unit.model_dump(mode="json")
+    if contract_version in {
+        LEGACY_REGISTRY_CONTRACT_VERSION,
+        "corpus-structural-registry-v2",
+        "corpus-structural-registry-v3",
+    }:
+        payload.pop("attached_instrument_scope", None)
+        payload.pop("attached_instrument_kind", None)
+    if contract_version in {
+        LEGACY_REGISTRY_CONTRACT_VERSION,
+        "corpus-structural-registry-v2",
+    }:
+        payload.pop("appendix_scope", None)
+        payload.pop("appendix_number", None)
     if contract_version == LEGACY_REGISTRY_CONTRACT_VERSION:
         payload.pop("part_number", None)
         payload.pop("subsection_number", None)

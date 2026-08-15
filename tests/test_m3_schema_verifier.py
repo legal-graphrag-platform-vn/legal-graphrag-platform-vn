@@ -33,7 +33,11 @@ class FakeSession:
         for name in EXPECTED_USER_INDEXES - (
             {self.missing_index} if self.missing_index else set()
         ):
-            is_vector = name in {"article_embedding", "clause_embedding"}
+            is_vector = name in {
+                "appendix_embedding",
+                "article_embedding",
+                "clause_embedding",
+            }
             rows.append(
                 {
                     "name": name,
@@ -77,6 +81,26 @@ def test_schema_verifier_expected_names_match_canonical_bootstrap() -> None:
 
     assert constraint_names == EXPECTED_CONSTRAINTS
     assert index_names == EXPECTED_USER_INDEXES
+
+
+def test_appendix_migration_recreates_fulltext_index_with_new_label() -> None:
+    migration = (
+        REPO_ROOT / "infra" / "neo4j" / "migrations" / "1.12.0_to_1.13.0.cypher"
+    ).read_text(encoding="utf-8")
+
+    assert "DROP INDEX legal_article_clause_fulltext IF EXISTS" in migration
+    assert "FOR (n:Appendix|Article|Clause)" in migration
+    assert "CREATE VECTOR INDEX appendix_embedding" in migration
+
+
+def test_attached_instrument_migration_adds_constraint_and_lookup_indexes() -> None:
+    migration = (
+        REPO_ROOT / "infra" / "neo4j" / "migrations" / "1.13.0_to_1.14.0.cypher"
+    ).read_text(encoding="utf-8")
+
+    assert "CREATE CONSTRAINT attached_instrument_id_unique" in migration
+    assert "CREATE INDEX attached_instrument_scope" in migration
+    assert "CREATE INDEX attached_instrument_kind" in migration
 
 
 def test_schema_verifier_rejects_missing_index_and_wrong_vector_dimension() -> None:

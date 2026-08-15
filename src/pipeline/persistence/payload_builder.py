@@ -8,7 +8,7 @@ import unicodedata
 from pathlib import Path
 from typing import Any, Mapping
 
-from src.pipeline.parser.models import ParsedDocument
+from src.pipeline.parser.models import Appendix, ParsedDocument
 from src.shared.ontology.contract import NODE_OPTIONAL_FIELDS
 from src.shared.ontology.payload_consistency_validator import (
     deterministic_relation_id,
@@ -138,7 +138,9 @@ def build_graph_payload(
     subsections_by_key = {
         (
             normalize_part_number(subsection.part) if subsection.part else None,
-            normalize_chapter_number(subsection.chapter) if subsection.chapter else None,
+            normalize_chapter_number(subsection.chapter)
+            if subsection.chapter
+            else None,
             normalize_section_number(subsection.section),
             normalize_subsection_number(subsection.number),
         ): subsection
@@ -146,6 +148,10 @@ def build_graph_payload(
     }
     content_status = CONTENT_STATUS_FALLBACK.get(parsed.document.legal_status, "ACTIVE")
     effective_from = str(parsed.document.effective_from)
+    article_number_counts = {
+        number: sum(1 for item in parsed.articles if item.number == number)
+        for number in {item.number for item in parsed.articles}
+    }
 
     for article in parsed.articles:
         parent_id = document_node["id"]
@@ -275,9 +281,7 @@ def build_graph_payload(
                             "title": section.title,
                         },
                     )
-                    _add_relation(
-                        relations, parent_id, "CONTAINS", section_node_id, {}
-                    )
+                    _add_relation(relations, parent_id, "CONTAINS", section_node_id, {})
                 parent_id = section_node_id
                 if article.subsection:
                     subsection_key = (
@@ -307,15 +311,14 @@ def build_graph_payload(
                             )
                         parent_id = subsection_node_id
 
-        if article.part and f"{document_node['id']}_art{article.number}" in nodes:
-            part_num = normalize_part_number(article.part)
-            article_id = f"{document_node['id']}_p{part_num}_art{article.number}"
+        if article_number_counts[article.number] > 1:
+            if normalized_part is None:
+                raise PayloadBuildError(
+                    f"Article {article.number} repeats without distinct Part ownership"
+                )
+            article_id = f"{document_node['id']}_p{normalized_part}_art{article.number}"
         else:
             article_id = f"{document_node['id']}_art{article.number}"
-
-        if article_id in nodes:
-            count = sum(1 for n in nodes if n.startswith(article_id))
-            article_id = f"{article_id}_{count + 1}"
 
         structural_ids[article_id] = article_id
         _add_node(
@@ -335,9 +338,6 @@ def build_graph_payload(
 
         for clause in article.clauses:
             clause_id = f"{article_id}_cl{clause.number}"
-            if clause_id in nodes:
-                count = sum(1 for n in nodes if n.startswith(clause_id))
-                clause_id = f"{clause_id}_{count + 1}"
             structural_ids[clause_id] = clause_id
             _add_node(
                 nodes,
@@ -371,6 +371,64 @@ def build_graph_payload(
                 )
                 _add_relation(relations, clause_id, "CONTAINS", point_id, {})
 
+    for instrument in parsed.attached_instruments:
+        instrument_id = f"{document_node['id']}_inst{instrument.scope}"
+        structural_ids[instrument_id] = instrument_id
+        _add_node(
+            nodes,
+            {
+                "type": "AttachedInstrument",
+                "id": instrument_id,
+                "scope": instrument.scope,
+                "heading": instrument.heading,
+                "adoption_text": instrument.adoption_text,
+                "title": instrument.title,
+                "content_raw": instrument.content_raw,
+                "instrument_kind": instrument.instrument_kind,
+            },
+        )
+        _add_relation(relations, document_node["id"], "CONTAINS", instrument_id, {})
+        _add_structured_owner_hierarchy(
+            nodes=nodes,
+            relations=relations,
+            structural_ids=structural_ids,
+            owner_id=instrument_id,
+            owner_label="AttachedInstrument",
+            owner_scope=instrument.scope,
+            parts=instrument.parts,
+            sections=instrument.sections,
+            subsections=instrument.subsections,
+            articles=instrument.articles,
+            effective_from=effective_from,
+            effective_to=_optional_str(parsed.document.effective_to),
+            legal_status=content_status,
+        )
+        for appendix in instrument.appendices:
+            _add_appendix(
+                nodes=nodes,
+                relations=relations,
+                structural_ids=structural_ids,
+                parent_id=instrument_id,
+                appendix_owner_id=instrument_id,
+                appendix=appendix,
+                effective_from=effective_from,
+                effective_to=_optional_str(parsed.document.effective_to),
+                legal_status=content_status,
+            )
+
+    for appendix in parsed.appendices:
+        _add_appendix(
+            nodes=nodes,
+            relations=relations,
+            structural_ids=structural_ids,
+            parent_id=document_node["id"],
+            appendix_owner_id=document_node["id"],
+            appendix=appendix,
+            effective_from=effective_from,
+            effective_to=_optional_str(parsed.document.effective_to),
+            legal_status=content_status,
+        )
+
     for record in accepted_records:
         if record.get("materialization_route") == CORPUS_RELATION_MATERIALIZATION_ROUTE:
             continue
@@ -401,6 +459,246 @@ def build_graph_payload(
         "nodes": list(nodes.values()),
         "relations": list(relations.values()),
     }
+
+
+def _add_appendix(
+    *,
+    nodes: dict[str, dict[str, Any]],
+    relations: dict[str, dict[str, Any]],
+    structural_ids: dict[str, str],
+    parent_id: str,
+    appendix_owner_id: str,
+    appendix: Appendix,
+    effective_from: str,
+    effective_to: str | None,
+    legal_status: str,
+) -> None:
+    appendix_id = f"{appendix_owner_id}_app{appendix.scope}"
+    structural_ids[appendix_id] = appendix_id
+    _add_node(
+        nodes,
+        {
+            "type": "Appendix",
+            "id": appendix_id,
+            "scope": appendix.scope,
+            "number": appendix.number,
+            "heading": appendix.heading,
+            "title": appendix.title,
+            "content_raw": appendix.content_raw,
+            "appendix_kind": appendix.appendix_kind,
+            "effective_from": effective_from,
+            "effective_to": effective_to,
+            "legal_status": legal_status,
+        },
+    )
+    _add_relation(relations, parent_id, "CONTAINS", appendix_id, {})
+    _add_structured_owner_hierarchy(
+        nodes=nodes,
+        relations=relations,
+        structural_ids=structural_ids,
+        owner_id=appendix_id,
+        owner_label="Appendix",
+        owner_scope=appendix.scope,
+        parts=appendix.parts,
+        sections=appendix.sections,
+        subsections=appendix.subsections,
+        articles=appendix.articles,
+        effective_from=effective_from,
+        effective_to=effective_to,
+        legal_status=legal_status,
+    )
+
+
+def _add_structured_owner_hierarchy(
+    *,
+    nodes: dict[str, dict[str, Any]],
+    relations: dict[str, dict[str, Any]],
+    structural_ids: dict[str, str],
+    owner_id: str,
+    owner_label: str,
+    owner_scope: str,
+    parts: list,
+    sections: list,
+    subsections: list,
+    articles: list,
+    effective_from: str,
+    effective_to: str | None,
+    legal_status: str,
+) -> None:
+    parts = {normalize_part_number(part.number): part for part in parts}
+    sections = {
+        (
+            normalize_part_number(section.part) if section.part else None,
+            normalize_chapter_number(section.chapter) if section.chapter else None,
+            normalize_section_number(section.number),
+        ): section
+        for section in sections
+    }
+    subsections = {
+        (
+            normalize_part_number(item.part) if item.part else None,
+            normalize_chapter_number(item.chapter) if item.chapter else None,
+            normalize_section_number(item.section),
+            normalize_subsection_number(item.number),
+        ): item
+        for item in subsections
+    }
+
+    for article in articles:
+        parent_id = owner_id
+        normalized_part = None
+        if article.part:
+            normalized_part = normalize_part_number(article.part)
+            part = parts.get(normalized_part)
+            if part is None:
+                raise PayloadBuildError(
+                    f"{owner_label} {owner_scope} Article {article.number} "
+                    f"references missing Part {article.part}"
+                )
+            part_node_id = part_id(owner_id, article.part)
+            structural_ids[part_node_id] = part_node_id
+            _add_node(
+                nodes,
+                {
+                    "type": "Part",
+                    "id": part_node_id,
+                    "number": str(part.number),
+                    "title": part.title,
+                },
+            )
+            _add_relation(relations, owner_id, "CONTAINS", part_node_id, {})
+            parent_id = part_node_id
+
+        if article.chapter:
+            chapter_node_id = chapter_id(owner_id, article.chapter)
+            structural_ids[chapter_node_id] = chapter_node_id
+            _add_node(
+                nodes,
+                {
+                    "type": "Chapter",
+                    "id": chapter_node_id,
+                    "number": str(article.chapter),
+                    "title": article.chapter_title or f"Chương {article.chapter}",
+                },
+            )
+            _add_relation(relations, parent_id, "CONTAINS", chapter_node_id, {})
+            parent_id = chapter_node_id
+
+        if article.section:
+            section_key = (
+                normalized_part,
+                normalize_chapter_number(article.chapter) if article.chapter else None,
+                normalize_section_number(article.section),
+            )
+            section = sections.get(section_key)
+            if section is None:
+                raise PayloadBuildError(
+                    f"{owner_label} {owner_scope} Article {article.number} "
+                    f"references missing Section {article.section}"
+                )
+            section_node_id = (
+                section_id(owner_id, article.chapter, article.section)
+                if article.chapter
+                else f"{owner_id}_sec{normalize_section_number(article.section)}"
+            )
+            structural_ids[section_node_id] = section_node_id
+            _add_node(
+                nodes,
+                {
+                    "type": "Section",
+                    "id": section_node_id,
+                    "number": str(section.number),
+                    "title": section.title,
+                },
+            )
+            _add_relation(relations, parent_id, "CONTAINS", section_node_id, {})
+            parent_id = section_node_id
+
+            if article.subsection:
+                subsection_key = (
+                    *section_key,
+                    normalize_subsection_number(article.subsection),
+                )
+                subsection = subsections.get(subsection_key)
+                if subsection is None:
+                    raise PayloadBuildError(
+                        f"{owner_label} {owner_scope} Article {article.number} "
+                        f"references missing Subsection {article.subsection}"
+                    )
+                subsection_node_id = (
+                    subsection_id(
+                        owner_id,
+                        article.chapter,
+                        article.section,
+                        article.subsection,
+                    )
+                    if article.chapter
+                    else f"{section_node_id}_subsec{normalize_subsection_number(article.subsection)}"
+                )
+                structural_ids[subsection_node_id] = subsection_node_id
+                _add_node(
+                    nodes,
+                    {
+                        "type": "Subsection",
+                        "id": subsection_node_id,
+                        "number": str(subsection.number),
+                        "title": subsection.title,
+                    },
+                )
+                _add_relation(
+                    relations, section_node_id, "CONTAINS", subsection_node_id, {}
+                )
+                parent_id = subsection_node_id
+
+        article_id = f"{owner_id}_art{article.number}"
+        structural_ids[article_id] = article_id
+        _add_node(
+            nodes,
+            {
+                "type": "Article",
+                "id": article_id,
+                "number": str(article.number),
+                "title": article.title,
+                "content_raw": article.content_raw,
+                "effective_from": effective_from,
+                "effective_to": effective_to,
+                "legal_status": legal_status,
+            },
+        )
+        _add_relation(relations, parent_id, "CONTAINS", article_id, {})
+
+        for clause in article.clauses:
+            clause_id = f"{article_id}_cl{clause.number}"
+            structural_ids[clause_id] = clause_id
+            _add_node(
+                nodes,
+                {
+                    "type": "Clause",
+                    "id": clause_id,
+                    "number": str(clause.number),
+                    "content_raw": clause.content,
+                    "effective_from": effective_from,
+                    "effective_to": effective_to,
+                    "legal_status": legal_status,
+                },
+            )
+            _add_relation(relations, article_id, "CONTAINS", clause_id, {})
+            for point in clause.points:
+                point_id = f"{clause_id}_p{_normalize_point_label(point.label)}"
+                structural_ids[point_id] = point_id
+                _add_node(
+                    nodes,
+                    {
+                        "type": "Point",
+                        "id": point_id,
+                        "label": point.label,
+                        "content_raw": point.content,
+                        "effective_from": effective_from,
+                        "effective_to": effective_to,
+                        "legal_status": legal_status,
+                    },
+                )
+                _add_relation(relations, clause_id, "CONTAINS", point_id, {})
 
 
 def _document_node(parsed: ParsedDocument) -> dict[str, Any]:

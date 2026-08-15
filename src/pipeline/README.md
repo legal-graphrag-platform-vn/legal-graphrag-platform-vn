@@ -38,13 +38,28 @@ and `write` for curated ready documents. The write command verifies each new
 `Chapter -> Section -> Article` chain before removing its exact legacy direct
 `Chapter -> Article` edge.
 
+Ontology 1.13.0 persists an explicit full-line `Phụ lục` as `Appendix` under its
+Document. Supported designators include Roman/Arabic/letter codes and compound
+forms such as `I-1` or `01/TĐG`; any Article/Clause parsed inside uses the
+Appendix ID as its canonical prefix. Inline references to a Phụ lục do not open
+a new scope. Form/list/table content remains on the Appendix node unless source
+structure proves citable Articles. A trailing `MỤC LỤC` is retained only as a
+`TABLE_OF_CONTENTS` parser artifact and never creates Neo4j data.
+
+Ontology 1.14.0 persists an evidenced `Quy chế`, `Quy định`, `Điều lệ`, or
+`Chuẩn mực` ban hành kèm as `AttachedInstrument`. The parser requires a full-line
+controlled heading plus a nearby `ban hành kèm theo` line; its Articles use an
+AttachedInstrument-scoped canonical ID and no longer collide with host Articles.
+The ownership node itself is not embedded in Phase 1; Article/Clause descendants
+remain the retrieval and citation units.
+
 A `Chapter` may also retain direct preamble Articles before its first `Section`.
 The parser and payload consistency validator reject the mixed structure if any
 direct Article number is at or after the first Article contained by a Section.
 
 Trước một đợt nạp hoặc cập nhật corpus lớn, chạy `embed --dry-run` cho từng
-document đã write. Lệnh này kiểm tra hai vector index đang `ONLINE`, dimension
-khớp BGE-M3/1024, và báo số Article/Clause stale theo content hash + provenance;
+document đã write. Lệnh này kiểm tra ba vector index đang `ONLINE`, dimension
+khớp BGE-M3/1024, và báo số Appendix/Article/Clause stale theo content hash + provenance;
 nó không tải embedding model và không ghi Neo4j. Chỉ chạy `embed` không có
 `--dry-run` sau khi readiness report đúng với phạm vi dữ liệu dự kiến.
 
@@ -91,7 +106,7 @@ Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger đ
 append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
 ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
-Ontology v1.12.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
+Ontology v1.14.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
 Document-level `AMENDS`, `REPEALS`, `REPLACES`, và `GUIDES`. Diagram category
 phải map bằng bảng explicit, target phải resolve qua canonical registry, và
 relation vẫn phải qua required-property, temporal, whitelist và consistency

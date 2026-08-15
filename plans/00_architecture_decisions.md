@@ -1741,3 +1741,117 @@ có đủ bằng chứng trong corpus.
   hiện có mà không tạo placeholder node.
 - Neo4j bootstrap không đổi; thay đổi nằm ở ontology property contract,
   checkpoint evidence và relation-only reconciliation.
+
+---
+
+## ADR-35: Phụ lục là đơn vị pháp lý có ownership riêng
+
+**Ngày**: 2026-08-15
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Corpus Thông tư chứa nhiều heading thực tế như `Phụ lục I-1`, `Phụ lục V-28`
+và `Phụ lục số 01/TĐG: Mẫu ...`. Một số Phụ lục là biểu mẫu; số khác chứa danh
+mục, bảng hoặc các Điều có giá trị pháp lý. Parser 1.0 chỉ bảo toàn một tập nhỏ
+heading dưới `UnparsedSection(APPENDIX)` và để các variant còn lại chảy vào Điều
+cuối của chính văn. Khi Phụ lục khởi động lại số Điều, payload sinh hậu tố `_2`
+trong khi extraction checkpoint vẫn khóa theo `article.number`, làm mất ownership
+và có thể ghi đè kết quả.
+
+`MỤC LỤC` cũng lặp lại heading Chương/Điều nhưng chỉ là dữ liệu điều hướng. Đưa
+Mục lục vào graph sẽ tạo bằng chứng và citation trùng, không tạo thêm tri thức
+pháp lý.
+
+### Quyết định
+
+1. Ontology 1.13.0 thêm structural node `Appendix`. Appendix bắt buộc có canonical
+   `id`, source `heading`, lossless `content_raw`, `appendix_kind`, temporal fields
+   và `legal_status`; `number` và `title` là optional vì corpus có Phụ lục không số.
+2. `Document -> Appendix` là ownership edge bắt buộc. Appendix được chứa trực tiếp
+   `Part`, `Chapter`, `Section` hoặc `Article` khi các heading đó nằm trong exact
+   source span của Appendix. Mọi descendant vẫn có đúng một canonical parent.
+3. Canonical ID của mọi descendant mang prefix Appendix. Không sinh hậu tố `_2`
+   để che collision giữa chính văn và Phụ lục. Heading Appendix trùng canonical
+   designator trong cùng Document là hard parse/validation failure.
+4. Appendix không có Article descendant được phép có BGE-M3/1024 embedding riêng.
+   Appendix có Article descendant dùng embedding của Article/Clause để tránh bằng
+   chứng retrieval trùng.
+5. `REFERS_TO` được phép dùng Appendix làm source hoặc target. Các quan hệ temporal
+   `AMENDS`, `REPEALS`, `REPLACES` chưa mở rộng endpoint trong ADR này; chỉ bổ sung
+   sau khi resolver có evidence và canonical endpoint test tương ứng.
+6. Parser chỉ mở Appendix từ full-line heading được công nhận. Inline mention như
+   `theo Phụ lục I` không thay đổi structural scope.
+7. `TABLE_OF_CONTENTS` và `UNPARSED_BODY` tiếp tục là artifact-only source section.
+   Chúng giữ span/hash để kiểm toán nhưng không tạo node, edge, embedding hoặc
+   extraction checkpoint.
+8. `Quy chế`, `Điều lệ`, `Chuẩn mực` ban hành kèm nhưng không mang heading Phụ lục
+   chưa bị ép thành Appendix. Container `AttachedInstrument` là migration riêng
+   sau khi corpus classification contract được chốt.
+
+### Migration
+
+1. Cập nhật executable ontology contract, validators và Neo4j bootstrap trước writer.
+2. Cập nhật parser model, Appendix partitioner và scoped canonical ID helpers.
+3. Cập nhật payload, structural registry, checkpoint identity và reference registry
+   để dùng canonical Article ID thay vì riêng `article.number`.
+4. Reparse corpus; artifact 1.12.x không được write theo ontology 1.13.0.
+5. Chạy root payload validation, rebuild reference registry, write và re-embed các
+   Appendix/descendant đủ điều kiện.
+6. Trên database hiện hữu, tạo `appendix_embedding` và drop/recreate
+   `legal_article_clause_fulltext` với labels `Appendix|Article|Clause`; `IF NOT
+   EXISTS` không thể thay đổi definition của index đã tồn tại. Migration chuẩn là
+   `infra/neo4j/migrations/1.12.0_to_1.13.0.cypher`.
+
+### Hệ quả
+
+- Phụ lục có thể retrieval/citation mà không làm trùng Article chính văn.
+- Biểu mẫu được giữ đúng provenance nhưng không mặc định trở thành vector evidence.
+- Mục lục cuối file không còn tạo Article giả.
+
+---
+
+## ADR-36: Văn bản ban hành kèm có ownership riêng
+
+**Ngày**: 2026-08-15
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Corpus có các Nghị định, Quyết định và Thông tư chứa Điều của văn bản chủ, sau
+đó ban hành kèm một `Quy chế`, `Quy định`, `Điều lệ` hoặc `Chuẩn mực` có cấu
+trúc Phần/Chương/Mục/Điều riêng và thường khởi động lại từ Điều 1. Ví dụ thực
+`LTV_15583` có năm Điều của Nghị định 39-CP và 49 Điều của Điều lệ ban hành kèm.
+Gắn cả hai vào Document làm sai ownership và gây collision canonical Article ID;
+ép văn bản kèm thành Appendix lại trái heading và semantics nguồn.
+
+### Quyết định
+
+1. Ontology 1.14.0 thêm structural owner `AttachedInstrument` với các kind
+   `REGULATION`, `CHARTER`, `STANDARD`.
+2. Parser chỉ mở scope khi heading toàn dòng thuộc controlled set và trong ba
+   dòng không rỗng kế tiếp có adoption evidence `ban hành kèm theo` gắn với một
+   loại văn bản chủ được hỗ trợ. Heading viết hoa đơn lẻ không đủ bằng chứng.
+3. `Document -> AttachedInstrument`; owner này được chứa `Appendix`, `Part`,
+   `Chapter`, `Section`, hoặc `Article`. Mọi descendant có đúng một parent và ID
+   mang prefix AttachedInstrument.
+4. AttachedInstrument phải có ít nhất một Article trong Phase 1. Candidate không
+   có Article hoặc ownership không chắc chắn tiếp tục fail closed; không tạo node
+   rỗng hay suy đoán từ tiêu đề.
+5. AttachedInstrument chỉ là ownership node trong Phase 1. Nó không có embedding
+   và chưa là endpoint `REFERS_TO`; Article/Clause descendants là đơn vị retrieval
+   và citation. Mở rộng direct citation chỉ thực hiện bằng ADR riêng sau evidence.
+6. `adoption_text`, exact source span và content hash được giữ trong parser
+   artifact; `adoption_text` cùng lossless `content_raw` được persist để audit.
+7. Corpus structural registry tăng lên v4 và mang `attached_instrument_scope` để
+   lookup cùng số Điều không rơi về Document owner.
+
+### Hệ quả
+
+- Điều của văn bản chủ và văn bản ban hành kèm không còn collision.
+- Citation/retrieval dùng canonical Article/Clause thuộc đúng owner.
+- Các tiêu đề `QUY ĐỊNH ...` của chính văn không bị tách nhầm vì thiếu adoption evidence.
+- Artifact parser 2.0/registry v3 phải regenerate thành parser 2.1/registry v4
+  trước write theo ontology 1.14.0.
+- Migration chạm toàn chuỗi parser đến retrieval; không được deploy ontology
+  writer 1.14.0 với parser 2.0 hoặc registry v3.

@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.12.0
+// Source of truth: plans/legal_ontology.md v1.14.0
 //
 // Script idempotent nhờ IF NOT EXISTS.
 // =============================================================================
@@ -13,6 +13,14 @@
 CREATE CONSTRAINT doc_id_unique IF NOT EXISTS
 FOR (d:Document)
 REQUIRE d.id IS UNIQUE;
+
+CREATE CONSTRAINT appendix_id_unique IF NOT EXISTS
+FOR (a:Appendix)
+REQUIRE a.id IS UNIQUE;
+
+CREATE CONSTRAINT attached_instrument_id_unique IF NOT EXISTS
+FOR (a:AttachedInstrument)
+REQUIRE a.id IS UNIQUE;
 
 CREATE CONSTRAINT part_id_unique IF NOT EXISTS
 FOR (p:Part)
@@ -83,6 +91,26 @@ CREATE INDEX doc_issuer_name IF NOT EXISTS
 FOR (d:Document)
 ON (d.issuer_name);
 
+CREATE INDEX appendix_number IF NOT EXISTS
+FOR (a:Appendix)
+ON (a.number);
+
+CREATE INDEX appendix_kind IF NOT EXISTS
+FOR (a:Appendix)
+ON (a.appendix_kind);
+
+CREATE INDEX appendix_legal_status IF NOT EXISTS
+FOR (a:Appendix)
+ON (a.legal_status);
+
+CREATE INDEX attached_instrument_scope IF NOT EXISTS
+FOR (a:AttachedInstrument)
+ON (a.scope);
+
+CREATE INDEX attached_instrument_kind IF NOT EXISTS
+FOR (a:AttachedInstrument)
+ON (a.instrument_kind);
+
 CREATE INDEX art_number IF NOT EXISTS
 FOR (a:Article)
 ON (a.number);
@@ -126,6 +154,10 @@ ON (a.name);
 CREATE INDEX doc_temporal IF NOT EXISTS
 FOR (d:Document)
 ON (d.effective_from, d.effective_to);
+
+CREATE INDEX appendix_temporal IF NOT EXISTS
+FOR (a:Appendix)
+ON (a.effective_from, a.effective_to);
 
 CREATE INDEX art_temporal IF NOT EXISTS
 FOR (a:Article)
@@ -200,7 +232,7 @@ ON (r.relation_id);
 // =============================================================================
 
 CREATE FULLTEXT INDEX legal_article_clause_fulltext IF NOT EXISTS
-FOR (n:Article|Clause)
+FOR (n:Appendix|Article|Clause)
 ON EACH [n.content_raw, n.title];
 
 CREATE FULLTEXT INDEX legal_point_fulltext IF NOT EXISTS
@@ -213,6 +245,16 @@ ON EACH [p.content_raw];
 
 CREATE VECTOR INDEX article_embedding IF NOT EXISTS
 FOR (a:Article)
+ON (a.embedding)
+OPTIONS {
+  indexConfig: {
+    `vector.dimensions`: 1024,
+    `vector.similarity_function`: 'cosine'
+  }
+};
+
+CREATE VECTOR INDEX appendix_embedding IF NOT EXISTS
+FOR (a:Appendix)
 ON (a.embedding)
 OPTIONS {
   indexConfig: {

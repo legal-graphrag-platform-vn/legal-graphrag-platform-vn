@@ -131,7 +131,7 @@ def test_vector_index_dimension_mismatch_fails_startup(monkeypatch) -> None:
             "state": "ONLINE",
             "options": {"indexConfig": {"vector.dimensions": 768}},
         }
-        for name in ("article_embedding", "clause_embedding")
+        for name in ("appendix_embedding", "article_embedding", "clause_embedding")
     ]
     indexes.append(
         {

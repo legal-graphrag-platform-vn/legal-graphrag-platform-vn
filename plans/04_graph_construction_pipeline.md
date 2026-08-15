@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Liên quan đến**: RC2
-> **Depends on**: [legal_ontology.md v1.12.0](./legal_ontology.md)
+> **Depends on**: [legal_ontology.md v1.14.0](./legal_ontology.md)
 
 > [!WARNING]
 > Relation names đã đổi sang **active voice** theo ADR-17. Sử dụng các tên mới trong mọi implementation mới:
@@ -157,7 +157,7 @@ extraction/Neo4j trước khi có parser rule phù hợp.
 > **Contract**: LLM chỉ được phép trả về JSON. Các key `entities` và `relations` luôn tồn tại (dù có thể rỗng rỗng). `type` của entity phải nằm trong danh sách Enum (Entity, Concept, Action).
 
 ### 4. Validator & Writer Contract
-> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.12.0. Nếu có lỗi, relation bị drop hoặc raise error.
+> **Validator Guarantee**: Bất cứ triple nào lọt qua được Validator đều tuân thủ 100% rules trong `legal_ontology.md` v1.14.0. Nếu có lỗi, relation bị drop hoặc raise error.
 > **Writer Guarantee (Neo4j)**: Quá trình MERGE mang tính Idempotent. Việc chạy lại cùng một file JSON 10 lần sẽ không sinh ra duplicate node hay edge nào trong đồ thị.
 
 ### 5. Embedding Contract
@@ -177,9 +177,9 @@ BKAI Vietnamese bi-encoder 768-dim chỉ là baseline/ablation. Article và Clau
 Rules:
 
 - model output dimension phải bằng `EMBEDDING_DIM`
-- `article_embedding` và `clause_embedding` phải dùng cùng concrete dimension
+- `appendix_embedding`, `article_embedding` và `clause_embedding` phải dùng cùng concrete dimension
 - dimension mismatch là hard failure trước database update
-- đổi dimension bắt buộc recreate vector indexes và re-embed toàn bộ Article/Clause
+- đổi dimension bắt buộc recreate vector indexes và re-embed toàn bộ Appendix/Article/Clause đủ điều kiện
 - application config, ontology contract và Neo4j schema phải được test parity
 
 ### 6. CLI Identity Contract
@@ -253,6 +253,10 @@ Thay vì bắt LLM tự đoán các trường thông tin quan trọng như `effe
 
 ```
 Document
+├── Văn bản ban hành kèm (AttachedInstrument) [optional, evidenced owner]
+│   └── Phần/Chương/Mục/Điều [requires Article descendant]
+├── Phụ lục (Appendix)   [optional, citable owner]
+│   └── Phần/Chương/Mục/Điều [optional]
 ├── Phần (Part)          [optional]
 │   └── Chương (Chapter)
 │       └── Mục (Section) [optional]
@@ -296,6 +300,20 @@ Invalid parent context, duplicate canonical key, missing title, or grouping node
 without an Article descendant is a parser/data-quality failure. Full-line
 matching prevents citation text such as `theo Mục 1 Chương III` from becoming a
 heading.
+
+Appendix headings are full-line only and cover corpus variants such as `Phụ lục
+I-1`, `Phụ lục V-28`, and `Phụ lục số 01/TĐG: Mẫu ...`. Appendix descendants
+use an Appendix-scoped canonical ID. Form/list/table Appendices keep lossless raw
+content and do not invent Article descendants. A trailing `MỤC LỤC` is preserved
+as `TABLE_OF_CONTENTS` outside the ontology and never enters extraction, graph,
+or embedding. Duplicate Article numbers or duplicate Appendix scopes within one
+owner fail closed instead of receiving synthetic `_2` suffixes.
+
+AttachedInstrument headings are limited to evidenced `Quy chế`, `Quy định`,
+`Điều lệ`, and `Chuẩn mực` blocks. The heading must be followed within three
+non-empty lines by `ban hành kèm theo` evidence naming a supported host document;
+uppercase text alone never opens an owner. Descendant IDs use the
+`{document_id}_inst{kind}_{source_order}` prefix.
 
 ### Output Format
 
@@ -530,7 +548,7 @@ ONTOLOGY_LABEL_MAP = {
 ## Step 4: Ontology Validation
 
 > [!IMPORTANT]
-> Source of truth: `legal_ontology.md` v1.12.0.
+> Source of truth: `legal_ontology.md` v1.14.0.
 > ADR-15: `GUIDES_WHITELIST` chỉ trong validator, không trong Neo4j. Numeric precedence/level rules are legacy and must not be used in the current validator.
 > ADR-17: Tất cả relation names dùng active voice.
 
@@ -557,6 +575,17 @@ CONSTRAINTS = {
             ("Document", "Part"),
             ("Document", "Chapter"),
             ("Document", "Section"),
+            ("Document", "AttachedInstrument"),
+            ("Document", "Appendix"),
+            ("AttachedInstrument", "Appendix"),
+            ("AttachedInstrument", "Part"),
+            ("AttachedInstrument", "Chapter"),
+            ("AttachedInstrument", "Section"),
+            ("AttachedInstrument", "Article"),
+            ("Appendix", "Part"),
+            ("Appendix", "Chapter"),
+            ("Appendix", "Section"),
+            ("Appendix", "Article"),
             ("Part",     "Chapter"),
             ("Part",     "Section"),
             ("Part",     "Article"),

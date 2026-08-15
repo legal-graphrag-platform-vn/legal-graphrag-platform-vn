@@ -5,6 +5,8 @@ Tốc độ: <1ms, không cần DB hay LLM.
 """
 
 from src.shared.ontology.contract import (
+    APPENDIX_KINDS,
+    ATTACHED_INSTRUMENT_KINDS,
     DOCUMENT_RELATION_EXTRACTION_METHODS,
     NODE_ENUMS,
     NODE_OPTIONAL_FIELDS,
@@ -39,7 +41,7 @@ def test_all_relations_have_constraints() -> None:
 
 
 def test_executable_contract_matches_frozen_ontology_version() -> None:
-    assert ONTOLOGY_VERSION == "1.12.0"
+    assert ONTOLOGY_VERSION == "1.14.0"
 
 
 def test_contract_separates_reference_and_document_relation_provenance() -> None:
@@ -71,6 +73,30 @@ def test_contract_exposes_merged_node_metadata() -> None:
         "ACTIVE",
         "AMENDED",
         "REPEALED",
+    }
+    assert NODE_ENUMS["Appendix"]["appendix_kind"] == APPENDIX_KINDS
+    assert set(NODE_REQUIRED_FIELDS["Appendix"]) == {
+        "id",
+        "scope",
+        "heading",
+        "content_raw",
+        "appendix_kind",
+        "effective_from",
+        "legal_status",
+    }
+    assert {"number", "title", "effective_to", "embedding", "updated_at"} == set(
+        NODE_OPTIONAL_FIELDS["Appendix"]
+    )
+    assert NODE_ENUMS["AttachedInstrument"]["instrument_kind"] == (
+        ATTACHED_INSTRUMENT_KINDS
+    )
+    assert set(NODE_REQUIRED_FIELDS["AttachedInstrument"]) == {
+        "id",
+        "scope",
+        "heading",
+        "adoption_text",
+        "content_raw",
+        "instrument_kind",
     }
 
 
@@ -218,6 +244,41 @@ def test_contains_allows_evidenced_direct_part_and_section_parents() -> None:
     ):
         ok, err = validate_relation(head, "CONTAINS", tail)
         assert ok, f"{head}->{tail} bị reject: {err}"
+
+
+def test_appendix_owns_supported_structural_roots_and_is_citable() -> None:
+    for child in ("Part", "Chapter", "Section", "Article"):
+        ok, err = validate_relation("Appendix", "CONTAINS", child)
+        assert ok, f"Appendix->{child} bị reject: {err}"
+
+    for head, tail in (
+        ("Appendix", "Article"),
+        ("Clause", "Appendix"),
+    ):
+        ok, err = validate_relation(head, "REFERS_TO", tail, properties=REFERS_TO_PROPS)
+        assert ok, f"{head} REFERS_TO {tail} bị reject: {err}"
+
+
+def test_attached_instrument_owns_supported_structural_roots() -> None:
+    for child in ("Appendix", "Part", "Chapter", "Section", "Article"):
+        ok, err = validate_relation("AttachedInstrument", "CONTAINS", child)
+        assert ok, f"AttachedInstrument->{child} bị reject: {err}"
+
+    ok, err = validate_relation("Document", "CONTAINS", "AttachedInstrument")
+    assert ok, f"Document->AttachedInstrument bị reject: {err}"
+
+
+def test_appendix_does_not_expand_temporal_relation_endpoints_without_evidence() -> (
+    None
+):
+    for relation in ("AMENDS", "REPEALS", "REPLACES"):
+        ok, _ = validate_relation(
+            "Document",
+            relation,
+            "Appendix",
+            properties={"effective_from": "2026-08-15"},
+        )
+        assert not ok
 
 
 def test_contains_still_rejects_unsupported_structural_shortcuts() -> None:

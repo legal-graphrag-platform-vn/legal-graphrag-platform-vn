@@ -4,14 +4,13 @@ from datetime import date
 
 import json
 
-import pytest
-from pydantic import ValidationError
-
 from src.pipeline.extraction.structural_context import (
     DocumentRegistry,
     StructuralRegistry,
 )
+from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import (
+    Appendix,
     Article,
     Clause,
     DocumentInfo,
@@ -172,6 +171,96 @@ def test_registry_indexes_part_and_subsection_ancestors() -> None:
             entity_label="Tiểu mục 1a Mục 1 Chương I",
         ).canonical_id
         == "ldn_2020_ch1_sec1_subsec1a"
+    )
+
+
+def test_registry_scopes_appendix_hierarchy_and_references() -> None:
+    parsed = _parsed()
+    appendix_article = Article(
+        number="1",
+        content_raw="Điều 1 thuộc Phụ lục I",
+        chapter="I",
+        chapter_title="Quy định riêng",
+        section="1",
+        source_start_char=100,
+        source_end_char=130,
+    )
+    parsed.appendices = [
+        Appendix(
+            scope="i",
+            number="I",
+            heading="PHỤ LỤC I",
+            appendix_kind="LEGAL_CONTENT",
+            content_raw="CHƯƠNG I\nMục 1\nĐiều 1 thuộc Phụ lục I",
+            sections=[Section(number="1", title="Phạm vi", chapter="I")],
+            articles=[appendix_article],
+            source_start_char=90,
+            source_end_char=130,
+            source_start_line=10,
+            source_end_line=13,
+            content_hash="a" * 64,
+        )
+    ]
+
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+    article_id = "ldn_2020_appi_art1"
+
+    assert registry.types["ldn_2020_appi"] == "Appendix"
+    assert registry.chapter_for_article_id(article_id) == "ldn_2020_appi_ch1"
+    assert registry.section_for_article_id(article_id) == "ldn_2020_appi_ch1_sec1"
+    assert (
+        registry.resolve(
+            "appendix_i",
+            current_article=article_id,
+            entity_type="Appendix",
+            entity_label="Phụ lục I",
+        ).canonical_id
+        == "ldn_2020_appi"
+    )
+    assert (
+        registry.resolve(
+            "chapter_i",
+            current_article=article_id,
+            entity_type="Chapter",
+            entity_label="Chương I",
+        ).canonical_id
+        == "ldn_2020_appi_ch1"
+    )
+    assert (
+        registry.resolve(
+            "section_1",
+            current_article=article_id,
+            entity_type="Section",
+            entity_label="Mục 1 Chương I",
+        ).canonical_id
+        == "ldn_2020_appi_ch1_sec1"
+    )
+
+
+def test_registry_scopes_attached_instrument_articles_and_local_references() -> None:
+    parsed = parse_text(
+        "Điều 1. Điều của văn bản chủ\n"
+        "QUY CHẾ HOẠT ĐỘNG\n"
+        "(Ban hành kèm theo Luật số 59/2020/QH14)\n"
+        "Điều 1. Điều của Quy chế\n"
+        "1. Theo Điều 1 của Quy chế này",
+        _parsed().document,
+    )
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+    instrument_article = parsed.attached_instruments[0].articles[0]
+    context = registry.context_for_article(instrument_article)
+
+    assert registry.types["ldn_2020_instregulation_1"] == "AttachedInstrument"
+    assert context.article_id == "ldn_2020_instregulation_1_art1"
+    assert context.clause_ids == {"1": "ldn_2020_instregulation_1_art1_cl1"}
+    assert (
+        registry.resolve(
+            "article_1",
+            current_article=context.article_id,
+            entity_type="Article",
+            entity_label="Điều 1",
+        ).canonical_id
+        == context.article_id
     )
 
 

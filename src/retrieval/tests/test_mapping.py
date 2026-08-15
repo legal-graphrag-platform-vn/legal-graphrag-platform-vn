@@ -30,6 +30,26 @@ def test_clause_mapping_builds_attribution_citation_and_deep_link() -> None:
     assert unit.retrieval_sources == ["vector"]
 
 
+def test_appendix_mapping_does_not_require_article_ancestry() -> None:
+    unit = map_retrieved_unit(
+        {
+            "id": "tt_demo_appi",
+            "label": "Appendix",
+            "appendix_number": "I",
+            "content_raw": "Nội dung Phụ lục",
+            "document_id": "tt_demo",
+            "document_number": "01/2026/TT-DEMO",
+            "effective_from": date(2026, 1, 1),
+            "score": 0.8,
+        },
+        score_field="vector_score",
+    )
+
+    assert unit.article_id is None
+    assert unit.citation_label == "Phụ lục I, 01/2026/TT-DEMO"
+    assert unit.deep_link == "/documents/tt_demo/units/tt_demo_appi"
+
+
 def test_mapping_rejects_missing_document_attribution() -> None:
     with pytest.raises(RetrievalRecordError, match="document_id"):
         map_retrieved_unit({"id": "x", "label": "Article"})

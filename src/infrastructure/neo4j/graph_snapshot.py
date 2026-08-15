@@ -13,14 +13,25 @@ from src.shared.ontology.contract import LEGACY_RELATION_ALIASES
 
 
 LEGAL_EXCLUDED_PROPERTIES = {
-    "embedding", "embedding_model", "embedding_provider", "embedding_dimension",
-    "embedding_normalized", "embedding_content_hash", "embedding_created_at", "updated_at",
+    "embedding",
+    "embedding_model",
+    "embedding_provider",
+    "embedding_dimension",
+    "embedding_normalized",
+    "embedding_content_hash",
+    "embedding_created_at",
+    "updated_at",
 }
 DATE_PROPERTIES = {"effective_from", "effective_to", "issued_date"}
 DATETIME_PROPERTIES = {"created_at", "updated_at", "embedding_created_at"}
 EMBEDDING_PROPERTIES = {
-    "embedding", "embedding_model", "embedding_provider", "embedding_dimension",
-    "embedding_normalized", "embedding_content_hash", "embedding_created_at",
+    "embedding",
+    "embedding_model",
+    "embedding_provider",
+    "embedding_dimension",
+    "embedding_normalized",
+    "embedding_content_hash",
+    "embedding_created_at",
 }
 
 
@@ -32,44 +43,63 @@ def payload_projection(payload: Mapping[str, Any]) -> dict[str, list[dict[str, A
     nodes = []
     for node in payload.get("nodes", []):
         properties = {
-            key: value for key, value in node.items()
+            key: value
+            for key, value in node.items()
             if key not in {"type", *LEGAL_EXCLUDED_PROPERTIES} and value is not None
         }
-        nodes.append({"id": str(node["id"]), "labels": [str(node["type"])], "properties": _normalize_properties(properties)})
+        nodes.append(
+            {
+                "id": str(node["id"]),
+                "labels": [str(node["type"])],
+                "properties": _normalize_properties(properties),
+            }
+        )
     relations = []
     for relation in payload.get("relations", []):
         properties = {
-            key: value for key, value in (relation.get("properties") or {}).items()
+            key: value
+            for key, value in (relation.get("properties") or {}).items()
             if key not in LEGAL_EXCLUDED_PROPERTIES and value is not None
         }
-        relations.append({
-            "relation_id": str(properties.get("relation_id", "")),
-            "type": str(relation["type"]),
-            "source_id": str(relation["head_id"]),
-            "target_id": str(relation["tail_id"]),
-            "properties": _normalize_properties(properties),
-        })
+        relations.append(
+            {
+                "relation_id": str(properties.get("relation_id", "")),
+                "type": str(relation["type"]),
+                "source_id": str(relation["head_id"]),
+                "target_id": str(relation["tail_id"]),
+                "properties": _normalize_properties(properties),
+            }
+        )
     return _sorted_projection(nodes, relations)
 
 
-def graph_projection(session: SessionProtocol, node_ids: list[str]) -> dict[str, list[dict[str, Any]]]:
-    node_rows = list(session.run(
-        "MATCH (n) WHERE n.id IN $node_ids RETURN n.id AS id, labels(n) AS labels, properties(n) AS properties",
-        node_ids=node_ids,
-    ))
-    relation_rows = list(session.run(
-        "MATCH (a)-[r]->(b) WHERE a.id IN $node_ids AND b.id IN $node_ids "
-        "RETURN r.relation_id AS relation_id, type(r) AS type, a.id AS source_id, b.id AS target_id, properties(r) AS properties",
-        node_ids=node_ids,
-    ))
+def graph_projection(
+    session: SessionProtocol, node_ids: list[str]
+) -> dict[str, list[dict[str, Any]]]:
+    node_rows = list(
+        session.run(
+            "MATCH (n) WHERE n.id IN $node_ids RETURN n.id AS id, labels(n) AS labels, properties(n) AS properties",
+            node_ids=node_ids,
+        )
+    )
+    relation_rows = list(
+        session.run(
+            "MATCH (a)-[r]->(b) WHERE a.id IN $node_ids AND b.id IN $node_ids "
+            "RETURN r.relation_id AS relation_id, type(r) AS type, a.id AS source_id, b.id AS target_id, properties(r) AS properties",
+            node_ids=node_ids,
+        )
+    )
     nodes = [
         {
             "id": str(row["id"]),
             "labels": sorted(str(label) for label in row["labels"]),
-            "properties": _normalize_properties({
-                k: v for k, v in dict(row["properties"]).items()
-                if k not in LEGAL_EXCLUDED_PROPERTIES and v is not None
-            }),
+            "properties": _normalize_properties(
+                {
+                    k: v
+                    for k, v in dict(row["properties"]).items()
+                    if k not in LEGAL_EXCLUDED_PROPERTIES and v is not None
+                }
+            ),
         }
         for row in node_rows
     ]
@@ -79,24 +109,31 @@ def graph_projection(session: SessionProtocol, node_ids: list[str]) -> dict[str,
             "type": str(row["type"]),
             "source_id": str(row["source_id"]),
             "target_id": str(row["target_id"]),
-            "properties": _normalize_properties({
-                k: v for k, v in dict(row["properties"]).items()
-                if k not in LEGAL_EXCLUDED_PROPERTIES and v is not None
-            }),
+            "properties": _normalize_properties(
+                {
+                    k: v
+                    for k, v in dict(row["properties"]).items()
+                    if k not in LEGAL_EXCLUDED_PROPERTIES and v is not None
+                }
+            ),
         }
         for row in relation_rows
     ]
     return _sorted_projection(nodes, relations)
 
 
-def generate_snapshot(session: SessionProtocol, payload: Mapping[str, Any], *, graph_id: str, uri: str) -> dict[str, Any]:
+def generate_snapshot(
+    session: SessionProtocol, payload: Mapping[str, Any], *, graph_id: str, uri: str
+) -> dict[str, Any]:
     local = payload_projection(payload)
     scope_node_ids = [node["id"] for node in local["nodes"]]
     written = graph_projection(session, scope_node_ids)
     written_node_ids = [node["id"] for node in written["nodes"]]
     relation_ids = [relation["relation_id"] for relation in written["relations"]]
     node_counts = _count_values(node["labels"][0] for node in written["nodes"])
-    relation_counts = _count_values(relation["type"] for relation in written["relations"])
+    relation_counts = _count_values(
+        relation["type"] for relation in written["relations"]
+    )
     projection_diagnostics = _projection_diagnostics(local, written)
     return {
         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -125,9 +162,12 @@ def generate_snapshot(session: SessionProtocol, payload: Mapping[str, Any], *, g
             for node in written["nodes"]
         ),
         "legacy_relation_count": sum(
-            relation["type"] in LEGACY_RELATION_ALIASES for relation in written["relations"]
+            relation["type"] in LEGACY_RELATION_ALIASES
+            for relation in written["relations"]
         ),
-        "temporal_property_type_breakdown": _temporal_type_breakdown(session, scope_node_ids),
+        "temporal_property_type_breakdown": _temporal_type_breakdown(
+            session, scope_node_ids
+        ),
         "embedding_coverage": _embedding_coverage(session, scope_node_ids),
         "article_count": node_counts.get("Article", 0),
         "clause_count": node_counts.get("Clause", 0),
@@ -135,40 +175,70 @@ def generate_snapshot(session: SessionProtocol, payload: Mapping[str, Any], *, g
     }
 
 
-def write_snapshot(snapshot: Mapping[str, Any], output_dir: Path, output_name: str) -> Path:
-    if not output_name or Path(output_name).name != output_name or not output_name.endswith(".json"):
-        raise ValueError("Snapshot output must be a .json file name without path components")
+def write_snapshot(
+    snapshot: Mapping[str, Any], output_dir: Path, output_name: str
+) -> Path:
+    if (
+        not output_name
+        or Path(output_name).name != output_name
+        or not output_name.endswith(".json")
+    ):
+        raise ValueError(
+            "Snapshot output must be a .json file name without path components"
+        )
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / output_name
     temporary = output_dir / f".{output_name}.tmp"
-    temporary.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     temporary.replace(path)
     return path
 
 
 def projection_sha256(projection: Mapping[str, Any]) -> str:
-    blob = json.dumps(projection, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    blob = json.dumps(
+        projection, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()
 
 
-def _sorted_projection(nodes: list[dict[str, Any]], relations: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+def _sorted_projection(
+    nodes: list[dict[str, Any]], relations: list[dict[str, Any]]
+) -> dict[str, list[dict[str, Any]]]:
     return {
         "nodes": sorted(nodes, key=lambda item: item["id"]),
-        "relations": sorted(relations, key=lambda item: (item["relation_id"], item["type"], item["source_id"], item["target_id"])),
+        "relations": sorted(
+            relations,
+            key=lambda item: (
+                item["relation_id"],
+                item["type"],
+                item["source_id"],
+                item["target_id"],
+            ),
+        ),
     }
 
 
-def _projection_diagnostics(local: Mapping[str, Any], written: Mapping[str, Any]) -> dict[str, Any]:
+def _projection_diagnostics(
+    local: Mapping[str, Any], written: Mapping[str, Any]
+) -> dict[str, Any]:
     local_nodes = {node["id"]: node for node in local["nodes"]}
     written_nodes = {node["id"]: node for node in written["nodes"]}
-    local_relations = {relation["relation_id"]: relation for relation in local["relations"]}
-    written_relations = {relation["relation_id"]: relation for relation in written["relations"]}
+    local_relations = {
+        relation["relation_id"]: relation for relation in local["relations"]
+    }
+    written_relations = {
+        relation["relation_id"]: relation for relation in written["relations"]
+    }
     changed_nodes = sorted(
-        node_id for node_id in local_nodes.keys() & written_nodes.keys()
+        node_id
+        for node_id in local_nodes.keys() & written_nodes.keys()
         if local_nodes[node_id] != written_nodes[node_id]
     )
     changed_relations = sorted(
-        relation_id for relation_id in local_relations.keys() & written_relations.keys()
+        relation_id
+        for relation_id in local_relations.keys() & written_relations.keys()
         if local_relations[relation_id] != written_relations[relation_id]
     )
     sample_node = changed_nodes[0] if changed_nodes else None
@@ -181,15 +251,23 @@ def _projection_diagnostics(local: Mapping[str, Any], written: Mapping[str, Any]
             "id": sample_node,
             "payload": local_nodes.get(sample_node),
             "graph": written_nodes.get(sample_node),
-        } if sample_node else None,
-        "missing_relation_ids": sorted(local_relations.keys() - written_relations.keys())[:20],
-        "extra_relation_ids": sorted(written_relations.keys() - local_relations.keys())[:20],
+        }
+        if sample_node
+        else None,
+        "missing_relation_ids": sorted(
+            local_relations.keys() - written_relations.keys()
+        )[:20],
+        "extra_relation_ids": sorted(written_relations.keys() - local_relations.keys())[
+            :20
+        ],
         "changed_relation_count": len(changed_relations),
         "changed_relation_sample": {
             "relation_id": sample_relation,
             "payload": local_relations.get(sample_relation),
             "graph": written_relations.get(sample_relation),
-        } if sample_relation else None,
+        }
+        if sample_relation
+        else None,
     }
 
 
@@ -214,7 +292,11 @@ def _normalize(value: Any) -> Any:
 def _canonical_datetime(value: datetime) -> str:
     if value.tzinfo is None:
         raise ValueError("Canonical DateTime values must include a timezone")
-    return value.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+    return (
+        value.astimezone(timezone.utc)
+        .isoformat(timespec="microseconds")
+        .replace("+00:00", "Z")
+    )
 
 
 def _normalize_properties(properties: Mapping[str, Any]) -> dict[str, Any]:
@@ -240,24 +322,37 @@ def _count_values(values) -> dict[str, int]:
 
 
 def _embedding_state_sha256(session: SessionProtocol, node_ids: list[str]) -> str:
-    rows = list(session.run(
-        "MATCH (n) WHERE n.id IN $node_ids AND (n:Article OR n:Clause) "
-        "RETURN n.id AS id, n.embedding_model AS model, n.embedding_provider AS provider, "
-        "n.embedding_dimension AS dimension, n.embedding_normalized AS normalized, "
-        "n.embedding_content_hash AS content_hash, size(n.embedding) AS vector_size",
-        node_ids=node_ids,
-    ))
+    rows = list(
+        session.run(
+            "MATCH (n) WHERE n.id IN $node_ids "
+            "AND (n:Appendix OR n:Article OR n:Clause) "
+            "AND (NOT n:Appendix OR NOT (n)-[:CONTAINS*1..]->(:Article)) "
+            "RETURN n.id AS id, n.embedding_model AS model, n.embedding_provider AS provider, "
+            "n.embedding_dimension AS dimension, n.embedding_normalized AS normalized, "
+            "n.embedding_content_hash AS content_hash, size(n.embedding) AS vector_size",
+            node_ids=node_ids,
+        )
+    )
     state = sorted((_normalize(dict(row)) for row in rows), key=lambda item: item["id"])
-    return hashlib.sha256(json.dumps(state, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return hashlib.sha256(
+        json.dumps(state, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
 
 
-def _embedding_coverage(session: SessionProtocol, node_ids: list[str]) -> dict[str, dict[str, float | int]]:
-    rows = list(session.run(
-        "MATCH (n) WHERE n.id IN $node_ids AND (n:Article OR n:Clause) "
-        "RETURN CASE WHEN n:Article THEN 'Article' ELSE 'Clause' END AS label, "
-        "count(n) AS total, count(n.embedding) AS embedded",
-        node_ids=node_ids,
-    ))
+def _embedding_coverage(
+    session: SessionProtocol, node_ids: list[str]
+) -> dict[str, dict[str, float | int]]:
+    rows = list(
+        session.run(
+            "MATCH (n) WHERE n.id IN $node_ids "
+            "AND (n:Appendix OR n:Article OR n:Clause) "
+            "AND (NOT n:Appendix OR NOT (n)-[:CONTAINS*1..]->(:Article)) "
+            "RETURN CASE WHEN n:Appendix THEN 'Appendix' "
+            "WHEN n:Article THEN 'Article' ELSE 'Clause' END AS label, "
+            "count(n) AS total, count(n.embedding) AS embedded",
+            node_ids=node_ids,
+        )
+    )
     result: dict[str, dict[str, float | int]] = {}
     for row in rows:
         total = int(row["total"] or 0)
@@ -265,31 +360,43 @@ def _embedding_coverage(session: SessionProtocol, node_ids: list[str]) -> dict[s
         result[str(row["label"])] = {
             "total": total,
             "embedded": embedded,
-            "coverage": 0.0 if total == 0 else embedded / total,
+            "coverage": 1.0 if total == 0 else embedded / total,
         }
-    for label in ("Article", "Clause"):
-        result.setdefault(label, {"total": 0, "embedded": 0, "coverage": 0.0})
+    for label in ("Appendix", "Article", "Clause"):
+        result.setdefault(label, {"total": 0, "embedded": 0, "coverage": 1.0})
     return result
 
 
-def _temporal_type_breakdown(session: SessionProtocol, node_ids: list[str]) -> dict[str, int]:
-    node_rows = list(session.run(
-        "MATCH (n) WHERE n.id IN $node_ids "
-        "UNWIND ['effective_from','effective_to','issued_date','created_at'] AS property "
-        "WITH property, n[property] AS value WHERE value IS NOT NULL "
-        "RETURN 'node.' + property + ':' + valueType(value) AS key, count(*) AS count",
-        node_ids=node_ids,
-    ))
-    relation_rows = list(session.run(
-        "MATCH (a)-[r]->(b) WHERE a.id IN $node_ids AND b.id IN $node_ids "
-        "UNWIND ['effective_from','created_at'] AS property "
-        "WITH property, r[property] AS value WHERE value IS NOT NULL "
-        "RETURN 'relation.' + property + ':' + valueType(value) AS key, count(*) AS count",
-        node_ids=node_ids,
-    ))
-    return dict(sorted((str(row["key"]), int(row["count"])) for row in [*node_rows, *relation_rows]))
+def _temporal_type_breakdown(
+    session: SessionProtocol, node_ids: list[str]
+) -> dict[str, int]:
+    node_rows = list(
+        session.run(
+            "MATCH (n) WHERE n.id IN $node_ids "
+            "UNWIND ['effective_from','effective_to','issued_date','created_at'] AS property "
+            "WITH property, n[property] AS value WHERE value IS NOT NULL "
+            "RETURN 'node.' + property + ':' + valueType(value) AS key, count(*) AS count",
+            node_ids=node_ids,
+        )
+    )
+    relation_rows = list(
+        session.run(
+            "MATCH (a)-[r]->(b) WHERE a.id IN $node_ids AND b.id IN $node_ids "
+            "UNWIND ['effective_from','created_at'] AS property "
+            "WITH property, r[property] AS value WHERE value IS NOT NULL "
+            "RETURN 'relation.' + property + ':' + valueType(value) AS key, count(*) AS count",
+            node_ids=node_ids,
+        )
+    )
+    return dict(
+        sorted(
+            (str(row["key"]), int(row["count"])) for row in [*node_rows, *relation_rows]
+        )
+    )
 
 
 def _git_commit() -> str:
-    result = subprocess.run(["git", "rev-parse", "HEAD"], check=False, capture_output=True, text=True)
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"], check=False, capture_output=True, text=True
+    )
     return result.stdout.strip() or "unknown"

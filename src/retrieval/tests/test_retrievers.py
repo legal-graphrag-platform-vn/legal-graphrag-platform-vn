@@ -56,7 +56,7 @@ class FakeRepo:
         return [_row("fulltext_unit")]
 
 
-def test_vector_retriever_encodes_a_batch_and_queries_both_indexes() -> None:
+def test_vector_retriever_encodes_a_batch_and_queries_all_indexes() -> None:
     repo = FakeRepo()
     encoder = FakeEmbeddingGenerator()
     filters = RetrievalFilters(document_ids=["doc"])
@@ -68,7 +68,7 @@ def test_vector_retriever_encodes_a_batch_and_queries_both_indexes() -> None:
     assert encoder.calls == [["vốn điều lệ"]]
     assert [call[0] for call in repo.vector_calls] == list(VECTOR_INDEXES)
     assert len(repo.vector_calls[0][1]) == 1024
-    assert len(results) == 2
+    assert len(results) == 3
     assert all(
         result.deep_link.startswith("/documents/doc/units/") for result in results
     )

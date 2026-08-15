@@ -1,4 +1,4 @@
-"""Generate and validate Article/Clause embeddings for the canonical graph."""
+"""Generate and validate Appendix/Article/Clause embeddings for the canonical graph."""
 
 from __future__ import annotations
 
@@ -11,7 +11,9 @@ from src.pipeline.config import settings
 
 
 class EncoderProtocol(Protocol):
-    def encode(self, texts: list[str], normalize_embeddings: bool = True) -> Iterable[Iterable[float]]: ...
+    def encode(
+        self, texts: list[str], normalize_embeddings: bool = True
+    ) -> Iterable[Iterable[float]]: ...
 
 
 class EmbeddingDimensionError(ValueError):
@@ -34,7 +36,12 @@ class EmbeddingGenerator:
         if self.encoder is None:
             self.encoder = self._load_encoder()
         encoder = self.encoder
-        vectors = [list(vector) for vector in encoder.encode(texts, normalize_embeddings=self.normalize_embeddings)]
+        vectors = [
+            list(vector)
+            for vector in encoder.encode(
+                texts, normalize_embeddings=self.normalize_embeddings
+            )
+        ]
         for vector in vectors:
             validate_embedding_dimension(vector, self.expected_dimension)
         return vectors
@@ -45,16 +52,22 @@ class EmbeddingGenerator:
                 import torch
                 from FlagEmbedding import BGEM3FlagModel
             except ImportError as exc:
-                raise RuntimeError("Install FlagEmbedding and torch to use the BGE-M3 embed command") from exc
+                raise RuntimeError(
+                    "Install FlagEmbedding and torch to use the BGE-M3 embed command"
+                ) from exc
             use_fp16 = torch.cuda.is_available()
             device = "cuda" if use_fp16 else "cpu"
-            return _FlagEmbeddingEncoder(BGEM3FlagModel(self.model_name, use_fp16=use_fp16, device=device))
+            return _FlagEmbeddingEncoder(
+                BGEM3FlagModel(self.model_name, use_fp16=use_fp16, device=device)
+            )
 
         if self.provider == "sentence_transformers":
             try:
                 from sentence_transformers import SentenceTransformer
             except ImportError as exc:
-                raise RuntimeError("Install sentence-transformers to use the embedding baseline") from exc
+                raise RuntimeError(
+                    "Install sentence-transformers to use the embedding baseline"
+                ) from exc
             return SentenceTransformer(self.model_name)
 
         raise EmbeddingProviderError(f"Unsupported embedding provider: {self.provider}")
@@ -62,6 +75,8 @@ class EmbeddingGenerator:
 
 def embedding_text_for_node(node: dict) -> str | None:
     node_type = node.get("type")
+    if node_type == "Appendix":
+        return build_appendix_embedding_text(node)
     if node_type == "Article":
         return build_article_embedding_text(node)
     if node_type == "Clause":
@@ -70,7 +85,40 @@ def embedding_text_for_node(node: dict) -> str | None:
 
 
 def embedding_targets(payload: dict) -> list[dict]:
-    return [node for node in payload.get("nodes", []) if node.get("type") in {"Article", "Clause"}]
+    nodes = list(payload.get("nodes", []))
+    appendix_ids_with_articles: set[str] = set()
+    node_types = {str(node.get("id")): node.get("type") for node in nodes}
+    children: dict[str, list[str]] = {}
+    for relation in payload.get("relations", []):
+        if relation.get("type") != "CONTAINS":
+            continue
+        children.setdefault(str(relation.get("head_id")), []).append(
+            str(relation.get("tail_id"))
+        )
+    for node in nodes:
+        if node.get("type") != "Appendix":
+            continue
+        appendix_id = str(node.get("id"))
+        pending = list(children.get(appendix_id, []))
+        seen: set[str] = set()
+        while pending:
+            child_id = pending.pop()
+            if child_id in seen:
+                continue
+            seen.add(child_id)
+            if node_types.get(child_id) == "Article":
+                appendix_ids_with_articles.add(appendix_id)
+                break
+            pending.extend(children.get(child_id, []))
+    return [
+        node
+        for node in nodes
+        if node.get("type") in {"Article", "Clause"}
+        or (
+            node.get("type") == "Appendix"
+            and str(node.get("id")) not in appendix_ids_with_articles
+        )
+    ]
 
 
 def embedding_texts_by_node_id(payload: dict) -> dict[str, str]:
@@ -81,7 +129,12 @@ def embedding_texts_by_node_id(payload: dict) -> dict[str, str]:
             continue
         head = nodes.get(str(relation.get("head_id")))
         tail = nodes.get(str(relation.get("tail_id")))
-        if head and tail and head.get("type") == "Article" and tail.get("type") == "Clause":
+        if (
+            head
+            and tail
+            and head.get("type") == "Article"
+            and tail.get("type") == "Clause"
+        ):
             parent_article_by_clause_id[str(tail["id"])] = head
 
     texts: dict[str, str] = {}
@@ -89,8 +142,12 @@ def embedding_texts_by_node_id(payload: dict) -> dict[str, str]:
         node_id = str(node["id"])
         if node.get("type") == "Article":
             texts[node_id] = build_article_embedding_text(node)
+        elif node.get("type") == "Appendix":
+            texts[node_id] = build_appendix_embedding_text(node)
         else:
-            texts[node_id] = build_clause_embedding_text(parent_article_by_clause_id.get(node_id, {}), node)
+            texts[node_id] = build_clause_embedding_text(
+                parent_article_by_clause_id.get(node_id, {}), node
+            )
     return texts
 
 
@@ -100,6 +157,16 @@ def embedding_content_hash(text: str) -> str:
 
 def build_article_embedding_text(article: dict) -> str:
     return "\n".join(_clean_parts(article.get("title"), article.get("content_raw")))
+
+
+def build_appendix_embedding_text(appendix: dict) -> str:
+    return "\n".join(
+        _clean_parts(
+            appendix.get("heading"),
+            appendix.get("title"),
+            appendix.get("content_raw"),
+        )
+    )
 
 
 def build_clause_embedding_text(article: dict, clause: dict) -> str:
@@ -118,9 +185,13 @@ def build_clause_embedding_text(article: dict, clause: dict) -> str:
     return "\n".join(_clean_parts(article_header, clause_header))
 
 
-def validate_embedding_dimension(vector: list[float], expected_dimension: int = settings.embedding_dimension) -> None:
+def validate_embedding_dimension(
+    vector: list[float], expected_dimension: int = settings.embedding_dimension
+) -> None:
     if len(vector) != expected_dimension:
-        raise EmbeddingDimensionError(f"Expected {expected_dimension}-dim embedding, got {len(vector)}")
+        raise EmbeddingDimensionError(
+            f"Expected {expected_dimension}-dim embedding, got {len(vector)}"
+        )
 
 
 def _clean_parts(*parts: object) -> list[str]:
@@ -131,7 +202,9 @@ class _FlagEmbeddingEncoder:
     def __init__(self, model: object) -> None:
         self.model = model
 
-    def encode(self, texts: list[str], normalize_embeddings: bool = True) -> list[list[float]]:
+    def encode(
+        self, texts: list[str], normalize_embeddings: bool = True
+    ) -> list[list[float]]:
         result = self.model.encode(
             texts,
             return_dense=True,

@@ -137,10 +137,67 @@ class Subsection(BaseModel):
         return normalized
 
 
+class Appendix(BaseModel):
+    """Phụ lục — citable structural owner scoped under one Document."""
+
+    scope: str = Field(pattern=r"^[a-z0-9_]+$")
+    number: LegalNumber | None = None
+    heading: str
+    title: str | None = None
+    appendix_kind: Literal["LEGAL_CONTENT", "FORM", "LIST", "TABLE", "UNCLASSIFIED"] = (
+        "UNCLASSIFIED"
+    )
+    content_raw: str
+    parts: list[Part] = Field(default_factory=list)
+    sections: list[Section] = Field(default_factory=list)
+    subsections: list[Subsection] = Field(default_factory=list)
+    articles: list[Article] = Field(default_factory=list)
+    source_start_char: int = Field(ge=0)
+    source_end_char: int = Field(ge=0)
+    source_start_line: int = Field(ge=1)
+    source_end_line: int = Field(ge=1)
+    content_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @field_validator("heading", "content_raw")
+    @classmethod
+    def required_source_text_must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("must not be blank")
+        return value
+
+
+class AttachedInstrument(BaseModel):
+    """Văn bản pháp lý được ban hành kèm theo một Document chủ."""
+
+    scope: str = Field(pattern=r"^[a-z0-9_]+$")
+    heading: str
+    adoption_text: str
+    title: str | None = None
+    instrument_kind: Literal["REGULATION", "CHARTER", "STANDARD"]
+    content_raw: str
+    parts: list[Part] = Field(default_factory=list)
+    sections: list[Section] = Field(default_factory=list)
+    subsections: list[Subsection] = Field(default_factory=list)
+    articles: list[Article] = Field(default_factory=list)
+    appendices: list[Appendix] = Field(default_factory=list)
+    source_start_char: int = Field(ge=0)
+    source_end_char: int = Field(ge=0)
+    source_start_line: int = Field(ge=1)
+    source_end_line: int = Field(ge=1)
+    content_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @field_validator("heading", "adoption_text", "content_raw")
+    @classmethod
+    def required_source_text_must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("must not be blank")
+        return value
+
+
 class UnparsedSection(BaseModel):
     """Losslessly preserved source section outside the active graph ontology."""
 
-    section_type: Literal["APPENDIX", "UNPARSED_BODY"]
+    section_type: Literal["TABLE_OF_CONTENTS", "UNPARSED_BODY"]
     heading: str | None = None
     content_raw: str
     source_document_id: str
@@ -165,7 +222,7 @@ class ParseDiagnostics(BaseModel):
     """Auditable result of one permissive parse attempt."""
 
     parser_name: Literal["hierarchy_parser"] = "hierarchy_parser"
-    parser_version: Literal["1.0"] = "1.0"
+    parser_version: Literal["2.1"] = "2.1"
     source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     status: Literal["PARSED", "PARSED_WITH_WARNINGS", "SOURCE_PRESERVED"]
     article_count: int = Field(ge=0)
@@ -204,11 +261,37 @@ class ParsedDocument(BaseModel):
     parts: list[Part] = Field(default_factory=list)
     sections: list[Section] = Field(default_factory=list)
     subsections: list[Subsection] = Field(default_factory=list)
+    appendices: list[Appendix] = Field(default_factory=list)
+    attached_instruments: list[AttachedInstrument] = Field(default_factory=list)
     unparsed_sections: list[UnparsedSection] = Field(default_factory=list)
     parser_metadata: ParseDiagnostics | None = None
 
     @model_validator(mode="after")
     def section_hierarchy_must_be_consistent(self) -> "ParsedDocument":
+        appendix_scopes: set[str] = set()
+        for appendix in self.appendices:
+            if appendix.scope in appendix_scopes:
+                raise ValueError(f"Duplicate Appendix scope: {appendix.scope}")
+            appendix_scopes.add(appendix.scope)
+
+        instrument_scopes: set[str] = set()
+        for instrument in self.attached_instruments:
+            if instrument.scope in instrument_scopes:
+                raise ValueError(
+                    f"Duplicate AttachedInstrument scope: {instrument.scope}"
+                )
+            instrument_scopes.add(instrument.scope)
+
+        article_numbers: set[tuple[str | None, str]] = set()
+        for article in self.articles:
+            key = (
+                normalize_part_number(article.part) if article.part else None,
+                article.number,
+            )
+            if key in article_numbers:
+                raise ValueError(f"Duplicate Article number: {article.number}")
+            article_numbers.add(key)
+
         part_index: dict[str, Part] = {}
         for part in self.parts:
             key = normalize_part_number(part.number)
