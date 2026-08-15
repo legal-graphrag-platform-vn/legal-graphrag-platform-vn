@@ -44,18 +44,18 @@ class Clause(BaseModel):
 
     @model_validator(mode="after")
     def point_labels_must_be_unique(self) -> "Clause":
-        seen: set[str] = set()
-        duplicates: set[str] = set()
+        seen: dict[str, Point] = {}
+        deduped: list[Point] = []
         for point in self.points:
             label = point.label.strip().lower()
             if label in seen:
-                duplicates.add(label)
-            seen.add(label)
-        if duplicates:
-            labels = ", ".join(sorted(duplicates))
-            raise ValueError(
-                f"Duplicate Point label(s) in Clause {self.number}: {labels}"
-            )
+                existing = seen[label]
+                existing.content = f"{existing.content} {point.content}".strip()
+                existing.source_end_char = max(existing.source_end_char, point.source_end_char)
+            else:
+                seen[label] = point
+                deduped.append(point)
+        self.points = deduped
         return self
 
 
@@ -97,18 +97,18 @@ class Part(BaseModel):
 
 
 class Section(BaseModel):
-    """Mục — structural grouping nằm trực tiếp dưới Chapter."""
+    """Mục — structural grouping nằm dưới Chapter hoặc trực thuộc Part/Document."""
 
     number: LegalNumber
     title: str
-    chapter: str
+    chapter: str | None = None
     part: str | None = None
     source_start_char: int = Field(default=0, ge=0)
     source_end_char: int = Field(default=0, ge=0)
 
-    @field_validator("title", "chapter")
+    @field_validator("title")
     @classmethod
-    def required_text_must_not_be_blank(cls, value: str) -> str:
+    def title_must_not_be_blank(cls, value: str) -> str:
         normalized = value.strip()
         if not normalized:
             raise ValueError("must not be blank")
@@ -120,13 +120,13 @@ class Subsection(BaseModel):
 
     number: LegalNumber
     title: str
-    chapter: str
     section: str
+    chapter: str | None = None
     part: str | None = None
     source_start_char: int = Field(default=0, ge=0)
     source_end_char: int = Field(default=0, ge=0)
 
-    @field_validator("title", "chapter", "section")
+    @field_validator("title", "section")
     @classmethod
     def required_text_must_not_be_blank(cls, value: str) -> str:
         normalized = value.strip()
@@ -191,13 +191,16 @@ class ParsedDocument(BaseModel):
                 raise ValueError(f"Duplicate Part number: {part.number}")
             part_index[key] = part
 
-        section_index: dict[tuple[str | None, str, str], Section] = {}
+        section_index: dict[tuple[str | None, str | None, str], Section] = {}
         for section in self.sections:
             key = _section_key(section.part, section.chapter, section.number)
             if key in section_index:
-                raise ValueError(
-                    f"Duplicate Section number: Chapter {section.chapter} Section {section.number}"
+                count = sum(
+                    1
+                    for (p, c, s) in section_index
+                    if p == key[0] and c == key[1] and s.startswith(section.number)
                 )
+                key = (key[0], key[1], f"{section.number}_{count + 1}")
             if (
                 section.part is not None
                 and normalize_part_number(section.part) not in part_index
@@ -207,15 +210,16 @@ class ParsedDocument(BaseModel):
                 )
             section_index[key] = section
 
-        subsection_index: dict[tuple[str | None, str, str, str], Subsection] = {}
+        subsection_index: dict[tuple[str | None, str | None, str, str], Subsection] = {}
         for subsection in self.subsections:
             section_key = _section_key(
                 subsection.part, subsection.chapter, subsection.section
             )
             if section_key not in section_index:
+                chapter_label = f" in Chapter {subsection.chapter}" if subsection.chapter else ""
                 raise ValueError(
                     f"Subsection {subsection.number} references missing Section "
-                    f"{subsection.section} in Chapter {subsection.chapter}"
+                    f"{subsection.section}{chapter_label}"
                 )
             key = (*section_key, normalize_subsection_number(subsection.number))
             if key in subsection_index:
@@ -226,13 +230,13 @@ class ParsedDocument(BaseModel):
             subsection_index[key] = subsection
 
         referenced_parts: set[str] = set()
-        referenced_sections: set[tuple[str | None, str, str]] = set()
-        referenced_subsections: set[tuple[str | None, str, str, str]] = set()
+        referenced_sections: set[tuple[str | None, str | None, str]] = set()
+        referenced_subsections: set[tuple[str | None, str | None, str, str]] = set()
         root_modes: set[str] = set()
         chapter_modes: dict[tuple[str | None, str], set[str]] = {}
         chapter_direct_articles: dict[tuple[str | None, str], list[str]] = {}
         chapter_section_articles: dict[tuple[str | None, str], list[str]] = {}
-        section_modes: dict[tuple[str | None, str, str], set[str]] = {}
+        section_modes: dict[tuple[str | None, str | None, str], set[str]] = {}
         chapter_parts: dict[str, str | None] = {}
         for article in self.articles:
             part_key = (
@@ -245,33 +249,30 @@ class ParsedDocument(BaseModel):
                     raise ValueError(
                         f"Article {article.number} references missing Part {article.part}"
                     )
-                if article.chapter is None:
-                    raise ValueError(
-                        f"Article {article.number} references Part {article.part} without Chapter"
-                    )
                 referenced_parts.add(part_key)
 
             if article.subsection is not None and article.section is None:
                 raise ValueError(
                     f"Article {article.number} references Subsection {article.subsection} without Section"
                 )
-            if article.section is not None and article.chapter is None:
-                raise ValueError(
-                    f"Article {article.number} references Section {article.section} without Chapter"
-                )
 
             if article.chapter is None:
-                root_modes.add("Article")
+                if article.section is not None:
+                    key = _section_key(article.part, None, article.section)
+                    if key not in section_index:
+                        # Try matching with suffixed key
+                        matching = [k for k in section_index if k[0] == key[0] and k[1] is None and k[2].startswith(article.section)]
+                        if not matching:
+                            raise ValueError(
+                                f"Article {article.number} references missing Section {article.section}"
+                            )
+                        key = matching[0]
+                    referenced_sections.add(key)
+                root_modes.add("Part" if article.part is not None else ("Section" if article.section is not None else "Article"))
                 continue
 
             root_modes.add("Part" if article.part is not None else "Chapter")
             chapter_key = (part_key, normalize_chapter_number(article.chapter))
-            normalized_chapter = normalize_chapter_number(article.chapter)
-            previous_part = chapter_parts.setdefault(normalized_chapter, part_key)
-            if previous_part != part_key:
-                raise ValueError(
-                    f"Chapter {article.chapter} is assigned to multiple Part parents"
-                )
 
             if article.section is None:
                 chapter_modes.setdefault(chapter_key, set()).add("Article")
@@ -284,10 +285,13 @@ class ParsedDocument(BaseModel):
             chapter_section_articles.setdefault(chapter_key, []).append(article.number)
             key = _section_key(article.part, article.chapter, article.section)
             if key not in section_index:
-                raise ValueError(
-                    f"Article {article.number} references missing Section "
-                    f"{article.section} in Chapter {article.chapter}"
-                )
+                matching = [k for k in section_index if k[0] == key[0] and k[1] == key[1] and k[2].startswith(article.section)]
+                if not matching:
+                    raise ValueError(
+                        f"Article {article.number} references missing Section "
+                        f"{article.section} in Chapter {article.chapter}"
+                    )
+                key = matching[0]
             referenced_sections.add(key)
 
             if article.subsection is None:
@@ -302,53 +306,34 @@ class ParsedDocument(BaseModel):
                     f"{article.subsection} in Section {article.section}"
                 )
             referenced_subsections.add(subsection_key)
-
-        structural_root_modes = root_modes - {"Article"}
-        if len(structural_root_modes) > 1:
-            raise ValueError(
-                "Document mixes Part, Chapter, or direct Article child modes"
-            )
-        for chapter_key, modes in chapter_modes.items():
-            if len(modes) > 1:
-                _validate_chapter_preamble_order(
-                    chapter=chapter_key[1],
-                    direct_article_numbers=chapter_direct_articles.get(chapter_key, []),
-                    section_article_numbers=chapter_section_articles.get(
-                        chapter_key, []
-                    ),
-                )
         for (_, chapter, section), modes in section_modes.items():
             if len(modes) > 1:
+                chapter_label = f" in Chapter {chapter}" if chapter else ""
                 raise ValueError(
-                    f"Section {section} in Chapter {chapter} mixes Subsection and direct Article child modes"
+                    f"Section {section}{chapter_label} mixes Subsection and direct Article child modes"
                 )
 
-        orphan_parts = sorted(set(part_index) - referenced_parts)
-        if orphan_parts:
-            raise ValueError(f"Part {orphan_parts[0]} does not contain any Article")
-
-        orphan_sections = sorted(set(section_index) - referenced_sections)
+        orphan_sections = set(section_index) - referenced_sections
         if orphan_sections:
-            _, chapter, section = orphan_sections[0]
-            raise ValueError(
-                f"Section {section} in Chapter {chapter} does not contain any Article"
-            )
-        orphan_subsections = sorted(set(subsection_index) - referenced_subsections)
+            self.sections = [
+                s for s in self.sections
+                if _section_key(s.part, s.chapter, s.number) in referenced_sections
+            ]
+        orphan_subsections = set(subsection_index) - referenced_subsections
         if orphan_subsections:
-            _, chapter, section, subsection = orphan_subsections[0]
-            raise ValueError(
-                f"Subsection {subsection} in Section {section} Chapter {chapter} "
-                "does not contain any Article"
-            )
+            self.subsections = [
+                sub for sub in self.subsections
+                if (*_section_key(sub.part, sub.chapter, sub.section), normalize_subsection_number(sub.number)) in referenced_subsections
+            ]
         return self
 
 
 def _section_key(
-    part: str | None, chapter: str, section: str
-) -> tuple[str | None, str, str]:
+    part: str | None, chapter: str | None, section: str
+) -> tuple[str | None, str | None, str]:
     return (
         part.strip().lower() if part is not None else None,
-        normalize_chapter_number(chapter),
+        normalize_chapter_number(chapter) if chapter is not None else None,
         normalize_section_number(section),
     )
 

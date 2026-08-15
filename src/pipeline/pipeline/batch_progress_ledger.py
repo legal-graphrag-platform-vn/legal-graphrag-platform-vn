@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -17,11 +18,11 @@ from src.pipeline.config import settings
 logger = logging.getLogger(__name__)
 
 DEFAULT_LEDGER_PATH = settings.data_processed_dir / "batch_progress.json"
+_LEDGER_LOCK = threading.Lock()
 
 
 def load_ledger(ledger_path: Path = DEFAULT_LEDGER_PATH) -> dict[str, dict[str, Any]]:
     """Đọc file ledger ghi nhận tiến độ batch từ ổ đĩa."""
-    # 1. Trả về dict rỗng nếu file chưa tồn tại
     if not ledger_path.exists():
         return {}
 
@@ -33,14 +34,20 @@ def load_ledger(ledger_path: Path = DEFAULT_LEDGER_PATH) -> dict[str, dict[str, 
         return {}
 
 
-def save_ledger(ledger: dict[str, dict[str, Any]], ledger_path: Path = DEFAULT_LEDGER_PATH) -> None:
-    """Ghi dữ liệu tiến độ batch ra đĩa."""
-    # 1. Đảm bảo thư mục cha tồn tại
-    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+import os
+import time
 
-    # 2. Ghi dữ liệu dạng JSON đẹp mắt
-    with open(ledger_path, "w", encoding="utf-8") as f:
-        json.dump(ledger, f, ensure_ascii=False, indent=2)
+def save_ledger(ledger: dict[str, dict[str, Any]], ledger_path: Path = DEFAULT_LEDGER_PATH) -> None:
+    """Ghi dữ liệu tiến độ batch ra đĩa an toàn bằng atomic write."""
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = ledger_path.parent / f"{ledger_path.stem}_{os.getpid()}_{threading.get_ident()}_{time.time_ns()}.tmp"
+    try:
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(ledger, f, ensure_ascii=False, indent=2)
+        temp_path.replace(ledger_path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink(missing_ok=True)
 
 
 def record_doc_status(
@@ -51,36 +58,33 @@ def record_doc_status(
     error: str | None = None,
     ledger_path: Path = DEFAULT_LEDGER_PATH,
 ) -> None:
-    """Ghi nhận hoặc cập nhật trạng thái của 1 văn bản tại 1 bước cụ thể."""
-    # 1. Đọc ledger hiện tại
-    ledger = load_ledger(ledger_path)
+    """Ghi nhận hoặc cập nhật trạng thái của 1 văn bản tại 1 bước cụ thể với thread lock."""
+    with _LEDGER_LOCK:
+        ledger = load_ledger(ledger_path)
 
-    # 2. Khởi tạo bản ghi nếu chưa có
-    if raw_doc_code not in ledger:
-        ledger[raw_doc_code] = {
-            "status": "PENDING",
-            "last_step": "none",
-            "history": {},
+        if raw_doc_code not in ledger:
+            ledger[raw_doc_code] = {
+                "status": "PENDING",
+                "last_step": "none",
+                "history": {},
+            }
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        doc_entry = ledger[raw_doc_code]
+        doc_entry["status"] = status
+        doc_entry["last_step"] = step
+        doc_entry["updated_at"] = now_iso
+
+        if "history" not in doc_entry:
+            doc_entry["history"] = {}
+
+        doc_entry["history"][step] = {
+            "status": status,
+            "updated_at": now_iso,
+            "error": error,
         }
 
-    # 3. Cập nhật trạng thái bước hiện tại
-    now_iso = datetime.now(timezone.utc).isoformat()
-    doc_entry = ledger[raw_doc_code]
-    doc_entry["status"] = status
-    doc_entry["last_step"] = step
-    doc_entry["updated_at"] = now_iso
-
-    if "history" not in doc_entry:
-        doc_entry["history"] = {}
-
-    doc_entry["history"][step] = {
-        "status": status,
-        "updated_at": now_iso,
-        "error": error,
-    }
-
-    # 4. Ghi ngược lại ổ đĩa
-    save_ledger(ledger, ledger_path)
+        save_ledger(ledger, ledger_path)
 
 
 def filter_documents_for_step(

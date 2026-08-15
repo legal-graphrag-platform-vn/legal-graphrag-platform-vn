@@ -154,23 +154,29 @@ class DiagramParseResult:
     unknown_categories: tuple[str, ...]
 
 
-def parse_diagram(diagram: dict[str, list[str]]) -> DiagramParseResult:
+def parse_diagram(diagram: dict) -> DiagramParseResult:
     """Parse diagram JSON thành DiagramParseResult.
 
     Args:
-        diagram: Dict với key là category label (có hoặc không có count trong ngoặc)
-                 và value là list tên văn bản. Count trong ngoặc "(n)" được strip.
+        diagram: Dict với key là category label hoặc format LuatVietnam có trường `groups`.
 
     Returns:
         DiagramParseResult phân biệt: candidates / unsupported / unknown.
         Category không có item (danh sách rỗng) được bỏ qua hoàn toàn.
     """
+    if "groups" in diagram and isinstance(diagram["groups"], dict):
+        raw_map = diagram["groups"]
+    else:
+        raw_map = diagram
+
     candidates: list[DiagramRelationCandidate] = []
     unsupported: list[str] = []
     unknown: list[str] = []
 
-    for raw_category, targets in diagram.items():
-        if not targets:
+    for raw_category, targets in raw_map.items():
+        if raw_category in {"schema_version", "external_id", "source_url", "fetched_at"}:
+            continue
+        if not targets or not isinstance(targets, list):
             continue
 
         category = _strip_count(raw_category)
@@ -184,7 +190,11 @@ def parse_diagram(diagram: dict[str, list[str]]) -> DiagramParseResult:
             unknown.append(category)
             continue
 
-        for raw_target in targets:
+        for raw_item in targets:
+            if isinstance(raw_item, dict):
+                raw_target = str(raw_item.get("title") or raw_item.get("text") or raw_item.get("number") or "")
+            else:
+                raw_target = str(raw_item)
             stripped = raw_target.strip()
             if not stripped:
                 continue
@@ -199,7 +209,7 @@ def parse_diagram(diagram: dict[str, list[str]]) -> DiagramParseResult:
 
     return DiagramParseResult(
         candidates=tuple(candidates),
-        unsupported_categories=tuple(dict.fromkeys(unsupported)),  # dedupe, preserve order
+        unsupported_categories=tuple(dict.fromkeys(unsupported)),
         unknown_categories=tuple(dict.fromkeys(unknown)),
     )
 
