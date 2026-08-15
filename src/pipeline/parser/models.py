@@ -51,7 +51,9 @@ class Clause(BaseModel):
             if label in seen:
                 existing = seen[label]
                 existing.content = f"{existing.content} {point.content}".strip()
-                existing.source_end_char = max(existing.source_end_char, point.source_end_char)
+                existing.source_end_char = max(
+                    existing.source_end_char, point.source_end_char
+                )
             else:
                 seen[label] = point
                 deduped.append(point)
@@ -138,8 +140,8 @@ class Subsection(BaseModel):
 class UnparsedSection(BaseModel):
     """Losslessly preserved source section outside the active graph ontology."""
 
-    section_type: Literal["APPENDIX"]
-    heading: str
+    section_type: Literal["APPENDIX", "UNPARSED_BODY"]
+    heading: str | None = None
     content_raw: str
     source_document_id: str
     source_start_char: int = Field(ge=0)
@@ -147,6 +149,28 @@ class UnparsedSection(BaseModel):
     source_start_line: int = Field(ge=1)
     source_end_line: int = Field(ge=1)
     content_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ParseWarning(BaseModel):
+    """A recoverable parser condition recorded beside the hierarchy artifact."""
+
+    code: str
+    message: str
+    source_line: int | None = Field(default=None, ge=1)
+    source_start_char: int | None = Field(default=None, ge=0)
+    source_end_char: int | None = Field(default=None, ge=0)
+
+
+class ParseDiagnostics(BaseModel):
+    """Auditable result of one permissive parse attempt."""
+
+    parser_name: Literal["hierarchy_parser"] = "hierarchy_parser"
+    parser_version: Literal["1.0"] = "1.0"
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    status: Literal["PARSED", "PARSED_WITH_WARNINGS", "SOURCE_PRESERVED"]
+    article_count: int = Field(ge=0)
+    unparsed_section_count: int = Field(ge=0)
+    warnings: list[ParseWarning] = Field(default_factory=list)
 
 
 class DocumentInfo(BaseModel):
@@ -181,6 +205,7 @@ class ParsedDocument(BaseModel):
     sections: list[Section] = Field(default_factory=list)
     subsections: list[Subsection] = Field(default_factory=list)
     unparsed_sections: list[UnparsedSection] = Field(default_factory=list)
+    parser_metadata: ParseDiagnostics | None = None
 
     @model_validator(mode="after")
     def section_hierarchy_must_be_consistent(self) -> "ParsedDocument":
@@ -216,7 +241,9 @@ class ParsedDocument(BaseModel):
                 subsection.part, subsection.chapter, subsection.section
             )
             if section_key not in section_index:
-                chapter_label = f" in Chapter {subsection.chapter}" if subsection.chapter else ""
+                chapter_label = (
+                    f" in Chapter {subsection.chapter}" if subsection.chapter else ""
+                )
                 raise ValueError(
                     f"Subsection {subsection.number} references missing Section "
                     f"{subsection.section}{chapter_label}"
@@ -237,7 +264,6 @@ class ParsedDocument(BaseModel):
         chapter_direct_articles: dict[tuple[str | None, str], list[str]] = {}
         chapter_section_articles: dict[tuple[str | None, str], list[str]] = {}
         section_modes: dict[tuple[str | None, str | None, str], set[str]] = {}
-        chapter_parts: dict[str, str | None] = {}
         for article in self.articles:
             part_key = (
                 normalize_part_number(article.part)
@@ -261,14 +287,24 @@ class ParsedDocument(BaseModel):
                     key = _section_key(article.part, None, article.section)
                     if key not in section_index:
                         # Try matching with suffixed key
-                        matching = [k for k in section_index if k[0] == key[0] and k[1] is None and k[2].startswith(article.section)]
+                        matching = [
+                            k
+                            for k in section_index
+                            if k[0] == key[0]
+                            and k[1] is None
+                            and k[2].startswith(article.section)
+                        ]
                         if not matching:
                             raise ValueError(
                                 f"Article {article.number} references missing Section {article.section}"
                             )
                         key = matching[0]
                     referenced_sections.add(key)
-                root_modes.add("Part" if article.part is not None else ("Section" if article.section is not None else "Article"))
+                root_modes.add(
+                    "Part"
+                    if article.part is not None
+                    else ("Section" if article.section is not None else "Article")
+                )
                 continue
 
             root_modes.add("Part" if article.part is not None else "Chapter")
@@ -285,7 +321,13 @@ class ParsedDocument(BaseModel):
             chapter_section_articles.setdefault(chapter_key, []).append(article.number)
             key = _section_key(article.part, article.chapter, article.section)
             if key not in section_index:
-                matching = [k for k in section_index if k[0] == key[0] and k[1] == key[1] and k[2].startswith(article.section)]
+                matching = [
+                    k
+                    for k in section_index
+                    if k[0] == key[0]
+                    and k[1] == key[1]
+                    and k[2].startswith(article.section)
+                ]
                 if not matching:
                     raise ValueError(
                         f"Article {article.number} references missing Section "
@@ -316,14 +358,20 @@ class ParsedDocument(BaseModel):
         orphan_sections = set(section_index) - referenced_sections
         if orphan_sections:
             self.sections = [
-                s for s in self.sections
+                s
+                for s in self.sections
                 if _section_key(s.part, s.chapter, s.number) in referenced_sections
             ]
         orphan_subsections = set(subsection_index) - referenced_subsections
         if orphan_subsections:
             self.subsections = [
-                sub for sub in self.subsections
-                if (*_section_key(sub.part, sub.chapter, sub.section), normalize_subsection_number(sub.number)) in referenced_subsections
+                sub
+                for sub in self.subsections
+                if (
+                    *_section_key(sub.part, sub.chapter, sub.section),
+                    normalize_subsection_number(sub.number),
+                )
+                in referenced_subsections
             ]
         return self
 

@@ -4,7 +4,7 @@ from datetime import date
 
 import pytest
 
-from src.pipeline.parser.hierarchy_parser import parse_text
+from src.pipeline.parser.hierarchy_parser import parse_text, parse_text_with_diagnostics
 from src.pipeline.parser.models import (
     Article,
     Clause,
@@ -99,6 +99,25 @@ def test_build_graph_payload_uses_canonical_ids_and_relation_id() -> None:
     assert defines["id"]
     assert defines["properties"]["relation_id"]
     assert defines["id"] == defines["properties"]["relation_id"]
+
+
+def test_parser_metadata_does_not_create_graph_nodes_or_relations() -> None:
+    parsed, diagnostics = parse_text_with_diagnostics(
+        "Điều 1. Phạm vi điều chỉnh", _parsed().document
+    )
+
+    payload = build_graph_payload(parsed, [], {}, raw_doc_code="L59_2020")
+
+    assert parsed.parser_metadata == diagnostics
+    assert [node["type"] for node in payload["nodes"]] == [
+        "Document",
+        "Issuer",
+        "Article",
+    ]
+    assert [relation["type"] for relation in payload["relations"]] == [
+        "ISSUED_BY",
+        "CONTAINS",
+    ]
 
 
 def test_build_graph_payload_fails_for_missing_entity_index_entry() -> None:

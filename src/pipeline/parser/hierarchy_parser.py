@@ -16,6 +16,8 @@ from src.pipeline.parser.models import (
     Article,
     Clause,
     DocumentInfo,
+    ParseDiagnostics,
+    ParseWarning,
     Part,
     ParsedDocument,
     Point,
@@ -190,6 +192,11 @@ APPENDIX_HEADING_RE = re.compile(
     r"^\s*(?:danh\s*muc|phu\s*luc|mau\s*so|bieu\s*mau)(?:\s+[ivxlcdm\d]+)?(?:\s*[:.\-].*)?$",
     re.IGNORECASE,
 )
+REPLACEMENT_QUOTE_INTRO_RE = re.compile(
+    r"(?:sua\s+doi|bo\s+sung|thay\s+the|bai\s+bo).{0,200}"
+    r"(?:nhu\s+sau|sau\s+day)\s*:\s*(.*)$",
+    re.IGNORECASE,
+)
 
 
 def is_citation_context(prev_line: str, line: str, next_line: str) -> bool:
@@ -213,12 +220,134 @@ class _ParsedHierarchy:
     subsections: list[Subsection]
 
 
+def _replacement_quote_lines(
+    lines: list[str] | list[LineRecord],
+) -> tuple[set[int], list[ParseWarning]]:
+    """Locate only explicit, closed amendment/replacement quotation blocks.
+
+    Ordinary typographic quotes are content punctuation and must never disable
+    structural heading recognition for the remainder of a document.
+    """
+
+    quoted_lines: set[int] = set()
+    warnings: list[ParseWarning] = []
+    pending_intro: LineRecord | None = None
+    active_origin: LineRecord | None = None
+    active_lines: list[int] = []
+    quote_style: str | None = None
+    quote_depth = 0
+
+    def as_record(item: str | LineRecord, index: int) -> LineRecord:
+        if isinstance(item, LineRecord):
+            return item
+        return LineRecord(text=str(item), source_line=index + 1)
+
+    def start_scope(record: LineRecord, index: int, line: str) -> None:
+        nonlocal active_origin, quote_style, quote_depth
+        active_origin = pending_intro or record
+        quote_style = "curly" if line.startswith("“") else "straight"
+        quote_depth = (
+            line.count("“") - line.count("”")
+            if quote_style == "curly"
+            else line.count('"') % 2
+        )
+        if (
+            quote_style == "curly"
+            and quote_depth > 0
+            and re.search(r'"\s*[.,;:]?\s*$', line)
+        ):
+            quote_depth = 0
+        active_lines.append(index)
+
+    for index, item in enumerate(lines):
+        record = as_record(item, index)
+        line = clean_vietnamese_spacing(record.text).strip()
+        if not line:
+            continue
+
+        if active_origin is not None:
+            active_lines.append(index)
+            if quote_style == "curly":
+                quote_depth += line.count("“") - line.count("”")
+                if quote_depth > 0 and re.search(r'"\s*[.,;:]?\s*$', line):
+                    quote_depth = 0
+            else:
+                quote_depth ^= line.count('"') % 2
+            if quote_depth <= 0:
+                quoted_lines.update(active_lines)
+                active_origin = None
+                active_lines = []
+                quote_style = None
+                quote_depth = 0
+            continue
+
+        if pending_intro is not None:
+            if line.startswith(("“", '"')):
+                start_scope(record, index, line)
+                pending_intro = None
+                if quote_depth <= 0:
+                    quoted_lines.update(active_lines)
+                    active_origin = None
+                    active_lines = []
+                    quote_style = None
+                continue
+            pending_intro = None
+
+        intro_match = REPLACEMENT_QUOTE_INTRO_RE.search(_ascii(line).lower())
+        if intro_match is not None:
+            suffix = intro_match.group(1).lstrip()
+            if suffix.startswith(("“", '"')):
+                start_scope(record, index, suffix)
+                active_lines.clear()  # The intro itself remains normal host content.
+                if quote_depth <= 0:
+                    active_origin = None
+                    quote_style = None
+            else:
+                pending_intro = record
+            continue
+
+        if line.count("“") != line.count("”"):
+            warnings.append(
+                ParseWarning(
+                    code="UNSCOPED_QUOTE_IMBALANCE_IGNORED",
+                    message=(
+                        "Unbalanced ordinary quotation mark was treated as content; "
+                        "structural heading detection remained active."
+                    ),
+                    source_line=record.source_line,
+                    source_start_char=record.source_start_char,
+                    source_end_char=record.source_end_char,
+                )
+            )
+
+    if active_origin is not None:
+        warnings.append(
+            ParseWarning(
+                code="UNCLOSED_REPLACEMENT_QUOTE_IGNORED",
+                message=(
+                    "An explicit replacement quotation was not closed; its internal "
+                    "headings were parsed permissively instead of swallowing the "
+                    "remainder of the document."
+                ),
+                source_line=active_origin.source_line,
+                source_start_char=active_origin.source_start_char,
+                source_end_char=active_origin.source_end_char,
+            )
+        )
+
+    return quoted_lines, warnings
+
+
 def parse_lines(lines: list[str] | list[LineRecord]) -> list[Article]:
     """Compatibility wrapper returning only parsed Articles."""
     return _parse_hierarchy(lines).articles
 
 
-def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
+def _parse_hierarchy(
+    lines: list[str] | list[LineRecord],
+    *,
+    warnings: list[ParseWarning] | None = None,
+) -> _ParsedHierarchy:
     """Parse the canonical seven-path structural hierarchy deterministically."""
     articles: list[Article] = []
     parts: list[Part] = []
@@ -263,7 +392,9 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
                     duplicate.source_end_char, current_point.source_end_char
                 )
             else:
-                duplicate.content = f"{duplicate.content} {current_point.content}".strip()
+                duplicate.content = (
+                    f"{duplicate.content} {current_point.content}".strip()
+                )
                 duplicate.source_end_char = max(
                     duplicate.source_end_char, current_point.source_end_char
                 )
@@ -320,7 +451,9 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
     pending_chapter_title = False
     pending_article_title = False
     pending_heading: tuple[str, str, LineRecord] | None = None
-    quote_depth = 0
+    replacement_quote_lines, quote_warnings = _replacement_quote_lines(lines)
+    if warnings is not None:
+        warnings.extend(quote_warnings)
     raw_text_lines = [
         item.text if isinstance(item, LineRecord) else str(item) for item in lines
     ]
@@ -337,14 +470,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
-        total_quotes = line.count("“") + line.count("”")
-        if total_quotes > 0 and total_quotes % 2 == 0:
-            in_quote = False
-        else:
-            in_quote = quote_depth > 0 or line.startswith("“")
-            quote_depth = max(0, quote_depth + line.count("“") - line.count("”"))
-
-        if in_quote:
+        if idx in replacement_quote_lines:
             if current_article is not None:
                 current_article.content_lines.append(line)
                 current_article.source_end_char = record.source_end_char
@@ -629,7 +755,9 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         if clause_match is not None:
             number, content = clause_match
             existing_clauses = {c.number for c in current_article.clauses}
-            if current_clause is not None and (number in existing_clauses or number == current_clause.number):
+            if current_clause is not None and (
+                number in existing_clauses or number == current_clause.number
+            ):
                 clause_match = None
 
         if clause_match is not None:
@@ -697,15 +825,111 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
 def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
     """Parse từ văn bản text thuần."""
     canonical_text = canonicalize_source_text(text)
-    if document.effective_from is None:
-        source_effective_from = infer_source_effective_from(canonical_text)
-        if source_effective_from:
-            document = document.model_copy(
-                update={"effective_from": source_effective_from}
-            )
+    document = _with_source_effective_date(canonical_text, document)
+    return _parse_canonical_text(canonical_text, document)
+
+
+def parse_text_with_diagnostics(
+    text: str, document: DocumentInfo
+) -> tuple[ParsedDocument, ParseDiagnostics]:
+    """Parse permissively while preserving uncertain source and audit warnings."""
+
+    canonical_text = canonicalize_source_text(text)
+    document = _with_source_effective_date(canonical_text, document)
+    warnings: list[ParseWarning] = []
     records = source_line_records(canonical_text)
     main_records, appendix_groups = partition_appendices(records)
-    hierarchy = _parse_hierarchy(main_records)
+    try:
+        parsed = _parse_canonical_text(
+            canonical_text,
+            document,
+            warnings=warnings,
+            partitioned=(main_records, appendix_groups),
+        )
+    except ValueError as exc:
+        warnings.append(
+            ParseWarning(
+                code="HIERARCHY_VALIDATION_FALLBACK",
+                message=str(exc),
+            )
+        )
+        parsed = _source_preserved_document(
+            canonical_text, document, main_records, appendix_groups
+        )
+
+    if not parsed.articles and _records_have_content(main_records):
+        if not any(
+            section.section_type == "UNPARSED_BODY"
+            for section in parsed.unparsed_sections
+        ):
+            parsed = parsed.model_copy(
+                update={
+                    "unparsed_sections": [
+                        _unparsed_body_section(
+                            main_records, canonical_text, document.id
+                        ),
+                        *parsed.unparsed_sections,
+                    ]
+                }
+            )
+        if not any(
+            warning.code == "HIERARCHY_VALIDATION_FALLBACK" for warning in warnings
+        ):
+            warnings.append(
+                ParseWarning(
+                    code="NO_ARTICLE_BOUNDARY",
+                    message=(
+                        "No supported Article boundary was found; the canonical "
+                        "body was preserved without inventing legal structure."
+                    ),
+                    source_line=main_records[0].source_line,
+                    source_start_char=main_records[0].source_start_char,
+                    source_end_char=main_records[-1].source_end_char,
+                )
+            )
+
+    status = (
+        "SOURCE_PRESERVED"
+        if any(
+            section.section_type == "UNPARSED_BODY"
+            for section in parsed.unparsed_sections
+        )
+        else "PARSED_WITH_WARNINGS"
+        if warnings
+        else "PARSED"
+    )
+    diagnostics = ParseDiagnostics(
+        source_sha256=hashlib.sha256(canonical_text.encode("utf-8")).hexdigest(),
+        status=status,
+        article_count=len(parsed.articles),
+        unparsed_section_count=len(parsed.unparsed_sections),
+        warnings=warnings,
+    )
+    parsed = parsed.model_copy(update={"parser_metadata": diagnostics})
+    return parsed, diagnostics
+
+
+def _with_source_effective_date(
+    canonical_text: str, document: DocumentInfo
+) -> DocumentInfo:
+    if document.effective_from is not None:
+        return document
+    source_effective_from = infer_source_effective_from(canonical_text)
+    if source_effective_from is None:
+        return document
+    return document.model_copy(update={"effective_from": source_effective_from})
+
+
+def _parse_canonical_text(
+    canonical_text: str,
+    document: DocumentInfo,
+    *,
+    warnings: list[ParseWarning] | None = None,
+    partitioned: tuple[list[LineRecord], list[list[LineRecord]]] | None = None,
+) -> ParsedDocument:
+    records = source_line_records(canonical_text)
+    main_records, appendix_groups = partitioned or partition_appendices(records)
+    hierarchy = _parse_hierarchy(main_records, warnings=warnings)
     articles = hierarchy.articles
     _validate_unique_point_labels(articles)
     return ParsedDocument(
@@ -719,6 +943,24 @@ def parse_text(text: str, document: DocumentInfo) -> ParsedDocument:
             for group in appendix_groups
         ],
     )
+
+
+def _source_preserved_document(
+    canonical_text: str,
+    document: DocumentInfo,
+    main_records: list[LineRecord],
+    appendix_groups: list[list[LineRecord]],
+) -> ParsedDocument:
+    unparsed_sections: list[UnparsedSection] = []
+    if _records_have_content(main_records):
+        unparsed_sections.append(
+            _unparsed_body_section(main_records, canonical_text, document.id)
+        )
+    unparsed_sections.extend(
+        _appendix_section(group, canonical_text, document.id)
+        for group in appendix_groups
+    )
+    return ParsedDocument(document=document, unparsed_sections=unparsed_sections)
 
 
 def infer_source_effective_from(source_text: str) -> date | None:
@@ -850,6 +1092,31 @@ def _appendix_section(
         source_start_line=records[0].source_line,
         source_end_line=records[-1].source_line,
         content_hash=hashlib.sha256(hash_input).hexdigest(),
+    )
+
+
+def _records_have_content(records: list[LineRecord]) -> bool:
+    return any(record.text.strip() for record in records)
+
+
+def _unparsed_body_section(
+    records: list[LineRecord], canonical_text: str, document_id: str
+) -> UnparsedSection:
+    if not records:
+        raise ValueError("Cannot preserve an empty unparsed body")
+    start = records[0].source_start_char
+    end = records[-1].source_end_char
+    content_raw = canonical_text[start:end].strip("\n")
+    return UnparsedSection(
+        section_type="UNPARSED_BODY",
+        heading=None,
+        content_raw=content_raw,
+        source_document_id=document_id,
+        source_start_char=start,
+        source_end_char=end,
+        source_start_line=records[0].source_line,
+        source_end_line=records[-1].source_line,
+        content_hash=hashlib.sha256(content_raw.encode("utf-8")).hexdigest(),
     )
 
 

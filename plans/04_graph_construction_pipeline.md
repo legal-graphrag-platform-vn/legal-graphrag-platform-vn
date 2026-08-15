@@ -129,6 +129,19 @@ stateDiagram-v2
 ```
 > **Contract**: Khôi phục đúng cấu trúc cha-con. Thuộc tính `number` của Article và Clause luôn được extract thành công, định dạng số nguyên/chuỗi chuẩn. Parser phải normalize `raw_doc_code`/metadata thành `document.id = graph_id`, `type` thành `doc_type`, `status` thành `legal_status`, và bảo đảm `normative` tồn tại trước mọi bước downstream. Không sinh ra UUID ngẫu nhiên mà dùng deterministic ID (`ldn_2020_art17_cl1`). Chapter được có direct Article trước Mục đầu tiên như phần mở đầu; mọi direct Article phải có số đứng trước mọi Article thuộc các Mục trong cùng Chapter. Mỗi Article/Clause/Point phải giữ `source_start_char` và `source_end_char` trong canonical `source.txt`; extraction/normalization có canonical source nhưng thiếu hoặc vượt giới hạn span phải fail-closed và yêu cầu parse lại, không được âm thầm giữ LLM structural reference.
 
+Batch parse mặc định bao phủ mọi raw folder có đủ `source.txt` và
+`metadata.json`, không chỉ curated manifest. Mỗi `hierarchy.json` phải chứa
+`parser_metadata` để lưu parser version, source hash, trạng thái, số lượng đơn vị
+và warning có tọa độ nguồn;
+metadata này không tạo node/cạnh Neo4j. Chỉ block trích dẫn sửa đổi/bổ sung tường minh và có
+dấu đóng mới được phép che các heading cấu trúc bên trong. Dấu ngoặc không cân
+bằng được ghi warning nhưng không làm vô hiệu nhận diện heading cho phần còn lại
+của văn bản. Khi hierarchy không hợp lệ hoặc không tìm thấy ranh giới `Điều`,
+pipeline được phép hoàn tất theo trạng thái `SOURCE_PRESERVED`: canonical body
+được lưu lossless dưới `unparsed_sections[].section_type=UNPARSED_BODY`. Đây là
+fallback kiểm toán ngoài ontology, không phải `Article` giả và không được đưa vào
+extraction/Neo4j trước khi có parser rule phù hợp.
+
 ### 3. Extractor Output & Contract
 **Schema:** JSON danh sách entities và relations.
 ```json

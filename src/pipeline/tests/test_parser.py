@@ -2,9 +2,8 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
 
-from src.pipeline.parser.hierarchy_parser import parse_text
+from src.pipeline.parser.hierarchy_parser import parse_text, parse_text_with_diagnostics
 from src.pipeline.parser.models import (
     Article,
     Clause,
@@ -373,6 +372,81 @@ def test_parser_keeps_structural_headings_inside_replacement_quote_in_host_artic
 
     assert [article.number for article in parsed.articles] == ["1", "2"]
     assert "Điều 17a. Nội dung được bổ sung" in parsed.articles[0].content_raw
+
+
+def test_parser_does_not_merge_articles_after_mixed_typographic_quote() -> None:
+    text = (
+        "Điều 19. Tài khoản kế toán\n"
+        '1. Bao gồm khoản “Phải thu nội bộ".\n'
+        "Điều 20. Báo cáo tài chính\n"
+        "1. Lập báo cáo theo quy định."
+    )
+
+    parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["19", "20"]
+    assert diagnostics.status == "PARSED_WITH_WARNINGS"
+    assert [warning.code for warning in diagnostics.warnings] == [
+        "UNSCOPED_QUOTE_IMBALANCE_IGNORED"
+    ]
+
+
+def test_parser_does_not_merge_articles_after_unclosed_ordinary_quote() -> None:
+    text = (
+        "Điều 6. Công ty mẹ\n"
+        "1. Công ty mẹ “ Tập đoàn thực hiện quyền quản lý.\n"
+        "Điều 7. Công ty con\n"
+        "1. Công ty con thực hiện nghĩa vụ."
+    )
+
+    parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["6", "7"]
+    assert diagnostics.warnings[0].source_line == 2
+
+
+def test_parser_recovers_headings_from_unclosed_replacement_quote() -> None:
+    text = (
+        "Điều 1. Sửa đổi, bổ sung\n"
+        "1. Bổ sung nội dung như sau:\n"
+        "“Mục 3a\n"
+        "Điều 17a. Nội dung được bổ sung\n"
+        "Nội dung không có dấu đóng.\n"
+        "Điều 2. Điều khoản thi hành"
+    )
+
+    parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
+
+    assert [article.number for article in parsed.articles] == ["1", "17a", "2"]
+    assert diagnostics.warnings[-1].code == "UNCLOSED_REPLACEMENT_QUOTE_IGNORED"
+
+
+def test_parser_preserves_unstructured_body_in_permissive_result() -> None:
+    text = "I. QUY ĐỊNH CHUNG\n1/ Phạm vi áp dụng\n2/ Đối tượng thực hiện"
+
+    parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
+
+    assert parsed.articles == []
+    assert diagnostics.status == "SOURCE_PRESERVED"
+    assert [warning.code for warning in diagnostics.warnings] == ["NO_ARTICLE_BOUNDARY"]
+    assert len(parsed.unparsed_sections) == 1
+    fallback = parsed.unparsed_sections[0]
+    assert fallback.section_type == "UNPARSED_BODY"
+    assert fallback.content_raw == text
+
+
+def test_permissive_result_preserves_source_when_hierarchy_validation_fails() -> None:
+    text = (
+        "Chương I\nTÊN CHƯƠNG\nMục 1. Mục\nĐiều 1. Trực tiếp\n"
+        "Tiểu mục 1. Tiểu mục\nĐiều 2. Trong tiểu mục"
+    )
+
+    parsed, diagnostics = parse_text_with_diagnostics(text, _doc_info())
+
+    assert parsed.articles == []
+    assert diagnostics.status == "SOURCE_PRESERVED"
+    assert diagnostics.warnings[-1].code == "HIERARCHY_VALIDATION_FALLBACK"
+    assert parsed.unparsed_sections[0].content_raw == text
 
 
 def test_parser_uses_explicit_source_effective_date_when_metadata_is_missing() -> None:

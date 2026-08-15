@@ -113,6 +113,17 @@ uv run python -m src.pipeline.main crawl --url "https://vbpl.vn/van-ban/chi-tiet
 uv run python -m src.pipeline.main parse --raw-doc-code L59_2020
 ```
 
+Không truyền `--raw-doc-code` thì lệnh `parse` xử lý mọi thư mục con trong
+`data/raw/` có đủ `source.txt` và `metadata.json`; curated manifest không giới
+hạn batch parse. Mỗi `hierarchy.json` chứa `parser_metadata` với parser version,
+SHA-256 của canonical source, trạng thái, số lượng đơn vị và các warning có tọa độ nguồn. Parser chỉ coi heading nằm
+trong dấu ngoặc kép là nội
+dung nhúng khi đó là một block sửa đổi/bổ sung tường minh và block đã đóng.
+Dấu ngoặc lỗi không được phép nuốt các heading `Điều` còn lại. Nếu không nhận
+diện được `Điều`, hoặc hierarchy không qua validation, canonical body được giữ
+trong `unparsed_sections` với loại `UNPARSED_BODY`; phần này không trở thành node
+ontology và phải được xử lý lại trước extraction/write.
+
 Nếu muốn parse một file `.txt` riêng, thư mục raw tương ứng vẫn phải có
 `metadata.json` hợp lệ và pass `validate-data`:
 
