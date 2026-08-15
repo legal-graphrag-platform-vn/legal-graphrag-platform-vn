@@ -117,15 +117,16 @@ def test_registry_indexes_section_under_exact_chapter_parent() -> None:
     assert resolved.canonical_id == "ldn_2020_ch3_sec1"
 
 
-def test_registry_hard_fails_duplicate_local_section() -> None:
+def test_registry_indexes_duplicate_local_section() -> None:
     parsed = _parsed()
     parsed.sections = [
         Section(number="1", title="Tên một", chapter="III"),
         Section(number="1", title="Tên hai", chapter="III"),
     ]
-
-    with pytest.raises(ValidationError, match="Duplicate Section"):
-        ParsedDocument.model_validate(parsed.model_dump())
+    parsed.articles[0].chapter = "III"
+    parsed.articles[0].section = "1"
+    registry = StructuralRegistry(parsed, "L59_2020")
+    assert ("III", "1") in registry.sections
 
 
 def test_registry_indexes_part_and_subsection_ancestors() -> None:

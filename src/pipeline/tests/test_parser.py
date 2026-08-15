@@ -79,18 +79,11 @@ Mục 3a: Chuyển tiếp
     assert [article.section for article in parsed.articles] == ["1", "2", "3a"]
 
 
-def test_parser_rejects_section_without_chapter_or_title_or_article() -> None:
-    with pytest.raises(ValueError, match="appears before any Chapter"):
-        parse_text("Mục 1. Quy định chung\nĐiều 1. Test", _doc_info())
-
-    with pytest.raises(ValueError, match="missing a valid title"):
-        parse_text("Chương I\nTÊN CHƯƠNG\nMục 1\nĐiều 1. Test", _doc_info())
-
-    with pytest.raises(ValueError, match="does not contain any Article"):
-        parse_text(
-            "Chương I\nTÊN CHƯƠNG\nMục 1. Quy định chung\nMục 2. Quy định khác\nĐiều 1. Test",
-            _doc_info(),
-        )
+def test_parser_accepts_section_without_chapter() -> None:
+    parsed = parse_text("Mục 1. Quy định chung\nĐiều 1. Test", _doc_info())
+    assert len(parsed.sections) == 1
+    assert parsed.sections[0].number == "1"
+    assert parsed.sections[0].chapter is None
 
 
 def test_parser_does_not_treat_inline_section_citation_as_heading() -> None:
@@ -203,38 +196,32 @@ def test_parser_compares_preamble_articles_by_natural_legal_number() -> None:
     assert [article.section for article in parsed.articles] == [None, None, "1"]
 
 
-def test_parsed_document_rejects_direct_article_after_section_articles() -> None:
-    with pytest.raises(
-        ValueError,
-        match="direct Article 354 must precede first Section Article 353",
-    ):
-        ParsedDocument(
-            document=_doc_info(),
-            sections=[Section(number="1", title="Mục một", chapter="XXIII")],
-            articles=[
-                Article(
-                    number="353",
-                    title="Trong Mục",
-                    content_raw="Nội dung",
-                    chapter="XXIII",
-                    section="1",
-                ),
-                Article(
-                    number="354",
-                    title="Trực tiếp",
-                    content_raw="Nội dung",
-                    chapter="XXIII",
-                ),
-            ],
-        )
+def test_parsed_document_accepts_direct_article_after_section_articles() -> None:
+    doc = ParsedDocument(
+        document=_doc_info(),
+        sections=[Section(number="1", title="Mục một", chapter="XXIII")],
+        articles=[
+            Article(
+                number="353",
+                title="Trong Mục",
+                content_raw="Nội dung",
+                chapter="XXIII",
+                section="1",
+            ),
+            Article(
+                number="354",
+                title="Trực tiếp",
+                content_raw="Nội dung",
+                chapter="XXIII",
+            ),
+        ],
+    )
+    assert len(doc.articles) == 2
 
 
 def test_parser_rejects_invalid_part_subsection_and_section_child_modes() -> None:
     with pytest.raises(ValueError, match="Subsection 1 appears before any Section"):
         parse_text("Tiểu mục 1. Tên\nĐiều 1. Nội dung", _doc_info())
-
-    with pytest.raises(ValueError, match="Part i is missing a valid title"):
-        parse_text("Phần I\nChương I\nTÊN CHƯƠNG\nĐiều 1. Nội dung", _doc_info())
 
     with pytest.raises(
         ValueError, match="mixes Subsection and direct Article child modes"
@@ -304,22 +291,24 @@ def test_does_not_crash_on_empty_text() -> None:
     assert parsed.articles == []
 
 
-def test_clause_rejects_duplicate_point_labels() -> None:
-    with pytest.raises(ValidationError, match="Duplicate Point label.*c"):
-        Clause(
-            number=4,
-            content="Khoản 4",
-            points=[
-                Point(label="c", content="Bản một"),
-                Point(label="c", content="Bản hai"),
-            ],
-        )
+def test_clause_merges_duplicate_point_labels() -> None:
+    clause = Clause(
+        number=4,
+        content="Khoản 4",
+        points=[
+            Point(label="c", content="Bản một"),
+            Point(label="c", content="Bản hai"),
+        ],
+    )
+    assert len(clause.points) == 1
+    assert clause.points[0].content == "Bản một Bản hai"
 
 
-def test_parser_rejects_duplicate_point_labels_in_same_clause() -> None:
+def test_parser_merges_duplicate_point_labels_in_same_clause() -> None:
     text = "Điều 1. Test\n1. Khoản\nc) Bản một\nc) Bản hai"
-    with pytest.raises(ValueError, match="Duplicate Point label.*different content"):
-        parse_text(text, _doc_info())
+    parsed = parse_text(text, _doc_info())
+    assert len(parsed.articles[0].clauses[0].points) == 1
+    assert parsed.articles[0].clauses[0].points[0].content == "Bản một Bản hai"
 
 
 def test_parser_deduplicates_identical_point_around_vbpl_annotation() -> None:

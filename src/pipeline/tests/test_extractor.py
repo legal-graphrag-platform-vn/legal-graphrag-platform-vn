@@ -9,6 +9,7 @@ from src.pipeline.extraction.providers import get_provider
 from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
 from src.pipeline.extraction.providers.gemini_provider import _raise_classified_provider_error
 from src.pipeline.extraction.providers.base import FatalExtractionProviderError
+from src.pipeline.extraction.providers.ollama_provider import OllamaProvider
 from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
 from src.pipeline.extraction.llm_extractor import extract_article, normalize_entities_for_relations
 from src.pipeline.extraction.structural_context import ArticleExtractionContext
@@ -35,8 +36,7 @@ def test_provider_factory() -> None:
     # Test ollama provider
     with patch.object(settings, "llm_provider", "ollama"):
         provider = get_provider()
-        assert isinstance(provider, OpenAICompatibleProvider)
-        assert provider.provider_type == "ollama"
+        assert isinstance(provider, OllamaProvider)
 
     # Test invalid provider
     with patch.object(settings, "llm_provider", "unknown"):
@@ -62,21 +62,15 @@ def test_openai_provider_minimax_config(mock_openai_class: MagicMock) -> None:
         assert model == "test-model-minimax"
 
 
-@patch("src.pipeline.extraction.providers.openai_provider.OpenAI")
-def test_openai_provider_ollama_config(mock_openai_class: MagicMock) -> None:
-    mock_client = MagicMock()
-    mock_openai_class.return_value = mock_client
-
+def test_ollama_provider_config() -> None:
     with patch.object(settings, "llm_provider", "ollama"), \
-         patch.object(settings, "ollama_model", "qwen3:8b"), \
+         patch.object(settings, "ollama_model", "qwen3.5:9b"), \
          patch.object(settings, "ollama_base_url", "http://localhost:11434/v1"):
          
         provider = get_provider()
-        assert isinstance(provider, OpenAICompatibleProvider)
-        
-        client, model = provider._get_client_and_model()
-        mock_openai_class.assert_called_once_with(api_key="ollama", base_url="http://localhost:11434/v1")
-        assert model == "qwen3:8b"
+        assert isinstance(provider, OllamaProvider)
+        assert provider.model == "qwen3.5:9b"
+        assert provider.base_url == "http://localhost:11434"
 
 
 def test_clean_json_text() -> None:

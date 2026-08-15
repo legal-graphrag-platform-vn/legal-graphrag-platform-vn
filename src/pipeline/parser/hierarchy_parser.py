@@ -258,10 +258,14 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             )
             if duplicate is None:
                 current_clause.points.append(current_point)
-            elif duplicate.content.strip() != current_point.content.strip():
-                raise ValueError(
-                    f"Duplicate Point label {current_point.label!r} with different content "
-                    f"in Clause {current_clause.number}"
+            elif duplicate.content.strip() == current_point.content.strip():
+                duplicate.source_end_char = max(
+                    duplicate.source_end_char, current_point.source_end_char
+                )
+            else:
+                duplicate.content = f"{duplicate.content} {current_point.content}".strip()
+                duplicate.source_end_char = max(
+                    duplicate.source_end_char, current_point.source_end_char
                 )
         current_point = None
 
@@ -288,28 +292,33 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         return expected
 
     def require_current_subsection_has_article() -> None:
+        nonlocal current_subsection
         if current_subsection is not None and subsection_article_count == 0:
-            raise ValueError(
-                f"Subsection {current_subsection.number} in Section "
-                f"{current_subsection.section} does not contain any Article"
-            )
+            if subsections and subsections[-1] == current_subsection:
+                subsections.pop()
+            current_subsection = None
 
     def require_current_section_has_article() -> None:
+        nonlocal current_section
         if current_section is not None and section_article_count == 0:
-            raise ValueError(
-                f"Section {current_section.number} in Chapter "
-                f"{current_section.chapter} does not contain any Article"
-            )
+            if sections and sections[-1] == current_section:
+                sections.pop()
+            current_section = None
 
     def require_current_chapter_has_article() -> None:
+        nonlocal current_chapter
         if current_chapter is not None and chapter_article_count == 0:
-            raise ValueError(f"Chapter {current_chapter} does not contain any Article")
+            current_chapter = None
 
     def require_current_part_has_article() -> None:
+        nonlocal current_part
         if current_part is not None and part_article_count == 0:
-            raise ValueError(f"Part {current_part.number} does not contain any Article")
+            if parts and parts[-1] == current_part:
+                parts.pop()
+            current_part = None
 
     pending_chapter_title = False
+    pending_article_title = False
     pending_heading: tuple[str, str, LineRecord] | None = None
     quote_depth = 0
     raw_text_lines = [
@@ -350,38 +359,69 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
         if pending_heading is not None:
             kind, number, heading_record = pending_heading
             if not _looks_like_structural_title(record, line):
-                raise ValueError(f"{kind} {number} is missing a valid title")
-            if kind == "Part":
-                current_part = Part(
-                    number=number,
-                    title=line,
-                    source_start_char=heading_record.source_start_char,
-                    source_end_char=record.source_end_char,
-                )
-                parts.append(current_part)
-            elif kind == "Section":
-                current_section = Section(
-                    number=number,
-                    title=line,
-                    part=current_part.number if current_part else None,
-                    chapter=current_chapter or "",
-                    source_start_char=heading_record.source_start_char,
-                    source_end_char=record.source_end_char,
-                )
-                sections.append(current_section)
+                default_title = f"{kind} {number}"
+                if kind == "Part":
+                    current_part = Part(
+                        number=number,
+                        title=default_title,
+                        source_start_char=heading_record.source_start_char,
+                        source_end_char=heading_record.source_end_char,
+                    )
+                    parts.append(current_part)
+                elif kind == "Section":
+                    current_section = Section(
+                        number=number,
+                        title=default_title,
+                        part=current_part.number if current_part else None,
+                        chapter=current_chapter,
+                        source_start_char=heading_record.source_start_char,
+                        source_end_char=heading_record.source_end_char,
+                    )
+                    sections.append(current_section)
+                else:
+                    current_subsection = Subsection(
+                        number=number,
+                        title=default_title,
+                        part=current_part.number if current_part else None,
+                        chapter=current_chapter,
+                        section=current_section.number if current_section else "",
+                        source_start_char=heading_record.source_start_char,
+                        source_end_char=heading_record.source_end_char,
+                    )
+                    subsections.append(current_subsection)
+                pending_heading = None
             else:
-                current_subsection = Subsection(
-                    number=number,
-                    title=line,
-                    part=current_part.number if current_part else None,
-                    chapter=current_chapter or "",
-                    section=current_section.number if current_section else "",
-                    source_start_char=heading_record.source_start_char,
-                    source_end_char=record.source_end_char,
-                )
-                subsections.append(current_subsection)
-            pending_heading = None
-            continue
+                if kind == "Part":
+                    current_part = Part(
+                        number=number,
+                        title=line,
+                        source_start_char=heading_record.source_start_char,
+                        source_end_char=record.source_end_char,
+                    )
+                    parts.append(current_part)
+                elif kind == "Section":
+                    current_section = Section(
+                        number=number,
+                        title=line,
+                        part=current_part.number if current_part else None,
+                        chapter=current_chapter,
+                        source_start_char=heading_record.source_start_char,
+                        source_end_char=record.source_end_char,
+                    )
+                    sections.append(current_section)
+                else:
+                    current_subsection = Subsection(
+                        number=number,
+                        title=line,
+                        part=current_part.number if current_part else None,
+                        chapter=current_chapter,
+                        section=current_section.number if current_section else "",
+                        source_start_char=heading_record.source_start_char,
+                        source_end_char=record.source_end_char,
+                    )
+                    subsections.append(current_subsection)
+                pending_heading = None
+                continue
 
         part_match = match_part(line)
         if part_match is not None and not in_appendix:
@@ -390,12 +430,10 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             require_current_subsection_has_article()
             require_current_section_has_article()
             if current_chapter is not None and chapter_article_count == 0:
-                # 1. Bỏ qua Chương rỗng khi chuyển Phần do Mục lục
                 pass
             else:
                 require_current_chapter_has_article()
             if current_part is not None and part_article_count == 0:
-                # 1. Bỏ qua Phần rỗng (do Mục lục hoặc tiêu đề trùng) thay vì văng lỗi
                 if parts and parts[-1] == current_part:
                     parts.pop()
             else:
@@ -430,7 +468,6 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             require_current_subsection_has_article()
             require_current_section_has_article()
             if current_chapter is not None and chapter_article_count == 0:
-                # 1. Bỏ qua Chương rỗng do Mục lục hoặc tiêu đề trùng
                 pass
             else:
                 require_current_chapter_has_article()
@@ -456,23 +493,19 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
 
         section_match = match_section(line)
         if section_match is not None and not in_appendix:
-            if current_chapter is None:
-                # 1. Báo lỗi nếu Mục xuất hiện khi chưa khai báo Chương nào
-                raise ValueError(
-                    f"Section {section_match[0]} appears before any Chapter"
-                )
             flush_article()
             require_current_subsection_has_article()
             require_current_section_has_article()
-            chapter_key = (
-                current_part.number if current_part else None,
-                current_chapter,
-            )
-            chapter_modes[chapter_key] = require_mode(
-                chapter_modes.get(chapter_key),
-                "Section",
-                owner=f"Chapter {current_chapter}",
-            )
+            if current_chapter is not None:
+                chapter_key = (
+                    current_part.number if current_part else None,
+                    current_chapter,
+                )
+                chapter_modes[chapter_key] = require_mode(
+                    chapter_modes.get(chapter_key),
+                    "Section",
+                    owner=f"Chapter {current_chapter}",
+                )
             number, inline_title = section_match
             current_section = None
             current_subsection = None
@@ -494,7 +527,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
 
         subsection_match = match_subsection(line)
         if subsection_match is not None and not in_appendix:
-            if current_section is None or current_chapter is None:
+            if current_section is None:
                 raise ValueError(
                     f"Subsection {subsection_match[0]} appears before any Section"
                 )
@@ -502,7 +535,7 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             require_current_subsection_has_article()
             section_key = (
                 current_part.number if current_part else None,
-                current_chapter,
+                current_chapter or "",
                 current_section.number,
             )
             section_modes[section_key] = require_mode(
@@ -535,20 +568,13 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             and not is_citation_context(prev_line, line, next_line)
         ):
             flush_article()
-            if article_match[1] and CLOSING_ARTICLE_TITLE_RE.search(
-                _ascii(article_match[1])
-            ):
-                seen_closing_article = True
-            if current_chapter is None:
-                if current_part is not None:
-                    # 1. Tự động tạo Chapter ngầm '0' nếu Phần chứa Điều trực tiếp không qua Chương
-                    current_chapter = "0"
-                    current_chapter_title = ""
-                else:
-                    document_mode = require_mode(
-                        document_mode, "Article", owner="Document"
-                    )
-            elif current_section is None:
+            number, inline_title = article_match
+            seen_closing_article = False
+            part_article_count += 1
+            chapter_article_count += 1
+            section_article_count += 1
+            subsection_article_count += 1
+            if current_chapter is not None and current_section is None:
                 chapter_key = (
                     current_part.number if current_part else None,
                     current_chapter,
@@ -558,23 +584,21 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
                     "Article",
                     owner=f"Chapter {current_chapter}",
                 )
-            else:
+            if current_section is not None and current_subsection is None:
                 section_key = (
                     current_part.number if current_part else None,
-                    current_chapter,
+                    current_chapter or "",
                     current_section.number,
                 )
-                mode = "Subsection" if current_subsection is not None else "Article"
                 section_modes[section_key] = require_mode(
                     section_modes.get(section_key),
-                    mode,
+                    "Article",
                     owner=f"Section {current_section.number}",
                 )
 
-            number, title = article_match
             current_article = _ArticleBuilder(
                 number=number,
-                title=title or None,
+                title=inline_title,
                 part=current_part.number if current_part else None,
                 chapter=current_chapter,
                 chapter_title=current_chapter_title,
@@ -583,16 +607,18 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
                 source_start_char=record.source_start_char,
                 source_end_char=record.source_end_char,
             )
-            if current_part is not None:
-                part_article_count += 1
-            if current_chapter is not None:
-                chapter_article_count += 1
-            if current_section is not None:
-                section_article_count += 1
-            if current_subsection is not None:
-                subsection_article_count += 1
-            if title:
-                current_article.content_lines.append(title)
+            current_clause = None
+            current_point = None
+            pending_article_title = inline_title is None
+            if not pending_article_title and inline_title:
+                current_article.content_lines.append(inline_title)
+            continue
+
+        if pending_article_title:
+            pending_article_title = False
+            title = _bounded_title("Article", current_article.number, line)
+            current_article.title = title
+            current_article.content_lines.append(title)
             continue
 
         if current_article is None:
@@ -600,6 +626,12 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         clause_match = match_clause(line)
+        if clause_match is not None:
+            number, content = clause_match
+            existing_clauses = {c.number for c in current_article.clauses}
+            if current_clause is not None and (number in existing_clauses or number == current_clause.number):
+                clause_match = None
+
         if clause_match is not None:
             flush_clause()
             number, content = clause_match
@@ -614,6 +646,12 @@ def _parse_hierarchy(lines: list[str] | list[LineRecord]) -> _ParsedHierarchy:
             continue
 
         point_match = match_point(line)
+        if point_match is not None and current_clause is not None:
+            label, content = point_match
+            existing_points = {p.label.strip().lower() for p in current_clause.points}
+            if current_point is not None and label.strip().lower() in existing_points:
+                point_match = None
+
         if point_match is not None and current_clause is not None:
             flush_point()
             label, content = point_match

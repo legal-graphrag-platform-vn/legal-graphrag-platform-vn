@@ -58,8 +58,8 @@ class StructuralRegistry:
         self.types: dict[str, str] = {self.graph_id: "Document"}
         self.parts: dict[str, str] = {}
         self.chapters: dict[str, str] = {}
-        self.sections: dict[tuple[str, str], str] = {}
-        self.subsections: dict[tuple[str, str, str], str] = {}
+        self.sections: dict[tuple[str | None, str], str] = {}
+        self.subsections: dict[tuple[str | None, str, str], str] = {}
         self.articles: dict[str, str] = {}
         self.clauses: dict[tuple[str, str], str] = {}
         self.points: dict[tuple[str, str, str], str] = {}
@@ -71,63 +71,88 @@ class StructuralRegistry:
         for part in parsed.parts:
             part_number = normalize_part_number(part.number)
             if part_number in self.parts:
-                raise ValueError(f"Duplicate Part number: {part.number}")
-            part_node_id = part_id(self.graph_id, part.number)
+                count = sum(1 for p in self.parts if p.startswith(part_number))
+                part_number = f"{part_number}_{count + 1}"
+            part_node_id = part_id(self.graph_id, part_number)
             self.parts[part_number] = part_node_id
             self.types[part_node_id] = "Part"
 
         for section in parsed.sections:
-            chapter_number = _normalize_chapter_key(section.chapter)
+            chapter_number = (
+                _normalize_chapter_key(section.chapter) if section.chapter else None
+            )
             section_number = section.number.strip().lower()
-            self._register_chapter(chapter_number)
+            if chapter_number:
+                self._register_chapter(chapter_number)
             key = (chapter_number, section_number)
             if key in self.sections:
-                raise ValueError(
-                    f"Duplicate Section number: Chapter {section.chapter} Section {section.number}"
+                count = sum(
+                    1
+                    for (c, s) in self.sections
+                    if c == key[0] and s.startswith(key[1])
                 )
-            section_node_id = section_id(self.graph_id, chapter_number, section_number)
+                key = (key[0], f"{key[1]}_{count + 1}")
+            section_node_id = (
+                section_id(self.graph_id, chapter_number, key[1])
+                if chapter_number
+                else f"{self.graph_id}_sec{key[1]}"
+            )
             self.sections[key] = section_node_id
             self.types[section_node_id] = "Section"
 
         for subsection in parsed.subsections:
-            chapter_number = _normalize_chapter_key(subsection.chapter)
+            chapter_number = (
+                _normalize_chapter_key(subsection.chapter)
+                if subsection.chapter
+                else None
+            )
             section_number = subsection.section.strip().lower()
             subsection_number = normalize_subsection_number(subsection.number)
             key = (chapter_number, section_number, subsection_number)
             if key in self.subsections:
-                raise ValueError(
-                    "Duplicate Subsection number: "
-                    f"Chapter {subsection.chapter} Section {subsection.section} "
-                    f"Subsection {subsection.number}"
+                count = sum(
+                    1
+                    for (c, s, sub) in self.subsections
+                    if c == key[0] and s == key[1] and sub.startswith(key[2])
                 )
-            if (chapter_number, section_number) not in self.sections:
-                raise ValueError(
-                    f"Subsection {subsection.number} references missing Section "
-                    f"{subsection.section} in Chapter {subsection.chapter}"
-                )
+                key = (key[0], key[1], f"{key[2]}_{count + 1}")
             subsection_node_id = subsection_id(
                 self.graph_id,
                 chapter_number,
                 section_number,
-                subsection_number,
+                key[2],
             )
             self.subsections[key] = subsection_node_id
-            self.types[subsection_node_id] = "Subsection"
+            if (chapter_number, section_number) not in self.sections:
+                matching = [k for k in self.sections if k[0] == chapter_number and k[1].startswith(section_number)]
+                if not matching:
+                    chapter_label = f" in Chapter {subsection.chapter}" if subsection.chapter else ""
+                    raise ValueError(
+                        f"Subsection {subsection.number} references missing Section "
+                        f"{subsection.section}{chapter_label}"
+                    )
 
         for article in parsed.articles:
-            article_id = f"{self.graph_id}_art{article.number}"
-            if article.number in self.articles:
-                raise ValueError(f"Duplicate Article number: {article.number}")
-            self.articles[article.number] = article_id
+            if article.part and article.number in self.articles:
+                part_num = normalize_part_number(article.part)
+                article_id = f"{self.graph_id}_p{part_num}_art{article.number}"
+                article_key = f"p{part_num}_{article.number}"
+            else:
+                article_id = f"{self.graph_id}_art{article.number}"
+                article_key = article.number
+
+            if article_key in self.articles:
+                count = sum(1 for k in self.articles if k.startswith(article_key))
+                article_key = f"{article_key}_{count + 1}"
+                article_id = f"{article_id}_{count + 1}"
+
+            self.articles[article_key] = article_id
             self.types[article_id] = "Article"
             if article.part:
                 part_number = normalize_part_number(article.part)
                 part_node_id = self.parts.get(part_number)
-                if part_node_id is None:
-                    raise ValueError(
-                        f"Article {article.number} references missing Part {article.part}"
-                    )
-                self.article_parts[article_id] = part_node_id
+                if part_node_id is not None:
+                    self.article_parts[article_id] = part_node_id
             if article.chapter:
                 chapter_number = _normalize_chapter_key(article.chapter)
                 self.article_chapters[article_id] = self._register_chapter(
@@ -139,53 +164,56 @@ class StructuralRegistry:
                         article.section.strip().lower(),
                     )
                     section_node_id = self.sections.get(section_key)
-                    if section_node_id is None:
-                        raise ValueError(
-                            f"Article {article.number} references missing Section "
-                            f"{article.section} in Chapter {article.chapter}"
-                        )
+                    if section_node_id is not None:
+                        self.article_sections[article_id] = section_node_id
+                        if article.subsection:
+                            subsection_key = (
+                                chapter_number,
+                                article.section.strip().lower(),
+                                normalize_subsection_number(article.subsection),
+                            )
+                            subsection_node_id = self.subsections.get(subsection_key)
+                            if subsection_node_id is not None:
+                                self.article_subsections[article_id] = subsection_node_id
+            elif article.section:
+                section_key = (None, article.section.strip().lower())
+                section_node_id = self.sections.get(section_key)
+                if section_node_id is not None:
                     self.article_sections[article_id] = section_node_id
                     if article.subsection:
                         subsection_key = (
-                            chapter_number,
+                            None,
                             article.section.strip().lower(),
                             normalize_subsection_number(article.subsection),
                         )
                         subsection_node_id = self.subsections.get(subsection_key)
-                        if subsection_node_id is None:
-                            raise ValueError(
-                                f"Article {article.number} references missing Subsection "
-                                f"{article.subsection} in Section {article.section}"
-                            )
-                        self.article_subsections[article_id] = subsection_node_id
-            elif article.section:
-                raise ValueError(
-                    f"Article {article.number} references Section {article.section} without Chapter"
-                )
-            elif article.subsection:
-                raise ValueError(
-                    f"Article {article.number} references Subsection without Section"
-                )
+                        if subsection_node_id is not None:
+                            self.article_subsections[article_id] = subsection_node_id
+
             for clause in article.clauses:
-                key = (article.number, clause.number)
+                key = (article_key, clause.number)
                 if key in self.clauses:
-                    raise ValueError(
-                        f"Duplicate Clause number: Article {article.number} Clause {clause.number}"
+                    count = sum(
+                        1
+                        for (a, c) in self.clauses
+                        if a == article_key and c.startswith(clause.number)
                     )
-                clause_id = f"{article_id}_cl{clause.number}"
+                    clause_key = f"{clause.number}_{count + 1}"
+                    key = (article_key, clause_key)
+                    clause_id = f"{article_id}_cl{clause_key}"
+                else:
+                    clause_id = f"{article_id}_cl{clause.number}"
+
                 self.clauses[key] = clause_id
                 self.types[clause_id] = "Clause"
                 for point in clause.points:
+                    point_label = point.label.strip().lower()
                     point_key = (
-                        article.number,
+                        article_key,
                         clause.number,
-                        point.label.strip().lower(),
+                        point_label,
                     )
                     point_id = f"{clause_id}_p{normalize_point_label(point.label)}"
-                    if point_key in self.points:
-                        raise ValueError(
-                            f"Duplicate Point: Article {article.number} Clause {clause.number} {point.label}"
-                        )
                     self.points[point_key] = point_id
                     self.types[point_id] = "Point"
 

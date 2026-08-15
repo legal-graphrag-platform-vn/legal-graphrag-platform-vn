@@ -11,7 +11,11 @@ def get_provider() -> BaseProvider:
         from src.pipeline.extraction.providers.gemini_provider import GeminiProvider
 
         return GeminiProvider()
-    elif provider_name in ("minimax", "qwen", "openai", "ollama"):
+    elif provider_name == "ollama":
+        from src.pipeline.extraction.providers.ollama_provider import OllamaProvider
+
+        return OllamaProvider()
+    elif provider_name in ("minimax", "qwen", "openai"):
         from src.pipeline.extraction.providers.openai_provider import OpenAICompatibleProvider
 
         return OpenAICompatibleProvider(provider_type=provider_name)

@@ -18,6 +18,7 @@ from collections import Counter
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Annotated
 
 import typer
@@ -174,6 +175,47 @@ def _read_canonical_source(raw_doc_code: str) -> str:
     if not source_path.is_file():
         raise ValueError(f"Missing canonical source: {source_path}")
     return source_path.read_text(encoding="utf-8")
+
+
+def _read_diagram(raw_doc_code: str, raw_root: Path | None = None) -> dict[str, list[str]] | None:
+    """Đọc diagram.json từ thư mục raw nếu tồn tại để trích xuất quan hệ liên văn bản."""
+    base_raw_dir = raw_root or settings.data_raw_dir
+    raw_doc_dir = (
+        base_raw_dir / raw_doc_code
+        if (base_raw_dir / raw_doc_code).exists()
+        else settings.luatvietnam_raw_dir / raw_doc_code
+    )
+    diagram_path = raw_doc_dir / "diagram.json"
+    if diagram_path.is_file():
+        try:
+            data = json.loads(diagram_path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                groups = data.get("groups")
+                if isinstance(groups, list):
+                    result: dict[str, list[str]] = {}
+                    for group in groups:
+                        if isinstance(group, dict):
+                            label = str(group.get("label") or "").strip()
+                            items = group.get("items") or []
+                            extracted_items: list[str] = []
+                            for item in items:
+                                if isinstance(item, dict):
+                                    title = (
+                                        item.get("title")
+                                        or item.get("text")
+                                        or item.get("number")
+                                    )
+                                    if title:
+                                        extracted_items.append(str(title).strip())
+                                elif isinstance(item, str) and item.strip():
+                                    extracted_items.append(item.strip())
+                            if label and extracted_items:
+                                result[label] = extracted_items
+                    return result
+                return data
+        except Exception as exc:
+            logger.warning("Không thể đọc diagram.json cho %s: %s", raw_doc_code, exc)
+    return None
 
 
 def _write_parse_artifacts(
@@ -483,6 +525,7 @@ def extract(
             raw_doc_code=raw_doc_code,
             article_numbers=selected,
             source_text=_read_canonical_source(raw_doc_code),
+            diagram=_read_diagram(raw_doc_code),
         )
     except (ExtractionProviderError, ValueError) as exc:
         typer.echo(f"Extraction blocked: {exc}", err=True)
@@ -526,6 +569,7 @@ def normalize_extraction(
             provider_calls_allowed=False,
             article_numbers=selected,
             source_text=_read_canonical_source(raw_doc_code),
+            diagram=_read_diagram(raw_doc_code),
         )
     except (ExtractionProviderError, ValueError) as exc:
         typer.echo(f"Extraction normalization blocked: {exc}", err=True)
@@ -1169,7 +1213,7 @@ def batch_parse(
     raw_dir: Annotated[
         Path, typer.Option(help="Thư mục lưu trữ dataset thô")
     ] = settings.luatvietnam_raw_dir,
-    workers: Annotated[int, typer.Option(min=1, max=32, help="Số lượng luồng xử lý song song")] = 4,
+    workers: Annotated[int, typer.Option(min=1, max=128, help="Số lượng luồng xử lý song song")] = 4,
     retry_failed: Annotated[bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")] = False,
     limit: Annotated[int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")] = None,
 ) -> None:
@@ -1227,6 +1271,9 @@ def batch_extract(
     raw_dir: Annotated[
         Path, typer.Option(help="Thư mục lưu trữ dataset thô")
     ] = settings.luatvietnam_raw_dir,
+    workers: Annotated[
+        int, typer.Option(help="Số lượng văn bản xử lý song song", min=1, max=32)
+    ] = 4,
     retry_failed: Annotated[bool, typer.Option(help="Chạy lại các văn bản từng gặp lỗi")] = False,
     limit: Annotated[int | None, typer.Option(help="Giới hạn số lượng văn bản xử lý (vd: --limit 3 để test)")] = None,
 ) -> None:
@@ -1250,12 +1297,8 @@ def batch_extract(
         typer.echo("Tất cả văn bản đã extract tri thức xong.")
         return
 
-    success_count = 0
-    fail_count = 0
-
-    for code in pending_codes:
+    def _extract_single_doc(code: str) -> bool:
         try:
-            # Đảm bảo văn bản đã được parse trước
             processed_dir = _processed_dir(code)
             hierarchy_path = processed_dir / "hierarchy.json"
             if not hierarchy_path.exists():
@@ -1268,19 +1311,40 @@ def batch_extract(
             source_file = raw_doc_dir / "source.txt"
             source_text = source_file.read_text(encoding="utf-8") if source_file.exists() else None
 
-            # Chạy pipeline orchestrator cho văn bản
+            diagram = _read_diagram(code, raw_root=raw_dir)
             run_pipeline(
                 parsed,
                 settings.data_processed_dir,
                 raw_doc_code=code,
                 source_text=source_text,
+                diagram=diagram,
             )
-            success_count += 1
             record_doc_status(code, step="extract", status="SUCCESS")
+            typer.echo(f"Extract thành công [{code}]")
+            return True
         except Exception as exc:
-            fail_count += 1
             typer.echo(f"Lỗi extract [{code}]: {exc}", err=True)
             record_doc_status(code, step="extract", status="FAILED", error=str(exc))
+            return False
+
+    success_count = 0
+    fail_count = 0
+
+    if workers == 1:
+        for code in pending_codes:
+            if _extract_single_doc(code):
+                success_count += 1
+            else:
+                fail_count += 1
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_code = {executor.submit(_extract_single_doc, code): code for code in pending_codes}
+            for future in as_completed(future_to_code):
+                if future.result():
+                    success_count += 1
+                else:
+                    fail_count += 1
+
     typer.echo(f"Hoàn thành Batch Extract. Thành công: {success_count}, Thất bại: {fail_count}")
 
 
@@ -1422,7 +1486,14 @@ def ingest_folder(
                     raw_doc_dir = base_raw_dir / code if (base_raw_dir / code).exists() else settings.data_raw_dir / code
                     source_file = raw_doc_dir / "source.txt"
                     source_text = source_file.read_text(encoding="utf-8") if source_file.exists() else None
-                    run_pipeline(parsed, settings.data_processed_dir, raw_doc_code=code, source_text=source_text)
+                    diagram = _read_diagram(code, raw_root=base_raw_dir)
+                    run_pipeline(
+                        parsed,
+                        settings.data_processed_dir,
+                        raw_doc_code=code,
+                        source_text=source_text,
+                        diagram=diagram,
+                    )
 
                 # Write Neo4j
                 if write_neo4j:

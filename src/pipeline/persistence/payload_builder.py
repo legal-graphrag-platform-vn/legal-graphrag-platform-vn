@@ -130,7 +130,7 @@ def build_graph_payload(
     sections_by_key = {
         (
             normalize_part_number(section.part) if section.part else None,
-            normalize_chapter_number(section.chapter),
+            normalize_chapter_number(section.chapter) if section.chapter else None,
             normalize_section_number(section.number),
         ): section
         for section in parsed.sections
@@ -138,7 +138,7 @@ def build_graph_payload(
     subsections_by_key = {
         (
             normalize_part_number(subsection.part) if subsection.part else None,
-            normalize_chapter_number(subsection.chapter),
+            normalize_chapter_number(subsection.chapter) if subsection.chapter else None,
             normalize_section_number(subsection.section),
             normalize_subsection_number(subsection.number),
         ): subsection
@@ -255,8 +255,68 @@ def build_graph_payload(
                             {},
                         )
                     parent_id = subsection_node_id
+        elif article.section:
+            section_key = (
+                normalized_part,
+                None,
+                normalize_section_number(article.section),
+            )
+            section = sections_by_key.get(section_key)
+            if section is not None:
+                section_node_id = f"{document_node['id']}_sec{normalize_section_number(article.section)}"
+                structural_ids[section_node_id] = section_node_id
+                if section_node_id not in nodes:
+                    _add_node(
+                        nodes,
+                        {
+                            "type": "Section",
+                            "id": section_node_id,
+                            "number": str(section.number),
+                            "title": section.title,
+                        },
+                    )
+                    _add_relation(
+                        relations, parent_id, "CONTAINS", section_node_id, {}
+                    )
+                parent_id = section_node_id
+                if article.subsection:
+                    subsection_key = (
+                        *section_key,
+                        normalize_subsection_number(article.subsection),
+                    )
+                    subsection = subsections_by_key.get(subsection_key)
+                    if subsection is not None:
+                        subsection_node_id = f"{section_node_id}_subsec{normalize_subsection_number(article.subsection)}"
+                        structural_ids[subsection_node_id] = subsection_node_id
+                        if subsection_node_id not in nodes:
+                            _add_node(
+                                nodes,
+                                {
+                                    "type": "Subsection",
+                                    "id": subsection_node_id,
+                                    "number": str(subsection.number),
+                                    "title": subsection.title,
+                                },
+                            )
+                            _add_relation(
+                                relations,
+                                section_node_id,
+                                "CONTAINS",
+                                subsection_node_id,
+                                {},
+                            )
+                        parent_id = subsection_node_id
 
-        article_id = f"{document_node['id']}_art{article.number}"
+        if article.part and f"{document_node['id']}_art{article.number}" in nodes:
+            part_num = normalize_part_number(article.part)
+            article_id = f"{document_node['id']}_p{part_num}_art{article.number}"
+        else:
+            article_id = f"{document_node['id']}_art{article.number}"
+
+        if article_id in nodes:
+            count = sum(1 for n in nodes if n.startswith(article_id))
+            article_id = f"{article_id}_{count + 1}"
+
         structural_ids[article_id] = article_id
         _add_node(
             nodes,
@@ -275,6 +335,9 @@ def build_graph_payload(
 
         for clause in article.clauses:
             clause_id = f"{article_id}_cl{clause.number}"
+            if clause_id in nodes:
+                count = sum(1 for n in nodes if n.startswith(clause_id))
+                clause_id = f"{clause_id}_{count + 1}"
             structural_ids[clause_id] = clause_id
             _add_node(
                 nodes,
