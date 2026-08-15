@@ -1,8 +1,8 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.10.0
-> **Frozen date**: 2026-08-10
+> **Version**: 1.11.0
+> **Frozen date**: 2026-08-15
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
 This file is the only source of truth for graph labels, relation names, required properties, and validation boundaries.
@@ -161,8 +161,11 @@ The exact Phase 1 `CONTAINS` pairs are:
 ```text
 Document   -> Part
 Document   -> Chapter
+Document   -> Section
 Document   -> Article
 Part       -> Chapter
+Part       -> Section
+Part       -> Article
 Chapter    -> Section
 Chapter    -> Article
 Section    -> Subsection
@@ -172,13 +175,15 @@ Article    -> Clause
 Clause     -> Point
 ```
 
-These pairs produce seven canonical parent chains to `Article`: with or without
-`Part`, with direct Chapter Articles or `Section`, and with direct Section
-Articles or `Subsection`. `Document -> Article` remains valid. Invalid shortcuts
-include `Document -> Section`, `Part -> Article`, and `Chapter -> Subsection`.
-Every structural descendant has exactly one direct canonical parent. Each
-`Document` and `Section` uses one child mode; alternatives are not mixed under
-the same concrete parent. A `Chapter` may mix direct `Article` children with
+These pairs produce the canonical parent chains observed in the corpus: with or
+without `Part` or `Chapter`, and with direct Section Articles or `Subsection` descendants.
+`Document -> Article` remains valid. Corpus-evidenced direct Section parents are
+`Document -> Section` and `Part -> Section`; `Part -> Article` is also valid when
+a Part contains Articles without an intermediate Chapter. `Chapter -> Subsection`
+and `Document -> Subsection` remain invalid shortcuts. Every structural descendant
+has exactly one direct canonical parent. Packaging documents may mix direct
+`Article` children with `Part`, `Chapter`, or `Section` children, and a `Part` may
+mix direct Articles with its grouping children. A `Chapter` may mix direct `Article` children with
 `Section` children only for preamble Articles: every direct Article number must
 sort before every Article number contained by the Chapter's Sections. A direct
 Article at or after the first Section Article is invalid.
@@ -302,8 +307,8 @@ Any current pipeline, test, prompt, or repository code that emits a legacy alias
 | `Document.id` | snake-case slug | `ldn_2020` |
 | `Part.id` | `{doc_id}_part{normalized_part}` | `nd34_2016_part2` |
 | `Chapter.id` | `{doc_id}_ch{N}` | `ldn_2020_ch2` |
-| `Section.id` | `{doc_id}_ch{N}_sec{M}` | `ldn_2020_ch3_sec1` |
-| `Subsection.id` | `{doc_id}_ch{N}_sec{M}_subsec{K}` | `nd34_2016_ch5_sec3_subsec1` |
+| `Section.id` | `{doc_id}_ch{N}_sec{M}` when under Chapter; `{doc_id}_sec{M}` when no Chapter exists | `ldn_2020_ch3_sec1`, `ttlt178_2015_sec1` |
+| `Subsection.id` | `{section_id}_subsec{K}` | `ttlt178_2015_sec1_subsec1`, `nd34_2016_ch5_sec3_subsec1` |
 | `Article.id` | `{doc_id}_art{N}` | `ldn_2020_art17` |
 | `Clause.id` | `{doc_id}_art{N}_cl{K}` | `ldn_2020_art17_cl1` |
 | `Point.id` | `{doc_id}_art{N}_cl{K}_p{letter}` | `ldn_2020_art17_cl1_pa` |
@@ -402,3 +407,4 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.8.1 | 2026-08-08 | Allowed direct preamble Articles before Section Articles within the same Chapter while retaining ordered mixed-mode validation | ADR-28 and BLHS 2015 Chapter XXIII |
 | 1.9.0 | 2026-08-10 | Synchronized executable metadata fields, reserved optional Point temporal fields, and fail-closed deterministic diagram relation provenance | ADR-29 |
 | 1.10.0 | 2026-08-12 | Extended `AMENDS` and `REPEALS` to the smallest evidenced structural unit, including `Point`; unresolved provider endpoints remain outside graph persistence | ADR-32 |
+| 1.11.0 | 2026-08-15 | Added corpus-evidenced `Document -> Section`, `Part -> Section`, `Part -> Article`, and packaging-document mixed root structure | ADR-33 |

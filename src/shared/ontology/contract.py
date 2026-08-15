@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 
-ONTOLOGY_VERSION = "1.10.0"
+ONTOLOGY_VERSION = "1.11.0"
 
 
 DOCUMENT_TYPES: set[str] = {
@@ -134,8 +134,11 @@ CONSTRAINTS: dict[str, dict[str, Any]] = {
         "valid_pairs": [
             ("Document", "Part"),
             ("Document", "Chapter"),
+            ("Document", "Section"),
             ("Document", "Article"),
             ("Part", "Chapter"),
+            ("Part", "Section"),
+            ("Part", "Article"),
             ("Chapter", "Section"),
             ("Chapter", "Article"),
             ("Section", "Subsection"),

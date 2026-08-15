@@ -30,8 +30,9 @@ uv run python -m src.pipeline.main graph-quality --raw-doc-code L59_2020
 uv run python -m pytest src/pipeline/tests/ -v
 ```
 
-`Mục` is persisted as `Section` under its `Chapter` when the canonical source
-contains a verified heading and legal title. Existing processed artifacts do
+`Mục` is persisted as `Section` under its direct canonical parent: `Document`,
+`Part`, or `Chapter`, when the canonical source contains a verified heading and
+legal title. Existing processed artifacts do
 not migrate automatically: re-run `parse`, normalization, payload validation,
 and `write` for curated ready documents. The write command verifies each new
 `Chapter -> Section -> Article` chain before removing its exact legacy direct
@@ -90,7 +91,7 @@ Mỗi bundle chạy trong một Neo4j transaction; sau commit, attempt ledger đ
 append + fsync trước khi checkpoint được CAS sang `WRITTEN`. Target thiếu, sai
 ownership, mơ hồ hoặc xung đột target cũ không tạo node/cạnh giả.
 
-Ontology v1.10.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
+Ontology v1.11.0 còn nhận `DIAGRAM` như nguồn deterministic cho quan hệ
 Document-level `AMENDS`, `REPEALS`, `REPLACES`, và `GUIDES`. Diagram category
 phải map bằng bảng explicit, target phải resolve qua canonical registry, và
 relation vẫn phải qua required-property, temporal, whitelist và consistency

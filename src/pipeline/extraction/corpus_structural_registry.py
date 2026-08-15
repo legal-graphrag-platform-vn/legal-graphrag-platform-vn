@@ -54,8 +54,11 @@ ALLOWED_CONTAINS_PAIRS = frozenset(
     {
         ("Document", "Part"),
         ("Document", "Chapter"),
+        ("Document", "Section"),
         ("Document", "Article"),
         ("Part", "Chapter"),
+        ("Part", "Section"),
+        ("Part", "Article"),
         ("Chapter", "Section"),
         ("Chapter", "Article"),
         ("Section", "Subsection"),
@@ -454,13 +457,13 @@ def publish_registry_build(build: RegistryBuild, root: Path) -> Path:
     temporary_pointer = root / f".current_reference_registry.{os.getpid()}.tmp"
     if temporary_pointer.exists() or temporary_pointer.is_symlink():
         temporary_pointer.unlink()
-    
+
     target_rel = Path("builds") / build.receipt.build_id
     try:
         temporary_pointer.symlink_to(target_rel)
     except OSError:
         temporary_pointer.write_text(str(target_rel.as_posix()), encoding="utf-8")
-        
+
     os.replace(temporary_pointer, pointer)
     _fsync_directory(root)
     return build_dir
@@ -567,29 +570,55 @@ def structural_lookup_key(
             raise RegistryError("Chapter lookup requires chapter_number")
         return (document_id, unit_type, normalize_chapter_number(chapter_number))
     if unit_type == "Section":
-        if chapter_number is None or section_number is None:
-            raise RegistryError("Section lookup requires chapter and section")
-        return (
-            document_id,
-            unit_type,
-            normalize_chapter_number(chapter_number),
-            normalize_section_number(section_number),
-        )
+        if section_number is None:
+            raise RegistryError("Section lookup requires section_number")
+        normalized_section = normalize_section_number(section_number)
+        if chapter_number is not None:
+            return (
+                document_id,
+                unit_type,
+                normalize_chapter_number(chapter_number),
+                normalized_section,
+            )
+        if part_number is not None:
+            return (
+                document_id,
+                unit_type,
+                "part",
+                normalize_part_number(part_number),
+                normalized_section,
+            )
+        return (document_id, unit_type, "document", normalized_section)
     if unit_type == "Subsection":
-        if (
-            chapter_number is None
-            or section_number is None
-            or subsection_number is None
-        ):
+        if section_number is None or subsection_number is None:
             raise RegistryError(
-                "Subsection lookup requires chapter, section, and subsection"
+                "Subsection lookup requires section_number and subsection_number"
+            )
+        normalized_section = normalize_section_number(section_number)
+        normalized_subsection = normalize_subsection_number(subsection_number)
+        if chapter_number is not None:
+            return (
+                document_id,
+                unit_type,
+                normalize_chapter_number(chapter_number),
+                normalized_section,
+                normalized_subsection,
+            )
+        if part_number is not None:
+            return (
+                document_id,
+                unit_type,
+                "part",
+                normalize_part_number(part_number),
+                normalized_section,
+                normalized_subsection,
             )
         return (
             document_id,
             unit_type,
-            normalize_chapter_number(chapter_number),
-            normalize_section_number(section_number),
-            normalize_subsection_number(subsection_number),
+            "document",
+            normalized_section,
+            normalized_subsection,
         )
     if unit_type == "Article":
         if article_number is None:

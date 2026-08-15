@@ -1656,3 +1656,43 @@ Point có thể sửa đổi hoặc bãi bỏ Point của văn bản khác. Onto
   target xuất hiện sẽ resolve candidate cũ.
 - `UNRESOLVED`, `AMBIGUOUS`, `NOT_APPLICABLE` không được đưa vào Neo4j.
 - Artifact ontology 1.9.x cần regenerate trước khi ghi theo contract 1.10.0.
+
+---
+
+## ADR-33: Mục trực thuộc Văn bản hoặc Phần
+
+**Ngày**: 2026-08-15
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Corpus mở rộng có văn bản dùng `Mục` mà không có `Chương`. Hai cấu trúc đã được
+đối chiếu trực tiếp với canonical `source.txt`:
+
+- Thông tư liên tịch 178/2015 tổ chức `Document -> Section -> Article`.
+- Quyết định 113/2008/QĐ-TTg gồm ba Điều của Quyết định và Quy chế kèm theo.
+  Quy chế có cả `Part -> Article` và `Part -> Section -> Article`.
+
+Ontology 1.10.0 chỉ cho `Chapter -> Section`, nên parser có thể khôi phục đúng
+nguồn nhưng payload bị write gate từ chối.
+
+### Quyết định
+
+1. Ontology 1.11.0 thêm các cặp `CONTAINS` đã có bằng chứng:
+   `Document -> Section`, `Part -> Section` và `Part -> Article`.
+2. Không mở các shortcut `Chapter -> Subsection` hoặc `Document -> Subsection`.
+3. `Document` đóng gói văn bản chủ và quy chế/phụ lục kèm theo được phép có
+   direct Article cùng các grouping child. `Part` cũng được phép dùng Chapter,
+   Section hoặc direct Article theo nguồn. Mỗi structural node vẫn có đúng một
+   canonical parent; confidence không được nới quy tắc này.
+4. Không thay đổi parser hoặc quy tắc sinh ID trong migration này. Shared
+   ontology validator, payload consistency validator và corpus registry phải
+   chấp nhận cùng endpoint contract trước mọi Neo4j `MERGE`.
+
+### Hệ quả
+
+- Artifact ontology 1.10.x không tự tương thích với 1.11.0; phải parse và
+  regenerate payload/registry trước khi write dữ liệu mới.
+- Neo4j bootstrap không cần constraint hoặc index mới vì label `Section` và
+  relation `CONTAINS` đã tồn tại. Endpoint validity tiếp tục do application
+  write gate enforce trong Neo4j Community Edition.

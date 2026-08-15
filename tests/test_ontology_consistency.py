@@ -132,6 +132,9 @@ class OntologyConsistencyTests(unittest.TestCase):
         cases = [
             ("Document", "ISSUED_BY", "Issuer", {}),
             ("Document", "CONTAINS", "Chapter", {}),
+            ("Document", "CONTAINS", "Section", {}),
+            ("Part", "CONTAINS", "Section", {}),
+            ("Part", "CONTAINS", "Article", {}),
             ("Chapter", "CONTAINS", "Section", {}),
             ("Section", "CONTAINS", "Article", {}),
             ("Chapter", "CONTAINS", "Article", {}),

@@ -15,7 +15,10 @@ from src.shared.ontology.hierarchy import legal_number_sort_key
 STRUCTURAL_PAIRS = {
     ("Document", "Part"),
     ("Document", "Chapter"),
+    ("Document", "Section"),
     ("Part", "Chapter"),
+    ("Part", "Section"),
+    ("Part", "Article"),
     ("Chapter", "Section"),
     ("Chapter", "Article"),
     ("Section", "Subsection"),
@@ -36,7 +39,6 @@ STRUCTURAL_LABELS = {
     "Point",
 }
 GROUPING_CHILD_MODES = {
-    "Document": {"Part", "Chapter", "Article"},
     "Chapter": {"Section", "Article"},
     "Section": {"Subsection", "Article"},
 }
