@@ -45,8 +45,14 @@ class SourceContext(BaseModel):
     clause_id: str | None = None
     point_id: str | None = None
     source_unit_id: str
-    source_start_char: int = Field(ge=0)
-    source_end_char: int = Field(ge=0)
+    source_start_char: int | None = Field(default=None, ge=0)
+    source_end_char: int | None = Field(default=None, ge=0)
+
+    @model_validator(mode="after")
+    def validate_coordinate_pair(self) -> "SourceContext":
+        if (self.source_start_char is None) != (self.source_end_char is None):
+            raise ValueError("Source context coordinates must be present as a pair")
+        return self
 
 
 class ReferenceMention(BaseModel):
@@ -68,6 +74,8 @@ class ResolvedReference(BaseModel):
     resolution_method: ResolutionMethod
     reason_code: str
     registry_evidence: "RegistryResolutionEvidence | None" = None
+    registry_evidences: tuple["RegistryResolutionEvidence", ...] = ()
+    projection_evidence: "ProjectionEvidence | None" = None
 
     @model_validator(mode="after")
     def validate_self_reference_contract(self) -> "ResolvedReference":
@@ -82,6 +90,13 @@ class ResolvedReference(BaseModel):
                 "is_self_reference must be derived from resolved endpoint identity"
             )
         return self
+
+    def all_registry_evidences(self) -> tuple["RegistryResolutionEvidence", ...]:
+        """Return the v2 evidence collection with v1 checkpoint compatibility."""
+
+        if self.registry_evidences:
+            return self.registry_evidences
+        return (self.registry_evidence,) if self.registry_evidence is not None else ()
 
 
 class StructuralTargetCandidate(BaseModel):
@@ -163,6 +178,18 @@ class RegistryResolutionEvidence(BaseModel):
     target_type: str
     target_document_id: str
     target_ancestor_ids: tuple[str, ...]
+
+
+class ProjectionEvidence(BaseModel):
+    """Host-coordinate proof for a relation whose legal source is projected."""
+
+    host_document_id: str
+    host_source_unit_id: str
+    host_source_type: str
+    host_source_ancestor_ids: tuple[str, ...]
+    host_source_char_start: int = Field(ge=0)
+    host_source_char_end: int = Field(ge=0)
+    projection_basis_candidate_id: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -262,11 +289,15 @@ class StructuralReferenceResolver:
         source_text: str,
         corpus_registry: CorpusStructuralRegistry | None = None,
         registry_receipt: RegistryBuildReceipt | None = None,
+        excluded_source_spans: tuple[tuple[int, int], ...] = (),
     ) -> None:
         self.registry = registry
         self.source_text = canonicalize_source_text(source_text)
         self.corpus_registry = corpus_registry
         self.registry_receipt = registry_receipt
+        self.excluded_source_spans = tuple(
+            sorted(_validate_source_spans(excluded_source_spans, len(self.source_text)))
+        )
         if (corpus_registry is None) != (registry_receipt is None):
             raise ValueError(
                 "corpus_registry and registry_receipt must be provided together"
@@ -314,6 +345,15 @@ class StructuralReferenceResolver:
         for pattern, handler in patterns:
             for match in pattern.finditer(text):
                 local_span = match.span()
+                source_span = (
+                    segment.start + local_span[0],
+                    segment.start + local_span[1],
+                )
+                if any(
+                    _overlaps(source_span, excluded)
+                    for excluded in self.excluded_source_spans
+                ):
+                    continue
                 if (
                     pattern is _EXPLICIT_ARTICLE
                     and segment.start + match.start()
@@ -579,9 +619,12 @@ class StructuralReferenceResolver:
     def _resolve_explicit_point(
         self, mention: ReferenceMention, match: re.Match[str]
     ) -> ResolvedReference:
+        article_key = self._reference_article_key(
+            mention, match.group("article").lower()
+        )
         target = self.registry.points.get(
             (
-                match.group("article").lower(),
+                article_key or "",
                 match.group("clause").lower(),
                 match.group("label").lower(),
             )
@@ -591,9 +634,11 @@ class StructuralReferenceResolver:
     def _resolve_explicit_clauses(
         self, mention: ReferenceMention, match: re.Match[str]
     ) -> ResolvedReference:
-        article_number = match.group("article").lower()
+        article_key = self._reference_article_key(
+            mention, match.group("article").lower()
+        )
         targets = tuple(
-            self.registry.clauses.get((article_number, clause_number)) or ""
+            self.registry.clauses.get((article_key or "", clause_number)) or ""
             for clause_number in _clause_numbers(match)
         )
         if not targets or any(not target for target in targets):
@@ -603,11 +648,11 @@ class StructuralReferenceResolver:
     def _resolve_clause_current_article(
         self, mention: ReferenceMention, match: re.Match[str]
     ) -> ResolvedReference:
-        article_number = self.registry.article_number_for_id(
+        article_key = self.registry.article_key_for_id(
             mention.source_context.article_id
         )
         target = self.registry.clauses.get(
-            (article_number or "", match.group("clause").lower())
+            (article_key or "", match.group("clause").lower())
         )
         return _resolved_or_missing(
             mention, target, "current_article_clause_target_missing"
@@ -632,11 +677,37 @@ class StructuralReferenceResolver:
     def _resolve_explicit_article(
         self, mention: ReferenceMention, match: re.Match[str]
     ) -> ResolvedReference:
-        target = self.registry.articles.get(match.group("article").lower())
+        article_key = self._reference_article_key(
+            mention, match.group("article").lower()
+        )
+        target = self.registry.articles.get(article_key or "")
         return _resolved_or_missing(mention, target, "explicit_article_target_missing")
 
+    def _reference_article_key(
+        self, mention: ReferenceMention, article_number: str
+    ) -> str | None:
+        candidates = self.registry.article_ids_for_number(article_number)
+        if len(candidates) == 1:
+            return self.registry.article_key_for_id(candidates[0])
+        current_part = self.registry.part_for_article_id(
+            mention.source_context.article_id
+        )
+        same_part = tuple(
+            article_id
+            for article_id in candidates
+            if self.registry.part_for_article_id(article_id) == current_part
+        )
+        if current_part is not None and len(same_part) == 1:
+            return self.registry.article_key_for_id(same_part[0])
+        return None
+
     def _article_segments(self, article: Article) -> list[_UnitSegment]:
-        article_id = self.registry.articles[article.number]
+        article_id = self.registry.article_id_for_model(article)
+        if article_id is None:
+            raise ValueError(f"Article is not registered: {article.number}")
+        article_key = self.registry.article_key_for_id(article_id)
+        if article_key is None:
+            raise ValueError(f"Article key is not registered: {article_id}")
         segments: list[_UnitSegment] = []
         clause_intervals = [
             (clause.source_start_char, clause.source_end_char)
@@ -659,7 +730,7 @@ class StructuralReferenceResolver:
                 )
             )
         for clause in article.clauses:
-            clause_id = self.registry.clauses[(article.number, clause.number)]
+            clause_id = self.registry.clauses[(article_key, clause.number)]
             point_intervals = [
                 (point.source_start_char, point.source_end_char)
                 for point in clause.points
@@ -678,7 +749,7 @@ class StructuralReferenceResolver:
                 )
             for point in clause.points:
                 point_id = self.registry.points[
-                    (article.number, clause.number, point.label.strip().lower())
+                    (article_key, clause.number, point.label.strip().lower())
                 ]
                 segments.append(
                     _UnitSegment(
@@ -784,6 +855,17 @@ def _unresolved(
 
 def _overlaps(left: tuple[int, int], right: tuple[int, int]) -> bool:
     return left[0] < right[1] and right[0] < left[1]
+
+
+def _validate_source_spans(
+    spans: tuple[tuple[int, int], ...], source_length: int
+) -> tuple[tuple[int, int], ...]:
+    validated: list[tuple[int, int]] = []
+    for start, end in spans:
+        if start < 0 or end <= start or end > source_length:
+            raise ValueError(f"Invalid excluded source span: ({start}, {end})")
+        validated.append((start, end))
+    return tuple(validated)
 
 
 def _subtract_intervals(

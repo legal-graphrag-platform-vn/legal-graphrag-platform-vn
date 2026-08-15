@@ -178,6 +178,39 @@ c) Phải thực hiện các điểm a, b, d và đ khoản này.
     )
 
 
+def test_provider_owned_span_is_not_resolved_again_by_generic_rules() -> None:
+    text = "Điều 1. Dẫn chiếu\n1. Thực hiện theo [Điều 2].\nĐiều 2. Quy định\n"
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+    start = text.index("[Điều 2]")
+
+    references = StructuralReferenceResolver(
+        registry,
+        text,
+        excluded_source_spans=((start, start + len("[Điều 2]")),),
+    ).resolve_article(parsed.articles[0])
+
+    assert references == []
+
+
+def test_resolver_uses_part_scoped_article_key_for_clause_segments() -> None:
+    text = (
+        "Phần thứ nhất\nQUY ĐỊNH\n"
+        "Điều 1. Nội dung\n1. Nội dung phần một.\n"
+        "Phần thứ hai\nQUY ĐỊNH KHÁC\n"
+        "Điều 1. Nội dung khác\n1. Thực hiện theo Điều 1.\n"
+    )
+    parsed = parse_text(text, _document())
+    registry = StructuralRegistry.from_parsed_document(parsed, "L59_2020")
+
+    references = StructuralReferenceResolver(registry, text).resolve_article(
+        parsed.articles[1]
+    )
+
+    assert len(references) == 1
+    assert references[0].target_unit_ids == ("ldn_2020_p2_art1",)
+
+
 def test_missing_one_target_rejects_the_whole_reference() -> None:
     text = """Điều 1. Trách nhiệm
 1. Khoản

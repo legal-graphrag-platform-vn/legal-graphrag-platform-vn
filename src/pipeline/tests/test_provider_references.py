@@ -12,10 +12,14 @@ from src.pipeline.extraction.provider_references import (
     load_provider_references,
 )
 from src.pipeline.extraction.provider_identity_index import (
+    _smallest_structural_endpoint,
     build_luatvietnam_identity_indexes,
 )
+from src.pipeline.extraction.structural_context import StructuralRegistry
 from src.pipeline.extraction.provider_relation_candidates import (
+    ProviderRelationCandidateV1,
     build_provider_relation_candidates,
+    provider_owned_source_spans,
 )
 from src.pipeline.parser.hierarchy_parser import parse_text
 from src.pipeline.parser.models import DocumentInfo
@@ -82,6 +86,85 @@ def test_ensure_sidecar_fails_when_html_serialization_differs_from_source(
         ProviderReferenceSidecarError, match="does not match canonical source"
     ):
         ensure_luatvietnam_reference_sidecar(raw_dir)
+
+
+def test_provider_item_can_resolve_to_section_endpoint() -> None:
+    source = "Mục 1. Quy định chung\nĐiều 1. Nội dung\n"
+    parsed = parse_text(
+        source,
+        DocumentInfo(
+            id="l_test",
+            title="Luật thử nghiệm",
+            number="1/2020/QH14",
+            doc_type="Law",
+        ),
+    )
+    registry = StructuralRegistry.from_parsed_document(parsed, "LTV_1")
+
+    endpoint = _smallest_structural_endpoint(
+        parsed,
+        registry,
+        source.index("Mục 1"),
+        source.index("Mục 1") + len("Mục 1. Quy định chung"),
+    )
+
+    assert endpoint == ("l_test_sec1", "Section")
+
+
+def test_provider_item_can_resolve_to_chapter_heading() -> None:
+    source = "Chương II\nQUY ĐỊNH CHUNG\nĐiều 1. Nội dung\n"
+    parsed = parse_text(
+        source,
+        DocumentInfo(
+            id="l_test",
+            title="Luật thử nghiệm",
+            number="1/2020/QH14",
+            doc_type="Law",
+        ),
+    )
+    registry = StructuralRegistry.from_parsed_document(parsed, "LTV_1")
+    heading_end = source.index("Điều 1")
+
+    endpoint = _smallest_structural_endpoint(
+        parsed,
+        registry,
+        0,
+        heading_end,
+        source_text=source,
+    )
+
+    assert endpoint == ("l_test_ch2", "Chapter")
+
+
+def test_provider_owned_spans_reject_stale_candidate_even_when_unresolved() -> None:
+    source = "Điều 1. Theo [Điều 2]."
+    start = source.index("[Điều 2]")
+    mention = ProviderReferenceMentionV1(
+        contract_version="provider-reference-mention-v1",
+        provider="luatvietnam",
+        provider_source_document_id="100",
+        provider_target_document_id="200",
+        provider_link_type="REFERENCE",
+        citation_text="Điều 2",
+        source_char_start=start + 1,
+        source_char_end=start + len("[Điều 2]"),
+    )
+    candidate = ProviderRelationCandidateV1(
+        candidate_id="stale-provider-candidate",
+        provider_relation_id=None,
+        relation_candidate="REFERS_TO",
+        source_ownership="HOST",
+        host_source_id=None,
+        canonical_source_id=None,
+        canonical_source_type=None,
+        status="UNRESOLVED",
+        reason_code="target_document_not_in_corpus",
+        evidence=source,
+        reference=mention,
+    )
+
+    with pytest.raises(ValueError, match="source span drift"):
+        provider_owned_source_spans((candidate,), source)
 
 
 def test_change_content_candidate_resolves_local_source_and_defers_missing_target() -> (
@@ -196,11 +279,99 @@ def test_reference_without_item_id_resolves_to_existing_document() -> None:
         source,
         (reference,),
         provider_document_index={("luatvietnam", "186730"): "nd_82_2020"},
+        provider_document_number_index={("luatvietnam", "186730"): "82/2020/NĐ-CP"},
     )[0]
 
     assert candidate.status == "RESOLVED"
     assert candidate.canonical_target_ids == ("nd_82_2020",)
     assert candidate.canonical_target_types == ("Document",)
+
+
+def test_provider_items_mapping_to_same_unit_are_canonicalized_once() -> None:
+    source = "Điều 1. Dẫn chiếu\n1. Thực hiện theo [điểm a và điểm b]."
+    marker_start = source.index("[điểm a")
+    parsed = parse_text(
+        source,
+        DocumentInfo(
+            id="source_doc",
+            title="Văn bản nguồn",
+            number="1/2024/NĐ-CP",
+            doc_type="Decree",
+        ),
+    )
+    reference = ProviderReferenceMentionV1(
+        contract_version="provider-reference-mention-v1",
+        provider="luatvietnam",
+        provider_source_document_id="100",
+        provider_target_document_id="200",
+        provider_target_item_ids=("11", "12"),
+        provider_link_type="REFERENCE",
+        citation_text="điểm a và điểm b",
+        source_char_start=marker_start,
+        source_char_end=marker_start + len("[điểm a và điểm b]"),
+    )
+
+    candidate = build_provider_relation_candidates(
+        parsed,
+        source,
+        (reference,),
+        provider_document_index={("luatvietnam", "200"): "target_doc"},
+        provider_unit_index={
+            ("luatvietnam", "200", "11"): ("target_doc_art1_cl1", "Clause"),
+            ("luatvietnam", "200", "12"): ("target_doc_art1_cl1", "Clause"),
+        },
+    )[0]
+
+    assert candidate.status == "RESOLVED"
+    assert candidate.canonical_target_ids == ("target_doc_art1_cl1",)
+    assert candidate.canonical_target_types == ("Clause",)
+    assert candidate.reference.provider_target_item_ids == ("11", "12")
+
+
+def test_explicit_document_number_conflict_fails_closed() -> None:
+    source = (
+        "Điều 1. Dẫn chiếu\n"
+        "1. Thực hiện theo [Khoản 11 Điều 9 Nghị định số 187/2013/NĐ-CP]."
+    )
+    marker_start = source.index("[Khoản 11")
+    parsed = parse_text(
+        source,
+        DocumentInfo(
+            id="nd_17_2020",
+            title="Nghị định 17",
+            number="17/2020/NĐ-CP",
+            doc_type="Decree",
+        ),
+    )
+    reference = ProviderReferenceMentionV1(
+        contract_version="provider-reference-mention-v1",
+        provider="luatvietnam",
+        provider_source_document_id="180465",
+        provider_target_document_id="106761",
+        provider_target_item_ids=("92427",),
+        provider_link_type="REFERENCE",
+        citation_text="Khoản 11 Điều 9 Nghị định số 187/2013/NĐ-CP",
+        source_char_start=marker_start,
+        source_char_end=marker_start
+        + len("[Khoản 11 Điều 9 Nghị định số 187/2013/NĐ-CP]"),
+    )
+
+    candidate = build_provider_relation_candidates(
+        parsed,
+        source,
+        (reference,),
+        provider_document_index={("luatvietnam", "106761"): "nd_77_2016"},
+        provider_document_number_index={("luatvietnam", "106761"): "77/2016/NĐ-CP"},
+        provider_unit_index={
+            ("luatvietnam", "106761", "92427"): (
+                "nd_77_2016_art1",
+                "Article",
+            )
+        },
+    )[0]
+
+    assert candidate.status == "UNRESOLVED"
+    assert candidate.reason_code == "provider_text_target_conflict"
 
 
 def test_reference_inside_replacement_text_uses_amended_target_as_source() -> None:
@@ -267,7 +438,66 @@ def test_reference_inside_replacement_text_uses_amended_target_as_source() -> No
     assert candidate.source_ownership == "PROJECTED"
     assert candidate.canonical_source_id == "nd_82_2020_art2_cl2_pa"
     assert candidate.canonical_target_id == "nd_82_2020_art3"
+    assert candidate.projection_basis_candidate_id is not None
     assert candidate.status == "RESOLVED"
+
+
+def test_reference_inside_added_unit_does_not_inherit_positional_anchor() -> None:
+    source = (
+        "Điều 1. Bổ sung\n"
+        "1. Bổ sung Điều 4a vào sau [Điều 4] như sau:\n"
+        "“Điều 4a. Thực hiện theo [Điều 6 Nghị định này].”"
+    )
+    outer_start = source.index("[Điều 4]")
+    inner_start = source.index("[Điều 6")
+    parsed = parse_text(
+        source,
+        DocumentInfo(
+            id="amending_doc",
+            title="Văn bản sửa đổi",
+            number="1/2024/NĐ-CP",
+            doc_type="Decree",
+        ),
+    )
+    common = {
+        "contract_version": "provider-reference-mention-v1",
+        "provider": "luatvietnam",
+        "provider_source_document_id": "100",
+    }
+    outer = ProviderReferenceMentionV1(
+        **common,
+        provider_target_document_id="200",
+        provider_target_item_ids=("4",),
+        provider_link_type="CHANGE_CONTENT",
+        citation_text="Điều 4",
+        source_char_start=outer_start,
+        source_char_end=outer_start + len("[Điều 4]"),
+    )
+    inner = ProviderReferenceMentionV1(
+        **common,
+        provider_target_document_id="200",
+        provider_target_item_ids=("6",),
+        provider_link_type="REFERENCE",
+        citation_text="Điều 6 Nghị định này",
+        source_char_start=inner_start,
+        source_char_end=inner_start + len("[Điều 6 Nghị định này]"),
+    )
+
+    candidate = build_provider_relation_candidates(
+        parsed,
+        source,
+        (outer, inner),
+        provider_document_index={("luatvietnam", "200"): "target_doc"},
+        provider_unit_index={
+            ("luatvietnam", "200", "4"): ("target_doc_art4", "Article"),
+            ("luatvietnam", "200", "6"): ("target_doc_art6", "Article"),
+        },
+    )[1]
+
+    assert candidate.status == "UNRESOLVED"
+    assert candidate.canonical_source_id is None
+    assert candidate.reason_code == "projected_added_source_not_in_corpus"
+    assert candidate.projection_basis_candidate_id is not None
 
 
 def test_provider_item_resolves_only_through_existing_target_hierarchy(
@@ -339,11 +569,12 @@ def test_provider_item_resolves_only_through_existing_target_hierarchy(
         source_char_end=marker_start + len("[điểm a khoản 2]"),
     )
 
-    documents, units, failures = build_luatvietnam_identity_indexes(
+    documents, numbers, units, failures = build_luatvietnam_identity_indexes(
         raw_root, processed_root, current_parsed, (reference,)
     )
 
     assert documents[("luatvietnam", "186730")] == "nd_82_2020"
+    assert numbers[("luatvietnam", "186730")] == "82/2020/NĐ-CP"
     assert units[("luatvietnam", "186730", "1399134")] == (
         "nd_82_2020_art2_cl2_pa",
         "Point",
@@ -351,7 +582,7 @@ def test_provider_item_resolves_only_through_existing_target_hierarchy(
     assert failures == {}
 
     (target_processed / "hierarchy.json").unlink()
-    _, units, failures = build_luatvietnam_identity_indexes(
+    _, _, units, failures = build_luatvietnam_identity_indexes(
         raw_root, processed_root, current_parsed, (reference,)
     )
     assert units == {}

@@ -13,7 +13,12 @@ from src.shared.ontology.validators import (
 )
 
 
-def _batch(*, target_type: str = "Article", target_id: str = "target_art35"):
+def _batch(
+    *,
+    target_type: str = "Article",
+    target_id: str = "target_art35",
+    projected_same_document: bool = False,
+):
     properties = {
         "relation_id": "rel-1",
         "citation_text": "Điều 35 Luật số 68/2014/QH13",
@@ -28,6 +33,19 @@ def _batch(*, target_type: str = "Article", target_id: str = "target_art35"):
         "linker_name": "corpus-structural-registry",
         "linker_version": "1.0.0",
     }
+    if projected_same_document:
+        properties.update(
+            {
+                "source_ownership": "PROJECTED",
+                "host_evidence_document_id": "host_doc",
+                "host_evidence_source_unit_id": "host_art1",
+                "host_evidence_char_start": 10,
+                "host_evidence_char_end": 42,
+                "projection_basis_candidate_id": "provider-basis-1",
+            }
+        )
+        properties.pop("source_char_start")
+        properties.pop("source_char_end")
     relation = ValidatedRelation(
         head_id="source_art1",
         relation_type="REFERS_TO",
@@ -44,7 +62,7 @@ def _batch(*, target_type: str = "Article", target_id: str = "target_art35"):
         source_ancestor_ids=("source_doc",),
         target_id=target_id,
         target_type=target_type,
-        target_document_id="target_doc",
+        target_document_id=("source_doc" if projected_same_document else "target_doc"),
         target_ancestor_ids=("target_doc",),
         reference_bundle_id="bundle-1",
     )
@@ -65,15 +83,16 @@ class _Result:
 
 
 class _Transaction:
-    def __init__(self, existing=()):
+    def __init__(self, existing=(), *, target_owner="target_doc"):
         self.existing = tuple(existing)
+        self.target_owner = target_owner
         self.queries = []
 
     def run(self, query, **parameters):
         self.queries.append((query, parameters))
         if "ownership_path_count" in query:
             endpoint = parameters["endpoint_id"]
-            owner = "source_doc" if endpoint == "source_art1" else "target_doc"
+            owner = "source_doc" if endpoint == "source_art1" else self.target_owner
             return _Result(
                 [
                     {
@@ -99,8 +118,8 @@ class _Transaction:
 
 
 class _Session:
-    def __init__(self, existing=()):
-        self.tx = _Transaction(existing)
+    def __init__(self, existing=(), *, target_owner="target_doc"):
+        self.tx = _Transaction(existing, target_owner=target_owner)
 
     def execute_write(self, callback, *args):
         return callback(self.tx, *args)
@@ -133,6 +152,16 @@ def test_external_writer_blocks_conflicting_old_target_before_merge() -> None:
 def test_external_writer_rejects_raw_input() -> None:
     with pytest.raises(TypeError, match="ValidatedRelationBatch"):
         Neo4jExternalReferenceWriter(_Session()).write({"references": []})
+
+
+def test_external_writer_accepts_projected_same_document_relation() -> None:
+    session = _Session(target_owner="source_doc")
+
+    result = Neo4jExternalReferenceWriter(session).write(
+        _batch(projected_same_document=True)
+    )[0]
+
+    assert result.final_target_ids == ("target_art35",)
 
 
 @pytest.mark.parametrize(

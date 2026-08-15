@@ -8,6 +8,7 @@ from src.pipeline.extraction.provider_relation_candidates import (
     ProviderRelationCandidateV1,
 )
 from src.pipeline.extraction.structural_context import StructuralRegistry
+from src.pipeline.extraction.structural_references import LINKER_NAME, LINKER_VERSION
 from src.pipeline.parser.hierarchy_parser import infer_source_effective_from
 from src.pipeline.parser.models import DocumentInfo
 from src.pipeline.validation.record_consistency_validator import (
@@ -21,7 +22,7 @@ from src.shared.ontology.validators import validate_relation as validate_ontolog
 
 PROVIDER_EXTRACTION_METHOD = "PROVIDER_HTML"
 PROVIDER_MATERIALIZATION_ROUTE = "CORPUS_RELATION_RECONCILIATION"
-SUPPORTED_PROVIDER_RELATIONS = frozenset({"AMENDS", "REPEALS"})
+SUPPORTED_PROVIDER_RELATIONS = frozenset({"AMENDS", "REPEALS", "REFERS_TO"})
 
 
 def build_provider_relation_records(
@@ -46,8 +47,27 @@ def build_provider_relation_records(
             continue
         _validate_candidate_integrity(candidate, source_text, registry)
         article_number = _host_article_number(candidate, registry)
+        if article_number is None:
+            if (
+                candidate.relation_candidate == "REFERS_TO"
+                and candidate.source_ownership == "PROJECTED"
+            ):
+                # This edge belongs to the projected document and is handled by
+                # corpus reconciliation, not the host document extraction file.
+                continue
+            raise ValueError(
+                f"Provider candidate host Article is unresolved: {candidate.candidate_id}"
+            )
         if article_number not in selected_article_numbers:
             continue
+        defer_materialization = (
+            candidate.relation_candidate != "REFERS_TO"
+            or candidate.canonical_source_id not in registry.types
+            or any(
+                target_id not in registry.types
+                for target_id in candidate.canonical_target_ids
+            )
+        )
         properties = {
             "effective_from": str(effective_from) if effective_from else None,
             "extraction_method": PROVIDER_EXTRACTION_METHOD,
@@ -62,17 +82,57 @@ def build_provider_relation_records(
             "provider_target_document_id": (
                 candidate.reference.provider_target_document_id
             ),
-            "source_char_start": candidate.reference.source_char_start,
-            "source_char_end": candidate.reference.source_char_end,
-            "materialization_route": PROVIDER_MATERIALIZATION_ROUTE,
+            "source_ownership": candidate.source_ownership,
         }
+        if candidate.source_ownership == "HOST":
+            properties.update(
+                {
+                    "source_char_start": candidate.reference.source_char_start,
+                    "source_char_end": candidate.reference.source_char_end,
+                }
+            )
+        else:
+            properties.update(
+                {
+                    "host_evidence_document_id": document.id,
+                    "host_evidence_source_unit_id": candidate.host_source_id,
+                    "host_evidence_char_start": candidate.reference.source_char_start,
+                    "host_evidence_char_end": candidate.reference.source_char_end,
+                    "projection_basis_candidate_id": (
+                        candidate.projection_basis_candidate_id
+                    ),
+                }
+            )
+        if defer_materialization:
+            properties["materialization_route"] = PROVIDER_MATERIALIZATION_ROUTE
+        if candidate.relation_candidate == "REFERS_TO":
+            properties.update(
+                {
+                    "citation_text": source_text[
+                        candidate.reference.source_char_start : candidate.reference.source_char_end
+                    ],
+                    "citation_type": (
+                        "RANGE" if len(candidate.canonical_target_ids) > 1 else "DIRECT"
+                    ),
+                    "extraction_method": "ENTITY_LINKING",
+                    "reference_bundle_id": candidate.candidate_id,
+                    "reference_target_count": len(candidate.canonical_target_ids),
+                    "source_unit_id": candidate.canonical_source_id,
+                    "linker_name": LINKER_NAME,
+                    "linker_version": LINKER_VERSION,
+                }
+            )
         properties = {
             key: value for key, value in properties.items() if value is not None
         }
         if candidate.relation_candidate == "AMENDS":
             properties["source_doc_id"] = document.id
 
-        known_ids = set(registry.types) | set(candidate.canonical_target_ids)
+        known_ids = (
+            set(registry.types)
+            | set(candidate.canonical_target_ids)
+            | {candidate.canonical_source_id}
+        )
         for target_id, target_type in zip(
             candidate.canonical_target_ids,
             candidate.canonical_target_types,
@@ -135,7 +195,11 @@ def build_provider_relation_records(
                     "blocking": consistency.blocking,
                     "confidence": None,
                     "extraction_method": PROVIDER_EXTRACTION_METHOD,
-                    "materialization_route": PROVIDER_MATERIALIZATION_ROUTE,
+                    "materialization_route": (
+                        PROVIDER_MATERIALIZATION_ROUTE
+                        if defer_materialization
+                        else None
+                    ),
                     "provider_bundle_id": candidate.candidate_id,
                 }
             )
@@ -151,11 +215,18 @@ def _validate_candidate_integrity(
         raise ValueError(
             f"Resolved provider candidate has no source: {candidate.candidate_id}"
         )
-    if candidate.canonical_source_id not in registry.types:
+    if (
+        candidate.source_ownership == "HOST"
+        and candidate.canonical_source_id not in registry.types
+    ):
         raise ValueError(
             f"Provider candidate source is not in current hierarchy: {candidate.candidate_id}"
         )
-    if registry.types[candidate.canonical_source_id] != candidate.canonical_source_type:
+    if (
+        candidate.source_ownership == "HOST"
+        and registry.types[candidate.canonical_source_id]
+        != candidate.canonical_source_type
+    ):
         raise ValueError(
             f"Provider candidate source type drift: {candidate.candidate_id}"
         )
@@ -175,18 +246,14 @@ def _validate_candidate_integrity(
 
 def _host_article_number(
     candidate: ProviderRelationCandidateV1, registry: StructuralRegistry
-) -> str:
+) -> str | None:
     source_id = candidate.host_source_id or candidate.canonical_source_id or ""
     matches = [
         number
         for number, article_id in registry.articles.items()
         if source_id == article_id or source_id.startswith(f"{article_id}_")
     ]
-    if len(matches) != 1:
-        raise ValueError(
-            f"Provider candidate host Article is unresolved: {candidate.candidate_id}"
-        )
-    return matches[0]
+    return matches[0] if len(matches) == 1 else None
 
 
 def _effective_from(document: DocumentInfo, source_text: str) -> date | None:
