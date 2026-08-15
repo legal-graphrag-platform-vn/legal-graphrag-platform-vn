@@ -1,6 +1,6 @@
 # Lược đồ Neo4j — Node & Edge (Legal GraphRAG VN)
 
-> **Phiên bản ontology:** `1.10.0`
+> **Phiên bản ontology:** `1.12.0`
 > **Nguồn đối chiếu:** `src/shared/ontology/contract.py`,
 > `infra/neo4j/init/01_schema_init.cypher`, `docs/report/neo4j_database_schema.md`.
 > **Phạm vi:** 12 label được Phase 1 writer persist (9 structural + 3 semantic).
@@ -24,8 +24,11 @@ flowchart TB
         D -->|ISSUED_BY| I
         D -->|CONTAINS| PART
         D -.->|CONTAINS — văn bản không có Phần| CH
+        D -.->|CONTAINS — Mục trực thuộc Văn bản| SEC
         D -.->|CONTAINS — văn bản không có Chương| ART
         PART -->|CONTAINS| CH
+        PART -.->|CONTAINS — Mục trực thuộc Phần| SEC
+        PART -.->|CONTAINS — Điều trực thuộc Phần| ART
         CH -->|CONTAINS| SEC
         CH -.->|CONTAINS — direct hoặc preamble trước Mục| ART
         SEC -->|CONTAINS| SUB
@@ -48,8 +51,6 @@ flowchart TB
     CLA -->|REGULATES| LS
     ART -->|REGULATES| LA
     CLA -->|REGULATES| LA
-    ART -->|REGULATES| I
-    CLA -->|REGULATES| I
     LS -->|REQUIRES| LC
 
     classDef structural fill:#e8f1fb,stroke:#2563eb,color:#172554,stroke-width:1.5px;
@@ -64,6 +65,28 @@ flowchart TB
 > Mỗi structural descendant vẫn có đúng một direct canonical parent.
 > Neo4j Community chỉ enforce uniqueness + index; ràng buộc required/enum/endpoint
 > được validate ở tầng Python trước khi ghi.
+
+### Quan hệ dẫn chiếu, thời gian và liên văn bản
+
+```mermaid
+flowchart LR
+    REF_SOURCE["Article | Clause | Point"]
+    REF_TARGET["Document | Part | Chapter | Section | Subsection<br/>Article | Clause | Point"]
+    TEMP_SOURCE["Document | Article | Clause | Point — đơn vị mới"]
+    TEMP_TARGET["Document | Article | Clause | Point — đơn vị bị tác động"]
+    NEW_DOC["Document — văn bản mới/cấp trên"]
+    OLD_DOC["Document — văn bản cũ/được hướng dẫn"]
+
+    REF_SOURCE -->|REFERS_TO| REF_TARGET
+    TEMP_SOURCE -->|AMENDS hoặc REPEALS| TEMP_TARGET
+    NEW_DOC -->|REPLACES| OLD_DOC
+    NEW_DOC -->|GUIDES — whitelist doc_type| OLD_DOC
+```
+
+`AMENDS`, `REPEALS` và `REPLACES` luôn có hướng chủ động từ đơn vị/văn bản mới
+tới đơn vị/văn bản cũ bị tác động. `REFERS_TO` giữ cùng contract cho cả target
+nội văn bản và liên văn bản; projected provider relation phải lưu riêng canonical
+source và host evidence provenance.
 
 ---
 
@@ -176,7 +199,8 @@ Community Edition không enforce uniqueness cho relationship → Python kiểm t
 | `ISSUED_BY` | Document → Issuer | `relation_id` | string       | NOT NULL, indexed | Identity/MERGE key; không có property khác        |
 | `CONTAINS`  | (phân cấp hợp lệ) | `relation_id` | string       | NOT NULL, indexed | Quan hệ chứa cấu trúc; endpoint validate ở Python |
 
-Các cặp `CONTAINS` hợp lệ: `Document→{Part,Chapter,Article}`, `Part→Chapter`,
+Các cặp `CONTAINS` hợp lệ: `Document→{Part,Chapter,Section,Article}`,
+`Part→{Chapter,Section,Article}`,
 `Chapter→{Section,Article}`, `Section→{Subsection,Article}`, `Subsection→Article`,
 `Article→Clause`, `Clause→Point`.
 
@@ -187,8 +211,8 @@ Các cặp `CONTAINS` hợp lệ: `Document→{Part,Chapter,Article}`, `Part→C
 | `relation_id`    | string       | NOT NULL, indexed | Identity/MERGE key                                    |
 | `effective_from` | ISO date     | NOT NULL, indexed | Mốc hiệu lực của tác động; source (mới) → target (cũ) |
 
-- `AMENDS`: `Document|Article|Clause → Document|Article|Clause` (đủ 9 tổ hợp).
-- `REPEALS`: `Document → Document|Article|Clause`.
+- `AMENDS`: `Document|Article|Clause|Point → Document|Article|Clause|Point` (đủ 16 tổ hợp).
+- `REPEALS`: `Document|Article|Clause|Point → Document|Article|Clause|Point` (đủ 16 tổ hợp).
 - `REPLACES`: `Document → Document`.
 - Hướng canonical: đơn vị/văn bản **mới hơn** trỏ tới đơn vị/văn bản **cũ** bị tác động.
 
@@ -245,11 +269,22 @@ cho cạnh `REFERS_TO`.
 | `linker_name`       | string       | NOT NULL (ENTITY_LINKING)       | Tên linker                                               |
 | `linker_version`    | string       | NOT NULL (ENTITY_LINKING)       | Phiên bản linker                                         |
 | `source_unit_id`    | string       | NOT NULL (RULE, ENTITY_LINKING) | Unit chứa citation                                       |
-| `source_char_start` | integer      | NOT NULL (RULE, ENTITY_LINKING) | Offset inclusive trên source sanitized                   |
-| `source_char_end`   | integer      | NOT NULL (RULE, ENTITY_LINKING) | Offset exclusive; `[start,end)` cắt đúng `citation_text` |
+| `source_char_start` | integer      | NOT NULL (RULE, host-owned ENTITY_LINKING) | Offset inclusive trên source sanitized         |
+| `source_char_end`   | integer      | NOT NULL (RULE, host-owned ENTITY_LINKING) | Offset exclusive; `[start,end)` cắt đúng `citation_text` |
 | `confidence`        | float        | NOT NULL (LLM)                  | Confidence của LLM extraction                            |
 | `llm_model`         | string       | NOT NULL (LLM)                  | Model dùng để extract                                    |
 | `checkpoint_id`     | string       | NOT NULL (LLM)                  | Checkpoint của extraction                                |
+
+Với `ENTITY_LINKING`, host-owned citation dùng `source_char_start/end` trên
+canonical source. Projected citation thay cặp offset đó bằng
+`source_ownership=PROJECTED`, `host_evidence_document_id`,
+`host_evidence_source_unit_id`, `host_evidence_char_start/end` và
+`projection_basis_candidate_id`.
+
+Projected provider `AMENDS`/`REPEALS` vẫn bắt buộc có `effective_from`, đồng
+thời mang cùng nhóm `source_ownership=PROJECTED`, host-evidence và
+projection-basis properties. Các trường này chứng minh vị trí provider hiển thị
+bằng chứng; chúng không thay thế canonical source endpoint của cạnh.
 
 ---
 
@@ -258,7 +293,7 @@ cho cạnh `REFERS_TO`.
 | Loại                        | Số lượng | Chi tiết                                                                 |
 | --------------------------- | -------: | ------------------------------------------------------------------------ |
 | Node uniqueness constraints |       12 | `id` unique cho toàn bộ 12 label                                         |
-| Range/property indexes      |       28 | 12 lookup + 3 node-temporal + 3 relationship-temporal + 10 `relation_id` |
+| Range/property indexes      |       30 | 13 lookup + 4 node-temporal + 3 relationship-temporal + 10 `relation_id` |
 | Full-text indexes           |        2 | `Article\|Clause(content_raw,title)`, `Point(content_raw)`               |
 | Vector indexes              |        2 | `article_embedding`, `clause_embedding` — cosine, 1024 chiều             |
 

@@ -1,6 +1,6 @@
 // =============================================================================
 // Legal GraphRAG — Neo4j Schema Initialization
-// Source of truth: plans/legal_ontology.md v1.11.0
+// Source of truth: plans/legal_ontology.md v1.12.0
 //
 // Script idempotent nhờ IF NOT EXISTS.
 // =============================================================================

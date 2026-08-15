@@ -1,18 +1,18 @@
 # Lược đồ Neo4j hiện tại — Legal GraphRAG VN
 
 > **Phạm vi:** ontology và runtime contract đang có trong repository, phiên bản
-> `1.10.0`.
+> `1.12.0`.
 >
 > **Đã đối chiếu:** `plans/legal_ontology.md`,
 > `src/shared/ontology/contract.py`, `src/shared/ontology/validators.py`,
 > `src/pipeline/persistence/payload_builder.py`, các Neo4j writer/repository và
 > `infra/neo4j/init/01_schema_init.cypher`.
 >
-> **Ngày kiểm tra:** 10/08/2026.
+> **Ngày kiểm tra:** 15/08/2026.
 >
-> Đây là lược đồ **được code hiện tại chấp nhận và ghi**, không phải thống kê số
-> node/edge của một database live. Schema bootstrap không chứng minh dữ liệu đã
-> được migrate hoặc ingest đầy đủ.
+> Đây là lược đồ **canonical mà payload và writer phải tuân thủ**, không phải
+> thống kê số node/edge của một database live. Schema bootstrap và unit test
+> không chứng minh dữ liệu đã được migrate hoặc ingest đầy đủ.
 
 ## 1. Ba lớp cần phân biệt
 
@@ -52,8 +52,11 @@ flowchart TB
         D -->|ISSUED_BY| I
         D -->|CONTAINS| PART
         D -.->|CONTAINS — văn bản không có Phần| CH
+        D -.->|CONTAINS — Mục trực thuộc Văn bản| SEC
         D -.->|CONTAINS — văn bản không có Chương| ART
         PART -->|CONTAINS| CH
+        PART -.->|CONTAINS — Mục trực thuộc Phần| SEC
+        PART -.->|CONTAINS — Điều trực thuộc Phần| ART
         CH -->|CONTAINS| SEC
         CH -.->|CONTAINS — direct hoặc preamble trước Mục| ART
         SEC -->|CONTAINS| SUB
@@ -76,8 +79,6 @@ flowchart TB
     CLA -->|REGULATES| LS
     ART -->|REGULATES| LA
     CLA -->|REGULATES| LA
-    ART -->|REGULATES| I
-    CLA -->|REGULATES| I
     LS -->|REQUIRES| LC
 
     classDef structural fill:#e8f1fb,stroke:#2563eb,color:#172554,stroke-width:1.5px;
@@ -86,21 +87,27 @@ flowchart TB
     class LC,LS,LA semantic;
 ```
 
-Bảy dạng path hierarchy tới `Article` đều canonical:
+Mười hai dạng path hierarchy tới `Article` đều canonical:
 
 ```text
 Document -> Article -> Clause -> Point
+Document -> Section -> Article -> Clause -> Point
+Document -> Section -> Subsection -> Article -> Clause -> Point
 Document -> Chapter -> Article -> Clause -> Point
 Document -> Chapter -> Section -> Article -> Clause -> Point
 Document -> Chapter -> Section -> Subsection -> Article -> Clause -> Point
+Document -> Part -> Article -> Clause -> Point
+Document -> Part -> Section -> Article -> Clause -> Point
+Document -> Part -> Section -> Subsection -> Article -> Clause -> Point
 Document -> Part -> Chapter -> Article -> Clause -> Point
 Document -> Part -> Chapter -> Section -> Article -> Clause -> Point
 Document -> Part -> Chapter -> Section -> Subsection -> Article -> Clause -> Point
 ```
 
-Không có cạnh tắt `Document -> Section`, `Part -> Article` hoặc
-`Chapter -> Subsection`. Mỗi structural descendant có đúng một direct canonical
-parent. Cạnh flattened cũ chỉ được xóa sau khi chain thay thế đã tồn tại.
+`Document -> Section`, `Part -> Section` và `Part -> Article` là direct parent
+đã được corpus chứng minh. `Document -> Subsection` và `Chapter -> Subsection`
+vẫn không hợp lệ. Mỗi structural descendant có đúng một direct canonical parent.
+Cạnh flattened cũ chỉ được xóa sau khi chain thay thế đã tồn tại.
 
 ### Thuộc tính node
 
@@ -286,9 +293,10 @@ Sau khi embedding chạy, node Article/Clause có thêm property dạng:
 })
 ```
 
-`Part`, `Chapter`, `Section` và `Subsection` là grouping node: không có temporal fields, full-text
-index hoặc embedding. `Point` có full-text index nhưng không có embedding hoặc
-temporal fields. Temporal scope của một Điểm được nâng lên `Clause` gần nhất.
+`Part`, `Chapter`, `Section` và `Subsection` là grouping node: không có temporal
+fields, full-text index hoặc embedding. `Point` có full-text index, không có
+embedding và có thể mang temporal metadata riêng; khi các field đó vắng mặt,
+temporal scope của Điểm được kế thừa từ `Clause` gần nhất.
 
 ## 3. Quan hệ polymorphic và temporal
 
@@ -296,24 +304,22 @@ temporal fields. Temporal scope của một Điểm được nâng lên `Clause`
 flowchart LR
     RS["Article | Clause | Point"]
     RT["Document | Part | Chapter | Section<br/>Subsection | Article | Clause | Point"]
-    TS["Document | Article | Clause"]
-    TT["Document | Article | Clause"]
-    RD["Document"]
-    RDT["Document | Article | Clause"]
+    TS["Document | Article | Clause | Point"]
+    TT["Document | Article | Clause | Point"]
     RP["Document"]
     GD1["Document — văn bản cấp trên"]
     GD2["Document — văn bản được hướng dẫn"]
 
     RS -->|REFERS_TO — mọi cặp source/target trong hai tập| RT
-    TS -->|AMENDS — 9 cặp được phép| TT
-    RD -->|REPEALS| RDT
+    TS -->|AMENDS — 16 cặp được phép| TT
+    TS -->|REPEALS — 16 cặp được phép| TT
     RP -->|REPLACES| RP2["Document"]
     GD1 -->|GUIDES — whitelist theo doc_type| GD2
 
     classDef source fill:#fff7ed,stroke:#ea580c,color:#7c2d12;
     classDef target fill:#f5f3ff,stroke:#7c3aed,color:#4c1d95;
-    class RS,TS,RD,RP,GD1 source;
-    class RT,TT,RDT,RP2,GD2 target;
+    class RS,TS,RP,GD1 source;
+    class RT,TT,RP2,GD2 target;
 ```
 
 Mũi tên luôn giữ hướng canonical `source -[:RELATION]-> target`:
@@ -330,15 +336,15 @@ Mũi tên luôn giữ hướng canonical `source -[:RELATION]-> target`:
 | Relation    | Source hợp lệ                   | Target hợp lệ                                                                        | Required ontology properties                                    |
 | ----------- | ------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
 | `ISSUED_BY` | `Document`                      | `Issuer`                                                                             | —                                                               |
-| `CONTAINS`  | `Document`                      | `Part`, `Chapter`, `Article`                                                         | —                                                               |
-| `CONTAINS`  | `Part`                          | `Chapter`                                                                            | —                                                               |
+| `CONTAINS`  | `Document`                      | `Part`, `Chapter`, `Section`, `Article`                                              | —                                                               |
+| `CONTAINS`  | `Part`                          | `Chapter`, `Section`, `Article`                                                      | —                                                               |
 | `CONTAINS`  | `Chapter`                       | `Section`, `Article`                                                                 | —                                                               |
 | `CONTAINS`  | `Section`                       | `Subsection`, `Article`                                                              | —                                                               |
 | `CONTAINS`  | `Subsection`                    | `Article`                                                                            | —                                                               |
 | `CONTAINS`  | `Article`                       | `Clause`                                                                             | —                                                               |
 | `CONTAINS`  | `Clause`                        | `Point`                                                                              | —                                                               |
-| `AMENDS`    | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point`                                      | `effective_from`                                                |
-| `REPEALS`   | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point`                                      | `effective_from`                                                |
+| `AMENDS`    | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point`                                      | `effective_from`; projected provider relation thêm dual provenance |
+| `REPEALS`   | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point`                                      | `effective_from`; projected provider relation thêm dual provenance |
 | `REPLACES`  | `Document`                      | `Document`                                                                           | `effective_from`                                                |
 | `GUIDES`    | `Document`                      | `Document`                                                                           | Cặp `doc_type` phải thuộc whitelist                             |
 | `REFERS_TO` | `Article`, `Clause`, `Point`    | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | Citation/bundle provenance và provenance theo extraction method |
@@ -346,9 +352,14 @@ Mũi tên luôn giữ hướng canonical `source -[:RELATION]-> target`:
 | `REGULATES` | `Article`, `Clause`             | `LegalSubject`, `LegalAction`                                                        | `confidence`, `llm_model`, `created_at`                         |
 | `REQUIRES`  | `LegalSubject`                  | `LegalConcept`                                                                       | `confidence`, `llm_model`, `created_at`                         |
 
-`AMENDS` thực sự cho phép đủ 9 tổ hợp giữa
-`Document|Article|Clause -> Document|Article|Clause`. Nó không chỉ là quan hệ
-`Document -> Document` và cũng không chỉ là `Article <-> Clause`.
+`AMENDS` và `REPEALS` cho phép đủ 16 tổ hợp giữa
+`Document|Article|Clause|Point -> Document|Article|Clause|Point`. Chúng không
+chỉ là quan hệ `Document -> Document` và cũng không chỉ là `Article <-> Clause`.
+Khi quan hệ được project từ bằng chứng phía provider, cạnh còn mang
+`source_ownership=PROJECTED`, `host_evidence_document_id`,
+`host_evidence_source_unit_id`, `host_evidence_char_start/end` và
+`projection_basis_candidate_id`. Canonical source endpoint vẫn là đơn vị pháp
+lý thực sự bị provider trình bày gián tiếp, không phải host chứa bằng chứng.
 
 `REQUIRES` trong graph Phase 1 hiện là:
 
@@ -381,7 +392,7 @@ Method-specific properties:
 | Method           | Required thêm                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------- |
 | `RULE`           | `resolver_name`, `resolver_version`, `source_unit_id`, `source_char_start`, `source_char_end` |
-| `ENTITY_LINKING` | `linker_name`, `linker_version`, `source_unit_id`, `source_char_start`, `source_char_end`     |
+| `ENTITY_LINKING` | `linker_name`, `linker_version`, `source_unit_id`; host-owned thêm source offsets, projected thêm host-evidence và projection-basis fields |
 | `LLM`            | `confidence`, `llm_model`, `checkpoint_id`                                                    |
 
 `relation_id` là identity deterministic mà Neo4j writer yêu cầu cho **mọi**
@@ -534,9 +545,14 @@ phải một tầng node trong graph. External writer:
 | Canonical path                                                    | Số cạnh `CONTAINS` từ Document |
 | ----------------------------------------------------------------- | -----------------------------: |
 | `Document -> Article`                                             |                              1 |
+| `Document -> Section -> Article`                                  |                              2 |
+| `Document -> Section -> Subsection -> Article`                    |                              3 |
 | `Document -> Chapter -> Article`                                  |                              2 |
 | `Document -> Chapter -> Section -> Article`                       |                              3 |
 | `Document -> Chapter -> Section -> Subsection -> Article`         |                              4 |
+| `Document -> Part -> Article`                                     |                              2 |
+| `Document -> Part -> Section -> Article`                          |                              3 |
+| `Document -> Part -> Section -> Subsection -> Article`            |                              4 |
 | `Document -> Part -> Chapter -> Article`                          |                              3 |
 | `Document -> Part -> Chapter -> Section -> Article`               |                              4 |
 | `Document -> Part -> Chapter -> Section -> Subsection -> Article` |                              5 |
@@ -560,10 +576,10 @@ mọi path dài tối đa 7 là hierarchy hợp lệ.
 Bootstrap hiện tạo:
 
 | Category                    | Số lượng | Chi tiết                                                                                                                                                      |
-| --------------------------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| --------------------------- | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Node uniqueness constraints |       12 | `id` unique cho `Document`, `Issuer`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, `LegalAction` |
-| Range/property indexes      |       28 | 12 lookup, 3 node-temporal, 3 relationship-temporal, 10 `relation_id`                                                                                         |
-| Full-text indexes           |        2 | `Article                                                                                                                                                      | Clause(content_raw,title)`và`Point(content_raw)` |
+| Range/property indexes      |       30 | 13 lookup, 4 node-temporal, 3 relationship-temporal, 10 `relation_id`                                                                                         |
+| Full-text indexes           |        2 | `Article|Clause(content_raw,title)` và `Point(content_raw)`                                                                                                   |
 | Vector indexes              |        2 | `article_embedding`, `clause_embedding`; cosine, 1024 chiều                                                                                                   |
 
 Relationship `relation_id` indexes hiện có cho:
@@ -603,7 +619,7 @@ application validation kiểm tra trước write.
 ## 9. Kết luận dùng trong report
 
 > Neo4j runtime contract cho phép persist 12 label Phase 1, gồm hierarchy linh hoạt
-> bảy canonical path `Document -> ... -> Article -> Clause -> Point`, ba semantic
+> mười hai canonical path `Document -> ... -> Article -> Clause -> Point`, ba semantic
 > label `LegalConcept`, `LegalSubject`, `LegalAction`, và 10 loại relation được
 > index theo deterministic `relation_id`. `REFERS_TO` là relation polymorphic từ
 > `Article|Clause|Point` tới mọi structural endpoint; dẫn chiếu khác văn bản vẫn
