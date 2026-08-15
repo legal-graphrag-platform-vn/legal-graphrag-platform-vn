@@ -83,7 +83,7 @@ from src.pipeline.validation.schema_validator import (
 
 logger = logging.getLogger(__name__)
 
-NORMALIZER_VERSION = "structural-endpoint-v3"
+NORMALIZER_VERSION = "structural-endpoint-v4"
 RELATION_ENRICHER_VERSION = "checkpoint-provenance-v1"
 DIAGRAM_RELATION_TYPES = frozenset({"AMENDS", "REPEALS", "REPLACES", "GUIDES"})
 DIAGRAM_REVIEW_REASONS = frozenset(
@@ -225,6 +225,7 @@ def _checkpoint_llm_model(result: ExtractionResult) -> str:
 def _relation_properties(
     raw_relation,
     article: Article,
+    article_id: str,
     document: DocumentInfo,
     extraction_result: ExtractionResult,
 ) -> dict:
@@ -242,12 +243,12 @@ def _relation_properties(
         relation_properties["citation_type"] = "DIRECT"
         relation_properties["extraction_method"] = "LLM"
         relation_properties["reference_bundle_id"] = _llm_reference_bundle_id(
-            article.number, raw_relation.head, raw_relation.tail, raw_relation.evidence
+            article_id, raw_relation.head, raw_relation.tail, raw_relation.evidence
         )
         relation_properties["reference_target_count"] = 1
         relation_properties["checkpoint_id"] = (
             extraction_result.checkpoint_id
-            or _derived_checkpoint_id(article.number, extraction_result)
+            or _derived_checkpoint_id(article_id, extraction_result)
         )
     if raw_relation.relation in {"DEFINES", "REGULATES", "REQUIRES", "REFERS_TO"}:
         relation_properties["confidence"] = raw_relation.confidence
@@ -256,25 +257,23 @@ def _relation_properties(
             extraction_result.completed_at
         )
     if raw_relation.relation == "REQUIRES":
-        relation_properties["source_article"] = f"{document.id}_art{article.number}"
+        relation_properties["source_article"] = article_id
 
     return relation_properties
 
 
 def _llm_reference_bundle_id(
-    article_number: str, head: str, tail: str, evidence: str
+    article_id: str, head: str, tail: str, evidence: str
 ) -> str:
-    source = "|".join(
-        ["LLM", str(article_number), head, tail, _normalize_citation(evidence)]
-    )
+    source = "|".join(["LLM", article_id, head, tail, _normalize_citation(evidence)])
     return hashlib.sha256(source.encode("utf-8")).hexdigest()
 
 
-def _derived_checkpoint_id(article_number: str, result: ExtractionResult) -> str:
+def _derived_checkpoint_id(article_id: str, result: ExtractionResult) -> str:
     required = (result.provider, result.resolved_model, result.completed_at)
     if any(not value for value in required):
         raise ValueError("Extraction result is missing checkpoint identity provenance")
-    source = "|".join([str(article_number), *[str(value) for value in required]])
+    source = "|".join([article_id, *[str(value) for value in required]])
     return hashlib.sha256(source.encode("utf-8")).hexdigest()
 
 
@@ -335,7 +334,7 @@ def process_article(
             semantic_entries,
             registry,
             document_registry,
-            article.number,
+            context.article_id,
         )
         tail_resolution = _resolve_endpoint(
             raw_relation.tail,
@@ -344,7 +343,7 @@ def process_article(
             semantic_entries,
             registry,
             document_registry,
-            article.number,
+            context.article_id,
         )
         relation_dict = raw_relation.model_dump()
         if head_resolution.canonical_id:
@@ -365,7 +364,7 @@ def process_article(
 
         # 1.   Construct actual relationship properties from document metadata and context
         relation_properties = _relation_properties(
-            raw_relation, article, document, result
+            raw_relation, article, context.article_id, document, result
         )
 
         # 2.   Enrich the relation dictionary with actual properties
@@ -415,6 +414,7 @@ def process_article(
 
         record = {
             "document_id": document.id,
+            "article_id": context.article_id,
             "article_number": article.number,
             "raw_relation": raw_relation_dict,
             "relation": relation_dict,
@@ -686,13 +686,52 @@ def run_pipeline(
     entity_index: dict[str, dict] = {}
     semantic_type_conflicts: set[str] = set()
     registry = StructuralRegistry.from_parsed_document(parsed, raw_doc_code)
-    selected_articles = [
-        article
-        for article in parsed.articles
-        if article_numbers is None or article.number in article_numbers
+    available_articles = [
+        *parsed.articles,
+        *[article for appendix in parsed.appendices for article in appendix.articles],
+        *[
+            article
+            for instrument in parsed.attached_instruments
+            for article in instrument.articles
+        ],
+        *[
+            article
+            for instrument in parsed.attached_instruments
+            for appendix in instrument.appendices
+            for article in appendix.articles
+        ],
     ]
+    contexts_by_model = {
+        id(article): registry.context_for_article(article)
+        for article in available_articles
+    }
+    if article_numbers is None:
+        selected_articles = available_articles
+    else:
+        selected_articles = []
+        for selector in sorted(article_numbers):
+            matches = [
+                article
+                for article in available_articles
+                if article.number == selector
+                or contexts_by_model[id(article)].article_id == selector
+            ]
+            if len(matches) > 1:
+                raise ValueError(
+                    f"Selected Article is ambiguous; use canonical article_id: {selector}"
+                )
+            if matches:
+                selected_articles.append(matches[0])
     if article_numbers is not None:
-        found = {article.number for article in selected_articles}
+        found = {
+            selector
+            for selector in article_numbers
+            if any(
+                article.number == selector
+                or contexts_by_model[id(article)].article_id == selector
+                for article in selected_articles
+            )
+        }
         missing_selection = sorted(article_numbers - found)
         if missing_selection:
             raise ValueError(
@@ -725,13 +764,14 @@ def run_pipeline(
         allow_legacy_prompt=not provider_calls_allowed,
     )
     provider_called = provider_calls_allowed and any(
-        article.number not in checkpoints for article in selected_articles
+        contexts_by_model[id(article)].article_id not in checkpoints
+        for article in selected_articles
     )
     if not provider_calls_allowed:
         missing = [
-            article.number
+            contexts_by_model[id(article)].article_id
             for article in selected_articles
-            if article.number not in checkpoints
+            if contexts_by_model[id(article)].article_id not in checkpoints
         ]
         if missing:
             raise ValueError(
@@ -751,7 +791,8 @@ def run_pipeline(
         article = next(articles, None)
         if article is None:
             return False
-        checkpoint = checkpoints.get(article.number)
+        article_id = contexts_by_model[id(article)].article_id
+        checkpoint = checkpoints.get(article_id)
         future = executor.submit(
             _process_article_worker,
             article,
@@ -787,7 +828,8 @@ def run_pipeline(
                     ) from exc
 
                 completed += 1
-                results_by_article[article.number] = records
+                article_id = contexts_by_model[id(article)].article_id
+                results_by_article[article_id] = records
                 for entity_id, entry in article_entity_index.items():
                     existing = entity_index.get(entity_id)
                     if existing is not None and existing.get("type") != entry.get(
@@ -812,7 +854,7 @@ def run_pipeline(
                     )
                     _write_extraction_blocked(out_dir, error)
                     raise error
-                checkpoints[article.number] = checkpoint_row
+                checkpoints[article_id] = checkpoint_row
                 _write_checkpoints(checkpoint_path, checkpoints)
                 logger.info(
                     "Đã trích xuất xong Điều %s (%d/%d)",
@@ -826,8 +868,9 @@ def run_pipeline(
 
     # Đảm bảo giữ đúng thứ tự các Điều trong văn bản gốc
     for article in selected_articles:
-        if article.number in results_by_article:
-            all_records.extend(results_by_article[article.number])
+        article_id = contexts_by_model[id(article)].article_id
+        if article_id in results_by_article:
+            all_records.extend(results_by_article[article_id])
 
     reference_resolver = StructuralReferenceResolver(
         registry,
@@ -850,7 +893,7 @@ def run_pipeline(
         reference_checkpoint_path,
         resolved_references,
         selected_article_ids={
-            registry.articles[article.number] for article in selected_articles
+            contexts_by_model[id(article)].article_id for article in selected_articles
         },
     )
     rule_records = _rule_reference_records(
@@ -956,7 +999,8 @@ def run_pipeline(
                         article.number for article in selected_articles
                     ],
                     "document_article_count": len(parsed.articles),
-                    "complete_document": len(selected_articles) == len(parsed.articles),
+                    "complete_document": len(selected_articles)
+                    == len(available_articles),
                     "prompt_version": PROMPT_VERSION,
                     "source_prompt_versions": sorted(
                         {
@@ -1014,6 +1058,7 @@ def _checkpoint_row(result: ExtractionResult, context, article_text: str) -> dic
         "raw_doc_code": context.raw_doc_code,
         "graph_id": context.graph_id,
         "article_number": context.article_number,
+        "article_id": context.article_id,
         "fingerprint": _checkpoint_fingerprint(
             context,
             article_text,
@@ -1060,10 +1105,30 @@ def _load_checkpoints(
 ) -> dict[str, dict]:
     if not path.exists():
         return {}
-    articles = {article.number: article for article in parsed.articles}
+    all_articles = [
+        *parsed.articles,
+        *[article for appendix in parsed.appendices for article in appendix.articles],
+        *[
+            article
+            for instrument in parsed.attached_instruments
+            for article in instrument.articles
+        ],
+        *[
+            article
+            for instrument in parsed.attached_instruments
+            for appendix in instrument.appendices
+            for article in appendix.articles
+        ],
+    ]
     contexts = {
-        number: registry.context_for_article(article)
-        for number, article in articles.items()
+        registry.context_for_article(article).article_id: registry.context_for_article(
+            article
+        )
+        for article in all_articles
+    }
+    articles = {
+        registry.context_for_article(article).article_id: article
+        for article in all_articles
     }
     valid: dict[str, dict] = {}
     seen_articles: set[str] = set()
@@ -1071,18 +1136,27 @@ def _load_checkpoints(
         if not line.strip():
             continue
         row = json.loads(line)
-        article_number = str(row.get("article_number", ""))
-        if article_number in seen_articles:
-            raise ValueError(f"Duplicate Article checkpoint: {article_number}")
-        seen_articles.add(article_number)
-        context = contexts.get(article_number)
+        article_id = str(row.get("article_id", ""))
+        if not article_id:
+            matching_ids = [
+                candidate_id
+                for candidate_id, article in articles.items()
+                if article.number == str(row.get("article_number", ""))
+            ]
+            article_id = matching_ids[0] if len(matching_ids) == 1 else ""
+        if article_id in seen_articles:
+            raise ValueError(f"Duplicate Article checkpoint: {article_id}")
+        seen_articles.add(article_id)
+        context = contexts.get(article_id)
+        if context is None:
+            continue
         current_content_hash = hashlib.sha256(
-            articles[article_number].content_raw.encode("utf-8")
+            articles[article_id].content_raw.encode("utf-8")
         ).hexdigest()
         current_fingerprint = (
             _checkpoint_fingerprint(
                 context,
-                articles[article_number].content_raw,
+                articles[article_id].content_raw,
                 provider=row.get("provider"),
                 configured_model=row.get("configured_model"),
             )
@@ -1101,7 +1175,7 @@ def _load_checkpoints(
             and row.get("completed_at")
         )
         if exact_match or legacy_match:
-            valid[article_number] = row
+            valid[article_id] = row
     return valid
 
 
@@ -1305,6 +1379,10 @@ def _structural_type_from_id(node_id: str) -> str | None:
         return "Chapter"
     if re.search(r"_part[^_]+$", node_id):
         return "Part"
+    if re.search(r"_app[^_]+$", node_id):
+        return "Appendix"
+    if re.search(r"_inst[^_]+$", node_id):
+        return "AttachedInstrument"
     return "Document" if node_id else None
 
 

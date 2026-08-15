@@ -29,9 +29,9 @@ from src.shared.ontology.hierarchy import (
 
 
 RESOLVER_NAME = "vn-structural-reference-resolver"
-RESOLVER_VERSION = "4.0.0"
+RESOLVER_VERSION = "5.0.0"
 LINKER_NAME = "corpus-structural-registry"
-LINKER_VERSION = "2.0.0"
+LINKER_VERSION = "3.0.0"
 
 ReferenceKind = Literal["STRUCTURAL", "EXPLICIT", "SEMANTIC"]
 ResolutionStatus = Literal["RESOLVED", "AMBIGUOUS", "UNRESOLVED"]
@@ -102,6 +102,7 @@ class ResolvedReference(BaseModel):
 class StructuralTargetCandidate(BaseModel):
     target_type: Literal[
         "Document",
+        "Appendix",
         "Part",
         "Chapter",
         "Section",
@@ -111,6 +112,8 @@ class StructuralTargetCandidate(BaseModel):
         "Point",
     ]
     document_number: str | None = None
+    appendix_scope: str | None = None
+    appendix_number: str | None = None
     part_number: str | None = None
     chapter_number: str | None = None
     section_number: str | None = None
@@ -123,6 +126,8 @@ class StructuralTargetCandidate(BaseModel):
     def validate_required_parents(self) -> "StructuralTargetCandidate":
         if self.target_type == "Document":
             children = (
+                self.appendix_scope,
+                self.appendix_number,
                 self.part_number,
                 self.chapter_number,
                 self.section_number,
@@ -133,6 +138,8 @@ class StructuralTargetCandidate(BaseModel):
             )
             if any(value is not None for value in children):
                 raise ValueError("Document target cannot carry structural child fields")
+        elif self.target_type == "Appendix" and self.appendix_scope is None:
+            raise ValueError("Appendix target requires appendix_scope")
         elif self.target_type == "Part" and self.part_number is None:
             raise ValueError("Part target requires part_number")
         elif self.target_type == "Chapter" and self.chapter_number is None:
@@ -208,6 +215,7 @@ _DOCUMENT_KIND = (
     r"(?:Luật|Nghị\s+định|Thông\s+tư|Quyết\s+định|Nghị\s+quyết|Pháp\s+lệnh|Hiến\s+pháp)"
 )
 _PART_NUMBER = r"(?:thứ\s+[a-zà-ỹ]+|[IVXLCDM]+|\d+[a-z]?)"
+_APPENDIX_NUMBER = r"(?:[IVXLCDM]+|\d+[A-Z]*)(?:[./-][A-Z0-9]+)*"
 _EXTERNAL_POINT = re.compile(
     rf"(?i)\bđiểm\s+(?P<label>[a-zđ])\s+khoản\s+(?P<clause>\d+[a-z]?)"
     rf"\s+điều\s+(?P<article>\d+[a-z]?)\s+(?:của\s+)?{_DOCUMENT_KIND}\s+"
@@ -241,6 +249,11 @@ _EXTERNAL_ARTICLE = re.compile(
     rf"(?i)\bđiều\s+(?P<article>\d+[a-z]?)\s+(?:của\s+)?{_DOCUMENT_KIND}\s+"
     r"(?:số\s+)?(?P<document>\d+/\d{4}/[A-ZĐ0-9-]+)\b"
 )
+_EXTERNAL_APPENDIX = re.compile(
+    rf"(?i)\bphụ\s+lục(?:\s+số)?\s+(?P<appendix>{_APPENDIX_NUMBER})"
+    rf"\s+(?:ban\s+hành\s+kèm\s+theo|kèm\s+theo|của)\s+{_DOCUMENT_KIND}\s+"
+    r"(?:số\s+)?(?P<document>\d+/\d{4}/[A-ZĐ0-9-]+)\b"
+)
 _EXTERNAL_DOCUMENT = re.compile(
     rf"(?i)\b{_DOCUMENT_KIND}\s+(?:số\s+)?"
     r"(?P<document>\d+/\d{4}/[A-ZĐ0-9-]+)\b"
@@ -255,6 +268,12 @@ _LOCAL_SUBSECTION = re.compile(
     r"chương\s+(?P<chapter>[IVXLCDM]+)\b"
 )
 _CURRENT_PART = re.compile(r"(?i)\bphần\s+này\b")
+_CURRENT_APPENDIX = re.compile(r"(?i)\bphụ\s+lục\s+này\b")
+_EXPLICIT_LOCAL_APPENDIX = re.compile(
+    rf"(?i)\bphụ\s+lục(?:\s+số)?\s+(?P<appendix>{_APPENDIX_NUMBER})"
+    r"(?:\s+(?:ban\s+hành\s+)?kèm\s+theo\s+(?:văn\s+bản|luật|"
+    r"nghị\s+định|thông\s+tư|quyết\s+định)\s+này)?\b"
+)
 _EXPLICIT_LOCAL_PART = re.compile(
     rf"(?i)\bphần\s+(?P<part>{_PART_NUMBER})\b"
     r"(?:\s+của\s+(?:luật|văn\s+bản)\s+này\b)?"
@@ -327,9 +346,12 @@ class StructuralReferenceResolver:
             (_EXTERNAL_CHAPTER, self._resolve_external_match),
             (_EXTERNAL_PART, self._resolve_external_match),
             (_EXTERNAL_ARTICLE, self._resolve_external_match),
+            (_EXTERNAL_APPENDIX, self._resolve_external_match),
             (_EXTERNAL_DOCUMENT, self._resolve_external_match),
             (_LOCAL_SUBSECTION, self._resolve_local_subsection),
             (_LOCAL_SECTION, self._resolve_local_section),
+            (_CURRENT_APPENDIX, self._resolve_current_appendix),
+            (_EXPLICIT_LOCAL_APPENDIX, self._resolve_explicit_local_appendix),
             (_CURRENT_PART, self._resolve_current_part),
             (_EXPLICIT_LOCAL_PART, self._resolve_explicit_local_part),
             (_CURRENT_CHAPTER, self._resolve_current_chapter),
@@ -372,6 +394,7 @@ class StructuralReferenceResolver:
                     _EXTERNAL_CHAPTER,
                     _EXTERNAL_PART,
                     _EXTERNAL_ARTICLE,
+                    _EXTERNAL_APPENDIX,
                     _EXTERNAL_DOCUMENT,
                 }
                 mention = self._mention(
@@ -401,6 +424,28 @@ class StructuralReferenceResolver:
             mention,
             target,
             "explicit_section_target_missing",
+            candidate=candidate,
+        )
+
+    def _resolve_current_appendix(
+        self, mention: ReferenceMention, _: re.Match[str]
+    ) -> ResolvedReference:
+        article_key = self.registry.article_key_for_id(
+            mention.source_context.article_id
+        )
+        scope = _appendix_scope_from_article_key(article_key or "")
+        target = self.registry.appendices.get(scope or "")
+        return _resolved_or_missing(mention, target, "current_appendix_context_missing")
+
+    def _resolve_explicit_local_appendix(
+        self, mention: ReferenceMention, match: re.Match[str]
+    ) -> ResolvedReference:
+        candidate = _target_candidate(match)
+        target = self.registry.appendices.get(candidate.appendix_scope or "")
+        return _resolved_or_missing(
+            mention,
+            target,
+            "explicit_appendix_target_missing",
             candidate=candidate,
         )
 
@@ -535,6 +580,7 @@ class StructuralReferenceResolver:
             target_candidates = self.corpus_registry.unit_candidates(
                 document_id=target_document.document_id,
                 unit_type=candidate.target_type,
+                appendix_scope=candidate.appendix_scope,
                 part_number=candidate.part_number,
                 chapter_number=candidate.chapter_number,
                 section_number=candidate.section_number,
@@ -887,6 +933,7 @@ def _subtract_intervals(
 def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
     groups = match.groupdict()
     document = groups.get("document")
+    appendix = groups.get("appendix")
     part = groups.get("part")
     chapter = groups.get("chapter")
     section = groups.get("section")
@@ -894,7 +941,9 @@ def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
     article = groups.get("article")
     clause = groups.get("clause")
     point = groups.get("label")
-    if point:
+    if appendix:
+        target_type = "Appendix"
+    elif point:
         target_type = "Point"
     elif clause:
         target_type = "Clause"
@@ -913,6 +962,8 @@ def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
     return StructuralTargetCandidate(
         target_type=target_type,
         document_number=document.upper() if document else None,
+        appendix_scope=_normalize_appendix_scope(appendix) if appendix else None,
+        appendix_number=appendix.upper() if appendix else None,
         part_number=normalize_part_number(part) if part else None,
         chapter_number=chapter.upper() if chapter else None,
         section_number=section.lower() if section else None,
@@ -923,6 +974,20 @@ def _target_candidate(match: re.Match[str]) -> StructuralTargetCandidate:
         clause_number=clause.lower() if clause else None,
         point_label=point.lower() if point else None,
     )
+
+
+def _normalize_appendix_scope(value: str) -> str:
+    decomposed = unicodedata.normalize("NFD", value)
+    ascii_value = "".join(
+        character for character in decomposed if not unicodedata.combining(character)
+    )
+    return re.sub(r"[^a-z0-9]+", "_", ascii_value.lower()).strip("_")
+
+
+def _appendix_scope_from_article_key(article_key: str) -> str | None:
+    if not article_key.startswith("app") or ":" not in article_key:
+        return None
+    return article_key[3:].split(":", 1)[0]
 
 
 def _clause_numbers(match: re.Match[str]) -> tuple[str, ...]:

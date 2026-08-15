@@ -26,6 +26,7 @@ class GraphQualityReporter:
     def generate_for_document(self, graph_id: str) -> dict:
         node_ids = self._written_node_ids(graph_id)
         label_counts = self._label_counts(node_ids)
+        appendix_stats = self._appendix_embedding_stats(node_ids)
         article_stats = self._embedding_stats(node_ids, "Article")
         clause_stats = self._embedding_stats(node_ids, "Clause")
         duplicate_node_id_count = self._duplicate_node_id_count(node_ids)
@@ -46,6 +47,8 @@ class GraphQualityReporter:
         return {
             "document_count": label_counts.get("Document", 0),
             "issuer_count": label_counts.get("Issuer", 0),
+            "attached_instrument_count": label_counts.get("AttachedInstrument", 0),
+            "appendix_count": label_counts.get("Appendix", 0),
             "part_count": label_counts.get("Part", 0),
             "chapter_count": label_counts.get("Chapter", 0),
             "section_count": label_counts.get("Section", 0),
@@ -77,6 +80,7 @@ class GraphQualityReporter:
                 "average_degree": "undirected projection 2E/N",
             },
             "embedding_coverage": {
+                "Appendix": appendix_stats["coverage"],
                 "Article": article_stats["coverage"],
                 "Clause": clause_stats["coverage"],
             },
@@ -130,6 +134,25 @@ class GraphQualityReporter:
         row = _single_row(
             self.session.run(
                 f"MATCH (n:{label}) WHERE n.id IN $node_ids RETURN count(n) AS total, count(n.embedding) AS embedded",
+                node_ids=list(node_ids),
+            )
+        )
+        total = int(_row_value(row, "total") or 0)
+        embedded = int(_row_value(row, "embedded") or 0)
+        return {
+            "total": total,
+            "embedded": embedded,
+            "coverage": _coverage(embedded, total),
+        }
+
+    def _appendix_embedding_stats(self, node_ids: set[str]) -> dict[str, float | int]:
+        row = _single_row(
+            self.session.run(
+                (
+                    "MATCH (n:Appendix) WHERE n.id IN $node_ids "
+                    "AND NOT (n)-[:CONTAINS*1..]->(:Article) "
+                    "RETURN count(n) AS total, count(n.embedding) AS embedded"
+                ),
                 node_ids=list(node_ids),
             )
         )
@@ -243,11 +266,35 @@ def build_graph_quality_report(payload: dict) -> dict:
     clause_nodes = [
         node for node in payload.get("nodes", []) if node.get("type") == "Clause"
     ]
+    appendix_nodes = [
+        node for node in payload.get("nodes", []) if node.get("type") == "Appendix"
+    ]
+    article_ids = {
+        str(node.get("id"))
+        for node in payload.get("nodes", [])
+        if node.get("type") == "Article"
+    }
+    child_ids: dict[str, list[str]] = {}
+    for relation in payload.get("relations", []):
+        if relation.get("type") == "CONTAINS":
+            child_ids.setdefault(str(relation.get("head_id")), []).append(
+                str(relation.get("tail_id"))
+            )
+    eligible_appendices = [
+        node
+        for node in appendix_nodes
+        if not _has_article_descendant(str(node.get("id")), child_ids, article_ids)
+    ]
+    embedded_appendices = [
+        node for node in eligible_appendices if node.get("embedding")
+    ]
     embedded_articles = [node for node in article_nodes if node.get("embedding")]
     embedded_clauses = [node for node in clause_nodes if node.get("embedding")]
 
     return {
         "document_count": node_counts.get("Document", 0),
+        "attached_instrument_count": node_counts.get("AttachedInstrument", 0),
+        "appendix_count": node_counts.get("Appendix", 0),
         "article_count": node_counts.get("Article", 0),
         "clause_count": node_counts.get("Clause", 0),
         "semantic_node_count": sum(
@@ -276,6 +323,7 @@ def build_graph_quality_report(payload: dict) -> dict:
             "average_degree": "undirected projection 2E/N",
         },
         "embedding_coverage": {
+            "Appendix": _coverage(len(embedded_appendices), len(eligible_appendices)),
             "Article": _coverage(len(embedded_articles), len(article_nodes)),
             "Clause": _coverage(len(embedded_clauses), len(clause_nodes)),
         },
@@ -330,6 +378,24 @@ def write_graph_quality_report(report: dict, out_dir: Path) -> None:
 
 def _coverage(done: int, total: int) -> float:
     return 1.0 if total == 0 else done / total
+
+
+def _has_article_descendant(
+    root_id: str,
+    children: dict[str, list[str]],
+    article_ids: set[str],
+) -> bool:
+    pending = list(children.get(root_id, []))
+    seen: set[str] = set()
+    while pending:
+        node_id = pending.pop()
+        if node_id in seen:
+            continue
+        seen.add(node_id)
+        if node_id in article_ids:
+            return True
+        pending.extend(children.get(node_id, []))
+    return False
 
 
 def _directed_density(node_count: int, edge_count: int) -> float:

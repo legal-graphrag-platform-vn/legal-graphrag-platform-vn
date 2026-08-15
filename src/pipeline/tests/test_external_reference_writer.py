@@ -181,4 +181,4 @@ def test_external_writer_accepts_verified_new_structural_targets(
     assert any(
         f"MATCH (target:{target_type}" in query for query, _ in session.tx.queries
     )
-    assert any("CONTAINS*1..7" in query for query, _ in session.tx.queries)
+    assert any("CONTAINS*1..9" in query for query, _ in session.tx.queries)

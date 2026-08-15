@@ -1,7 +1,7 @@
 # Legal Ontology — Canonical Contract
 
 > **Status**: FROZEN — changes require an ADR and version bump  
-> **Version**: 1.12.0
+> **Version**: 1.14.0
 > **Frozen date**: 2026-08-15
 > **Scope**: Vietnamese business law, centered on Luật Doanh nghiệp and related normative documents
 
@@ -32,7 +32,7 @@ legal_ontology.md
 
 ```text
 STRUCTURAL LAYER
-Document, Issuer, Part, Chapter, Section, Subsection, Article, Clause, Point
+Document, Issuer, AttachedInstrument, Appendix, Part, Chapter, Section, Subsection, Article, Clause, Point
 Relations: ISSUED_BY, CONTAINS, AMENDS, REPEALS, REPLACES, GUIDES, REFERS_TO
 
 SEMANTIC LAYER
@@ -84,6 +84,8 @@ Required means mandatory before `Neo4jRepository.merge(...)`. Neo4j Community Ed
 |---|---|---|---|
 | `Document` | `id`, `doc_type`, `number`, `normative`, `legal_status`, `effective_from`, `issuer_name` | `title`, `issued_date`, `effective_to`, `expiry_date`, `sector`, `field`, `signer_title`, `signer_name`, `source_url`, `updated_at` | `doc_type`: `Constitution`, `Law`, `Ordinance`, `Resolution`, `Decree`, `Decision`, `Circular`, `JointCircular`; `legal_status`: `ACTIVE`, `NOT_YET_EFFECTIVE`, `PARTIALLY_EFFECTIVE`, `REPLACED`, `REPEALED`, `EXPIRED` |
 | `Issuer` | `id`, `name`, `branch` | none | `branch`: `LEGISLATIVE`, `EXECUTIVE`, `JUDICIAL`, `OTHER` |
+| `AttachedInstrument` | `id`, `scope`, `heading`, `adoption_text`, `content_raw`, `instrument_kind` | `title`, `updated_at` | `instrument_kind`: `REGULATION`, `CHARTER`, `STANDARD` |
+| `Appendix` | `id`, `scope`, `heading`, `content_raw`, `appendix_kind`, `effective_from`, `legal_status` | `number`, `title`, `effective_to`, `updated_at`, `embedding` and embedding provenance | `scope`: normalized owner-local designator; `appendix_kind`: `LEGAL_CONTENT`, `FORM`, `LIST`, `TABLE`, `UNCLASSIFIED`; `legal_status`: `ACTIVE`, `AMENDED`, `REPEALED` |
 | `Part` | `id`, `number`, `title` | none | none |
 | `Chapter` | `id`, `number`, `title` | none | none |
 | `Section` | `id`, `number`, `title` | none | none |
@@ -98,11 +100,16 @@ Rules:
 |---|---|
 | `Issuer` creation | Writer derives `Issuer` from `Document.issuer_name`; LLM does not extract it directly |
 | `Issuer.id` | Slug of normalized issuer name; this is the `MERGE` key, not `name` |
-| Temporal denormalization | `Article` and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
+| Temporal denormalization | `Appendix`, `Article`, and `Clause` carry `effective_from`, `effective_to`, and `legal_status` for retrieval filtering |
 | Point temporal scope | Optional Point temporal fields are schema-reserved only. The current parser/payload builder does not emit them; runtime validity is inherited from the nearest `Clause` until point-level evidence is implemented and evaluated |
 | Grouping heading contract | `Part`, `Section`, and `Subsection` are created only from accepted headings in their canonical parent context; `title` is mandatory and is never replaced by a display fallback |
 | Grouping-node scope | `Part`, `Chapter`, `Section`, and `Subsection` do not carry temporal fields or embeddings |
-| Embeddings | `Article.embedding` and `Clause.embedding` are nullable `float[1024]` under the current BGE-M3 contract; grouping nodes and `Point` have no embedding |
+| Attached-instrument ownership | An `AttachedInstrument` is created only from a controlled full-line heading (`Quy chế`, `Quy định`, `Điều lệ`, `Chuẩn mực`) followed within three non-empty lines by explicit `ban hành kèm theo` evidence naming a supported host document kind. It has exactly one `Document` parent and at least one parsed Article. Uppercase text alone never opens this scope. |
+| Attached-instrument retrieval | `AttachedInstrument` is an ownership node, not a Phase 1 embedding/citation unit. Its Article/Clause descendants carry inherited temporal metadata and provide citable retrieval evidence. |
+| Appendix ownership | An `Appendix` is created only from an explicit full-line appendix heading in canonical source. An inline mention such as `theo Phụ lục I` never opens an Appendix. Every Appendix has exactly one `Document` or `AttachedInstrument` parent and owns any structural descendants parsed inside its source span. |
+| Appendix content | `content_raw` preserves the complete canonical Appendix body. `Appendix.embedding` is nullable and may be populated only when the Appendix has no citable `Article` descendants; structured descendants are embedded at Article/Clause level to avoid duplicate retrieval evidence. |
+| Non-ontology source sections | `TABLE_OF_CONTENTS` and `UNPARSED_BODY` remain parser artifacts with source spans and hashes. They do not create graph nodes, relations, embeddings, or extraction checkpoints. |
+| Embeddings | `Appendix.embedding`, `Article.embedding`, and `Clause.embedding` are nullable `float[1024]` under the current BGE-M3 contract; grouping nodes and `Point` have no embedding |
 
 ### 2.2 Semantic Nodes
 
@@ -124,6 +131,7 @@ Extraction mapping:
 | `Concept` | `LegalConcept` |
 | `Action` | `LegalAction` |
 | `Document` | `Document` |
+| `Appendix` | `Appendix` |
 | `Part` | `Part` |
 | `Article` | `Article` |
 | `Section` | `Section` |
@@ -133,7 +141,7 @@ Extraction mapping:
 
 Extraction types are input schema labels, not Neo4j labels. The writer or repository mapping layer must normalize them before persistence.
 
-Phase 1 persistence is limited to `Document`, `Issuer`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, and `LegalAction`. Runtime reasoning labels (`Obligation`, `Right`, `Condition`, `Exception`) are valid ontology labels, but they must not be persisted by the Phase 1 extraction pipeline.
+Phase 1 persistence is limited to `Document`, `Issuer`, `AttachedInstrument`, `Appendix`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point`, `LegalConcept`, `LegalSubject`, and `LegalAction`. Runtime reasoning labels (`Obligation`, `Right`, `Condition`, `Exception`) are valid ontology labels, but they must not be persisted by the Phase 1 extraction pipeline.
 
 ---
 
@@ -149,7 +157,7 @@ Only these relation names are current. Relation names use active voice.
 | `REPEALS` | `Document`, `Article`, `Clause`, `Point` | `Document`, `Article`, `Clause`, `Point` | `effective_from` | indexed only | yes |
 | `REPLACES` | `Document` | `Document` | `effective_from` | indexed only | yes |
 | `GUIDES` | `Document` | `Document` | none | no | yes, with whitelist |
-| `REFERS_TO` | `Article`, `Clause`, `Point` | `Document`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | common citation/bundle provenance plus method-specific provenance | no | yes |
+| `REFERS_TO` | `Appendix`, `Article`, `Clause`, `Point` | `Document`, `Appendix`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` | common citation/bundle provenance plus method-specific provenance | no | yes |
 | `DEFINES` | `Article`, `Clause` | `LegalConcept` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REGULATES` | `Article`, `Clause` | `LegalSubject`, `LegalAction` | `confidence`, `llm_model`, `created_at` | no | yes |
 | `REQUIRES` | `LegalSubject` | `LegalConcept`; `Obligation` only in runtime/future phase | `confidence`, `llm_model`, `created_at` | no | yes |
@@ -163,6 +171,17 @@ Document   -> Part
 Document   -> Chapter
 Document   -> Section
 Document   -> Article
+Document   -> Appendix
+Document   -> AttachedInstrument
+AttachedInstrument -> Appendix
+AttachedInstrument -> Part
+AttachedInstrument -> Chapter
+AttachedInstrument -> Section
+AttachedInstrument -> Article
+Appendix   -> Part
+Appendix   -> Chapter
+Appendix   -> Section
+Appendix   -> Article
 Part       -> Chapter
 Part       -> Section
 Part       -> Article
@@ -176,7 +195,8 @@ Clause     -> Point
 ```
 
 These pairs produce the canonical parent chains observed in the corpus: with or
-without `Part` or `Chapter`, and with direct Section Articles or `Subsection` descendants.
+without `Appendix`, `Part`, or `Chapter`, and with direct Section Articles or
+`Subsection` descendants.
 `Document -> Article` remains valid. Corpus-evidenced direct Section parents are
 `Document -> Section` and `Part -> Section`; `Part -> Article` is also valid when
 a Part contains Articles without an intermediate Chapter. `Chapter -> Subsection`
@@ -187,6 +207,18 @@ mix direct Articles with its grouping children. A `Chapter` may mix direct `Arti
 `Section` children only for preamble Articles: every direct Article number must
 sort before every Article number contained by the Chapter's Sections. A direct
 Article at or after the first Section Article is invalid.
+
+An `AttachedInstrument` owns the independent internal hierarchy of a regulation,
+charter, or standard explicitly promulgated with the host Document. Descendant
+identities are prefixed by its ID so restarted Article numbering cannot collide
+with the host Document. It may also own an explicit Appendix.
+
+An `Appendix` is a legal source unit, not a navigation artifact. It may directly
+contain `Part`, `Chapter`, `Section`, or `Article` according to its own canonical
+source structure. Descendant identities are scoped by the Appendix ID so an
+`Article 1` in an Appendix cannot collide with `Article 1` in the host Document.
+`TABLE_OF_CONTENTS` is explicitly excluded from the graph even when it repeats
+valid Article or Chapter headings.
 
 `REFERS_TO.citation_type` must be one of `DIRECT`, `INDIRECT`, `RANGE`.
 
@@ -318,13 +350,17 @@ Any current pipeline, test, prompt, or repository code that emits a legacy alias
 | Element | Convention | Example |
 |---|---|---|
 | `Document.id` | snake-case slug | `ldn_2020` |
-| `Part.id` | `{doc_id}_part{normalized_part}` | `nd34_2016_part2` |
-| `Chapter.id` | `{doc_id}_ch{N}` | `ldn_2020_ch2` |
-| `Section.id` | `{doc_id}_ch{N}_sec{M}` when under Chapter; `{doc_id}_sec{M}` when no Chapter exists | `ldn_2020_ch3_sec1`, `ttlt178_2015_sec1` |
+| `AttachedInstrument.id` | `{doc_id}_inst{kind}_{source_order}` | `nd39_1995_instcharter_1` |
+| Attached-instrument descendant | Prefix the ordinary structural suffix with `{attached_instrument_id}` | `nd39_1995_instcharter_1_art1` |
+| `Appendix.id` | `{doc_id}_app{normalized_designator}`; an unnumbered Appendix uses `{doc_id}_appx{source_order}` | `tt38_2014_app01_tdg`, `qd113_2008_appx1` |
+| Appendix descendant | Prefix the ordinary structural suffix with `{appendix_id}` | `tt38_2014_app01_tdg_art1`, `tt38_2014_app01_tdg_art1_cl1` |
+| `Part.id` | `{owner_id}_part{normalized_part}`, where owner is Document, AttachedInstrument, or Appendix | `nd34_2016_part2`, `qd113_2008_appx1_part2` |
+| `Chapter.id` | `{owner_id}_ch{N}`, where owner is Document, AttachedInstrument, or Appendix | `ldn_2020_ch2`, `qd113_2008_appx1_ch2` |
+| `Section.id` | `{owner_id}_ch{N}_sec{M}` when under Chapter; `{owner_id}_sec{M}` when no Chapter exists | `ldn_2020_ch3_sec1`, `tt38_2014_app01_tdg_sec1` |
 | `Subsection.id` | `{section_id}_subsec{K}` | `ttlt178_2015_sec1_subsec1`, `nd34_2016_ch5_sec3_subsec1` |
-| `Article.id` | `{doc_id}_art{N}` | `ldn_2020_art17` |
-| `Clause.id` | `{doc_id}_art{N}_cl{K}` | `ldn_2020_art17_cl1` |
-| `Point.id` | `{doc_id}_art{N}_cl{K}_p{letter}` | `ldn_2020_art17_cl1_pa` |
+| `Article.id` | `{owner_id}_art{N}`, where owner is Document, AttachedInstrument, or Appendix | `ldn_2020_art17`, `tt38_2014_app01_tdg_art1` |
+| `Clause.id` | `{article_id}_cl{K}` | `ldn_2020_art17_cl1`, `tt38_2014_app01_tdg_art1_cl1` |
+| `Point.id` | `{clause_id}_p{letter}` | `ldn_2020_art17_cl1_pa` |
 | Semantic node ID | snake-case, no Vietnamese diacritics | `von_dieu_le` |
 | `Issuer.id` | snake-case slug | `quoc_hoi` |
 | Relation | `SCREAMING_SNAKE_CASE`, active voice | `AMENDS`, `REFERS_TO` |
@@ -344,7 +380,7 @@ The bootstrap script must create only:
 | Temporal indexes | `effective_from`, `effective_to` filters |
 | Relationship property indexes | `AMENDS`, `REPEALS`, `REPLACES` temporal lookup |
 | Full-text indexes | `content_raw`, `title` search |
-| Vector indexes | `Article.embedding`, `Clause.embedding` with the selected concrete schema dimension; current contract is BGE-M3/1024 |
+| Vector indexes | `Appendix.embedding`, `Article.embedding`, `Clause.embedding` with the selected concrete schema dimension; current contract is BGE-M3/1024 |
 
 The database bootstrap must not be treated as a full ontology validator in Community Edition.
 
@@ -376,17 +412,17 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 `infra/neo4j/init/01_schema_init.cypher` must match this contract:
 
 > **Runtime status (2026-07-17)**: the signed-off pilot schema, indexes, and
-> Article/Clause embeddings use BGE-M3/1024. Any stale or external database still
+> Appendix/Article/Clause embeddings use BGE-M3/1024. Any stale or external database still
 > configured for BKAI/768 remains incompatible with this contract and must recreate
-> both vector indexes and re-embed Article/Clause before use.
+> all three vector indexes and re-embed eligible Appendix/Article/Clause nodes before use.
 
 | Area | Expected state |
 |---|---|
-| Structural uniqueness | `Document`, `Issuer`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` by `id` |
+| Structural uniqueness | `Document`, `Issuer`, `AttachedInstrument`, `Appendix`, `Part`, `Chapter`, `Section`, `Subsection`, `Article`, `Clause`, `Point` by `id` |
 | Phase 1 semantic uniqueness | `LegalConcept`, `LegalSubject`, `LegalAction` by `id` |
 | Runtime reasoning labels | No bootstrap requirement until persisted by a runtime reasoning component |
 | Relation indexes | `AMENDS.effective_from`, `REPEALS.effective_from`, `REPLACES.effective_from` |
-| Vector indexes | `article_embedding`, `clause_embedding`, 1024 dimensions, cosine |
+| Vector indexes | `appendix_embedding`, `article_embedding`, `clause_embedding`, 1024 dimensions, cosine |
 
 ---
 
@@ -422,3 +458,5 @@ If the project moves to Neo4j Enterprise Edition, property existence and type co
 | 1.10.0 | 2026-08-12 | Extended `AMENDS` and `REPEALS` to the smallest evidenced structural unit, including `Point`; unresolved provider endpoints remain outside graph persistence | ADR-32 |
 | 1.11.0 | 2026-08-15 | Added corpus-evidenced `Document -> Section`, `Part -> Section`, `Part -> Article`, and packaging-document mixed root structure | ADR-33 |
 | 1.12.0 | 2026-08-15 | Added dual provenance for projected provider relations and atomic multi-target reconciliation | ADR-34 |
+| 1.13.0 | 2026-08-15 | Added citable `Appendix` ownership, Appendix-scoped structural identity, and explicit exclusion of table-of-contents artifacts | ADR-35 |
+| 1.14.0 | 2026-08-15 | Added evidenced `AttachedInstrument` ownership for regulations, charters, and standards promulgated with a host Document | ADR-36 |

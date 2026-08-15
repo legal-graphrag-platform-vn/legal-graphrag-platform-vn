@@ -79,6 +79,7 @@ class GraphChannel:
 class Capabilities:
     def inspect_capabilities(self, filters):
         return {
+            "vector_appendix_index_available": True,
             "vector_article_index_available": True,
             "vector_clause_index_available": True,
             "fulltext_index_available": True,

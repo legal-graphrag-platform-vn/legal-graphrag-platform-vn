@@ -90,16 +90,14 @@ class ChatMetadataData(BaseModel):
     resolution_status: str | None = None
     # Deterministic user-facing text; internal reason codes stay server-side.
     insufficiency_message: str | None = None
-    resolved_references: list["ChatResolvedReferenceData"] = Field(
-        default_factory=list
-    )
+    resolved_references: list["ChatResolvedReferenceData"] = Field(default_factory=list)
     relation_goal: str | None = None
 
 
 class ChatResolvedReferenceData(BaseModel):
     mention: str
     node_id: str
-    node_type: Literal["Document", "Article", "Clause", "Point"]
+    node_type: Literal["Document", "Appendix", "Article", "Clause", "Point"]
     label: str
     document_id: str
     resolution_method: str
@@ -204,7 +202,7 @@ def encode_sse(event: str, data: BaseModel | dict[str, Any]) -> str:
 
 class RetrievedUnitDTO(BaseModel):
     id: str
-    label: Literal["Article", "Clause", "Point"]
+    label: Literal["Appendix", "Article", "Clause", "Point"]
     content_raw: str
     citation_label: str
 
@@ -219,6 +217,7 @@ class RetrievedUnitDTO(BaseModel):
     clause_id: str | None = None  # Clause ID hoặc parent Clause ID
     article_number: str | None = None
     clause_number: str | None = None
+    appendix_number: str | None = None
     version_family_id: str | None = None
 
     effective_from: date | None = None

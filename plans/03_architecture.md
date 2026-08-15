@@ -2,7 +2,7 @@
 
 > **Phiên bản**: 0.4
 > **Trạng thái**: Draft — cần nhóm review
-> **Depends on**: [legal_ontology.md v1.12.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md), [ADR-28](./00_architecture_decisions.md), [ADR-29](./00_architecture_decisions.md), [ADR-30](./00_architecture_decisions.md), [ADR-32](./00_architecture_decisions.md), [ADR-33](./00_architecture_decisions.md), [ADR-34](./00_architecture_decisions.md)
+> **Depends on**: [legal_ontology.md v1.14.0](./legal_ontology.md), [ADR-27](./00_architecture_decisions.md), [ADR-28](./00_architecture_decisions.md), [ADR-29](./00_architecture_decisions.md), [ADR-30](./00_architecture_decisions.md), [ADR-32](./00_architecture_decisions.md), [ADR-33](./00_architecture_decisions.md), [ADR-34](./00_architecture_decisions.md), [ADR-35](./00_architecture_decisions.md), [ADR-36](./00_architecture_decisions.md)
 
 > **This work adopts a layered architecture that separates stable legal knowledge from context-dependent legal reasoning. Stable legal knowledge (e.g., document hierarchy, legal concepts, temporal validity, and citation relationships) is represented explicitly in the Legal Knowledge Graph, whereas contextual legal reasoning (e.g., obligations, exceptions, conditions, and comparative interpretation) is performed by the LLM at runtime using retrieved evidence. This separation avoids ontology explosion while preserving explainability and maintainability.**
 
@@ -70,8 +70,9 @@ Kiến trúc hệ thống được chia thành 3 tầng rõ rệt, kết nối v
 │       LAYER 1: LEGAL KNOWLEDGE GRAPH          │
 │                                               │
 │  ├── Structural Knowledge                     │
-│  │      Document, Part, Chapter, Section,      │
-│  │      Subsection, Article, Clause, Point     │
+│  │      Document, AttachedInstrument, Part,    │
+│  │      Chapter, Section, Subsection,          │
+│  │      Article, Clause, Point                 │
 │  │      Citation, Hierarchy                   │
 │  ├── Semantic Knowledge                       │
 │  │      Legal Concepts, Legal Entities        │

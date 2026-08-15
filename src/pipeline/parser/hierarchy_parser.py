@@ -13,7 +13,9 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from src.pipeline.parser.models import (
+    Appendix,
     Article,
+    AttachedInstrument,
     Clause,
     DocumentInfo,
     ParseDiagnostics,
@@ -30,6 +32,7 @@ from src.pipeline.parser.patterns import (
     looks_like_title,
     match_article,
     match_chapter,
+    match_chapter_heading,
     match_clause,
     match_part,
     match_point,
@@ -188,10 +191,6 @@ CITATION_NEXT_RE = re.compile(
     re.IGNORECASE,
 )
 CLOSING_ARTICLE_TITLE_RE = re.compile(r"(?:thi\s+hanh|chuyen\s+tiep)", re.IGNORECASE)
-APPENDIX_HEADING_RE = re.compile(
-    r"^\s*(?:danh\s*muc|phu\s*luc|mau\s*so|bieu\s*mau)(?:\s+[ivxlcdm\d]+)?(?:\s*[:.\-].*)?$",
-    re.IGNORECASE,
-)
 REPLACEMENT_QUOTE_INTRO_RE = re.compile(
     r"(?:sua\s+doi|bo\s+sung|thay\s+the|bai\s+bo).{0,200}"
     r"(?:nhu\s+sau|sau\s+day)\s*:\s*(.*)$",
@@ -218,6 +217,28 @@ class _ParsedHierarchy:
     parts: list[Part]
     sections: list[Section]
     subsections: list[Subsection]
+
+
+@dataclass(frozen=True, slots=True)
+class _SourcePartitions:
+    main: list[LineRecord]
+    appendices: list[list[LineRecord]]
+    attached_instruments: list[list[LineRecord]]
+    table_of_contents: list[LineRecord]
+
+
+@dataclass(frozen=True, slots=True)
+class _AppendixHeading:
+    number: str | None
+    title: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _AttachedInstrumentHeading:
+    instrument_kind: str
+    title: str | None
+    adoption_text: str
+    adoption_line_offset: int
 
 
 def _replacement_quote_lines(
@@ -362,9 +383,6 @@ def _parse_hierarchy(
     current_article: _ArticleBuilder | None = None
     current_clause: Clause | None = None
     current_point: Point | None = None
-    seen_closing_article = False
-    in_appendix = False
-
     part_article_count = 0
     chapter_article_count = 0
     section_article_count = 0
@@ -464,9 +482,6 @@ def _parse_hierarchy(
         if not line or should_skip_line(line):
             continue
 
-        asc_line = _ascii(line).strip().lower()
-        if seen_closing_article and APPENDIX_HEADING_RE.match(asc_line):
-            in_appendix = True
         prev_line = raw_text_lines[idx - 1] if idx > 0 else ""
         next_line = raw_text_lines[idx + 1] if idx < len(raw_text_lines) - 1 else ""
 
@@ -550,9 +565,8 @@ def _parse_hierarchy(
                 continue
 
         part_match = match_part(line)
-        if part_match is not None and not in_appendix:
+        if part_match is not None:
             flush_article()
-            seen_closing_article = False
             require_current_subsection_has_article()
             require_current_section_has_article()
             if current_chapter is not None and chapter_article_count == 0:
@@ -587,10 +601,9 @@ def _parse_hierarchy(
                 parts.append(current_part)
             continue
 
-        chapter_num = match_chapter(line)
-        if chapter_num is not None and not in_appendix:
+        chapter_match = match_chapter_heading(line)
+        if chapter_match is not None:
             flush_article()
-            seen_closing_article = False
             require_current_subsection_has_article()
             require_current_section_has_article()
             if current_chapter is not None and chapter_article_count == 0:
@@ -601,14 +614,15 @@ def _parse_hierarchy(
             document_mode = require_mode(
                 document_mode, expected_root_mode, owner="Document"
             )
+            chapter_num, inline_chapter_title = chapter_match
             current_chapter = chapter_num
-            current_chapter_title = None
+            current_chapter_title = inline_chapter_title
             current_section = None
             current_subsection = None
             chapter_article_count = 0
             section_article_count = 0
             subsection_article_count = 0
-            pending_chapter_title = True
+            pending_chapter_title = inline_chapter_title is None
             continue
 
         if pending_chapter_title:
@@ -618,7 +632,7 @@ def _parse_hierarchy(
                 continue
 
         section_match = match_section(line)
-        if section_match is not None and not in_appendix:
+        if section_match is not None:
             flush_article()
             require_current_subsection_has_article()
             require_current_section_has_article()
@@ -652,7 +666,7 @@ def _parse_hierarchy(
             continue
 
         subsection_match = match_subsection(line)
-        if subsection_match is not None and not in_appendix:
+        if subsection_match is not None:
             if current_section is None:
                 raise ValueError(
                     f"Subsection {subsection_match[0]} appears before any Section"
@@ -688,14 +702,11 @@ def _parse_hierarchy(
             continue
 
         article_match = match_article(line)
-        if (
-            article_match is not None
-            and not in_appendix
-            and not is_citation_context(prev_line, line, next_line)
+        if article_match is not None and not is_citation_context(
+            prev_line, line, next_line
         ):
             flush_article()
             number, inline_title = article_match
-            seen_closing_article = False
             part_article_count += 1
             chapter_article_count += 1
             section_article_count += 1
@@ -838,13 +849,14 @@ def parse_text_with_diagnostics(
     document = _with_source_effective_date(canonical_text, document)
     warnings: list[ParseWarning] = []
     records = source_line_records(canonical_text)
-    main_records, appendix_groups = partition_appendices(records)
+    partitions = partition_source_sections(records)
+    main_records = partitions.main
     try:
         parsed = _parse_canonical_text(
             canonical_text,
             document,
             warnings=warnings,
-            partitioned=(main_records, appendix_groups),
+            partitioned=partitions,
         )
     except ValueError as exc:
         warnings.append(
@@ -853,9 +865,7 @@ def parse_text_with_diagnostics(
                 message=str(exc),
             )
         )
-        parsed = _source_preserved_document(
-            canonical_text, document, main_records, appendix_groups
-        )
+        parsed = _source_preserved_document(canonical_text, document)
 
     if not parsed.articles and _records_have_content(main_records):
         if not any(
@@ -901,7 +911,13 @@ def parse_text_with_diagnostics(
     diagnostics = ParseDiagnostics(
         source_sha256=hashlib.sha256(canonical_text.encode("utf-8")).hexdigest(),
         status=status,
-        article_count=len(parsed.articles),
+        article_count=len(parsed.articles)
+        + sum(len(appendix.articles) for appendix in parsed.appendices)
+        + sum(
+            len(instrument.articles)
+            + sum(len(appendix.articles) for appendix in instrument.appendices)
+            for instrument in parsed.attached_instruments
+        ),
         unparsed_section_count=len(parsed.unparsed_sections),
         warnings=warnings,
     )
@@ -925,11 +941,11 @@ def _parse_canonical_text(
     document: DocumentInfo,
     *,
     warnings: list[ParseWarning] | None = None,
-    partitioned: tuple[list[LineRecord], list[list[LineRecord]]] | None = None,
+    partitioned: _SourcePartitions | None = None,
 ) -> ParsedDocument:
     records = source_line_records(canonical_text)
-    main_records, appendix_groups = partitioned or partition_appendices(records)
-    hierarchy = _parse_hierarchy(main_records, warnings=warnings)
+    partitions = partitioned or partition_source_sections(records)
+    hierarchy = _parse_hierarchy(partitions.main, warnings=warnings)
     articles = hierarchy.articles
     _validate_unique_point_labels(articles)
     return ParsedDocument(
@@ -938,29 +954,52 @@ def _parse_canonical_text(
         parts=hierarchy.parts,
         sections=hierarchy.sections,
         subsections=hierarchy.subsections,
-        unparsed_sections=[
-            _appendix_section(group, canonical_text, document.id)
-            for group in appendix_groups
+        appendices=[
+            _appendix_from_records(
+                group,
+                canonical_text,
+                document,
+                source_order=source_order,
+                parse_structure=True,
+            )
+            for source_order, group in enumerate(partitions.appendices, start=1)
         ],
+        attached_instruments=[
+            _attached_instrument_from_records(
+                group,
+                canonical_text,
+                document,
+                source_order=source_order,
+            )
+            for source_order, group in enumerate(
+                partitions.attached_instruments, start=1
+            )
+        ],
+        unparsed_sections=(
+            [
+                _table_of_contents_section(
+                    partitions.table_of_contents, canonical_text, document.id
+                )
+            ]
+            if partitions.table_of_contents
+            else []
+        ),
     )
 
 
 def _source_preserved_document(
     canonical_text: str,
     document: DocumentInfo,
-    main_records: list[LineRecord],
-    appendix_groups: list[list[LineRecord]],
 ) -> ParsedDocument:
-    unparsed_sections: list[UnparsedSection] = []
-    if _records_have_content(main_records):
-        unparsed_sections.append(
-            _unparsed_body_section(main_records, canonical_text, document.id)
-        )
-    unparsed_sections.extend(
-        _appendix_section(group, canonical_text, document.id)
-        for group in appendix_groups
+    records = source_line_records(canonical_text)
+    return ParsedDocument(
+        document=document,
+        unparsed_sections=(
+            [_unparsed_body_section(records, canonical_text, document.id)]
+            if _records_have_content(records)
+            else []
+        ),
     )
-    return ParsedDocument(document=document, unparsed_sections=unparsed_sections)
 
 
 def infer_source_effective_from(source_text: str) -> date | None:
@@ -1043,35 +1082,288 @@ def source_line_records(canonical_text: str) -> list[LineRecord]:
     return records
 
 
-def partition_appendices(
-    records: list[LineRecord],
-) -> tuple[list[LineRecord], list[list[LineRecord]]]:
+def partition_source_sections(records: list[LineRecord]) -> _SourcePartitions:
+    """Split source into the host body, owned attachments, Appendices, and TOC."""
+
     main: list[LineRecord] = []
     appendices: list[list[LineRecord]] = []
-    current: list[LineRecord] | None = None
-    for record in records:
-        if _is_appendix_heading(record.text):
-            current = [record]
-            appendices.append(current)
-        elif current is None:
-            main.append(record)
-        else:
-            current.append(record)
-    return main, appendices
+    attached_instruments: list[list[LineRecord]] = []
+    current_appendix: list[LineRecord] | None = None
+    current_instrument: list[LineRecord] | None = None
+    table_of_contents: list[LineRecord] = []
+    seen_article = False
+    midpoint = len(records) // 2
 
+    for index, record in enumerate(records):
+        if table_of_contents:
+            table_of_contents.append(record)
+            continue
 
-def _is_appendix_heading(text: str) -> bool:
-    stripped = re.sub(r"\s+", " ", text.strip())
-    if not re.match(r"(?i)^phụ lục(?:\s+.*)?$", stripped):
-        return False
-    return stripped.upper() == stripped or bool(
-        re.fullmatch(
-            r"(?i)phụ lục(?:\s+(?:số\s+)?(?:[IVXLCDM]+|\d+[A-Z]?|[A-Z]))?", stripped
-        )
+        attached_heading = _match_attached_instrument_heading(records, index)
+        if attached_heading is not None and current_appendix is None:
+            current_instrument = [record]
+            attached_instruments.append(current_instrument)
+            continue
+
+        if current_instrument is not None:
+            current_instrument.append(record)
+            continue
+
+        appendix_heading = _match_appendix_heading(record.text)
+        if appendix_heading is not None:
+            current_appendix = [record]
+            appendices.append(current_appendix)
+            continue
+
+        if current_appendix is not None:
+            current_appendix.append(record)
+            continue
+
+        if (
+            seen_article
+            and index >= midpoint
+            and _is_table_of_contents_heading(record.text)
+        ):
+            table_of_contents.append(record)
+            continue
+
+        main.append(record)
+        seen_article = seen_article or match_article(record.text) is not None
+
+    return _SourcePartitions(
+        main=main,
+        appendices=appendices,
+        attached_instruments=attached_instruments,
+        table_of_contents=table_of_contents,
     )
 
 
-def _appendix_section(
+_ATTACHED_INSTRUMENT_PREFIXES: tuple[tuple[str, str], ...] = (
+    ("QUY CHE", "REGULATION"),
+    ("QUY DINH", "REGULATION"),
+    ("DIEU LE", "CHARTER"),
+    ("CHUAN MUC", "STANDARD"),
+)
+_ATTACHED_ADOPTION_RE = re.compile(
+    r"(?i)\b(?:được\s+)?(?:ban\s+hành\s+)?kèm\s+theo\s+"
+    r"(?:luật|nghị\s+định|thông\s+tư|quyết\s+định|nghị\s+quyết)\b"
+)
+
+
+def _match_attached_instrument_heading(
+    records: list[LineRecord], index: int
+) -> _AttachedInstrumentHeading | None:
+    heading = re.sub(r"\s+", " ", records[index].text.strip())
+    if not heading or heading != heading.upper():
+        return None
+    ascii_heading = _ascii(heading).upper()
+    matched_kind: str | None = None
+    matched_prefix: str | None = None
+    for prefix, instrument_kind in _ATTACHED_INSTRUMENT_PREFIXES:
+        if ascii_heading == prefix or ascii_heading.startswith(f"{prefix} "):
+            matched_kind = instrument_kind
+            matched_prefix = prefix
+            break
+    if matched_kind is None or matched_prefix is None:
+        return None
+
+    non_empty_seen = 0
+    for lookahead in range(index + 1, min(index + 6, len(records))):
+        candidate = records[lookahead].text.strip()
+        if not candidate:
+            continue
+        non_empty_seen += 1
+        if _ATTACHED_ADOPTION_RE.search(candidate):
+            title = heading[len(matched_prefix) :].strip(" .:-–—") or None
+            return _AttachedInstrumentHeading(
+                instrument_kind=matched_kind,
+                title=title,
+                adoption_text=candidate,
+                adoption_line_offset=lookahead - index,
+            )
+        if non_empty_seen >= 3 or match_article(candidate) is not None:
+            break
+    return None
+
+
+def _match_appendix_heading(text: str) -> _AppendixHeading | None:
+    stripped = re.sub(r"\s+", " ", text.strip())
+    prefix = re.fullmatch(r"(?i)phụ\s+lục", stripped)
+    if prefix:
+        return _AppendixHeading(number=None, title=None)
+
+    match = re.match(r"(?i)^phụ\s+lục(?:\s+số)?\s+(.+)$", stripped)
+    if match is None:
+        return None
+    remainder = match.group(1).strip()
+    first_token, _, trailing = remainder.partition(" ")
+    token = first_token.rstrip(":.–—-")
+    ascii_token = _ascii(token)
+    if not re.fullmatch(
+        r"(?i)(?:[IVXLCDM]+|\d+[A-Z]*|[A-Z])(?:[./-][A-Z0-9]+)*",
+        ascii_token,
+    ):
+        if stripped != stripped.upper():
+            return None
+        return _AppendixHeading(number=None, title=remainder)
+
+    has_delimiter = first_token != token
+    if trailing and not has_delimiter and trailing != trailing.upper():
+        return None
+    title = trailing.strip().lstrip(":.–—- ").strip() or None
+    return _AppendixHeading(number=token, title=title)
+
+
+def _appendix_from_records(
+    records: list[LineRecord],
+    canonical_text: str,
+    document: DocumentInfo,
+    *,
+    source_order: int,
+    parse_structure: bool,
+) -> Appendix:
+    heading_text = records[0].text.strip()
+    heading = _match_appendix_heading(heading_text)
+    if heading is None:
+        raise ValueError(f"Invalid Appendix heading: {heading_text}")
+    start = records[0].source_start_char
+    end = records[-1].source_end_char
+    content_start = (
+        records[1].source_start_char if len(records) > 1 else records[0].source_end_char
+    )
+    content_raw = canonical_text[content_start:end].strip("\n")
+    if not content_raw.strip():
+        content_raw = heading_text
+
+    scope = _appendix_scope(heading.number, source_order)
+    kind = _classify_appendix(heading_text, records[1:])
+    hierarchy = _ParsedHierarchy([], [], [], [])
+    if parse_structure and kind == "LEGAL_CONTENT":
+        hierarchy = _parse_hierarchy(records[1:])
+        _validate_unique_point_labels(hierarchy.articles)
+        ParsedDocument(
+            document=document,
+            articles=hierarchy.articles,
+            parts=hierarchy.parts,
+            sections=hierarchy.sections,
+            subsections=hierarchy.subsections,
+        )
+
+    hash_input = f"{heading_text}\n{content_raw}".encode("utf-8")
+    return Appendix(
+        scope=scope,
+        number=heading.number,
+        heading=heading_text,
+        title=heading.title,
+        appendix_kind=kind,
+        content_raw=content_raw,
+        parts=hierarchy.parts,
+        sections=hierarchy.sections,
+        subsections=hierarchy.subsections,
+        articles=hierarchy.articles,
+        source_start_char=start,
+        source_end_char=end,
+        source_start_line=records[0].source_line,
+        source_end_line=records[-1].source_line,
+        content_hash=hashlib.sha256(hash_input).hexdigest(),
+    )
+
+
+def _attached_instrument_from_records(
+    records: list[LineRecord],
+    canonical_text: str,
+    document: DocumentInfo,
+    *,
+    source_order: int,
+) -> AttachedInstrument:
+    heading = _match_attached_instrument_heading(records, 0)
+    if heading is None:
+        raise ValueError(f"Invalid AttachedInstrument heading: {records[0].text}")
+
+    start = records[0].source_start_char
+    end = records[-1].source_end_char
+    content_start = (
+        records[1].source_start_char if len(records) > 1 else records[0].source_end_char
+    )
+    content_raw = canonical_text[content_start:end].strip("\n")
+    if not content_raw.strip():
+        raise ValueError("AttachedInstrument content must not be blank")
+
+    inner_partitions = partition_source_sections(records[1:])
+    if inner_partitions.attached_instruments:
+        raise ValueError("Nested AttachedInstrument is not supported")
+    hierarchy = _parse_hierarchy(inner_partitions.main)
+    _validate_unique_point_labels(hierarchy.articles)
+    ParsedDocument(
+        document=document,
+        articles=hierarchy.articles,
+        parts=hierarchy.parts,
+        sections=hierarchy.sections,
+        subsections=hierarchy.subsections,
+    )
+    if not hierarchy.articles:
+        raise ValueError(
+            f"AttachedInstrument {records[0].text.strip()} has no Article boundary"
+        )
+
+    nested_appendices = [
+        _appendix_from_records(
+            group,
+            canonical_text,
+            document,
+            source_order=appendix_order,
+            parse_structure=True,
+        )
+        for appendix_order, group in enumerate(inner_partitions.appendices, start=1)
+    ]
+    scope = f"{heading.instrument_kind.lower()}_{source_order}"
+    heading_text = records[0].text.strip()
+    hash_input = f"{heading_text}\n{content_raw}".encode("utf-8")
+    return AttachedInstrument(
+        scope=scope,
+        heading=heading_text,
+        adoption_text=heading.adoption_text,
+        title=heading.title,
+        instrument_kind=heading.instrument_kind,
+        content_raw=content_raw,
+        parts=hierarchy.parts,
+        sections=hierarchy.sections,
+        subsections=hierarchy.subsections,
+        articles=hierarchy.articles,
+        appendices=nested_appendices,
+        source_start_char=start,
+        source_end_char=end,
+        source_start_line=records[0].source_line,
+        source_end_line=records[-1].source_line,
+        content_hash=hashlib.sha256(hash_input).hexdigest(),
+    )
+
+
+def _appendix_scope(number: str | None, source_order: int) -> str:
+    if number is None:
+        return f"x{source_order}"
+    normalized = _ascii(number).lower()
+    return re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
+
+
+def _classify_appendix(heading: str, body: list[LineRecord]) -> str:
+    normalized = _ascii(heading).lower()
+    if re.search(r"\b(?:mau|bieu mau)\b", normalized):
+        return "FORM"
+    if "danh muc" in normalized:
+        return "LIST"
+    if re.search(r"\bbang\b", normalized):
+        return "TABLE"
+    if any(match_article(record.text) is not None for record in body):
+        return "LEGAL_CONTENT"
+    return "UNCLASSIFIED"
+
+
+def _is_table_of_contents_heading(text: str) -> bool:
+    return bool(re.fullmatch(r"(?i)\s*mục\s+lục\s*", text))
+
+
+def _table_of_contents_section(
     records: list[LineRecord], canonical_text: str, document_id: str
 ) -> UnparsedSection:
     heading = records[0].text.strip()
@@ -1083,7 +1375,7 @@ def _appendix_section(
     content_raw = canonical_text[content_start:end].strip("\n")
     hash_input = f"{heading}\n{content_raw}".encode("utf-8")
     return UnparsedSection(
-        section_type="APPENDIX",
+        section_type="TABLE_OF_CONTENTS",
         heading=heading,
         content_raw=content_raw,
         source_document_id=document_id,

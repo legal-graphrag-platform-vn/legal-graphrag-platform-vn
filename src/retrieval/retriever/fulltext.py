@@ -1,4 +1,4 @@
-"""Neo4j full-text retrieval for Article and Clause legal units."""
+"""Neo4j full-text retrieval for Appendix, Article, and Clause legal units."""
 
 import re
 

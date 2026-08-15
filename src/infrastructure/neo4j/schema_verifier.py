@@ -8,6 +8,8 @@ from typing import Any, Protocol
 
 EXPECTED_CONSTRAINTS = {
     "doc_id_unique",
+    "appendix_id_unique",
+    "attached_instrument_id_unique",
     "part_id_unique",
     "ch_id_unique",
     "sec_id_unique",
@@ -26,6 +28,11 @@ EXPECTED_USER_INDEXES = {
     "doc_normative",
     "doc_legal_status",
     "doc_issuer_name",
+    "appendix_number",
+    "appendix_kind",
+    "appendix_legal_status",
+    "attached_instrument_scope",
+    "attached_instrument_kind",
     "art_number",
     "art_legal_status",
     "cls_legal_status",
@@ -35,6 +42,7 @@ EXPECTED_USER_INDEXES = {
     "ls_name",
     "la_name",
     "doc_temporal",
+    "appendix_temporal",
     "art_temporal",
     "cls_temporal",
     "pnt_temporal",
@@ -54,9 +62,10 @@ EXPECTED_USER_INDEXES = {
     "legal_article_clause_fulltext",
     "legal_point_fulltext",
     "article_embedding",
+    "appendix_embedding",
     "clause_embedding",
 }
-VECTOR_INDEXES = {"article_embedding", "clause_embedding"}
+VECTOR_INDEXES = {"appendix_embedding", "article_embedding", "clause_embedding"}
 FORBIDDEN_LEGACY_INDEXES = {"legal_fulltext", "entity_vector"}
 
 

@@ -10,6 +10,8 @@ from datetime import date, datetime
 from typing import Any, Mapping, Sequence
 
 from src.shared.ontology.contract import (
+    APPENDIX_KINDS,
+    ATTACHED_INSTRUMENT_KINDS,
     CONSTRAINTS,
     DOCUMENT_LEGAL_STATUSES,
     DOCUMENT_TYPES,
@@ -179,6 +181,42 @@ class OntologyValidator:
             required_fields=("id", "name"),
         )
 
+    def validate_appendix(self, appendix: Mapping[str, Any]) -> ValidatedNode:
+        return self._validate_node(
+            appendix,
+            node_type="Appendix",
+            required_fields=(
+                "id",
+                "scope",
+                "heading",
+                "content_raw",
+                "appendix_kind",
+                "effective_from",
+                "legal_status",
+            ),
+            enum_fields={
+                "appendix_kind": APPENDIX_KINDS,
+                "legal_status": CONTENT_LEGAL_STATUSES,
+            },
+        )
+
+    def validate_attached_instrument(
+        self, instrument: Mapping[str, Any]
+    ) -> ValidatedNode:
+        return self._validate_node(
+            instrument,
+            node_type="AttachedInstrument",
+            required_fields=(
+                "id",
+                "scope",
+                "heading",
+                "adoption_text",
+                "content_raw",
+                "instrument_kind",
+            ),
+            enum_fields={"instrument_kind": ATTACHED_INSTRUMENT_KINDS},
+        )
+
     def validate_chapter(self, chapter: Mapping[str, Any]) -> ValidatedNode:
         return self._validate_node(
             chapter,
@@ -321,9 +359,10 @@ class OntologyValidator:
                     f"{', '.join(missing_method_properties)}"
                 )
 
-        if relation_type == "REFERS_TO" and properties.get(
-            "extraction_method"
-        ) == "ENTITY_LINKING":
+        if (
+            relation_type == "REFERS_TO"
+            and properties.get("extraction_method") == "ENTITY_LINKING"
+        ):
             ownership = properties.get("source_ownership", "HOST")
             ownership_requirements = {
                 "HOST": ("source_char_start", "source_char_end"),
@@ -349,9 +388,10 @@ class OntologyValidator:
                     f"{', '.join(missing)}"
                 )
 
-        if relation_type in {"AMENDS", "REPEALS"} and properties.get(
-            "source_ownership"
-        ) == "PROJECTED":
+        if (
+            relation_type in {"AMENDS", "REPEALS"}
+            and properties.get("source_ownership") == "PROJECTED"
+        ):
             required = (
                 "host_evidence_document_id",
                 "host_evidence_source_unit_id",
@@ -423,6 +463,10 @@ class OntologyValidator:
                     node = self.validate_document(raw_node)
                 elif node_type == "Issuer":
                     node = self.validate_issuer(raw_node)
+                elif node_type == "Appendix":
+                    node = self.validate_appendix(raw_node)
+                elif node_type == "AttachedInstrument":
+                    node = self.validate_attached_instrument(raw_node)
                 elif node_type == "Part":
                     node = self.validate_part(raw_node)
                 elif node_type == "Chapter":

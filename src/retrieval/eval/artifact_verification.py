@@ -18,6 +18,7 @@ from src.shared.retrieval_contract import RetrievalCapability
 
 _CAPABILITY_FIELDS: dict[RetrievalCapability, tuple[str, ...]] = {
     RetrievalCapability.HYBRID_SEED_AND_SEMANTIC_GRAPH: (
+        "vector_appendix_index_available",
         "vector_article_index_available",
         "vector_clause_index_available",
         "fulltext_index_available",
@@ -40,6 +41,7 @@ _CAPABILITY_FIELDS: dict[RetrievalCapability, tuple[str, ...]] = {
 }
 _SCOPED_VALID_STATUSES = {
     "Document": {"ACTIVE", "PARTIALLY_EFFECTIVE"},
+    "Appendix": {"ACTIVE", "AMENDED"},
     "Article": {"ACTIVE", "AMENDED"},
     "Clause": {"ACTIVE", "AMENDED"},
 }

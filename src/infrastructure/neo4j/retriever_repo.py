@@ -98,11 +98,11 @@ class Neo4jRetrieverRepo:
         query = f"""
         UNWIND $anchor_ids AS anchor_id
         MATCH (anchor {{id: anchor_id}})
-        WHERE anchor:Document OR anchor:Article OR anchor:Clause OR anchor:Point
+        WHERE anchor:Document OR anchor:Appendix OR anchor:Article OR anchor:Clause OR anchor:Point
         OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(anchor)
         WITH anchor_id, anchor,
              CASE WHEN anchor:Point THEN parent_clause
-                  WHEN anchor:Article OR anchor:Clause THEN anchor
+                  WHEN anchor:Appendix OR anchor:Article OR anchor:Clause THEN anchor
                   ELSE null END AS node
         OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(node)
         OPTIONAL MATCH (owner:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(node)
@@ -156,7 +156,7 @@ class Neo4jRetrieverRepo:
             effective_to: path_node.effective_to,
             legal_status: path_node.legal_status,
             citable_unit_id: CASE
-              WHEN path_node:Article OR path_node:Clause THEN path_node.id
+              WHEN path_node:Appendix OR path_node:Article OR path_node:Clause THEN path_node.id
               WHEN path_node:Point THEN path_parent_clause.id
               ELSE null
             END
@@ -165,7 +165,7 @@ class Neo4jRetrieverRepo:
         OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(unit)
         OPTIONAL MATCH (document:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(unit)
         WITH path, path_node_refs, unit, parent_article, document
-        WHERE NOT (unit:Article OR unit:Clause) OR ({_GRAPH_UNIT_FILTER})
+        WHERE NOT (unit:Appendix OR unit:Article OR unit:Clause) OR ({_GRAPH_UNIT_FILTER})
         RETURN
           path_node_refs,
           [rel IN relationships(path) | {{
@@ -179,8 +179,9 @@ class Neo4jRetrieverRepo:
             citation_type: rel.citation_type,
             extraction_method: rel.extraction_method
           }}] AS path_edge_refs,
-          CASE WHEN unit:Article OR unit:Clause THEN unit.id ELSE null END AS id,
-          CASE WHEN unit:Article THEN 'Article'
+          CASE WHEN unit:Appendix OR unit:Article OR unit:Clause THEN unit.id ELSE null END AS id,
+          CASE WHEN unit:Appendix THEN 'Appendix'
+               WHEN unit:Article THEN 'Article'
                WHEN unit:Clause THEN 'Clause' ELSE null END AS label,
           unit.content_raw AS content_raw,
           unit.title AS title,
@@ -188,6 +189,7 @@ class Neo4jRetrieverRepo:
           CASE WHEN unit:Clause THEN unit.id ELSE null END AS clause_id,
           CASE WHEN unit:Article THEN unit.number ELSE parent_article.number END AS article_number,
           CASE WHEN unit:Clause THEN unit.number ELSE null END AS clause_number,
+          CASE WHEN unit:Appendix THEN unit.number ELSE null END AS appendix_number,
           document.id AS document_id,
           document.number AS document_number,
           document.title AS document_title,
@@ -377,7 +379,7 @@ class Neo4jRetrieverRepo:
         WITH scoped_nodes,
              [node IN scoped_nodes
               WHERE node IS NOT NULL
-                AND (node:Document OR node:Article OR node:Clause)] AS temporal_nodes
+                AND (node:Document OR node:Appendix OR node:Article OR node:Clause)] AS temporal_nodes
         UNWIND scoped_nodes AS scoped
         OPTIONAL MATCH (scoped)-[relation]-(other)
         RETURN collect(DISTINCT type(relation)) AS relation_types,
@@ -393,6 +395,9 @@ class Neo4jRetrieverRepo:
         )
         multiple_versions = self._multiple_versions_available(filters)
         return {
+            "vector_appendix_index_available": _index_online(
+                indexes, "appendix_embedding"
+            ),
             "vector_article_index_available": _index_online(
                 indexes, "article_embedding"
             ),
@@ -456,13 +461,15 @@ _GRAPH_UNIT_FILTER = _FILTER_PREDICATE.replace("node.", "unit.")
 
 _UNIT_PROJECTION = """
 node.id AS id,
-CASE WHEN node:Article THEN 'Article' ELSE 'Clause' END AS label,
+CASE WHEN node:Appendix THEN 'Appendix'
+     WHEN node:Article THEN 'Article' ELSE 'Clause' END AS label,
 node.content_raw AS content_raw,
 node.title AS title,
 CASE WHEN node:Article THEN node.id ELSE parent_article.id END AS article_id,
 CASE WHEN node:Clause THEN node.id ELSE null END AS clause_id,
 CASE WHEN node:Article THEN node.number ELSE parent_article.number END AS article_number,
 CASE WHEN node:Clause THEN node.number ELSE null END AS clause_number,
+CASE WHEN node:Appendix THEN node.number ELSE null END AS appendix_number,
 document.id AS document_id,
 document.number AS document_number,
 document.title AS document_title,
@@ -554,7 +561,7 @@ def _exact_path_query(depth: int) -> str:
             effective_to: path_node.effective_to,
             legal_status: path_node.legal_status,
             citable_unit_id: CASE
-              WHEN path_node:Article OR path_node:Clause THEN path_node.id
+              WHEN path_node:Appendix OR path_node:Article OR path_node:Clause THEN path_node.id
               WHEN path_node:Point THEN path_parent_clause.id
               ELSE null
             END

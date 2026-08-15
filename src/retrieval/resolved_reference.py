@@ -36,7 +36,7 @@ class ResolvedReference(BaseModel):
 
     mention: str = Field(min_length=1, max_length=4000)
     node_id: str = Field(min_length=1)
-    node_type: Literal["Document", "Article", "Clause", "Point"]
+    node_type: Literal["Document", "Appendix", "Article", "Clause", "Point"]
     label: str = Field(min_length=1)
     document_id: str = Field(min_length=1)
     resolution_method: ResolutionMethod
@@ -48,9 +48,7 @@ class RetrievalExecutionContext(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    resolved_references: tuple[ResolvedReference, ...] = Field(
-        default=(), max_length=5
-    )
+    resolved_references: tuple[ResolvedReference, ...] = Field(default=(), max_length=5)
     relation_goal: RelationGoal | None = None
 
     @model_validator(mode="after")

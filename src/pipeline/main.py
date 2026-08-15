@@ -776,9 +776,7 @@ def validate_payload(
         "graph_id": _graph_id(payload),
         "node_count_by_label": dict(sorted(node_counts.items())),
         "relation_count_by_type": dict(sorted(relation_counts.items())),
-        "embedding_target_count": sum(
-            node_counts.get(label, 0) for label in ("Article", "Clause")
-        ),
+        "embedding_target_count": len(embedding_texts_by_node_id(payload)),
         "duplicate_node_id_count": consistency.duplicate_node_id_count,
         "duplicate_relation_identity_count": consistency.duplicate_relation_identity_count,
         "dangling_endpoint_count": dangling_endpoint_count,
@@ -1003,7 +1001,7 @@ def embed_graph(
         ),
     ] = False,
 ) -> None:
-    """Generate and write configured-dimension Article/Clause embeddings."""
+    """Generate and write configured-dimension Appendix/Article/Clause embeddings."""
     payload = _validated_payload_for_raw_doc_code(raw_doc_code)
     texts_by_node_id = embedding_texts_by_node_id(payload)
     graph_id = _graph_id(payload)

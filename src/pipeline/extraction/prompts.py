@@ -46,7 +46,7 @@ QUY TẮC ĐẶT ID:
 
 - Concept/Entity/Action sử dụng ID tiếng Việt không dấu, viết thường,
   các từ cách nhau bằng dấu gạch dưới.
-- Không trích xuất Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại
+- Không trích xuất Phụ lục/Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại
   thành semantic entity. Các đơn vị này thuộc structural parser/resolver.
 - Không suy diễn thêm đối tượng không được nhắc đến trong văn bản.
 
@@ -85,7 +85,7 @@ Chỉ sử dụng các loại quan hệ sau:
   trong Phase 1.
 
 - REFERS_TO:
-  Article/Clause/Point -> Document/Part/Chapter/Section/Subsection/Article/Clause/Point
+  Article/Clause/Point -> Document/Appendix/Part/Chapter/Section/Subsection/Article/Clause/Point
   khác được viện dẫn.
 
 - AMENDS / REPLACES / REPEALS:

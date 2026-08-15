@@ -16,7 +16,7 @@ from src.infrastructure.neo4j.writer import neo4j_properties
 from src.shared.ontology.hierarchy import MAX_DOCUMENT_HIERARCHY_DEPTH
 
 
-SOURCE_LABELS = frozenset({"Article", "Clause", "Point"})
+SOURCE_LABELS = frozenset({"Appendix", "Article", "Clause", "Point"})
 TARGET_LABELS = frozenset(
     {
         "Document",
@@ -115,8 +115,7 @@ class Neo4jExternalReferenceWriter:
             _require_label(reference.target_type, TARGET_LABELS, "target")
             if (
                 reference.source_document_id == reference.target_document_id
-                and reference.relation.properties.get("source_ownership")
-                != "PROJECTED"
+                and reference.relation.properties.get("source_ownership") != "PROJECTED"
             ):
                 raise ExternalReferenceWriteError(
                     "same_document_reference_not_external"
@@ -262,7 +261,9 @@ class Neo4jProviderTemporalWriter:
             raise ExternalReferenceWriteError(
                 "unsupported_provider_temporal_relation", relation.relation_type
             )
-        temporal_labels = frozenset({"Document", "Article", "Clause", "Point"})
+        temporal_labels = frozenset(
+            {"Document", "Appendix", "Article", "Clause", "Point"}
+        )
         _require_label(relation.head_type, temporal_labels, "source")
         _require_label(relation.tail_type, temporal_labels, "target")
         for endpoint_id, endpoint_type, expected_owner in (

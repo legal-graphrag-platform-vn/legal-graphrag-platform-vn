@@ -281,6 +281,8 @@ def test_external_section_checkpoint_preserves_structured_candidate(tmp_path) ->
     assert row["reference"]["target_candidate"] == {
         "target_type": "Section",
         "document_number": "57/2026/NĐ-CP",
+        "appendix_scope": None,
+        "appendix_number": None,
         "part_number": None,
         "chapter_number": "III",
         "section_number": "1",
