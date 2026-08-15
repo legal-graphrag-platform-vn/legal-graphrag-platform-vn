@@ -43,6 +43,7 @@ from src.pipeline.extraction.provider_relation_records import (
 from src.pipeline.extraction.structural_context import (
     ENDPOINT_CONTRACT_VERSION,
     PROMPT_VERSION,
+    ArticleExtractionContext,
     DocumentRegistry,
     EndpointResolution,
     StructuralRegistry,
@@ -73,6 +74,7 @@ from src.shared.ontology.validators import validate_relation as validate_ontolog
 from src.shared.ontology.contract import (
     DOCUMENT_RELATION_EXTRACTION_METHODS,
     ONTOLOGY_VERSION,
+    SYNTHETIC_ARTICLE_NUMBER_PREFIX,
 )
 from src.pipeline.validation.record_consistency_validator import (
     validate_record_relation,
@@ -620,6 +622,113 @@ def _validate_diagram_records(
     return validated_records
 
 
+# Kích thước tối đa mỗi chunk synthetic (ký tự) — ~750 token, vừa context window LLM
+_SYNTHETIC_CHUNK_MAX_CHARS = 3000
+
+# Regex nhận diện ranh giới Roman-outline phổ biến trong Thông tư cũ:
+# I/ TÊN, II. TÊN, III - TÊN, I- TÊN (đầu dòng, chữ in hoa sau)
+_ROMAN_OUTLINE_RE = re.compile(
+    r"^([IVX]+)\s*[/\.\-]\s+([A-ZĐÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸ].+)$",
+    re.UNICODE,
+)
+
+
+def _is_synthetic(article: Article) -> bool:
+    """Kiểm tra xem Article có phải là synthetic (tạo từ SOURCE_PRESERVED) không."""
+    return article.number.startswith(SYNTHETIC_ARTICLE_NUMBER_PREFIX)
+
+
+def _split_by_roman_outline(text: str) -> list[tuple[str, str]]:
+    """Split text theo Roman-outline headers, trả về list (heading, content).
+
+    Ví dụ: 'I/ NHỮNG QUY ĐỊNH CHUNG\n...' -> [('I/ NHỮNG QUY ĐỊNH CHUNG', '...')]
+    Trả về [] nếu không tìm thấy đủ ranh giới (< 2 chunks).
+    """
+    lines = text.splitlines()
+    chunks: list[tuple[str, str]] = []
+    current_heading: str | None = None
+    current_lines: list[str] = []
+
+    for line in lines:
+        if _ROMAN_OUTLINE_RE.match(line.strip()):
+            # Flush chunk hiện tại
+            if current_lines or current_heading is not None:
+                chunks.append((current_heading or "", "\n".join(current_lines).strip()))
+            current_heading = line.strip()
+            current_lines = []
+        else:
+            current_lines.append(line)
+
+    if current_lines or current_heading is not None:
+        chunks.append((current_heading or "", "\n".join(current_lines).strip()))
+
+    # Chỉ trả về kết quả nếu thực sự phân tách được
+    return chunks if len(chunks) >= 2 else []
+
+
+def _split_by_size(text: str, max_chars: int) -> list[tuple[str, str]]:
+    """Fallback: chunk text theo kích thước, cắt tại ranh giới dòng gần nhất."""
+    chunks: list[tuple[str, str]] = []
+    start = 0
+    while start < len(text):
+        end = min(start + max_chars, len(text))
+        if end < len(text):
+            # Cắt tại dòng mới gần nhất để tránh cắt giữa câu
+            newline = text.rfind("\n", start, end)
+            if newline > start:
+                end = newline
+        chunks.append(("", text[start:end].strip()))
+        start = end
+    return chunks
+
+
+def _synthetic_articles_from_unparsed(parsed: ParsedDocument) -> list[Article]:
+    """Tạo synthetic Articles từ unparsed_sections khi document SOURCE_PRESERVED.
+
+    Chiến lược:
+    1. Thử split text theo Roman-outline headers (I/, II., I- ...)
+    2. Fallback: split theo kích thước (_SYNTHETIC_CHUNK_MAX_CHARS ký tự/chunk)
+
+    Synthetic Articles có number='SP_1', 'SP_2', ... để phân biệt với Điều thật.
+    Không có chapter/section/part — được gắn thẳng vào Document node trong graph.
+    """
+    body_sections = [
+        s for s in parsed.unparsed_sections if s.section_type == "UNPARSED_BODY"
+    ]
+    if not body_sections:
+        return []
+
+    full_text = "\n".join(s.content_raw for s in body_sections).strip()
+    if not full_text:
+        return []
+
+    # Thử split theo Roman outline trước
+    chunks = _split_by_roman_outline(full_text)
+
+    # Fallback: split theo kích thước
+    if not chunks:
+        chunks = _split_by_size(full_text, _SYNTHETIC_CHUNK_MAX_CHARS)
+
+    if not chunks:
+        return []
+
+    articles: list[Article] = []
+    for i, (heading, content) in enumerate(chunks, start=1):
+        if not content:
+            continue
+        articles.append(
+            Article(
+                number=f"{SYNTHETIC_ARTICLE_NUMBER_PREFIX}{i}",
+                title=heading or f"[Phần {i}]",
+                content_raw=content,
+                # source spans trỏ vào toàn bộ body section
+                source_start_char=body_sections[0].source_start_char,
+                source_end_char=body_sections[-1].source_end_char,
+            )
+        )
+    return articles
+
+
 def _validate_structural_reference_source(
     articles: list[Article],
     *,
@@ -737,14 +846,44 @@ def run_pipeline(
             raise ValueError(
                 f"Selected Article(s) not found in hierarchy: {missing_selection}"
             )
+    # Khi document SOURCE_PRESERVED (0 Article từ parser), tạo synthetic Articles
+    # từ unparsed_sections để extraction vẫn có thể chạy được trên toàn văn bản thô.
+    if not available_articles:
+        synthetic = _synthetic_articles_from_unparsed(parsed)
+        if synthetic:
+            logger.info(
+                "Document %s có 0 Điều (SOURCE_PRESERVED); tạo %d synthetic chunk Article(s) "
+                "từ unparsed_sections để extraction.",
+                raw_doc_code,
+                len(synthetic),
+            )
+            available_articles = synthetic
+            # Tạo synthetic contexts: article_id = '{graph_id}_SP_{i}'
+            for article in synthetic:
+                contexts_by_model[id(article)] = ArticleExtractionContext(
+                    raw_doc_code=raw_doc_code,
+                    graph_id=parsed.document.id,
+                    article_number=article.number,
+                    article_id=f"{parsed.document.id}_{article.number}",
+                    clause_ids={},
+                    point_ids={},
+                )
+            # Cập nhật selected_articles
+            if article_numbers is None:
+                selected_articles = available_articles
+
     if not selected_articles:
         raise ValueError("Extraction requires at least one selected Article")
+
     source_path = settings.data_raw_dir / raw_doc_code / "source.txt"
-    _validate_structural_reference_source(
-        selected_articles,
-        source_text=source_text,
-        source_path=source_path,
-    )
+    # Synthetic articles không có source spans chính xác theo Điều
+    # → bỏ qua source span validation để tránh crash.
+    if not any(_is_synthetic(a) for a in selected_articles):
+        _validate_structural_reference_source(
+            selected_articles,
+            source_text=source_text,
+            source_path=source_path,
+        )
     document_registry = DocumentRegistry.from_manifest(settings.curated_manifest_path)
     provider_candidates = load_provider_relation_candidates(
         out_dir / "provider_relation_candidates.jsonl"

@@ -674,3 +674,140 @@ def test_main_and_appendix_articles_use_distinct_checkpoint_identities(
         "tt_demo_art1",
         "tt_demo_appi_art1",
     }
+
+
+# ─── Tests for SOURCE_PRESERVED synthetic article chunking ───────────────────
+
+from src.pipeline.pipeline.orchestrator import (
+    _is_synthetic,
+    _split_by_roman_outline,
+    _split_by_size,
+    _synthetic_articles_from_unparsed,
+)
+from src.shared.ontology.contract import SYNTHETIC_ARTICLE_NUMBER_PREFIX
+from src.pipeline.parser.models import UnparsedSection
+import hashlib
+
+
+def _make_unparsed_section(content: str, doc_id: str = "test_doc") -> UnparsedSection:
+    return UnparsedSection(
+        section_type="UNPARSED_BODY",
+        content_raw=content,
+        source_document_id=doc_id,
+        source_start_char=0,
+        source_end_char=len(content),
+        source_start_line=1,
+        source_end_line=content.count("\n") + 1,
+        content_hash=hashlib.sha256(content.encode()).hexdigest(),
+    )
+
+
+def test_split_by_roman_outline_basic() -> None:
+    text = (
+        "I/ ĐỐI TƯỢNG ÁP DỤNG\n"
+        "Nội dung phần 1.\n"
+        "II/ XẾP LƯƠNG\n"
+        "Nội dung phần 2.\n"
+        "III/ TỔ CHỨC THỰC HIỆN\n"
+        "Nội dung phần 3."
+    )
+    chunks = _split_by_roman_outline(text)
+    assert len(chunks) == 3
+    assert chunks[0][0] == "I/ ĐỐI TƯỢNG ÁP DỤNG"
+    assert "Nội dung phần 1." in chunks[0][1]
+    assert chunks[1][0] == "II/ XẾP LƯƠNG"
+    assert chunks[2][0] == "III/ TỔ CHỨC THỰC HIỆN"
+
+
+def test_split_by_roman_outline_no_match_returns_empty() -> None:
+    text = "Không có Roman outline\nChỉ là text bình thường."
+    chunks = _split_by_roman_outline(text)
+    assert chunks == []
+
+
+def test_split_by_roman_outline_single_section_returns_empty() -> None:
+    """Chỉ 1 section không đủ để split → trả về []."""
+    text = "I/ DUY NHẤT\nNội dung."
+    chunks = _split_by_roman_outline(text)
+    assert chunks == []
+
+
+def test_split_by_size_basic() -> None:
+    text = "a" * 100 + "\n" + "b" * 100
+    chunks = _split_by_size(text, max_chars=120)
+    assert len(chunks) >= 2
+    for _, content in chunks:
+        assert len(content) <= 120
+
+
+def test_split_by_size_short_text_is_single_chunk() -> None:
+    text = "Ngắn."
+    chunks = _split_by_size(text, max_chars=3000)
+    assert len(chunks) == 1
+    assert chunks[0][1] == "Ngắn."
+
+
+def test_is_synthetic_detects_prefix() -> None:
+    synth = Article(number="SP_1", content_raw="test")
+    real = Article(number="1", content_raw="test")
+    assert _is_synthetic(synth) is True
+    assert _is_synthetic(real) is False
+
+
+def _make_source_preserved_doc(content: str) -> ParsedDocument:
+    doc_info = DocumentInfo(
+        id="test_sp_doc",
+        title="Test SOURCE_PRESERVED",
+        number="01/2000/TT-BTC",
+        doc_type="Circular",
+        issued_date=date(2000, 1, 1),
+        effective_from=date(2000, 1, 1),
+    )
+    section = _make_unparsed_section(content, doc_id="test_sp_doc")
+    return ParsedDocument(document=doc_info, articles=[], unparsed_sections=[section])
+
+
+def test_synthetic_articles_roman_outline() -> None:
+    content = (
+        "I/ ĐỐI TƯỢNG\n"
+        "Người lao động khu vực khác.\n"
+        "II/ XẾP LƯƠNG\n"
+        "Xếp theo nguyên tắc làm việc gì hưởng lương đó.\n"
+        "III/ TỔ CHỨC THỰC HIỆN\n"
+        "Thông tư có hiệu lực từ ngày ký."
+    )
+    parsed = _make_source_preserved_doc(content)
+    articles = _synthetic_articles_from_unparsed(parsed)
+
+    assert len(articles) == 3
+    assert all(a.number.startswith(SYNTHETIC_ARTICLE_NUMBER_PREFIX) for a in articles)
+    assert articles[0].title == "I/ ĐỐI TƯỢNG"
+    assert articles[1].title == "II/ XẾP LƯƠNG"
+    assert articles[2].title == "III/ TỔ CHỨC THỰC HIỆN"
+    assert "Người lao động" in articles[0].content_raw
+
+
+def test_synthetic_articles_size_fallback() -> None:
+    """Khi không có Roman outline, fallback chia theo kích thước."""
+    content = ("Nội dung không có Roman outline. " * 200).strip()
+    parsed = _make_source_preserved_doc(content)
+    articles = _synthetic_articles_from_unparsed(parsed)
+
+    assert len(articles) >= 2  # Phải chia ít nhất 2 chunk
+    for a in articles:
+        assert len(a.content_raw) <= 3000
+        assert a.number.startswith(SYNTHETIC_ARTICLE_NUMBER_PREFIX)
+        assert a.title == f"[Phần {a.number[len(SYNTHETIC_ARTICLE_NUMBER_PREFIX):]}]"
+
+
+def test_synthetic_articles_empty_unparsed_returns_empty() -> None:
+    doc_info = DocumentInfo(
+        id="empty_doc",
+        title="Empty",
+        number="01/2000",
+        doc_type="Circular",
+        issued_date=date(2000, 1, 1),
+        effective_from=date(2000, 1, 1),
+    )
+    parsed = ParsedDocument(document=doc_info, articles=[], unparsed_sections=[])
+    assert _synthetic_articles_from_unparsed(parsed) == []

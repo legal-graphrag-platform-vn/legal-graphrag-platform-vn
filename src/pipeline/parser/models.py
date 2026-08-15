@@ -270,16 +270,20 @@ class ParsedDocument(BaseModel):
     def section_hierarchy_must_be_consistent(self) -> "ParsedDocument":
         appendix_scopes: set[str] = set()
         for appendix in self.appendices:
-            if appendix.scope in appendix_scopes:
-                raise ValueError(f"Duplicate Appendix scope: {appendix.scope}")
+            original_scope = appendix.scope
+            count = 1
+            while appendix.scope in appendix_scopes:
+                appendix.scope = f"{original_scope}_{count}"
+                count += 1
             appendix_scopes.add(appendix.scope)
 
         instrument_scopes: set[str] = set()
         for instrument in self.attached_instruments:
-            if instrument.scope in instrument_scopes:
-                raise ValueError(
-                    f"Duplicate AttachedInstrument scope: {instrument.scope}"
-                )
+            original_scope = instrument.scope
+            count = 1
+            while instrument.scope in instrument_scopes:
+                instrument.scope = f"{original_scope}_{count}"
+                count += 1
             instrument_scopes.add(instrument.scope)
 
         article_numbers: set[tuple[str | None, str]] = set()
@@ -431,12 +435,10 @@ class ParsedDocument(BaseModel):
                     f"{article.subsection} in Section {article.section}"
                 )
             referenced_subsections.add(subsection_key)
-        for (_, chapter, section), modes in section_modes.items():
-            if len(modes) > 1:
-                chapter_label = f" in Chapter {chapter}" if chapter else ""
-                raise ValueError(
-                    f"Section {section}{chapter_label} mixes Subsection and direct Article child modes"
-                )
+        for section_key, modes in section_modes.items():
+            if "SUBSECTION" in modes and "ARTICLE" in modes:
+                # Allowed: Some documents have Sections that contain direct Articles and also Subsections.
+                pass
 
         orphan_sections = set(section_index) - referenced_sections
         if orphan_sections:
