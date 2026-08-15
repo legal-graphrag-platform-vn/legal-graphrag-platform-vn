@@ -1,6 +1,9 @@
 # Hướng Dẫn Vận Hành Pipeline: Dataset LuatVietnam & Batch Processing Engine
 
 > **Mục đích**: Hướng dẫn chi tiết cách vận hành Pipeline đơn lẻ (Single Ingest) và hàng loạt (Batch Ingest) cho tập dữ liệu văn bản pháp luật, cơ chế cào dữ liệu Luật Việt Nam kết hợp VBPL, tự động quy ước mã tên 26 hình thức văn bản, và cơ chế nạp Đồ thị Neo4j + BGE-M3 Vector Embeddings.
+>
+> **Ontology contract:** `1.11.0` — hỗ trợ `Section` trực thuộc `Document`,
+> `Part` hoặc `Chapter` theo cấu trúc thực tế của corpus LuatVietnam.
 
 ---
 
@@ -102,6 +105,18 @@ uv run python -m src.pipeline.main batch-ingest-all --limit 3
   5. **Batch Write Neo4j**: Nạp tất cả Nút & Quan hệ vào Neo4j Graph DB.
   6. **Batch Generate Embeddings**: Sinh Vector BGE-M3 (1024 dims) inject vào Neo4j.
 
+Các hierarchy/payload sinh bởi ontology `1.10.x` phải được parse và regenerate
+trước khi write bằng runtime `1.11.0`; pipeline không tự coi artifact cũ là tương
+thích. Các parent chain mới được chấp nhận là:
+
+```text
+Document -> Section -> Article
+Document -> Section -> Subsection -> Article
+Document -> Part -> Section -> Article
+Document -> Part -> Section -> Subsection -> Article
+Document -> Part -> Article
+```
+
 ---
 
 ### 2.3 Chạy FULL PIPELINE Cho Một Thư Mục Tùy Chỉnh (`ingest-folder`)
@@ -201,4 +216,3 @@ Khi chạy cào một văn bản từ Luật Việt Nam:
 | **Chạy luồng Batch nhưng Parse từng văn bản một** | `uv run python -m src.pipeline.main batch-ingest-all --workers 1` |
 | **Chạy lại các bài bị lỗi / ép chạy lại LLM** | `uv run python -m src.pipeline.main ingest-folder --folder "<PATH>" --retry-failed` |
 | **Kiểm tra trợ giúp** | `uv run python -m src.pipeline.main --help` |
-

@@ -39,7 +39,7 @@ def test_all_relations_have_constraints() -> None:
 
 
 def test_executable_contract_matches_frozen_ontology_version() -> None:
-    assert ONTOLOGY_VERSION == "1.10.0"
+    assert ONTOLOGY_VERSION == "1.11.0"
 
 
 def test_contract_separates_reference_and_document_relation_provenance() -> None:
@@ -150,9 +150,23 @@ def test_contains_and_refers_to_support_part_and_subsection() -> None:
         assert ok, f"Clause REFERS_TO {target} bị reject: {err}"
 
 
-def test_document_to_section_is_not_a_valid_hierarchy_shortcut() -> None:
-    ok, _ = validate_relation("Document", "CONTAINS", "Section")
-    assert not ok
+def test_contains_allows_evidenced_direct_part_and_section_parents() -> None:
+    for head, tail in (
+        ("Document", "Section"),
+        ("Part", "Section"),
+        ("Part", "Article"),
+    ):
+        ok, err = validate_relation(head, "CONTAINS", tail)
+        assert ok, f"{head}->{tail} bị reject: {err}"
+
+
+def test_contains_still_rejects_unsupported_structural_shortcuts() -> None:
+    for head, tail in (
+        ("Chapter", "Subsection"),
+        ("Document", "Subsection"),
+    ):
+        ok, _ = validate_relation(head, "CONTAINS", tail)
+        assert not ok
 
 
 def test_requires_not_rejected() -> None:

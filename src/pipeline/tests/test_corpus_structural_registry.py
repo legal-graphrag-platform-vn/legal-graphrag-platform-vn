@@ -126,6 +126,65 @@ def _build(*, build_id: str = "registry-build-1", source: str = "Nội dung"):
     )
 
 
+def test_registry_accepts_document_to_section_chain() -> None:
+    payload = validate_graph_payload(
+        {
+            "nodes": [
+                {
+                    "type": "Document",
+                    "id": "ttlt_178_2015",
+                    "number": "178/2015/TTLT-BTC-BNNPTNT-BTNMT-BYT",
+                    "doc_type": "JointCircular",
+                    "normative": True,
+                    "legal_status": "ACTIVE",
+                    "effective_from": "2016-02-01",
+                    "issuer_name": "Bộ Tài chính",
+                },
+                {
+                    "type": "Section",
+                    "id": "ttlt_178_2015_sec1",
+                    "number": "1",
+                    "title": "Quy định chung",
+                },
+                {
+                    "type": "Article",
+                    "id": "ttlt_178_2015_art1",
+                    "number": "1",
+                    "content_raw": "Phạm vi điều chỉnh",
+                    "effective_from": "2016-02-01",
+                    "legal_status": "ACTIVE",
+                },
+            ],
+            "relations": [
+                {
+                    "head_id": "ttlt_178_2015",
+                    "type": "CONTAINS",
+                    "tail_id": "ttlt_178_2015_sec1",
+                    "properties": {},
+                },
+                {
+                    "head_id": "ttlt_178_2015_sec1",
+                    "type": "CONTAINS",
+                    "tail_id": "ttlt_178_2015_art1",
+                    "properties": {},
+                },
+            ],
+        }
+    )
+
+    build = build_corpus_registry(
+        {"TTLT178": payload},
+        {"TTLT178": "Nội dung"},
+        build_id="registry-direct-section",
+        created_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+
+    assert [unit.unit_id for unit in build.registry.units] == [
+        "ttlt_178_2015_art1",
+        "ttlt_178_2015_sec1",
+    ]
+
+
 def _part_subsection_payload():
     document_id = "nd34_2016"
     nodes = [

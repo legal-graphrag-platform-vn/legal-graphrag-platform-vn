@@ -72,6 +72,43 @@ def test_pipeline_ingestion_uses_root_validated_payload() -> None:
     assert "effective_from" not in document_call.kwargs["properties"]
 
 
+def test_pipeline_ingestion_writes_document_section_chain() -> None:
+    payload = _valid_payload()
+    payload["nodes"].insert(
+        1,
+        {
+            "type": "Section",
+            "id": "ldn_2020_sec1",
+            "number": "1",
+            "title": "Quy định chung",
+        },
+    )
+    payload["relations"] = [
+        {
+            "head_id": head_id,
+            "type": "CONTAINS",
+            "tail_id": tail_id,
+            "properties": {
+                "relation_id": deterministic_relation_id(head_id, "CONTAINS", tail_id)
+            },
+        }
+        for head_id, tail_id in (
+            ("ldn_2020", "ldn_2020_sec1"),
+            ("ldn_2020_sec1", "ldn_2020_art17"),
+        )
+    ]
+    session = Mock()
+
+    GraphIngestionService(writer=Neo4jWriter(session=session)).ingest(payload)
+
+    relation_calls = session.run.call_args_list[-2:]
+    assert [call.kwargs["head_id"] for call in relation_calls] == [
+        "ldn_2020",
+        "ldn_2020_sec1",
+    ]
+    assert all("MERGE (head)-[r:CONTAINS" in call.args[0] for call in relation_calls)
+
+
 def test_pipeline_ingestion_reconciles_only_after_validated_write() -> None:
     session = Mock()
     reconciler = Mock()
