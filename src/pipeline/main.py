@@ -68,7 +68,7 @@ from src.infrastructure.neo4j.vector_smoke import (
     run_vector_smoke,
     write_vector_smoke_evidence,
 )
-from src.pipeline.parser.hierarchy_parser import parse_text
+from src.pipeline.parser.hierarchy_parser import parse_text_with_diagnostics
 from src.pipeline.parser.models import DocumentInfo, ParsedDocument
 from src.infrastructure.neo4j.writer import (
     GraphIngestionService,
@@ -227,7 +227,7 @@ def _write_parse_artifacts(
     provider_references: tuple[ProviderReferenceMentionV1, ...] = (),
     raw_root: Path | None = None,
 ) -> None:
-    """Persist hierarchy plus fail-closed provider relation candidates."""
+    """Persist hierarchy with parser metadata and provider relation candidates."""
 
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "hierarchy.json").write_text(
@@ -324,7 +324,7 @@ def _parse_folder_worker(
         provider_references = ensure_luatvietnam_reference_sidecar(raw_dir)
         text = source_path.read_text(encoding="utf-8")
         try:
-            parsed = parse_text(text, doc_info)
+            parsed, diagnostics = parse_text_with_diagnostics(text, doc_info)
         except ValueError as exc:
             typer.echo(f"Parse validation error [{raw_doc_code}]: {exc}", err=True)
             return False
@@ -406,7 +406,7 @@ def parse(
     raw_doc_code: Annotated[
         str | None,
         typer.Option(
-            help="Filesystem document code, vd 'L59_2020'. Nếu không truyền, parse curated folders trong data/raw/"
+            help="Filesystem document code, vd 'L59_2020'. Nếu không truyền, parse mọi raw folder hợp lệ"
         ),
     ] = None,
     txt: Annotated[
@@ -418,7 +418,9 @@ def parse(
 
     Mặc định đọc data/raw/<raw_doc_code>/source.txt (output của `crawl`, lấy từ HTML body).
     Dùng `--txt <path>` để parse trực tiếp từ file text (.txt).
-    Nếu không truyền --raw-doc-code và không dùng --txt, chỉ parse các thư mục thuộc curated manifest.
+    Nếu không truyền --raw-doc-code và không dùng --txt, parse mọi thư mục raw
+    có cả source.txt và metadata.json. Kết quả audit nằm trong
+    hierarchy.json.parser_metadata.
     """
     # 1.   Nếu dùng --txt để parse trực tiếp từ file text tự chọn
     if txt is not None:
@@ -445,7 +447,7 @@ def parse(
 
         text = txt.read_text(encoding="utf-8")
         try:
-            parsed = parse_text(text, doc_info)
+            parsed, diagnostics = parse_text_with_diagnostics(text, doc_info)
         except ValueError as exc:
             typer.echo(f"Parse validation error: {exc}", err=True)
             raise typer.Exit(code=1) from exc
@@ -478,7 +480,7 @@ def parse(
         provider_references = ensure_luatvietnam_reference_sidecar(raw_dir)
         text = source_path.read_text(encoding="utf-8")
         try:
-            parsed = parse_text(text, doc_info)
+            parsed, diagnostics = parse_text_with_diagnostics(text, doc_info)
         except ValueError as exc:
             typer.echo(f"Parse validation error: {exc}", err=True)
             raise typer.Exit(code=1) from exc
@@ -489,20 +491,15 @@ def parse(
         )
         return
 
-    # 3. Nếu không truyền --txt/--raw-doc-code, parse các thư mục curated trong data/raw/
+    # 3. Nếu không truyền --txt/--raw-doc-code, parse mọi raw folder đầy đủ input.
     if not settings.data_raw_dir.exists():
         typer.echo(f"Thư mục nguồn {settings.data_raw_dir} không tồn tại.", err=True)
         raise typer.Exit(code=1)
 
-    curated_codes = set(load_curated_manifest(settings.curated_manifest_path))
-    subdirs = [
-        p
-        for p in settings.data_raw_dir.iterdir()
-        if p.is_dir() and p.name in curated_codes
-    ]
+    subdirs = [p for p in settings.data_raw_dir.iterdir() if p.is_dir()]
     valid_folders = [
         p.name
-        for p in subdirs
+        for p in sorted(subdirs, key=lambda path: path.name)
         if (p / "source.txt").exists() and (p / "metadata.json").exists()
     ]
 
