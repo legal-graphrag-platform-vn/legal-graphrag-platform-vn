@@ -14,6 +14,7 @@ import type {
    DocumentDetail,
    SectionDetail,
    SubsectionDetail,
+   DocumentRelation,
 } from '@/types/documents'
 import { useDocumentGraph } from '@/hooks/useDocumentGraph'
 
@@ -37,12 +38,66 @@ const RELATION_LABELS: Record<string, string> = {
    ISSUED_BY: 'Ban hành bởi',
 }
 
+function renderContentWithLinks(
+   text: string,
+   relations: DocumentRelation[],
+   onNavigate?: (id: string) => void
+) {
+   if (!text) return text
+   if (!relations || relations.length === 0) return text
+
+   const validRelations = relations
+      .filter((r) => r.doc_number)
+      .sort((a, b) => b.doc_number.length - a.doc_number.length)
+   
+   if (validRelations.length === 0) return text
+
+   const escapedNumbers = validRelations.map((r) =>
+      r.doc_number.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+   )
+   const regex = new RegExp(`(?<![a-zA-Z0-9À-ỹ])(${escapedNumbers.join('|')})(?![a-zA-Z0-9À-ỹ])`, 'gi')
+
+   const parts = text.split(regex)
+   return parts.map((part, i) => {
+      const match = validRelations.find(
+         (r) => r.doc_number.toLowerCase() === part.toLowerCase()
+      )
+      if (match) {
+         return (
+            <span
+               key={i}
+               onClick={(e) => {
+                  e.stopPropagation()
+                  onNavigate?.(match.doc_id)
+               }}
+               className="text-primary hover:underline cursor-pointer font-medium"
+               title={`Xem văn bản ${match.doc_number}`}
+            >
+               {part}
+            </span>
+         )
+      }
+      return <span key={i}>{part}</span>
+   })
+}
+
+interface HierarchyHighlights {
+   highlightArticleId?: string
+   highlightClauseId?: string
+   relations: DocumentRelation[]
+   onNavigateDoc?: (docId: string) => void
+}
+
 function ClauseItem({
    clause,
    highlighted,
+   relations,
+   onNavigateDoc,
 }: {
    clause: ArticleDetail['clauses'][0]
    highlighted: boolean
+   relations: DocumentRelation[]
+   onNavigateDoc?: (docId: string) => void
 }) {
    return (
       <div
@@ -52,11 +107,11 @@ function ClauseItem({
          }`}
       >
          <span className="font-medium text-muted-foreground">{clause.number}. </span>
-         <span>{clause.content_raw}</span>
+         <span>{renderContentWithLinks(clause.content_raw, relations, onNavigateDoc)}</span>
          {clause.points.map((pt) => (
             <div key={pt.id} className="ml-4 mt-1 text-muted-foreground">
                <span className="font-medium">{pt.label} </span>
-               {pt.content_raw}
+               {renderContentWithLinks(pt.content_raw, relations, onNavigateDoc)}
             </div>
          ))}
       </div>
@@ -67,11 +122,9 @@ function ArticleItem({
    article,
    highlightArticleId,
    highlightClauseId,
-}: {
-   article: ArticleDetail
-   highlightArticleId?: string
-   highlightClauseId?: string
-}) {
+   relations,
+   onNavigateDoc,
+}: { article: ArticleDetail } & HierarchyHighlights) {
    const isHighlighted = article.id === highlightArticleId
    const [open, setOpen] = useState(isHighlighted)
 
@@ -100,20 +153,23 @@ function ArticleItem({
          {open && (
             <div className="px-3 pb-3 pt-1 space-y-1">
                {article.content_raw && !article.clauses.length && (
-                  <p className="text-xs text-muted-foreground">{article.content_raw}</p>
+                  <p className="text-xs text-muted-foreground">
+                     {renderContentWithLinks(article.content_raw, relations, onNavigateDoc)}
+                  </p>
                )}
                {article.clauses.map((cl) => (
-                  <ClauseItem key={cl.id} clause={cl} highlighted={cl.id === highlightClauseId} />
+                  <ClauseItem 
+                     key={cl.id} 
+                     clause={cl} 
+                     highlighted={cl.id === highlightClauseId} 
+                     relations={relations}
+                     onNavigateDoc={onNavigateDoc}
+                  />
                ))}
             </div>
          )}
       </div>
    )
-}
-
-type HierarchyHighlights = {
-   highlightArticleId?: string
-   highlightClauseId?: string
 }
 
 function SubsectionBlock({
@@ -260,6 +316,8 @@ export function DocumentDetailPanel({
                                  chapter={chapter}
                                  highlightArticleId={highlightArticleId}
                                  highlightClauseId={highlightClauseId}
+                                 relations={doc.relations}
+                                 onNavigateDoc={onNavigateDoc}
                               />
                            ))}
                         </div>
@@ -270,6 +328,8 @@ export function DocumentDetailPanel({
                            chapter={ch}
                            highlightArticleId={highlightArticleId}
                            highlightClauseId={highlightClauseId}
+                           relations={doc.relations}
+                           onNavigateDoc={onNavigateDoc}
                         />
                      ))}
                      {doc.ungrouped_articles.map((art) => (
@@ -278,6 +338,8 @@ export function DocumentDetailPanel({
                            article={art}
                            highlightArticleId={highlightArticleId}
                            highlightClauseId={highlightClauseId}
+                           relations={doc.relations}
+                           onNavigateDoc={onNavigateDoc}
                         />
                      ))}
                   </div>
