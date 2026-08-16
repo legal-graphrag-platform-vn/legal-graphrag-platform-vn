@@ -80,14 +80,26 @@ uv run python -m src.pipeline.main batch-load-parsed
 
 ---
 
-### 3.3 Nhóm lệnh xử lý hàng loạt từ nguồn thô (Raw Batch)
+### 3.4 Nhóm lệnh Đối soát & Kết nối Quan hệ Liên văn bản (Cross-document References - Plan 17 & Plan 22)
+
+Các quan hệ **Dẫn chiếu (`REFERS_TO`)**, **Sửa đổi (`AMENDS`)**, **Bãi bỏ (`REPEALS`)** giữa các văn bản khác nhau được tự động đối soát và kết nối bằng 1 lệnh duy nhất:
+
+```bash
+# Tự động quét toàn bộ kho dữ liệu, tạo snapshot và ghi tất cả cạnh liên văn bản vào Neo4j:
+uv run python -m src.pipeline.main batch-reconcile-references --apply
+```
+
+---
+
+### 3.5 Nhóm lệnh xử lý hàng loạt từ nguồn thô (Raw Batch)
 
 | Lệnh | Ý nghĩa | Tùy chọn nổi bật |
 |---|---|---|
 | `build-manifest` | Quét thư mục raw và tạo file manifest JSON | `--raw-dir`, `--output` |
 | `batch-parse` | Parse cấu trúc cây cho toàn bộ dataset trong manifest | `--workers 4`, `--retry-failed`, `--limit` |
 | `batch-extract` | Gọi LLM trích xuất tri thức song song (hỗ trợ checkpoint per-Article) | `--limit`, `--retry-failed` |
-| `batch-ingest-all` | Chạy tuần tự toàn bộ 6 bước Batch trong 1 lệnh | `--skip-extract`, `--workers 4`, `--limit` |
+| `batch-reconcile-references` | Tự động kết nối toàn bộ quan hệ liên văn bản vào Neo4j | `--apply` |
+| `batch-ingest-all` | Chạy tuần tự toàn bộ các bước Batch trong 1 lệnh | `--skip-extract`, `--workers 4`, `--limit` |
 | `ingest-folder` / `pipeline-folder` | Chạy Full Pipeline cho một thư mục bất kỳ | `--folder`, `--skip-extract`, `--doc-by-doc`, `--workers 4` |
 
 **Ví dụ:**
