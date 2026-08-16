@@ -28,6 +28,7 @@ from src.retrieval.planning.errors import (
     QueryPlannerTimeoutError,
 )
 from src.retrieval.planning.models import UnlinkedSemanticPlan
+from src.retrieval.ports import EmbeddingPort
 from src.shared.retrieval_contract import RetrievalRequest
 from src.retrieval.resolved_reference import RetrievalExecutionContext
 
@@ -43,26 +44,30 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         *,
         planner: QueryPlannerPort | None = None,
         planning_enabled: bool = False,
+        # Embedding encoder dùng riêng cho warmup — không qua Neo4j.
+        # Nếu None, warmup sẽ bỏ qua bước preload encoder.
+        warmup_encoder: EmbeddingPort | None = None,
     ) -> None:
         self._runtime = runtime
         self._runner = runner
         self._planner = planner
         self._planning_enabled = planning_enabled
+        self._warmup_encoder = warmup_encoder
 
     async def warmup(self) -> None:
-        """Pre-load and warm up embedding encoder and reranker at startup.
+        """Pre-load embedding encoder vào RAM trước khi nhận request.
 
-        Chạy qua asyncio.to_thread thay vì BoundedRetrievalRunner để tránh
-        bị chặn bởi backend_retrieval_timeout_seconds (30s) trong khi
-        BGE-M3 load lần đầu từ disk có thể mất 30-90s.
-
-        Không đặt timeout: warmup phải block startup cho đến khi model
-        sẵn sàng — nếu timeout thì request đầu tiên vẫn bị lỗi.
+        Chỉ gọi encoder.encode() — không chạy full retrieval pipeline,
+        không đụng Neo4j. Điều này tránh block startup khi Neo4j chưa ready.
         """
+        if self._warmup_encoder is None:
+            logger.info("No warmup encoder configured, skipping encoder preload.")
+            return
         logger.info("Warming up GraphRAG embedding and retrieval models...")
         try:
-            warmup_request = RetrievalRequest(query="khởi động hệ thống pháp luật")
-            await asyncio.to_thread(self._runtime.retrieve, warmup_request)
+            await asyncio.to_thread(
+                self._warmup_encoder.encode, ["khởi động hệ thống pháp luật"]
+            )
             logger.info("GraphRAG model warm-up completed successfully.")
         except Exception as exc:
             logger.warning("GraphRAG model warm-up encountered a non-fatal error: %s", exc)
