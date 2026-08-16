@@ -190,12 +190,17 @@ class Neo4jCanonicalLookup:
         rows = await self._runner.run(lambda: self._repo.lookup(reference))
         
         if len(rows) > 1 and reference.law_name:
+            import re
             target_title = reference.law_name.lower().strip()
+            target_title_clean = re.sub(r'\s+(năm\s+)?\d{4}$', '', target_title).strip()
+            
             exact_rows = []
             for row in rows:
-                doc_title = row.get("document_title")
-                if doc_title and doc_title.lower().strip() == target_title:
-                    exact_rows.append(row)
+                doc_title = row.get("document_title", "")
+                if doc_title:
+                    doc_title_clean = re.sub(r'\s+(năm\s+)?\d{4}$', '', doc_title.lower().strip()).strip()
+                    if doc_title_clean == target_title_clean:
+                        exact_rows.append(row)
             
             if exact_rows:
                 rows = exact_rows
