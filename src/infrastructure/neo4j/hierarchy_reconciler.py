@@ -118,17 +118,18 @@ def _section_article_mappings(payload: Any) -> list[dict[str, str]]:
     mappings: list[dict[str, str]] = []
     for section_id, article_id in section_articles:
         parents = sorted(set(chapter_parents.get(section_id, [])))
-        if len(parents) != 1:
+        if len(parents) > 1:
             raise HierarchyReconciliationError(
-                f"Section {section_id} must have exactly one Chapter parent in validated payload"
+                f"Section {section_id} must have at most one Chapter parent in validated payload"
             )
-        mappings.append(
-            {
-                "chapter_id": parents[0],
-                "section_id": section_id,
-                "article_id": article_id,
-            }
-        )
+        if len(parents) == 1:
+            mappings.append(
+                {
+                    "chapter_id": parents[0],
+                    "section_id": section_id,
+                    "article_id": article_id,
+                }
+            )
     return sorted(
         mappings,
         key=lambda item: (
