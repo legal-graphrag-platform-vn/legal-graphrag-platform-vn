@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 class VectorSearchPort(Protocol):
     def vector_search(
         self,
-        index_name: str,
+        index_names: list[str],
         query_embedding: list[float],
         *,
         filters: RetrievalFilters,

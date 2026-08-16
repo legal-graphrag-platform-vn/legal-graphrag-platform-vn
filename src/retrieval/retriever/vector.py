@@ -29,16 +29,12 @@ class VectorRetriever:
 
         query_embedding = self._embedding_generator.encode([query])[0]
         active_filters = filters or RetrievalFilters()
-        rows = [
-            row
-            for index_name in VECTOR_INDEXES
-            for row in self._repo.vector_search(
-                index_name,
-                query_embedding,
-                filters=active_filters,
-                k=top_k,
-            )
-        ]
+        rows = self._repo.vector_search(
+            list(VECTOR_INDEXES),
+            query_embedding,
+            filters=active_filters,
+            k=top_k,
+        )
         units = [map_retrieved_unit(row, score_field="vector_score") for row in rows]
         units.sort(key=lambda unit: (-(unit.vector_score or 0.0), unit.id))
         return units[:top_k]
