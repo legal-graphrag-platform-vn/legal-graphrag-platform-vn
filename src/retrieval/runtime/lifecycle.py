@@ -12,6 +12,7 @@ from src.retrieval.models import (
 )
 from src.retrieval.planning.binder import PlanBinder, PlanBindingFailure
 from src.retrieval.planning.models import BoundSemanticPlan, UnlinkedSemanticPlan
+from src.retrieval.ports import EmbeddingPort
 from src.retrieval.runtime.runtime import RetrievalRuntime
 from src.retrieval.resolved_reference import RetrievalExecutionContext
 
@@ -23,11 +24,14 @@ class RetrievalRuntimeHandle:
         *,
         binder: PlanBinder | None = None,
         close_callbacks: Sequence[Callable[[], None]] = (),
+        # Encoder dùng riêng cho warmup — không qua Neo4j.
+        warmup_encoder: EmbeddingPort | None = None,
     ) -> None:
         self._runtime = runtime
         self._binder = binder
         self._close_callbacks = list(close_callbacks)
         self._closed = False
+        self.warmup_encoder: EmbeddingPort | None = warmup_encoder
 
     def __enter__(self) -> "RetrievalRuntimeHandle":
         return self

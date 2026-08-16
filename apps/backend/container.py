@@ -170,6 +170,7 @@ async def build_container(
         runner,
         planner=query_planner,
         planning_enabled=settings.query_planning_enabled,
+        warmup_encoder=getattr(runtime, "warmup_encoder", None),
     )
     create_browser = browser_factory or _create_document_browser_service
     try:

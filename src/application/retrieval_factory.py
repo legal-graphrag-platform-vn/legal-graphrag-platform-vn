@@ -241,7 +241,10 @@ def create_retrieval_runtime(
             _build_plan_binder(repo, vector, fulltext) if planning_enabled else None
         )
         return RetrievalRuntimeHandle(
-            runtime, binder=binder, close_callbacks=callbacks
+            runtime,
+            binder=binder,
+            close_callbacks=callbacks,
+            warmup_encoder=generator if vector is not None else None,
         )
     except Exception:
         for callback in reversed(callbacks):
