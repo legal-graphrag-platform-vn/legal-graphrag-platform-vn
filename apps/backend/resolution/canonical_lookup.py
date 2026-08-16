@@ -188,4 +188,16 @@ class Neo4jCanonicalLookup:
         self, reference: ExplicitReference
     ) -> tuple[ResolvedCandidate, ...]:
         rows = await self._runner.run(lambda: self._repo.lookup(reference))
-        return tuple(row_to_candidate(row) for row in rows)
+        candidates = tuple(row_to_candidate(row) for row in rows)
+        
+        if len(candidates) > 1 and reference.law_name:
+            target_title = reference.law_name.lower().strip()
+            exact_candidates = []
+            for c in candidates:
+                if c.document_title and c.document_title.lower().strip() == target_title:
+                    exact_candidates.append(c)
+            
+            if exact_candidates:
+                return tuple(exact_candidates)
+                
+        return candidates
