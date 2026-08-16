@@ -55,7 +55,7 @@ class Neo4jRetrieverRepo:
                 "YIELD node, score RETURN node, score"
             )
         
-        union_clause = "\n        UNION\n        ".join(union_blocks)
+        union_clause = "\n        UNION ALL\n        ".join(union_blocks)
         
         query = f"""
         CALL {{
