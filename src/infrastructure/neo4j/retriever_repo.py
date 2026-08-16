@@ -61,6 +61,7 @@ class Neo4jRetrieverRepo:
         CALL {{
             {union_clause}
         }}
+        WITH node, score
         {_LEGAL_UNIT_CONTEXT}
         WHERE {_FILTER_PREDICATE}
         RETURN {_UNIT_PROJECTION}, score
