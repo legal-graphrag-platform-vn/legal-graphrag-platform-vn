@@ -110,7 +110,9 @@ from src.pipeline.pipeline.batch_progress_ledger import (
 )
 from src.pipeline.validation.extraction_readiness import (
     ExtractionReadinessError,
+    StructuralReadinessError,
     validate_extraction_readiness,
+    validate_structural_readiness,
 )
 from src.shared.ontology.payload_consistency_validator import (
     validate_payload_consistency,
@@ -739,16 +741,23 @@ def validate_payload(
     raw_doc_code: Annotated[
         str, typer.Option(help="Filesystem document code, vd 'L59_2020'")
     ],
+    mode: Annotated[
+        str,
+        typer.Option(help="Validation mode: 'full' (Gate 2 + structure) or 'structural' (Gate 1 only)"),
+    ] = "full",
 ) -> None:
     """Build and validate a graph payload without opening a Neo4j connection."""
     processed_dir = _processed_dir(raw_doc_code)
     try:
-        validate_extraction_readiness(processed_dir)
-    except ExtractionReadinessError as exc:
-        typer.echo(f"Extraction readiness error: {exc}", err=True)
+        if mode == "structural":
+            validate_structural_readiness(processed_dir)
+        else:
+            validate_extraction_readiness(processed_dir)
+    except (ExtractionReadinessError, StructuralReadinessError) as exc:
+        typer.echo(f"Readiness error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
     try:
-        payload = build_payload_from_paths(processed_dir)
+        payload = build_payload_from_paths(processed_dir, mode=mode)
     except PayloadBuildError as exc:
         typer.echo(f"Payload build error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -814,18 +823,19 @@ def build_reference_registry(
     ] = None,
 ) -> None:
     """Build an immutable accepted-structure registry without Neo4j or LLM calls."""
-    if bool(raw_doc_code) == bool(manifest):
+    if raw_doc_code and manifest:
         typer.echo(
             "Provide either repeated --raw-doc-code or --manifest, but not both.",
             err=True,
         )
         raise typer.Exit(code=1)
     try:
-        selected = (
-            list(dict.fromkeys(raw_doc_code or []))
-            if manifest is None
-            else list(load_curated_manifest(manifest))
-        )
+        if raw_doc_code:
+            selected = list(dict.fromkeys(raw_doc_code))
+        elif manifest:
+            selected = list(load_curated_manifest(manifest))
+        else:
+            selected = _discover_processed_doc_codes(settings.data_processed_dir)
     except Exception as exc:
         typer.echo(f"Registry selection error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -869,36 +879,59 @@ def build_reference_registry(
 
 
 @app.command("reconcile-external-references")
+@app.command("batch-reconcile-references")
+@app.command("batch-reconcile")
 def reconcile_external_reference_command(
-    build_id: Annotated[str, typer.Option(help="Verified registry build receipt ID")],
+    build_id: Annotated[
+        str | None,
+        typer.Option(help="Verified registry build receipt ID (mặc định: tự động tạo/dùng build_latest)"),
+    ] = None,
     raw_doc_code: Annotated[
-        list[str], typer.Option(help="Repeat for each source document to reconcile")
-    ],
+        list[str] | None,
+        typer.Option(help="Danh sách mã văn bản cần đối soát (nếu để trống, tự động quét toàn bộ kho processed)"),
+    ] = None,
     apply: Annotated[
-        bool, typer.Option(help="Write verified REFERS_TO edges to Neo4j")
+        bool, typer.Option(help="Ghi các cạnh quan hệ liên văn bản (REFERS_TO, AMENDS, REPEALS) vào Neo4j")
     ] = False,
     raw_dir: Annotated[
         Path | None,
         typer.Option(help="Raw corpus root used to load canonical source.txt files"),
     ] = None,
 ) -> None:
-    """Resolve external citations; graph writes require explicit --apply."""
+    """Tự động đối soát và kết nối toàn bộ quan hệ LIÊN VĂN BẢN (Plan 17 & Plan 22) vào Neo4j."""
+    # 1.   Nếu không chỉ định văn bản, tự động quét toàn bộ thư mục processed
+    codes = list(dict.fromkeys(raw_doc_code or []))
+    if not codes:
+        codes = _discover_processed_doc_codes(settings.data_processed_dir)
+        if not codes:
+            typer.echo("Không tìm thấy văn bản nào trong data/processed để đối soát liên văn bản.")
+            return
+        typer.echo(f"🔍 Tự động phát hiện {len(codes)} văn bản trong kho dữ liệu.")
+
+    # 2.   Nếu chưa có build_id, tự động tạo registry snapshot cho toàn bộ kho
+    actual_build_id = build_id or "build_latest"
+    build_dir = settings.data_registry_dir / "builds" / actual_build_id
+    if not build_dir.exists() or build_id is None:
+        typer.echo(f"📦 Đang tự động xây dựng Registry Snapshot ('{actual_build_id}') cho {len(codes)} văn bản...")
+        try:
+            build_reference_registry(raw_doc_code=codes, build_id=actual_build_id, raw_dir=raw_dir)
+        except Exception as exc:
+            typer.echo(f"⚠️ Không thể xây dựng registry: {exc}", err=True)
+
     try:
-        build = load_registry_build(settings.data_registry_dir, build_id)
+        build = load_registry_build(settings.data_registry_dir, actual_build_id)
     except (RegistryError, OSError, ValueError) as exc:
         typer.echo(f"Registry load blocked: {exc}", err=True)
         raise typer.Exit(code=1) from exc
     session = create_neo4j_session() if apply else None
     reports = []
     try:
-        for code in dict.fromkeys(raw_doc_code):
+        for code in codes:
             processed_dir = _processed_dir(code)
             hierarchy_path = processed_dir / "hierarchy.json"
             source_path = (raw_dir or settings.data_raw_dir) / code / "source.txt"
             if not hierarchy_path.is_file() or not source_path.is_file():
-                raise ValueError(
-                    f"Missing hierarchy/source for {code}; run parse and normalization first"
-                )
+                continue
             parsed = ParsedDocument.model_validate_json(
                 hierarchy_path.read_text(encoding="utf-8")
             )
@@ -960,9 +993,13 @@ def write_graph(
     raw_doc_code: Annotated[
         str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
     ],
+    mode: Annotated[
+        str,
+        typer.Option(help="Write mode: 'full' (default) or 'structural' (only Document hierarchy)"),
+    ] = "full",
 ) -> None:
     """Build accepted graph payload and write it to Neo4j through the guarded writer."""
-    payload = _validated_payload_for_raw_doc_code(raw_doc_code)
+    payload = _validated_payload_for_raw_doc_code(raw_doc_code, mode=mode)
     session = create_neo4j_session()
     try:
         service = GraphIngestionService(
@@ -975,7 +1012,7 @@ def write_graph(
         if callable(close):
             close()
     typer.echo(
-        f"Wrote graph for {raw_doc_code}: "
+        f"Wrote graph ({mode}) for {raw_doc_code}: "
         f"{len(validated_payload.nodes)} nodes, {len(validated_payload.relations)} relations"
     )
     hierarchy_report = service.last_hierarchy_report
@@ -987,6 +1024,32 @@ def write_graph(
         )
 
 
+@app.command("add-node")
+@app.command("write-node")
+@app.command("write-structural")
+def write_graph_structural(
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
+    ],
+) -> None:
+    """Ghi các node cấu trúc (Document/Article/Clause/Point/Appendix...) của 1 raw_doc_code vào Neo4j (Phase 1)."""
+    write_graph(raw_doc_code=raw_doc_code, mode="structural")
+
+
+@app.command("sync-concept")
+@app.command("sync-concepts")
+@app.command("sync-semantics")
+@app.command("enrich-semantics")
+def sync_concepts(
+    raw_doc_code: Annotated[
+        str, typer.Option(help="Folder name under data/processed, vd 'LDN2020'")
+    ],
+) -> None:
+    """Đồng bộ các thực thể ngữ nghĩa (LegalConcept, LegalSubject, LegalAction) và quan hệ của 1 raw_doc_code vào Neo4j (Phase 2)."""
+    write_graph(raw_doc_code=raw_doc_code, mode="full")
+
+
+@app.command("embed-node")
 @app.command("embed")
 def embed_graph(
     raw_doc_code: Annotated[
@@ -1207,11 +1270,18 @@ def milestone_a_report(
         raise typer.Exit(code=1)
 
 
-def _validated_payload_for_raw_doc_code(raw_doc_code: str) -> dict:
+def _validated_payload_for_raw_doc_code(
+    raw_doc_code: str, *, mode: str = "full"
+) -> dict:
     processed_dir = _processed_dir(raw_doc_code)
     try:
-        return load_validated_payload(processed_dir).raw_payload
+        return load_validated_payload(processed_dir, mode=mode).raw_payload
     except ValidatedPayloadLoadError as exc:
+        if mode == "full" and (processed_dir / "hierarchy.json").exists():
+            try:
+                return load_validated_payload(processed_dir, mode="structural").raw_payload
+            except Exception:
+                pass
         typer.echo(f"Validated payload load error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
 
@@ -1239,20 +1309,29 @@ def ingest(
         str | None, typer.Option(help="Số hiệu văn bản, vd '59/2020/QH14'. Tùy chọn")
     ] = None,
     write_neo4j: Annotated[
-        bool, typer.Option(help="Tự động ghi đồ thị vào Neo4j sau khi extract")
+        bool, typer.Option(help="Tự động ghi đồ thị vào Neo4j")
     ] = True,
     generate_embedding: Annotated[
         bool, typer.Option(help="Tự động tạo BGE-M3 embedding vào Neo4j")
     ] = True,
+    skip_extract: Annotated[
+        bool,
+        typer.Option(
+            "--skip-extract",
+            help="Bỏ qua trích xuất LLM, chỉ nạp khung cấu trúc và tạo embedding",
+        ),
+    ] = False,
 ) -> None:
-    """Full pipeline đơn lẻ chạy 1 mạch: crawl -> parse -> extract -> write -> embed."""
+    """Full pipeline: crawl -> parse -> [extract] -> write -> embed."""
     saved_dir = crawl(url, raw_doc_code, number)
     code = raw_doc_code or saved_dir.name
     parse(code)
-    extract(code)
+    if not skip_extract:
+        extract(code)
     if write_neo4j:
         try:
-            write_graph(code)
+            write_mode = "structural" if skip_extract else "full"
+            write_graph(code, mode=write_mode)
         except Exception as exc:
             typer.echo(f"Bỏ qua write Neo4j: {exc}", err=True)
     if generate_embedding and write_neo4j:
@@ -1468,6 +1547,330 @@ def batch_extract(
     )
 
 
+def _discover_processed_doc_codes(
+    processed_root: Path,
+    manifest_path: Path | None = None,
+    limit: int | None = None,
+) -> list[str]:
+    # 1.   If manifest is provided and exists, load doc_codes from manifest
+    if manifest_path is not None and manifest_path.exists():
+        manifest_data = load_curated_manifest(manifest_path)
+        codes = [
+            code
+            for code in manifest_data.keys()
+            if (processed_root / code / "hierarchy.json").exists()
+        ]
+    else:
+        # 2.   Otherwise, scan processed directory for all folders with hierarchy.json
+        if not processed_root.exists():
+            return []
+        codes = [
+            sub.name
+            for sub in sorted(processed_root.iterdir())
+            if sub.is_dir() and (sub / "hierarchy.json").exists()
+        ]
+    if limit is not None and limit > 0:
+        codes = codes[:limit]
+    return codes
+
+
+# Lệnh CLI ghi đồ thị hàng loạt các văn bản đã parse vào Neo4j
+@app.command("batch-add-nodes")
+@app.command("batch-write-nodes")
+@app.command("batch-write")
+def batch_write(
+    processed_dir: Annotated[
+        Path,
+        typer.Option(help="Thư mục chứa các folder processed (mặc định: data/processed)"),
+    ] = settings.data_processed_dir,
+    manifest: Annotated[
+        Path | None,
+        typer.Option(help="Đường dẫn file manifest JSON (tùy chọn để lọc danh sách)"),
+    ] = None,
+    mode: Annotated[
+        str,
+        typer.Option(help="Chế độ write: 'structural' (mặc định) hoặc 'full'"),
+    ] = "structural",
+    workers: Annotated[
+        int,
+        typer.Option(min=1, max=32, help="Số lượng luồng ghi song song vào Neo4j"),
+    ] = 4,
+    skip_existing: Annotated[
+        bool,
+        typer.Option(
+            "--skip-existing",
+            help="Bỏ qua các văn bản đã có trên Neo4j (Checkpoint thông minh)",
+        ),
+    ] = False,
+    limit: Annotated[
+        int | None,
+        typer.Option(help="Giới hạn số lượng văn bản xử lý"),
+    ] = None,
+) -> None:
+    """Ghi hàng loạt toàn bộ folder processed nodes (cấu trúc phân cấp) vào Neo4j."""
+    # 1.   Quét danh sách các văn bản đã parse
+    doc_codes = _discover_processed_doc_codes(processed_dir, manifest_path=manifest, limit=limit)
+    if not doc_codes:
+        typer.echo(f"Không tìm thấy văn bản nào có hierarchy.json trong {processed_dir}")
+        return
+
+    # 2.   Nếu bật --skip-existing, truy vấn danh sách văn bản đã có trên Neo4j
+    if skip_existing:
+        session = create_neo4j_session()
+        try:
+            res = session.run("MATCH (d:Document) RETURN d.id AS id").data()
+            existing_ids = {r["id"] for r in res}
+            # Lọc bỏ các doc_code đã nạp
+            original_len = len(doc_codes)
+            doc_codes = [c for c in doc_codes if c not in existing_ids]
+            skipped_count = original_len - len(doc_codes)
+            if skipped_count > 0:
+                typer.echo(f"⏩ [Checkpoint] Đã bỏ qua {skipped_count} văn bản đã có trên Neo4j.")
+        except Exception as exc:
+            typer.echo(f"⚠️ Không thể lấy danh sách Document hiện tại ({exc}), tiếp tục nạp bình thường.")
+        finally:
+            close = getattr(session, "close", None)
+            if callable(close):
+                close()
+
+    if not doc_codes:
+        typer.echo("🎉 Tất cả văn bản đã tồn tại trên Neo4j. Không có văn bản nào cần nạp mới!")
+        return
+
+    typer.echo(f"🚀 Bắt đầu Batch Write ({mode}) cho {len(doc_codes)} văn bản với {workers} luồng...")
+    success_count = 0
+    fail_count = 0
+
+    def _write_single_doc(code: str) -> bool:
+        typer.echo(f"⏳ [Luồng bắt đầu] Writing {code}...")
+        try:
+            write_graph(code, mode=mode)
+            typer.echo(f"✅ [Hoàn thành] Wrote {code}")
+            return True
+        except Exception as exc:
+            typer.echo(f"❌ [Lỗi] write {code}: {exc}", err=True)
+            return False
+
+    # 2.   Thực hiện write theo luồng
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_code = {executor.submit(_write_single_doc, code): code for code in doc_codes}
+            for future in as_completed(future_to_code):
+                if future.result():
+                    success_count += 1
+                else:
+                    fail_count += 1
+    else:
+        for code in doc_codes:
+            if _write_single_doc(code):
+                success_count += 1
+            else:
+                fail_count += 1
+
+    typer.echo(f"\n🎉 Hoàn thành Batch Write. Thành công: {success_count}, Thất bại: {fail_count}")
+
+
+# Lệnh CLI tạo Vector Embedding hàng loạt cho các văn bản đã parse
+@app.command("batch-embed-nodes")
+@app.command("batch-embed")
+def batch_embed(
+    processed_dir: Annotated[
+        Path,
+        typer.Option(help="Thư mục chứa các folder processed (mặc định: data/processed)"),
+    ] = settings.data_processed_dir,
+    manifest: Annotated[
+        Path | None,
+        typer.Option(help="Đường dẫn file manifest JSON (tùy chọn để lọc danh sách)"),
+    ] = None,
+    batch_size: Annotated[
+        int,
+        typer.Option(min=1, help="Embedding batch size"),
+    ] = 32,
+    limit: Annotated[
+        int | None,
+        typer.Option(help="Giới hạn số lượng văn bản xử lý"),
+    ] = None,
+) -> None:
+    """Sinh vector embeddings hàng loạt cho toàn bộ các văn bản trong folder processed và ghi vào Neo4j."""
+    # 1.   Quét danh sách các văn bản đã parse
+    doc_codes = _discover_processed_doc_codes(processed_dir, manifest_path=manifest, limit=limit)
+    if not doc_codes:
+        typer.echo(f"Không tìm thấy văn bản nào có hierarchy.json trong {processed_dir}")
+        return
+
+    typer.echo(f"🚀 Bắt đầu Batch Embed cho {len(doc_codes)} văn bản...")
+    success_count = 0
+    fail_count = 0
+
+    # 2.   Thực hiện embed từng văn bản
+    for idx, code in enumerate(doc_codes, 1):
+        typer.echo(f"[{idx}/{len(doc_codes)}] Embedding {code}...")
+        try:
+            embed_graph(code, batch_size=batch_size)
+            success_count += 1
+        except Exception as exc:
+            typer.echo(f"❌ Lỗi embed {code}: {exc}", err=True)
+            fail_count += 1
+
+    typer.echo(f"\n🎉 Hoàn thành Batch Embed. Thành công: {success_count}, Thất bại: {fail_count}")
+
+
+# Lệnh CLI nạp trọn gói hàng loạt văn bản ĐÃ PARSE (Write + Embed)
+@app.command("batch-load-parsed")
+def batch_load_parsed(
+    processed_dir: Annotated[
+        Path,
+        typer.Option(help="Thư mục chứa các folder processed (mặc định: data/processed)"),
+    ] = settings.data_processed_dir,
+    manifest: Annotated[
+        Path | None,
+        typer.Option(help="Đường dẫn file manifest JSON (tùy chọn)"),
+    ] = None,
+    mode: Annotated[
+        str,
+        typer.Option(help="Chế độ write: 'structural' (mặc định) hoặc 'full'"),
+    ] = "structural",
+    generate_embedding: Annotated[
+        bool,
+        typer.Option(help="Tự động tạo vector embeddings sau khi write"),
+    ] = True,
+    workers: Annotated[
+        int,
+        typer.Option(min=1, max=32, help="Số lượng luồng ghi song song vào Neo4j"),
+    ] = 4,
+    skip_existing: Annotated[
+        bool,
+        typer.Option(
+            "--skip-existing",
+            help="Bỏ qua các văn bản đã có trên Neo4j (Checkpoint thông minh)",
+        ),
+    ] = False,
+    batch_size: Annotated[
+        int,
+        typer.Option(min=1, help="Embedding batch size"),
+    ] = 32,
+    limit: Annotated[
+        int | None,
+        typer.Option(help="Giới hạn số lượng văn bản xử lý"),
+    ] = None,
+) -> None:
+    """Nạp nhanh hàng loạt các văn bản ĐÃ PARSE vào Neo4j (Write + Embed)."""
+    typer.echo(f"=== BƯỚC 1/2: Ghi đồ thị hàng loạt ({mode}) vào Neo4j ===")
+    batch_write(
+        processed_dir=processed_dir,
+        manifest=manifest,
+        mode=mode,
+        workers=workers,
+        skip_existing=skip_existing,
+        limit=limit,
+    )
+
+    if generate_embedding:
+        typer.echo("\n=== BƯỚC 2/2: Tạo Vector Embedding hàng loạt ===")
+        batch_embed(processed_dir=processed_dir, manifest=manifest, batch_size=batch_size, limit=limit)
+
+    typer.echo("\n🎉 HOÀN THÀNH NẠP DỮ LIỆU ĐÃ PARSE VÀO NEO4J!")
+
+
+def _discover_extraction_ready_doc_codes(
+    processed_root: Path,
+    manifest_path: Path | None = None,
+    limit: int | None = None,
+) -> list[str]:
+    # 1.   If manifest is provided and exists, filter from manifest
+    if manifest_path is not None and manifest_path.exists():
+        manifest_data = load_curated_manifest(manifest_path)
+        codes = [
+            code
+            for code in manifest_data.keys()
+            if (processed_root / code / "accepted.jsonl").exists()
+            and (processed_root / code / "entity_index.json").exists()
+        ]
+    else:
+        # 2.   Otherwise, scan processed directory for folders having accepted.jsonl & entity_index.json
+        if not processed_root.exists():
+            return []
+        codes = [
+            sub.name
+            for sub in sorted(processed_root.iterdir())
+            if sub.is_dir()
+            and (sub / "accepted.jsonl").exists()
+            and (sub / "entity_index.json").exists()
+        ]
+    if limit is not None and limit > 0:
+        codes = codes[:limit]
+    return codes
+
+
+# Lệnh CLI đồng bộ toàn bộ thực thể & quan hệ ngữ nghĩa hàng loạt vào Neo4j (Phase 2 Batch)
+@app.command("batch-sync-concepts")
+@app.command("batch-sync-semantics")
+def batch_sync_semantics(
+    processed_dir: Annotated[
+        Path,
+        typer.Option(help="Thư mục chứa các folder processed (mặc định: data/processed)"),
+    ] = settings.data_processed_dir,
+    manifest: Annotated[
+        Path | None,
+        typer.Option(help="Đường dẫn file manifest JSON (tùy chọn để lọc danh sách)"),
+    ] = None,
+    workers: Annotated[
+        int,
+        typer.Option(min=1, max=32, help="Số lượng luồng đồng bộ song song vào Neo4j"),
+    ] = 4,
+    limit: Annotated[
+        int | None,
+        typer.Option(help="Giới hạn số lượng văn bản xử lý"),
+    ] = None,
+) -> None:
+    """Đồng bộ hàng loạt toàn bộ thực thể ngữ nghĩa (LegalConcept, LegalSubject, LegalAction) vào Neo4j."""
+    # 1.   Quét danh sách các văn bản đã có kết quả trích xuất
+    doc_codes = _discover_extraction_ready_doc_codes(
+        processed_dir, manifest_path=manifest, limit=limit
+    )
+    if not doc_codes:
+        typer.echo(
+            f"Không tìm thấy văn bản nào có accepted.jsonl và entity_index.json trong {processed_dir}"
+        )
+        return
+
+    typer.echo(
+        f"🚀 Bắt đầu Batch Sync Semantics cho {len(doc_codes)} văn bản với {workers} luồng..."
+    )
+    success_count = 0
+    fail_count = 0
+
+    def _sync_single_doc(code: str) -> bool:
+        typer.echo(f"⏳ [Luồng bắt đầu] Syncing semantics for {code}...")
+        try:
+            write_graph(code, mode="full")
+            typer.echo(f"✅ [Hoàn thành] Synced semantics for {code}")
+            return True
+        except Exception as exc:
+            typer.echo(f"❌ [Lỗi] sync semantics {code}: {exc}", err=True)
+            return False
+
+    # 2.   Đồng bộ theo luồng vào Neo4j
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_code = {executor.submit(_sync_single_doc, code): code for code in doc_codes}
+            for future in as_completed(future_to_code):
+                if future.result():
+                    success_count += 1
+                else:
+                    fail_count += 1
+    else:
+        for code in doc_codes:
+            if _sync_single_doc(code):
+                success_count += 1
+            else:
+                fail_count += 1
+
+    typer.echo(
+        f"\n🎉 Hoàn thành Batch Sync Semantics. Thành công: {success_count}, Thất bại: {fail_count}"
+    )
+
+
 # 4. Lệnh CLI chạy tuần tự TOÀN BỘ luồng Batch trong 1 câu lệnh (End-to-End Batch Ingest)
 @app.command("batch-ingest-all")
 def batch_ingest_all(
@@ -1493,8 +1896,15 @@ def batch_ingest_all(
     generate_embedding: Annotated[
         bool, typer.Option(help="Tự động tạo BGE-M3 embedding vào Neo4j")
     ] = True,
+    skip_extract: Annotated[
+        bool,
+        typer.Option(
+            "--skip-extract",
+            help="Bỏ qua trích xuất LLM, chỉ nạp khung cấu trúc và tạo embedding",
+        ),
+    ] = False,
 ) -> None:
-    """Chạy tuần tự TOÀN BỘ luồng Batch trong 1 lệnh duy nhất: manifest -> parse -> extract -> registry -> write -> embed."""
+    """Chạy tuần tự TOÀN BỘ luồng Batch trong 1 lệnh duy nhất: manifest -> parse -> [extract] -> registry -> write -> embed."""
     typer.echo("=== BƯỚC 1/6: Tạo Manifest Dataset ===")
     build_manifest(raw_dir, output=manifest)
 
@@ -1507,10 +1917,11 @@ def batch_ingest_all(
         limit=limit,
     )
 
-    typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
-    batch_extract(
-        manifest=manifest, raw_dir=raw_dir, retry_failed=retry_failed, limit=limit
-    )
+    if not skip_extract:
+        typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
+        batch_extract(
+            manifest=manifest, raw_dir=raw_dir, retry_failed=retry_failed, limit=limit
+        )
 
     manifest_data = load_curated_manifest(manifest)
     doc_codes = list(manifest_data.keys())
@@ -1518,9 +1929,10 @@ def batch_ingest_all(
         doc_codes = doc_codes[:limit]
 
     if write_neo4j:
-        typer.echo("\n=== BƯỚC 4/6: Ghi Node Đồ thị Hàng loạt vào Neo4j ===")
+        write_mode = "structural" if skip_extract else "full"
+        typer.echo(f"\n=== BƯỚC 4/6: Ghi Node Đồ thị Hàng loạt ({write_mode}) vào Neo4j ===")
         for code in doc_codes:
-            write_graph(code)
+            write_graph(code, mode=write_mode)
 
     typer.echo("\n=== BƯỚC 5/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
     build_reference_registry(manifest=manifest, raw_dir=raw_dir)
@@ -1578,8 +1990,15 @@ def ingest_folder(
             help="Xử lý trọn gói (Parse -> Extract -> Write Neo4j -> Embed) lần lượt cho từng văn bản một trước khi sang văn bản tiếp theo"
         ),
     ] = False,
+    skip_extract: Annotated[
+        bool,
+        typer.Option(
+            "--skip-extract",
+            help="Bỏ qua trích xuất LLM, chỉ nạp khung cấu trúc và tạo embedding",
+        ),
+    ] = False,
 ) -> None:
-    """Chạy FULL PIPELINE end-to-end cho một thư mục văn bản: Manifest -> Parse -> LLM Extract -> Reference Reconcile -> Write Neo4j -> BGE-M3 Embed."""
+    """Chạy FULL PIPELINE end-to-end cho một thư mục văn bản: Manifest -> Parse -> [LLM Extract] -> Reference Reconcile -> Write Neo4j -> BGE-M3 Embed."""
     # 1.   Xác định đường dẫn thư mục và file manifest
     raw_dir = folder.resolve()
     if not raw_dir.exists() or not raw_dir.is_dir():
@@ -1608,6 +2027,8 @@ def ingest_folder(
     if limit and limit > 0:
         doc_codes = doc_codes[:limit]
 
+    write_mode = "structural" if skip_extract else "full"
+
     # Xử lý tuần tự từng văn bản một (Document by Document End-to-End)
     if doc_by_doc:
         typer.echo(
@@ -1626,35 +2047,36 @@ def ingest_folder(
                     raise RuntimeError(f"Parse failed for {code}")
 
                 # LLM Extract
-                processed_dir = _processed_dir(code)
-                hierarchy_path = processed_dir / "hierarchy.json"
-                if hierarchy_path.exists():
-                    parsed = ParsedDocument.model_validate_json(
-                        hierarchy_path.read_text(encoding="utf-8")
-                    )
-                    raw_doc_dir = (
-                        base_raw_dir / code
-                        if (base_raw_dir / code).exists()
-                        else settings.data_raw_dir / code
-                    )
-                    source_file = raw_doc_dir / "source.txt"
-                    source_text = (
-                        source_file.read_text(encoding="utf-8")
-                        if source_file.exists()
-                        else None
-                    )
-                    diagram = _read_diagram(code, raw_root=base_raw_dir)
-                    run_pipeline(
-                        parsed,
-                        settings.data_processed_dir,
-                        raw_doc_code=code,
-                        source_text=source_text,
-                        diagram=diagram,
-                    )
+                if not skip_extract:
+                    processed_dir = _processed_dir(code)
+                    hierarchy_path = processed_dir / "hierarchy.json"
+                    if hierarchy_path.exists():
+                        parsed = ParsedDocument.model_validate_json(
+                            hierarchy_path.read_text(encoding="utf-8")
+                        )
+                        raw_doc_dir = (
+                            base_raw_dir / code
+                            if (base_raw_dir / code).exists()
+                            else settings.data_raw_dir / code
+                        )
+                        source_file = raw_doc_dir / "source.txt"
+                        source_text = (
+                            source_file.read_text(encoding="utf-8")
+                            if source_file.exists()
+                            else None
+                        )
+                        diagram = _read_diagram(code, raw_root=base_raw_dir)
+                        run_pipeline(
+                            parsed,
+                            settings.data_processed_dir,
+                            raw_doc_code=code,
+                            source_text=source_text,
+                            diagram=diagram,
+                        )
 
                 # Write Neo4j
                 if write_neo4j:
-                    write_graph(code)
+                    write_graph(code, mode=write_mode)
 
                 # Embeddings
                 if generate_embedding and write_neo4j:
@@ -1691,19 +2113,20 @@ def ingest_folder(
     )
 
     # 4.   Bước 3: LLM Extraction
-    typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
-    batch_extract(
-        manifest=manifest_path,
-        raw_dir=base_raw_dir,
-        retry_failed=retry_failed,
-        limit=limit,
-    )
+    if not skip_extract:
+        typer.echo("\n=== BƯỚC 3/6: Rút trích Tri thức LLM Hàng loạt (Batch Extract) ===")
+        batch_extract(
+            manifest=manifest_path,
+            raw_dir=base_raw_dir,
+            retry_failed=retry_failed,
+            limit=limit,
+        )
 
     # 5. Write all endpoints before relation-only reconciliation.
     if write_neo4j:
-        typer.echo("\n=== BƯỚC 4/6: Ghi Node Đồ thị Hàng loạt vào Neo4j ===")
+        typer.echo(f"\n=== BƯỚC 4/6: Ghi Node Đồ thị Hàng loạt ({write_mode}) vào Neo4j ===")
         for code in doc_codes:
-            write_graph(code)
+            write_graph(code, mode=write_mode)
 
     # 6. Build one registry snapshot and reconcile provider/rule references.
     typer.echo("\n=== BƯỚC 5/6: Đăng ký & Đối soát Dẫn chiếu Toàn bộ Corpus ===")
@@ -1790,5 +2213,49 @@ def verify_schema_command(
         driver.close()
 
 
+@app.command("clear-database")
+@app.command("clean-database")
+def clear_database_command(
+    uri: Annotated[str, typer.Option(help="Neo4j Bolt URI")] = "",
+    user: Annotated[str, typer.Option(help="Neo4j User")] = "",
+    password: Annotated[str, typer.Option(help="Neo4j Password")] = "",
+    force: Annotated[bool, typer.Option("--force", "-f", help="Bỏ qua xác nhận xóa")] = False,
+) -> None:
+    """Xóa toàn bộ nodes và relationships trong cơ sở dữ liệu Neo4j."""
+    from neo4j import GraphDatabase
+
+    bolt_uri = uri or settings.neo4j_uri
+    neo_user = user or settings.neo4j_user
+    neo_pass = password or settings.neo4j_password
+
+    if not force:
+        confirm = typer.confirm(f"⚠️ Bạn có CHẮC CHẮN muốn xóa toàn bộ data trên Neo4j ({bolt_uri})?")
+        if not confirm:
+            typer.echo("Đã hủy thao tác xóa.")
+            return
+
+    typer.echo(f"🗑️ Đang kết nối tới {bolt_uri} để xóa toàn bộ data...")
+    driver = GraphDatabase.driver(bolt_uri, auth=(neo_user, neo_pass))
+    try:
+        with driver.session() as session:
+            # 1.   Đếm số lượng node và quan hệ hiện tại
+            count_res = session.run("MATCH (n) RETURN count(n) AS node_count").single()
+            node_count = count_res["node_count"] if count_res else 0
+            rel_res = session.run("MATCH ()-[r]->() RETURN count(r) AS rel_count").single()
+            rel_count = rel_res["rel_count"] if rel_res else 0
+
+            typer.echo(f"Tìm thấy: {node_count} nodes, {rel_count} relationships.")
+            if node_count == 0 and rel_count == 0:
+                typer.echo("✅ Database hiện tại đã trống.")
+                return
+
+            # 2.   Thực hiện xóa toàn bộ
+            session.run("MATCH (n) DETACH DELETE n")
+            typer.echo(f"✅ Đã xóa sạch toàn bộ {node_count} nodes và {rel_count} relationships trên Neo4j!")
+    finally:
+        driver.close()
+
+
 if __name__ == "__main__":
     app()
+
