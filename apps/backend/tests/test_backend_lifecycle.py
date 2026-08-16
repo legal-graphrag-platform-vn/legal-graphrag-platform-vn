@@ -143,7 +143,7 @@ def test_graphrag_mode_constructs_runtime_once_with_canonical_settings() -> None
 
     assert len(calls) == 1
     assert len(runners) == 1
-    assert container.rag_service is None
+    assert container.rag_service is not None
     assert container.chat_service is None
     asyncio.run(container.close())
     assert runtime.close_count == 1

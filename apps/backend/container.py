@@ -261,7 +261,7 @@ async def build_container(
         query_service=RetrievalQueryService(retrieval),
         chat_service=chat_service,
         document_service=document_service,
-        rag_service=None,
+        rag_service=retrieval,
         answer_generator=answer_generator,
         query_planner=query_planner,
         retrieval_runtime=runtime,
