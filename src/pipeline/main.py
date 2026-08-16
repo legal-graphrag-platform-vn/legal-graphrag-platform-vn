@@ -1567,6 +1567,17 @@ def batch_write(
         str,
         typer.Option(help="Chế độ write: 'structural' (mặc định) hoặc 'full'"),
     ] = "structural",
+    workers: Annotated[
+        int,
+        typer.Option(min=1, max=32, help="Số lượng luồng ghi song song vào Neo4j"),
+    ] = 4,
+    skip_existing: Annotated[
+        bool,
+        typer.Option(
+            "--skip-existing",
+            help="Bỏ qua các văn bản đã có trên Neo4j (Checkpoint thông minh)",
+        ),
+    ] = False,
     limit: Annotated[
         int | None,
         typer.Option(help="Giới hạn số lượng văn bản xử lý"),
@@ -1579,19 +1590,58 @@ def batch_write(
         typer.echo(f"Không tìm thấy văn bản nào có hierarchy.json trong {processed_dir}")
         return
 
-    typer.echo(f"🚀 Bắt đầu Batch Write ({mode}) cho {len(doc_codes)} văn bản...")
+    # 2.   Nếu bật --skip-existing, truy vấn danh sách văn bản đã có trên Neo4j
+    if skip_existing:
+        session = create_neo4j_session()
+        try:
+            res = session.run("MATCH (d:Document) RETURN d.id AS id").data()
+            existing_ids = {r["id"] for r in res}
+            # Lọc bỏ các doc_code đã nạp
+            original_len = len(doc_codes)
+            doc_codes = [c for c in doc_codes if c not in existing_ids]
+            skipped_count = original_len - len(doc_codes)
+            if skipped_count > 0:
+                typer.echo(f"⏩ [Checkpoint] Đã bỏ qua {skipped_count} văn bản đã có trên Neo4j.")
+        except Exception as exc:
+            typer.echo(f"⚠️ Không thể lấy danh sách Document hiện tại ({exc}), tiếp tục nạp bình thường.")
+        finally:
+            close = getattr(session, "close", None)
+            if callable(close):
+                close()
+
+    if not doc_codes:
+        typer.echo("🎉 Tất cả văn bản đã tồn tại trên Neo4j. Không có văn bản nào cần nạp mới!")
+        return
+
+    typer.echo(f"🚀 Bắt đầu Batch Write ({mode}) cho {len(doc_codes)} văn bản với {workers} luồng...")
     success_count = 0
     fail_count = 0
 
-    # 2.   Thực hiện write từng văn bản
-    for idx, code in enumerate(doc_codes, 1):
-        typer.echo(f"[{idx}/{len(doc_codes)}] Writing {code}...")
+    def _write_single_doc(code: str) -> bool:
+        typer.echo(f"⏳ [Luồng bắt đầu] Writing {code}...")
         try:
             write_graph(code, mode=mode)
-            success_count += 1
+            typer.echo(f"✅ [Hoàn thành] Wrote {code}")
+            return True
         except Exception as exc:
-            typer.echo(f"❌ Lỗi write {code}: {exc}", err=True)
-            fail_count += 1
+            typer.echo(f"❌ [Lỗi] write {code}: {exc}", err=True)
+            return False
+
+    # 2.   Thực hiện write theo luồng
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_code = {executor.submit(_write_single_doc, code): code for code in doc_codes}
+            for future in as_completed(future_to_code):
+                if future.result():
+                    success_count += 1
+                else:
+                    fail_count += 1
+    else:
+        for code in doc_codes:
+            if _write_single_doc(code):
+                success_count += 1
+            else:
+                fail_count += 1
 
     typer.echo(f"\n🎉 Hoàn thành Batch Write. Thành công: {success_count}, Thất bại: {fail_count}")
 
@@ -1660,6 +1710,17 @@ def batch_load_parsed(
         bool,
         typer.Option(help="Tự động tạo vector embeddings sau khi write"),
     ] = True,
+    workers: Annotated[
+        int,
+        typer.Option(min=1, max=32, help="Số lượng luồng ghi song song vào Neo4j"),
+    ] = 4,
+    skip_existing: Annotated[
+        bool,
+        typer.Option(
+            "--skip-existing",
+            help="Bỏ qua các văn bản đã có trên Neo4j (Checkpoint thông minh)",
+        ),
+    ] = False,
     batch_size: Annotated[
         int,
         typer.Option(min=1, help="Embedding batch size"),
@@ -1671,7 +1732,14 @@ def batch_load_parsed(
 ) -> None:
     """Nạp nhanh hàng loạt các văn bản ĐÃ PARSE vào Neo4j (Write + Embed)."""
     typer.echo(f"=== BƯỚC 1/2: Ghi đồ thị hàng loạt ({mode}) vào Neo4j ===")
-    batch_write(processed_dir=processed_dir, manifest=manifest, mode=mode, limit=limit)
+    batch_write(
+        processed_dir=processed_dir,
+        manifest=manifest,
+        mode=mode,
+        workers=workers,
+        skip_existing=skip_existing,
+        limit=limit,
+    )
 
     if generate_embedding:
         typer.echo("\n=== BƯỚC 2/2: Tạo Vector Embedding hàng loạt ===")
@@ -1722,6 +1790,10 @@ def batch_sync_semantics(
         Path | None,
         typer.Option(help="Đường dẫn file manifest JSON (tùy chọn để lọc danh sách)"),
     ] = None,
+    workers: Annotated[
+        int,
+        typer.Option(min=1, max=32, help="Số lượng luồng đồng bộ song song vào Neo4j"),
+    ] = 4,
     limit: Annotated[
         int | None,
         typer.Option(help="Giới hạn số lượng văn bản xử lý"),
@@ -1739,20 +1811,36 @@ def batch_sync_semantics(
         return
 
     typer.echo(
-        f"🚀 Bắt đầu Batch Sync Semantics cho {len(doc_codes)} văn bản..."
+        f"🚀 Bắt đầu Batch Sync Semantics cho {len(doc_codes)} văn bản với {workers} luồng..."
     )
     success_count = 0
     fail_count = 0
 
-    # 2.   Đồng bộ tuần tự/hàng loạt từng văn bản vào Neo4j
-    for idx, code in enumerate(doc_codes, 1):
-        typer.echo(f"[{idx}/{len(doc_codes)}] Syncing semantics for {code}...")
+    def _sync_single_doc(code: str) -> bool:
+        typer.echo(f"⏳ [Luồng bắt đầu] Syncing semantics for {code}...")
         try:
             write_graph(code, mode="full")
-            success_count += 1
+            typer.echo(f"✅ [Hoàn thành] Synced semantics for {code}")
+            return True
         except Exception as exc:
-            typer.echo(f"❌ Lỗi sync semantics {code}: {exc}", err=True)
-            fail_count += 1
+            typer.echo(f"❌ [Lỗi] sync semantics {code}: {exc}", err=True)
+            return False
+
+    # 2.   Đồng bộ theo luồng vào Neo4j
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            future_to_code = {executor.submit(_sync_single_doc, code): code for code in doc_codes}
+            for future in as_completed(future_to_code):
+                if future.result():
+                    success_count += 1
+                else:
+                    fail_count += 1
+    else:
+        for code in doc_codes:
+            if _sync_single_doc(code):
+                success_count += 1
+            else:
+                fail_count += 1
 
     typer.echo(
         f"\n🎉 Hoàn thành Batch Sync Semantics. Thành công: {success_count}, Thất bại: {fail_count}"
