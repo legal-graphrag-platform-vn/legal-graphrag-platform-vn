@@ -823,18 +823,19 @@ def build_reference_registry(
     ] = None,
 ) -> None:
     """Build an immutable accepted-structure registry without Neo4j or LLM calls."""
-    if bool(raw_doc_code) == bool(manifest):
+    if raw_doc_code and manifest:
         typer.echo(
             "Provide either repeated --raw-doc-code or --manifest, but not both.",
             err=True,
         )
         raise typer.Exit(code=1)
     try:
-        selected = (
-            list(dict.fromkeys(raw_doc_code or []))
-            if manifest is None
-            else list(load_curated_manifest(manifest))
-        )
+        if raw_doc_code:
+            selected = list(dict.fromkeys(raw_doc_code))
+        elif manifest:
+            selected = list(load_curated_manifest(manifest))
+        else:
+            selected = _discover_processed_doc_codes(settings.data_processed_dir)
     except Exception as exc:
         typer.echo(f"Registry selection error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -878,36 +879,59 @@ def build_reference_registry(
 
 
 @app.command("reconcile-external-references")
+@app.command("batch-reconcile-references")
+@app.command("batch-reconcile")
 def reconcile_external_reference_command(
-    build_id: Annotated[str, typer.Option(help="Verified registry build receipt ID")],
+    build_id: Annotated[
+        str | None,
+        typer.Option(help="Verified registry build receipt ID (mặc định: tự động tạo/dùng build_latest)"),
+    ] = None,
     raw_doc_code: Annotated[
-        list[str], typer.Option(help="Repeat for each source document to reconcile")
-    ],
+        list[str] | None,
+        typer.Option(help="Danh sách mã văn bản cần đối soát (nếu để trống, tự động quét toàn bộ kho processed)"),
+    ] = None,
     apply: Annotated[
-        bool, typer.Option(help="Write verified REFERS_TO edges to Neo4j")
+        bool, typer.Option(help="Ghi các cạnh quan hệ liên văn bản (REFERS_TO, AMENDS, REPEALS) vào Neo4j")
     ] = False,
     raw_dir: Annotated[
         Path | None,
         typer.Option(help="Raw corpus root used to load canonical source.txt files"),
     ] = None,
 ) -> None:
-    """Resolve external citations; graph writes require explicit --apply."""
+    """Tự động đối soát và kết nối toàn bộ quan hệ LIÊN VĂN BẢN (Plan 17 & Plan 22) vào Neo4j."""
+    # 1.   Nếu không chỉ định văn bản, tự động quét toàn bộ thư mục processed
+    codes = list(dict.fromkeys(raw_doc_code or []))
+    if not codes:
+        codes = _discover_processed_doc_codes(settings.data_processed_dir)
+        if not codes:
+            typer.echo("Không tìm thấy văn bản nào trong data/processed để đối soát liên văn bản.")
+            return
+        typer.echo(f"🔍 Tự động phát hiện {len(codes)} văn bản trong kho dữ liệu.")
+
+    # 2.   Nếu chưa có build_id, tự động tạo registry snapshot cho toàn bộ kho
+    actual_build_id = build_id or "build_latest"
+    build_dir = settings.data_registry_dir / "builds" / actual_build_id
+    if not build_dir.exists() or build_id is None:
+        typer.echo(f"📦 Đang tự động xây dựng Registry Snapshot ('{actual_build_id}') cho {len(codes)} văn bản...")
+        try:
+            build_reference_registry(raw_doc_code=codes, build_id=actual_build_id, raw_dir=raw_dir)
+        except Exception as exc:
+            typer.echo(f"⚠️ Không thể xây dựng registry: {exc}", err=True)
+
     try:
-        build = load_registry_build(settings.data_registry_dir, build_id)
+        build = load_registry_build(settings.data_registry_dir, actual_build_id)
     except (RegistryError, OSError, ValueError) as exc:
         typer.echo(f"Registry load blocked: {exc}", err=True)
         raise typer.Exit(code=1) from exc
     session = create_neo4j_session() if apply else None
     reports = []
     try:
-        for code in dict.fromkeys(raw_doc_code):
+        for code in codes:
             processed_dir = _processed_dir(code)
             hierarchy_path = processed_dir / "hierarchy.json"
             source_path = (raw_dir or settings.data_raw_dir) / code / "source.txt"
             if not hierarchy_path.is_file() or not source_path.is_file():
-                raise ValueError(
-                    f"Missing hierarchy/source for {code}; run parse and normalization first"
-                )
+                continue
             parsed = ParsedDocument.model_validate_json(
                 hierarchy_path.read_text(encoding="utf-8")
             )
