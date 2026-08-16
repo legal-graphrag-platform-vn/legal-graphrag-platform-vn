@@ -6,7 +6,7 @@ import json
 import re
 import unicodedata
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from src.pipeline.parser.models import Appendix, ParsedDocument
 from src.shared.ontology.contract import NODE_OPTIONAL_FIELDS
@@ -85,7 +85,12 @@ def load_entity_index(path: Path) -> dict[str, dict[str, Any]]:
     return {str(key): dict(value) for key, value in raw.items()}
 
 
-def build_payload_from_paths(processed_doc_dir: Path) -> dict[str, Any]:
+def build_payload_from_paths(
+    processed_doc_dir: Path,
+    *,
+    mode: str = "full",
+) -> dict[str, Any]:
+    # 1.   Load parsed hierarchy artifact
     hierarchy_path = processed_doc_dir / "hierarchy.json"
     if not hierarchy_path.exists():
         raise PayloadBuildError(f"Missing hierarchy.json: {hierarchy_path}")
@@ -93,6 +98,14 @@ def build_payload_from_paths(processed_doc_dir: Path) -> dict[str, Any]:
     parsed = ParsedDocument.model_validate_json(
         hierarchy_path.read_text(encoding="utf-8")
     )
+
+    # 2.   Build structural-only payload if requested
+    if mode == "structural":
+        return build_structural_payload(
+            parsed, raw_doc_code=processed_doc_dir.name
+        )
+
+    # 3.   Load extraction artifacts for full payload
     accepted_records = load_jsonl(processed_doc_dir / "accepted.jsonl")
     entity_index = load_entity_index(processed_doc_dir / "entity_index.json")
     return build_graph_payload(
@@ -100,21 +113,38 @@ def build_payload_from_paths(processed_doc_dir: Path) -> dict[str, Any]:
     )
 
 
+def build_structural_payload(
+    parsed: ParsedDocument,
+    *,
+    raw_doc_code: str,
+) -> dict[str, Any]:
+    # 1.   Build structural-only payload
+    return build_graph_payload(
+        parsed,
+        accepted_records=[],
+        entity_index={},
+        raw_doc_code=raw_doc_code,
+    )
+
+
 def build_graph_payload(
     parsed: ParsedDocument,
-    accepted_records: list[Mapping[str, Any]],
-    entity_index: Mapping[str, Mapping[str, Any]],
+    accepted_records: Sequence[Mapping[str, Any]] | None = None,
+    entity_index: Mapping[str, Mapping[str, Any]] | None = None,
     *,
     raw_doc_code: str,
 ) -> dict[str, Any]:
     if not raw_doc_code:
         raise PayloadBuildError("raw_doc_code is required")
 
+    accepted_list = list(accepted_records or [])
+    entities_map = dict(entity_index or {})
+
     nodes: dict[str, dict[str, Any]] = {}
     relations: dict[str, dict[str, Any]] = {}
     deferred_relation_count = sum(
         1
-        for record in accepted_records
+        for record in accepted_list
         if record.get("materialization_route") == CORPUS_RELATION_MATERIALIZATION_ROUTE
     )
 
@@ -429,19 +459,19 @@ def build_graph_payload(
             legal_status=content_status,
         )
 
-    for record in accepted_records:
+    for record in accepted_list:
         if record.get("materialization_route") == CORPUS_RELATION_MATERIALIZATION_ROUTE:
             continue
         relation = record.get("relation") or {}
         head_id = _resolve_endpoint_id(
-            relation.get("head"), structural_ids, entity_index
+            relation.get("head"), structural_ids, entities_map
         )
         tail_id = _resolve_endpoint_id(
-            relation.get("tail"), structural_ids, entity_index
+            relation.get("tail"), structural_ids, entities_map
         )
 
-        _ensure_semantic_node(nodes, relation.get("head"), entity_index)
-        _ensure_semantic_node(nodes, relation.get("tail"), entity_index)
+        _ensure_semantic_node(nodes, relation.get("head"), entities_map)
+        _ensure_semantic_node(nodes, relation.get("tail"), entities_map)
 
         relation_type = relation.get("relation")
         properties = dict(relation.get("properties") or {})

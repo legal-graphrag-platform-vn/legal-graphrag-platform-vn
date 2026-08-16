@@ -13,6 +13,10 @@ class ExtractionReadinessError(RuntimeError):
     """Raised when extraction artifacts cannot support a Milestone A run."""
 
 
+class StructuralReadinessError(RuntimeError):
+    """Raised when structural hierarchy artifacts cannot support a graph write."""
+
+
 @dataclass(frozen=True, slots=True)
 class ExtractionReadiness:
     extracted_count: int
@@ -72,3 +76,23 @@ def _count_jsonl(path: Path) -> int:
                 raise ExtractionReadinessError(f"Invalid JSONL at {path}:{line_no}") from exc
             count += 1
     return count
+
+
+def validate_structural_readiness(processed_dir: Path) -> None:
+    # 1.   Check existence of hierarchy.json artifact
+    hierarchy_path = processed_dir / "hierarchy.json"
+    if not hierarchy_path.exists():
+        raise StructuralReadinessError(f"Missing hierarchy artifact: {hierarchy_path}")
+
+    # 2.   Parse and validate hierarchy payload structure
+    try:
+        data = json.loads(hierarchy_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise StructuralReadinessError(f"Invalid JSON at {hierarchy_path}") from exc
+
+    doc_info = data.get("document")
+    if not isinstance(doc_info, dict) or not doc_info.get("id"):
+        raise StructuralReadinessError(
+            f"hierarchy.json at {hierarchy_path} is missing valid document header"
+        )
+

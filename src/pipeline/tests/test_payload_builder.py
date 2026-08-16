@@ -387,3 +387,35 @@ def test_requires_relations_preserve_distinct_source_articles() -> None:
     ]
     assert len(requires) == 2
     assert len({relation["id"] for relation in requires}) == 2
+
+
+def test_build_structural_payload_without_extraction(tmp_path) -> None:
+    from src.pipeline.persistence.payload_builder import (
+        build_payload_from_paths,
+        build_structural_payload,
+    )
+
+    parsed = _parsed()
+    payload = build_structural_payload(parsed, raw_doc_code="L59_2020")
+    validate_payload_consistency_or_raise(payload)
+
+    node_types = {node["type"] for node in payload["nodes"]}
+    assert "Document" in node_types
+    assert "Article" in node_types
+    assert "LegalConcept" not in node_types
+    assert "LegalSubject" not in node_types
+
+    relation_types = {relation["type"] for relation in payload["relations"]}
+    assert "CONTAINS" in relation_types
+    assert "ISSUED_BY" in relation_types
+    assert "DEFINES" not in relation_types
+
+    # Also test build_payload_from_paths with mode="structural"
+    doc_dir = tmp_path / "L59_2020"
+    doc_dir.mkdir()
+    (doc_dir / "hierarchy.json").write_text(parsed.model_dump_json(indent=2), encoding="utf-8")
+
+    from_path_payload = build_payload_from_paths(doc_dir, mode="structural")
+    assert len(from_path_payload["nodes"]) == len(payload["nodes"])
+    assert len(from_path_payload["relations"]) == len(payload["relations"])
+
