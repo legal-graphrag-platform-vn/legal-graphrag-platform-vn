@@ -107,7 +107,7 @@ def _build_query(reference: ExplicitReference) -> tuple[str, dict[str, Any]]:
         predicates.append("toLower(document.title) CONTAINS toLower($law_name)")
         params["law_name"] = reference.law_name
     if reference.law_year:
-        predicates.append("document.issued_date.year = $law_year")
+        predicates.append("toString(document.issued_date) CONTAINS toString($law_year)")
         params["law_year"] = reference.law_year
     if predicates:
         lines.append("WHERE " + " AND ".join(predicates))
