@@ -17,7 +17,7 @@ _GREETING_MESSAGES = frozenset(
 )
 
 _GREETING_RESPONSE = (
-    "Xin chào! Tôi hỗ trợ tra cứu Luật Doanh nghiệp 2020 trên dữ liệu pilot. "
+    "Xin chào! Tôi hỗ trợ tra cứu văn bản pháp luật Việt Nam. "
     "Bạn có thể hỏi về điều, khoản, khái niệm hoặc quy định pháp lý cụ thể."
 )
 
