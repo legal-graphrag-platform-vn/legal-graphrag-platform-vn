@@ -81,11 +81,16 @@ def _optional_text(value: object) -> str | None:
 
 
 def _native_date(value: object) -> date | None:
-    if value is None:
+    if value in (None, ""):
         return None
     native = value.to_native() if hasattr(value, "to_native") else value
     if isinstance(native, date):
         return native
+    if isinstance(native, str):
+        try:
+            return date.fromisoformat(native.split("T")[0])
+        except ValueError:
+            pass
     raise RetrievalRecordError(
         f"Expected date-compatible value, got {type(value).__name__}"
     )

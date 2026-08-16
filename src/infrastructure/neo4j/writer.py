@@ -172,7 +172,7 @@ def neo4j_properties(
         if field in (DATE_PROPERTIES | DATETIME_PROPERTIES):
             value = properties.pop(field)
             if value in (None, ""):
-                properties[field] = ""
+                properties[field] = None
             else:
                 parameter = f"{alias}_{field}"
                 if field in DATE_PROPERTIES:
