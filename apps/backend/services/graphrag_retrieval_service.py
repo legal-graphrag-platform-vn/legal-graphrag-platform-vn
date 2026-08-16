@@ -53,7 +53,7 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         """Pre-load and warm up embedding encoder and reranker at startup."""
         logger.info("Warming up GraphRAG embedding and retrieval models...")
         try:
-            warmup_request = RetrievalRequest(query_text="khởi động hệ thống pháp luật")
+            warmup_request = RetrievalRequest(query="khởi động hệ thống pháp luật")
             await self._runner.run(partial(self._runtime.retrieve, warmup_request))
             logger.info("GraphRAG model warm-up completed successfully.")
         except Exception as exc:
