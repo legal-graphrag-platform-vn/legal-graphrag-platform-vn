@@ -48,10 +48,10 @@ class Neo4jRetrieverRepo:
             return []
 
         union_blocks = []
-        for i, idx in enumerate(index_names):
-            # Neo4j allows passing the index name dynamically as a parameter in vector search
+        for idx in index_names:
+            # Neo4j vector index names are internal constants, safe to interpolate
             union_blocks.append(
-                f"CALL db.index.vector.queryNodes($index_names[{i}], $candidate_k, $query_embedding) "
+                f"CALL db.index.vector.queryNodes('{idx}', $candidate_k, $query_embedding) "
                 "YIELD node, score RETURN node, score"
             )
         
