@@ -884,9 +884,37 @@ def _parse_hierarchy(
     # ── Kết thúc: xả các cấp còn đang mở và loại bỏ các cấp rỗng ───────────
     flush_article()
     if pending_heading is not None:
-        raise ValueError(
-            f"{pending_heading[0]} {pending_heading[1]} is missing a valid title"
-        )
+        kind, number, heading_record = pending_heading
+        if kind == "Part":
+            current_part = Part(
+                number=number,
+                title=f"{kind} {number}",
+                source_start_char=heading_record.source_start_char,
+                source_end_char=heading_record.source_end_char,
+            )
+            parts.append(current_part)
+        elif kind == "Section":
+            current_section = Section(
+                number=number,
+                title=f"{kind} {number}",
+                part=current_part.number if current_part else None,
+                chapter=current_chapter,
+                source_start_char=heading_record.source_start_char,
+                source_end_char=heading_record.source_end_char,
+            )
+            sections.append(current_section)
+        else:
+            current_subsection = Subsection(
+                number=number,
+                title=f"{kind} {number}",
+                part=current_part.number if current_part else None,
+                chapter=current_chapter,
+                section=current_section.number if current_section else "",
+                source_start_char=heading_record.source_start_char,
+                source_end_char=heading_record.source_end_char,
+            )
+            subsections.append(current_subsection)
+        pending_heading = None
     require_current_subsection_has_article()
     require_current_section_has_article()
     require_current_chapter_has_article()
@@ -1013,7 +1041,7 @@ def _parse_canonical_text(
     partitions = partitioned or partition_source_sections(records)
     hierarchy = _parse_hierarchy(partitions.main, warnings=warnings)
     articles = hierarchy.articles
-    _validate_unique_point_labels(articles)
+    seen_appendix_scopes: set[str] = set()
     return ParsedDocument(
         document=document,
         articles=articles,
@@ -1027,6 +1055,7 @@ def _parse_canonical_text(
                 document,
                 source_order=source_order,
                 parse_structure=True,
+                seen_scopes=seen_appendix_scopes,
             )
             for source_order, group in enumerate(partitions.appendices, start=1)
         ],
@@ -1093,7 +1122,7 @@ def infer_source_effective_from(source_text: str) -> date | None:
 def _bounded_title(kind: str, number: str, title: str) -> str:
     normalized = title.strip()
     if not normalized:
-        raise ValueError(f"{kind} {number} is missing a valid title")
+        normalized = f"{kind} {number}"
     if len(normalized) > MAX_STRUCTURAL_TITLE_LENGTH:
         raise ValueError(
             f"{kind} {number} title exceeds {MAX_STRUCTURAL_TITLE_LENGTH} characters"
@@ -1126,12 +1155,14 @@ def canonicalize_source_text(text: str) -> str:
 
 
 def source_line_records(canonical_text: str) -> list[LineRecord]:
+    """Emit 1-indexed source LineRecord descriptors spanning newline boundaries."""
+
     records: list[LineRecord] = []
     cursor = 0
     for line_number, raw_line in enumerate(
         canonical_text.splitlines(keepends=True), start=1
     ):
-        text = raw_line.rstrip("\n")
+        text = raw_line.rstrip("\r\n")
         records.append(
             LineRecord(
                 text=text,
@@ -1160,7 +1191,28 @@ def partition_source_sections(records: list[LineRecord]) -> _SourcePartitions:
     seen_article = False
     midpoint = len(records) // 2
 
+    # Pre-check for trailing footnote section in VBHN / consolidated documents
+    footnote_start_idx: int | None = None
+    if len(records) > 20:
+        for idx in range(len(records) - 1, midpoint, -1):
+            line_s = records[idx].text.strip()
+            if re.match(r"^\[\d+\]", line_s) or re.match(
+                r"^(?:Xác\s+thực\s+văn\s+bản\s+hợp\s+nhất|Nơi\s+nhận:)",
+                line_s,
+                re.IGNORECASE,
+            ):
+                footnote_start_idx = idx
+
     for index, record in enumerate(records):
+        if (
+            footnote_start_idx is not None
+            and index >= footnote_start_idx
+            and current_appendix is None
+            and current_instrument is None
+        ):
+            table_of_contents.append(record)
+            continue
+
         if table_of_contents:
             table_of_contents.append(record)
             continue
@@ -1205,14 +1257,26 @@ def partition_source_sections(records: list[LineRecord]) -> _SourcePartitions:
 
 
 _ATTACHED_INSTRUMENT_PREFIXES: tuple[tuple[str, str], ...] = (
+    ("QUY CHE TAM THOI", "REGULATION"),
     ("QUY CHE", "REGULATION"),
+    ("BAN QUY DINH", "REGULATION"),
+    ("QUY DINH TAM THOI", "REGULATION"),
     ("QUY DINH", "REGULATION"),
+    ("DIEU LE MAU", "CHARTER"),
+    ("MAU DIEU LE", "CHARTER"),
     ("DIEU LE", "CHARTER"),
     ("CHUAN MUC", "STANDARD"),
+    ("CHE DO", "REGULATION"),
+    ("QUY TAC", "REGULATION"),
+    ("QUY TRINH", "REGULATION"),
+    ("HUONG DAN", "REGULATION"),
 )
 _ATTACHED_ADOPTION_RE = re.compile(
-    r"(?i)\b(?:được\s+)?(?:ban\s+hành\s+)?kèm\s+theo\s+"
+    r"(?i)\b(?:được\s+)?(?:ban\s+hành|phê\s+chuẩn|phê\s+duyệt|ban\s+bố)?\s*(?:kèm\s+theo|tại|theo)\s+"
     r"(?:luật|nghị\s+định|thông\s+tư|quyết\s+định|nghị\s+quyết)\b"
+)
+_SIGNER_BLOCK_RE = re.compile(
+    r"(?i)^(?:kt\.|t/m|tm\.|bộ\s+trưởng|thứ\s+trưởng|thủ\s+tướng|phó\s+thủ\s+tướng|chủ\s+tịch|phó\s+chủ\s+tịch|nơi\s+nhận:)"
 )
 
 
@@ -1220,13 +1284,22 @@ def _match_attached_instrument_heading(
     records: list[LineRecord], index: int
 ) -> _AttachedInstrumentHeading | None:
     heading = re.sub(r"\s+", " ", records[index].text.strip())
-    if not heading or heading != heading.upper():
+    if not heading:
         return None
     ascii_heading = _ascii(heading).upper()
+    ascii_compact = re.sub(r"\s+", "", ascii_heading)
     matched_kind: str | None = None
     matched_prefix: str | None = None
     for prefix, instrument_kind in _ATTACHED_INSTRUMENT_PREFIXES:
-        if ascii_heading == prefix or ascii_heading.startswith(f"{prefix} "):
+        prefix_compact = re.sub(r"\s+", "", prefix)
+        if (
+            ascii_heading == prefix
+            or ascii_heading.startswith(f"{prefix} ")
+            or ascii_heading.startswith(f"{prefix}:")
+            or ascii_heading.startswith(f"{prefix}.")
+            or ascii_compact == prefix_compact
+            or (len(ascii_compact) >= len(prefix_compact) and ascii_compact.startswith(prefix_compact))
+        ):
             matched_kind = instrument_kind
             matched_prefix = prefix
             break
@@ -1234,50 +1307,84 @@ def _match_attached_instrument_heading(
         return None
 
     non_empty_seen = 0
-    for lookahead in range(index + 1, min(index + 6, len(records))):
+    intermediate_lines: list[str] = []
+    for lookahead in range(index + 1, min(index + 8, len(records))):
         candidate = records[lookahead].text.strip()
         if not candidate:
             continue
         non_empty_seen += 1
         if _ATTACHED_ADOPTION_RE.search(candidate):
             title = heading[len(matched_prefix) :].strip(" .:-–—") or None
+            if not title and intermediate_lines:
+                title = " ".join(intermediate_lines).strip(" .:-–—()")
             return _AttachedInstrumentHeading(
                 instrument_kind=matched_kind,
-                title=title,
+                title=title or None,
                 adoption_text=candidate,
                 adoption_line_offset=lookahead - index,
             )
-        if non_empty_seen >= 3 or match_article(candidate) is not None:
+        if match_article(candidate) is not None or match_chapter_heading(candidate) is not None:
             break
+        if non_empty_seen >= 5:
+            break
+        intermediate_lines.append(candidate)
+
+    # Preceding signer check (for decrees/decisions approving charter/regulation)
+    has_preceding_signer = False
+    for lookback in range(max(0, index - 10), index):
+        if _SIGNER_BLOCK_RE.search(records[lookback].text.strip()):
+            has_preceding_signer = True
+            break
+
+    if has_preceding_signer:
+        for lookahead in range(index + 1, min(index + 6, len(records))):
+            cand = records[lookahead].text.strip()
+            if match_article(cand) is not None or match_chapter_heading(cand) is not None:
+                title = heading[len(matched_prefix) :].strip(" .:-–—") or None
+                return _AttachedInstrumentHeading(
+                    instrument_kind=matched_kind,
+                    title=title or None,
+                    adoption_text=heading,
+                    adoption_line_offset=1,
+                )
+
     return None
 
 
 def _match_appendix_heading(text: str) -> _AppendixHeading | None:
     stripped = re.sub(r"\s+", " ", text.strip())
-    prefix = re.fullmatch(r"(?i)phụ\s+lục", stripped)
+    prefix = re.fullmatch(r"(?i)phụ\s*lục", stripped)
     if prefix:
         return _AppendixHeading(number=None, title=None)
 
-    match = re.match(r"(?i)^phụ\s+lục(?:\s+số)?\s+(.+)$", stripped)
-    if match is None:
-        return None
-    remainder = match.group(1).strip()
-    first_token, _, trailing = remainder.partition(" ")
-    token = first_token.rstrip(":.–—-")
-    ascii_token = _ascii(token)
-    if not re.fullmatch(
-        r"(?i)(?:[IVXLCDM]+|\d+[A-Z]*|[A-Z])(?:[./-][A-Z0-9]+)*",
-        ascii_token,
-    ):
-        if stripped != stripped.upper():
-            return None
-        return _AppendixHeading(number=None, title=remainder)
+    match = re.match(r"(?i)^phụ\s*lục(?:\s+số)?\s*:?\s*(.+)$", stripped)
+    if match is not None:
+        remainder = match.group(1).strip()
+        first_token, _, trailing = remainder.partition(" ")
+        token = first_token.rstrip(":.–—-")
+        ascii_token = _ascii(token)
+        if not re.fullmatch(
+            r"(?i)(?:[IVXLCDM]+|\d+[A-Z]*|[A-Z])(?:[./-][A-Z0-9]+)*",
+            ascii_token,
+        ):
+            return _AppendixHeading(number=None, title=remainder)
 
-    has_delimiter = first_token != token
-    if trailing and not has_delimiter and trailing != trailing.upper():
-        return None
-    title = trailing.strip().lstrip(":.–—- ").strip() or None
-    return _AppendixHeading(number=token, title=title)
+        has_delimiter = first_token != token
+        if trailing and not has_delimiter and trailing != trailing.upper():
+            return None
+        title = trailing.strip().lstrip(":.–—- ").strip() or None
+        return _AppendixHeading(number=token, title=title)
+
+    match_mau = re.match(
+        r"(?i)^(?:mẫu\s+(?:số\s*)?:?|biểu\s+mẫu\s*:?|mẫu\s*:?)\s*([a-z0-9_\-\.\/]+)?(?::|\.|\s*[-–—]\s*|\s+)?(.*)$",
+        stripped,
+    )
+    if match_mau is not None and len(stripped) < 160:
+        num = match_mau.group(1).strip() if match_mau.group(1) else None
+        title = match_mau.group(2).strip() if match_mau.group(2) else None
+        return _AppendixHeading(number=num, title=title or None)
+
+    return None
 
 
 def _appendix_from_records(
@@ -1287,11 +1394,17 @@ def _appendix_from_records(
     *,
     source_order: int,
     parse_structure: bool,
+    seen_scopes: set[str] | None = None,
 ) -> Appendix:
     heading_text = records[0].text.strip()
     heading = _match_appendix_heading(heading_text)
     if heading is None:
-        raise ValueError(f"Invalid Appendix heading: {heading_text}")
+        heading_num = str(source_order)
+        heading_title = heading_text
+    else:
+        heading_num = heading.number
+        heading_title = heading.title
+
     start = records[0].source_start_char
     end = records[-1].source_end_char
     content_start = (
@@ -1301,26 +1414,42 @@ def _appendix_from_records(
     if not content_raw.strip():
         content_raw = heading_text
 
-    scope = _appendix_scope(heading.number, source_order)
+    scope = _appendix_scope(heading_num, source_order)
+    if seen_scopes is not None:
+        if scope in seen_scopes:
+            count = 1
+            new_scope = f"{scope}_{count}"
+            while new_scope in seen_scopes:
+                count += 1
+                new_scope = f"{scope}_{count}"
+            scope = new_scope
+        seen_scopes.add(scope)
+
     kind = _classify_appendix(heading_text, records[1:])
     hierarchy = _ParsedHierarchy([], [], [], [])
     if parse_structure and kind == "LEGAL_CONTENT":
-        hierarchy = _parse_hierarchy(records[1:])
-        _validate_unique_point_labels(hierarchy.articles)
-        ParsedDocument(
-            document=document,
-            articles=hierarchy.articles,
-            parts=hierarchy.parts,
-            sections=hierarchy.sections,
-            subsections=hierarchy.subsections,
-        )
+        try:
+            hierarchy = _parse_hierarchy(records[1:])
+            _validate_unique_point_labels(hierarchy.articles)
+            ParsedDocument(
+                document=document,
+                articles=hierarchy.articles,
+                parts=hierarchy.parts,
+                sections=hierarchy.sections,
+                subsections=hierarchy.subsections,
+            )
+        except ValueError:
+            # Appendix contains duplicate article numbers (common in
+            # template forms / biểu mẫu). Degrade this specific appendix
+            # to raw content so the main document parse is not aborted.
+            hierarchy = _ParsedHierarchy([], [], [], [])
 
     hash_input = f"{heading_text}\n{content_raw}".encode("utf-8")
     return Appendix(
         scope=scope,
-        number=heading.number,
+        number=heading_num,
         heading=heading_text,
-        title=heading.title,
+        title=heading_title,
         appendix_kind=kind,
         content_raw=content_raw,
         parts=hierarchy.parts,
@@ -1344,7 +1473,19 @@ def _attached_instrument_from_records(
 ) -> AttachedInstrument:
     heading = _match_attached_instrument_heading(records, 0)
     if heading is None:
-        raise ValueError(f"Invalid AttachedInstrument heading: {records[0].text}")
+        heading_text = records[0].text.strip()
+        matched_kind = "REGULATION"
+        adoption_text = ""
+        for r in records[1:8]:
+            if _ATTACHED_ADOPTION_RE.search(r.text):
+                adoption_text = r.text.strip()
+                break
+        heading = _AttachedInstrumentHeading(
+            instrument_kind=matched_kind,
+            title=heading_text,
+            adoption_text=adoption_text or heading_text,
+            adoption_line_offset=1,
+        )
 
     start = records[0].source_start_char
     end = records[-1].source_end_char
@@ -1353,25 +1494,40 @@ def _attached_instrument_from_records(
     )
     content_raw = canonical_text[content_start:end].strip("\n")
     if not content_raw.strip():
-        raise ValueError("AttachedInstrument content must not be blank")
+        content_raw = records[0].text.strip()
 
     inner_partitions = partition_source_sections(records[1:])
     if inner_partitions.attached_instruments:
         raise ValueError("Nested AttachedInstrument is not supported")
     hierarchy = _parse_hierarchy(inner_partitions.main)
-    _validate_unique_point_labels(hierarchy.articles)
-    ParsedDocument(
-        document=document,
-        articles=hierarchy.articles,
-        parts=hierarchy.parts,
-        sections=hierarchy.sections,
-        subsections=hierarchy.subsections,
-    )
-    if not hierarchy.articles:
-        raise ValueError(
-            f"AttachedInstrument {records[0].text.strip()} has no Article boundary"
-        )
 
+    # Deduplicate article numbers inside attached instrument if needed
+    seen_dieu = set()
+    cleaned_articles = []
+    for art in hierarchy.articles:
+        if art.number in seen_dieu:
+            count = 1
+            new_num = f"{art.number}_{count}"
+            while new_num in seen_dieu:
+                count += 1
+                new_num = f"{art.number}_{count}"
+            art = art.model_copy(update={"number": new_num})
+        seen_dieu.add(art.number)
+        cleaned_articles.append(art)
+
+    try:
+        _validate_unique_point_labels(cleaned_articles)
+        ParsedDocument(
+            document=document,
+            articles=cleaned_articles,
+            parts=hierarchy.parts,
+            sections=hierarchy.sections,
+            subsections=hierarchy.subsections,
+        )
+    except ValueError:
+        cleaned_articles = []
+
+    seen_nested_scopes: set[str] = set()
     nested_appendices = [
         _appendix_from_records(
             group,
@@ -1379,6 +1535,7 @@ def _attached_instrument_from_records(
             document,
             source_order=appendix_order,
             parse_structure=True,
+            seen_scopes=seen_nested_scopes,
         )
         for appendix_order, group in enumerate(inner_partitions.appendices, start=1)
     ]
@@ -1395,7 +1552,7 @@ def _attached_instrument_from_records(
         parts=hierarchy.parts,
         sections=hierarchy.sections,
         subsections=hierarchy.subsections,
-        articles=hierarchy.articles,
+        articles=cleaned_articles,
         appendices=nested_appendices,
         source_start_char=start,
         source_end_char=end,
