@@ -38,15 +38,29 @@ class Neo4jRetrieverRepo:
 
     def vector_search(
         self,
-        index_name: str,
+        index_names: list[str],
         query_embedding: list[float],
         *,
         filters: RetrievalFilters,
         k: int = 5,
     ) -> list[dict[str, Any]]:
+        if not index_names:
+            return []
+
+        union_blocks = []
+        for i, idx in enumerate(index_names):
+            # Neo4j allows passing the index name dynamically as a parameter in vector search
+            union_blocks.append(
+                f"CALL db.index.vector.queryNodes($index_names[{i}], $candidate_k, $query_embedding) "
+                "YIELD node, score RETURN node, score"
+            )
+        
+        union_clause = "\n        UNION\n        ".join(union_blocks)
+        
         query = f"""
-        CALL db.index.vector.queryNodes($index_name, $candidate_k, $query_embedding)
-        YIELD node, score
+        CALL {{
+            {union_clause}
+        }}
         {_LEGAL_UNIT_CONTEXT}
         WHERE {_FILTER_PREDICATE}
         RETURN {_UNIT_PROJECTION}, score
@@ -55,7 +69,7 @@ class Neo4jRetrieverRepo:
         """
         return self._run(
             query,
-            index_name=index_name,
+            index_names=index_names,
             query_embedding=query_embedding,
             candidate_k=max(k * 4, k),
             k=k,

@@ -14,9 +14,9 @@ services:
       NEO4J_apoc_import_file_enabled: "true"
       NEO4J_apoc_import_file_use__neo4j__config: "true"
       # Memory — phù hợp cho dev (máy có ≥8GB RAM)
-      NEO4J_server_memory_heap_initial__size: "512m"
-      NEO4J_server_memory_heap_max__size: "2g"
-      NEO4J_server_memory_pagecache_size: "512m"
+      NEO4J_server_memory_heap_initial__size: "1g"
+      NEO4J_server_memory_heap_max__size: "4g"
+      NEO4J_server_memory_pagecache_size: "4g"
       # Cho phép vector index (mặc định bật từ 5.11+)
       NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*"
       # Bật Vector API để tối ưu HNSW index và tránh warning lúc khởi động

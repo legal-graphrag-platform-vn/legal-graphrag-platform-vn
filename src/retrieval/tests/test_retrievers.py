@@ -47,9 +47,9 @@ class FakeRepo:
         self.vector_calls: list[tuple] = []
         self.fulltext_calls: list[tuple] = []
 
-    def vector_search(self, index_name, query_embedding, *, filters, k):
-        self.vector_calls.append((index_name, query_embedding, filters, k))
-        return [_row(f"{index_name}_unit")]
+    def vector_search(self, index_names, query_embedding, *, filters, k):
+        self.vector_calls.append((index_names, query_embedding, filters, k))
+        return [_row(f"{idx}_unit") for idx in index_names]
 
     def fulltext_search(self, index_name, text_query, *, filters, k):
         self.fulltext_calls.append((index_name, text_query, filters, k))
@@ -66,7 +66,7 @@ def test_vector_retriever_encodes_a_batch_and_queries_all_indexes() -> None:
     )
 
     assert encoder.calls == [["vốn điều lệ"]]
-    assert [call[0] for call in repo.vector_calls] == list(VECTOR_INDEXES)
+    assert [call[0] for call in repo.vector_calls] == [list(VECTOR_INDEXES)]
     assert len(repo.vector_calls[0][1]) == 1024
     assert len(results) == 3
     assert all(
