@@ -188,21 +188,23 @@ class Neo4jCanonicalLookup:
         self, reference: ExplicitReference
     ) -> tuple[ResolvedCandidate, ...]:
         rows = await self._runner.run(lambda: self._repo.lookup(reference))
-        
         if len(rows) > 1 and reference.law_name:
-            import re
-            target_title = reference.law_name.lower().strip()
-            target_title_clean = re.sub(r'\s+(năm\s+)?\d{4}$', '', target_title).strip()
+            target_title = reference.law_name.strip()
             
-            exact_rows = []
-            for row in rows:
-                doc_title = row.get("document_title", "")
-                if doc_title:
-                    doc_title_clean = re.sub(r'\s+(năm\s+)?\d{4}$', '', doc_title.lower().strip()).strip()
-                    if doc_title_clean == target_title_clean:
-                        exact_rows.append(row)
+            # Find the minimum character length difference between the target and DB titles
+            # This elegantly handles slight mismatches (like missing years) without regex
+            # and naturally filters out long implementation decrees.
+            min_diff = min(
+                abs(len(r.get("document_title") or "") - len(target_title)) 
+                for r in rows
+            )
             
-            if exact_rows:
-                rows = exact_rows
+            best_rows = [
+                r for r in rows 
+                if abs(len(r.get("document_title") or "") - len(target_title)) == min_diff
+            ]
+            
+            if best_rows:
+                rows = best_rows
                 
         return tuple(row_to_candidate(row) for row in rows)
