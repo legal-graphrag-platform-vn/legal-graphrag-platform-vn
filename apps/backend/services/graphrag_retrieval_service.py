@@ -50,11 +50,19 @@ class GraphRAGRetrievalService(RetrievalApplicationPort):
         self._planning_enabled = planning_enabled
 
     async def warmup(self) -> None:
-        """Pre-load and warm up embedding encoder and reranker at startup."""
+        """Pre-load and warm up embedding encoder and reranker at startup.
+
+        Chạy qua asyncio.to_thread thay vì BoundedRetrievalRunner để tránh
+        bị chặn bởi backend_retrieval_timeout_seconds (30s) trong khi
+        BGE-M3 load lần đầu từ disk có thể mất 30-90s.
+
+        Không đặt timeout: warmup phải block startup cho đến khi model
+        sẵn sàng — nếu timeout thì request đầu tiên vẫn bị lỗi.
+        """
         logger.info("Warming up GraphRAG embedding and retrieval models...")
         try:
             warmup_request = RetrievalRequest(query="khởi động hệ thống pháp luật")
-            await self._runner.run(partial(self._runtime.retrieve, warmup_request))
+            await asyncio.to_thread(self._runtime.retrieve, warmup_request)
             logger.info("GraphRAG model warm-up completed successfully.")
         except Exception as exc:
             logger.warning("GraphRAG model warm-up encountered a non-fatal error: %s", exc)
