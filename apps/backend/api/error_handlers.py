@@ -89,10 +89,11 @@ async def retrieval_error_handler(
             "required_capability": error.required_capability,
             "available_capability": error.available_capability,
         }
-    logger.warning(
+    logger.error(
         "Backend retrieval request failed: code=%s error_type=%s",
         code,
         type(error).__name__,
+        exc_info=True,
     )
     return _response(
         status_code=status_code,
