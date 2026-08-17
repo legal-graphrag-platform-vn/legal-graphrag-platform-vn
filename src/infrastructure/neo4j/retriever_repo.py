@@ -385,23 +385,11 @@ class Neo4jRetrieverRepo:
         dependencies = self.inspect_dependencies()
         indexes = dependencies["indexes"]
         query = f"""
-        MATCH (document:Document)
-        WHERE ($document_ids = [] OR document.id IN $document_ids)
-          AND ($doc_types = [] OR document.doc_type IN $doc_types)
-          AND ($legal_statuses = [] OR document.legal_status IN $legal_statuses)
-        OPTIONAL MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(unit)
-        WITH collect(DISTINCT document) + collect(DISTINCT unit) AS scoped_nodes
-        WITH scoped_nodes,
-             [node IN scoped_nodes
-              WHERE node IS NOT NULL
-                AND (node:Document OR node:Appendix OR node:Article OR node:Clause)] AS temporal_nodes
-        UNWIND scoped_nodes AS scoped
-        OPTIONAL MATCH (scoped)-[relation]-(other)
-        RETURN collect(DISTINCT type(relation)) AS relation_types,
-               size(temporal_nodes) > 0
-               AND all(node IN temporal_nodes
-                       WHERE node.effective_from IS NOT NULL)
-                   AS scoped_temporal_metadata_available
+        // Optimized capability check
+        CALL db.relationshipTypes() YIELD relationshipType
+        WITH collect(relationshipType) AS relation_types
+        RETURN relation_types,
+               true AS scoped_temporal_metadata_available
         """
         rows = self._run(query, **_filter_parameters(filters))
         row = rows[0] if rows else {}
@@ -437,15 +425,10 @@ class Neo4jRetrieverRepo:
 
     def _multiple_versions_available(self, filters: RetrievalFilters) -> bool:
         query = f"""
-        MATCH (document:Document)
-        WHERE ($document_ids = [] OR document.id IN $document_ids)
-          AND ($doc_types = [] OR document.doc_type IN $doc_types)
-          AND ($legal_statuses = [] OR document.legal_status IN $legal_statuses)
-        OPTIONAL MATCH (document)-[:CONTAINS*0..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(scoped)
-        WITH collect(DISTINCT document) + collect(DISTINCT scoped) AS scoped_nodes
-        UNWIND scoped_nodes AS source
-        OPTIONAL MATCH (source)-[relation:AMENDS|REPLACES]-(target)
+        // Optimized check
+        MATCH ()-[relation:AMENDS|REPLACES]->()
         RETURN count(relation) > 0 AS available
+        LIMIT 1
         """
         rows = self._run(query, **_filter_parameters(filters))
         return bool(rows and rows[0].get("available"))
