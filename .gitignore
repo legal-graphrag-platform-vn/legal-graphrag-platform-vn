@@ -41,12 +41,6 @@ src/frontend/node_modules/
 # Misc
 *.log
 .DS_Store
-tree.txt
-
-.env
-.env.*
-# uv
-.venv/
 
 # Safe, non-secret configuration templates
 !apps/backend/.env.example
