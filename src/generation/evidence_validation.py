@@ -104,6 +104,11 @@ class EvidenceValidator:
                 raise EvidenceContractError(
                     f"Clause evidence has inconsistent hierarchy IDs: {unit.id}"
                 )
+        elif unit.label == "Appendix":
+            # Appendix belongs directly to a Document/AttachedInstrument, not
+            # nested under an Article/Clause — article_id/clause_id are
+            # legitimately absent, unlike Point below.
+            pass
         elif not unit.article_id or not unit.clause_id:
             raise EvidenceContractError(
                 f"Point evidence has inconsistent hierarchy IDs: {unit.id}"

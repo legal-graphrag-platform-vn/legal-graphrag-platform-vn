@@ -10,12 +10,14 @@ interface SourceCardProps {
 }
 
 const LABEL_COLORS: Record<string, string> = {
+   Appendix: 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20',
    Article: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
    Clause: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
    Point: 'bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-500/20',
 }
 
 const LABEL_VN: Record<string, string> = {
+   Appendix: 'Phụ lục',
    Article: 'Điều',
    Clause: 'Khoản',
    Point: 'Điểm',

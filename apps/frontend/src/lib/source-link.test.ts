@@ -43,4 +43,17 @@ describe('sourceHref', () => {
    it('returns null when no navigation identity is available', () => {
       expect(sourceHref({ id: 'legacy', title: 'Legacy', content: '' })).toBeNull()
    })
+
+   it('returns null for Appendix so the caller falls back to the detail modal', () => {
+      expect(
+         sourceHref({
+            id: 'app1',
+            title: 'Phụ lục 1',
+            content: '',
+            label: 'Appendix',
+            document_id: 'ldn_2020',
+            deep_link: '/documents/ldn_2020/units/ldn_2020_app1',
+         }),
+      ).toBeNull()
+   })
 })

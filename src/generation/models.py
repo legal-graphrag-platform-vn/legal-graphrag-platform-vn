@@ -193,7 +193,7 @@ class LegalEvidenceBlock(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     unit_id: str = Field(min_length=1)
-    label: Literal["Article", "Clause", "Point"]
+    label: Literal["Appendix", "Article", "Clause", "Point"]
     citation_label: str = Field(min_length=1)
     document_id: str = Field(min_length=1)
     document_number: str | None

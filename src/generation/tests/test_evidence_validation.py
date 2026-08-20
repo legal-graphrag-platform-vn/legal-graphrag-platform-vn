@@ -5,12 +5,35 @@ import pytest
 from src.generation.errors import EvidenceContractError
 from src.generation.evidence_validation import EvidenceValidator
 from src.generation.tests.factories import retrieval_context, retrieved_unit
+from src.retrieval.models import RetrievedUnit
 
 
 def test_clean_evidence_passes_validation() -> None:
     context = retrieval_context()
     validated = EvidenceValidator().validate(context)
     assert len(validated.candidates) == 1
+
+
+def test_appendix_evidence_with_no_article_or_clause_is_accepted() -> None:
+    """Appendix belongs directly to a Document, not nested under an
+    Article/Clause — article_id/clause_id being absent must not be rejected
+    as if it were a malformed Point."""
+    context = retrieval_context()
+    context.retrieved_units[0] = RetrievedUnit(
+        id="doc_app1",
+        label="Appendix",
+        content_raw="Danh mục ngành, nghề kinh doanh có điều kiện.",
+        document_id="doc",
+        document_number="01/2026/QH",
+        citation_label="Phụ lục 1, Luật thử nghiệm",
+        deep_link="/documents/doc/units/doc_app1",
+        retrieval_sources=["vector"],
+    )
+
+    validated = EvidenceValidator().validate(context)
+
+    assert len(validated.candidates) == 1
+    assert validated.candidates[0].unit.label == "Appendix"
 
 
 @pytest.mark.parametrize(

@@ -18,6 +18,14 @@ def build_citation_label(
         parts.append(f"Điều {article_number}")
     if label == "Clause" and clause_number:
         parts.append(f"Khoản {clause_number}")
+    if label != "Appendix" and appendix_number:
+        # This unit is scoped by an Appendix ID (an Article/Clause/Point that
+        # lives inside an Appendix rather than the host Document's own body).
+        # Disambiguate it in the citation text: legal_ontology.md explicitly
+        # allows an Article 1 inside an Appendix to share its number with an
+        # unrelated Article 1 in the host Document — IDs never collide, but
+        # without this the citation label would read identically for both.
+        parts.append(f"Phụ lục {appendix_number}")
     if not parts:
         parts.append(label)
     if document_number:
