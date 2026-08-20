@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import re
+import unicodedata
+
 from src.generation.errors import (
     CitationValidationError,
     GroundingValidationError,
@@ -57,18 +60,27 @@ class GroundingValidator:
         evidence_by_id = {item.unit_id: item for item in registry.entries}
         statements = tuple(iter_candidate_statements(candidate))
         citation_order: list[str] = []
+        quoted_text_by_citation: dict[str, str] = {}
         for statement in statements:
             if not statement.text.strip():
                 raise GroundingValidationError(
                     "Answer statement text must not be blank"
                 )
-            for citation_id in statement.citation_ids:
-                if citation_id not in evidence_by_id:
+            for citation in statement.citations:
+                citation_id = citation.citation_id
+                evidence = evidence_by_id.get(citation_id)
+                if evidence is None:
                     raise CitationValidationError(
                         f"Citation is not allowlisted: {citation_id}"
                     )
+                if not _is_verbatim_quote(citation.quoted_text, evidence.content_raw):
+                    raise CitationValidationError(
+                        f"quoted_text for citation {citation_id} is not a verbatim "
+                        "excerpt of the cited evidence"
+                    )
                 if citation_id not in citation_order:
                     citation_order.append(citation_id)
+                    quoted_text_by_citation[citation_id] = citation.quoted_text
 
         paths_by_id = {
             path.path_id: path
@@ -139,14 +151,15 @@ class GroundingValidator:
         )
         citations = tuple(
             AnswerCitation(
-                unit_id=item.unit_id,
-                citation_label=item.citation_label,
-                document_id=item.document_id,
-                article_id=item.article_id,
-                clause_id=item.clause_id,
-                deep_link=item.deep_link,
+                unit_id=evidence_by_id[citation_id].unit_id,
+                citation_label=evidence_by_id[citation_id].citation_label,
+                document_id=evidence_by_id[citation_id].document_id,
+                article_id=evidence_by_id[citation_id].article_id,
+                clause_id=evidence_by_id[citation_id].clause_id,
+                deep_link=evidence_by_id[citation_id].deep_link,
+                quoted_text=quoted_text_by_citation[citation_id],
             )
-            for item in (evidence_by_id[citation_id] for citation_id in citation_order)
+            for citation_id in citation_order
         )
         citation_ordinals = {
             citation_id: ordinal
@@ -212,3 +225,17 @@ class GroundingValidator:
 
 def _first_occurrence(values) -> list[str]:
     return list(dict.fromkeys(values))
+
+
+_WHITESPACE_RUN = re.compile(r"\s+")
+
+
+def _normalize_for_match(value: str) -> str:
+    """Collapse whitespace and normalize Unicode so quote matching tolerates
+    the LLM re-typing text with different spacing/diacritic composition,
+    while still requiring the same underlying characters in order."""
+    return _WHITESPACE_RUN.sub(" ", unicodedata.normalize("NFC", value)).strip()
+
+
+def _is_verbatim_quote(quoted_text: str, content_raw: str) -> bool:
+    return _normalize_for_match(quoted_text) in _normalize_for_match(content_raw)

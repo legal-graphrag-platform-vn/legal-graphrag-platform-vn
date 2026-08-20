@@ -25,7 +25,7 @@ from src.retrieval.models import (
     TemporalSource,
 )
 from src.retrieval.ports import Clock, IntentClassifierPort
-from src.retrieval.query.temporal_parser import TemporalParser
+from src.retrieval.query.temporal_parser import CURRENT_VALIDITY_WORDING, TemporalParser
 from src.retrieval.resolved_reference import RelationGoal
 
 
@@ -35,6 +35,12 @@ class RuleConfidence(Enum):
     HIGH = "high"
     LOW = "low"
 
+
+# Shared wording fragments — referenced both by the _RULES intent-classification
+# table below and by _required_capability(). Keeping a single source prevents
+# the two from drifting apart when Vietnamese phrasing is added or tweaked.
+_AMENDMENT_WORDING = r"sửa đổi|bãi bỏ|thay thế"
+_GUIDES_WORDING = r"văn bản.*hướng dẫn"
 
 _Rule = tuple[
     re.Pattern[str], IntentType, RetrievalDecisionReasonCode, RuleConfidence
@@ -53,8 +59,8 @@ _RULES: tuple[_Rule, ...] = (
     ),
     (
         re.compile(
-            r"(thuộc chương|thuộc điều|thuộc khoản|nằm ở chương|"
-            r"văn bản nào hướng dẫn|quan hệ thứ bậc)",
+            rf"(thuộc chương|thuộc điều|thuộc khoản|nằm ở chương|"
+            rf"{_GUIDES_WORDING}|quan hệ thứ bậc)",
             re.I,
         ),
         IntentType.HIERARCHY,
@@ -78,8 +84,8 @@ _RULES: tuple[_Rule, ...] = (
     ),
     (
         re.compile(
-            r"(sửa đổi|bãi bỏ|thay thế|hết hiệu lực|"
-            r"(?:có|đang có|còn) hiệu lực)",
+            rf"({_AMENDMENT_WORDING}|hết hiệu lực|"
+            rf"(?:có|đang có|còn) hiệu lực)",
             re.I,
         ),
         IntentType.VALIDITY,
@@ -118,11 +124,11 @@ class IntentRouter:
         if temporal.parse_error:
             raise TemporalRoutingError(temporal.parse_error)
 
-        temporal, temporal_source, filters = self._resolve_temporal(
-            request.filters, temporal
-        )
         intent, reason_code, reason = self._resolve_intent(
             request, relation_goal=relation_goal
+        )
+        temporal, temporal_source, filters = self._resolve_temporal(
+            request.filters, temporal, intent=intent
         )
         if intent is IntentType.VALIDITY and temporal.resolved_from is None:
             raise TemporalRoutingError(
@@ -229,7 +235,11 @@ class IntentRouter:
         )
 
     def _resolve_temporal(
-        self, request_filters: RetrievalFilters, temporal: TemporalQuery
+        self,
+        request_filters: RetrievalFilters,
+        temporal: TemporalQuery,
+        *,
+        intent: IntentType,
     ) -> tuple[TemporalQuery, TemporalSource, RetrievalFilters]:
         request_date = request_filters.query_date
         parsed_date = temporal.resolved_from
@@ -266,6 +276,29 @@ class IntentRouter:
             return (
                 resolved,
                 TemporalSource.INJECTED_CURRENT_DATE,
+                request_filters.model_copy(update={"query_date": current}),
+            )
+        if intent not in (IntentType.VALIDITY, IntentType.COMPARISON):
+            # No explicit temporal signal in the query. Vietnamese legal
+            # questions are almost always implicitly "as of today" — defaulting
+            # to no filtering at all would let repealed/superseded units leak
+            # into ordinary factual/definition/hierarchy/multi-hop answers.
+            # VALIDITY and COMPARISON are excluded: both intentionally require
+            # an explicit temporal point from the user (enforced right after
+            # this call returns), so injecting one here would silently defeat
+            # that requirement.
+            current = self._clock.today()
+            resolved = temporal.model_copy(
+                update={
+                    "has_temporal": True,
+                    "resolved_from": current,
+                    "resolved_to": current,
+                    "granularity": "day",
+                }
+            )
+            return (
+                resolved,
+                TemporalSource.INJECTED_DEFAULT_CURRENT_DATE,
                 request_filters.model_copy(update={"query_date": current}),
             )
         return temporal, TemporalSource.NONE, request_filters
@@ -305,8 +338,8 @@ def classify_intent_by_rule(
 ) -> tuple[IntentType | None, RetrievalDecisionReasonCode | None, RuleConfidence | None]:
     for pattern, intent, reason, confidence in _RULES:
         if pattern.search(query):
-            if intent is IntentType.VALIDITY and re.search(
-                r"(hiện hành|hiện nay|đang có hiệu lực|còn hiệu lực)", query, re.I
+            if intent is IntentType.VALIDITY and CURRENT_VALIDITY_WORDING.search(
+                query
             ):
                 return (
                     intent,
@@ -332,7 +365,7 @@ def _required_capability(
     intent: IntentType, query: str, temporal_source: TemporalSource
 ) -> RetrievalCapability | None:
     if intent is IntentType.VALIDITY:
-        if re.search(r"(sửa đổi|bãi bỏ|thay thế)", query, re.I):
+        if re.search(_AMENDMENT_WORDING, query, re.I):
             return RetrievalCapability.VERSION_CHAIN_VALIDITY
         if temporal_source is TemporalSource.INJECTED_CURRENT_DATE:
             return RetrievalCapability.CORPUS_COMPLETE_CURRENT_VALIDITY
@@ -340,7 +373,7 @@ def _required_capability(
     if intent is IntentType.HIERARCHY:
         return (
             RetrievalCapability.GUIDES_RELATIONS
-            if re.search(r"văn bản.*hướng dẫn", query, re.I)
+            if re.search(_GUIDES_WORDING, query, re.I)
             else RetrievalCapability.STRUCTURAL_HIERARCHY
         )
     if intent is IntentType.COMPARISON:

@@ -13,6 +13,23 @@ from src.shared.ontology.contract import RELATION_ENUM
 
 _CANONICAL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
 
+# Defense-in-depth against prompt injection smuggled inside ingested legal
+# text: the prompt-injection defense in context_projection.py is a single
+# system-instruction sentence, which an LLM has no structural obligation to
+# obey. Real Vietnamese legal content_raw never contains our own prompt
+# delimiter tokens or these English meta-instruction phrases, so a match here
+# is a strong, low-false-positive signal of corrupted or adversarial input —
+# fail closed instead of forwarding it to the model.
+_PROMPT_INJECTION_MARKERS = re.compile(
+    r"BEGIN_TRUSTED_RETRIEVAL_CONTEXT|END_TRUSTED_RETRIEVAL_CONTEXT|"
+    r"BEGIN_OUTPUT_CONTRACT|END_OUTPUT_CONTRACT|BEGIN_REPAIR_FEEDBACK|"
+    r"END_REPAIR_FEEDBACK|ALLOWED_CITATION_IDS|"
+    r"ignore (all |the )?(previous|above) instructions?|"
+    r"disregard (all |the )?(previous|above) instructions?|"
+    r"you are now|system prompt|new instructions?:",
+    re.IGNORECASE,
+)
+
 
 @dataclass(frozen=True)
 class EvidenceCandidate:
@@ -65,6 +82,12 @@ class EvidenceValidator:
         _require_canonical_id(unit.id, "unit ID")
         if not unit.content_raw.strip():
             raise EvidenceContractError(f"Evidence {unit.id} has empty content_raw")
+        if _PROMPT_INJECTION_MARKERS.search(unit.content_raw):
+            raise EvidenceContractError(
+                f"Evidence {unit.id} content_raw contains a prompt-structure "
+                "marker or meta-instruction phrase; refusing to forward it "
+                "to the answer model"
+            )
         _require_canonical_id(unit.document_id, "document ID")
         if not unit.citation_label.strip():
             raise EvidenceContractError(f"Evidence {unit.id} has no citation label")

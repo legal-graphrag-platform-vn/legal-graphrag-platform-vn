@@ -22,8 +22,10 @@ Trích xuất các đối tượng pháp lý thực sự được đề cập tr
 
 1. Document:
    Văn bản pháp luật bên ngoài được viện dẫn rõ ràng.
-   ID do LLM tạo ở bước này chỉ là raw extraction ID; canonical Document ID
-   sẽ được document registry/resolver xác định.
+   ID do LLM tạo ở bước này là raw extraction ID (BẮT BUỘC phải có, không được
+   bỏ trống) — canonical Document ID chính thức sẽ do document
+   registry/resolver xác định sau, raw ID chỉ cần đủ để nhận diện văn bản
+   được viện dẫn.
 
 2. Concept / LegalConcept:
    Khái niệm, thuật ngữ, đối tượng hoặc chế định pháp lý được quy định,
@@ -42,10 +44,16 @@ Trích xuất các đối tượng pháp lý thực sự được đề cập tr
    Ví dụ: "thành lập công ty", "góp vốn",
    "chuyển nhượng cổ phần", "giải thể".
 
-QUY TẮC ĐẶT ID:
+QUY TẮC ĐẶT ID (áp dụng cho MỌI entity, kể cả Document — trường "id" là
+BẮT BUỘC trên từng entity, không được bỏ trống hay bỏ qua field này):
 
-- Concept/Entity/Action sử dụng ID tiếng Việt không dấu, viết thường,
-  các từ cách nhau bằng dấu gạch dưới.
+- Mọi entity — Document, Concept, Entity, Action — đều phải có "id" dạng
+  snake_case, không dấu tiếng Việt, viết thường, các từ cách nhau bằng dấu
+  gạch dưới. Ví dụ: "vốn điều lệ" -> "von_dieu_le",
+  "Nghị định số 78/2015/NĐ-CP" -> "nd_78_2015".
+- Với Document, đặt id ngắn gọn dựa trên loại văn bản + số hiệu + năm ban
+  hành nếu có trong văn bản (vd Nghị định 78/2015 -> "nd_78_2015"); nếu
+  không đủ thông tin số hiệu/năm, dùng slug rút gọn từ tên văn bản.
 - Không trích xuất Phụ lục/Phần/Chương/Mục/Tiểu mục/Điều/Khoản/Điểm hiện tại
   thành semantic entity. Các đơn vị này thuộc structural parser/resolver.
 - Không suy diễn thêm đối tượng không được nhắc đến trong văn bản.
@@ -125,3 +133,4 @@ Với mỗi relation:
 
 Chỉ trả về quan hệ có evidence rõ ràng trong văn bản.
 Không suy diễn."""
+

@@ -46,13 +46,36 @@ class FakeProvider:
         self.candidate = candidate or answer_candidate()
         self.calls = 0
         self.closed = 0
+        self.requests: list = []
 
     async def generate_structured(self, request):
         self.calls += 1
+        self.requests.append(request)
         return self.candidate
 
     async def aclose(self) -> None:
         self.closed += 1
+
+
+class SequencedProvider:
+    """Returns a different candidate on each successive call, in order."""
+
+    provider_name = "fake"
+    model_name = "fake-model"
+
+    def __init__(self, candidates: list) -> None:
+        self._candidates = list(candidates)
+        self.calls = 0
+        self.requests: list = []
+
+    async def generate_structured(self, request):
+        self.requests.append(request)
+        candidate = self._candidates[min(self.calls, len(self._candidates) - 1)]
+        self.calls += 1
+        return candidate
+
+    async def aclose(self) -> None:
+        pass
 
 
 def test_insufficient_evidence_does_not_call_provider() -> None:
@@ -130,6 +153,74 @@ def test_hallucinated_citation_is_hard_failure() -> None:
             await _generator(provider).generate(
                 AnswerGenerationRequest(query=context.query, retrieval_context=context)
             )
+
+    asyncio.run(scenario())
+
+
+def test_grounding_failure_self_repairs_on_second_attempt() -> None:
+    """First candidate is ungrounded (bad citation); the model gets exactly one
+    chance to resend a corrected candidate, and the repaired one is used."""
+
+    async def scenario() -> None:
+        provider = SequencedProvider(
+            [answer_candidate(citation_id="doc_art999"), answer_candidate()]
+        )
+        context = retrieval_context()
+        response = await _generator(provider).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+        assert provider.calls == 2
+        assert "BEGIN_REPAIR_FEEDBACK" in provider.requests[1].prompt
+        assert response.cannot_answer is False
+        assert response.citations[0].unit_id == "doc_art1"
+
+    asyncio.run(scenario())
+
+
+def test_grounding_failure_gives_up_after_one_repair_attempt() -> None:
+    """Repair is bounded to a single extra LLM call — if the model still can't
+    self-correct, the turn fails instead of retrying indefinitely."""
+
+    async def scenario() -> None:
+        provider = FakeProvider(answer_candidate(citation_id="doc_art999"))
+        context = retrieval_context()
+        with pytest.raises(CitationValidationError):
+            await _generator(provider).generate(
+                AnswerGenerationRequest(query=context.query, retrieval_context=context)
+            )
+        assert provider.calls == 2
+
+    asyncio.run(scenario())
+
+
+def test_fabricated_quote_is_hard_failure() -> None:
+    """citation_id is valid and allowlisted, but quoted_text is not an actual
+    excerpt of that evidence's content_raw — this must still be rejected,
+    otherwise a model could cite a real unit while asserting fabricated text."""
+
+    async def scenario() -> None:
+        provider = FakeProvider(
+            answer_candidate(quoted_text="Nội dung bịa đặt không có trong evidence")
+        )
+        context = retrieval_context()
+        with pytest.raises(CitationValidationError, match="verbatim"):
+            await _generator(provider).generate(
+                AnswerGenerationRequest(query=context.query, retrieval_context=context)
+            )
+
+    asyncio.run(scenario())
+
+
+def test_verbatim_quote_is_surfaced_on_the_rendered_citation() -> None:
+    async def scenario() -> None:
+        provider = FakeProvider()
+        context = retrieval_context()
+        response = await _generator(provider).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+        assert response.citations[0].quoted_text == (
+            "Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp"
+        )
 
     asyncio.run(scenario())
 

@@ -1,0 +1,741 @@
+{
+  "version": "1.0",
+  "documents": [
+    {
+      "raw_doc_code": "BLHS_2015",
+      "graph_id": "100_2015_qh13",
+      "number": "100/2015/QH13",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "L13_1999",
+      "graph_id": "13_1999_qh10",
+      "number": "13/1999/QH10",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "L37_2013",
+      "graph_id": "37_2013_qh13",
+      "number": "37/2013/QH13",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "L59_2020",
+      "graph_id": "59_2020_qh14",
+      "number": "59/2020/QH14",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "L60_2005",
+      "graph_id": "60_2005_qh11",
+      "number": "60/2005/QH11",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "L68_2014",
+      "graph_id": "68_2014_qh13",
+      "number": "68/2014/QH13",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "L76_2025",
+      "graph_id": "76_2025_qh15",
+      "number": "76/2025/QH15",
+      "doc_type": "Law",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND01_2021",
+      "graph_id": "01_2021_nd_cp",
+      "number": "01/2021/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND05_2013",
+      "graph_id": "05_2013_nd_cp",
+      "number": "05/2013/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND102_2010",
+      "graph_id": "102_2010_nd_cp",
+      "number": "102/2010/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND104_2010",
+      "graph_id": "104_2010_nd_cp",
+      "number": "104/2010/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND106_2015",
+      "graph_id": "106_2015_nd_cp",
+      "number": "106/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND109_2008",
+      "graph_id": "109_2008_nd_cp",
+      "number": "109/2008/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND115_2014",
+      "graph_id": "115_2014_nd_cp",
+      "number": "115/2014/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND116_2015",
+      "graph_id": "116_2015_nd_cp",
+      "number": "116/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND116_2020",
+      "graph_id": "116_2020_tt_btc",
+      "number": "116/2020/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND128_2014",
+      "graph_id": "128_2014_nd_cp",
+      "number": "128/2014/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND139_2007",
+      "graph_id": "139_2007_nd_cp",
+      "number": "139/2007/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND14_2010",
+      "graph_id": "14_2010_tt_bkhdt",
+      "number": "14/2010/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND168_2025",
+      "graph_id": "168_2025_nd_cp",
+      "number": "168/2025/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND194_2013",
+      "graph_id": "194_2013_tt_btc",
+      "number": "194/2013/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND19_2014",
+      "graph_id": "19_2014_nd_cp",
+      "number": "19/2014/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND202_2011",
+      "graph_id": "202_2011_tt_btc",
+      "number": "202/2011/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND210_2025",
+      "graph_id": "210_2025_nd_cp",
+      "number": "210/2025/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND23_2022",
+      "graph_id": "23_2022_nd_cp",
+      "number": "23/2022/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND248_2025",
+      "graph_id": "248_2025_nd_cp",
+      "number": "248/2025/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND297_2025",
+      "graph_id": "297_2025_nd_cp",
+      "number": "297/2025/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND365_2025",
+      "graph_id": "365_2025_nd_cp",
+      "number": "365/2025/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND43_2010",
+      "graph_id": "43_2010_nd_cp",
+      "number": "43/2010/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND47_2021",
+      "graph_id": "47_2021_nd_cp",
+      "number": "47/2021/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND49_2014",
+      "graph_id": "49_2014_nd_cp",
+      "number": "49/2014/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND50_2013",
+      "graph_id": "50_2013_nd_cp",
+      "number": "50/2013/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND50_2016",
+      "graph_id": "50_2016_nd_cp",
+      "number": "50/2016/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND51_2013",
+      "graph_id": "51_2013_nd_cp",
+      "number": "51/2013/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND56_2009",
+      "graph_id": "56_2009_nd_cp",
+      "number": "56/2009/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND59_2011",
+      "graph_id": "59_2011_nd_cp",
+      "number": "59/2011/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND61_2013",
+      "graph_id": "61_2013_nd_cp",
+      "number": "61/2013/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND66_2011",
+      "graph_id": "66_2011_nd_cp",
+      "number": "66/2011/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND71_2013",
+      "graph_id": "71_2013_nd_cp",
+      "number": "71/2013/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND78_2015",
+      "graph_id": "78_2015_nd_cp",
+      "number": "78/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND81_2015",
+      "graph_id": "81_2015_nd_cp",
+      "number": "81/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND82_2025",
+      "graph_id": "82_2025_tt_btc",
+      "number": "82/2025/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND87_2015",
+      "graph_id": "87_2015_nd_cp",
+      "number": "87/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND90_2011",
+      "graph_id": "90_2011_nd_cp",
+      "number": "90/2011/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND91_2015",
+      "graph_id": "91_2015_nd_cp",
+      "number": "91/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND93_2015",
+      "graph_id": "93_2015_nd_cp",
+      "number": "93/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND96_2010",
+      "graph_id": "96_2010_nd_cp",
+      "number": "96/2010/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND96_2015",
+      "graph_id": "96_2015_nd_cp",
+      "number": "96/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND97_2015",
+      "graph_id": "97_2015_nd_cp",
+      "number": "97/2015/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "ND99_2012",
+      "graph_id": "99_2012_nd_cp",
+      "number": "99/2012/NĐ-CP",
+      "doc_type": "Decree",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD14_2011",
+      "graph_id": "14_2011_qd_ttg",
+      "number": "14/2011/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD169_2007",
+      "graph_id": "169_2007_qd_ttg",
+      "number": "169/2007/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD22_2015",
+      "graph_id": "22_2015_qd_ttg",
+      "number": "22/2015/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD328_QĐ-TTg",
+      "graph_id": "328_qd_ttg",
+      "number": "328/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD36_2014",
+      "graph_id": "36_2014_qd_ttg",
+      "number": "36/2014/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD37_2014",
+      "graph_id": "37_2014_qd_ttg",
+      "number": "37/2014/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD419_QĐ-TTg",
+      "graph_id": "419_qd_ttg",
+      "number": "419/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD58_2013",
+      "graph_id": "58_2013_qd_ttg",
+      "number": "58/2013/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD74_2013",
+      "graph_id": "74_2013_qd_ttg",
+      "number": "74/2013/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD77_2010",
+      "graph_id": "77_2010_qd_ttg",
+      "number": "77/2010/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "QD982_QĐ-TTg",
+      "graph_id": "982_qd_ttg",
+      "number": "982/QĐ-TTg",
+      "doc_type": "Decision",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT01_2013",
+      "graph_id": "01_2013_tt_bkhdt",
+      "number": "01/2013/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT01_2016",
+      "graph_id": "01_2016_ttlt_bkhdt_btc",
+      "number": "01/2016/TTLT-BKHĐT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT02_2015",
+      "graph_id": "02_2015_tt_bkhdt",
+      "number": "02/2015/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT04_2011",
+      "graph_id": "04_2011_tt_bkhdt",
+      "number": "04/2011/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT04_2015",
+      "graph_id": "04_2015_ttlt_bkhdt_btc_bnv",
+      "number": "04/2015/TTLT-BKHĐT-BTC-BNV",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT08_2026",
+      "graph_id": "08_2026_tt_btc",
+      "number": "08/2026/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT10_2014",
+      "graph_id": "10_2014_tt_bvhttdl",
+      "number": "10/2014/TT-BVHTTDL",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT116_2020",
+      "graph_id": "116_2020_tt_btc",
+      "number": "116/2020/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT117_2010",
+      "graph_id": "117_2010_tt_btc",
+      "number": "117/2010/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT119_2015",
+      "graph_id": "119_2015_tt_btc",
+      "number": "119/2015/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT120_2016",
+      "graph_id": "120_2016_tt_btc",
+      "number": "120/2016/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT121_2012",
+      "graph_id": "121_2012_tt_btc",
+      "number": "121/2012/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT127_2014",
+      "graph_id": "127_2014_tt_btc",
+      "number": "127/2014/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT127_2015",
+      "graph_id": "127_2015_tt_btc",
+      "number": "127/2015/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT134_2016",
+      "graph_id": "134_2016_tt_btc",
+      "number": "134/2016/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT135_2015",
+      "graph_id": "135_2015_tt_btc",
+      "number": "135/2015/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT138_2010",
+      "graph_id": "138_2010_tt_btc",
+      "number": "138/2010/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT138_2012",
+      "graph_id": "138_2012_tt_btc",
+      "number": "138/2012/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT13_2015",
+      "graph_id": "13_2015_tt_bkhdt",
+      "number": "13/2015/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT142_2012",
+      "graph_id": "142_2012_tt_btc",
+      "number": "142/2012/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT147_2014",
+      "graph_id": "147_2014_tt_btc",
+      "number": "147/2014/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT14_2010",
+      "graph_id": "14_2010_tt_bkhdt",
+      "number": "14/2010/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT183_2013",
+      "graph_id": "183_2013_tt_bqp",
+      "number": "183/2013/TT-BQP",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT194_2013",
+      "graph_id": "194_2013_tt_btc",
+      "number": "194/2013/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT196_2011",
+      "graph_id": "196_2011_tt_btc",
+      "number": "196/2011/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT202_2011",
+      "graph_id": "202_2011_tt_btc",
+      "number": "202/2011/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT20_2015",
+      "graph_id": "20_2015_tt_bkhdt",
+      "number": "20/2015/TT-BKHĐT",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT42_2021",
+      "graph_id": "42_2021_tt_btc",
+      "number": "42/2021/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT68_2025",
+      "graph_id": "68_2025_tt_btc",
+      "number": "68/2025/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT79_2011",
+      "graph_id": "79_2011_tt_btc",
+      "number": "79/2011/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    },
+    {
+      "raw_doc_code": "TT82_2025",
+      "graph_id": "82_2025_tt_btc",
+      "number": "82/2025/TT-BTC",
+      "doc_type": "Circular",
+      "required": false,
+      "gold_annotation": false
+    }
+  ]
+}

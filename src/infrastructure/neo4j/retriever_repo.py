@@ -449,9 +449,9 @@ _FILTER_PREDICATE = """
 AND ($doc_types = [] OR document.doc_type IN $doc_types)
 AND ($legal_statuses = [] OR document.legal_status IN $legal_statuses)
 AND ($query_date IS NULL OR (
-  node.effective_from IS NOT NULL
-  AND node.effective_from <= $query_date
-  AND (node.effective_to IS NULL OR node.effective_to > $query_date)
+  coalesce(node.effective_from, document.effective_from) IS NOT NULL
+  AND coalesce(node.effective_from, document.effective_from) <= $query_date
+  AND (coalesce(node.effective_to, document.effective_to) IS NULL OR coalesce(node.effective_to, document.effective_to) > $query_date)
 ))
 """
 
@@ -472,8 +472,8 @@ document.id AS document_id,
 document.number AS document_number,
 document.title AS document_title,
 null AS source_url,
-node.effective_from AS effective_from,
-node.effective_to AS effective_to,
+coalesce(node.effective_from, document.effective_from) AS effective_from,
+coalesce(node.effective_to, document.effective_to) AS effective_to,
 document.legal_status AS legal_status,
 null AS version_family_id
 """

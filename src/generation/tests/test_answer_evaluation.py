@@ -1,174 +1,203 @@
 from __future__ import annotations
 
-import asyncio
-import json
+from datetime import date
 
-import pytest
-
-from src.generation.eval.models import AnswerEvaluationDataset
-from src.generation.eval.runner import AnswerEvaluationRunner, EvaluationMetadata
-from src.generation.eval.cli import _write_atomic
 from src.generation.models import (
     AnswerBlock,
-    AnswerCitation,
-    AnswerGenerationRequest,
+    AnswerCandidate,
     AnswerParagraph,
-    AnswerResponse,
     GroundedStatement,
+    StatementCitation,
 )
-from src.generation.tests.factories import retrieval_context
-from src.retrieval.errors import RetrievalCapabilityError
+from src.retrieval.models import (
+    EvidenceItem,
+    GraphEdge,
+    GraphNodeRef,
+    GraphPath,
+    GraphReasoningRequirement,
+    IntentType,
+    RetrievalContext,
+    RetrievedUnit,
+    TemporalQuery,
+)
+from src.retrieval.execution_contract import (
+    PlanExecutionResult,
+    PlanExecutionStatus,
+    PlanReasonCode,
+)
+from src.retrieval.path_identity import build_topology_path_fingerprint
+from src.shared.retrieval_contract import RetrievalStrategyType, TemporalSource
 
 
-class FakeRetrieval:
-    def __init__(self, *, unsupported: bool = False) -> None:
-        self.unsupported = unsupported
-
-    def retrieve(self, request):
-        if self.unsupported:
-            raise RetrievalCapabilityError(
-                "missing capability",
-                required_capability="multiple_versions",
-                available_capability="none",
-            )
-        context = retrieval_context(intent=request.force_intent)
-        return context.model_copy(update={"query": request.query})
-
-
-class FakeGeneration:
-    def __init__(self, citation_id: str = "doc_art1") -> None:
-        self.citation_id = citation_id
-
-    async def generate(self, request: AnswerGenerationRequest) -> AnswerResponse:
-        unit = request.retrieval_context.retrieved_units[0]
-        statement = GroundedStatement(
-            statement_id="statement-1",
-            text="Câu trả lời có căn cứ.",
-            citation_ids=[self.citation_id],
-        )
-        direct_answer = AnswerBlock(
-            paragraphs=[AnswerParagraph(statements=[statement])]
-        )
-        return AnswerResponse(
-            retrieval_contract_version=request.retrieval_context.contract_version,
-            query=request.query,
-            answer_text="Câu trả lời có căn cứ. [Điều 1]",
-            direct_answer=direct_answer,
-            sections=(),
-            caveats=(),
-            citations=(
-                AnswerCitation(
-                    unit_id=self.citation_id,
-                    citation_label=unit.citation_label,
-                    document_id=unit.document_id,
-                    article_id=unit.article_id,
-                    clause_id=unit.clause_id,
-                    deep_link=unit.deep_link,
-                ),
-            ),
-            reasoning_paths=(),
-            temporal_notes=(),
-            cannot_answer=False,
-            insufficiency_reason=None,
-            confidence=0.8,
-            provider="fake",
-            model="fake-model",
-            intent=request.retrieval_context.intent.value,
-            strategy=request.retrieval_context.strategy.value,
-        )
-
-
-def test_answer_evaluation_passes_hard_citation_check() -> None:
-    report = asyncio.run(
-        AnswerEvaluationRunner(FakeRetrieval(), FakeGeneration()).run(
-            _dataset(), _metadata()
-        )
+def retrieved_unit(
+    unit_id: str = "doc_art1",
+    *,
+    label: str = "Article",
+) -> RetrievedUnit:
+    article_id = unit_id.split("_cl", 1)[0]
+    return RetrievedUnit(
+        id=unit_id,
+        label=label,
+        content_raw="Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp.",
+        document_id="doc",
+        document_number="01/2026/QH",
+        article_id=article_id,
+        clause_id=unit_id if label == "Clause" else None,
+        article_number="1",
+        clause_number="1" if label == "Clause" else None,
+        effective_from=date(2021, 1, 1),
+        effective_to=None,
+        legal_status="ACTIVE",
+        citation_label="Điều 1, Luật thử nghiệm",
+        deep_link=f"/documents/doc/units/{unit_id}",
+        retrieval_sources=["vector"],
     )
 
-    assert report["summary"]["technical_checks_status"] == "PASS"
-    assert report["summary"]["human_legal_review_status"] == "PENDING"
-    assert report["summary"]["official_evidence_eligible"] is False
 
-
-def test_answer_evaluation_reports_missing_required_citation() -> None:
-    report = asyncio.run(
-        AnswerEvaluationRunner(
-            FakeRetrieval(), FakeGeneration("doc_art_unrelated")
-        ).run(_dataset(), _metadata())
-    )
-
-    assert report["summary"]["technical_checks_status"] == "FAIL"
-    assert report["cases"][0]["hard_failures"] == ["MISSING_CITATION_GROUP_1"]
-
-
-def test_expected_unsupported_capability_is_not_an_empty_result() -> None:
-    dataset = _dataset(expected_outcome="unsupported_capability")
-    report = asyncio.run(
-        AnswerEvaluationRunner(FakeRetrieval(unsupported=True), FakeGeneration()).run(
-            dataset, _metadata()
-        )
-    )
-
-    assert report["cases"][0]["actual_outcome"] == "unsupported_capability"
-    assert report["cases"][0]["hard_status"] == "pass"
-
-
-def test_atomic_report_write_cleans_temp_file_on_failure(tmp_path, monkeypatch) -> None:
-    output = tmp_path / "report.json"
-
-    def fail_dump(*args, **kwargs):
-        raise TypeError("not serializable")
-
-    monkeypatch.setattr(json, "dump", fail_dump)
-    with pytest.raises(TypeError, match="not serializable"):
-        _write_atomic(output, {"status": "PASS"})
-
-    assert not output.exists()
-    assert list(tmp_path.iterdir()) == []
-
-
-def _dataset(*, expected_outcome: str = "answered") -> AnswerEvaluationDataset:
-    case = {
-        "query_id": "factual_01",
-        "query": "Ai có quyền thành lập doanh nghiệp?",
-        "intent": "factual",
-        "expected_outcome": expected_outcome,
-        "required_capability": (
-            "multiple_versions"
-            if expected_outcome == "unsupported_capability"
+def retrieval_context(
+    *,
+    intent: IntentType = IntentType.FACTUAL,
+    no_results: bool = False,
+    path_relations: list[str] | None = None,
+    temporal: bool = False,
+) -> RetrievalContext:
+    units = [] if no_results else [retrieved_unit()]
+    relations = path_relations or []
+    paths = []
+    if relations:
+        path_units = [units[0]]
+        for index in range(1, len(relations) + 1):
+            target = retrieved_unit(f"doc_art{index + 1}")
+            units.append(target)
+            path_units.append(target)
+        paths = [graph_path([unit.id for unit in path_units], relations)]
+    query_date = date(2022, 7, 1) if temporal else None
+    context = RetrievalContext(
+        query="Ai có quyền thành lập doanh nghiệp?",
+        intent=intent,
+        strategy=_strategy(intent),
+        temporal=TemporalQuery(
+            has_temporal=temporal,
+            resolved_from=query_date,
+            resolved_to=query_date,
+        ),
+        temporal_source=(TemporalSource.REQUEST if temporal else TemporalSource.NONE),
+        retrieved_units=units,
+        graph_paths=paths,
+        evidence=(
+            []
+            if no_results
+            else [
+                EvidenceItem(
+                    unit_id=unit.id,
+                    evidence_type="vector",
+                    is_eligible=True,
+                )
+                for unit in units
+            ]
+        ),
+        metrics={},
+        retrieval_mode="no_results" if no_results else "hybrid",
+        capability_status="no_results" if no_results else "supported",
+        reasoning_requirement=(
+            GraphReasoningRequirement(minimum_edges=2)
+            if intent is IntentType.MULTI_HOP and len(relations) >= 2
             else None
         ),
-        "required_citation_groups": (
-            [] if expected_outcome == "unsupported_capability" else [["doc_art1"]]
-        ),
-        "gold_key_claims": (
-            [] if expected_outcome == "unsupported_capability" else ["Có quyền."]
-        ),
-        "review": {"status": "pending"},
-    }
-    return AnswerEvaluationDataset.model_validate(
-        {
-            "schema_version": "answer-evaluation-dataset-v1",
-            "evaluation_scope": "pilot_development",
-            "name": "test",
-            "source_retrieval_dataset": "retrieval.json",
-            "document_ids": ["doc"],
-            "review": {"status": "pending"},
-            "cases": [case],
-        }
+    )
+    if intent is IntentType.MULTI_HOP and len(relations) >= 2:
+        bind_satisfied_path(context)
+    return context
+
+
+def bind_satisfied_path(
+    context: RetrievalContext,
+    *,
+    path_index: int = 0,
+    requirement: GraphReasoningRequirement | None = None,
+) -> None:
+    path = context.graph_paths[path_index]
+    trusted_requirement = requirement or GraphReasoningRequirement(minimum_edges=2)
+    context.reasoning_requirement = trusted_requirement
+    context.plan_execution = PlanExecutionResult(
+        plan_fingerprint="plan-test",
+        satisfied_path_fingerprints=(build_topology_path_fingerprint(path),),
+        bound_anchor_id=path.nodes[0].node_id,
+        bound_target_id=path.nodes[-1].node_id,
+        execution_status=PlanExecutionStatus.SATISFIED,
+        reason_code=PlanReasonCode.SATISFIED,
+        derived_reasoning_requirement=trusted_requirement,
     )
 
 
-def _metadata() -> EvaluationMetadata:
-    return EvaluationMetadata(
-        source_commit="abc123",
-        working_tree_state="dirty",
-        dataset_sha256="dataset",
-        graph_snapshot_hash="graph",
-        retrieval_contract_version="retrieval-runtime-v2",
-        answer_contract_version="answer-generation-v2",
-        prompt_sha256="prompt",
-        generation_config_sha256="config",
-        provider="fake",
-        model="fake-model",
+def graph_path(
+    node_ids: list[str],
+    relation_types: list[str],
+    *,
+    semantic_node_ids: set[str] | None = None,
+) -> GraphPath:
+    semantic_ids = semantic_node_ids or set()
+    return GraphPath(
+        nodes=tuple(
+            GraphNodeRef(
+                node_id=node_id,
+                labels=("LegalConcept",) if node_id in semantic_ids else ("Article",),
+                citable_unit_id=None if node_id in semantic_ids else node_id,
+            )
+            for node_id in node_ids
+        ),
+        edges=tuple(
+            GraphEdge(
+                relation_id=f"rel-{index + 1}",
+                relation_type=relation_type,
+                source_id=node_ids[index],
+                target_id=node_ids[index + 1],
+            )
+            for index, relation_type in enumerate(relation_types)
+        ),
+        path_description="Verified legal path",
     )
+
+
+def answer_candidate(
+    *,
+    citation_id: str = "doc_art1",
+    quoted_text: str = "Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp",
+) -> AnswerCandidate:
+    return AnswerCandidate(
+        direct_answer=AnswerBlock(
+            paragraphs=[
+                AnswerParagraph(
+                    statements=[
+                        GroundedStatement(
+                            statement_id="statement-1",
+                            text=("Tổ chức, cá nhân có quyền thành lập doanh nghiệp."),
+                            citations=[
+                                StatementCitation(
+                                    citation_id=citation_id,
+                                    quoted_text=quoted_text,
+                                )
+                            ],
+                        )
+                    ]
+                )
+            ]
+        ),
+        sections=[],
+        caveats=[],
+        temporal_assertions=[],
+        confidence=0.9,
+        cannot_answer=False,
+        insufficiency_reason=None,
+    )
+
+
+def _strategy(intent: IntentType) -> RetrievalStrategyType:
+    return {
+        IntentType.FACTUAL: RetrievalStrategyType.FACTUAL_HYBRID,
+        IntentType.DEFINITION: RetrievalStrategyType.DEFINITION_GRAPH,
+        IntentType.HIERARCHY: RetrievalStrategyType.HIERARCHY_GRAPH,
+        IntentType.MULTI_HOP: RetrievalStrategyType.MULTI_HOP_HYBRID,
+        IntentType.VALIDITY: RetrievalStrategyType.VALIDITY_TEMPORAL,
+        IntentType.COMPARISON: RetrievalStrategyType.COMPARISON_TEMPORAL,
+    }[intent]

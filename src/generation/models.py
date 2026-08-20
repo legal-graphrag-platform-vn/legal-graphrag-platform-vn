@@ -38,16 +38,39 @@ class AnswerGenerationRequest(BaseModel):
         return self
 
 
+class StatementCitation(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    citation_id: str = Field(min_length=1)
+    quoted_text: str = Field(
+        min_length=1,
+        description=(
+            "Verbatim substring copied from the cited evidence's content_raw "
+            "that directly supports this statement. Must not be paraphrased."
+        ),
+    )
+
+
 class GroundedStatement(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     statement_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9_-]+$")
     text: str = Field(min_length=1)
-    citation_ids: list[str] = Field(min_length=1)
+    citations: list[StatementCitation] = Field(min_length=1)
     reasoning_path_ids: list[str] = Field(default_factory=list)
     temporal_assertion_ids: list[str] = Field(default_factory=list)
 
-    @field_validator("citation_ids", "reasoning_path_ids", "temporal_assertion_ids")
+    @field_validator("citations")
+    @classmethod
+    def citations_are_unique(
+        cls, values: list[StatementCitation]
+    ) -> list[StatementCitation]:
+        citation_ids = [item.citation_id for item in values]
+        if len(citation_ids) != len(set(citation_ids)):
+            raise ValueError("Statement citation IDs must be unique")
+        return values
+
+    @field_validator("reasoning_path_ids", "temporal_assertion_ids")
     @classmethod
     def linked_ids_are_unique(cls, values: list[str]) -> list[str]:
         if any(not value.strip() for value in values):

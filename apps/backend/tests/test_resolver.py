@@ -40,14 +40,14 @@ class FakeLookup:
 
 
 def _candidate(
-    node_id: str, *, article_number: str, document_id: str
+    node_id: str, *, article_number: str, document_id: str, document_number: str = "59/2020/QH14"
 ) -> ResolvedCandidate:
     return ResolvedCandidate(
         node_id=node_id,
         node_type=ExpectedUnitType.ARTICLE,
         canonical_label=f"Điều {article_number} ({document_id})",
         document_id=document_id,
-        document_number="59/2020/QH14",
+        document_number=document_number,
         article_id=node_id,
         article_number=article_number,
     )
@@ -113,8 +113,8 @@ def test_multiple_explicit_matches_are_ambiguous() -> None:
         FakeLookup(
             {
                 "5": (
-                    _candidate("a-doc1", article_number="5", document_id="doc-1"),
-                    _candidate("a-doc2", article_number="5", document_id="doc-2"),
+                    _candidate("a-doc1", article_number="5", document_id="doc-1", document_number="doc1-num"),
+                    _candidate("a-doc2", article_number="5", document_id="doc-2", document_number="doc2-num"),
                 )
             }
         )
@@ -266,8 +266,8 @@ def test_pending_selection_preserves_relation_goal_and_original_question() -> No
         FakeLookup(
             {
                 "5": (
-                    _candidate("a-doc1", article_number="5", document_id="doc-1"),
-                    _candidate("a-doc2", article_number="5", document_id="doc-2"),
+                    _candidate("a-doc1", article_number="5", document_id="doc-1", document_number="doc1-num"),
+                    _candidate("a-doc2", article_number="5", document_id="doc-2", document_number="doc2-num"),
                 )
             }
         )

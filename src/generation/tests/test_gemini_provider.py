@@ -69,9 +69,8 @@ def test_gemini_provider_returns_structured_candidate_and_closes() -> None:
         result = await provider.generate_structured(_request())
         await provider.aclose()
         await provider.aclose()
-        assert result.direct_answer.paragraphs[0].statements[0].citation_ids == [
-            "doc_art1"
-        ]
+        citations = result.direct_answer.paragraphs[0].statements[0].citations
+        assert [item.citation_id for item in citations] == ["doc_art1"]
         assert client.aio.close_count == 1
 
     asyncio.run(scenario())

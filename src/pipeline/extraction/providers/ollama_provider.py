@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 import httpx
+from pydantic import ValidationError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from src.pipeline.config import settings
@@ -22,7 +23,7 @@ from src.pipeline.extraction.structural_context import ArticleExtractionContext
 logger = logging.getLogger(__name__)
 
 _retry_llm_call = retry(
-    retry=retry_if_exception_type((httpx.HTTPError, json.JSONDecodeError)),
+    retry=retry_if_exception_type((httpx.HTTPError, json.JSONDecodeError, ValidationError)),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=20),
     reraise=True,
@@ -84,7 +85,7 @@ class OllamaProvider(BaseProvider):
             "stream": False,
             "think": False,
             "format": "json",
-            "options": {"temperature": 0.0},
+            "options": {"temperature": 0.0, "num_predict": 2048},
         }
 
         endpoint = f"{self.base_url}/api/chat"
@@ -104,8 +105,8 @@ class OllamaProvider(BaseProvider):
 
         if "entities" in data and isinstance(data["entities"], list):
             for ent in data["entities"]:
-                if isinstance(ent, dict) and "id" in ent:
-                    ent["id"] = self._normalize_id(ent["id"])
+                if isinstance(ent, dict):
+                    ent["id"] = self._normalize_id(str(ent.get("id") or ent.get("label", "")))
 
         result = EntityExtractionResult.model_validate(data)
         return result.entities
@@ -142,7 +143,7 @@ class OllamaProvider(BaseProvider):
             "stream": False,
             "think": False,
             "format": "json",
-            "options": {"temperature": 0.0},
+            "options": {"temperature": 0.0, "num_predict": 2560},
         }
 
         endpoint = f"{self.base_url}/api/chat"

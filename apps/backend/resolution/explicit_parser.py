@@ -15,7 +15,7 @@ from resolution.models import ExplicitReference
 _DOCUMENT_NUMBER = re.compile(r"\d{1,5}/\d{4}/[0-9A-Za-zĐđ]+(?:-[0-9A-Za-zĐđ]+)*")
 # "Luật Doanh nghiệp 2020", "Bộ luật Lao động 2019"
 _LAW_NAME = re.compile(
-    r"(?:Bộ\s+luật|Luật)\s+([A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*?)\s+(?:năm\s+)?(\d{4})",
+    r"((?:Bộ\s+luật|Luật)\s+[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*?)\s+(?:năm\s+)?(\d{4})",
     re.IGNORECASE,
 )
 _ARTICLE = re.compile(r"Điều\s+(\d+[A-Za-zĐđ]?)", re.IGNORECASE)

@@ -54,8 +54,8 @@ class DeterministicAnswerRenderer:
         citation_ordinals: Mapping[str, int],
     ) -> str:
         citations = "".join(
-            f"[{citation_ordinals[citation_id]}]"
-            for citation_id in statement.citation_ids
+            f"[{citation_ordinals[citation.citation_id]}]"
+            for citation in statement.citations
         )
         return f"{self._escape(statement.text.strip())} {citations}"
 

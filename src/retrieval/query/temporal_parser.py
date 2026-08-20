@@ -14,7 +14,10 @@ from src.retrieval.ports import TextGenerationPort
 
 logger = logging.getLogger(__name__)
 
-_CURRENT_VALIDITY = re.compile(
+# Public: also referenced by routing/router.py so both places recognize
+# "current validity" wording from the same single source instead of two
+# independently-maintained regexes that can drift apart.
+CURRENT_VALIDITY_WORDING = re.compile(
     r"(hiện hành|hiện nay|đang có hiệu lực|còn hiệu lực(?:\s+không)?)",
     re.IGNORECASE,
 )
@@ -52,7 +55,7 @@ class TemporalParser:
         self._iso_pattern = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
 
     def parse(self, query: str) -> TemporalQuery:
-        current_match = _CURRENT_VALIDITY.search(query)
+        current_match = CURRENT_VALIDITY_WORDING.search(query)
         explicit_match = self._date_pattern.search(query) or self._iso_pattern.search(
             query
         )

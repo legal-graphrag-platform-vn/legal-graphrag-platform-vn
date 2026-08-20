@@ -233,7 +233,7 @@ class TracedAnswerProvider:
             raw_output=redact(candidate.model_dump_json()),
             statement_count=len(tuple(iter_candidate_statements(candidate))),
             citation_reference_count=sum(
-                len(statement.citation_ids)
+                len(statement.citations)
                 for statement in iter_candidate_statements(candidate)
             ),
             reasoning_path_count=len(

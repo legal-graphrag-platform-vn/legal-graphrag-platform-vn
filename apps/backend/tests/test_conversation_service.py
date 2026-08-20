@@ -34,6 +34,7 @@ from src.generation.models import (
     AnswerParagraph,
     AnswerResponse,
     GroundedStatement,
+    StatementCitation,
 )
 from src.retrieval.errors import RetrievalDependencyError
 from src.retrieval.resolved_reference import ResolutionMethod, ReferenceSource
@@ -175,7 +176,11 @@ class FakeGenerator:
                             GroundedStatement(
                                 statement_id="statement-1",
                                 text="Câu trả lời đã kiểm chứng.",
-                                citation_ids=[unit.id],
+                                citations=[
+                                    StatementCitation(
+                                        citation_id=unit.id, quoted_text="đoạn trích"
+                                    )
+                                ],
                             )
                         ]
                     )

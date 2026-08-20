@@ -31,3 +31,17 @@ class BaseProvider(ABC):
     ) -> list[ExtractedRelation]:
         """Trích xuất mối quan hệ (relations) giữa các thực thể đã xác định."""
         pass
+
+    def extract_article(
+        self, article_text: str, *, context: ArticleExtractionContext
+    ) -> tuple[list[ExtractedEntity], list[ExtractedRelation]]:
+        """Chạy 2 pass (entities rồi relations) trong 2 lần gọi LLM riêng biệt.
+
+        Provider nào hỗ trợ gộp 1 lần gọi (ví dụ Ollama) nên override method này.
+        """
+        from src.pipeline.extraction.entity_normalization import normalize_entities_for_relations
+
+        raw_entities = self.extract_entities(article_text, context=context)
+        normalized = normalize_entities_for_relations(raw_entities)
+        relations = self.extract_relations(article_text, normalized, context=context)
+        return raw_entities, relations

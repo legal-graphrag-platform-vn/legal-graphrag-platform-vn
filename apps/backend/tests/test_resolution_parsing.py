@@ -17,7 +17,7 @@ def test_parses_article_with_named_law_and_year() -> None:
     assert len(refs) == 1
     ref = refs[0]
     assert ref.article_number == "111"
-    assert ref.law_name == "Doanh nghiệp"
+    assert ref.law_name == "Luật Doanh nghiệp"
     assert ref.law_year == 2020
     assert ref.deepest_unit_type is ExpectedUnitType.ARTICLE
 

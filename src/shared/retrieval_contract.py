@@ -55,6 +55,7 @@ class TemporalSource(str, Enum):
     REQUEST = "request"
     QUERY_EXPRESSION = "query_expression"
     INJECTED_CURRENT_DATE = "injected_current_date"
+    INJECTED_DEFAULT_CURRENT_DATE = "injected_default_current_date"
 
 
 class RetrievalDecisionReasonCode(str, Enum):

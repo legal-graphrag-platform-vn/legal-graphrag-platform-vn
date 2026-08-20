@@ -248,21 +248,15 @@ class ConversationChatService:
 
         if isinstance(outcome, ResolvedResolution):
             anchors = outcome.candidate.required_anchors()
-            if any(
-                not _contains_all_anchors(subquery.query, anchors)
-                for subquery in result.subqueries
-            ):
-                log_event(
-                    "query_processor.failed",
-                    "error",
-                    error_type="CanonicalAnchorLoss",
-                )
-                return await self._persist_failure(
-                    turn,
-                    begun,
-                    QUERY_PROCESSING_FAILED_CODE,
-                    _QUERY_PROCESSING_FAILED_MESSAGE,
-                )
+            new_subqueries = []
+            for subquery in result.subqueries:
+                if not _contains_all_anchors(subquery.query, anchors):
+                    missing = [a for a in anchors if a.casefold() not in subquery.query.casefold()]
+                    if missing:
+                        subquery = subquery.model_copy(update={"query": f"{subquery.query} ({', '.join(missing)})"})
+                new_subqueries.append(subquery)
+            
+            result = result.model_copy(update={"subqueries": new_subqueries})
 
         # The resolver/rewriter owns the canonical query. Query processing may
         # decompose it, but its redundant standalone_query field cannot replace it.

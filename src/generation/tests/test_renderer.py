@@ -6,6 +6,7 @@ from src.generation.models import (
     AnswerParagraph,
     AnswerSection,
     GroundedStatement,
+    StatementCitation,
 )
 from src.generation.renderer import DeterministicAnswerRenderer
 
@@ -14,7 +15,10 @@ def _statement(statement_id: str, text: str, citations: list[str]) -> GroundedSt
     return GroundedStatement(
         statement_id=statement_id,
         text=text,
-        citation_ids=citations,
+        citations=[
+            StatementCitation(citation_id=citation_id, quoted_text="đoạn trích")
+            for citation_id in citations
+        ],
     )
 
 

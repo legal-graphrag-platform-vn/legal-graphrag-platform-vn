@@ -53,10 +53,10 @@ def test_openai_provider_minimax_config(mock_openai_class: MagicMock) -> None:
          patch.object(settings, "minimax_api_key", "test-key-minimax"), \
          patch.object(settings, "minimax_model", "test-model-minimax"), \
          patch.object(settings, "minimax_base_url", "https://api.test-minimax.chat"):
-         
+
         provider = get_provider()
         assert isinstance(provider, OpenAICompatibleProvider)
-        
+
         client, model = provider._get_client_and_model()
         mock_openai_class.assert_called_once_with(api_key="test-key-minimax", base_url="https://api.test-minimax.chat")
         assert model == "test-model-minimax"
@@ -66,7 +66,7 @@ def test_ollama_provider_config() -> None:
     with patch.object(settings, "llm_provider", "ollama"), \
          patch.object(settings, "ollama_model", "qwen3.5:9b"), \
          patch.object(settings, "ollama_base_url", "http://localhost:11434/v1"):
-         
+
         provider = get_provider()
         assert isinstance(provider, OllamaProvider)
         assert provider.model == "qwen3.5:9b"
@@ -75,7 +75,7 @@ def test_ollama_provider_config() -> None:
 
 def test_clean_json_text() -> None:
     provider = OpenAICompatibleProvider(provider_type="openai")
-    
+
     # Test case 1: simple json with markdown wrapper and thinking block
     raw_content = "<think>I should output JSON</think>\n```json\n{\n  \"entities\": []\n}\n```"
     cleaned = provider._clean_json_text(raw_content)
@@ -89,7 +89,7 @@ def test_clean_json_text() -> None:
 
 def test_normalize_id() -> None:
     provider = OpenAICompatibleProvider(provider_type="openai")
-    
+
     assert provider._normalize_id("luat_phá_san") == "luat_pha_san"
     assert provider._normalize_id("nhung_nhiễu") == "nhung_nhieu"
     assert provider._normalize_id("doanh_nghiep_moi_gioi_bao_hiểm") == "doanh_nghiep_moi_gioi_bao_hiem"
@@ -178,12 +178,19 @@ def test_normalize_entities_resolves_duplicate_canonical_ids() -> None:
 
 
 def test_extract_article_passes_canonical_entities_to_relation_provider() -> None:
-    provider = MagicMock()
-    provider.resolved_model = "gemini-flash-lite-001"
-    provider.extract_entities.return_value = [
-        ExtractedEntity(id="raw_concept", type="Concept", label="Vốn điều lệ")
-    ]
-    provider.extract_relations.return_value = []
+    from src.pipeline.extraction.providers.base import BaseProvider
+
+    class _FakeProvider(BaseProvider):
+        resolved_model = "gemini-flash-lite-001"
+
+        def extract_entities(self, article_text, *, context):
+            return [ExtractedEntity(id="raw_concept", type="Concept", label="Vốn điều lệ")]
+
+        def extract_relations(self, article_text, entities, *, context):
+            self.relation_entities = entities
+            return []
+
+    provider = _FakeProvider()
     context = ArticleExtractionContext(
         raw_doc_code="L59_2020",
         graph_id="ldn_2020",
@@ -195,7 +202,7 @@ def test_extract_article_passes_canonical_entities_to_relation_provider() -> Non
     with patch("src.pipeline.extraction.llm_extractor.get_provider", return_value=provider):
         result = extract_article("5", "Điều 5", context=context)
 
-    relation_entities = provider.extract_relations.call_args.args[1]
+    relation_entities = provider.relation_entities
     assert relation_entities[0].id == "von_dieu_le"
     assert result.raw_entities[0].id == "raw_concept"
     assert result.entities[0].id == "von_dieu_le"

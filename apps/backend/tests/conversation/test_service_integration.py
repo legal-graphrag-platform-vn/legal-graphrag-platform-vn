@@ -23,6 +23,7 @@ from src.generation.models import (
     AnswerParagraph,
     AnswerResponse,
     GroundedStatement,
+    StatementCitation,
 )
 from src.shared.retrieval_contract import (
     PlanType,
@@ -77,7 +78,11 @@ class CountingGenerator:
                             GroundedStatement(
                                 statement_id="statement-1",
                                 text="Câu trả lời đã kiểm chứng.",
-                                citation_ids=[unit.id],
+                                citations=[
+                                    StatementCitation(
+                                        citation_id=unit.id, quoted_text="đoạn trích"
+                                    )
+                                ],
                             )
                         ]
                     )

@@ -5,13 +5,36 @@ from __future__ import annotations
 from collections import Counter
 
 from src.generation.context_projection import ContextProjector
+from src.generation.errors import (
+    CitationValidationError,
+    GroundingValidationError,
+    ReasoningPathValidationError,
+    TemporalAnswerValidationError,
+)
 from src.generation.evidence_compaction import EvidenceCompactor
 from src.generation.evidence_validation import EvidenceValidator
 from src.generation.grounding import GroundingValidator
-from src.generation.models import AnswerGenerationRequest, AnswerResponse
+from src.generation.models import (
+    AnswerGenerationRequest,
+    AnswerResponse,
+    EvidenceRegistry,
+    ProjectedAnswerContext,
+)
 from src.generation.ports import AnswerProviderPort
 from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
+
+
+# A grounding failure means the model produced a schema-valid but ungrounded
+# candidate (bad citation/quote/path/temporal claim). One repair attempt lets
+# it self-correct from the exact validation error instead of failing the turn
+# outright; kept to a single retry since each attempt is a full LLM call.
+_GROUNDING_ERRORS = (
+    CitationValidationError,
+    GroundingValidationError,
+    ReasoningPathValidationError,
+    TemporalAnswerValidationError,
+)
 
 
 class AnswerGenerator:
@@ -83,9 +106,45 @@ class AnswerGenerator:
         diagnostics["sufficient"] = True
         request.retrieval_context.metrics["generation_context"] = diagnostics
         registry = self._projector.build_registry(projected)
-        candidate = await self._provider.generate_structured(
-            self._projector.provider_request(projected, registry)
-        )
+        provider_request = self._projector.provider_request(projected, registry)
+        candidate = await self._provider.generate_structured(provider_request)
+        try:
+            return self._render(
+                candidate=candidate,
+                projected=projected,
+                registry=registry,
+                request=request,
+            )
+        except _GROUNDING_ERRORS as exc:
+            repair_request = provider_request.model_copy(
+                update={
+                    "prompt": (
+                        provider_request.prompt
+                        + "\nBEGIN_REPAIR_FEEDBACK\n"
+                        + "Your previous JSON candidate was rejected: "
+                        + f"{exc}\n"
+                        + "Fix exactly this issue and resend the full corrected "
+                        "JSON candidate, following BEGIN_OUTPUT_CONTRACT.\n"
+                        + "END_REPAIR_FEEDBACK"
+                    )
+                }
+            )
+            candidate = await self._provider.generate_structured(repair_request)
+            return self._render(
+                candidate=candidate,
+                projected=projected,
+                registry=registry,
+                request=request,
+            )
+
+    def _render(
+        self,
+        *,
+        candidate,
+        projected: ProjectedAnswerContext,
+        registry: EvidenceRegistry,
+        request: AnswerGenerationRequest,
+    ) -> AnswerResponse:
         return self._grounding.validate_and_render(
             candidate=candidate,
             projected=projected,

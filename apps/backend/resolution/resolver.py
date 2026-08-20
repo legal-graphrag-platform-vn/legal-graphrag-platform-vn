@@ -155,6 +155,18 @@ class ReferenceResolver:
                 if candidate.node_id not in seen:
                     seen.add(candidate.node_id)
                     candidates.append(candidate)
+        # Deduplicate candidates by document_number if they refer to the same logical document.
+        unique_candidates = []
+        seen_numbers = set()
+        for c in candidates:
+            if c.document_number:
+                if c.document_number not in seen_numbers:
+                    seen_numbers.add(c.document_number)
+                    unique_candidates.append(c)
+            else:
+                unique_candidates.append(c)
+        candidates = unique_candidates
+
         if len(candidates) == 1:
             return ResolvedResolution(
                 candidate=candidates[0],

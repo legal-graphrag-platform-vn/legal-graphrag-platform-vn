@@ -292,13 +292,15 @@ def process_article(
     registry: StructuralRegistry | None = None,
     extraction_result: ExtractionResult | None = None,
     document_registry: DocumentRegistry | None = None,
+    context: ArticleExtractionContext | None = None,
 ) -> int:
     """Chạy Pass 1+2 extraction + validation + scoring cho 1 Article. Trả về số relations xử lý."""
     article_text = article.content_raw
     registry = registry or StructuralRegistry.from_parsed_document(
         ParsedDocument(document=document, articles=[article]), raw_doc_code=document.id
     )
-    context = registry.context_for_article(article)
+    if context is None:
+        context = registry.context_for_article(article)
     document_registry = document_registry or DocumentRegistry.from_manifest(
         settings.curated_manifest_path
     )
@@ -445,10 +447,12 @@ def _process_article_worker(
     registry: StructuralRegistry,
     document_registry: DocumentRegistry,
     checkpoint: dict | None = None,
+    context: ArticleExtractionContext | None = None,
 ) -> tuple[list[dict], dict[str, dict], dict]:
     records = []
     entity_index: dict[str, dict] = {}
-    context = registry.context_for_article(article)
+    if context is None:
+        context = registry.context_for_article(article)
     if checkpoint:
         result = _result_from_checkpoint(checkpoint)
     else:
@@ -479,6 +483,7 @@ def _process_article_worker(
         registry=registry,
         extraction_result=result,
         document_registry=document_registry,
+        context=context,
     )
     return records, entity_index, _checkpoint_row(result, context, article.content_raw)
 
@@ -930,8 +935,8 @@ def run_pipeline(
         article = next(articles, None)
         if article is None:
             return False
-        article_id = contexts_by_model[id(article)].article_id
-        checkpoint = checkpoints.get(article_id)
+        context = contexts_by_model[id(article)]
+        checkpoint = checkpoints.get(context.article_id)
         future = executor.submit(
             _process_article_worker,
             article,
@@ -939,6 +944,7 @@ def run_pipeline(
             registry,
             document_registry,
             checkpoint,
+            context,
         )
         future_to_article[future] = article
         return True
@@ -1022,6 +1028,7 @@ def run_pipeline(
         [
             reference
             for article in selected_articles
+            if not _is_synthetic(article)
             for reference in reference_resolver.resolve_article(article)
         ]
         if source_text
