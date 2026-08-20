@@ -55,10 +55,10 @@ This repository enforces strict clean architecture boundaries. Do **not** violat
   * `src/retrieval/`
   * `src/generation/`
 
-* `prototypes/` must not be imported by runtime code.
+* `experiments/` must not be imported by runtime code.
 
-  * No imports from `apps/`, `src/pipeline/`, `src/infrastructure/`, `src/retrieval/`, `src/generation/`, or `src/shared/` into `prototypes/`.
-  * No imports from `prototypes/` into `apps/` or `src/`.
+  * No imports from `apps/`, `src/pipeline/`, `src/infrastructure/`, `src/retrieval/`, `src/generation/`, or `src/shared/` into `experiments/`.
+  * No imports from `experiments/` into `apps/` or `src/`.
 
 ## Ontology Contract Rule
 
@@ -103,11 +103,11 @@ Forbidden:
 * writing `review.jsonl` or `extract.jsonl` directly
 * creating graph labels or relation types outside the ontology contract
 
-## Prototype Rule
+## Experiments Rule
 
-`prototypes/` contains archived or experimental code only.
+`experiments/` contains archived or experimental code only.
 
-Code in `prototypes/` may be read for ideas, but must not become part of the active runtime or pipeline without being migrated into the proper package and made compliant with these import rules.
+Code in `experiments/` may be read for ideas, but must not become part of the active runtime or pipeline without being migrated into the proper package and made compliant with these import rules.
 
 ## Python Dependency Management
 
