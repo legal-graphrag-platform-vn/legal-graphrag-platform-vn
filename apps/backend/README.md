@@ -1,5 +1,8 @@
 # Legal GraphRAG FastAPI Backend
 
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the component overview (structure,
+endpoints, composition root, test evidence).
+
 Backend exposes retrieval evidence and an opt-in grounded answer profile.
 `POST /api/v1/query` remains retrieval-only. `POST /api/v1/chat` retrieves once,
 generates a structured answer, validates every citation/path/temporal assertion,

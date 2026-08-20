@@ -1,5 +1,8 @@
 # Legal GraphRAG Frontend
 
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the component overview (structure,
+features, backend contract, test evidence).
+
 Next.js pilot interface for chat, grounded citations, document exploration, and
 graph visualization. The frontend consumes the FastAPI contracts under
 `/api/v1`; it does not access Neo4j or model providers directly.

@@ -3,7 +3,8 @@
 Crawler (vbpl.vn) → Hierarchy Parser (Chương/Mục/Điều/Khoản/Điểm) → LLM Extraction
 (Gemini, two-pass) → Schema/Ontology Validation → Confidence Scoring → Decision
 Gate. Xem [`REPORT.md`](REPORT.md) cho thiết kế chi tiết, lý do kỹ thuật, và
-data flow đầy đủ.
+data flow đầy đủ; xem [`ARCHITECTURE.md`](ARCHITECTURE.md) cho tổng quan
+kiến trúc component (module, CLI, kiểm chứng test).
 
 ## Quick start
 
