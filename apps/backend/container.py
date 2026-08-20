@@ -346,6 +346,10 @@ def _build_query_processor(
     from observability import TracedTextGenerator
     from query_processing.adapter import QueryProcessorAdapter
     from src.infrastructure.llm.text_generation_factory import build_text_generator
+    from src.retrieval.nlu.prompts import (
+        QUERY_PROCESSING_SYSTEM_PROMPT,
+        QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT,
+    )
     from src.retrieval.nlu.query_processor import QueryProcessor
 
     text_generator = build_text_generator(
@@ -359,7 +363,19 @@ def _build_query_processor(
     )
     # Trace the LLM I/O (prompt + raw output) of the query processor (Plan 21).
     traced_generator = TracedTextGenerator(text_generator, stage="query_processor")
-    return QueryProcessorAdapter(QueryProcessor(traced_generator), runner)
+    # The fine-tuned Qwen adapter (served via Ollama) was trained on the terser
+    # QUERY_PROCESSING_SYSTEM_PROMPT and must keep receiving it unchanged;
+    # Gemini has no such fine-tuning and needs the zero-shot variant with
+    # explicit intent definitions to classify borderline questions
+    # (factual vs validity) consistently.
+    system_prompt = (
+        QUERY_PROCESSING_SYSTEM_PROMPT
+        if settings.llm_provider == "ollama"
+        else QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT
+    )
+    return QueryProcessorAdapter(
+        QueryProcessor(traced_generator, system_prompt=system_prompt), runner
+    )
 
 
 async def _cleanup_retrieval_after_startup_failure(

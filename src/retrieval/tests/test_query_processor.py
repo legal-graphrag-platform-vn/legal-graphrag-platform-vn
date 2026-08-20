@@ -19,7 +19,10 @@ from src.retrieval.errors import (
     QueryProcessingError,
     QueryProcessingParseError,
 )
-from src.retrieval.nlu.prompts import QUERY_PROCESSING_SYSTEM_PROMPT
+from src.retrieval.nlu.prompts import (
+    QUERY_PROCESSING_SYSTEM_PROMPT,
+    QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT,
+)
 from src.retrieval.nlu.query_processor import (
     QueryProcessor,
     build_user_prompt,
@@ -290,6 +293,42 @@ def test_process_passes_system_prompt_and_history() -> None:
     assert call["response_format"] == "json"
     assert "Luật Doanh nghiệp 2020" in call["user_prompt"]
     assert "Điều 1 của nó?" in call["user_prompt"]
+
+
+def test_process_uses_custom_system_prompt_when_provided() -> None:
+    """Gemini (no fine-tuned adapter) must be able to opt into the zero-shot
+    prompt without touching the fine-tuned Qwen adapter's default prompt."""
+    generator = FakeTextGenerator(_ready_single_payload())
+    processor = QueryProcessor(
+        generator, system_prompt=QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT
+    )
+    processor.process("Điều kiện thành lập công ty cổ phần là gì?")
+    assert (
+        generator.calls[0]["system_prompt"] == QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT
+    )
+
+
+def test_zero_shot_prompt_keeps_json_contract_identical_to_default() -> None:
+    """Only the intent-definitions block may differ; the JSON contract and
+    subquery rules must stay byte-identical so both prompts validate against
+    the same QueryProcessingResult schema."""
+    default_lines = QUERY_PROCESSING_SYSTEM_PROMPT.splitlines()
+    zero_shot_lines = QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT.splitlines()
+    default_tail = default_lines[default_lines.index("Quy tắc tạo subquery:") :]
+    zero_shot_tail = zero_shot_lines[zero_shot_lines.index("Quy tắc tạo subquery:") :]
+    assert default_tail == zero_shot_tail
+
+
+def test_zero_shot_prompt_disambiguates_factual_from_validity() -> None:
+    """Regression guard for the factual/validity flip-flop observed in
+    production: the same borderline question ("đổi tên doanh nghiệp có làm
+    thay đổi quyền và nghĩa vụ") was classified factual in one call and
+    validity in another by an untuned model given only bare label names."""
+    assert "KHÔNG hỏi về việc quy định đó còn hiệu lực" in (
+        QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT
+    )
+    assert "TRẠNG THÁI HIỆU LỰC" in QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT
+    assert "đổi tên doanh nghiệp" in QUERY_PROCESSING_SYSTEM_PROMPT_ZERO_SHOT.lower()
 
 
 def test_process_blank_query_rejected() -> None:
