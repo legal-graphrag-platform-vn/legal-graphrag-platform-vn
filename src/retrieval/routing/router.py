@@ -134,7 +134,9 @@ class IntentRouter:
             raise TemporalRoutingError(
                 "Validity retrieval requires a resolved temporal point"
             )
-        if intent is IntentType.COMPARISON and not temporal.has_temporal:
+        if intent is IntentType.COMPARISON and not (
+            temporal.has_temporal or temporal.spans_all_versions
+        ):
             raise TemporalRoutingError(
                 "Comparison retrieval requires a temporal expression"
             )

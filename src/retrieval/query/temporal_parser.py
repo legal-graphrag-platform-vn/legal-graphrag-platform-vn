@@ -37,6 +37,17 @@ _EXPLICIT_TEMPORAL_WORDS = re.compile(
     r"\b(?:trước|sau)\s+(?:ngày|tháng|năm|thời điểm|\d))",
     re.IGNORECASE,
 )
+# A comparison anchored to an event (an amendment) rather than a calendar
+# point — "so sánh trước và sau khi sửa đổi". No date can be resolved from
+# wording alone, so this deliberately does NOT set has_temporal=True; it only
+# flags spans_all_versions so COMPARISON is allowed through without a date
+# and TemporalFilter's existing preserve_versions path lets every version
+# reach generation for the LLM to compare directly.
+_VERSION_SPAN_WORDING = re.compile(
+    r"trước và sau khi\s+(?:sửa đổi|bãi bỏ|thay thế)|"
+    r"(?:trước|sau) khi\s+(?:sửa đổi|bãi bỏ|thay thế)",
+    re.IGNORECASE,
+)
 
 
 class TemporalParser:
@@ -102,6 +113,14 @@ class TemporalParser:
                 has_temporal=True,
                 expression=current_match.group(0),
                 requests_current_validity=True,
+            )
+
+        version_span_match = _VERSION_SPAN_WORDING.search(query)
+        if version_span_match:
+            return TemporalQuery(
+                has_temporal=False,
+                expression=version_span_match.group(0),
+                spans_all_versions=True,
             )
 
         if _EXPLICIT_DURATION_EXPRESSIONS.search(query):

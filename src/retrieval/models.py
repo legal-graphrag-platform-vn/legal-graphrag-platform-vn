@@ -49,6 +49,11 @@ class TemporalQuery(BaseModel):
     granularity: str | None = None
     parse_error: str | None = None
     requests_current_validity: bool = False
+    # Set when the query asks to compare a unit's wording across its whole
+    # version history (e.g. "trước và sau khi sửa đổi") rather than at one
+    # calendar point — deliberately has no resolved_from/resolved_to so
+    # TemporalFilter's preserve_versions path lets every version through.
+    spans_all_versions: bool = False
 
 
 class RetrievedUnit(BaseModel):

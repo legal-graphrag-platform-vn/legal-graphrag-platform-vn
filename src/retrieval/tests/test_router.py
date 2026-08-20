@@ -193,6 +193,69 @@ def test_structural_hierarchy_does_not_require_guides() -> None:
     assert result.decision.required_capability == "structural_hierarchy"
 
 
+def test_guides_wording_routes_hierarchy_and_requires_guides_relations() -> None:
+    """The 'văn bản...hướng dẫn' wording must be recognized consistently by
+    both intent classification and capability selection — they share one
+    regex fragment precisely so this stays true."""
+    result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+        RetrievalRequest(query="Văn bản nào hướng dẫn luật này?")
+    )
+
+    assert result.decision.intent is IntentType.HIERARCHY
+    assert result.decision.required_capability == "guides_relations"
+
+
+def test_amendment_wording_routes_validity_and_requires_version_chain() -> None:
+    """The 'sửa đổi/bãi bỏ/thay thế' wording must be recognized consistently
+    by both intent classification and capability selection."""
+    result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+        RetrievalRequest(query="Điều 5 hiện hành đã bị sửa đổi bởi văn bản nào?")
+    )
+
+    assert result.decision.intent is IntentType.VALIDITY
+    assert result.decision.required_capability == "version_chain_validity"
+
+
+def test_factual_query_without_temporal_signal_defaults_to_today() -> None:
+    """An ordinary present-tense question implicitly means "as of today" —
+    it must not skip temporal filtering entirely, or repealed/superseded
+    units could leak into the answer."""
+    result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+        RetrievalRequest(query="Điều kiện thành lập doanh nghiệp")
+    )
+    assert result.temporal.has_temporal is True
+    assert result.temporal.resolved_from == date(2026, 7, 13)
+    assert result.temporal.resolved_to == date(2026, 7, 13)
+    assert result.decision.temporal_source is TemporalSource.INJECTED_DEFAULT_CURRENT_DATE
+    assert result.decision.apply_temporal_filter is True
+
+
+def test_comparison_without_temporal_signal_still_requires_explicit_range() -> None:
+    with pytest.raises(TemporalRoutingError, match="temporal expression"):
+        IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+            RetrievalRequest(query="So sánh quy định về vốn điều lệ")
+        )
+
+
+def test_relative_amendment_comparison_is_allowed_without_explicit_date() -> None:
+    """"Trước và sau khi sửa đổi" is a real temporal signal (an event, not a
+    calendar point) — COMPARISON must be allowed through without raising,
+    and must NOT get a resolved_from/resolved_to (no date exists to give it);
+    TemporalFilter's preserve_versions path is what actually lets every
+    version reach generation for the LLM to compare."""
+    result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
+        RetrievalRequest(
+            query="So sánh quy định trước và sau khi sửa đổi luật doanh nghiệp"
+        )
+    )
+
+    assert result.decision.intent is IntentType.COMPARISON
+    assert result.temporal.has_temporal is False
+    assert result.temporal.spans_all_versions is True
+    assert result.temporal.resolved_from is None
+    assert result.decision.preserve_versions is True
+
+
 def test_regulation_of_obligations_is_not_misread_as_definition() -> None:
     result = IntentRouter(RetrievalConfig(), clock=FixedClock()).route(
         RetrievalRequest(query="Các khoản quy định nghĩa vụ thuộc Điều nào?")
