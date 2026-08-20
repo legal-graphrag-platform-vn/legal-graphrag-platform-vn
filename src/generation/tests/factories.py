@@ -7,6 +7,7 @@ from src.generation.models import (
     AnswerCandidate,
     AnswerParagraph,
     GroundedStatement,
+    StatementCitation,
 )
 from src.retrieval.models import (
     EvidenceItem,
@@ -158,7 +159,11 @@ def graph_path(
     )
 
 
-def answer_candidate(*, citation_id: str = "doc_art1") -> AnswerCandidate:
+def answer_candidate(
+    *,
+    citation_id: str = "doc_art1",
+    quoted_text: str = "Tổ chức, cá nhân có quyền thành lập và quản lý doanh nghiệp",
+) -> AnswerCandidate:
     return AnswerCandidate(
         direct_answer=AnswerBlock(
             paragraphs=[
@@ -167,7 +172,12 @@ def answer_candidate(*, citation_id: str = "doc_art1") -> AnswerCandidate:
                         GroundedStatement(
                             statement_id="statement-1",
                             text=("Tổ chức, cá nhân có quyền thành lập doanh nghiệp."),
-                            citation_ids=[citation_id],
+                            citations=[
+                                StatementCitation(
+                                    citation_id=citation_id,
+                                    quoted_text=quoted_text,
+                                )
+                            ],
                         )
                     ]
                 )

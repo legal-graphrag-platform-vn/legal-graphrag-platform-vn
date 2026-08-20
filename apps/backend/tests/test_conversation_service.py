@@ -432,7 +432,12 @@ def test_query_processor_receives_canonical_query_and_resolved_filter() -> None:
     assert store.turn.persisted_answer["resolution_status"] is ResolutionStatus.RESOLVED
 
 
-def test_query_processor_cannot_drop_resolved_canonical_anchor() -> None:
+def test_query_processor_repairs_dropped_canonical_anchor_before_retrieving() -> None:
+    """If Query Processor's fanout drops the resolved canonical anchor from a
+    subquery, the service repairs it by appending the missing anchor text
+    rather than failing the turn outright — retrieval still runs, but only
+    against the repaired (anchor-restored) query."""
+
     class AnchorDroppingQueryProcessor:
         async def process(self, current_query, conversation_history=()):
             return QueryProcessingResult(
@@ -459,9 +464,10 @@ def test_query_processor_cannot_drop_resolved_canonical_anchor() -> None:
 
     events = _run_events(service, _request("điều đó quy định gì"), _owner())
 
-    assert retrieval.calls == 0
-    assert store.turn.failed["error_code"] == "QUERY_PROCESSING_FAILED"
-    assert events[-1].data["status"] == "error"
+    assert retrieval.calls == 1
+    assert "59/2020/QH14" in retrieval.last_query
+    assert "Điều 111" in retrieval.last_query
+    assert events[-1].data["status"] == "completed"
 
 
 def test_query_processor_cannot_replace_canonical_generation_query() -> None:
