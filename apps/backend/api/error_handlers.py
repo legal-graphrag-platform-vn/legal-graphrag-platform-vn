@@ -105,6 +105,21 @@ async def retrieval_error_handler(
 
 
 async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    import neo4j.exceptions
+    if isinstance(exc, neo4j.exceptions.ServiceUnavailable):
+        logger.error(
+            "Backend Neo4j dependency unavailable: error_type=%s message=%s",
+            type(exc).__name__,
+            str(exc),
+        )
+        return _response(
+            status_code=503,
+            code="RETRIEVAL_DEPENDENCY_UNAVAILABLE",
+            message="Không thể kết nối đến cơ sở dữ liệu đồ thị",
+            request=request,
+            details={},
+        )
+
     logger.error(
         "Unexpected backend failure: error_type=%s",
         type(exc).__name__,
