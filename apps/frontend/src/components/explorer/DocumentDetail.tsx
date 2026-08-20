@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
 import type {
+   AppendixDetail,
    ArticleDetail,
    ChapterDetail,
    DocumentDetail,
@@ -51,12 +52,12 @@ function renderContentWithLinks(
    if (!text) return text
    if (!relations || relations.length === 0) return text
 
-   // Filter out empty document numbers and sort by length descending 
+   // Filter out empty document numbers and sort by length descending
    // so that longer document numbers (more specific) are matched first before shorter ones.
    const validRelations = relations
       .filter((r) => r.doc_number)
       .sort((a, b) => b.doc_number.length - a.doc_number.length)
-   
+
    if (validRelations.length === 0) return text
 
    // Escape special regex characters in document numbers
@@ -168,10 +169,10 @@ function ArticleItem({
                   </p>
                )}
                {article.clauses.map((cl) => (
-                  <ClauseItem 
-                     key={cl.id} 
-                     clause={cl} 
-                     highlighted={cl.id === highlightClauseId} 
+                  <ClauseItem
+                     key={cl.id}
+                     clause={cl}
+                     highlighted={cl.id === highlightClauseId}
                      relations={relations}
                      onNavigateDoc={onNavigateDoc}
                   />
@@ -233,6 +234,70 @@ function ChapterBlock({
          {chapter.sections.map((section) => (
             <SectionBlock key={section.id} section={section} {...highlights} />
          ))}
+      </div>
+   )
+}
+
+function AppendixBlock({
+   appendix,
+   ...highlights
+}: { appendix: AppendixDetail } & HierarchyHighlights) {
+   const [open, setOpen] = useState(false)
+   const hasStructure =
+      appendix.parts.length > 0 ||
+      appendix.chapters.length > 0 ||
+      appendix.ungrouped_articles.length > 0
+
+   return (
+      <div className="border rounded-md mb-3 overflow-hidden border-border">
+         <button
+            onClick={() => setOpen(!open)}
+            className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-muted/50 transition-colors bg-sky-500/5"
+         >
+            {open ? (
+               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            ) : (
+               <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            )}
+            <span className="text-[11px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400 shrink-0">
+               {appendix.heading || `Phụ lục ${appendix.number ?? ''}`.trim()}
+            </span>
+            {appendix.title && (
+               <span className="text-xs text-muted-foreground truncate">
+                  — {appendix.title}
+               </span>
+            )}
+         </button>
+
+         {open && (
+            <div className="px-3 pb-3 pt-2 space-y-3">
+               {appendix.content_raw && !hasStructure && (
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                     {renderContentWithLinks(
+                        appendix.content_raw,
+                        highlights.relations,
+                        highlights.onNavigateDoc
+                     )}
+                  </p>
+               )}
+               {appendix.parts.map((part) => (
+                  <div key={part.id} className="mb-4">
+                     <p className="text-xs font-bold uppercase tracking-widest text-foreground mb-3">
+                        Phần {part.number} — {part.title}
+                     </p>
+                     {part.chapters.map((chapter) => (
+                        <ChapterBlock key={chapter.id} chapter={chapter} {...highlights} />
+                     ))}
+                  </div>
+               ))}
+               {appendix.chapters.map((chapter) => (
+                  <ChapterBlock key={chapter.id} chapter={chapter} {...highlights} />
+               ))}
+               {appendix.ungrouped_articles.map((article) => (
+                  <ArticleItem key={article.id} article={article} {...highlights} />
+               ))}
+            </div>
+         )}
       </div>
    )
 }
@@ -352,6 +417,23 @@ export function DocumentDetailPanel({
                            onNavigateDoc={onNavigateDoc}
                         />
                      ))}
+                     {doc.appendices.length > 0 && (
+                        <div className="mt-7">
+                           <p className="text-xs font-bold uppercase tracking-widest text-foreground mb-4">
+                              Phụ lục
+                           </p>
+                           {doc.appendices.map((appendix) => (
+                              <AppendixBlock
+                                 key={appendix.id}
+                                 appendix={appendix}
+                                 highlightArticleId={highlightArticleId}
+                                 highlightClauseId={highlightClauseId}
+                                 relations={doc.relations}
+                                 onNavigateDoc={onNavigateDoc}
+                              />
+                           ))}
+                        </div>
+                     )}
                   </div>
                </ScrollArea>
             </TabsContent>

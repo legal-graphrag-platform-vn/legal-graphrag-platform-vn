@@ -412,6 +412,23 @@ class PartDetail(BaseModel):
     chapters: list[ChapterDetail] = Field(default_factory=list)
 
 
+class AppendixDetail(BaseModel):
+    """An Appendix is a legal source unit owned directly by the Document —
+    it may in turn contain its own Part/Chapter/Article structure per
+    legal_ontology.md, scoped by the Appendix ID so numbering restarts
+    without colliding with the host Document's own body."""
+
+    id: str
+    number: str | None = None  # Optional — some Appendices are unnumbered
+    heading: str | None = None
+    title: str | None = None
+    content_raw: str = ""
+    appendix_kind: str | None = None  # LEGAL_CONTENT, FORM, LIST, TABLE, UNCLASSIFIED
+    parts: list[PartDetail] = Field(default_factory=list)
+    chapters: list[ChapterDetail] = Field(default_factory=list)
+    ungrouped_articles: list[ArticleDetail] = Field(default_factory=list)
+
+
 class DocumentRelation(BaseModel):
     doc_id: str
     doc_number: str
@@ -436,6 +453,7 @@ class DocumentDetail(DocumentSummary):
     # 2. ungrouped_articles: Document có thể chứa Article trực tiếp (không qua Chapter).
     # Ví dụ: Nghị định ngắn thường không có Chương, chỉ có Điều.
     ungrouped_articles: list[ArticleDetail] = Field(default_factory=list)
+    appendices: list[AppendixDetail] = Field(default_factory=list)
     relations: list[DocumentRelation] = Field(default_factory=list)
 
 

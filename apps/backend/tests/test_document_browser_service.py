@@ -102,6 +102,70 @@ class FullHierarchyRepo(FakeDocumentRepo):
         }
 
 
+class AppendixRepo(FakeDocumentRepo):
+    def get_document(self, document_id: str):
+        return {
+            "document": _document(),
+            "nodes": [
+                # Host Document's own body — Điều 1.
+                _node("doc_art1", "Article", "1", title="Phạm vi"),
+                # An Appendix owned directly by the Document, containing its
+                # own Chapter -> Article structure per legal_ontology.md —
+                # this Article 1 is scoped by the Appendix ID and must not
+                # collide or merge with the host Document's own Điều 1 above.
+                _node(
+                    "doc_app1",
+                    "Appendix",
+                    "01",
+                    title="Danh mục ngành nghề",
+                    content_raw="Nội dung phụ lục đầy đủ.",
+                    heading="PHỤ LỤC 01",
+                    appendix_kind="LIST",
+                ),
+                _node("doc_app1_ch1", "Chapter", "1", title="Chương phụ lục"),
+                _node("doc_app1_ch1_art1", "Article", "1", title="Điều phụ lục"),
+                # An Article owned directly by the Appendix (no Chapter) —
+                # exercises the Appendix's own ungrouped_articles path.
+                _node("doc_app1_art2", "Article", "2", title="Điều rời trong phụ lục"),
+            ],
+            "structural_edges": [
+                {"source": "doc", "target": "doc_art1"},
+                {"source": "doc", "target": "doc_app1"},
+                {"source": "doc_app1", "target": "doc_app1_ch1"},
+                {"source": "doc_app1_ch1", "target": "doc_app1_ch1_art1"},
+                {"source": "doc_app1", "target": "doc_app1_art2"},
+            ],
+            "relations": [],
+        }
+
+
+def test_document_browser_includes_appendix_with_its_own_substructure() -> None:
+    async def scenario() -> None:
+        service = Neo4jDocumentBrowserService(AppendixRepo(), InlineRunner())
+
+        detail = await service.get_document_detail("doc")
+
+        # Host Document's own Điều 1 is untouched — no leakage from the Appendix.
+        assert [article.id for article in detail.ungrouped_articles] == ["doc_art1"]
+
+        assert len(detail.appendices) == 1
+        appendix = detail.appendices[0]
+        assert appendix.id == "doc_app1"
+        assert appendix.number == "01"
+        assert appendix.heading == "PHỤ LỤC 01"
+        assert appendix.appendix_kind == "LIST"
+        assert appendix.content_raw == "Nội dung phụ lục đầy đủ."
+
+        # Appendix owns its own Chapter -> Article substructure...
+        assert appendix.chapters[0].id == "doc_app1_ch1"
+        assert appendix.chapters[0].articles[0].id == "doc_app1_ch1_art1"
+        # ...and its own directly-owned (ungrouped) Article, scoped by the
+        # Appendix ID rather than the host Document.
+        assert [a.id for a in appendix.ungrouped_articles] == ["doc_app1_art2"]
+
+    asyncio.run(scenario())
+
+
 def test_document_browser_builds_canonical_hierarchy() -> None:
     async def scenario() -> None:
         service = Neo4jDocumentBrowserService(FakeDocumentRepo(), InlineRunner())
@@ -191,4 +255,6 @@ def _node(
         "content_raw": properties.get("content_raw", ""),
         "point_label": properties.get("point_label"),
         "name": properties.get("name"),
+        "heading": properties.get("heading"),
+        "appendix_kind": properties.get("appendix_kind"),
     }

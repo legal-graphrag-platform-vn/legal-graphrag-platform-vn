@@ -7,6 +7,7 @@ from functools import partial
 from typing import Any, Protocol
 
 from api.models import (
+    AppendixDetail,
     ArticleDetail,
     ArticleResponse,
     ChapterDetail,
@@ -235,58 +236,124 @@ def _document_detail(result: dict[str, Any]) -> DocumentDetail:
         for node_id, node in nodes.items()
         if node["label"] == "Chapter"
     }
-    parts = [
-        PartDetail(
-            id=node_id,
-            number=str(node.get("number") or ""),
-            title=str(node.get("title") or ""),
-            chapters=sorted(
-                [
-                    chapters[item]
-                    for item in children.get(node_id, [])
-                    if item in chapters
-                ],
-                key=lambda item: _number_key(item.number),
-            ),
-        )
-        for node_id, node in nodes.items()
-        if node["label"] == "Part" and parent.get(node_id) == document["id"]
-    ]
-    root_chapters = [
-        ChapterDetail(
-            id=node_id,
-            number=str(node.get("number") or ""),
-            title=node.get("title"),
-            articles=_sorted_items(
-                [
-                    articles[item]
-                    for item in children.get(node_id, [])
-                    if item in articles
-                ]
-            ),
-            sections=sorted(
-                [
-                    sections[item]
-                    for item in children.get(node_id, [])
-                    if item in sections
-                ],
-                key=lambda item: _number_key(item.number),
-            ),
-        )
-        for node_id, node in nodes.items()
-        if node["label"] == "Chapter" and parent.get(node_id) == document["id"]
-    ]
-    ungrouped = [
-        article
-        for node_id, article in articles.items()
-        if parent.get(node_id) == document["id"]
-    ]
+    appendices = sorted(
+        [
+            _appendix(node_id, node, nodes, parent, children, articles, sections, chapters)
+            for node_id, node in nodes.items()
+            if node["label"] == "Appendix"
+        ],
+        key=lambda item: _number_key(item.number or ""),
+    )
     return DocumentDetail(
         **_document_fields(document),
-        parts=sorted(parts, key=lambda item: _number_key(item.number)),
-        chapters=sorted(root_chapters, key=lambda item: _number_key(item.number)),
-        ungrouped_articles=_sorted_items(ungrouped),
+        parts=_owned_parts(document["id"], nodes, parent, children, chapters),
+        chapters=_owned_chapters(document["id"], nodes, parent, children, articles, sections),
+        ungrouped_articles=_owned_ungrouped_articles(document["id"], articles, parent),
+        appendices=appendices,
         relations=[DocumentRelation(**relation) for relation in result["relations"]],
+    )
+
+
+def _owned_parts(
+    owner_id: str,
+    nodes: dict[str, dict[str, Any]],
+    parent: dict[str, str],
+    children: dict[str, list[str]],
+    chapters: dict[str, ChapterDetail],
+) -> list[PartDetail]:
+    return sorted(
+        [
+            PartDetail(
+                id=node_id,
+                number=str(node.get("number") or ""),
+                title=str(node.get("title") or ""),
+                chapters=sorted(
+                    [
+                        chapters[item]
+                        for item in children.get(node_id, [])
+                        if item in chapters
+                    ],
+                    key=lambda item: _number_key(item.number),
+                ),
+            )
+            for node_id, node in nodes.items()
+            if node["label"] == "Part" and parent.get(node_id) == owner_id
+        ],
+        key=lambda item: _number_key(item.number),
+    )
+
+
+def _owned_chapters(
+    owner_id: str,
+    nodes: dict[str, dict[str, Any]],
+    parent: dict[str, str],
+    children: dict[str, list[str]],
+    articles: dict[str, ArticleDetail],
+    sections: dict[str, SectionDetail],
+) -> list[ChapterDetail]:
+    return sorted(
+        [
+            ChapterDetail(
+                id=node_id,
+                number=str(node.get("number") or ""),
+                title=node.get("title"),
+                articles=_sorted_items(
+                    [
+                        articles[item]
+                        for item in children.get(node_id, [])
+                        if item in articles
+                    ]
+                ),
+                sections=sorted(
+                    [
+                        sections[item]
+                        for item in children.get(node_id, [])
+                        if item in sections
+                    ],
+                    key=lambda item: _number_key(item.number),
+                ),
+            )
+            for node_id, node in nodes.items()
+            if node["label"] == "Chapter" and parent.get(node_id) == owner_id
+        ],
+        key=lambda item: _number_key(item.number),
+    )
+
+
+def _owned_ungrouped_articles(
+    owner_id: str,
+    articles: dict[str, ArticleDetail],
+    parent: dict[str, str],
+) -> list[ArticleDetail]:
+    return _sorted_items(
+        [
+            article
+            for node_id, article in articles.items()
+            if parent.get(node_id) == owner_id
+        ]
+    )
+
+
+def _appendix(
+    node_id: str,
+    node: dict[str, Any],
+    nodes: dict[str, dict[str, Any]],
+    parent: dict[str, str],
+    children: dict[str, list[str]],
+    articles: dict[str, ArticleDetail],
+    sections: dict[str, SectionDetail],
+    chapters: dict[str, ChapterDetail],
+) -> AppendixDetail:
+    return AppendixDetail(
+        id=node_id,
+        number=node.get("number"),
+        heading=node.get("heading"),
+        title=node.get("title"),
+        content_raw=node.get("content_raw") or "",
+        appendix_kind=node.get("appendix_kind"),
+        parts=_owned_parts(node_id, nodes, parent, children, chapters),
+        chapters=_owned_chapters(node_id, nodes, parent, children, articles, sections),
+        ungrouped_articles=_owned_ungrouped_articles(node_id, articles, parent),
     )
 
 
@@ -296,12 +363,13 @@ def _parent_rank(
     if parent_id == document_id:
         return 0
     return {
-        "Part": 1,
-        "Chapter": 2,
-        "Section": 3,
-        "Subsection": 4,
-        "Article": 5,
-        "Clause": 6,
+        "Appendix": 1,
+        "Part": 2,
+        "Chapter": 3,
+        "Section": 4,
+        "Subsection": 5,
+        "Article": 6,
+        "Clause": 7,
     }.get(str(nodes.get(parent_id, {}).get("label") or ""), -1)
 
 

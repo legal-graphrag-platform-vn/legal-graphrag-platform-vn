@@ -223,6 +223,7 @@ _BROWSER_NODE_PROJECTION = """
 node.id AS id,
 CASE
   WHEN node:Document THEN 'Document'
+  WHEN node:Appendix THEN 'Appendix'
   WHEN node:Part THEN 'Part'
   WHEN node:Chapter THEN 'Chapter'
   WHEN node:Section THEN 'Section'
@@ -240,7 +241,9 @@ node.number AS number,
 node.title AS title,
 node.content_raw AS content_raw,
 node.label AS point_label,
-node.name AS name
+node.name AS name,
+node.heading AS heading,
+node.appendix_kind AS appendix_kind
 """
 
 

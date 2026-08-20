@@ -55,6 +55,24 @@ export interface PartDetail {
    chapters: ChapterDetail[]
 }
 
+/**
+ * An Appendix is a legal source unit owned directly by the Document — it may
+ * in turn contain its own Part/Chapter/Article structure (legal_ontology.md),
+ * scoped by the Appendix ID so numbering restarts without colliding with the
+ * host Document's own body.
+ */
+export interface AppendixDetail {
+   id: string
+   number?: string
+   heading?: string
+   title?: string
+   content_raw: string
+   appendix_kind?: string
+   parts: PartDetail[]
+   chapters: ChapterDetail[]
+   ungrouped_articles: ArticleDetail[]
+}
+
 export interface DocumentRelation {
    doc_id: string
    doc_number: string
@@ -77,6 +95,7 @@ export interface DocumentDetail extends DocumentSummary {
    parts: PartDetail[]
    chapters: ChapterDetail[]
    ungrouped_articles: ArticleDetail[]
+   appendices: AppendixDetail[]
    relations: DocumentRelation[]
 }
 
@@ -119,7 +138,7 @@ export interface DocumentListResponse {
 
 export interface RetrievedUnitDTO {
    id: string
-   label: 'Article' | 'Clause' | 'Point'
+   label: 'Appendix' | 'Article' | 'Clause' | 'Point'
    content_raw: string
    citation_label: string
    document_id: string
