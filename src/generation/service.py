@@ -6,6 +6,9 @@ from collections import Counter
 
 from src.generation.context_projection import ContextProjector
 from src.generation.errors import (
+    AnswerProviderDependencyError,
+    AnswerProviderOutputError,
+    AnswerProviderTimeoutError,
     CitationValidationError,
     GroundingValidationError,
     ReasoningPathValidationError,
@@ -34,6 +37,18 @@ _GROUNDING_ERRORS = (
     GroundingValidationError,
     ReasoningPathValidationError,
     TemporalAnswerValidationError,
+)
+
+# A repair-attempt failure at the provider boundary (empty/malformed LLM output,
+# timeout, dependency unavailable) is not the model failing to self-correct —
+# it is the one extra LLM call itself misbehaving. Degrade to cannot_answer
+# instead of losing a turn that already had a valid first candidate. A second
+# _GROUNDING_ERRORS from the repaired candidate is a genuine self-correction
+# failure and must still hard-fail (see test_grounding_failure_gives_up_after_one_repair_attempt).
+_REPAIR_PROVIDER_ERRORS = (
+    AnswerProviderDependencyError,
+    AnswerProviderTimeoutError,
+    AnswerProviderOutputError,
 )
 
 
@@ -116,6 +131,11 @@ class AnswerGenerator:
                 request=request,
             )
         except _GROUNDING_ERRORS as exc:
+            request.retrieval_context.metrics["generation_context"] = {
+                **request.retrieval_context.metrics.get("generation_context", {}),
+                "grounding_repair_triggered": True,
+                "grounding_repair_reason": f"{type(exc).__name__}: {exc}",
+            }
             repair_request = provider_request.model_copy(
                 update={
                     "prompt": (
@@ -129,13 +149,28 @@ class AnswerGenerator:
                     )
                 }
             )
-            candidate = await self._provider.generate_structured(repair_request)
-            return self._render(
-                candidate=candidate,
-                projected=projected,
-                registry=registry,
-                request=request,
-            )
+            try:
+                candidate = await self._provider.generate_structured(repair_request)
+                return self._render(
+                    candidate=candidate,
+                    projected=projected,
+                    registry=registry,
+                    request=request,
+                )
+            except _REPAIR_PROVIDER_ERRORS as repair_exc:
+                request.retrieval_context.metrics["generation_context"] = {
+                    **request.retrieval_context.metrics.get("generation_context", {}),
+                    "grounding_repair_failed": True,
+                    "grounding_repair_failure_reason": (
+                        f"{type(repair_exc).__name__}: {repair_exc}"
+                    ),
+                }
+                return self._cannot_answer(
+                    request,
+                    "ANSWER_REPAIR_FAILED",
+                    "Không thể tạo câu trả lời đủ căn cứ sau khi thử sửa lại; "
+                    "vui lòng thử lại câu hỏi.",
+                )
 
     def _render(
         self,

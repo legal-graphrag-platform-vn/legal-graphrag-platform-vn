@@ -10,6 +10,7 @@ from src.generation.context_projection import ContextProjector
 from src.generation.evidence_compaction import EvidenceCompactor
 from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import (
+    AnswerProviderOutputError,
     CitationValidationError,
     ReasoningPathValidationError,
     TemporalAnswerValidationError,
@@ -189,6 +190,72 @@ def test_grounding_failure_gives_up_after_one_repair_attempt() -> None:
                 AnswerGenerationRequest(query=context.query, retrieval_context=context)
             )
         assert provider.calls == 2
+
+    asyncio.run(scenario())
+
+
+class RepairFailsAtProviderLevel:
+    """First call returns an ungrounded candidate (triggers repair); the repair
+    call itself fails at the provider boundary, e.g. empty/malformed LLM output."""
+
+    provider_name = "fake"
+    model_name = "fake-model"
+
+    def __init__(self, first_candidate) -> None:
+        self._first_candidate = first_candidate
+        self.calls = 0
+
+    async def generate_structured(self, request):
+        self.calls += 1
+        if self.calls == 1:
+            return self._first_candidate
+        raise AnswerProviderOutputError("Gemini returned an empty answer payload")
+
+    async def aclose(self) -> None:
+        pass
+
+
+def test_grounding_repair_reason_is_recorded_in_metrics() -> None:
+    """The first (rejected) candidate's grounding failure must be observable —
+    it was previously swallowed silently before triggering repair."""
+
+    async def scenario() -> None:
+        provider = SequencedProvider(
+            [answer_candidate(citation_id="doc_art999"), answer_candidate()]
+        )
+        context = retrieval_context()
+        await _generator(provider).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+        diagnostics = context.metrics["generation_context"]
+        assert diagnostics["grounding_repair_triggered"] is True
+        assert "CitationValidationError" in diagnostics["grounding_repair_reason"]
+
+    asyncio.run(scenario())
+
+
+def test_repair_provider_failure_degrades_to_cannot_answer() -> None:
+    """If the repair attempt itself fails at the provider boundary (empty or
+    malformed LLM output), the turn must not be lost outright — degrade to
+    cannot_answer instead of propagating the provider error and failing the
+    whole conversation turn."""
+
+    async def scenario() -> None:
+        provider = RepairFailsAtProviderLevel(
+            answer_candidate(citation_id="doc_art999")
+        )
+        context = retrieval_context()
+        response = await _generator(provider).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+        assert response.cannot_answer is True
+        assert response.insufficiency_reason == "ANSWER_REPAIR_FAILED"
+        diagnostics = context.metrics["generation_context"]
+        assert diagnostics["grounding_repair_failed"] is True
+        assert (
+            "AnswerProviderOutputError"
+            in diagnostics["grounding_repair_failure_reason"]
+        )
 
     asyncio.run(scenario())
 
