@@ -50,7 +50,8 @@ class Neo4jDocumentBrowserRepo:
             "limit": page_size,
         }
         predicate = """
-        ($doc_type IS NULL OR document.doc_type = $doc_type)
+        document.id IS NOT NULL
+        AND ($doc_type IS NULL OR document.doc_type = $doc_type)
         AND ($issuer IS NULL OR toLower(document.issuer_name) CONTAINS $issuer)
         AND ($status IS NULL OR document.legal_status = $status)
         AND ($year IS NULL OR document.issued_date.year = $year)
