@@ -1660,12 +1660,15 @@ def batch_write(
                     success_count += 1
                 else:
                     fail_count += 1
+                total_done = success_count + fail_count
+                typer.echo(f"📊 [Batch Write] Tiến độ: {total_done}/{len(doc_codes)} (Thành công: {success_count}, Lỗi: {fail_count})")
     else:
-        for code in doc_codes:
+        for i, code in enumerate(doc_codes, 1):
             if _write_single_doc(code):
                 success_count += 1
             else:
                 fail_count += 1
+            typer.echo(f"📊 [Batch Write] Tiến độ: {i}/{len(doc_codes)} (Thành công: {success_count}, Lỗi: {fail_count})")
 
     typer.echo(f"\n🎉 Hoàn thành Batch Write. Thành công: {success_count}, Thất bại: {fail_count}")
 
@@ -1816,7 +1819,7 @@ def batch_sync_semantics(
     ] = None,
     workers: Annotated[
         int,
-        typer.Option(min=1, max=32, help="Số lượng luồng đồng bộ song song vào Neo4j"),
+        typer.Option(min=1, max=128, help="Số lượng luồng đồng bộ song song vào Neo4j"),
     ] = 4,
     limit: Annotated[
         int | None,
@@ -1859,12 +1862,15 @@ def batch_sync_semantics(
                     success_count += 1
                 else:
                     fail_count += 1
+                total_done = success_count + fail_count
+                typer.echo(f"📊 [Batch Sync Semantics] Tiến độ: {total_done}/{len(doc_codes)} (Thành công: {success_count}, Lỗi: {fail_count})")
     else:
-        for code in doc_codes:
+        for i, code in enumerate(doc_codes, 1):
             if _sync_single_doc(code):
                 success_count += 1
             else:
                 fail_count += 1
+            typer.echo(f"📊 [Batch Sync Semantics] Tiến độ: {i}/{len(doc_codes)} (Thành công: {success_count}, Lỗi: {fail_count})")
 
     typer.echo(
         f"\n🎉 Hoàn thành Batch Sync Semantics. Thành công: {success_count}, Thất bại: {fail_count}"
