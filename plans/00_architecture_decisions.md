@@ -1855,3 +1855,40 @@ Gắn cả hai vào Document làm sai ownership và gây collision canonical Art
   trước write theo ontology 1.14.0.
 - Migration chạm toàn chuỗi parser đến retrieval; không được deploy ontology
   writer 1.14.0 với parser 2.0 hoặc registry v3.
+
+---
+
+## ADR-37: Bảo toàn comparison composition qua fan-out retrieval
+
+**Ngày**: 2026-08-22
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Query Processor có thể phân rã một câu so sánh khái niệm thành nhiều subquery
+factual. Mỗi nhánh retrieval chạy đúng intent, nhưng `merge_contexts` trước đây
+chỉ hợp nhất unit/evidence và lấy context đầu làm base. Generation vì thế mất
+`plan_type=comparison` và không biết evidence nào thuộc từng vế. Đổi merged intent
+thành `comparison` không đúng vì retrieval comparison hiện biểu diễn so sánh
+phiên bản theo `version_family_id` hoặc quan hệ temporal.
+
+### Quyết định
+
+1. Retrieval intent và answer composition là hai contract độc lập.
+2. Orchestrator tạo server-owned `AnswerCompositionPlan` cho conceptual
+   comparison; mỗi operand giữ subquery ID, query và eligible evidence unit IDs
+   của đúng fan-out branch.
+3. Evidence compaction phải giữ ít nhất một required bundle cho mỗi operand.
+   Dedup phải chuyển provenance sang retained evidence ID thay vì làm mất một vế.
+4. Projection chỉ truyền các operand evidence ID đã được chọn vào trusted provider
+   context. Thiếu evidence ở bất kỳ operand nào thì fail closed trước provider.
+5. `IntentType.COMPARISON` tiếp tục dành cho verified temporal/version comparison;
+   conceptual comparison không được làm méo retrieval routing hoặc sufficiency.
+
+### Hệ quả
+
+- Câu trả lời comparison không còn phụ thuộc vào việc model tự suy ra hai vế từ
+  một danh sách evidence đã trộn.
+- Citation allowlist và statement-level grounding giữ nguyên.
+- Public chat request không nhận composition metadata; toàn bộ mapping do server
+  xây dựng từ Query Processor và kết quả retrieval thực tế.

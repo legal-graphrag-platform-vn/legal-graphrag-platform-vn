@@ -160,10 +160,12 @@ class FakeGenerator:
     def __init__(self) -> None:
         self.calls = 0
         self.last_query = None
+        self.last_request = None
 
     async def generate(self, request) -> AnswerResponse:
         self.calls += 1
         self.last_query = request.query
+        self.last_request = request
         unit = request.retrieval_context.retrieved_units[0]
         return AnswerResponse(
             retrieval_contract_version=request.retrieval_context.contract_version,
@@ -349,6 +351,74 @@ def test_query_processor_trace_preserves_subquery_ids_and_merge_counts() -> None
     assert merge["input_unit_count"] == 2
     assert merge["merged_unit_count"] == 1
     assert merge["deduplicated_unit_count"] == 1
+
+
+def test_comparison_plan_preserves_evidence_provenance_for_generation() -> None:
+    class ComparisonQueryProcessor:
+        async def process(self, current_query, conversation_history=()):
+            return QueryProcessingResult(
+                status=ProcessingStatus.READY,
+                standalone_query=current_query,
+                plan_type=PlanType.COMPARISON,
+                subqueries=[
+                    SubqueryDTO(
+                        id="ordinary",
+                        query="Quyền của cổ phần phổ thông?",
+                        intent=SubqueryIntent.FACTUAL,
+                    ),
+                    SubqueryDTO(
+                        id="voting_preference",
+                        query="Quyền của cổ phần ưu đãi biểu quyết?",
+                        intent=SubqueryIntent.FACTUAL,
+                    ),
+                ],
+            )
+
+    class DistinctRetrieval(FakeRetrieval):
+        async def retrieve_context(self, request, *, execution_context=None):
+            context = await super().retrieve_context(
+                request,
+                execution_context=execution_context,
+            )
+            suffix = "ordinary" if "phổ thông" in request.query else "preference"
+            unit_id = f"doc_art_{suffix}"
+            context.retrieved_units = [
+                context.retrieved_units[0].model_copy(
+                    update={"id": unit_id, "article_id": unit_id}
+                )
+            ]
+            context.evidence = [
+                context.evidence[0].model_copy(update={"unit_id": unit_id})
+            ]
+            return context
+
+    generator = FakeGenerator()
+    service = _service(
+        FakeStore(),
+        FakeResolver(StandaloneResolution()),
+        query_processor=ComparisonQueryProcessor(),
+        retrieval=DistinctRetrieval(),
+        generator=generator,
+    )
+
+    _run_events(
+        service,
+        _request("So sánh cổ phần phổ thông và cổ phần ưu đãi biểu quyết"),
+        _owner(),
+    )
+
+    assert generator.last_request is not None
+    composition = generator.last_request.composition_plan
+    assert composition is not None
+    assert composition.mode == "comparison"
+    assert [operand.operand_id for operand in composition.operands] == [
+        "ordinary",
+        "voting_preference",
+    ]
+    assert [operand.evidence_unit_ids for operand in composition.operands] == [
+        ("doc_art_ordinary",),
+        ("doc_art_preference",),
+    ]
 
 
 def test_reference_resolver_clarification_precedes_query_processor() -> None:

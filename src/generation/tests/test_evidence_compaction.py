@@ -11,7 +11,11 @@ from src.generation.evidence_compaction import EvidenceCompactor
 from src.generation.evidence_validation import EvidenceValidator
 from src.generation.errors import EvidenceContractError
 from src.generation.grounding import GroundingValidator
-from src.generation.models import AnswerGenerationRequest
+from src.generation.models import (
+    AnswerCompositionOperand,
+    AnswerCompositionPlan,
+    AnswerGenerationRequest,
+)
 from src.generation.projected_validation import ProjectedContextValidator
 from src.generation.service import AnswerGenerator
 from src.generation.sufficiency import EvidenceSufficiencyPolicy
@@ -38,6 +42,148 @@ class FakeProvider:
 
     async def aclose(self) -> None:
         return None
+
+
+def _comparison_plan() -> AnswerCompositionPlan:
+    return AnswerCompositionPlan(
+        operands=(
+            AnswerCompositionOperand(
+                operand_id="ordinary",
+                query="Quyền của cổ phần phổ thông?",
+                evidence_unit_ids=("doc_art1",),
+            ),
+            AnswerCompositionOperand(
+                operand_id="voting_preference",
+                query="Quyền của cổ phần ưu đãi biểu quyết?",
+                evidence_unit_ids=("doc_art2",),
+            ),
+        )
+    )
+
+
+def test_comparison_composition_requires_evidence_from_each_operand() -> None:
+    context = retrieval_context()
+    second = retrieved_unit("doc_art2")
+    second.content_raw = "Cổ phần ưu đãi biểu quyết có nhiều hơn một phiếu biểu quyết."
+    context.retrieved_units.append(second)
+    context.evidence.append(
+        EvidenceItem(unit_id=second.id, evidence_type="vector", is_eligible=True)
+    )
+    composition = _comparison_plan()
+    validated = EvidenceValidator().validate(context)
+
+    plan = EvidenceCompactor().compact(
+        context,
+        validated,
+        composition_plan=composition,
+    )
+
+    assert len(plan.required_bundle_sets) == 1
+    required = plan.required_bundle_sets[0]
+    assert {bundle.operand_id for bundle in required} == {
+        "ordinary",
+        "voting_preference",
+    }
+    assert {bundle.unit_ids for bundle in required} == {
+        ("doc_art1",),
+        ("doc_art2",),
+    }
+
+
+def test_comparison_provenance_follows_deduplicated_evidence() -> None:
+    context = retrieval_context()
+    duplicate = retrieved_unit("doc_art2")
+    context.retrieved_units.append(duplicate)
+    context.evidence.append(
+        EvidenceItem(unit_id=duplicate.id, evidence_type="vector", is_eligible=True)
+    )
+    composition = _comparison_plan()
+
+    plan = EvidenceCompactor().compact(
+        context,
+        EvidenceValidator().validate(context),
+        composition_plan=composition,
+    )
+
+    assert plan.composition_plan is not None
+    assert [
+        operand.evidence_unit_ids for operand in plan.composition_plan.operands
+    ] == [
+        ("doc_art1",),
+        ("doc_art1",),
+    ]
+    assert {bundle.operand_id for bundle in plan.required_bundle_sets[0]} == {
+        "ordinary",
+        "voting_preference",
+    }
+
+
+def test_projected_comparison_prompt_preserves_operand_evidence_mapping() -> None:
+    context = retrieval_context()
+    second = retrieved_unit("doc_art2")
+    second.content_raw = "Cổ phần ưu đãi biểu quyết có nhiều hơn một phiếu biểu quyết."
+    context.retrieved_units.append(second)
+    context.evidence.append(
+        EvidenceItem(unit_id=second.id, evidence_type="vector", is_eligible=True)
+    )
+    composition = _comparison_plan()
+    request = AnswerGenerationRequest(
+        query=context.query,
+        retrieval_context=context,
+        composition_plan=composition,
+    )
+    projector = ContextProjector(GenerationConfig())
+    validated = EvidenceValidator().validate(context)
+    plan = EvidenceCompactor().compact(
+        context,
+        validated,
+        composition_plan=composition,
+    )
+
+    result = projector.project(request, plan)
+
+    assert result.projected is not None
+    assert result.projected.selected_unit_ids[:2] == ("doc_art1", "doc_art2")
+    projected_plan = result.projected.composition_plan
+    assert projected_plan is not None
+    assert projected_plan.operands == composition.operands
+    assigned_ids = {
+        unit_id
+        for operand in projected_plan.operands
+        for unit_id in operand.evidence_unit_ids
+    }
+    assert assigned_ids == set(result.projected.selected_unit_ids)
+    provider_request = projector.provider_request(
+        result.projected,
+        projector.build_registry(result.projected),
+    )
+    assert '"composition_plan"' in provider_request.prompt
+    assert '"operand_id":"ordinary"' in provider_request.prompt
+
+
+def test_comparison_missing_one_operand_evidence_does_not_call_provider() -> None:
+    async def scenario() -> None:
+        provider = FakeProvider()
+        context = retrieval_context()
+        composition = _comparison_plan()
+        second = retrieved_unit("doc_art2")
+        second.content_raw = (
+            "Cổ phần ưu đãi biểu quyết có nhiều hơn một phiếu biểu quyết."
+        )
+        context.retrieved_units.append(second)
+        request = AnswerGenerationRequest(
+            query=context.query,
+            retrieval_context=context,
+            composition_plan=composition,
+        )
+
+        response = await _generator(provider, GenerationConfig()).generate(request)
+
+        assert response.cannot_answer is True
+        assert response.insufficiency_reason == "PROJECTED_EVIDENCE_INSUFFICIENT"
+        assert provider.calls == 0
+
+    asyncio.run(scenario())
 
 
 def test_evidence_validator_rejects_malformed_unit() -> None:

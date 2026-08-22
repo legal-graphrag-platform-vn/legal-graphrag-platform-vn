@@ -274,13 +274,23 @@ riêng, route theo `intent` của chính nó, chạy **đồng thời** (`asynci
 dưới giới hạn concurrency của retrieval runner → `merge_contexts` dedupe
 evidence/units trước khi generate.
 
+`plan_type=comparison` là composition topology, không thay thế retrieval intent
+của từng subquery. Orchestrator tạo một server-owned `AnswerCompositionPlan`
+giữ mapping `subquery_id -> eligible evidence unit IDs`. Sau dedup, mapping được
+chuyển sang retained canonical evidence ID. Compactor bắt buộc giữ ít nhất một
+evidence bundle cho mỗi comparison operand; thiếu một vế thì generation fail
+closed trước provider call. `IntentType.COMPARISON` tiếp tục dành cho temporal
+version comparison đã được xác minh, không dùng cho so sánh hai khái niệm.
+
 ```text
 HistoryContext → Canonical ReferenceResolver → Standalone Query → QueryProcessor
    ├─ needs_clarification → hỏi lại (KHÔNG retrieval)
    └─ ready
         self-contained q1 ─┐
-        self-contained q2 ─┼→ concurrent RetrievalRuntime → merge_contexts → Generator
-        self-contained q3 ─┘
+        self-contained q2 ─┼→ concurrent RetrievalRuntime → merge_contexts
+        self-contained q3 ─┘                                  + composition provenance
+                                                                  ↓
+                                                        grounded Generator
 ```
 
 **Ranh giới multi-hop (ADR-27):** `depends_on` là *logical metadata*, **không**

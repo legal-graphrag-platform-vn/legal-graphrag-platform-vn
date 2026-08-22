@@ -86,7 +86,11 @@ class AnswerGenerator:
             return self._cannot_answer(request, result.reason_code, result.reason)
 
         validated = self._evidence_validator.validate(request.retrieval_context)
-        plan = self._compactor.compact(request.retrieval_context, validated)
+        plan = self._compactor.compact(
+            request.retrieval_context,
+            validated,
+            composition_plan=request.composition_plan,
+        )
         projection = self._projector.project(request, plan)
         if projection.projected is None:
             request.retrieval_context.metrics["generation_context"] = {
@@ -220,7 +224,7 @@ class AnswerGenerator:
 
 def _projection_diagnostics(validated, plan, projected) -> dict[str, object]:
     omitted_reason_counts = Counter(item.reason for item in projected.omitted_evidence)
-    return {
+    diagnostics = {
         "validated_candidate_count": len(validated.candidates),
         "validated_path_count": len(validated.paths),
         "compacted_candidate_count": len(plan.candidates),
@@ -236,3 +240,15 @@ def _projection_diagnostics(validated, plan, projected) -> dict[str, object]:
         "truncated": projected.truncated,
         "admitted_bundle_count": len(projected.admitted_bundle_ids),
     }
+    if projected.composition_plan is not None:
+        diagnostics.update(
+            {
+                "composition_mode": projected.composition_plan.mode,
+                "composition_operand_count": len(projected.composition_plan.operands),
+                "composition_operand_evidence_counts": {
+                    operand.operand_id: len(operand.evidence_unit_ids)
+                    for operand in projected.composition_plan.operands
+                },
+            }
+        )
+    return diagnostics

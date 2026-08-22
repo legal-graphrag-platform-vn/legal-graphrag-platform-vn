@@ -185,6 +185,19 @@ class AnswerGenerationRequest(BaseModel):
     language: Literal["vi"] = "vi"
 ```
 
+Current `answer-generation-v2` also accepts an optional server-owned
+`composition_plan`. For conceptual comparison, each operand contains the
+subquery ID, self-contained subquery text, and eligible evidence IDs returned by
+that exact fan-out branch. This metadata does not change `RetrievalContext.intent`:
+factual subqueries remain factual, while `IntentType.COMPARISON` remains reserved
+for verified temporal/version comparison.
+
+The compactor must admit at least one required evidence bundle per operand.
+Evidence deduplication must remap operand provenance to the retained unit ID;
+missing evidence for any operand returns grounded cannot-answer before a provider
+call. The projected provider context contains only operand IDs that survived the
+trusted evidence projection.
+
 Rules:
 
 - Query must exactly match the standalone query used to build
@@ -691,6 +704,10 @@ Expected behavior:
 - History is bounded and cannot add citations.
 - Prompt-injection text remains delimited evidence.
 - No credentials/vectors/raw provider payload.
+- Conceptual comparison preserves subquery-to-evidence provenance.
+- Every comparison operand contributes required projected evidence.
+- Deduplicated evidence remaps operand provenance to the retained unit ID.
+- Missing evidence for one operand avoids the provider call.
 
 ### 20.4 Citation and grounding tests
 

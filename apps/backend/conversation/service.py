@@ -81,12 +81,16 @@ from services.retrieval_mapping import to_retrieval_response
 from src.generation.errors import AnswerGenerationError
 from src.generation.models import (
     ANSWER_CONTRACT_VERSION,
+    AnswerCompositionOperand,
+    AnswerCompositionPlan,
     AnswerGenerationRequest,
 )
 from src.retrieval.errors import QueryProcessingError, RetrievalError
+from src.retrieval.models import RetrievalContext
 from src.shared.llm_errors import TextGenerationError
 from src.shared.retrieval_contract import (
     RETRIEVAL_CONTRACT_VERSION,
+    PlanType,
     ProcessingStatus,
     QueryProcessingResult,
     RetrievalFilters,
@@ -251,11 +255,17 @@ class ConversationChatService:
             new_subqueries = []
             for subquery in result.subqueries:
                 if not _contains_all_anchors(subquery.query, anchors):
-                    missing = [a for a in anchors if a.casefold() not in subquery.query.casefold()]
+                    missing = [
+                        a
+                        for a in anchors
+                        if a.casefold() not in subquery.query.casefold()
+                    ]
                     if missing:
-                        subquery = subquery.model_copy(update={"query": f"{subquery.query} ({', '.join(missing)})"})
+                        subquery = subquery.model_copy(
+                            update={"query": f"{subquery.query} ({', '.join(missing)})"}
+                        )
                 new_subqueries.append(subquery)
-            
+
             result = result.model_copy(update={"subqueries": new_subqueries})
 
         # The resolver/rewriter owns the canonical query. Query processing may
@@ -487,6 +497,7 @@ class ConversationChatService:
                 )
             )
             input_unit_count = sum(len(context.retrieved_units) for context in contexts)
+            composition_plan = _build_answer_composition_plan(result, contexts)
             merged_context = merge_contexts(contexts, query=standalone_query)
             log_event(
                 "retrieval.merge",
@@ -499,6 +510,14 @@ class ConversationChatService:
                 ),
                 merged_evidence_count=len(merged_context.evidence),
                 merged_graph_path_count=len(merged_context.graph_paths),
+                composition_mode=(
+                    composition_plan.mode if composition_plan is not None else None
+                ),
+                composition_operand_count=(
+                    len(composition_plan.operands)
+                    if composition_plan is not None
+                    else 0
+                ),
             )
             log_event(
                 "retrieval.fanout",
@@ -510,6 +529,7 @@ class ConversationChatService:
                     query=standalone_query,
                     retrieval_context=merged_context,
                     conversation_history=(),
+                    composition_plan=composition_plan,
                 )
             )
         except (RetrievalError, AnswerGenerationError) as exc:
@@ -760,6 +780,31 @@ def _answer_resolution(
         # EXPLICIT_FOUND for direct mentions, ANAPHORA_RESOLVED for anaphora.
         return ResolutionStatus.RESOLVED, outcome.reason_code
     return ResolutionStatus.UNRESOLVED, REASON_NO_ANAPHORA
+
+
+def _build_answer_composition_plan(
+    result: QueryProcessingResult,
+    contexts: list[RetrievalContext],
+) -> AnswerCompositionPlan | None:
+    if result.plan_type is not PlanType.COMPARISON:
+        return None
+    if len(result.subqueries) != len(contexts):
+        raise ValueError("Comparison subqueries and retrieval contexts must align")
+
+    operands: list[AnswerCompositionOperand] = []
+    for subquery, context in zip(result.subqueries, contexts, strict=True):
+        eligible_ids = {item.unit_id for item in context.evidence if item.is_eligible}
+        evidence_unit_ids = tuple(
+            unit.id for unit in context.retrieved_units if unit.id in eligible_ids
+        )
+        operands.append(
+            AnswerCompositionOperand(
+                operand_id=subquery.id,
+                query=subquery.query,
+                evidence_unit_ids=evidence_unit_ids,
+            )
+        )
+    return AnswerCompositionPlan(operands=tuple(operands))
 
 
 def _retrieval_execution_context(

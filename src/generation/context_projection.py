@@ -12,6 +12,7 @@ from src.generation.errors import (
 )
 from src.generation.evidence_compaction import CompactionPlan, EvidenceBundle
 from src.generation.models import (
+    AnswerCompositionPlan,
     AnswerGenerationRequest,
     ContextBudgetPlan,
     EvidenceRegistry,
@@ -142,6 +143,10 @@ class ContextProjector:
         projected_paths = tuple(
             _to_path(paths_by_id[path_id]) for path_id in chosen_paths
         )
+        composition_plan = _project_composition_plan(
+            plan.composition_plan,
+            selected_ids,
+        )
         budget = ContextBudgetPlan(
             total_chars=self._config.context_max_chars,
             fixed_overhead_chars=fixed_overhead,
@@ -165,6 +170,7 @@ class ContextProjector:
                 reference.node_id
                 for reference in request.retrieval_context.resolved_references
             ),
+            composition_plan=composition_plan,
             evidence=tuple(evidence),
             paths=projected_paths,
             admitted_bundle_ids=tuple(bundle.bundle_id for bundle in chosen),
@@ -231,6 +237,10 @@ class ContextProjector:
                 reference.node_id for reference in context.resolved_references
             ],
         }
+        if request.composition_plan is not None:
+            metadata["composition_plan"] = request.composition_plan.model_dump(
+                mode="json"
+            )
         # This deterministic character estimate includes prompt framing and routing
         # metadata. Evidence and graph paths are costed separately before admission.
         return (
@@ -305,6 +315,11 @@ def _provider_payload(projected: ProjectedAnswerContext) -> dict[str, object]:
         ),
         "relation_goal": projected.relation_goal,
         "anchor_node_ids": list(projected.anchor_node_ids),
+        "composition_plan": (
+            projected.composition_plan.model_dump(mode="json")
+            if projected.composition_plan is not None
+            else None
+        ),
         "evidence": [item.model_dump(mode="json") for item in projected.evidence],
         "paths": [item.model_dump(mode="json") for item in projected.paths],
     }
@@ -329,6 +344,11 @@ def _output_contract(
         "statement_id MUST be unique across direct_answer, sections and caveats.",
         "reasoning_path_ids and temporal_assertion_ids belong to each statement.",
     ]
+    if projected.composition_plan is not None:
+        rules.append(
+            "Address every COMPOSITION_PLAN operand and compare them explicitly; "
+            "do not transfer a rule from one operand to another."
+        )
     if registry.allowed_path_ids:
         rules.append(
             "Each statement reasoning_path_ids MUST contain only these IDs: "
@@ -354,3 +374,28 @@ def _output_contract(
         )
     rules.append("END_OUTPUT_CONTRACT")
     return "\n".join(rules)
+
+
+def _project_composition_plan(
+    composition_plan: AnswerCompositionPlan | None,
+    selected_ids: list[str],
+) -> AnswerCompositionPlan | None:
+    if composition_plan is None:
+        return None
+    selected = set(selected_ids)
+    return composition_plan.model_copy(
+        update={
+            "operands": tuple(
+                operand.model_copy(
+                    update={
+                        "evidence_unit_ids": tuple(
+                            unit_id
+                            for unit_id in operand.evidence_unit_ids
+                            if unit_id in selected
+                        )
+                    }
+                )
+                for operand in composition_plan.operands
+            )
+        }
+    )

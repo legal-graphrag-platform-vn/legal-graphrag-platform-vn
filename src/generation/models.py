@@ -22,6 +22,37 @@ class GenerationHistoryMessage(BaseModel):
     content: str = Field(min_length=1)
 
 
+class AnswerCompositionOperand(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    operand_id: str = Field(min_length=1, pattern=r"^[A-Za-z0-9_-]+$")
+    query: str = Field(min_length=1, max_length=4000)
+    evidence_unit_ids: tuple[str, ...] = ()
+
+    @field_validator("evidence_unit_ids")
+    @classmethod
+    def evidence_ids_are_valid(cls, values: tuple[str, ...]) -> tuple[str, ...]:
+        if any(not value.strip() for value in values):
+            raise ValueError("Composition evidence IDs must not be blank")
+        if len(values) != len(set(values)):
+            raise ValueError("Composition evidence IDs must be unique per operand")
+        return values
+
+
+class AnswerCompositionPlan(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    mode: Literal["comparison"] = "comparison"
+    operands: tuple[AnswerCompositionOperand, ...] = Field(min_length=2)
+
+    @model_validator(mode="after")
+    def operand_ids_are_unique(self) -> "AnswerCompositionPlan":
+        operand_ids = [operand.operand_id for operand in self.operands]
+        if len(operand_ids) != len(set(operand_ids)):
+            raise ValueError("Composition operand IDs must be unique")
+        return self
+
+
 class AnswerGenerationRequest(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -30,11 +61,23 @@ class AnswerGenerationRequest(BaseModel):
     retrieval_context: RetrievalContext
     conversation_history: tuple[GenerationHistoryMessage, ...] = ()
     language: Literal["vi"] = "vi"
+    composition_plan: AnswerCompositionPlan | None = None
 
     @model_validator(mode="after")
     def validate_query_matches_retrieval(self) -> "AnswerGenerationRequest":
         if self.query != self.retrieval_context.query:
             raise ValueError("Generation query must match retrieval context query")
+        if self.composition_plan is not None:
+            retrieved_ids = {unit.id for unit in self.retrieval_context.retrieved_units}
+            assigned_ids = {
+                unit_id
+                for operand in self.composition_plan.operands
+                for unit_id in operand.evidence_unit_ids
+            }
+            if not assigned_ids.issubset(retrieved_ids):
+                raise ValueError(
+                    "Composition evidence IDs must exist in retrieval context"
+                )
         return self
 
 
@@ -272,6 +315,7 @@ class ProjectedAnswerContext(BaseModel):
     resolved_to: date | None
     relation_goal: str | None = None
     anchor_node_ids: tuple[str, ...] = ()
+    composition_plan: AnswerCompositionPlan | None = None
     evidence: tuple[LegalEvidenceBlock, ...]
     paths: tuple[ProjectedPathBlock, ...]
     admitted_bundle_ids: tuple[str, ...]
@@ -292,6 +336,15 @@ class ProjectedAnswerContext(BaseModel):
             raise ValueError("Projected evidence IDs must be unique")
         if len(self.admitted_bundle_ids) != len(set(self.admitted_bundle_ids)):
             raise ValueError("Admitted bundle IDs must be unique")
+        if self.composition_plan is not None:
+            selected_ids = set(self.selected_unit_ids)
+            for operand in self.composition_plan.operands:
+                if not operand.evidence_unit_ids:
+                    raise ValueError(
+                        "Projected composition operands require selected evidence"
+                    )
+                if not set(operand.evidence_unit_ids).issubset(selected_ids):
+                    raise ValueError("Projected composition evidence must be selected")
         budget_omissions = any(
             item.reason == "context_budget_exceeded" for item in self.omitted_evidence
         )

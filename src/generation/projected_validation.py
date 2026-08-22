@@ -30,6 +30,18 @@ class ProjectedContextValidator:
             if not set(bundle.path_ids).issubset(selected_path_ids):
                 return _insufficient("Projected context lost a required graph path")
 
+        if projected.composition_plan is not None:
+            expected_operands = {
+                operand.operand_id for operand in projected.composition_plan.operands
+            }
+            admitted_operands = {
+                bundle.operand_id
+                for bundle in admitted.values()
+                if bundle.operand_id is not None
+            }
+            if admitted_operands != expected_operands:
+                return _insufficient("Projected comparison evidence is incomplete")
+
         intent = IntentType(projected.intent)
         if intent in {IntentType.FACTUAL, IntentType.DEFINITION}:
             if not selected_ids:

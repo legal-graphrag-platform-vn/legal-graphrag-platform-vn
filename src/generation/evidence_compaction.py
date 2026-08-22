@@ -13,7 +13,7 @@ from src.generation.evidence_validation import (
     ValidatedEvidence,
     ValidatedPath,
 )
-from src.generation.models import OmittedEvidence
+from src.generation.models import AnswerCompositionPlan, OmittedEvidence
 from src.retrieval.models import IntentType, RetrievalContext
 
 
@@ -26,6 +26,7 @@ class EvidenceBundle:
     temporal_subject_ids: tuple[str, ...]
     version_keys: tuple[str, ...]
     source_rank: int
+    operand_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ class CompactionPlan:
     authoritative_path_ids: tuple[str, ...]
     required_bundle_sets: tuple[tuple[EvidenceBundle, ...], ...]
     omitted_evidence: tuple[OmittedEvidence, ...]
+    composition_plan: AnswerCompositionPlan | None = None
 
 
 class EvidenceCompactor:
@@ -42,6 +44,7 @@ class EvidenceCompactor:
         self,
         context: RetrievalContext,
         validated: ValidatedEvidence,
+        composition_plan: AnswerCompositionPlan | None = None,
     ) -> CompactionPlan:
         paths, authoritative_path_ids = self._authoritative_paths(context, validated)
         protected_ids = {
@@ -50,26 +53,46 @@ class EvidenceCompactor:
             for node in path.path.nodes
             if node.citable_unit_id is not None
         }
-        source_candidates = (
-            tuple(
+        if composition_plan is not None:
+            assigned_ids = {
+                unit_id
+                for operand in composition_plan.operands
+                for unit_id in operand.evidence_unit_ids
+            }
+            source_candidates = tuple(
+                candidate
+                for candidate in validated.candidates
+                if candidate.unit.id in assigned_ids
+            )
+        elif context.intent is IntentType.MULTI_HOP:
+            source_candidates = tuple(
                 candidate
                 for candidate in validated.candidates
                 if candidate.unit.id in protected_ids
             )
-            if context.intent is IntentType.MULTI_HOP
-            else validated.candidates
-        )
+        else:
+            source_candidates = validated.candidates
         candidates, omissions = self._deduplicate(
             source_candidates,
             protected_ids=protected_ids,
         )
-        required = self._resolve_required_bundles(context, candidates, paths)
+        normalized_composition = _normalize_composition_plan(
+            composition_plan,
+            omissions,
+        )
+        required = self._resolve_required_bundles(
+            context,
+            candidates,
+            paths,
+            composition_plan=normalized_composition,
+        )
         return CompactionPlan(
             candidates=candidates,
             paths=paths,
             authoritative_path_ids=authoritative_path_ids,
             required_bundle_sets=required,
             omitted_evidence=omissions,
+            composition_plan=normalized_composition,
         )
 
     @staticmethod
@@ -134,7 +157,15 @@ class EvidenceCompactor:
         context: RetrievalContext,
         candidates: tuple[EvidenceCandidate, ...],
         paths: tuple[ValidatedPath, ...],
+        *,
+        composition_plan: AnswerCompositionPlan | None,
     ) -> tuple[tuple[EvidenceBundle, ...], ...]:
+        if composition_plan is not None:
+            return self._composition_bundles(
+                context,
+                candidates,
+                composition_plan,
+            )
         intent = context.intent
         if context.relation_goal is not None:
             return self._relation_goal_bundles(context, candidates, paths)
@@ -234,6 +265,36 @@ class EvidenceCompactor:
             return tuple(alternatives)
         return ()
 
+    def _composition_bundles(
+        self,
+        context: RetrievalContext,
+        candidates: tuple[EvidenceCandidate, ...],
+        composition_plan: AnswerCompositionPlan,
+    ) -> tuple[tuple[EvidenceBundle, ...], ...]:
+        candidates_by_id = {candidate.unit.id: candidate for candidate in candidates}
+        required: list[EvidenceBundle] = []
+        for operand in composition_plan.operands:
+            operand_candidates = sorted(
+                (
+                    candidates_by_id[unit_id]
+                    for unit_id in operand.evidence_unit_ids
+                    if unit_id in candidates_by_id
+                    and candidates_by_id[unit_id].is_eligible
+                ),
+                key=lambda candidate: (candidate.rank, candidate.unit.id),
+            )
+            if not operand_candidates:
+                return ()
+            required.append(
+                self._bundle(
+                    context.intent,
+                    (operand_candidates[0],),
+                    (),
+                    operand_id=operand.operand_id,
+                )
+            )
+        return (tuple(required),)
+
     def _relation_goal_bundles(
         self,
         context: RetrievalContext,
@@ -276,6 +337,7 @@ class EvidenceCompactor:
         *,
         temporal_subject_ids: tuple[str, ...] = (),
         version_keys: tuple[str, ...] = (),
+        operand_id: str | None = None,
     ) -> EvidenceBundle:
         unit_ids = tuple(dict.fromkeys(item.unit.id for item in candidates))
         path_ids = tuple(dict.fromkeys(item.path_id for item in paths))
@@ -285,6 +347,7 @@ class EvidenceCompactor:
             "path_ids": path_ids,
             "temporal_subject_ids": temporal_subject_ids,
             "version_keys": version_keys,
+            "operand_id": operand_id,
         }
         digest = hashlib.sha256(
             json.dumps(
@@ -301,11 +364,42 @@ class EvidenceCompactor:
             temporal_subject_ids=temporal_subject_ids,
             version_keys=version_keys,
             source_rank=min(item.rank for item in candidates),
+            operand_id=operand_id,
         )
 
 
 def _normalize_content(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip().casefold()
+
+
+def _normalize_composition_plan(
+    composition_plan: AnswerCompositionPlan | None,
+    omissions: tuple[OmittedEvidence, ...],
+) -> AnswerCompositionPlan | None:
+    if composition_plan is None:
+        return None
+    replacements = {
+        omission.unit_id: omission.retained_unit_id
+        for omission in omissions
+        if omission.retained_unit_id is not None
+    }
+    return composition_plan.model_copy(
+        update={
+            "operands": tuple(
+                operand.model_copy(
+                    update={
+                        "evidence_unit_ids": tuple(
+                            dict.fromkeys(
+                                replacements.get(unit_id, unit_id)
+                                for unit_id in operand.evidence_unit_ids
+                            )
+                        )
+                    }
+                )
+                for operand in composition_plan.operands
+            )
+        }
+    )
 
 
 def _valid_on(candidate: EvidenceCandidate, query_date: date) -> bool:
