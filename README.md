@@ -2,7 +2,7 @@
 
 **Thực hiện bởi sinh viên Học viện Công nghệ Bưu chính Viễn thông Cơ sở Hồ Chí Minh (PTIT HCM):**
 - [Đặng Xuân Lâm - N22DCCN047](https://github.com/lamdx4)
-- [Nguyễn Anh Kha - N22DCCN078](https://github.com/anhkha30804)
+- [Nguyễn Anh Kha - N22DCCN038](https://github.com/anhkha30804)
 - [Phan Nhật Minh - N22DCC054](https://github.com/nhatminh16704)
 
 **Giáo viên hướng dẫn:** Nguyễn Thị Bích Nguyên
