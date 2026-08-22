@@ -1,5 +1,12 @@
 # Legal GraphRAG VN
 
+**Thực hiện bởi sinh viên Học viện Công nghệ Bưu chính Viễn thông Cơ sở Hồ Chí Minh (PTIT HCM):**
+- Đặng Xuân Lâm - N22DCCN047
+- Nguyễn Anh Kha - N22DCCN078
+- Phan Nhật Minh - N22DCC054
+
+**Giáo viên hướng dẫn:** Nguyễn Thị Bích Nguyên
+
 Hệ thống trả lời câu hỏi pháp luật Việt Nam có **trích dẫn kiểm chứng được** (grounded citation), dựng trên một đồ thị tri thức pháp lý (Neo4j) được nạp bằng trích xuất tự động (LLM) từ văn bản luật thô. Khác với RAG thông thường ở 2 điểm: phải xử lý đúng **hiệu lực theo thời gian** của quy phạm pháp luật (một điều luật có thể đã bị sửa đổi/bãi bỏ/thay thế tại thời điểm hỏi), và phải **từ chối trả lời** thay vì suy diễn khi không đủ căn cứ hoặc không xác định được mốc thời gian áp dụng.
 
 Tài liệu này trình bày kiến trúc theo hướng từ tổng quan xuống chi tiết: bức tranh toàn hệ thống trước, sau đó đi sâu vào từng lớp/component.
