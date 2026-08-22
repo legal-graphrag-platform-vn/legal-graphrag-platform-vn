@@ -149,6 +149,50 @@ class CanonicalRelationGraph:
         )
 
 
+class CanonicalDocumentGraph(EmptyGraph):
+    def __init__(self, *, effective_to: date | None) -> None:
+        super().__init__()
+        self.hydration_filters = []
+        self.anchor = RetrievedUnit(
+            id="l_68_2014",
+            label="Document",
+            content_raw="Luật Doanh nghiệp số 68/2014/QH13",
+            document_id="l_68_2014",
+            document_number="68/2014/QH13",
+            document_title="Luật Doanh nghiệp số 68/2014/QH13",
+            effective_from=date(2015, 7, 1),
+            effective_to=effective_to,
+            legal_status="EXPIRED" if effective_to else "ACTIVE",
+            citation_label="Văn bản, 68/2014/QH13",
+            deep_link="/documents/l_68_2014/units/l_68_2014",
+            retrieval_sources=["graph"],
+        )
+
+    def hydrate_anchors(self, anchor_ids, *, filters):
+        self.hydration_filters.append(filters)
+        if self.anchor.id not in anchor_ids:
+            return CanonicalAnchorHydration()
+        return CanonicalAnchorHydration(
+            matched_anchor_ids=(self.anchor.id,), units=[self.anchor]
+        )
+
+
+def _document_reference_context() -> RetrievalExecutionContext:
+    return RetrievalExecutionContext(
+        resolved_references=(
+            ResolvedReference(
+                mention="Luật Doanh nghiệp năm 2014",
+                node_id="l_68_2014",
+                node_type="Document",
+                label="68/2014/QH13",
+                document_id="l_68_2014",
+                resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+                source=ReferenceSource.CURRENT_MESSAGE,
+            ),
+        )
+    )
+
+
 def _reference_context() -> RetrievalExecutionContext:
     return RetrievalExecutionContext(
         resolved_references=(
@@ -360,9 +404,7 @@ def test_exact_anchor_outside_seed_top_k_still_starts_one_graph_expansion() -> N
     )
 
     assert graph.hydration_calls == [["ldn_2020_art4_cl11"]]
-    assert graph.expansion_calls == [
-        (["ldn_2020_art4_cl11"], RelationGoal.REFERS_TO)
-    ]
+    assert graph.expansion_calls == [(["ldn_2020_art4_cl11"], RelationGoal.REFERS_TO)]
     assert context.intent is IntentType.FACTUAL
     assert [unit.id for unit in context.retrieved_units[:2]] == [
         "ldn_2020_art4_cl11",
@@ -381,9 +423,7 @@ def test_relation_goal_with_no_edge_does_not_fuzzy_fallback() -> None:
 
     assert len(graph.expansion_calls) == 1
     assert context.graph_paths == []
-    assert [unit.id for unit in context.retrieved_units] == [
-        "ldn_2020_art4_cl11"
-    ]
+    assert [unit.id for unit in context.retrieved_units] == ["ldn_2020_art4_cl11"]
 
 
 def test_unavailable_exact_anchor_fails_with_typed_error() -> None:
@@ -397,6 +437,49 @@ def test_unavailable_exact_anchor_fails_with_typed_error() -> None:
         )
 
     assert graph.expansion_calls == []
+
+
+def test_expired_document_anchor_proves_negative_validity_without_graph_expansion() -> (
+    None
+):
+    graph = CanonicalDocumentGraph(effective_to=date(2021, 1, 1))
+
+    context = _runtime(
+        CapabilityInspector(scoped_temporal_metadata_available=True), graph
+    ).retrieve(
+        RetrievalRequest(
+            query="Luật Doanh nghiệp năm 2014 hiện nay còn hiệu lực không?",
+            force_intent="validity",
+        ),
+        execution_context=_document_reference_context(),
+    )
+
+    assert graph.calls == 0
+    assert graph.hydration_filters[0].query_date is None
+    assert context.filters_applied.query_date == date(2026, 7, 13)
+    assert context.metrics["direct_negative_validity"] is True
+    assert [unit.id for unit in context.retrieved_units] == ["l_68_2014"]
+
+
+def test_open_ended_document_anchor_keeps_corpus_complete_validity_gate() -> None:
+    graph = CanonicalDocumentGraph(effective_to=None)
+
+    with pytest.raises(RetrievalCapabilityError):
+        _runtime(
+            CapabilityInspector(
+                scoped_temporal_metadata_available=True,
+                corpus_complete_current_validity_available=False,
+            ),
+            graph,
+        ).retrieve(
+            RetrievalRequest(
+                query="Luật Doanh nghiệp này hiện nay còn hiệu lực không?",
+                force_intent="validity",
+            ),
+            execution_context=_document_reference_context(),
+        )
+
+    assert graph.calls == 0
 
 
 def test_multi_hop_without_bound_plan_remains_requirement_unresolved() -> None:

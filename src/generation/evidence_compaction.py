@@ -201,6 +201,9 @@ class EvidenceCompactor:
             query_date = context.temporal.resolved_from
             if query_date is None:
                 return ()
+            resolved_subject_ids = {
+                reference.node_id for reference in context.resolved_references
+            }
             return tuple(
                 (
                     self._bundle(
@@ -211,7 +214,11 @@ class EvidenceCompactor:
                     ),
                 )
                 for candidate in candidates
-                if candidate.is_eligible and _valid_on(candidate, query_date)
+                if _is_validity_subject_candidate(
+                    candidate,
+                    query_date=query_date,
+                    resolved_subject_ids=resolved_subject_ids,
+                )
             )
         if intent == IntentType.COMPARISON:
             by_version: dict[tuple[str, str], EvidenceCandidate] = {}
@@ -409,6 +416,22 @@ def _valid_on(candidate: EvidenceCandidate, query_date: date) -> bool:
         and unit.effective_from <= query_date
         and (unit.effective_to is None or query_date < unit.effective_to)
     )
+
+
+def _is_validity_subject_candidate(
+    candidate: EvidenceCandidate,
+    *,
+    query_date: date,
+    resolved_subject_ids: set[str],
+) -> bool:
+    if not candidate.is_eligible:
+        return False
+    if resolved_subject_ids:
+        return (
+            candidate.unit.id in resolved_subject_ids
+            and candidate.unit.effective_from is not None
+        )
+    return _valid_on(candidate, query_date)
 
 
 def _version_key(candidate: EvidenceCandidate) -> str:

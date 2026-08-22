@@ -58,7 +58,7 @@ class TemporalQuery(BaseModel):
 
 class RetrievedUnit(BaseModel):
     id: str
-    label: Literal["Appendix", "Article", "Clause", "Point"]
+    label: Literal["Document", "Appendix", "Article", "Clause", "Point"]
     content_raw: str
     title: str | None = None
     document_id: str

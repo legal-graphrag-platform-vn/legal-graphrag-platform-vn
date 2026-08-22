@@ -50,6 +50,28 @@ def test_appendix_mapping_does_not_require_article_ancestry() -> None:
     assert unit.deep_link == "/documents/tt_demo/units/tt_demo_appi"
 
 
+def test_document_mapping_supports_canonical_temporal_evidence() -> None:
+    unit = map_retrieved_unit(
+        {
+            "id": "l_68_2014",
+            "label": "Document",
+            "content_raw": "Luật Doanh nghiệp số 68/2014/QH13",
+            "document_id": "l_68_2014",
+            "document_number": "68/2014/QH13",
+            "effective_from": date(2015, 7, 1),
+            "effective_to": date(2021, 1, 1),
+            "legal_status": "EXPIRED",
+            "score": 1.0,
+        },
+        score_field="graph_score",
+    )
+
+    assert unit.article_id is None
+    assert unit.citation_label == "Văn bản, 68/2014/QH13"
+    assert unit.deep_link == "/documents/l_68_2014/units/l_68_2014"
+    assert unit.effective_to == date(2021, 1, 1)
+
+
 def test_mapping_rejects_missing_document_attribution() -> None:
     with pytest.raises(RetrievalRecordError, match="document_id"):
         map_retrieved_unit({"id": "x", "label": "Article"})

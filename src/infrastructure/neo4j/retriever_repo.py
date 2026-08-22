@@ -54,9 +54,9 @@ class Neo4jRetrieverRepo:
                 f"CALL db.index.vector.queryNodes('{idx}', $candidate_k, $query_embedding) "
                 "YIELD node, score RETURN node, score"
             )
-        
+
         union_clause = "\n        UNION ALL\n        ".join(union_blocks)
-        
+
         query = f"""
         CALL {{
             {union_clause}
@@ -117,7 +117,7 @@ class Neo4jRetrieverRepo:
         OPTIONAL MATCH (parent_clause:Clause)-[:CONTAINS]->(anchor)
         WITH anchor_id, anchor,
              CASE WHEN anchor:Point THEN parent_clause
-                  WHEN anchor:Appendix OR anchor:Article OR anchor:Clause THEN anchor
+                  WHEN anchor:Document OR anchor:Appendix OR anchor:Article OR anchor:Clause THEN anchor
                   ELSE null END AS node
         OPTIONAL MATCH (parent_article:Article)-[:CONTAINS]->(node)
         OPTIONAL MATCH (owner:Document)-[:CONTAINS*1..{MAX_DOCUMENT_TO_CITABLE_UNIT_DEPTH}]->(node)
@@ -384,7 +384,7 @@ class Neo4jRetrieverRepo:
     def inspect_capabilities(self, filters: RetrievalFilters) -> dict[str, object]:
         dependencies = self.inspect_dependencies()
         indexes = dependencies["indexes"]
-        query = f"""
+        query = """
         // Optimized capability check
         CALL db.relationshipTypes() YIELD relationshipType
         WITH collect(relationshipType) AS relation_types
@@ -424,7 +424,7 @@ class Neo4jRetrieverRepo:
         }
 
     def _multiple_versions_available(self, filters: RetrievalFilters) -> bool:
-        query = f"""
+        query = """
         // Optimized check
         MATCH ()-[relation:AMENDS|REPLACES]->()
         RETURN count(relation) > 0 AS available
@@ -459,9 +459,11 @@ _GRAPH_UNIT_FILTER = _FILTER_PREDICATE.replace("node.", "unit.")
 
 _UNIT_PROJECTION = """
 node.id AS id,
-CASE WHEN node:Appendix THEN 'Appendix'
+CASE WHEN node:Document THEN 'Document'
+     WHEN node:Appendix THEN 'Appendix'
      WHEN node:Article THEN 'Article' ELSE 'Clause' END AS label,
-node.content_raw AS content_raw,
+CASE WHEN node:Document THEN coalesce(node.title, node.number)
+     ELSE node.content_raw END AS content_raw,
 node.title AS title,
 CASE WHEN node:Article THEN node.id ELSE parent_article.id END AS article_id,
 CASE WHEN node:Clause THEN node.id ELSE null END AS clause_id,
@@ -471,7 +473,7 @@ CASE WHEN node:Appendix THEN node.number ELSE null END AS appendix_number,
 document.id AS document_id,
 document.number AS document_number,
 document.title AS document_title,
-null AS source_url,
+document.source_url AS source_url,
 coalesce(node.effective_from, document.effective_from) AS effective_from,
 coalesce(node.effective_to, document.effective_to) AS effective_to,
 document.legal_status AS legal_status,

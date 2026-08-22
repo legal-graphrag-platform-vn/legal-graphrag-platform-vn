@@ -399,6 +399,87 @@ def test_temporal_assertion_must_match_retrieved_interval() -> None:
     asyncio.run(scenario())
 
 
+def test_expired_document_anchor_supports_grounded_negative_validity() -> None:
+    async def scenario() -> None:
+        context = retrieval_context(intent=IntentType.VALIDITY, temporal=True)
+        document = context.retrieved_units[0].model_copy(
+            update={
+                "id": "l_68_2014",
+                "label": "Document",
+                "content_raw": "Luật Doanh nghiệp số 68/2014/QH13",
+                "document_id": "l_68_2014",
+                "document_number": "68/2014/QH13",
+                "document_title": "Luật Doanh nghiệp số 68/2014/QH13",
+                "article_id": None,
+                "article_number": None,
+                "effective_from": date(2015, 7, 1),
+                "effective_to": date(2021, 1, 1),
+                "legal_status": "EXPIRED",
+                "citation_label": "Văn bản, 68/2014/QH13",
+                "deep_link": "/documents/l_68_2014/units/l_68_2014",
+            }
+        )
+        context.retrieved_units = [document]
+        context.evidence[0].unit_id = document.id
+        context.resolved_references = (
+            ResolvedReference(
+                mention="Luật Doanh nghiệp năm 2014",
+                node_id=document.id,
+                node_type="Document",
+                label="68/2014/QH13",
+                document_id=document.document_id,
+                resolution_method=ResolutionMethod.EXACT_STRUCTURAL_LOOKUP,
+                source=ReferenceSource.CURRENT_MESSAGE,
+            ),
+        )
+        candidate = answer_candidate(
+            citation_id=document.id,
+            quoted_text=document.content_raw,
+        ).model_copy(
+            update={
+                "temporal_assertions": [
+                    TemporalAssertion(
+                        assertion_id="valid-at-query-date",
+                        subject_unit_id=document.id,
+                        query_date=date(2022, 7, 1),
+                        asserted_valid=False,
+                        scope="document",
+                    )
+                ]
+            }
+        )
+        statement = (
+            candidate.direct_answer.paragraphs[0]
+            .statements[0]
+            .model_copy(
+                update={
+                    "text": "Luật Doanh nghiệp năm 2014 không còn hiệu lực.",
+                    "temporal_assertion_ids": ["valid-at-query-date"],
+                }
+            )
+        )
+        paragraph = candidate.direct_answer.paragraphs[0].model_copy(
+            update={"statements": [statement]}
+        )
+        candidate = candidate.model_copy(
+            update={
+                "direct_answer": candidate.direct_answer.model_copy(
+                    update={"paragraphs": [paragraph]}
+                )
+            }
+        )
+
+        response = await _generator(FakeProvider(candidate)).generate(
+            AnswerGenerationRequest(query=context.query, retrieval_context=context)
+        )
+
+        assert response.cannot_answer is False
+        assert response.citations[0].unit_id == document.id
+        assert "không có hiệu lực" in response.temporal_notes[0]
+
+    asyncio.run(scenario())
+
+
 def _generator(provider: FakeProvider) -> AnswerGenerator:
     config = GenerationConfig()
     return AnswerGenerator(

@@ -372,6 +372,11 @@ def _output_contract(
             "from at least one statement, and query_date MUST equal "
             f"{projected.resolved_from.isoformat()}."
         )
+        if projected.intent == "validity":
+            rules.append(
+                "A validity answer MUST declare and link at least one temporal "
+                "assertion for an anchored subject unit."
+            )
     rules.append("END_OUTPUT_CONTRACT")
     return "\n".join(rules)
 

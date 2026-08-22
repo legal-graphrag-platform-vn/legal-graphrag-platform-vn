@@ -93,6 +93,21 @@ class EvidenceSufficiencyPolicy:
                     "MISSING_TEMPORAL_POINT",
                     "Chưa xác định được thời điểm pháp lý cần kiểm tra.",
                 )
+            resolved_subject_ids = {
+                reference.node_id for reference in context.resolved_references
+            }
+            if resolved_subject_ids:
+                units_by_id = {unit.id: unit for unit in context.retrieved_units}
+                if any(
+                    subject_id not in units_by_id
+                    or units_by_id[subject_id].effective_from is None
+                    for subject_id in resolved_subject_ids
+                ):
+                    return _insufficient(
+                        "MISSING_TEMPORAL_EVIDENCE",
+                        "Tham chiếu đã xác định chưa có metadata thời gian đầy đủ.",
+                    )
+                return self._evidence_required(context)
             if not any(
                 _is_valid_on(unit.effective_from, unit.effective_to, query_date)
                 for unit in context.retrieved_units

@@ -36,11 +36,11 @@ renderer.py               — render câu trả lời cuối (Markdown/structure
 | File | Trách nhiệm |
 |---|---|
 | `service.py` | `AnswerGenerator` — orchestrator chính của tầng generation; `_render()` gọi LLM rồi grounding-validate; bọc self-repair loop (`_GROUNDING_ERRORS` tuple) quanh `_render()`, cap cứng 1 lần retry. |
-| `evidence_validation.py` | `_validate_unit()` — kiểm tra từng evidence block: label phải hợp lệ (`Appendix/Article/Clause/Point`), Appendix được miễn yêu cầu `article_id/clause_id` (khác các label khác), và **chặn prompt-injection**: `_PROMPT_INJECTION_MARKERS` regex phát hiện chỉ thị lạ chèn trong nội dung điều luật (vd "ignore previous instructions", "system:") và reject unit đó thay vì đưa thẳng vào prompt. |
+| `evidence_validation.py` | `_validate_unit()` — kiểm tra từng evidence block: `Document` chỉ được dùng làm canonical temporal evidence; `Appendix/Article/Clause/Point` là các đơn vị nội dung pháp lý thông thường; đồng thời **chặn prompt-injection** bằng `_PROMPT_INJECTION_MARKERS`. |
 | `evidence_compaction.py` | Nén evidence khi tổng dung lượng vượt ngân sách context (loại bớt/rút gọn, ưu tiên theo score). |
 | `context_projection.py` | Build `SYSTEM_INSTRUCTION` + format evidence blocks đưa vào prompt LLM; giới hạn cứng bằng `context_max_chars`. |
 | `grounding.py` | Lớp phòng thủ quan trọng nhất — validate câu trả lời LLM sinh ra so với evidence thật: <br>• `_is_verbatim_quote()`/`_normalize_for_match()` (NFC-normalize + collapse whitespace) kiểm tra `StatementCitation.quoted_text` phải là **substring nguyên văn** của evidence, không chỉ khớp citation ID. <br>• Validate graph path, temporal assertion trong câu trả lời so với allowlist đã retrieve. |
-| `models.py` | DTO: `StatementCitation` (citation_id + quoted_text bắt buộc), `GroundedStatement.citations: list[StatementCitation]`, `LegalEvidenceBlock` (label kiểu Literal gồm cả `"Appendix"`), `AnswerCitation` (citation hiển thị cuối cho FE). |
+| `models.py` | DTO: `StatementCitation` (citation_id + quoted_text bắt buộc), `GroundedStatement.citations: list[StatementCitation]`, `LegalEvidenceBlock` (gồm canonical temporal `Document` và các content unit), `AnswerCitation` (citation hiển thị cuối cho FE). |
 | `renderer.py` | Render câu trả lời cuối cùng (structured statements → text/markdown + citation list) cho FE hiển thị. |
 | `sufficiency.py`, `projected_validation.py` | Đánh giá evidence đã project có đủ để trả lời không → nếu không, trigger nhánh "cannot answer" thay vì để LLM tự bịa. |
 | `config.py` | `GenerationConfig` — knobs (context_max_chars, ngưỡng self-repair, model...). |

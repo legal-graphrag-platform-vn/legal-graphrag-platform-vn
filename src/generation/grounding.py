@@ -130,6 +130,10 @@ class GroundingValidator:
             for statement in statements
             for assertion_id in statement.temporal_assertion_ids
         )
+        if projected.intent == "validity" and not assertion_order:
+            raise TemporalAnswerValidationError(
+                "A validity answer must link at least one temporal assertion"
+            )
         unknown_assertions = [
             assertion_id
             for assertion_id in assertion_order

@@ -13,7 +13,7 @@ export interface Source {
    score?: number
    // New fields from RetrievedUnitDTO
    citation_label?: string
-   label?: 'Appendix' | 'Article' | 'Clause' | 'Point'
+   label?: 'Document' | 'Appendix' | 'Article' | 'Clause' | 'Point'
    document_id?: string
    document_number?: string
    article_id?: string

@@ -1892,3 +1892,40 @@ phiên bản theo `version_family_id` hoặc quan hệ temporal.
 - Citation allowlist và statement-level grounding giữ nguyên.
 - Public chat request không nhận composition metadata; toàn bộ mapping do server
   xây dựng từ Query Processor và kết quả retrieval thực tế.
+
+---
+
+## ADR-38: Canonical temporal subject không bị loại bởi chính validity filter
+
+**Ngày**: 2026-08-22
+**Trạng thái**: ACCEPTED
+
+### Bối cảnh
+
+Câu hỏi “Luật Doanh nghiệp năm 2014 hiện nay còn hiệu lực không?” resolve đúng
+`l_68_2014`, nhưng anchor hydration áp dụng ngày hiện tại và loại node vì
+`effective_to=2021-01-01`. Retrieval vì vậy báo canonical reference unavailable
+trước khi có thể kiểm tra chính interval đang được hỏi. Temporal parser đồng thời
+có thể hiểu năm trong tên phiên bản văn bản là query date dù câu có “hiện nay”.
+
+### Quyết định
+
+1. Explicit calendar day có precedence cao nhất; current-validity wording có
+   precedence trên year/month dùng trong tên phiên bản văn bản.
+2. Canonical identity hydration giữ document/type scope nhưng bỏ query-date và
+   legal-status filter. Filter answer không được xóa identity của subject.
+3. `Document` được phép xuất hiện như canonical temporal evidence có typed
+   interval, source URL và deep link; nó không tham gia vector/full-text index.
+4. Khi mọi exact subject chắc chắn nằm ngoài interval tại query date, runtime có
+   thể kết luận nhánh negative từ scoped temporal metadata và không chạy graph
+   expansion. Mọi statement validity vẫn phải khai báo temporal assertion để
+   deterministic grounding tính lại kết quả.
+5. Open-ended interval không chứng minh positive current validity. Trường hợp đó
+   tiếp tục cần corpus-complete capability và graph policy hiện hành.
+
+### Hệ quả
+
+- Văn bản hết hiệu lực không còn bị báo nhầm là canonical reference bị thiếu.
+- Không cần fuzzy rediscovery hay rule riêng cho từng loại văn bản.
+- Dữ liệu Neo4j sai type vẫn fail closed; retrieval không silent-normalize chuỗi
+  ngày legacy thành ontology `Date`.

@@ -19,7 +19,7 @@ def map_retrieved_unit(
     unit_id = _required_text(record, "id")
     document_id = _required_text(record, "document_id")
     label = _required_text(record, "label")
-    if label not in {"Appendix", "Article", "Clause", "Point"}:
+    if label not in {"Document", "Appendix", "Article", "Clause", "Point"}:
         raise RetrievalRecordError(f"Unsupported retrieved label: {label!r}")
 
     article_number = _optional_text(record.get("article_number"))

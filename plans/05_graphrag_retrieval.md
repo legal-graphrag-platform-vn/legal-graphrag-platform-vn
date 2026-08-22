@@ -295,6 +295,16 @@ For an explicit relation lookup, source and target citable units on the matching
 path are pinned into final evidence; a missing edge is not replaced with a
 similar node.
 
+Canonical identity hydration preserves explicit document/type scope but does not
+apply `query_date` or `legal_statuses`: those filters determine the answer state,
+not whether an expired or not-yet-effective subject exists. A resolved `Document`
+may enter retrieval context only as canonical temporal evidence; it is never a
+vector/full-text seed unit. For current-validity queries, a closed interval that
+places every exact subject outside the query date proves only the negative result
+and may bypass graph expansion. Open-ended/positive validity still requires the
+normal corpus-completeness capability and is never inferred from `effective_to =
+null` alone.
+
 ---
 
 ## 4. Answer Generation Boundary

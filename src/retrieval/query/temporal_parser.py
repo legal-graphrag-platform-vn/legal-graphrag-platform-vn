@@ -82,6 +82,17 @@ class TemporalParser:
                     requests_current_validity=bool(current_match),
                 )
 
+        # A four-digit year in a legal query commonly identifies the document
+        # edition (for example "Luật Doanh nghiệp năm 2014"). When the user
+        # also says "hiện nay"/"còn hiệu lực", that current-validity wording is
+        # the requested time; only an explicit day above may override it.
+        if current_match:
+            return TemporalQuery(
+                has_temporal=True,
+                expression=current_match.group(0),
+                requests_current_validity=True,
+            )
+
         month_match = self._month_year_pattern.search(query)
         if month_match:
             month, year = int(month_match.group(1)), int(month_match.group(2))
@@ -106,13 +117,6 @@ class TemporalParser:
                 resolved_to=date(year, 12, 31),
                 granularity="year",
                 requests_current_validity=bool(current_match),
-            )
-
-        if current_match:
-            return TemporalQuery(
-                has_temporal=True,
-                expression=current_match.group(0),
-                requests_current_validity=True,
             )
 
         version_span_match = _VERSION_SPAN_WORDING.search(query)

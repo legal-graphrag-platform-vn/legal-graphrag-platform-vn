@@ -22,7 +22,9 @@ def test_temporal_parser_flags_relative_amendment_comparison() -> None:
 
 
 def test_temporal_parser_flags_relative_repeal_comparison() -> None:
-    parsed = TemporalParser().parse("Quy định trước khi bãi bỏ khác gì so với hiện tại?")
+    parsed = TemporalParser().parse(
+        "Quy định trước khi bãi bỏ khác gì so với hiện tại?"
+    )
 
     assert parsed.spans_all_versions is True
 
@@ -34,3 +36,14 @@ def test_temporal_parser_does_not_flag_ordinary_amendment_wording() -> None:
     parsed = TemporalParser().parse("Điều 5 đã bị sửa đổi bởi văn bản nào?")
 
     assert parsed.spans_all_versions is False
+
+
+def test_current_validity_takes_precedence_over_document_edition_year() -> None:
+    parsed = TemporalParser().parse(
+        "Luật Doanh nghiệp năm 2014 hiện nay còn hiệu lực không?"
+    )
+
+    assert parsed.requests_current_validity is True
+    assert parsed.expression == "hiện nay"
+    assert parsed.resolved_from is None
+    assert parsed.resolved_to is None

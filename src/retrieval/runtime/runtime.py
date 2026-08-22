@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from datetime import date
 from typing import Any
 
 from src.retrieval.context.context_builder import ContextBuilder
@@ -136,21 +137,31 @@ class RetrievalRuntime:
             raise RetrievalRequestError(
                 "A bound semantic plan may only execute for multi-hop retrieval"
             )
-        capabilities = CapabilitySnapshot.model_validate(
-            self._capability_inspector.inspect_capabilities(routing.filters)
-        )
-        _validate_legal_capability(decision.required_capability, capabilities)
-
         anchor_ids = list(execution_context.anchor_node_ids)
         anchor_hydration = self._hydrate_anchors(
             anchor_ids=anchor_ids,
-            filters=routing.filters,
+            filters=_canonical_identity_filters(routing.filters),
         )
         missing_anchors = set(anchor_ids) - set(anchor_hydration.matched_anchor_ids)
         if missing_anchors:
             raise CanonicalReferenceUnavailableError(
                 "Resolved canonical reference is unavailable under active filters"
             )
+        direct_negative_validity = _has_decisive_negative_validity(
+            decision=decision,
+            query_date=routing.temporal.resolved_from,
+            anchor_ids=set(anchor_ids),
+            anchor_units=anchor_hydration.units,
+        )
+        capabilities = CapabilitySnapshot.model_validate(
+            self._capability_inspector.inspect_capabilities(routing.filters)
+        )
+        required_capability = (
+            RetrievalCapability.SCOPED_TEMPORAL_METADATA
+            if direct_negative_validity
+            else decision.required_capability
+        )
+        _validate_legal_capability(required_capability, capabilities)
 
         seed_started = time.perf_counter()
         seed_results = self._seed_executor.execute(
@@ -166,16 +177,20 @@ class RetrievalRuntime:
         )
 
         graph_started = time.perf_counter()
-        expansion = self._expand_once(
-            decision=decision,
-            entry_ids=_stable_unique(
-                [
-                    *anchor_ids,
-                    *[unit.id for unit in seed_ranked[: decision.graph_entry_k]],
-                ]
-            ),
-            filters=routing.filters,
-            relation_goal=execution_context.relation_goal,
+        expansion = (
+            GraphExpansion()
+            if direct_negative_validity
+            else self._expand_once(
+                decision=decision,
+                entry_ids=_stable_unique(
+                    [
+                        *anchor_ids,
+                        *[unit.id for unit in seed_ranked[: decision.graph_entry_k]],
+                    ]
+                ),
+                filters=routing.filters,
+                relation_goal=execution_context.relation_goal,
+            )
         )
         graph_latency = _elapsed_ms(graph_started)
 
@@ -254,15 +269,16 @@ class RetrievalRuntime:
             "vector_hits": len(seed_results.get(RetrievalChannel.VECTOR, [])),
             "fulltext_hits": len(seed_results.get(RetrievalChannel.FULLTEXT, [])),
             "seed_fused_count": len(seed_ranked),
-            "graph_expansion_count": 1 if decision.graph_enabled else 0,
+            "graph_expansion_count": (
+                1 if decision.graph_enabled and not direct_negative_validity else 0
+            ),
+            "direct_negative_validity": direct_negative_validity,
             "graph_paths_count": len(graph_paths),
             "generic_graph_paths_count": len(expansion.paths),
             "graph_units_count": len(expansion.units),
             "resolved_reference_count": len(execution_context.resolved_references),
             "canonical_anchor_count": len(anchor_ids),
-            "canonical_anchor_hydrated_count": len(
-                anchor_hydration.matched_anchor_ids
-            ),
+            "canonical_anchor_hydrated_count": len(anchor_hydration.matched_anchor_ids),
             "relation_goal": (
                 execution_context.relation_goal.value
                 if execution_context.relation_goal is not None
@@ -372,10 +388,10 @@ def _required_canonical_units(
                 for node in path.nodes
                 if node.citable_unit_id is not None
             )
-    by_id = {
-        unit.id: unit for unit in _merge_units(anchor_units, expansion_units)
-    }
-    return [by_id[unit_id] for unit_id in _stable_unique(required_ids) if unit_id in by_id]
+    by_id = {unit.id: unit for unit in _merge_units(anchor_units, expansion_units)}
+    return [
+        by_id[unit_id] for unit_id in _stable_unique(required_ids) if unit_id in by_id
+    ]
 
 
 def _pin_required_units(
@@ -416,6 +432,55 @@ def _validate_legal_capability(
             required_capability=required.value,
             available_capability="none",
         )
+
+
+def _canonical_identity_filters(filters: RetrievalFilters) -> RetrievalFilters:
+    """Keep authorization/scope filters while resolving canonical identity.
+
+    Temporal and legal-status filters describe the answer date, not whether the
+    referenced node exists. Applying them here would erase the exact expired or
+    not-yet-effective subject that a validity question is asking about.
+    """
+
+    return filters.model_copy(
+        update={
+            "query_date": None,
+            "legal_statuses": [],
+        }
+    )
+
+
+def _has_decisive_negative_validity(
+    *,
+    decision: RetrievalDecision,
+    query_date: date | None,
+    anchor_ids: set[str],
+    anchor_units: list[RetrievedUnit],
+) -> bool:
+    """Return true only when every exact subject is outside its closed interval.
+
+    A closed interval can prove a negative validity answer without claiming the
+    corpus is complete. An open-ended interval cannot prove the positive case,
+    so it keeps the normal capability and graph-expansion path.
+    """
+
+    if (
+        decision.intent is not IntentType.VALIDITY
+        or query_date is None
+        or not anchor_ids
+    ):
+        return False
+    units_by_id = {unit.id: unit for unit in anchor_units}
+    if not anchor_ids.issubset(units_by_id):
+        return False
+    return all(
+        unit.effective_from is not None
+        and (
+            query_date < unit.effective_from
+            or (unit.effective_to is not None and query_date >= unit.effective_to)
+        )
+        for unit in (units_by_id[anchor_id] for anchor_id in anchor_ids)
+    )
 
 
 def _validate_planned_path_membership(

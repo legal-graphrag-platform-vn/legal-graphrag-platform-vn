@@ -94,7 +94,12 @@ class EvidenceValidator:
         if not unit.deep_link.strip():
             raise EvidenceContractError(f"Evidence {unit.id} has no deep link")
 
-        if unit.label == "Article":
+        if unit.label == "Document":
+            if unit.document_id != unit.id or unit.article_id or unit.clause_id:
+                raise EvidenceContractError(
+                    f"Document evidence has inconsistent hierarchy IDs: {unit.id}"
+                )
+        elif unit.label == "Article":
             if unit.article_id != unit.id or unit.clause_id is not None:
                 raise EvidenceContractError(
                     f"Article evidence has inconsistent hierarchy IDs: {unit.id}"

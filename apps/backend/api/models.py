@@ -202,7 +202,7 @@ def encode_sse(event: str, data: BaseModel | dict[str, Any]) -> str:
 
 class RetrievedUnitDTO(BaseModel):
     id: str
-    label: Literal["Appendix", "Article", "Clause", "Point"]
+    label: Literal["Document", "Appendix", "Article", "Clause", "Point"]
     content_raw: str
     citation_label: str
 
