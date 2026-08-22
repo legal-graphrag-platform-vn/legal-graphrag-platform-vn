@@ -22,6 +22,33 @@ def test_parses_article_with_named_law_and_year() -> None:
     assert ref.deepest_unit_type is ExpectedUnitType.ARTICLE
 
 
+def test_parses_article_with_named_law_without_year_at_sentence_end() -> None:
+    refs = parse_explicit_references(
+        "Cơ quan nào có thẩm quyền xử lý, có dẫn chiếu từ Điều 16 Luật Doanh nghiệp?"
+    )
+
+    assert len(refs) == 1
+    assert refs[0].article_number == "16"
+    assert refs[0].law_name == "Luật Doanh nghiệp"
+    assert refs[0].law_year is None
+
+
+def test_named_law_without_year_stops_before_question_predicate() -> None:
+    refs = parse_explicit_references("Điều 3 Luật Đất đai quy định gì?")
+
+    assert len(refs) == 1
+    assert refs[0].article_number == "3"
+    assert refs[0].law_name == "Luật Đất đai"
+
+
+def test_generic_law_anaphora_is_not_parsed_as_a_named_law() -> None:
+    refs = parse_explicit_references("Điều 17 Luật này quy định gì?")
+
+    assert len(refs) == 1
+    assert refs[0].article_number == "17"
+    assert refs[0].law_name is None
+
+
 def test_parses_document_number() -> None:
     refs = parse_explicit_references("Theo 59/2020/QH14 Điều 5")
     assert refs[0].document_number == "59/2020/QH14"

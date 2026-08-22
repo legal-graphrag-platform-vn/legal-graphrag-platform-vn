@@ -18,6 +18,13 @@ _LAW_NAME = re.compile(
     r"((?:Bộ\s+luật|Luật)\s+[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*?)\s+(?:năm\s+)?(\d{4})",
     re.IGNORECASE,
 )
+_LAW_NAME_WITHOUT_YEAR = re.compile(
+    r"((?:Bộ\s+luật|Luật)\s+[A-Za-zÀ-ỹ][A-Za-zÀ-ỹ\s]*?)"
+    r"(?=\s+(?:có|quy\s+định|dẫn\s+chiếu|nói|được|đang|hiện|áp\s+dụng|thì)\b"
+    r"|\s+và\s+(?:Bộ\s+luật|Luật)\b|[?,.;:]|$)",
+    re.IGNORECASE,
+)
+_LAW_ANAPHORA = frozenset({"luật này", "luật đó", "luật trên"})
 _ARTICLE = re.compile(r"Điều\s+(\d+[A-Za-zĐđ]?)", re.IGNORECASE)
 _CLAUSE = re.compile(r"Khoản\s+(\d+)", re.IGNORECASE)
 _POINT = re.compile(r"Điểm\s+([A-Za-zĐđ])\b", re.IGNORECASE)
@@ -42,6 +49,12 @@ def parse_explicit_references(message: str) -> list[ExplicitReference]:
     """
     document_numbers = _unique(_DOCUMENT_NUMBER.findall(message))
     law_refs = [(name.strip(), int(year)) for name, year in _LAW_NAME.findall(message)]
+    named_without_year = [
+        (name.strip(), None)
+        for name in _LAW_NAME_WITHOUT_YEAR.findall(message)
+        if name.strip().casefold() not in _LAW_ANAPHORA
+    ]
+    law_refs = list(dict.fromkeys([*law_refs, *named_without_year]))
     articles = _unique(_ARTICLE.findall(message))
     clauses = _unique(_CLAUSE.findall(message))
     points = _unique([label.lower() for label in _POINT.findall(message)])

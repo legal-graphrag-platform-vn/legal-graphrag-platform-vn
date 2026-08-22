@@ -8,6 +8,7 @@ by integration tests, while the resolver's unit tests use an in-memory fake.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from typing import Any, Protocol, TypeVar
 
@@ -27,12 +28,32 @@ class SyncCallRunner(Protocol):
 
 _UNIT_DEPTH = 3  # article -> clause -> point spans at most a few CONTAINS hops.
 _LOOKUP_LIMIT = 20
+_TITLE_VERSION_SUFFIX = re.compile(r"^(?:(?:năm\s+)?\d{4}\b|số\b)")
+_TITLE_SEPARATOR_PREFIXES = (",", ".", ";", ":", "-", "–", "—", "(")
 
 
 class CanonicalLookupPort(Protocol):
     async def lookup(
         self, reference: ExplicitReference
     ) -> tuple[ResolvedCandidate, ...]: ...
+
+
+def _normalize_title(value: str) -> str:
+    return " ".join(value.casefold().split())
+
+
+def _matches_named_document_title(document_title: str, law_name: str) -> bool:
+    """Match a named law and its year/number-qualified title, not mere mentions."""
+    normalized_title = _normalize_title(document_title)
+    normalized_name = _normalize_title(law_name)
+    if not normalized_title.startswith(normalized_name):
+        return False
+    suffix = normalized_title[len(normalized_name) :].lstrip()
+    if not suffix:
+        return True
+    return suffix.startswith(_TITLE_SEPARATOR_PREFIXES) or bool(
+        _TITLE_VERSION_SUFFIX.match(suffix)
+    )
 
 
 def build_canonical_label(
@@ -99,12 +120,12 @@ def row_to_candidate(row: dict[str, Any]) -> ResolvedCandidate:
 def _build_query(reference: ExplicitReference) -> tuple[str, dict[str, Any]]:
     params: dict[str, Any] = {}
     lines = ["MATCH (document:Document)"]
-    predicates: list[str] = []
+    predicates: list[str] = ["document.id IS NOT NULL"]
     if reference.document_number:
         predicates.append("document.number = $document_number")
         params["document_number"] = reference.document_number
     if reference.law_name:
-        predicates.append("toLower(document.title) CONTAINS toLower($law_name)")
+        predicates.append("toLower(document.title) STARTS WITH toLower($law_name)")
         params["law_name"] = reference.law_name
     if reference.law_year:
         predicates.append("toString(document.issued_date) CONTAINS toString($law_year)")
@@ -188,16 +209,15 @@ class Neo4jCanonicalLookup:
         self, reference: ExplicitReference
     ) -> tuple[ResolvedCandidate, ...]:
         rows = await self._runner.run(lambda: self._repo.lookup(reference))
-        
-        if len(rows) > 1 and reference.law_name:
-            target_title = reference.law_name.lower().strip()
-            exact_rows = []
-            for row in rows:
-                doc_title = row.get("document_title")
-                if doc_title and doc_title.lower().strip() == target_title:
-                    exact_rows.append(row)
-            
-            if exact_rows:
-                rows = exact_rows
-                
+
+        if reference.law_name:
+            rows = [
+                row
+                for row in rows
+                if row.get("document_title")
+                and _matches_named_document_title(
+                    row["document_title"], reference.law_name
+                )
+            ]
+
         return tuple(row_to_candidate(row) for row in rows)
