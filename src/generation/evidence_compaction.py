@@ -281,14 +281,13 @@ class EvidenceCompactor:
         candidates_by_id = {candidate.unit.id: candidate for candidate in candidates}
         required: list[EvidenceBundle] = []
         for operand in composition_plan.operands:
-            operand_candidates = sorted(
-                (
-                    candidates_by_id[unit_id]
-                    for unit_id in operand.evidence_unit_ids
-                    if unit_id in candidates_by_id
-                    and candidates_by_id[unit_id].is_eligible
-                ),
-                key=lambda candidate: (candidate.rank, candidate.unit.id),
+            # ``evidence_unit_ids`` preserves the operand-local retrieval rank.
+            # Do not re-sort by the merged-context rank: a unit shared with an
+            # earlier operand would otherwise displace this operand's own top hit.
+            operand_candidates = tuple(
+                candidates_by_id[unit_id]
+                for unit_id in operand.evidence_unit_ids
+                if unit_id in candidates_by_id and candidates_by_id[unit_id].is_eligible
             )
             if not operand_candidates:
                 return ()

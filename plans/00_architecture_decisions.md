@@ -1553,6 +1553,11 @@ notes khi tạo snapshot/API response.
    snapshot; không re-run renderer/generator.
 7. Internal `insufficiency_reason` chỉ dùng logging/eval và snapshot diagnostics.
    Client chỉ nhận message do backend map deterministic.
+8. Structured-output schema gửi cho provider phải là total shape: mọi field của
+   object đều nằm trong `required`; field optional được biểu diễn bằng nullable
+   value hoặc collection rỗng. Domain validator tiếp tục quyết định tổ hợp field
+   nào hợp lệ cho supported/cannot-answer, không dựa vào provider tự suy luận
+   cross-field invariant.
 
 ### Hệ quả
 
@@ -1880,6 +1885,8 @@ phiên bản theo `version_family_id` hoặc quan hệ temporal.
    của đúng fan-out branch.
 3. Evidence compaction phải giữ ít nhất một required bundle cho mỗi operand.
    Dedup phải chuyển provenance sang retained evidence ID thay vì làm mất một vế.
+   Thứ tự `evidence_unit_ids` của operand là operand-local retrieval rank và
+   không được sort lại bằng merged-context rank.
 4. Projection chỉ truyền các operand evidence ID đã được chọn vào trusted provider
    context. Thiếu evidence ở bất kỳ operand nào thì fail closed trước provider.
 5. `IntentType.COMPARISON` tiếp tục dành cho verified temporal/version comparison;

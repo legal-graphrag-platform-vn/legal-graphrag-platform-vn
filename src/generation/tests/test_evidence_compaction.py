@@ -118,6 +118,51 @@ def test_comparison_provenance_follows_deduplicated_evidence() -> None:
     }
 
 
+def test_comparison_required_bundle_preserves_operand_local_rank() -> None:
+    context = retrieval_context()
+    shared = retrieved_unit("doc_art2")
+    preferred = retrieved_unit("doc_art3")
+    shared.content_raw = "Quy định chung áp dụng cho cả hai loại cổ phần."
+    preferred.content_raw = "Quy định riêng về cổ phần ưu đãi biểu quyết."
+    context.retrieved_units.extend([shared, preferred])
+    context.evidence.extend(
+        [
+            EvidenceItem(unit_id=shared.id, evidence_type="vector", is_eligible=True),
+            EvidenceItem(
+                unit_id=preferred.id,
+                evidence_type="vector",
+                is_eligible=True,
+            ),
+        ]
+    )
+    composition = AnswerCompositionPlan(
+        operands=(
+            AnswerCompositionOperand(
+                operand_id="ordinary",
+                query="Cổ phần phổ thông?",
+                evidence_unit_ids=("doc_art1", "doc_art2"),
+            ),
+            AnswerCompositionOperand(
+                operand_id="voting_preference",
+                query="Cổ phần ưu đãi biểu quyết?",
+                evidence_unit_ids=("doc_art3", "doc_art2"),
+            ),
+        )
+    )
+
+    plan = EvidenceCompactor().compact(
+        context,
+        EvidenceValidator().validate(context),
+        composition_plan=composition,
+    )
+
+    required = plan.required_bundle_sets[0]
+    assert [bundle.unit_ids for bundle in required] == [
+        ("doc_art1",),
+        ("doc_art3",),
+    ]
+
+
 def test_projected_comparison_prompt_preserves_operand_evidence_mapping() -> None:
     context = retrieval_context()
     second = retrieved_unit("doc_art2")

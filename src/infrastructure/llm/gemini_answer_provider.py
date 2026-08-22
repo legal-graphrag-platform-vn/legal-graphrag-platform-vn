@@ -149,8 +149,17 @@ class _TransientProviderError(RuntimeError):
 
 
 def _gemini_response_schema() -> dict[str, Any]:
-    """Return the strict domain schema without unsupported Gemini keywords."""
-    return _without_additional_properties(AnswerCandidate.model_json_schema())
+    """Return a total answer shape without unsupported Gemini keywords.
+
+    Pydantic omits fields with defaults from JSON Schema ``required`` even when
+    our cross-field validator requires them for one answer state. Gemini may
+    then legally emit only ``confidence`` and ``cannot_answer``. Requiring every
+    object property keeps the provider shape total; nullable fields still use
+    explicit ``null`` and the domain validator remains authoritative.
+    """
+
+    schema = _without_additional_properties(AnswerCandidate.model_json_schema())
+    return _require_all_object_properties(schema)
 
 
 def _without_additional_properties(value: Any) -> Any:
@@ -162,6 +171,20 @@ def _without_additional_properties(value: Any) -> Any:
         }
     if isinstance(value, list):
         return [_without_additional_properties(item) for item in value]
+    return value
+
+
+def _require_all_object_properties(value: Any) -> Any:
+    if isinstance(value, dict):
+        normalized = {
+            key: _require_all_object_properties(item) for key, item in value.items()
+        }
+        properties = normalized.get("properties")
+        if normalized.get("type") == "object" and isinstance(properties, dict):
+            normalized["required"] = list(properties)
+        return normalized
+    if isinstance(value, list):
+        return [_require_all_object_properties(item) for item in value]
     return value
 
 

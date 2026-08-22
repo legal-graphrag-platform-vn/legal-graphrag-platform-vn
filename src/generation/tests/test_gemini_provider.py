@@ -99,6 +99,9 @@ def test_gemini_provider_uses_api_compatible_json_schema() -> None:
         config = client.aio.models.last_kwargs["config"]
         schema = config["response_json_schema"]
         assert "additionalProperties" not in json.dumps(schema)
+        assert set(schema["required"]) == set(schema["properties"])
+        statement_schema = schema["$defs"]["GroundedStatement"]
+        assert set(statement_schema["required"]) == set(statement_schema["properties"])
         assert config["response_mime_type"] == "application/json"
         assert config["thinking_config"] == {"thinking_level": "MINIMAL"}
 
